@@ -278,5 +278,6 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     VoyagerTrailCruiseSaturnUranus,
     VoyagerTrailEncounterUranus,
     VoyagerTrailCruiseUranusNeptune,
-    VoyagerTrailEncounterNeptune
+    VoyagerTrailEncounterNeptune,
+    VoyagerTrailCruiseNeptuneInf
 })

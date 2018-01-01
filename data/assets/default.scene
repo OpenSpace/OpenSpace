@@ -60,14 +60,14 @@ asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.set_default_dashboard()
-    openspace.set_default_gui_sorting()
+    openspace.setDefaultDashboard()
+    openspace.setDefaultGuiSorting()
 
     openspace.globebrowsing.loadWMSServersFromFile(
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )
 
-    openspace.mark_interesting_nodes({
+    openspace.markInterestingNodes({
         "Earth", "Mars", "Moon"
     })
 
@@ -96,7 +96,7 @@ asset.onDeinitialize(function ()
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
-    openspace.remove_interesting_nodes({
+    openspace.removeInterestingNodes({
         "Earth", "Mars", "Moon"
     })
 end)

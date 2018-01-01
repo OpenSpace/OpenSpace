@@ -1,36 +1,42 @@
 openspace.documentation = {
     {
-        Name = "mark_interating_nodes",
+        Name = "markInteratingNodes",
         Arguments = "List of nodes",
         Documentation = "This function marks the scene graph nodes identified by name " ..
         "as interesting, which will provide shortcut access to focus buttons and " .. 
         "featured properties."
     },
     {
-        Name = "remove_interesting_nodes",
+        Name = "removeInterestingNodes",
         Arguments = "List of nodes",
         Documentation = "This function removes unmarks the scene graph nodes " ..
         "identified by name as interesting, thus removing the shortcuts from the " ..
         "features properties list."
     },
     {
-        Name = "set_default_gui_sorting",
+        Name = "setDefaultGuiSorting",
         Arguments = "",
         Documentation = "This function sets the default GUI sorting for the space " ..
         "environment to increasing size, from solar system, through Milky Way, " ..
         "Universe and finishing with other elements"
     },
     {
-        Name = "set_default_dashboard",
+        Name = "setDefaultDashboard",
         Arguments = "",
         Documentation = "This function sets the default values for the dashboard " ..
         "consisting of 'DashboardItemDate', 'DashboardItemSimulationIncrement', " ..
         "'DashboardItemDistance', 'DashboardItemFramerate', and " ..
         "'DashboardItemParallelConnection'."
+    },
+    {
+        Name = "rebindKey",
+        Arguments = "string, string",
+        Documentation = "Rebinds all scripts from the old key (first argument) to the " ..
+        "new key (second argument)."
     }
 }
 
-openspace.mark_interesting_nodes = function(nodes)
+openspace.markInterestingNodes = function(nodes)
     for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
             openspace.addTag(n, "GUI.Interesting")
@@ -38,7 +44,7 @@ openspace.mark_interesting_nodes = function(nodes)
     end
 end
 
-openspace.remove_interesting_nodes = function(nodes)
+openspace.removeInterestingNodes = function(nodes)
     for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
             openspace.removeTag(n, "GUI.Interesting")
@@ -46,7 +52,7 @@ openspace.remove_interesting_nodes = function(nodes)
     end
 end
 
-openspace.set_default_dashboard = function()
+openspace.setDefaultDashboard = function()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemDate"
     })
@@ -68,11 +74,23 @@ openspace.set_default_dashboard = function()
     })
 end
 
-openspace.set_default_gui_sorting = function()
+openspace.setDefaultGuiSorting = function()
     openspace.setPropertyValueSingle(
         'Global Properties.ImGUI.Main.Properties.Ordering',
         {
             "Solar System", "Milky Way", "Universe", "Other"
         }
     )
+end
+
+openspace.rebindKey = function(oldKey, newKey)
+    local t = openspace.getKeyBinding(oldKey)
+    openspace.clearKey(oldKey)
+    for _, v in pairs(t) do
+        if v["Remote"] then
+            openspace.bindKey(newKey, v["Command"])
+        else
+            openspace.bindKeyLocal(newKey, v["Command"])
+        end
+    end
 end

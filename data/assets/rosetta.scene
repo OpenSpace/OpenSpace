@@ -84,7 +84,7 @@ asset.onInitialize(function ()
     openspace.time.setTime("2014-08-01T03:05:00.000")
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.set_default_dashboard()
+    openspace.setDefaultDashboard()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemSpacing",
         Spacing = 25
@@ -102,14 +102,14 @@ asset.onInitialize(function ()
         Type = "DashboardItemInstruments"
     })
 
-    openspace.set_default_gui_sorting()
+    openspace.setDefaultGuiSorting()
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.mark_interesting_nodes({
+    openspace.markInterestingNodes({
         "67P", "Rosetta", "Philae"
     })
 
@@ -136,7 +136,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.remove_interesting_nodes({
+    openspace.removeInterestingNodes({
         "67PBarycenter", "Rosetta", "Philae"
     })
 end)

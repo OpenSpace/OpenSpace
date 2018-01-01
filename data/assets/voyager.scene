@@ -24,15 +24,15 @@ local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1'
 asset.onInitialize(function ()
     openspace.time.setTime("1977 SEP 10 12:00:00")
 
-    openspace.set_default_dashboard()
-    openspace.set_default_gui_sorting()
+    openspace.setDefaultDashboard()
+    openspace.setDefaultGuiSorting()
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
 
-    openspace.mark_interesting_nodes({
+    openspace.markInterestingNodes({
         "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
     })
 
@@ -55,7 +55,7 @@ end)
 
 asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.remove_interesting_nodes({
+    openspace.removeInterestingNodes({
         "Earth", "Voyager 1", "Voyager 2", "Jupiter", "Saturn", "Uranus", "Neptune"
     })
 end)

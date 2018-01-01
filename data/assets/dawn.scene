@@ -19,10 +19,10 @@ local DawnAsset = asset.require('scene/solarsystem/missions/dawn/dawn')
 asset.onInitialize(function ()
     openspace.time.setTime("2011 AUG 06 00:00:00")
 
-    openspace.set_default_dashboard()
-    openspace.set_default_gui_sorting()
+    openspace.setDefaultDashboard()
+    openspace.setDefaultGuiSorting()
 
-    openspace.mark_interesting_nodes({
+    openspace.markInterestingNodes({
         "Dawn", "Ceres", "Vesta"
     })
 
@@ -45,7 +45,7 @@ end)
 
 asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.remove_interesting_nodes({
+    openspace.removeInterestingNodes({
         "Dawn", "Ceres", "Vesta"
     })
 end)

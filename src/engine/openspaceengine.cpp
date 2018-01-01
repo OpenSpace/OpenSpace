@@ -1535,7 +1535,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             }
         },
         {
-            absPath("${SCRIPTS}/common_scripts.lua")
+            absPath("${SCRIPTS}/core_scripts.lua")
         }
     };
 }

@@ -613,9 +613,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
             }
-        },
-        {
-            absPath("${SCRIPTS}/scene_helper.lua")
         }
     };
 }

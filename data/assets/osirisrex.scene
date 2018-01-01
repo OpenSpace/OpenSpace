@@ -83,7 +83,7 @@ asset.onInitialize(function ()
     openspace.time.setTime("2016 SEP 8 23:00:00.500")
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.set_default_dashboard()
+    openspace.setDefaultDashboard()
     openspace.dashboard.addDashboardItem({
         Type = "DashboardItemSpacing",
         Spacing = 25
@@ -101,14 +101,14 @@ asset.onInitialize(function ()
         Type = "DashboardItemInstruments"
     })
 
-    openspace.set_default_gui_sorting()
+    openspace.setDefaultGuiSorting()
 
     sceneHelper.setDeltaTimeKeys({
         1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
         2160, 4320, 8640
     })
 
-    openspace.mark_interesting_nodes({
+    openspace.markInterestingNodes({
         "OsirisRex", "BennuBarycenter", "Earth"
     })
 
@@ -133,7 +133,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.remove_interesting_nodes({
+    openspace.removeInterestingNodes({
         "OsirisRex", "BennuBarycenter", "Earth"
     })
 end)
