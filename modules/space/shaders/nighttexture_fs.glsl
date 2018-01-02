@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,8 @@ in vec2 vs_st;
 in vec2 vs_nightTex;
 in vec4 vs_normal;
 in vec4 vs_position;
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
 
 uniform vec4 objpos;
 
@@ -66,6 +68,10 @@ Fragment getFragment() {
 
     frag.color = vec4(diffuse.rgb, transparency);
     frag.depth = vs_position.w;
+
+    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    frag.gNormal    = vec4(vs_gNormal, 1.0);
 
     return frag;
 }

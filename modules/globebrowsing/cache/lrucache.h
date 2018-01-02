@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@ class LRUCache {
 public:
     using Item = std::pair<KeyType, ValueType>;
     using Items = std::list<Item>;
-    
+
     /**
      * \param size is the maximum size of the cache given in number of cached items.
      */
@@ -50,6 +50,7 @@ public:
     std::vector<Item> putAndFetchPopped(const KeyType& key, const ValueType& value);
     void clear();
     bool exist(const KeyType& key) const;
+
     /**
      * If value exists, the value is bumped to the front of the queue.
      * \returns true if value of this key exists.
@@ -62,7 +63,7 @@ public:
      * Pops the front of the queue.
      */
     Item popMRU();
-    
+
     /**
      * Pops the back of the queue.
      */
@@ -73,6 +74,7 @@ public:
 private:
     void putWithoutCleaning(const KeyType& key, const ValueType& value);
     void clean();
+
     std::vector<Item> cleanAndFetchPopped();
 
     Items _itemList;

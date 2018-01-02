@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <sstream>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -38,10 +39,9 @@ namespace {
     const char* GlslHelperPath = "${MODULE_VOLUME}/shaders/helper.glsl";
     const char* GlslBoundsVsPath = "${MODULE_VOLUME}/shaders/boundsvs.glsl";
     const char* GlslBoundsFsPath = "${MODULE_VOLUME}/shaders/boundsfs.glsl";
-}
+} // namespace
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
@@ -62,7 +62,6 @@ BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
 void BasicVolumeRaycaster::initialize() {
     _boundingBox.initialize();
 }
-
 
 void BasicVolumeRaycaster::deinitialize() {}
 
@@ -91,7 +90,6 @@ glm::dmat4 BasicVolumeRaycaster::modelViewTransform(const RenderData& data) {
     return data.camera.combinedViewMatrix() * modelTransform;
 }
 
-
 void BasicVolumeRaycaster::renderExitPoints(
     const RenderData& data,
     ghoul::opengl::ProgramObject& program)
@@ -109,7 +107,6 @@ void BasicVolumeRaycaster::renderExitPoints(
     // Restore defaults
     glCullFace(GL_BACK);
 }
-
 
 void BasicVolumeRaycaster::preRaycast(
     const RaycastData& data,
@@ -148,7 +145,6 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("rUpperBound_" + id, _rUpperBound);
 }
 
-
 void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
 {
     // For example: release texture units
@@ -156,11 +152,8 @@ void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::Progra
     _tfUnit = nullptr;
 }
 
-
-
-bool BasicVolumeRaycaster::cameraIsInside(
-    const RenderData & data,
-    glm::vec3 & localPosition)
+bool BasicVolumeRaycaster::cameraIsInside(const RenderData& data,
+                                          glm::vec3& localPosition)
 {
     glm::vec4 modelPos =
         glm::inverse(modelViewTransform(data)) * glm::vec4(0.0, 0.0, 0.0, 1.0);
@@ -173,19 +166,19 @@ bool BasicVolumeRaycaster::cameraIsInside(
 }
 
 std::string BasicVolumeRaycaster::getBoundsVsPath() const {
-    return GlslBoundsVsPath;
+    return absPath(GlslBoundsVsPath);
 }
 
 std::string BasicVolumeRaycaster::getBoundsFsPath() const {
-    return GlslBoundsFsPath;
+    return absPath(GlslBoundsFsPath);
 }
 
 std::string BasicVolumeRaycaster::getRaycastPath() const {
-    return GlslRaycastPath;
+    return absPath(GlslRaycastPath);
 }
 
 std::string BasicVolumeRaycaster::getHelperPath() const {
-    return GlslHelperPath;
+    return absPath(GlslHelperPath);
 }
 
 
@@ -226,7 +219,7 @@ float BasicVolumeRaycaster::rNormalization() const {
 }
 
 void BasicVolumeRaycaster::setRUpperBound(float rUpperBound) {
-   _rUpperBound = rUpperBound;
+    _rUpperBound = rUpperBound;
 }
 
 float BasicVolumeRaycaster::rUpperBound() const {
@@ -246,5 +239,4 @@ void BasicVolumeRaycaster::setModelTransform(const glm::mat4 & transform) {
 }
 
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

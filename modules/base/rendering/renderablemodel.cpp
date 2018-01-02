@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -156,19 +156,32 @@ bool RenderableModel::isReady() const {
     return _programObject && _texture;
 }
 
-void RenderableModel::initialize() {
+void RenderableModel::initializeGL() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "ModelProgram",
-        "${MODULE_BASE}/shaders/model_vs.glsl",
-        "${MODULE_BASE}/shaders/model_fs.glsl"
+        absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/model_fs.glsl")
     );
 
+    _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
+        "directionToSunViewSpace"
+    );
+    _uniformCache.modelViewTransform = _programObject->uniformLocation(
+        "modelViewTransform"
+    );
+    _uniformCache.projectionTransform = _programObject->uniformLocation(
+        "projectionTransform"
+    );
+    _uniformCache.performShading = _programObject->uniformLocation(
+        "performShading"
+    );
+    _uniformCache.texture = _programObject->uniformLocation("texture1");
     loadTexture();
 
-    _geometry->initialize(this); 
+    _geometry->initialize(this);
 }
 
-void RenderableModel::deinitialize() {
+void RenderableModel::deinitializeGL() {
     if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;
@@ -183,21 +196,36 @@ void RenderableModel::deinitialize() {
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
-    
+
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale));
+        glm::scale(
+            glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)
+        );
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
-    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+    glm::vec3 directionToSunViewSpace =
+        glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
-    _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
-    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _programObject->setUniform("performShading", _performShading);
+    _programObject->setUniform(
+        _uniformCache.directionToSunViewSpace,
+        directionToSunViewSpace
+    );
+    _programObject->setUniform(
+        _uniformCache.modelViewTransform,
+        glm::mat4(modelViewTransform)
+    );
+    _programObject->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
+    _programObject->setUniform(
+        _uniformCache.performShading,
+        _performShading
+    );
 
     _geometry->setUniforms(*_programObject);
 
@@ -205,7 +233,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _programObject->setUniform("texture1", unit);
+    _programObject->setUniform(_uniformCache.texture, unit);
 
     _geometry->render();
 
@@ -215,15 +243,33 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+
+        _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
+            "directionToSunViewSpace"
+        );
+        _uniformCache.modelViewTransform = _programObject->uniformLocation(
+            "modelViewTransform"
+        );
+        _uniformCache.projectionTransform = _programObject->uniformLocation(
+            "projectionTransform"
+        );
+        _uniformCache.performShading = _programObject->uniformLocation(
+            "performShading"
+        );
+        _uniformCache.texture = _programObject->uniformLocation("texture1");
     }
 
-    _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
+    _sunPos = OsEng.renderEngine().scene()->sceneGraphNode(
+        "SolarSystemBarycenter"
+    )->worldPosition();
 }
 
 void RenderableModel::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_texture) {
             LDEBUGC(
                 "RenderableModel",

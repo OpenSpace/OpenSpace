@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "SimpleTfBrickSelector";
+    constexpr const char* _loggerCat = "SimpleTfBrickSelector";
 } // namespace
 
 namespace openspace {
@@ -281,7 +281,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
     if (!tf) return false;
 
     size_t tfWidth = tf->width();
-    
+
     // By changing tfWidth to the correct type size_t, this check is no longer valid since
     // size_t is unsigned ---abock
     //if (tfWidth <= 0) return false;
@@ -311,7 +311,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             float x = static_cast<float>(i) / static_cast<float>(tfWidth);
             float sample = histogram->interpolate(x);
 
-            assert(sample >= 0);
+            ghoul_assert(sample >= 0, "@MISSING");
             dotProduct += sample * tf->sample(i).w;
         }
         _brickImportances[brickIndex] = dotProduct;

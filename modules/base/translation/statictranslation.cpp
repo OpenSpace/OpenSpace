@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,6 +69,8 @@ StaticTranslation::StaticTranslation()
     )
 {
     addProperty(_position);
+
+    _position.onChange([&](){ _positionValue = _position; });
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
@@ -81,10 +83,6 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     );
 
     _position = dictionary.value<glm::dvec3>(PositionInfo.identifier);
-}
-
-glm::dvec3 StaticTranslation::position() const {
-    return _position;
 }
 
 } // namespace openspace

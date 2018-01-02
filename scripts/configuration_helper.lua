@@ -32,7 +32,7 @@ function sgct.makeConfig(config) end
 -- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
--- msaa: The multisampling anti-aliasing factor [example: msaa=4] {default: 8}
+-- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
 -- eyeSep: The base eye separation in m [example: eyeSep=0.1] {default: 0.065}
 -- eyePos: The location of the user [example: eyePos={0.0, 1.0, 0.0}] {default: {0.0, 0.0, 0.0}}
 -- scene: Global settings to all scene objects (offset, orientation, scaling; each optional)
@@ -66,7 +66,7 @@ function sgct.config.single(arg) end
 -- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
--- msaa: The multisampling anti-aliasing factor [example: msaa=4] {default: 8}
+-- msaa: The multisampling anti-aliasing factor [example: msaa=8] {default: 4}
 -- eyeSep: The base eye separation in m [example: eyeSep=0.1] {default: 0.065}
 -- eyePos: The location of the user [example: eyePos={0.0, 1.0, 0.0}] {default: {0.0, 0.0, 0.0}}
 -- scene: Global settings to all scene objects (offset, orientation, scaling; each optional)
@@ -290,7 +290,7 @@ function generateSettings(arg)
 
     local refresh = ""
     if arg["refreshRate"] then
-        refresh = "refreshRate=" .. arg["refreshRate"] .. " "
+        refresh = "refreshRate=\"" .. arg["refreshRate"] .. "\" "
     end
 
 
@@ -557,7 +557,7 @@ function generateSingleWindowConfig(arg)
     end
 
     if arg["msaa"] == nil then
-        arg["msaa"] = 8
+        arg["msaa"] = 4
     end
 
     if arg["border"] == nil then

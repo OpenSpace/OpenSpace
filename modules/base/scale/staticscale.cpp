@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,18 +58,16 @@ StaticScale::StaticScale()
     : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
 {
     addProperty(_scaleValue);
+
+    _scaleValue.onChange([&](){ _scale = _scaleValue; });
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
     : StaticScale()
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
-    
-    _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
-}
 
-double StaticScale::scaleValue() const {
-    return _scaleValue;
+    _scaleValue = static_cast<float>(dictionary.value<double>(ScaleInfo.identifier));
 }
 
 } // namespace openspace

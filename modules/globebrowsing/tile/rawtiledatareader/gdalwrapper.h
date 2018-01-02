@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace openspace::globebrowsing {
 /**
  * Function for passing GDAL error messages to the GHOUL logging system.
  */
-static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
+void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
 
 /**
  * Singleton class interfacing with global GDAL functions.
@@ -77,9 +77,9 @@ public:
 private:
     GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
     ~GdalWrapper() = default;
-    
+
     void setGdalProxyConfiguration();
-    
+
     properties::BoolProperty _logGdalErrors;
     properties::IntProperty _gdalMaximumCacheSize;
 

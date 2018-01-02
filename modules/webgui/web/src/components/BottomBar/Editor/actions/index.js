@@ -1,86 +1,108 @@
 let IdContainer = [];
-export const addEnvelope = (points, transferfunctionId) => {
-  console.log(points)
+
+export const addEnvelope = (points, URI) => {
+  if (!(URI in IdContainer)) {
+    IdContainer[URI] = 0;
+  }
+  console.log(IdContainer[URI])
   return {
-    type: 'ADD_ENVELOPE',
-    transferfunctionId,
-    id: IdContainer[transferfunctionId]++,
-    points,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_ADD_ENVELOPE',
+      id: IdContainer[URI]++,
+      points,
+      URI,
+    }
   };
 };
 
-export const addPoint = (color, transferfunctionId) => {
+export const addPoint = (color, URI) => {
   return {
-    type: 'ADD_POINT',
-    transferfunctionId,
-    color,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_ADD_POINT',
+      color,
+      URI,
+    }
   };
 };
 
-export const deleteEnvelope = (transferfunctionId) => {
-  console.log(transferfunctionId)
+export const deleteEnvelope = (URI) => {
   return {
-    type: 'DELETE_ENVELOPE',
-    transferfunctionId,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_DELETE_ENVELOPE',
+      URI,
+    }
   };
 };
 
-export const clearEnvelopes = (transferfunctionId) => {
+export const clearEnvelopes = (URI) => {
   return {
-    type: 'CLEAR_ENVELOPES',
-    transferfunctionId,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_CLEAR_ENVELOPES',
+      URI,
+    }
   };
 };
 
-export const movePoint = (id, envelopeId, position, transferfunctionId) => {
+export const movePoint = (id, envelopeId, position, URI) => {
   return {
-    type: "MOVE_POINT",
-    envelopeId: envelopeId,
-    id: id,
-    position: position,
-    transferfunctionId,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_MOVE_POINT',
+      envelopeId: envelopeId,
+      id: id,
+      position: position,
+      URI,
+    }
   };
 };
 
-export const swapPoints = (id, swapId, envelopeId, transferfunctionId) => {
+export const swapPoints = (id, swapId, envelopeId, URI) => {
   return {
-    type: "SWAP_POINTS",
-    id,
-    swapId,
-    envelopeId,
-    transferfunctionId,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_SWAP_POINTS',
+      id,
+      swapId,
+      envelopeId,
+      URI,
+    }
   };
 };
 
-export const changeColor = (color, transferfunctionId) => {
+export const changeColor = (color, URI) => {
 return {
-    type: 'CHANGE_COLOR',
-    color,
-    transferfunctionId,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_CHANGE_COLOR',
+      color,
+      URI,
+    }
   };
 };
 
-export const toggleActiveEnvelope = (id, transferfunctionId) => {
+export const toggleActiveEnvelope = (id, URI) => {
   return {
-    type: "TOGGLE_ACTIVE_ENVELOPE",
-    id,
-    transferfunctionId,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_TOGGLE_ACTIVE_ENVELOPE',
+      id,
+      URI,
+    }
   };
 };
 
-export const toggleActivePoint = (envelopeId, pointId, transferfunctionId) => {
+export const toggleActivePoint = (envelopeId, pointId, URI) => {
   return {
-    type: "TOGGLE_ACTIVE_POINT",
-    envelopeId,
-    pointId,
-    transferfunctionId,
-  };
-};
-
-export const addTransferFunction = (transferfunction) => {
-  IdContainer[transferfunction.id] = 0;
-  return {
-    type: "ADD_TRANSFER_FUNCTION",
-    transferfunction,
+    type: 'SCENEGRAPH_CHANGE_PROPERTY',
+    payload: {
+      type: 'TRANSFERFUNCTION_TOGGLE_ACTIVE_POINT',
+      envelopeId,
+      pointId,
+      URI,
+    }
   };
 };

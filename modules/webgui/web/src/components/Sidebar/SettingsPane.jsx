@@ -4,8 +4,8 @@ import Pane from './Pane';
 import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 import FilterList from '../common/FilterList/FilterList';
 import DataManager from '../../api/DataManager';
-import { AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../../api/keys';
 import PropertyOwner from './Properties/PropertyOwner';
+import { connect } from 'react-redux';
 
 import styles from './SettingsPane.scss';
 
@@ -14,25 +14,20 @@ class SettingsPane extends Component {
     super(props);
     this.state = { properties: [], screenSpaceRenderables: [], hasData: false };
 
-    this.receiveData = this.receiveData.bind(this);
   }
 
   componentDidMount() {
-    DataManager.getValue(AllPropertiesKey, this.receiveData('properties'));
-    DataManager.getValue(AllScreenSpaceRenderablesKey, this.receiveData('screenSpaceRenderables'));
-  }
-
-  receiveData(prop) {
-    return ({ value }) => this.setState({ [prop]: value, hasData: true });
+    DataManager.getValue(AllPropertiesKey, this.props.InsertSettings);
+    DataManager.getValue(AllScreenSpaceRenderablesKey, this.props.InsertSettings);
   }
 
   render() {
-    const properties = this.state.properties.concat(this.state.screenSpaceRenderables)
+    const properties = this.props.properties.concat(this.state.screenSpaceRenderables)
       .map(prop => Object.assign(prop, { key: prop.name }));
 
     return (
       <Pane title="Settings" closeCallback={this.props.closeCallback}>
-        { !this.state.hasData && (
+        { (this.props.properties.length != 0 )&& (
           <LoadingBlocks className={Pane.styles.loading} />
         )}
 
@@ -55,5 +50,15 @@ SettingsPane.propTypes = {
 SettingsPane.defaultProps = {
   closeCallback: null,
 };
+
+const mapStateToProps = (state) => {
+    return {
+        properties: state.sceneGraph
+    }
+};
+
+SettingsPane = connect(
+  mapStateToProps,
+  )(SettingsPane)
 
 export default SettingsPane;

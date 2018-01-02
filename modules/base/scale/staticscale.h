@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,22 +30,20 @@
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
-    
+
 class StaticScale : public Scale {
 public:
     StaticScale();
     StaticScale(const ghoul::Dictionary& dictionary);
-
-    double scaleValue() const override;
 
     static documentation::Documentation Documentation();
 
 private:
     properties::FloatProperty _scaleValue;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___STATICSCALE___H__

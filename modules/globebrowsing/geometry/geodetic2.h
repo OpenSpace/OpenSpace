@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ namespace openspace::globebrowsing {
 struct Geodetic2 {
     Geodetic2(double latitude = 0.0, double longitude = 0.0);
     Geodetic2(const Geodetic2& src);
-    
+
     //static Geodetic2 fromCartesian(const Vec3& v);
     //Vec3 asUnitCartesian() const;
 

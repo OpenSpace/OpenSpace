@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@ layout(location = 1) in vec2 in_st;
 out vec2 vs_st;
 out vec4 vs_position;
 out float s;
+out vec4 vs_gPosition;
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
@@ -45,11 +46,13 @@ void main() {
                    0.0,  0.0, -1.0, 0.0,
                    0.0,  0.0,  0.0, 1.0) * ModelTransform;
 
+    vec4 position = pscTransform(tmp, mt);
 
     vs_position = tmp;
     vs_st = in_st;
-
-    vec4 position = pscTransform(tmp, mt);
+    vs_gPosition = position;
+    
     position = ViewProjection * position;
     gl_Position =  z_normalization(position);
+
 }

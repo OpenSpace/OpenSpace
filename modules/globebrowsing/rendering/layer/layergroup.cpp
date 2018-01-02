@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,9 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace {
-    const char* _loggerCat = "LayerGroup";
-    const char* KeyFallback = "Fallback";
+    constexpr const char* _loggerCat = "LayerGroup";
+    constexpr const char* KeyFallback = "Fallback";
+
     static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
@@ -69,13 +70,25 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
                 try {
                     addLayer(fallbackLayerDict);
                 }
-                catch (const ghoul::RuntimeError& e) {
-                    LERRORC(e.component, e.message);
+                catch (const ghoul::RuntimeError& except) {
+                    LERRORC(except.component, except.message);
                     continue;
                 }
             }
             continue;
         }
+    }
+}
+
+void LayerGroup::initialize() {
+    for (const std::shared_ptr<Layer>& l : _layers) {
+        l->initialize();
+    }
+}
+
+void LayerGroup::deinitialize() {
+    for (const std::shared_ptr<Layer>& l : _layers) {
+        l->deinitialize();
     }
 }
 
@@ -90,32 +103,38 @@ void LayerGroup::update() {
     }
 }
 
-void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     if (!layerDict.hasKeyAndValue<std::string>("Name")) {
         LERROR("'Name' must be specified for layer.");
-        return;
+        return nullptr;
     }
     auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
     if (hasPropertySubOwner(layer->name())) {
         LINFO("Layer with name " + layer->name() + " already exists.");
+        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        return nullptr;
     }
     else {
         _layers.push_back(layer);
-        update();
+        //update();
         if (_onChangeCallback) {
             _onChangeCallback();
         }
         addPropertySubOwner(layer.get());
+        _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
+        return layer;
     }
-
-    _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
 }
 
 void LayerGroup::deleteLayer(const std::string& layerName) {
-    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin(); it != _layers.end(); ++it) {
+    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin();
+         it != _layers.end();
+         ++it)
+    {
         if (it->get()->name() == layerName) {
             removePropertySubOwner(it->get());
+            (*it)->deinitialize();
             _layers.erase(it);
             update();
             if (_onChangeCallback) {

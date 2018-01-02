@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,8 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
  namespace {
-    const char* _loggerCat = "TransformationManager";
+     constexpr const char* _loggerCat = "TransformationManager";
  } // namespace
 
 namespace openspace {
@@ -53,9 +50,10 @@ TransformationManager::~TransformationManager(){
 #endif
 }
 
-glm::dmat3 TransformationManager::kameleonTransformationMatrix(std::string from,
-                                                               std::string to,
-                                                               double ephemerisTime) const
+glm::dmat3 TransformationManager::kameleonTransformationMatrix(
+                                                 [[maybe_unused]] const std::string& from,
+                                                   [[maybe_unused]] const std::string& to,
+                                              [[maybe_unused]] double ephemerisTime) const
 {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     ccmc::Position in0 = {1.f, 0.f, 0.f};
@@ -77,12 +75,13 @@ glm::dmat3 TransformationManager::kameleonTransformationMatrix(std::string from,
     );
 #else
     return glm::dmat3(0.0);
-#endif 
+#endif
 }
 
-glm::dmat3 TransformationManager::frameTransformationMatrix(std::string from,
-                                                            std::string to,
-                                                            double ephemerisTime) const
+glm::dmat3 TransformationManager::frameTransformationMatrix(
+                                                 [[maybe_unused]] const std::string& from,
+                                                   [[maybe_unused]] const std::string& to,
+                                              [[maybe_unused]] double ephemerisTime) const
 {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     auto fromit = _kameleonFrames.find(from);

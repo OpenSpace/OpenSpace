@@ -1,15 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Provider} from 'react-redux';
-import {createStore} from 'redux';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
 // AppContainer is a necessary wrapper component for hot module reloading
 import { AppContainer } from 'react-hot-loader';
-import openspaceApp from './reducers'
+import openspaceApp from './api/Reducers'
+import middleware from './api/Middleware'
 import App from './App';
 
 /* global document */
 
-let store = createStore(openspaceApp);
+let store = createStore(
+	openspaceApp,
+	middleware
+)
 
 const render = (Component) => {
   ReactDOM.render(

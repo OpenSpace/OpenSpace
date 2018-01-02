@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
 namespace luascriptfunctions {
@@ -53,7 +55,8 @@ int writeDocumentation(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.writeDocumentation();
+    OsEng.writeStaticDocumentation();
+    OsEng.writeSceneDocumentation();
 
     return 0;
 }
@@ -144,14 +147,62 @@ int removeVirtualProperty(lua_State* L) {
 int removeAllVirtualProperties(lua_State* L) {
     const int nArguments = lua_gettop(L);
     if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
     }
-    
+
     std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
     for (properties::Property* p : ps) {
         OsEng.virtualPropertyManager().removeProperty(p);
         delete p;
     }
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * addTag()
+ * Adds a Tag to a SceneGraphNode
+ */
+int addTag(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    const std::string uri = lua_tostring(L, -2);
+    const std::string tag = lua_tostring(L, -1);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    if (!node) {
+        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+    }
+
+    node->addTag(std::move(tag));
+
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * removeTag():
+ * Removes a tag from a SceneGraphNode
+ */
+int removeTag(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 2) {
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    }
+
+    const std::string uri = lua_tostring(L, -2);
+    const std::string tag = lua_tostring(L, -1);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
+    if (!node) {
+        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+    }
+
+    node->removeTag(tag);
+
     return 0;
 }
 
@@ -169,7 +220,7 @@ int downloadFile(lua_State* L) {
 
     const std::string _loggerCat = "OpenSpaceEngine";
     LINFO("Downloading file from " << uri);
-    DownloadManager dm = openspace::DownloadManager("", 1, false);
+    DownloadManager dm = openspace::DownloadManager(false);
     std::shared_ptr<openspace::DownloadManager::FileFuture> future =
         dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);
     if (!future || (future && !future->isFinished)) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-    
+
 documentation::Documentation SpiceRotation::Documentation() {
     using namespace openspace::documentation;
     return {
@@ -120,7 +120,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
 }
-    
+
 void SpiceRotation::update(const UpdateData& data) {
     try {
         _matrix = SpiceManager::ref().positionTransformMatrix(

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,12 +88,12 @@ protected:
     void initializeTime();
     void initializeGroup();
     /**
-     * Creates the shader program. Concrete IswaCygnets must set 
+     * Creates the shader program. Concrete IswaCygnets must set
      * _vsPath, _fsPath and _programName before this function in called.
      * @return true if successful creation
      */
     bool createShader();
-    
+
     // Subclass interface
     // ==================
     virtual bool createGeometry() = 0;
@@ -113,12 +113,13 @@ protected:
      */
     virtual bool updateTextureResource() = 0;
     /**
-     * should send a http request to get the resource it needs to create 
+     * should send a http request to get the resource it needs to create
      * a texture. For Texture cygnets, this should be an image. For DataCygnets,
      * this should be the data file.
      * @return true if update was successfull
      */
-    virtual bool downloadTextureResource(double timestamp = OsEng.timeManager().time().j2000Seconds()) = 0;
+    virtual bool downloadTextureResource(
+        double timestamp = OsEng.timeManager().time().j2000Seconds()) = 0;
     virtual bool readyToRender() const = 0;
      /**
      * should set all uniforms needed to render

@@ -55,7 +55,7 @@ public:
     ServerModule();
     virtual ~ServerModule();
 protected:
-    void internalInitialize() override;
+    void internalInitialize(const ghoul::Dictionary& configuration) override;
 private:
     void handleConnection(Connection* socket);
     void cleanUpFinishedThreads();

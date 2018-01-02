@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ public:
     DocumentationEngine();
 
     /**
-     * Adds the \p documentation to the list of Documentation%s that are written to a 
+     * Adds the \p documentation to the list of Documentation%s that are written to a
      * documentation file with the writeDocumentation method.
      * \param documentation The Documentation object that is to be stored for later use
      * \throws DuplicateDocumentationException If the \p documentation has a non-empty

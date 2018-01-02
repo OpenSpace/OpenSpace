@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,22 +63,23 @@
 #include <algorithm>
 #include <chrono>
 
-
-
 namespace {
-    const char* _loggerCat = "RenderableMultiresVolume";
-    const char* KeyDataSource = "Source";
-    const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    const char* KeyHints = "Hints";
-    const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* _loggerCat = "RenderableMultiresVolume";
+    constexpr const char* KeyDataSource = "Source";
+    constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    constexpr const char* KeyHints = "Hints";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
 
-    const char* KeyVolumeName = "VolumeName";
-    const char* KeyBrickSelector = "BrickSelector";
-    const char* KeyStartTime = "StartTime";
-    const char* KeyEndTime = "EndTime";
-    const char* GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
+    constexpr const char* KeyVolumeName = "VolumeName";
+    constexpr const char* KeyBrickSelector = "BrickSelector";
+    constexpr const char* KeyStartTime = "StartTime";
+    constexpr const char* KeyEndTime = "EndTime";
+    constexpr const char* GlslHelpersPath =
+        "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
+    constexpr const char* GlslHelperPath =
+        "${MODULES}/multiresvolume/shaders/helper.glsl";
+    constexpr const char* GlslHeaderPath =
+        "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
 
     static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
@@ -158,7 +159,6 @@ namespace {
         "Euler rotation",
         "" // @TODO Missing documentation
     };
-
 } // namespace
 
 namespace openspace {
@@ -174,7 +174,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f) 
+    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
     , _currentTime(CurrentTimeInfo, 0, 0, 0)
     , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
     , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)
@@ -190,8 +190,6 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
 {
     std::string name;
-    //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-    //assert(success);
 
     _filename = "";
     bool success = dictionary.getValue(KeyDataSource, _filename);
@@ -328,7 +326,6 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     addProperty(_translation);
     addProperty(_rotation);
 
-
     //_brickSelector = new ShenBrickSelector(_tsp, -1, -1);
 }
 
@@ -419,7 +416,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     return false;
 }
 
-void RenderableMultiresVolume::initialize() {
+void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
     unsigned int maxNumBricks = _tsp->header().xNumBricks_ * _tsp->header().yNumBricks_ * _tsp->header().zNumBricks_;
@@ -481,7 +478,7 @@ void RenderableMultiresVolume::initialize() {
     }
 }
 
-void RenderableMultiresVolume::deinitialize() {
+void RenderableMultiresVolume::deinitializeGL() {
     _tsp = nullptr;
     _transferFunction = nullptr;
 }
@@ -517,7 +514,8 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _errorHistogramManager->buildHistograms(nHistograms)) {
+                    success &= _errorHistogramManager->buildHistograms(nHistograms);
+                    if (success) {
                         LINFO("Writing cache to " << cacheFilename);
                         _errorHistogramManager->saveToFile(cacheFilename);
                     }
@@ -543,7 +541,11 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _histogramManager->buildHistograms(_tsp.get(), nHistograms)) {
+                    success &= _histogramManager->buildHistograms(
+                        _tsp.get(),
+                        nHistograms
+                    );
+                    if (success) {
                         LINFO("Writing cache to " << cacheFilename);
                         _histogramManager->saveToFile(cacheFilename);
                     }
@@ -569,7 +571,8 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _localErrorHistogramManager->buildHistograms(nHistograms)) {
+                    success &= _localErrorHistogramManager->buildHistograms(nHistograms);
+                    if (success) {
                         LINFO("Writing cache to " << cacheFilename);
                         _localErrorHistogramManager->saveToFile(cacheFilename);
                     }
@@ -682,7 +685,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
     }
     else if (_useGlobalTime) {
         double t = (_time - _startTime) / (_endTime - _startTime);
-        currentTimestep = t * numTimesteps;
+        currentTimestep = static_cast<int>(t * numTimesteps);
         visible = currentTimestep >= 0 && currentTimestep < numTimesteps;
     }
     else {
@@ -747,7 +750,6 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.z, glm::vec3(0, 0, 1));
         transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
 
-    
         _raycaster->setStepSizeCoefficient(_stepSizeCoefficient);
         _raycaster->setModelTransform(transform);
         //_raycaster->setTime(data.time);

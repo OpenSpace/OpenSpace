@@ -1,8 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "ceres_textures", Destination = "textures", Version = 1 }
-    },
-    TorrentFiles = {
-        { File = "DawnKernels.torrent", Destination = "${SPICE}" }
-    }
-}

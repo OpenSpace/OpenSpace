@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ public:
     SyncEngine(unsigned int syncBufferSize);
 
     /**
-     * Encodes all added Syncables in the injected <code>SyncBuffer</code>. 
+     * Encodes all added Syncables in the injected <code>SyncBuffer</code>.
      * This method is only called on the SGCT master node
      */
     void encodeSyncables();
@@ -71,7 +71,7 @@ public:
      * Invokes the postsync method of all added Syncables
      */
     void postSynchronization(IsMaster isMaster);
-    
+
     /**
      * Add a Syncable to be synchronized over the SGCT cluster.
      * \pre syncable must not be nullptr
@@ -95,7 +95,7 @@ public:
     void removeSyncables(const std::vector<Syncable*>& syncables);
 
 private:
-    /** 
+    /**
      * Vector of Syncables. The vectors ensures consistent encode/decode order
      */
     std::vector<Syncable*> _syncables;

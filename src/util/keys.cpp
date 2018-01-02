@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "Keys";
+    constexpr const char* _loggerCat = "Keys";
 } // namespace
 
 namespace openspace {
@@ -86,9 +86,9 @@ KeyWithModifier stringToKey(std::string str) {
 
     // default is unknown
     Key k = Key::Unknown;
-    auto it = KeyMapping.find(tokens.back());
-    if (it != KeyMapping.end()) {
-        k = it->second;
+    auto itKey = KeyMapping.find(tokens.back());
+    if (itKey != KeyMapping.end()) {
+        k = itKey->second;
     }
 
 
@@ -97,9 +97,9 @@ KeyWithModifier stringToKey(std::string str) {
         tokens.begin(),
         tokens.end() - 1,
         [&m](const std::string& s) {
-            auto it = KeyModifierMapping.find(s);
-            if (it != KeyModifierMapping.end()) {
-                m |= it->second;
+            auto itMod = KeyModifierMapping.find(s);
+            if (itMod != KeyModifierMapping.end()) {
+                m |= itMod->second;
             }
             else {
                 LERROR("Unknown modifier key '" << s << "'");
@@ -119,10 +119,15 @@ bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
     }
 }
 
+bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
+    return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
+}
+
+
 } // namespace openspace
 
 namespace std {
- 
+
 std::string to_string(openspace::Key key) {
     for (const auto& p : openspace::KeyMapping) {
         if (p.second == key) {
@@ -134,11 +139,11 @@ std::string to_string(openspace::Key key) {
 
 std::string to_string(openspace::KeyModifier mod) {
     using namespace openspace;
-    
+
     if (mod == KeyModifier::NoModifier) {
         return "";
     }
-    
+
     std::string result;
     for (const auto& p : KeyModifierMapping) {
         if (hasKeyModifier(mod, p.second)) {
@@ -158,5 +163,5 @@ std::string to_string(openspace::KeyWithModifier key) {
         return to_string(key.modifier) + "+" + to_string(key.key);
     }
 }
-    
+
 } // namespace std

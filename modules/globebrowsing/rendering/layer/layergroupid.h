@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,45 +110,15 @@ enum class BlendModeID {
     Color = 4,
 };
 
-static TypeID getTypeIDFromTypeString(std::string typeString) {
-    for (int i = 0; i < NUM_LAYER_TYPES; ++i) {
-        if (typeString == LAYER_TYPE_NAMES[i]) {
-            return static_cast<TypeID>(i);
-        }
-    }
-    return TypeID::Unknown;
-}
+TypeID getTypeIDFromTypeString(const std::string& typeString);
 
-static layergroupid::GroupID getGroupIDFromName(std::string layerGroupName) {
-    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        if (layerGroupName == layergroupid::LAYER_GROUP_NAMES[i]) {
-            return static_cast<layergroupid::GroupID>(i);
-        }
-    }
-    return GroupID::Unknown;
-}
+layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName);
 
-static layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
-    std::string adjustmentTypeName)
-{
-    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
-        if (adjustmentTypeName == layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
-            return static_cast<layergroupid::AdjustmentTypeID>(i);
-        }
-    }
-    return AdjustmentTypeID::None;
-}
+layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
+    const std::string& adjustmentTypeName);
 
-static layergroupid::BlendModeID getBlendModeIDFromName(
-    std::string blendModeName)
-{
-    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
-        if (blendModeName == layergroupid::BLEND_MODE_NAMES[i]) {
-            return static_cast<layergroupid::BlendModeID>(i);
-        }
-    }
-    return BlendModeID::Normal;
-}
+layergroupid::BlendModeID getBlendModeIDFromName(
+    const std::string& blendModeName);
 
 } // namespace openspace::globebrowsing::layergroupid
 

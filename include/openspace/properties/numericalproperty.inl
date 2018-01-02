@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -141,35 +141,35 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* state,  \
-                                                                      bool& success)     \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* lua,    \
+                                                                      bool& successful)  \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
+        return FROM_LUA_LAMBDA_EXPRESSION(lua, successful);                              \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* state, \
-                                                                       bool& success)    \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* lua,   \
+                                                                       bool& successful) \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(             \
-          state, success);                                                               \
+          lua, successful);                                                              \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* state,    \
-                                                                    TYPE value)          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* lua,      \
+                                                                    TYPE val)            \
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
+        return TO_LUA_LAMBDA_EXPRESSION(lua, val);                                       \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<NumericalProperty<TYPE>>::toLuaValue<TYPE>(lua_State* state,   \
-                                                                     TYPE value)         \
+                                                                     TYPE val)           \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(state, value); \
+        return PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(state, val);   \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -187,9 +187,9 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
-                                                              bool& success)             \
+                                                              bool& successful)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
+        return FROM_STRING_LAMBDA_EXPRESSION(value, successful);                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -205,18 +205,18 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            TYPE inValue)                \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& out,            \
+                                                            TYPE in)                     \
     {                                                                                    \
-        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
+        return TO_STRING_LAMBDA_EXPRESSION(out, in);                                     \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<NumericalProperty<TYPE>>::toString(std::string& outValue,      \
-                                                             TYPE inValue)               \
+    bool PropertyDelegate<NumericalProperty<TYPE>>::toString(std::string& out,           \
+                                                             TYPE in)                    \
     {                                                                                    \
-        return PropertyDelegate<TemplateProperty<TYPE>>::toString(outValue, inValue);    \
+        return PropertyDelegate<TemplateProperty<TYPE>>::toString(out, in);              \
     }
 
 
@@ -229,10 +229,13 @@ const std::string NumericalProperty<T>::MaximumValueKey = "MaximumValue";
 template <typename T>
 const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
 
+template <typename T>
+const std::string NumericalProperty<T>::ExponentValueKey = "Exponent";
+
 // Delegating constructors are necessary; automatic template deduction cannot
 // deduce template argument for 'U' if 'default' methods are used as default values in
-// a single constructor    
-        
+// a single constructor
+
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info)
     : NumericalProperty<T>(
@@ -240,7 +243,8 @@ NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info)
         PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
+        1.f
     )
 {}
 
@@ -251,7 +255,8 @@ NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value)
         std::move(value),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
         PropertyDelegate<NumericalProperty<T>>::template defaultMaximumValue<T>(),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
+        1.f
     )
 {}
 
@@ -260,18 +265,36 @@ NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
                                         T minimumValue, T maximumValue)
     : NumericalProperty<T>(
         std::move(info),
-        std::move(value), std::move(minimumValue), std::move(maximumValue),
-        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>()
+        std::move(value),
+        std::move(minimumValue),
+        std::move(maximumValue),
+        PropertyDelegate<NumericalProperty<T>>::template defaultSteppingValue<T>(),
+        1.f
     )
 {}
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
                                         T minimumValue, T maximumValue, T steppingValue)
+    : NumericalProperty<T>(
+        std::move(info),
+        std::move(value),
+        std::move(minimumValue),
+        std::move(maximumValue),
+        std::move(steppingValue),
+        1.f
+    )
+{}
+
+template <typename T>
+NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
+                                        T minimumValue, T maximumValue, T steppingValue,
+                                        float exponent)
     : TemplateProperty<T>(std::move(info), std::move(value))
     , _minimumValue(std::move(minimumValue))
     , _maximumValue(std::move(maximumValue))
     , _stepping(std::move(steppingValue))
+    , _exponent(exponent)
 {}
 
 template <typename T>
@@ -343,10 +366,30 @@ void NumericalProperty<T>::setMaxValue(T value) {
 }
 
 template <typename T>
+T NumericalProperty<T>::steppingValue() const {
+    return _stepping;
+}
+
+template <typename T>
+void NumericalProperty<T>::setSteppingValue(T value) {
+    _stepping = std::move(value);
+}
+
+template <typename T>
+float NumericalProperty<T>::exponent() const {
+    return _exponent;
+}
+
+template <typename T>
+void NumericalProperty<T>::setExponent(float exponent) {
+    _exponent = exponent;
+}
+
+template <typename T>
 std::string NumericalProperty<T>::generateAdditionalDescription() const {
     std::string result = "{ ";
-    result += "\"" + MinimumValueKey  + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
-    result += "\"" + MaximumValueKey  + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
+    result += "\"" + MinimumValueKey + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
+    result += "\"" + MaximumValueKey + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
     result += "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping));
     result += " }";
     return result;

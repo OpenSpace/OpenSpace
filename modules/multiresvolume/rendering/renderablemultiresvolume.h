@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace ghoul::opengl {
 }
 
 namespace openspace {
-    
+
 class TSP;
 class AtlasManager;
 class BrickSelector;
@@ -68,16 +68,14 @@ public:
     bool setSelectorType(Selector selector);
     bool initializeSelector();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
     virtual void update(const UpdateData& data) override;
     virtual void render(const RenderData& data, RendererTasks& tasks);
 
-  
-     
     //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
     //virtual std::string getHeaderPath() override;
     //virtual std::string getHelperPath() override;
@@ -91,7 +89,8 @@ private:
 
     properties::BoolProperty _useGlobalTime;
     properties::BoolProperty _loop;
-    properties::IntProperty _currentTime; // used to vary time, if not using global time nor looping
+    // used to vary time, if not using global time nor looping
+    properties::IntProperty _currentTime;
     properties::IntProperty _memoryBudget;
     properties::IntProperty _streamingBudget;
     properties::FloatProperty _stepSizeCoefficient;

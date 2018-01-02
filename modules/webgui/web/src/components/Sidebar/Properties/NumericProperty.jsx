@@ -2,15 +2,25 @@ import React from 'react';
 import Property from './Property';
 import NumericInput from '../../common/Input/NumericInput/NumericInput';
 import InfoBox from '../../common/InfoBox/InfoBox';
+import { connectProperty } from './connectProperty.js'
 
 class NumericProperty extends Property {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
+
+  componentDidMount() {
+    this.props.StartListening(this.props.Description.Identifier)
+  }
+
+  componentWillUnmount() {
+    this.props.StopListening(this.props.Description.Identifier)
+  }
+
   onChange(event) {
     const { value } = event.currentTarget;
-
-    this.saveValue(value);
-
-    // optimistic UI change!
-    this.setState({ value: parseFloat(value) });
+    this.props.ChangeValue(value);
   }
 
   get descriptionPopup() {
@@ -21,12 +31,11 @@ class NumericProperty extends Property {
   }
 
   render() {
-    const { Description } = this.props;
+    const { Description, Value } = this.props;
     const { SteppingValue, MaximumValue, MinimumValue } = Description.AdditionalData;
-    const { value } = this.state;
     return (
       <NumericInput
-        value={value}
+        value={Value}
         label={(<span>{Description.Name} {this.descriptionPopup}</span>)}
         placeholder={Description.Name}
         onChange={this.onChange}
@@ -39,4 +48,5 @@ class NumericProperty extends Property {
   }
 }
 
+NumericProperty = connectProperty(NumericProperty)
 export default NumericProperty;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,22 +42,22 @@
 #include <modules/volume/rawvolume.h>
 
 namespace {
-    const char* _loggerCat = "RenderableKameleonVolume";
+    constexpr const char* _loggerCat = "RenderableKameleonVolume";
 
-    const char* KeyDimensions = "Dimensions";
-    const char* KeyStepSize = "StepSize";
-    const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySource = "Source";
-    const char* KeyVariable = "Variable";
-    const char* KeyLowerDomainBound = "LowerDomainBound";
-    const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyDomainScale = "DomainScale";
-    const char* KeyLowerValueBound = "LowerValueBound";
-    const char* KeyUpperValueBound = "UpperValueBound";
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeyCache = "Cache";
-    const char* KeyGridType = "GridType";
-    const char* ValueSphericalGridType = "Spherical";
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyStepSize = "StepSize";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* KeySource = "Source";
+    constexpr const char* KeyVariable = "Variable";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyDomainScale = "DomainScale";
+    constexpr const char* KeyLowerValueBound = "LowerValueBound";
+    constexpr const char* KeyUpperValueBound = "UpperValueBound";
+    constexpr const char* KeyClipPlanes = "ClipPlanes";
+    constexpr const char* KeyCache = "Cache";
+    constexpr const char* KeyGridType = "GridType";
+    constexpr const char* ValueSphericalGridType = "Spherical";
 
     static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
@@ -235,8 +235,14 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _cache = cache;
     }
 
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Cartesian),
+        "Cartesian grid"
+    );
+    _gridType.addOption(
+        static_cast<int>(volume::VolumeGridType::Spherical),
+        "Spherical grid"
+    );
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
     std::string gridType;
@@ -251,7 +257,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
-void RenderableKameleonVolume::initialize() {
+void RenderableKameleonVolume::initializeGL() {
     load();
     
     _volumeTexture->uploadTexture();
@@ -316,7 +322,7 @@ void RenderableKameleonVolume::updateRaycasterModelTransform() {
     glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
     glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
-    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation); 
+    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
     modelTransform = glm::scale(modelTransform, scale);
     _raycaster->setModelTransform(modelTransform);
 }
@@ -327,8 +333,8 @@ bool RenderableKameleonVolume::cachingEnabled() {
 }
 
 void RenderableKameleonVolume::load() {
-    if (!FileSys.fileExists(_sourcePath)) {
-        LERROR("File " << _sourcePath << " does not exist."); 
+    if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
+        LERROR("File " << _sourcePath << " does not exist.");
         return;
     }
     if (!cachingEnabled()) {
@@ -383,8 +389,8 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     KameleonVolumeReader reader(path);
 
     if (_autoValueBounds) {
-        _lowerValueBound = reader.minValue(_variable);
-        _upperValueBound = reader.maxValue(_variable);
+        _lowerValueBound = static_cast<float>(reader.minValue(_variable));
+        _upperValueBound = static_cast<float>(reader.maxValue(_variable));
     }
 
     std::vector<std::string> variables = reader.gridVariableNames();
@@ -407,11 +413,16 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
         }
         else {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
-        }       
+        }
     }
 
     ghoul::Dictionary dict = reader.readMetaData();
-    _rawVolume = reader.readFloatVolume(_dimensions, _variable, _lowerDomainBound, _upperDomainBound);
+    _rawVolume = reader.readFloatVolume(
+        _dimensions,
+        _variable,
+        _lowerDomainBound,
+        _upperDomainBound
+    );
     updateTextureFromVolume();
 }
 
@@ -444,7 +455,7 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
     writer.write(*_rawVolume);
 }
     
-void RenderableKameleonVolume::deinitialize() {
+void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;

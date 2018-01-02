@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,10 @@
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+
+#include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
 
@@ -44,8 +47,8 @@ public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -55,20 +58,32 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    bool loadTextures();
-    void attitudeParameters(double time);
+    void loadColorTexture();
+    void loadHeightTexture();
 
+    void attitudeParameters(double time);
 
 private:
     void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
     ProjectionComponent _projectionComponent;
 
-    properties::StringProperty _colorTexturePath;
-    properties::StringProperty _heightMapTexturePath;
+    properties::OptionProperty _colorTexturePaths;
+    properties::StringProperty _addColorTexturePath;
+    bool _colorTextureDirty;
+
+    properties::OptionProperty _heightMapTexturePaths;
+    properties::StringProperty _addHeightMapTexturePath;
+    bool _heightMapTextureDirty;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
+        hasHeightMap, heightExaggeration, meridianShift, projectionFading,
+        baseTexture, projectionTexture, heightTexture) _mainUniformCache;
+
+    UniformCache(projectionTexture, projectorMatrix, modelTransform, scaling, boresight,
+        radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
@@ -77,7 +92,7 @@ private:
     properties::BoolProperty _meridianShift;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-    
+
     glm::vec2 _camScaling;
     glm::vec3 _up;
     glm::mat4 _transform;

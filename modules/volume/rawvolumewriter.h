@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ template <typename VoxelType>
 class RawVolumeWriter {
 public:
     RawVolumeWriter(std::string path, size_t bufferSize = 1024);
-    void setPath(const std::string& path);    
+    void setPath(const std::string& path);
     glm::uvec3 dimensions() const;
     void setDimensions(const glm::uvec3& dimensions);
     void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
@@ -45,15 +45,15 @@ public:
 
     size_t coordsToIndex(const glm::uvec3& coords) const;
     glm::ivec3 indexToCoords(size_t linear) const;
-    
+
 private:
     glm::ivec3 _dimensions;
     std::string _path;
-    size_t _bufferSize;    
+    size_t _bufferSize;
 };
 
 } // namespace volume
-} // namespace openspace 
+} // namespace openspace
 
 #include "rawvolumewriter.inl"
 

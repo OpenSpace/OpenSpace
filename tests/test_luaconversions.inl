@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,7 +92,20 @@ CONVERSION_TEST_NUMERICAL(SignedChar, signed char, 1)
 CONVERSION_TEST_NUMERICAL(UnsignedChar, unsigned char, 1)
 CONVERSION_TEST_NUMERICAL(Short, short, 1)
 CONVERSION_TEST_NUMERICAL(UnsignedShort, unsigned short, 1)
-CONVERSION_TEST_NUMERICAL(Int, int, 1)
+
+//CONVERSION_TEST_NUMERICAL(Int, int, 1)
+// Need to separate int into its own test as otherwise static_cast<int>(1) would throw a
+// useless cast warning
+TEST_F(LuaConversionTest, Int) {                                                                                    
+    using namespace openspace::properties;
+    bool success = PropertyDelegate<NumericalProperty<int>>::toLuaValue<int>(state, 1);                                                   
+    EXPECT_TRUE(success) << "toLuaValue";                                            
+    int value = 0;                                       
+    value = PropertyDelegate<NumericalProperty<int>>::fromLuaValue<int>(state, success);                                                           
+    EXPECT_TRUE(success) << "fromLuaValue";                                          
+    EXPECT_EQ(value, 1) << "fromLuaValue";                                   
+}
+
 CONVERSION_TEST_NUMERICAL(UnsignedInt, unsigned int, 1)
 CONVERSION_TEST_NUMERICAL(Long, long, 1)
 CONVERSION_TEST_NUMERICAL(UnsignedLong, unsigned long, 1)

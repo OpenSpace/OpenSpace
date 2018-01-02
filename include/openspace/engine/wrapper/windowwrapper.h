@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -76,7 +76,7 @@ public:
     * disables it
     */
     virtual void setSynchronization(bool enabled);
-    
+
     /**
      * This method clears all the rendering windows with the specified \p clearColor. In
      * most OpenGL cases, this will end up with one or mode <code>glClear</code> calls.
@@ -84,7 +84,7 @@ public:
      * \param clearColor The color with which to clear all windows
      */
     virtual void clearAllWindows(const glm::vec4& clearColor);
-    
+
     /**
      * Returns whether the current window has been resized recently. On default, this
      * method always returns <code>false</code>.
@@ -107,43 +107,50 @@ public:
     virtual double deltaTime() const;
 
     /**
+     * Returns the time that has passed (in seconds) since application start
+     * \return The time that has passed (in seconds) since application start
+     * @return [description]
+     */
+    virtual double applicationTime() const;
+
+    /**
      * Returns the location of the mouse cursor in pixel screen coordinates. On default,
      * this method returns <code>0,0</code>.
      * \return The location of the mouse cursor in pixel screen coordinates
      */
     virtual glm::vec2 mousePosition() const;
-    
+
     /**
      * Returns a bitmask of the status of all available mouse buttons. Bit <code>i</code>
      * is <code>1</code> if mouse button <code>i</code> is pressed down;
      * <code>false</code> otherwise. On default, this method returns that none of the
      * buttons is pressed.
-     * \param maxNumber The maximum number of mouse buttons that should be queried 
+     * \param maxNumber The maximum number of mouse buttons that should be queried
      * \return A bitmask showing the status of all mouse buttons (up to \p maxNumber)
      */
     virtual uint32_t mouseButtons(int maxNumber = 8) const;
-    
+
     /**
      * Returns the size of the currently active window in pixel coordinates. On default,
      * this method returns a window size of <code>0,0</code>.
      * \return The size of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentWindowSize() const;
-    
+
     /**
      * Returns the resolution of the currently active window in pixel coordinates. On
      * default, this method returns the same size as #currentWindowSize.
      * \return The resolution of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentWindowResolution() const;
-    
+
     /**
      * Returns the resolution of the currently active framebuffer in pixel coordinates.
      * On default, this method returns the same size as #currentWindowSize.
      * \return The resolution of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentDrawBufferResolution() const;
-    
+
     /**
      * Returns the DPI scaling factor for the current window. This is normally 1 on all
      * regular monitors and 2 on Retina screens.
@@ -180,7 +187,7 @@ public:
      * \return Whether the current rendering window is GUI-only
      */
     virtual bool isGuiWindow() const;
-    
+
     /**
      * Returns <code>true</code> if this application is the master for a clustered
      * environment.
@@ -194,8 +201,9 @@ public:
     virtual bool isUsingSwapGroups() const;
 
     /**
-    * Returns <code>true</code> if the current rendering window is master of the swap its group. 
-    */
+     * Returns <code>true</code> if the current rendering window is master of the swap its
+     * group.
+     */
     virtual bool isSwapGroupMaster() const;
 
     /**
@@ -211,7 +219,7 @@ public:
      * \return The currently employed model matrix
      */
     virtual glm::mat4 modelMatrix() const;
-    
+
     /**
      * Sets the near and far clipping planes of the rendering window. This method defaults
      * to a no-op.
@@ -219,7 +227,7 @@ public:
      * \param far The far clipping plane
      */
     virtual void setNearFarClippingPlane(float near, float far);
-    
+
     /**
      * Sets the stereo eye separation distance for the render engine.
      * \param distance The distance between eyes for stereo rendering.
@@ -234,7 +242,7 @@ public:
      * \return The location and size of the current viewport
      */
     virtual glm::ivec4 viewportPixelCoordinates() const;
-    
+
     /**
      * Returns <code>true</code> if there is an external control connected, i.e., an
      * application that can receive control commands. On default, this method will return
@@ -242,13 +250,13 @@ public:
      * \return If there is an external control connected
      */
     virtual bool isExternalControlConnected() const;
-    
+
     /**
      * Sends a \p message to an external control. This method defaults to a no-op.
      * \param message The message to be sent
      */
     virtual void sendMessageToExternalControl(const std::vector<char>& message) const;
-    
+
     /**
      * Returns <code>true</code> if the rendering is a single viewport with an single
      * window; <code>false</code> otherwise. On default, this method returns
@@ -262,6 +270,21 @@ public:
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
     virtual void takeScreenshot(bool applyWarping = false) const;
+
+    /**
+     * Encourages the windowing system to swap the back- and front buffers
+     */
+    virtual void swapBuffer() const;
+
+    /**
+     * Returns the number of windows that are currently instantiated
+     */
+    virtual int nWindows() const;
+
+    /**
+     * Returns the id of the current window (in the range [0, nWindows -1])
+     */
+    virtual int currentWindowId() const;
 
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);

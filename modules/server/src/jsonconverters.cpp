@@ -50,7 +50,8 @@ void to_json(json &j, const PropertyOwner &p) {
         { "name", p.name() },
         { "description", p.description() },
         { "properties", p.properties() },
-        { "subowners", p.propertySubOwners() }
+        { "subowners", p.propertySubOwners() },
+        { "tag", p.tags() }
     };
 }
 
@@ -69,13 +70,10 @@ void to_json(json &j, const SceneGraphNode &n) {
         { "position", n.position() },
         { "tags", n.tags() },
 
-        { "childrenCount", n.children().size() },
-        { "children", n.children() },
-
         { "propertiesCount", n.properties().size() },
         { "properties", n.properties() },
 
-        { "subproperties", n.propertySubOwners() }
+        { "subowners", n.propertySubOwners() }
     };
 /*
     auto renderable = n.renderable();

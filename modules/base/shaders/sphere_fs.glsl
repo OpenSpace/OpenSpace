@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 in vec2 vs_st;
 in vec4 vs_position;
+in vec4 vs_gPosition;
 
 uniform float time;
 uniform sampler2D texture1;
@@ -35,7 +36,6 @@ uniform float alpha;
 
 Fragment getFragment() {
     vec4 position = vs_position;
-
     vec2 texCoord = vs_st;
     // Why is this here? ---abock
     texCoord.s = 1 - texCoord.s;
@@ -43,6 +43,14 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = texture(texture1, texCoord) * vec4(1.0, 1.0, 1.0, alpha);
-    frag.depth = pscDepth(position);;
+    frag.depth = pscDepth(position);
+
+    // G-Buffer
+    frag.gOtherData = vec4(frag.color.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal (JCC)
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+
     return frag;
-}
+    }

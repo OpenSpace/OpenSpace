@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,11 +39,11 @@
 //  ---------------------------------------------------------------------------------
 //  | FF |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
 //  ---------------------------------------------------------------------------------
-//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15  
+//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                                    oldest
 //
 // In the begining the floating value starts at 0; this means that array element 0 is
-// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed 
+// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed
 // location and FF-1 element is the oldest fixed location (including wrapping around the
 // array) with the times of _lastPointTime and _firstPointTime.
 //
@@ -53,7 +53,7 @@
 //  ---------------------------------------------------------------------------------
 //  |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    | FF |
 //  ---------------------------------------------------------------------------------
-//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15  
+//    0     1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
 //                    <------ newer in time                              oldest
 //
 // Thus making the floating point traverse backwards through the array and element 0 being
@@ -169,20 +169,20 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
 }
 
-void RenderableTrailOrbit::initialize() {
-    RenderableTrail::initialize();
+void RenderableTrailOrbit::initializeGL() {
+    RenderableTrail::initializeGL();
 
     glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
     glGenBuffers(1, &_primaryRenderInformation._vBufferID);
     glGenBuffers(1, &_primaryRenderInformation._iBufferID);
 }
 
-void RenderableTrailOrbit::deinitialize() {
+void RenderableTrailOrbit::deinitializeGL() {
     glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
     glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
     glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
 
-    RenderableTrail::deinitialize();
+    RenderableTrail::deinitializeGL();
 }
 
 void RenderableTrailOrbit::update(const UpdateData& data) {
@@ -229,7 +229,10 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             if (_indexBufferDirty) {
                 // We only need to upload the index buffer if it has been invalidated
                 // by changing the number of values we want to represent
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _primaryRenderInformation._iBufferID);
+                glBindBuffer(
+                    GL_ELEMENT_ARRAY_BUFFER,
+                    _primaryRenderInformation._iBufferID
+                );
                 glBufferData(
                     GL_ELEMENT_ARRAY_BUFFER,
                     _indexArray.size() * sizeof(unsigned int),
@@ -254,7 +257,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // Only update the changed ones
             // Since we are using a ring buffer, the number of updated needed might be
             // bigger than our current points, which means we have to split the upload
-            // into two calls. 
+            // into two calls.
             if (report.nUpdated > 0) {
                 // deltaT is positive, so the pointer is moving backwards and update has
                 // to happen towards the front
@@ -274,7 +277,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
                     // The current index is too close to the wrap around part, so we need
                     // to split the upload into two parts:
                     // 1. from the current index to the end of the array
-                    // 2. the rest starting from the beginning of the array 
+                    // 2. the rest starting from the beginning of the array
                     int first = s - i;
                     int second = n - first;
                     upload(i, first);  // 1
@@ -382,7 +385,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously oldest permanent point has been moved nNewPoints steps into the
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
-        
+
         return { true, nNewPoints };
     }
     else {
@@ -411,7 +414,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
                 _primaryRenderInformation.first = 0;
             }
             else {
-                // Move the current pointer fowards one step  to be used as the new floating
+                // Move the current pointer fowards one step  to be used as the new
+                // floating
                 ++_primaryRenderInformation.first;
             }
         }

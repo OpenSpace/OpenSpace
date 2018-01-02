@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,9 +31,10 @@ layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
 out vec4 vs_position;
+//out vec4 vs_gPosition;
+//out vec3 vs_gNormal;
 
 uniform mat4 modelViewProjectionTransform;
-
 
 void main() {
     vs_st = in_st;

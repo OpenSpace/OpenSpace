@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,6 +41,17 @@ template struct Vector3Verifier<double>;
 template struct Vector4Verifier<bool>;
 template struct Vector4Verifier<int>;
 template struct Vector4Verifier<double>;
+
+template struct Vector2ListVerifier<bool>;
+template struct Vector2ListVerifier<int>;
+template struct Vector2ListVerifier<double>;
+template struct Vector3ListVerifier<bool>;
+template struct Vector3ListVerifier<int>;
+template struct Vector3ListVerifier<double>;
+template struct Vector4ListVerifier<bool>;
+template struct Vector4ListVerifier<int>;
+template struct Vector4ListVerifier<double>;
+
 
 template struct Matrix2x2Verifier<double>;
 template struct Matrix2x3Verifier<double>;
@@ -289,7 +300,7 @@ AndVerifier::AndVerifier(Verifier* l, Verifier* r)
 }
 
 TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string& key) const 
+                                   const std::string& key) const
 {
     TestResult resLhs = lhs->operator()(dict, key);
     TestResult resRhs = rhs->operator()(dict, key);

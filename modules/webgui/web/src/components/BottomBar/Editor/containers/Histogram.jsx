@@ -2,17 +2,16 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import DataManager from '../../../../api/DataManager';
-import { HistogramKey, UnitKey, MinKey, MaxKey } from '../../../../api/keys';
 import HistogramCanvas from '../presentational/HistogramCanvas';
 
-const normalizeHistogramDataToCanvas = (data, width, height) => {
+const normalizeHistogramDataToCanvas = (Value, width, height) => {
   var normalizedHistogramData;
-  var convertedData = (eval('('+data.Value+')'));
-  if(data.length < width) {
-    let maxValue =  Math.max.apply(Math,data.map(function(o){return o;}));
-    normalizedHistogramData = data.map((value, index) =>
+  var convertedData = (eval('('+Value+')'));
+  if(convertedData.length < width) {
+    let maxValue =  Math.max.apply(Math,convertedData.map(function(o){return o;}));
+    normalizedHistogramData = convertedData.map((value, index) =>
         Object.assign({},
-            {x: (index / data.length) * width,
+            {x: (index / convertedData.length) * width,
              y: (value / maxValue) * height,
             },
       )
@@ -26,20 +25,22 @@ const normalizeHistogramDataToCanvas = (data, width, height) => {
 
 const mapStateToProps = (state, ownProps) => {
     var histogram, minValue, maxValue, unit;
-    state.transferfunctions.map(transferfunction => {
-      if(transferfunction.id === ownProps.activeVolume) {
-        histogram = normalizeHistogramDataToCanvas(transferfunction.data.Histogram.value, ownProps.width, ownProps.height);
-        minValue = transferfunction.data.MinValue.value;
-        maxValue = transferfunction.data.MaxValue.value;
-        unit = transferfunction.data.DataUnit.value;
-      }
-    })
+    var envelopes;
+    state.sceneGraph.map(element => {
+          if(element.name === "Enlil Sequence") {
+            envelopes = element.subowners[1].subowners[1].properties[1].Value;
+            histogram = normalizeHistogramDataToCanvas(element.subowners[1].subowners[1].properties[2].Value, ownProps.width, ownProps.height);
+            minValue = element.subowners[1].subowners[1].properties[3].Value;
+            maxValue = element.subowners[1].subowners[1].properties[4].Value;
+            unit = element.subowners[1].subowners[1].properties[5].Value;
+          }
+        })
     return {
-      histogram,
+      histogram, 
       minValue,
       maxValue,
-      unit
-    }
+      unit,
+    };
 };
 
 const Histogram = connect(

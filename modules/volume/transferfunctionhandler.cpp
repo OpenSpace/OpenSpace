@@ -88,6 +88,7 @@ namespace openspace {
             addProperty(_minValue);
             addProperty(_maxValue);
 
+            this->addTag("TF");
             _texture = std::make_shared<ghoul::opengl::Texture>(
                 glm::size3_t(1024, 1, 1), ghoul::opengl::Texture::Format::RGBA,
                 GL_RGBA, GL_FLOAT, filtermode, wrappingmode);

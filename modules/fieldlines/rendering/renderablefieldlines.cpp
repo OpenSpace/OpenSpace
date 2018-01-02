@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -104,7 +104,7 @@ namespace {
 
 namespace openspace {
 
-RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary) 
+RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _stepSize(StepSizeInfo, defaultFieldlineStepSize, 0.f, 10.f)
     , _classification(Classification, true)
@@ -113,7 +113,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         defaultFieldlineColor,
         glm::vec4(0.f),
         glm::vec4(1.f)
-      )
+    )
     , _seedPointSource(SeedPointSourceInfo)
     , _seedPointSourceFile(SeedPointFileInfo)
     , _program(nullptr)
@@ -126,7 +126,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
         "Renderable does not have a name"
     );
-    
+
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
     setName(name);
@@ -188,24 +188,27 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
     bool success;
-    
+
     // Step size
     float stepSize;
     success = _fieldlineInfo.getValue(keyFieldlinesStepSize, stepSize);
-    if (success)
+    if (success) {
         _stepSize = stepSize;
+    }
 
     // Classification
     bool classification;
     success = _fieldlineInfo.getValue(keyFieldlinesClassification, classification);
-    if (success)
+    if (success) {
         _classification = classification;
+    }
 
     // Fieldline Color
     glm::vec4 color;
     success = _fieldlineInfo.getValue(keyFieldlinesColor, color);
-    if (success)
+    if (success) {
         _fieldlineColor = color;
+    }
 
     // Seedpoints Type
     std::string sourceType;
@@ -232,20 +235,20 @@ bool RenderableFieldlines::isReady() const {
     return programReady && vectorFieldReady && fieldlineReady && seedPointsReady;
 }
 
-void RenderableFieldlines::initialize() {
+void RenderableFieldlines::initializeGL() {
     if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
         throw ghoul::RuntimeError("Error initializing");
     }
 
     _program = OsEng.renderEngine().buildRenderProgram(
         "Fieldline",
-        "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
-        "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
-        "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
+        absPath("${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl"),
+        absPath("${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl"),
+        absPath("${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl")
     );
 }
 
-void RenderableFieldlines::deinitialize() {
+void RenderableFieldlines::deinitializeGL() {
     glDeleteVertexArrays(1, &_fieldlineVAO);
     _fieldlineVAO = 0;
     glDeleteBuffers(1, &_vertexPositionBuffer);
@@ -262,7 +265,10 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));
-    _program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
+    _program->setUniform(
+        "cameraViewDir",
+        glm::vec3(data.camera.viewDirectionWorldSpace())
+    );
     glDisable(GL_CULL_FACE);
     setPscUniforms(*_program, data.camera, data.position);
 
@@ -283,8 +289,9 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableFieldlines::update(const UpdateData&) {
-    if (_program->isDirty())
+    if (_program->isDirty()) {
         _program->rebuildFromFile();
+    }
 
     if (_seedPointsAreDirty) {
         loadSeedPoints();
@@ -295,8 +302,9 @@ void RenderableFieldlines::update(const UpdateData&) {
     if (_fieldLinesAreDirty) {
         std::vector<Line> fieldlines = generateFieldlines();
 
-        if (fieldlines.empty())
+        if (fieldlines.empty()) {
             return ;
+        }
 
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
@@ -305,27 +313,52 @@ void RenderableFieldlines::update(const UpdateData&) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());
-            vertexData.insert(vertexData.end(), fieldlines[j].begin(), fieldlines[j].end());
+            vertexData.insert(
+                vertexData.end(),
+                fieldlines[j].begin(),
+                fieldlines[j].end()
+            );
         }
         LDEBUG("Number of vertices : " << vertexData.size());
 
-        if (_fieldlineVAO == 0)
+        if (_fieldlineVAO == 0) {
             glGenVertexArrays(1, &_fieldlineVAO);
+        }
         glBindVertexArray(_fieldlineVAO);
 
-        if (_vertexPositionBuffer == 0)
+        if (_vertexPositionBuffer == 0) {
             glGenBuffers(1, &_vertexPositionBuffer);
+        }
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        glBufferData(GL_ARRAY_BUFFER, vertexData.size()*sizeof(LinePoint), &vertexData.front(), GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertexData.size() * sizeof(LinePoint),
+            &vertexData.front(),
+            GL_STATIC_DRAW
+        );
 
         GLuint vertexLocation = 0;
         glEnableVertexAttribArray(vertexLocation);
-        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(LinePoint), reinterpret_cast<void*>(0));
+        glVertexAttribPointer(
+            vertexLocation,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(LinePoint),
+            reinterpret_cast<void*>(0)
+        );
 
         GLuint colorLocation = 1;
         glEnableVertexAttribArray(colorLocation);
-        glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
+        glVertexAttribPointer(
+            colorLocation,
+            4,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(LinePoint),
+            (void*)(sizeof(glm::vec3))
+        );
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -353,7 +386,9 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
 
     std::ifstream seedFile(_seedPointSourceFile);
     if (!seedFile.good())
-        LERROR("Could not open seed points file '" << _seedPointSourceFile.value() << "'");
+        LERROR(
+            "Could not open seed points file '" << _seedPointSourceFile.value() << "'"
+        );
     else {
         std::string line;
         glm::vec3 point;
@@ -388,8 +423,9 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
         return {};
     }
 
-    if (type == vectorFieldTypeVolumeKameleon)
+    if (type == vectorFieldTypeVolumeKameleon) {
         return generateFieldlinesVolumeKameleon();
+    }
     else {
         LERROR(keyVectorField << "." << keyVectorFieldType <<
             " does not name a valid type");
@@ -419,7 +455,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     if (model != vectorFieldKameleonModelBATSRUS) {
         //modelType = KameleonWrapper::Model::BATSRUS;
     //else {
-        LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" << 
+        LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" <<
             model << "' not supported");
         return {};
     }
@@ -449,14 +485,20 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         _vectorFieldInfo.getValue(v3, zVariable);
 
         KameleonWrapper kw(fileName);
-        return kw.getClassifiedFieldLines(xVariable, yVariable, zVariable, _seedPoints, _stepSize);
+        return kw.getClassifiedFieldLines(
+            xVariable,
+            yVariable,
+            zVariable,
+            _seedPoints,
+            _stepSize
+        );
     }
-    
+
     if (lorentzForce) {
         KameleonWrapper kw(fileName);
         return kw.getLorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
-    
+
     ghoul_assert(false, "Should not reach this");
     return {};
 }

@@ -1,0 +1,24 @@
+local transforms = asset.require('./transforms')
+local assetHelper = asset.require('util/asset_helper')
+local texturesPath = asset.require('./earth_textures').TexturesPath
+
+
+
+local EarthMarker = {
+    Name = "EarthMarker",
+    Parent = transforms.EarthIAU.Name,
+    Renderable = {
+        Type = "RenderablePlane",
+        Enabled = false,
+        Size = 3.0E11,
+        Origin = "Center",
+        Billboard = true,
+        Texture = texturesPath .. "/marker.png",
+        BlendMode = "Additive"
+    },
+    GuiPath = "/Solar System/Planets/Earth"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { EarthMarker })

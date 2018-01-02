@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,29 +27,30 @@
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
-    const char* _loggerCat = "TextureCygnet";
+    constexpr const char* _loggerCat = "TextureCygnet";
 } // namespace
 
 namespace openspace {
 
 TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     : IswaCygnet(dictionary)
-{ 
+{
     registerProperties();
 }
 
 TextureCygnet::~TextureCygnet() {}
 
 bool TextureCygnet::updateTexture() {
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) _imageFile.buffer,
-                                                        _imageFile.size, 
-                                                        _imageFile.format);
+    auto texture = ghoul::io::TextureReader::ref().loadTexture(
+        (void*) _imageFile.buffer,
+        _imageFile.size,
+        _imageFile.format
+    );
 
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
         texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+        // Textures of planets looks much smoother with AnisotropicMipMap
         texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         _textures[0]  = std::move(texture);
     }

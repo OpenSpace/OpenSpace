@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,9 +28,9 @@ project(OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 9)
+set(OPENSPACE_VERSION_MINOR 11)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "prerelease-14 (Astronomy Live)")
+set(OPENSPACE_VERSION_STRING "Beta-1")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
@@ -119,6 +119,7 @@ add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul)
 target_link_libraries(libOpenSpace Ghoul)
 set_property(TARGET Lua PROPERTY FOLDER "External")
 set_property(TARGET lz4 PROPERTY FOLDER "External")
+link_directories("${GHOUL_LIBRARY_DIRS}")
 
 # SGCT
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
@@ -136,7 +137,9 @@ target_link_libraries(
     ${GLFW_LIBRARIES}
 )
 
-set_property(TARGET sgct_light PROPERTY FOLDER "External")
+if (TARGET sgct_light)
+    set_property(TARGET sgct_light PROPERTY FOLDER "External")
+endif ()
 if (TARGET glew)
     set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
 endif ()

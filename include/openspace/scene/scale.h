@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,16 +41,20 @@ namespace documentation { struct Documentation; }
 
 class Scale : public properties::PropertyOwner {
 public:
-    static std::unique_ptr<Scale> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Scale> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     Scale();
     virtual ~Scale() = default;
 
     virtual bool initialize();
-    virtual double scaleValue() const = 0;
+    virtual double scaleValue() const;
     virtual void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
+
+protected:
+    double _scale;
 };
 
 }  // namespace openspace

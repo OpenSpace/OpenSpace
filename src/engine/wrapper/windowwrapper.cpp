@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,6 +63,7 @@ scripting::LuaLibrary WindowWrapper::luaLibrary() {
             {
                 "setSynchronization",
                 &luascriptfunctions::setSynchronization,
+                {},
                 "bool",
                 "Enables or disables the frame synchronization of the cluster. If the "
                 "synchronization is enabled, the computers in the cluster will swap "
@@ -74,17 +75,17 @@ scripting::LuaLibrary WindowWrapper::luaLibrary() {
 }
 
 void WindowWrapper::terminate() {}
-    
+
 void WindowWrapper::setBarrier(bool) {}
 
 void WindowWrapper::setSynchronization(bool) {}
-    
+
 void WindowWrapper::clearAllWindows(const glm::vec4&) {}
 
 bool WindowWrapper::windowHasResized() const {
     return false;
 }
-    
+
 double WindowWrapper::averageDeltaTime() const {
     return 0.0;
 }
@@ -92,19 +93,23 @@ double WindowWrapper::averageDeltaTime() const {
 double WindowWrapper::deltaTime() const {
     return 0.0;
 }
-    
+
+double WindowWrapper::applicationTime() const {
+    return 0.0;
+}
+
 glm::vec2 WindowWrapper::mousePosition() const {
     return glm::vec2(0.f);
 }
-    
+
 uint32_t WindowWrapper::mouseButtons(int) const {
     return uint32_t(0);
 }
-    
+
 glm::ivec2 WindowWrapper::currentWindowSize() const {
     return glm::ivec2(0);
 }
-    
+
 glm::ivec2 WindowWrapper::currentWindowResolution() const {
     return currentWindowSize();
 }
@@ -112,7 +117,7 @@ glm::ivec2 WindowWrapper::currentWindowResolution() const {
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
     return currentWindowSize();
 }
-    
+
 glm::vec2 WindowWrapper::dpiScaling() const {
     return glm::vec2(1.f);
 }
@@ -145,7 +150,6 @@ bool WindowWrapper::isUsingSwapGroups() const {
     return false;
 }
 
-
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);
 }
@@ -153,11 +157,11 @@ glm::mat4 WindowWrapper::viewProjectionMatrix() const {
 glm::mat4 WindowWrapper::modelMatrix() const {
     return glm::mat4(1.f);
 }
-    
+
 void WindowWrapper::setNearFarClippingPlane(float, float) {}
 
 void WindowWrapper::setEyeSeparationDistance(float) {}
-    
+
 glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
     return glm::ivec4(
         0,
@@ -166,19 +170,30 @@ glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
         currentWindowResolution().y
     );
 }
-    
-    
+
+
 bool WindowWrapper::isExternalControlConnected() const {
     return false;
 }
-    
+
 void WindowWrapper::sendMessageToExternalControl(const std::vector<char>&) const {
 }
-    
+
 bool WindowWrapper::isSimpleRendering() const {
     return true;
 }
-    
+
 void WindowWrapper::takeScreenshot(bool) const {}
-    
+
+void WindowWrapper::swapBuffer() const {}
+
+int WindowWrapper::nWindows() const {
+    return 0;
+}
+
+int WindowWrapper::currentWindowId() const {
+    return 0;
+}
+
+
 } // namespace openspace

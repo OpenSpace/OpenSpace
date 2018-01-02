@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace documentation {  struct Documentation; }
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
  * therefore, has only accessors.
- * 
+ *
  * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an
  * optional MissionPhase::description, and optional subphases.
  */
@@ -114,7 +114,7 @@ protected:
      * \pre maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
-    
+
     /// The name of the MissionPhase
     std::string _name;
     /// The description of the MissionPhase

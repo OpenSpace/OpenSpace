@@ -31,7 +31,7 @@
 #include "connection.h"
 
 namespace openspace {
-
+class property;
 class SubscriptionTopic : public Topic {
 public:
     SubscriptionTopic();

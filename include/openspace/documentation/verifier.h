@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ struct Verifier {
      * \post If the return values' TestResult::success is \c true, its
      * TestResult::offenders is empty
      */
-    virtual TestResult operator()(const ghoul::Dictionary& dictionary, 
+    virtual TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const = 0;
 
     /**
@@ -116,7 +116,7 @@ struct TemplateVerifier : public Verifier {
 };
 
 /**
- * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type 
+ * A Verifier that checks whether a given key inside a ghoul::Dictionary is of type
  * \c bool. No implicit conversion is considered in this testing.
  */
 struct BoolVerifier : public TemplateVerifier<bool> {
@@ -257,6 +257,53 @@ struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVe
     std::string type() const override;
 };
 
+/**
+* A Verifier that checks whether all values contained in a Table are of
+* type <code>glm::tvec2<T></code>
+*/
+template <typename T>
+struct Vector2ListVerifier : public TableVerifier {
+    Vector2ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+            { "*", new Vector2Verifier<T>, Optional::No, std::move(elementDocumentation) }
+    })
+    {}
+
+    std::string type() const override {
+        return "List of ints";
+    }
+};
+
+/**
+* A Verifier that checks whether all values contained in a Table are of
+* type <code>glm::tvec3<T></code>
+*/
+template <typename T>
+struct Vector3ListVerifier : public TableVerifier {
+    Vector3ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+        { "*", new Vector3Verifier<T>, Optional::No, std::move(elementDocumentation) }
+    })
+    {}
+
+    std::string type() const override {
+        return "List of ints";
+    }
+};
+
+/**
+* A Verifier that checks whether all values contained in a Table are of
+* type <code>glm::tvec4<T></code>
+*/
+template <typename T>
+struct Vector4ListVerifier : public TableVerifier {
+    Vector4ListVerifier(std::string elementDocumentation = "") : TableVerifier({
+        { "*", new Vector4Verifier<T>, Optional::No, std::move(elementDocumentation) }
+    })
+    {}
+
+    std::string type() const override {
+        return "List of ints";
+    }
+};
 //----------------------------------------------------------------------------------------
 // Matrix verifiers
 //----------------------------------------------------------------------------------------
@@ -499,7 +546,9 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
 * as) BoolVerifier, StringVerifier, TableVerifier, or VectorVerifier.
 */
 template <typename T>
-struct GreaterEqualVerifier : public OperatorVerifier<T, std::greater_equal<typename T::Type>> {
+struct GreaterEqualVerifier : public OperatorVerifier<T,
+                                                     std::greater_equal<typename T::Type>>
+{
     static_assert(
         !std::is_base_of<BoolVerifier, T>::value,
         "T cannot be BoolVerifier"
@@ -580,7 +629,7 @@ struct InListVerifier : public T {
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
      * type by invoking the template parameter \c T, and then tests if the \p key's value
      * is part of the list passed to the constructor.
-     * \param dictionary The ghoul::Dictionary that contains the \p key 
+     * \param dictionary The ghoul::Dictionary that contains the \p key
      * \param key The key that is contained in the \p dictionary and whose value is tested
      * \return A TestResult containing the results of the specification testing. If the
      * \p key%'s value has the wrong type, it will be added to the TestResult's offense
@@ -641,7 +690,7 @@ struct NotInListVerifier : public T {
 * This Verifier checks whether the incoming value is of the correct type, using the
 * Verifier passed as a template parameter \c T and then checks whether it is greater or
 * equal to a lower limit and less or equal to a higher limit. To the missing comparison
-* operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier, 
+* operators, \c T cannot be a subclass of (or the same as) BoolVerifier, StringVerifier,
 * TableVerifier, or VectorVerifier. Both the lower and the higher limit are inclusive).
 */
 template <typename T>
@@ -843,7 +892,7 @@ struct ReferencingVerifier : public TableVerifier {
 
     std::string documentation() const override;
 
-    /// The identifier that references another Documentation registered with the 
+    /// The identifier that references another Documentation registered with the
     /// DocumentationEngine
     std::string identifier;
 };
@@ -853,7 +902,7 @@ struct ReferencingVerifier : public TableVerifier {
 //----------------------------------------------------------------------------------------
 
 /**
- * This Verifier takes two Verifiers and performs a boolean \c and operation on their 
+ * This Verifier takes two Verifiers and performs a boolean \c and operation on their
  * results. In essence, a value only passes this Verifier if it passes both Verifier%s
  * that are passed in the constructor. Opposed to the <code>C++</code> <code>&&</code>
  * operator, the AndVerifier does not perform any short-circut evaluation.

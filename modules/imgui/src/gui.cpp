@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <modules/imgui/imguimodule.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/keys.h>
 
@@ -36,10 +38,9 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <modules/imgui/include/imgui_include.h>
-
-#include "gui_lua.inl"
 
 //#define SHOW_IMGUI_HELPERS
 
@@ -47,8 +48,10 @@ namespace {
 
 const char* _loggerCat = "GUI";
 const char* configurationFile = "imgui.ini";
-const char* GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
-const ImVec2 size = ImVec2(350, 500);
+//const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
+const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+const float FontSize = 14.f;
+const ImVec2 size = ImVec2(500, 500);
 
 //GLuint fontTex = 0;
 // A VBO max size of 0 will cause a lazy instantiation of the buffer
@@ -57,8 +60,11 @@ GLuint vao = 0;
 GLuint vbo = 0;
 GLuint vboElements = 0;
 std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+UniformCache(tex, ortho) _uniformCache;
 std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 char* iniFileBuffer = nullptr;
+
+ImFont* captionFont = nullptr;
 
 static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
@@ -100,8 +106,8 @@ static void RenderDrawLists(ImDrawData* drawData) {
     );
     _program->activate();
 
-    _program->setUniform("tex", unit);
-    _program->setUniform("ortho", ortho);
+    _program->setUniform(_uniformCache.tex, unit);
+    _program->setUniform(_uniformCache.ortho, ortho);
 
     glBindVertexArray(vao);
 
@@ -125,7 +131,10 @@ static void RenderDrawLists(ImDrawData* drawData) {
             GL_STREAM_DRAW
         );
 
-        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin(); pcmd != cmdList->CmdBuffer.end(); pcmd++) {
+        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin();
+             pcmd != cmdList->CmdBuffer.end();
+             pcmd++)
+        {
             if (pcmd->UserCallback) {
                 pcmd->UserCallback(cmdList, pcmd);
             }
@@ -211,18 +220,34 @@ static void RenderDrawLists(ImDrawData* drawData) {
 }
 
 
-void addScreenSpaceImage(std::string texturePath) {
+
+void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(texturePath)) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
     }
 
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" +
+        texturePath + "') }";
+    const std::string script = "openspace.addScreenSpaceRenderable(" +
+        luaTable + ");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
+void addScreenSpaceRenderableOnline(std::string texturePath) {
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
+    const std::string script = "openspace.addScreenSpaceRenderable(" +
+        luaTable + ");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
+}
 
 void addScreenSpaceBrowser(std::string url) {
     const std::string luaTable =
@@ -230,34 +255,123 @@ void addScreenSpaceBrowser(std::string url) {
     const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
-} // namespace 
+static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+    "ShowHelpText",
+    "Show tooltip help",
+    "If this value is enabled these kinds of tooltips are shown for most properties "
+    "explaining what impact they have on the visuals."
+};
+
+static const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    "HelpTextDelay",
+    "Tooltip Delay (in s)",
+    "This value determines the delay in seconds after which the tooltip is shown."
+};
+
+static const openspace::properties::Property::PropertyInfo HiddenInfo = {
+    "IsHidden",
+    "Is Hidden",
+    "If this value is true, all GUI items will not be rendered, regardless of their "
+    "status"
+};
+
+} // namespace
 
 namespace openspace::gui {
 
-GUI::GUI() 
+void CaptionText(const char* text) {
+    ImGui::PushFont(captionFont);
+    ImGui::Text("%s", text);
+    ImGui::PopFont();
+}
+
+GUI::GUI()
     : GuiComponent("Main")
     , _globalProperty("Global")
-    , _property("Properties")
+    , _property(
+        "Properties",
+        GuiPropertyComponent::UseTreeLayout::Yes
+    )
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
+    , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)
+    , _showHelpText(ShowHelpInfo, true)
+    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
     , _currentVisibility(properties::Property::Visibility::Developer)
+    , _allHidden(HiddenInfo, true)
 {
     addPropertySubOwner(_help);
-    addPropertySubOwner(_origin);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
+    _featuredProperties.setEnabled(true);
+    addPropertySubOwner(_featuredProperties);
     addPropertySubOwner(_virtualProperty);
 #ifdef GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
-    addPropertySubOwner(_time);
+    addPropertySubOwner(_asset);
+    _spaceTime.setEnabled(true);
+    addPropertySubOwner(_spaceTime);
+    addPropertySubOwner(_mission);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     addPropertySubOwner(_iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+
+    {
+        auto showHelpTextFunc = [this](){
+            _help.setShowHelpTooltip(_showHelpText);
+            _filePath.setShowHelpTooltip(_showHelpText);
+#ifdef GLOBEBROWSING_USE_GDAL
+            _globeBrowsing.setShowHelpTooltip(_showHelpText);
+#endif // GLOBEBROWSING_USE_GDAL
+            _performance.setShowHelpTooltip(_showHelpText);
+            _globalProperty.setShowHelpTooltip(_showHelpText);
+            _property.setShowHelpTooltip(_showHelpText);
+            _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
+            _virtualProperty.setShowHelpTooltip(_showHelpText);
+            _spaceTime.setShowHelpTooltip(_showHelpText);
+            _mission.setShowHelpTooltip(_showHelpText);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+            _iswa.setShowHelpTooltip(_showHelpText);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _parallel.setShowHelpTooltip(_showHelpText);
+            _featuredProperties.setShowHelpTooltip(_showHelpText);
+        };
+        showHelpTextFunc();
+        _showHelpText.onChange(std::move(showHelpTextFunc));
+        addProperty(_showHelpText);
+    }
+
+    {
+        auto helpTextDelayFunc = [this](){
+            _help.setShowHelpTooltipDelay(_helpTextDelay);
+            _filePath.setShowHelpTooltipDelay(_helpTextDelay);
+#ifdef GLOBEBROWSING_USE_GDAL
+            _globeBrowsing.setShowHelpTooltipDelay(_helpTextDelay);
+#endif // GLOBEBROWSING_USE_GDAL
+            _performance.setShowHelpTooltipDelay(_helpTextDelay);
+            _globalProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _property.setShowHelpTooltipDelay(_helpTextDelay);
+            _screenSpaceProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _spaceTime.setShowHelpTooltipDelay(_helpTextDelay);
+            _mission.setShowHelpTooltipDelay(_helpTextDelay);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+            _iswa.setShowHelpTooltipDelay(_helpTextDelay);
+#endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _parallel.setShowHelpTooltipDelay(_helpTextDelay);
+            _featuredProperties.setShowHelpTooltipDelay(_helpTextDelay);
+        };
+        helpTextDelayFunc();
+        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+        addProperty(_helpTextDelay);
+    }
+
+    addProperty(_allHidden);
 }
 
 void GUI::initialize() {
@@ -273,97 +387,149 @@ void GUI::initialize() {
     strcpy(iniFileBuffer, cachedFile.c_str());
 #endif
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.IniFilename = iniFileBuffer;
-    io.DeltaTime = 1.f / 60.f;
-    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
-    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
-    io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
-    io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
-    io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
-    io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
-    io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
-    io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
-    io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
-    io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
-    io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
-    io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
-    io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
-    io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
-    io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
-    io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
-    io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
+    int nWindows = OsEng.windowWrapper().nWindows();
+    _contexts.resize(nWindows);
 
-    io.RenderDrawListsFn = RenderDrawLists;
-    io.Fonts->AddFontFromFileTTF(
-        absPath(GuiFont).c_str(),
-        16.f
-    );
+    for (int i = 0; i < nWindows; ++i) {
+        _contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
+        //}
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowPadding = { 4.f, 4.f };
-    style.WindowRounding = 0.f;
-    style.FramePadding = { 3.f, 3.f };
-    style.FrameRounding = 0.f;
-    style.ScrollbarSize = 15.f;
-    style.ScrollbarRounding = 0.f;
-    style.IndentSpacing = 25;
-    style.ItemSpacing = { 4.f, 2.f };
 
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
-    style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
-    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.5f, 0.94f, 1.0f, 0.45f);
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
-    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
-    style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
-    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.6f);
-    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
+        ImGuiIO& io = ImGui::GetIO();
+        io.IniFilename = iniFileBuffer;
+        io.DeltaTime = 1.f / 60.f;
+        io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
+        io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
+        io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
+        io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
+        io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
+        io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
+        io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
+        io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
+        io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
+        io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
+        io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
+        io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
+        io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
+        io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
+        io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
+        io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
+        io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
+        io.RenderDrawListsFn = RenderDrawLists;
+        io.Fonts->AddFontFromFileTTF(
+            absPath(GuiFont).c_str(),
+            FontSize
+        );
+
+        captionFont = io.Fonts->AddFontFromFileTTF(
+            absPath(GuiFont).c_str(),
+            FontSize * 1.5f
+        );
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowPadding = { 4.f, 4.f };
+        style.WindowRounding = 0.f;
+        style.FramePadding = { 3.f, 3.f };
+        style.FrameRounding = 0.f;
+        style.ItemSpacing = { 3.f, 2.f };
+        style.ItemInnerSpacing = { 3.f, 2.f };
+        style.TouchExtraPadding = { 1.f, 1.f };
+        style.IndentSpacing = 15.f;
+        style.ScrollbarSize = 10.f;
+        style.ScrollbarRounding = 0.f;
+        style.GrabMinSize = 10.f;
+        style.GrabRounding = 16.f;
+
+        style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+        style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
+        style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+        style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
+        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
+        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
+        style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+        style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
+        style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
+        style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
+        style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+        style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
+        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+        style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
+        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
+        style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
+        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+        style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+        style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+        style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+        style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+        style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
+        style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+        style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
+        style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+    }
     _property.initialize();
     _property.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
     _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
+    _featuredProperties.initialize();
+    _featuredProperties.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _filePath.initialize();
-#ifdef GLOBEBROWSING_USE_GDAL    
+    _asset.initialize();
+#ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initialize();
 #endif // GLOBEBROWSING_USE_GDAL
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
+    _mission.initialize();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.initialize(); 
+    _iswa.initialize();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 }
 
 void GUI::deinitialize() {
     ImGui::Shutdown();
 
+    int nWindows = OsEng.windowWrapper().nWindows();
+    for (int i = 0; i < nWindows; ++i) {
+        ImGui::DestroyContext(_contexts[i]);
+    }
+
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitialize();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    _mission.deinitialize();
     _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
+    _featuredProperties.deinitialize();
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
+    _asset.deinitialize();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitialize();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -375,17 +541,30 @@ void GUI::deinitialize() {
 void GUI::initializeGL() {
     _program = ghoul::opengl::ProgramObject::Build(
         "GUI",
-        "${MODULE_IMGUI}/shaders/gui_vs.glsl",
-        "${MODULE_IMGUI}/shaders/gui_fs.glsl"
+        absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
+        absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
+
+    _uniformCache.tex = _program->uniformLocation("tex");
+    _uniformCache.ortho = _program->uniformLocation("ortho");
+
     if (!_program) {
         return;
     }
 
     unsigned char* pngData;
     glm::ivec2 textureSize;
-    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pngData, &textureSize.x, &textureSize.y);
+    int nWindows = OsEng.windowWrapper().nWindows();
+    for (int i = 0; i < nWindows; ++i) {
+        //_contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
 
+        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(
+            &pngData,
+            &textureSize.x,
+            &textureSize.y
+        );
+    }
     _fontTexture = std::make_unique<ghoul::opengl::Texture>(
         pngData,
         glm::uvec3(textureSize.x, textureSize.y, 1)
@@ -395,14 +574,19 @@ void GUI::initializeGL() {
     _fontTexture->uploadTexture();
     GLuint id = *_fontTexture;
     uint64_t tmp = id;
-    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
+    for (int i = 0; i < nWindows; ++i) {
+        //_contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
+
+        ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
+    }
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vboMaxSize, nullptr, GL_DYNAMIC_DRAW);
-    
+
     glGenBuffers(1, &vboElements);
-    
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -440,13 +624,16 @@ void GUI::initializeGL() {
     _property.initializeGL();
     _screenSpaceProperty.initializeGL();
     _globalProperty.initializeGL();
+    _featuredProperties.initializeGL();
     _performance.initializeGL();
-    _help.initializeGL();    
+    _help.initializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
+    _asset.initializeGL();
     _parallel.initializeGL();
+    _mission.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.initializeGL();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -470,15 +657,18 @@ void GUI::deinitializeGL() {
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _iswa.deinitializeGL();
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    _mission.deinitializeGL();
     _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
+    _featuredProperties.deinitializeGL();
     _globalProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.deinitializeGL();
+    _asset.deinitializeGL();
     _property.deinitializeGL();
 }
 
@@ -486,6 +676,9 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
+    int iWindow = OsEng.windowWrapper().currentWindowId();
+    ImGui::SetCurrentContext(_contexts[iWindow]);
+
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
     io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);
@@ -502,14 +695,23 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 void GUI::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
+
+        _uniformCache.tex = _program->uniformLocation("tex");
+        _uniformCache.ortho = _program->uniformLocation("ortho");
     }
 
-    if (OsEng.renderEngine().doesPerformanceMeasurements()) {
+    bool perf = OsEng.renderEngine().doesPerformanceMeasurements();
+    _performance.setEnabled(perf);
+
+    if (_performance.isEnabled()) {
         _performance.render();
     }
 
-    if (_isEnabled) {
-        render();
+    if (!_allHidden) {
+
+        if (_isEnabled) {
+            render();
+        }
 
         if (_globalProperty.isEnabled()) {
             _globalProperty.render();
@@ -537,12 +739,27 @@ void GUI::endFrame() {
         if (_filePath.isEnabled()) {
             _filePath.render();
         }
+        if (_asset.isEnabled()) {
+            _asset.render();
+        }
 
 #ifdef GLOBEBROWSING_USE_GDAL
         if (_globeBrowsing.isEnabled()) {
             _globeBrowsing.render();
         }
 #endif // GLOBEBROWSING_USE_GDAL
+
+        if (_mission.isEnabled() && MissionManager::ref().hasCurrentMission()) {
+            _mission.render();
+        }
+
+        if (_spaceTime.isEnabled()) {
+            _spaceTime.render();
+        }
+
+        if (_featuredProperties.isEnabled()) {
+            _featuredProperties.render();
+        }
     }
 
     ImGui::Render();
@@ -579,7 +796,7 @@ bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
     const bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
         if (action == KeyAction::Press) {
-            io.KeysDown[keyIndex] = true; 
+            io.KeysDown[keyIndex] = true;
         }
         io.KeyShift = hasShift;
         io.KeyCtrl = hasCtrl;
@@ -616,7 +833,11 @@ bool GUI::charCallback(unsigned int character, KeyModifier) {
 }
 
 void GUI::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
     ImGui::Begin("OpenSpace GUI", nullptr);
+
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     bool property = _property.isEnabled();
     ImGui::Checkbox("Scene Graph Properties", &property);
@@ -626,9 +847,17 @@ void GUI::render() {
     ImGui::Checkbox("ScreenSpace Properties", &screenSpaceProperty);
     _screenSpaceProperty.setEnabled(screenSpaceProperty);
 
+    bool featuredProperties = _featuredProperties.isEnabled();
+    ImGui::Checkbox("Featured Properties", &featuredProperties);
+    _featuredProperties.setEnabled(featuredProperties);
+
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool spacetime = _spaceTime.isEnabled();
+    ImGui::Checkbox("Space/Time", &spacetime);
+    _spaceTime.setEnabled(spacetime);
 
     bool parallel = _parallel.isEnabled();
     ImGui::Checkbox("Parallel Connection", &parallel);
@@ -638,9 +867,17 @@ void GUI::render() {
     ImGui::Checkbox("Virtual Properties", &virtualProperty);
     _virtualProperty.setEnabled(virtualProperty);
 
+    bool mission = _mission.isEnabled();
+    ImGui::Checkbox("Mission Information", &mission);
+    _mission.setEnabled(mission);
+
     bool filePath = _filePath.isEnabled();
     ImGui::Checkbox("File Paths", &filePath);
     _filePath.setEnabled(filePath);
+
+    bool asset = _asset.isEnabled();
+    ImGui::Checkbox("Assets", &asset);
+    _asset.setEnabled(asset);
 
 #ifdef GLOBEBROWSING_USE_GDAL
     bool globeBrowsing = _globeBrowsing.isEnabled();
@@ -654,9 +891,6 @@ void GUI::render() {
     _iswa.setEnabled(iswa);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
 
-    _origin.render();
-    _time.render();
-
     bool help = _help.isEnabled();
     ImGui::Checkbox("Help", &help);
     _help.setEnabled(help);
@@ -664,16 +898,50 @@ void GUI::render() {
     renderAndUpdatePropertyVisibility();
 
     static const int addImageBufferSize = 256;
-    static char addImageBuffer[addImageBufferSize];
+    static char addImageLocalBuffer[addImageBufferSize];
+    static char addImageOnlineBuffer[addImageBufferSize];
 
-    bool addImage = ImGui::InputText(
-        "addImage",
-        addImageBuffer,
+    bool addImageLocal = ImGui::InputText(
+        "Add Local Image",
+        addImageLocalBuffer,
         addImageBufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
-    if (addImage) {
-        addScreenSpaceImage(std::string(addImageBuffer));
+    if (addImageLocal) {
+        addScreenSpaceRenderableLocal(std::string(addImageLocalBuffer));
+    }
+
+    bool addImageOnline = ImGui::InputText(
+        "Add Online Image",
+        addImageOnlineBuffer,
+        addImageBufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+
+//    if (addImage) {
+//        addScreenSpaceImage(std::string(addImageBuffer));
+//    }
+
+    if (addImageOnline) {
+        addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
+    }
+
+    bool addDashboard = ImGui::Button("Add New Dashboard");
+    if (addDashboard) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.addScreenSpaceRenderable({ Type = 'ScreenSpaceDashboard' });",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    bool addDashboardCopy = ImGui::Button("Add Copy of Main Dashboard");
+    if (addDashboardCopy) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.addScreenSpaceRenderable({ "
+                "Type = 'ScreenSpaceDashboard', UseMainDashboard = true "
+            "});",
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 
 #ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
@@ -710,7 +978,7 @@ void GUI::render() {
 
     ImGui::End();
 }
-    
+
 void GUI::renderAndUpdatePropertyVisibility() {
     // Fragile! Keep this in sync with properties::Property::Visibility
     using V = properties::Property::Visibility;
@@ -725,6 +993,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _property.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
     _virtualProperty.setVisibility(_currentVisibility);
+    _featuredProperties.setVisibility(_currentVisibility);
 }
 
 

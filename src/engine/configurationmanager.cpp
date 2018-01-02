@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,9 @@ using std::string;
 
 namespace {
     const char* _configurationFile = "openspace.cfg";
-    const char* _keyBasePath = "BASE_PATH";
-    const char* _initialConfigHelper = "${BASE_PATH}/scripts/configuration_helper.lua";
+    const char* _keyBasePath = "BASE";
+    // We can't use ${SCRIPTS} here as that hasn't been defined by this point
+    const char* _initialConfigHelper = "${BASE}/scripts/configuration_helper.lua";
 } // namespace
 
 namespace openspace {
@@ -48,6 +49,8 @@ const string ConfigurationManager::KeyPaths = "Paths";
 const string ConfigurationManager::KeyCache = "CACHE";
 const string ConfigurationManager::KeyFonts = "Fonts";
 const string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
+const string ConfigurationManager::KeyGlobalCustomizationScripts =
+    "GlobalCustomizationScripts";
 
 const string ConfigurationManager::PartType = "Type";
 const string ConfigurationManager::PartFile = "File";
@@ -61,6 +64,9 @@ const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentati
 const string ConfigurationManager::KeyRequireSocketAuthentication = "RequireSocketAuthentication";
 const string ConfigurationManager::KeyConfigScene = "Scene";
 const string ConfigurationManager::KeyConfigTasksRoot = "TasksRoot";
+
+const string ConfigurationManager::KeyConfigAsset = "Asset";
+const string ConfigurationManager::KeySceneLicenseDocumentation = "LicenseDocumentation";
 
 const string ConfigurationManager::KeyLogging = "Logging";
 const string ConfigurationManager::PartLogDir = "LogDir";
@@ -80,7 +86,6 @@ const string ConfigurationManager::KeyCapabilitiesVerbosity =
 const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const string ConfigurationManager::KeyDisableSceneOnMaster = "DisableSceneOnMaster";
-const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
 const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
 
@@ -108,11 +113,21 @@ const string ConfigurationManager::KeyWebHelperLocation = "WebHelperLocation";
 const string ConfigurationManager::KeyWebGuiUrl = "WebGuiUrl";
 const string ConfigurationManager::KeyServerClientAddressWhitelist = "ClientWhitelist";
 
+const string ConfigurationManager::KeyUseMultithreadedInitialization =
+    "UseMultithreadedInitialization";
+
+const string ConfigurationManager::KeyLoadingScreen = "LoadingScreen";
+const string ConfigurationManager::PartShowMessage = "ShowMessage";
+const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
+const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
+
+const string ConfigurationManager::KeyModuleConfigurations = "ModuleConfigurations";
+
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
-    
+
     Directory directory = FileSys.currentDirectory();
-    
+
     while (true) {
         std::string fullPath = FileSys.pathByAppendingComponent(
             directory,
@@ -123,12 +138,12 @@ string ConfigurationManager::findConfiguration(const string& filename) {
             // We have found the configuration file and can bail out
             return fullPath;
         }
-        
+
         // Otherwise, we traverse the directory tree up
         Directory nextDirectory = directory.parentDirectory(
             ghoul::filesystem::Directory::AbsolutePath::Yes
         );
-        
+
         if (directory.path() == nextDirectory.path()) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
@@ -139,24 +154,23 @@ string ConfigurationManager::findConfiguration(const string& filename) {
         directory = nextDirectory;
     }
 }
-    
+
 void ConfigurationManager::loadFromFile(const string& filename) {
     using ghoul::filesystem::FileSystem;
-    
+
     ghoul_assert(!filename.empty(), "Filename must not be empty");
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
-    
-    // ${BASE_PATH}
-    string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
-        + FileSystem::TokenClosingBraces;
+
+    // ${BASE}
+    string basePathToken = FileSystem::TokenOpeningBraces + string(_keyBasePath) +
+        FileSystem::TokenClosingBraces;
 
     // Retrieving the directory in which the configuration file lies
-    string absolutePath = FileSys.absolutePath(filename);
-    string basePath = ghoul::filesystem::File(absolutePath).directoryName();
+    string basePath = ghoul::filesystem::File(filename).directoryName();
     FileSys.registerPathToken(basePathToken, basePath);
-    
+
     ghoul::lua::LuaState state;
-    
+
     if (FileSys.fileExists(absPath(_initialConfigHelper))) {
         ghoul::lua::runScriptFile(state, absPath(_initialConfigHelper));
     }
@@ -179,7 +193,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         std::string fullKey =
             FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
         LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
-        
+
         bool override = (basePathToken == fullKey);
         if (override) {
             LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");

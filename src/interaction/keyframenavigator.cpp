@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/interaction/keyframenavigator.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
@@ -37,14 +38,16 @@
 namespace openspace::interaction {
 
 void KeyframeNavigator::updateCamera(Camera& camera) {
-    double now = OsEng.runTime();
+    double now = OsEng.windowWrapper().applicationTime();
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
         return;
     }
 
-    const Keyframe<CameraPose>* nextKeyframe = _cameraPoseTimeline.firstKeyframeAfter(now);
-    const Keyframe<CameraPose>* prevKeyframe = _cameraPoseTimeline.lastKeyframeBefore(now);
+    const Keyframe<CameraPose>* nextKeyframe =
+                                              _cameraPoseTimeline.firstKeyframeAfter(now);
+    const Keyframe<CameraPose>* prevKeyframe =
+                                              _cameraPoseTimeline.lastKeyframeBefore(now);
     double nextTime = 0;
     double prevTime = 0;
     double t = 0;
@@ -69,7 +72,7 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
 
     const CameraPose& prevPose = prevKeyframe->data;
     const CameraPose& nextPose = nextKeyframe->data;
-    
+
     Scene* scene = camera.parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
@@ -83,14 +86,23 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     glm::dquat prevKeyframeCameraRotation = prevPose.rotation;
     glm::dquat nextKeyframeCameraRotation = nextPose.rotation;
 
-    // Transform position and rotation based on focus node rotation (if following rotation)
+    // Transform position and rotation based on focus node rotation
+    // (if following rotation)
     if (prevPose.followFocusNodeRotation) {
-        prevKeyframeCameraRotation = glm::dquat(prevFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(prevPose.rotation)));
-        prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() * prevPose.position;
+        prevKeyframeCameraRotation = glm::dquat(
+            prevFocusNode->worldRotationMatrix() *
+            glm::dmat3(glm::dquat(prevPose.rotation))
+        );
+        prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() *
+                                     prevPose.position;
     }
     if (nextPose.followFocusNodeRotation) {
-        nextKeyframeCameraRotation = glm::dquat(nextFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(nextPose.rotation)));
-        nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() * nextPose.position;
+        nextKeyframeCameraRotation = glm::dquat(
+            nextFocusNode->worldRotationMatrix() *
+            glm::dmat3(glm::dquat(nextPose.rotation))
+        );
+        nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() *
+                                     nextPose.position;
     }
 
     // Transform position based on focus node position
@@ -98,15 +110,20 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     nextKeyframeCameraPosition += nextFocusNode->worldPosition();
 
     // Linear interpolation
-    camera.setPositionVec3(prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t);
-    camera.setRotation(glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t));
+    camera.setPositionVec3(
+        prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t
+    );
+    camera.setRotation(
+        glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
+    );
 }
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
     return _cameraPoseTimeline;
 }
 
-void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose) {
+void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
+{
     timeline().addKeyframe(timestamp, pose);
 }
 

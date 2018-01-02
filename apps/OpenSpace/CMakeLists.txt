@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -95,28 +95,19 @@ if (OPENSPACE_SPOUT_SUPPORT)
     add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
 endif ()
 
-# Building on MacOS? Bundle int into an .app!
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    create_new_application(OpenSpace
-        MACOSX_BUNDLE
-        ${SGCT_OPENVR_FILES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
-    )
-else ()
-    create_new_application(OpenSpace
-        ${SGCT_OPENVR_FILES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
-    )
-endif ()
+set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
-#if (OPENSPACE_SPOUT_SUPPORT)
-#    ghl_copy_files(
-#        ${APPLICATION_NAME}
-#        ${OPENSPACE_APPS_DIR}/OpenSpace/ext/spout/SpoutLibrary.dll
-#    )
-#endif ()
+create_new_application(OpenSpace
+    ${SGCT_OPENVR_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.rc
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/openspace.icns
+    PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
+)
 
 target_include_directories(
     OpenSpace PRIVATE

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ ProgressBar::ProgressBar(int end, int width, std::ostream& stream)
     : _width(width)
     , _previous(-1)
     , _end(end)
-    , _stream(stream) 
+    , _stream(stream)
 {
     print(0);
 }
@@ -50,9 +50,10 @@ void ProgressBar::print(int current) {
         int spWidth = _width - pos + 2;
         _stream << "[" << std::setfill('=') << std::setw(eqWidth)
             << ">" << std::setfill(' ') << std::setw(spWidth)
-            << "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r" << std::flush;
+            << "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r"
+            << std::flush;
     }
     _previous = iprogress;
-};
+}
 
 } // namespace openspace

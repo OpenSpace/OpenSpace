@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -122,7 +122,7 @@ OperatorVerifier<T, Operator>::OperatorVerifier(typename T::Type val)
 
 template <typename T, typename Operator>
 TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& dict,
-                                                     const std::string& key) const 
+                                                     const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
@@ -345,7 +345,9 @@ TestResult DeprecatedVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                              const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
-    res.warnings.push_back(TestResult::Warning{ key, TestResult::Warning::Reason::Deprecated });
+    res.warnings.push_back(
+        TestResult::Warning{ key, TestResult::Warning::Reason::Deprecated }
+    );
     return res;
 }
 

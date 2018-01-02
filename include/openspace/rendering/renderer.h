@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,18 +44,25 @@ namespace openspace {
 class RenderableVolume;
 class Camera;
 class Scene;
-    
+
 class Renderer {
 public:
     virtual ~Renderer() = default;
 
     virtual void initialize() = 0;
     virtual void deinitialize() = 0;
-    
+
     virtual void setCamera(Camera* camera) = 0;
     virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
     virtual void setNAaSamples(int nAaSamples) = 0;
+    virtual void setHDRExposure(float hdrExposure) = 0;
+    virtual void setHDRBackground(float hdrBackground) = 0;
+    virtual void setGamma(float gamma) = 0;
+
+    virtual float hdrBackground() const = 0;
+    virtual int nAaSamples() const = 0;
+    virtual std::vector<double> mSSAPattern() const = 0;
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
@@ -69,13 +76,13 @@ public:
 
 
     virtual void update() = 0;
+
     virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() = 0;
-    
 };
 
 } // openspace

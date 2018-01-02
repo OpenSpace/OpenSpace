@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,39 +29,54 @@
 #include <limits>
 #include <sstream>
 
+namespace {
+
+bool fromLuaConversion(lua_State* state, bool& success) {
+    success = (lua_isboolean(state, -1) == 1);
+    if (success) {
+        return lua_toboolean(state, -1) == 1;
+    }
+    else {
+        return false;
+    }
+}
+
+bool toLuaConversion(lua_State* state, bool value) {
+    lua_pushboolean(state, value);
+    return true;
+}
+
+bool fromStringConversion(std::string val, bool& success) {
+    std::stringstream s(val);
+    bool v;
+    s >> v;
+    success = !s.fail();
+    if (success) {
+        return v;
+    }
+    else {
+        throw ghoul::RuntimeError("Conversion error for string: " + val);
+    }
+}
+
+bool toStringConversion(std::string& outValue, bool inValue) {
+    outValue = inValue ? "true" : "false";
+    return true;
+}
+
+} // namespace
+
 namespace openspace::properties {
 
-REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
-    [](lua_State* state, bool& success) -> bool {
-        success = (lua_isboolean(state, -1) == 1);
-        if (success) {
-            return lua_toboolean(state, -1) == 1;
-        }
-        else {
-            return false;
-        }
-    },
-    [](lua_State* state, bool value) -> bool {
-        lua_pushboolean(state, value);
-        return true;
-    },
-    [](std::string value, bool& success) -> bool {
-        std::stringstream s(value);
-        bool v;
-        s >> v;
-        success = !s.fail();
-        if (success) {
-            return v;
-        }
-        else {
-            throw ghoul::RuntimeError("Conversion error for string: " + value);
-        }
-    },
-    [](std::string& outValue, bool inValue) -> bool {
-        outValue = inValue ? "true" : "false";
-        return true;
-    },
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    BoolProperty,
+    bool,
+    false,
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
     LUA_TBOOLEAN
-);
+)
 
 } // namespace openspace::properties

@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,8 @@ namespace volume {
 
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" }) // @TODO Missing name
-    , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10) // @TODO Missing documentation
+    // @TODO Missing documentation
+    , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
     std::vector<std::string> keys = dictionary.keys();
     for (const std::string& key : keys) {

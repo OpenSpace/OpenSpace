@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ int isLoaded(lua_State* L) {
     std::string moduleName = lua_tostring(L, -1);
 
     std::vector<OpenSpaceModule*> modules = OsEng.moduleEngine().modules();
-    
+
     auto it = std::find_if(
         modules.begin(),
         modules.end(),

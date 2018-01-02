@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,10 +59,12 @@ public:
     TransformationManager();
     ~TransformationManager();
 
-    glm::dmat3 frameTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
+    glm::dmat3 frameTransformationMatrix(const std::string& from, const std::string& to,
+        double ephemerisTime) const;
 
 private:
-    glm::dmat3 kameleonTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
+    glm::dmat3 kameleonTransformationMatrix(const std::string& from,
+        const std::string& to, double ephemerisTime) const;
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     std::shared_ptr<ccmc::Kameleon> _kameleon;

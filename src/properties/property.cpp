@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -246,14 +246,13 @@ void Property::notifyListener() {
 }
 
 std::string Property::generateBaseDescription() const {
-    std::string result = "{ ";
-    result += "\"" + std::string(TypeKey) + "\": \"" + className() + "\", ";
-    result += "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", ";
-    result += "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", ";
-    result += "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataDescription() + ", ";
-    result += "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalDescription();
-    result += " }";
-    return result;
+    return 
+        "{ \"" + std::string(TypeKey) + "\": \"" + className() + "\", " +
+        "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", " +
+        "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", " +
+        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataDescription() + ", " +
+        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalDescription() +
+        " }";
 }
 
 std::string Property::generateMetaDataDescription() const {

@@ -1,8 +1,8 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "settings that are being used when OpenSpace is started."
         },
         {
-            ConfigurationManager::KeyConfigScene,
+            ConfigurationManager::KeyConfigAsset,
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"
             ),
@@ -53,12 +53,12 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the Scene documentation."
         },
         {
-            ConfigurationManager::KeyConfigTasksRoot,
-            new StringAnnotationVerifier(
-                "A valid task file as described in the Task documentation"
-            ),
+            ConfigurationManager::KeyGlobalCustomizationScripts,
+            new StringListVerifier,
             Optional::Yes,
-            "The root task to be performed when launching the task runner application."
+            "This value names a list of scripts that get executed after initialization "
+            "of any scene. These scripts can be used for user-specific customization, "
+            "such as a global rebinding of keys from the default."
         },
         {
             ConfigurationManager::KeyPaths,
@@ -90,7 +90,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogDir,
                     new StringVerifier,
                     Optional::Yes,
-                    "The directory for logs. Default value is \"${BASE_PATH}\""
+                    "The directory for logs. Default value is \"${BASE}\""
                 },
                 {
                     ConfigurationManager::PartLogPerformancePrefix,
@@ -234,6 +234,14 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "The web URL for the GUI."
         },
         {
+            ConfigurationManager::KeySceneLicenseDocumentation,
+            new StringVerifier,
+            Optional::Yes,
+            "The file that will be created on startup containing the scene license "
+            "information. Any previous file in this location will be silently "
+            "overwritten."
+        },
+        {
             ConfigurationManager::KeyLauncher,
             new TableVerifier({
                 {
@@ -280,17 +288,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "of the rendering can be different from the size of the window, the onscreen "
             "text can either be scaled according to the window size ('window'), or the "
             "rendering resolution ('framebuffer'). This value defaults to 'window'."
-        },
-        {
-            ConfigurationManager::KeyDownloadRequestURL,
-            new OrVerifier(
-                new StringVerifier,
-                new StringListVerifier
-            ),
-            Optional::Yes,
-            "The URL from which files will be downloaded by the Launcher. This can "
-            "either be a single URL or a list of possible URLs from which the "
-            "Launcher can then choose."
         },
         {
             ConfigurationManager::KeyRenderingMethod,
@@ -374,7 +371,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether the OpenGL debug callbacks are performed "
-                    "synchronously. If set to <True> the callbacks are in the same thead "
+                    "synchronously. If set to <True> the callbacks are in the same trhead "
                     "as the context and in the scope of the OpenGL function that "
                     "triggered the message. The default value is <True>."
                 },
@@ -452,6 +449,51 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "'TRACE' loglevel. This will bring the rendering to a crawl but provides "
             "useful debugging features for the order in which OpenGL calls occur. This "
             "defaults to 'false'."
+        },
+        {
+            ConfigurationManager::KeyUseMultithreadedInitialization,
+            new BoolVerifier,
+            Optional::Yes,
+            "This value determines whether the initialization of the scene graph should "
+            "occur multithreaded, that is, whether multiple scene graph nodes should "
+            "initialize in parallel. The only use for this value is to disable it for "
+            "debugging support."
+        },
+        {
+            ConfigurationManager::KeyLoadingScreen,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartShowMessage,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is set to 'true', the loading screen will display a "
+                    "message information about the current phase the loading is in."
+                },
+                {
+                    ConfigurationManager::PartShowNodeNames,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is set to 'true', the loading screen will display a "
+                    "list of all of the nodes with their respective status (created, "
+                    "loaded, initialized)."
+                },
+                {
+                    ConfigurationManager::PartShowProgressbar,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is set to 'true', the loading screen will contain a "
+                    "progress bar that gives an estimate of the loading progression."
+                }
+            }),
+            Optional::Yes,
+            "Values in this table describe the behavior of the loading screen that is "
+            "displayed while the scene graph is created and initialized."
+        },
+        {
+            ConfigurationManager::KeyModuleConfigurations,
+            new TableVerifier,
+            Optional::Yes,
+            "Configurations for each module"
         }
         }
     };

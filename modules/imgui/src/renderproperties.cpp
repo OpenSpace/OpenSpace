@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,20 +28,27 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/matrixproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <glm/ext.hpp>
+#include <ghoul/misc/misc.h>
+
+#include <glm/gtx/component_wise.hpp>
+#include <imgui_internal.h>
 
 namespace openspace {
 
 using namespace properties;
 
-void renderTooltip(Property* prop) {
-    if (ImGui::IsItemHovered()) {
+void renderTooltip(Property* prop, double delay) {
+    if (ImGui::IsItemHovered() && (GImGui->HoveredIdTimer > delay)) {
         ImGui::BeginTooltip();
         if (!prop->description().empty()) {
             ImGui::TextWrapped("%s", prop->description().c_str());
@@ -85,7 +92,8 @@ void executeScript(const std::string& id, const std::string& value,
 }
 
 void renderBoolProperty(Property* prop, const std::string& ownerName,
-                        IsRegularProperty isRegular)
+                        IsRegularProperty isRegular, ShowToolTip showTooltip,
+                        double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     BoolProperty* p = static_cast<BoolProperty*>(prop);
@@ -94,7 +102,9 @@ void renderBoolProperty(Property* prop, const std::string& ownerName,
 
     BoolProperty::ValueType value = *p;
     ImGui::Checkbox(name.c_str(), &value);
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
     if (value != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false", isRegular);
@@ -103,7 +113,8 @@ void renderBoolProperty(Property* prop, const std::string& ownerName,
 }
 
 void renderOptionProperty(Property* prop, const std::string& ownerName,
-                          IsRegularProperty isRegular)
+                          IsRegularProperty isRegular, ShowToolTip showTooltip,
+                          double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     OptionProperty* p = static_cast<OptionProperty*>(prop);
@@ -120,16 +131,40 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
         ImGui::Separator();
         for (const OptionProperty::Option& o : options) {
             ImGui::RadioButton(o.description.c_str(), &value, o.value);
-            renderTooltip(prop);
+            if (showTooltip) {
+                renderTooltip(prop, tooltipDelay);
+            }
         }
+        ImGui::Separator();
         break;
     }
     case OptionProperty::DisplayType::Dropdown: {
+        // The order of the options does not have to correspond with the value of the
+        // option
         std::string nodeNames = "";
         for (const OptionProperty::Option& o : options) {
             nodeNames += o.description + '\0';
         }
-        ImGui::Combo(name.c_str(), &value, nodeNames.c_str());
+        nodeNames += '\0';
+
+        int idx = static_cast<int>(std::distance(
+            options.begin(),
+            std::find_if(
+                options.begin(),
+                options.end(),
+                [value](const OptionProperty::Option& o) { return o.value == value; }
+        )));
+
+        int oldIdx = idx;
+        ImGui::Combo(name.c_str(), &idx, nodeNames.c_str());
+        if (showTooltip) {
+            renderTooltip(prop, tooltipDelay);
+        }
+
+        if (idx != oldIdx) {
+            value = options[idx].value;
+        }
+
         break;
     }
     }
@@ -140,7 +175,8 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
 }
 
 void renderSelectionProperty(Property* prop, const std::string& ownerName,
-                             IsRegularProperty isRegular)
+                             IsRegularProperty isRegular, ShowToolTip showTooltip,
+                             double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
@@ -160,7 +196,9 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
             ) != selectedIndices.end();
 
             ImGui::Checkbox(description.c_str(), &selected);
-            renderTooltip(prop);
+            if (showTooltip) {
+                renderTooltip(prop, tooltipDelay);
+            }
 
             if (selected) {
                 newSelectedIndices.push_back(i);
@@ -181,14 +219,15 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
 }
 
 void renderStringProperty(Property* prop, const std::string& ownerName,
-                          IsRegularProperty isRegular)
+                          IsRegularProperty isRegular, ShowToolTip showTooltip,
+                          double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     StringProperty* p = static_cast<StringProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
-    std::string value = FileSys.convertPathSeparator(p->value(), '/');
+    const std::string value = p->value();
 
     static const int bufferSize = 256;
     static char buffer[bufferSize];
@@ -203,13 +242,65 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
         bufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
-    renderTooltip(prop);
-
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
     if (hasNewValue) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "'" + std::string(buffer) + "'",
+            "[[" + std::string(buffer) + "]]",
+            isRegular
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderStringListProperty(Property* prop, const std::string& ownerName,
+                              IsRegularProperty isRegular, ShowToolTip showTooltip,
+                              double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    StringListProperty* p = static_cast<StringListProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    std::string value;
+    p->getStringValue(value);
+    // const std::string value = p->value();
+
+    static const int bufferSize = 512;
+    static char buffer[bufferSize];
+#ifdef _MSC_VER
+    strcpy_s(buffer, value.length() + 1, value.c_str());
+#else
+    strcpy(buffer, value.c_str());
+#endif
+    bool hasNewValue = ImGui::InputText(
+        name.c_str(),
+        buffer,
+        bufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (hasNewValue) {
+        std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
+        std::string script = "{";
+        for (std::string& token : tokens) {
+            if (!token.empty()) {
+                ghoul::trimWhitespace(token);
+                script += "[[" + token + "]],";
+            }
+        }
+        script += "}";
+
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            std::move(script),
             isRegular
         );
     }
@@ -218,7 +309,8 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 }
 
 void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
-                          IsRegularProperty isRegular)
+                          IsRegularProperty isRegular, ShowToolTip showTooltip,
+                          double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DoubleProperty* p = static_cast<DoubleProperty*>(prop);
@@ -229,10 +321,19 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     float min = static_cast<float>(p->minValue());
     float max = static_cast<float>(p->maxValue());
 
-    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
-    renderTooltip(prop);
+    bool changed = ImGui::SliderFloat(
+        name.c_str(),
+        &value,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
-    if (value != static_cast<float>(p->value())) {
+    if (changed) {
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
@@ -240,7 +341,8 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
 }
 
 void renderIntProperty(Property* prop, const std::string& ownerName,
-                       IsRegularProperty isRegular)
+                       IsRegularProperty isRegular, ShowToolTip showTooltip,
+                       double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IntProperty* p = static_cast<IntProperty*>(prop);
@@ -250,11 +352,13 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     IntProperty::ValueType value = *p;
     int min = p->minValue();
     int max = p->maxValue();
-    
-    ImGui::SliderInt(name.c_str(), &value, min, max);
-    renderTooltip(prop);
 
-    if (value != p->value()) {
+    bool changed = ImGui::SliderInt(name.c_str(), &value, min, max);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
@@ -262,60 +366,65 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
 }
 
 void renderIVec2Property(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IVec2Property* p = static_cast<IVec2Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
-    
+
     IVec2Property::ValueType value = *p;
-    int min = std::min(p->minValue().x, p->minValue().y);
-    int max = std::max(p->maxValue().x, p->maxValue().y);
-    ImGui::SliderInt2(
+    int min = glm::compMin(p->minValue());
+    int max = glm::compMax(p->maxValue());
+    bool changed = ImGui::SliderInt2(
         name.c_str(),
         &value.x,
         min,
         max
     );
-    renderTooltip(prop);
-    
-    if (value != p->value()) {
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            std::to_string(value),
             isRegular
         );
     }
-    
+
     ImGui::PopID();
 }
 
 void renderIVec3Property(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IVec3Property* p = static_cast<IVec3Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
-    
+
     IVec3Property::ValueType value = *p;
-    int min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
-    int max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
-    
-    ImGui::SliderInt3(
+    int min = glm::compMin(p->minValue());
+    int max = glm::compMax(p->maxValue());
+
+    bool changed = ImGui::SliderInt3(
         name.c_str(),
         &value.x,
         min,
         max
     );
-    renderTooltip(prop);
-    
-    if (value != p->value()) {
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -323,36 +432,32 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
 }
 
 void renderIVec4Property(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IVec4Property* p = static_cast<IVec4Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
-    
+
     IVec4Property::ValueType value = *p;
-    int min = std::min(std::min(std::min(
-        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
-    );
-    int max = std::max(std::max(std::max(
-        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
-    );
-    
-    ImGui::SliderInt4(
+    int min = glm::compMin(p->minValue());
+    int max = glm::compMax(p->maxValue());
+
+    bool changed = ImGui::SliderInt4(
         name.c_str(),
         &value.x,
         min,
         max
     );
-    renderTooltip(prop);
-    
-    if (value != p->value()) {
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                std::to_string(value.y) + "," +
-                std::to_string(value.z) + "," +
-                std::to_string(value.w) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -360,7 +465,8 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
 }
 
 void renderFloatProperty(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     FloatProperty* p = static_cast<FloatProperty*>(prop);
@@ -370,10 +476,19 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
     FloatProperty::ValueType value = *p;
     float min = p->minValue();
     float max = p->maxValue();
-    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
-    renderTooltip(prop);
+    bool changed = ImGui::SliderFloat(
+        name.c_str(),
+        &value,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
-    if (value != p->value()) {
+    if (changed) {
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
@@ -381,7 +496,8 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
 }
 
 void renderVec2Property(Property* prop, const std::string& ownerName,
-                        IsRegularProperty isRegular)
+                        IsRegularProperty isRegular, ShowToolTip showTooltip,
+                        double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     Vec2Property* p = static_cast<Vec2Property*>(prop);
@@ -389,21 +505,25 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec2Property::ValueType value = *p;
-    float min = std::min(p->minValue().x, p->minValue().y);
-    float max = std::max(p->maxValue().x, p->maxValue().y);
-    ImGui::SliderFloat2(
+    float min = static_cast<float>(glm::compMin(p->minValue()));
+    float max = static_cast<float>(glm::compMax(p->maxValue()));
+
+    bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
-    if (value != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -412,7 +532,8 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
 }
 
 void renderVec3Property(Property* prop, const std::string& ownerName,
-                        IsRegularProperty isRegular)
+                        IsRegularProperty isRegular, ShowToolTip showTooltip,
+                        double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     Vec3Property* p = static_cast<Vec3Property*>(prop);
@@ -420,34 +541,34 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec3Property::ValueType value = *p;
-    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
-    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+    float min = static_cast<float>(glm::compMin(p->minValue()));
+    float max = static_cast<float>(glm::compMax(p->maxValue()));
 
-
-
+    bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
-        ImGui::ColorEdit3(
+        changed = ImGui::ColorEdit3(
             name.c_str(),
             glm::value_ptr(value)
         );
     }
     else {
-        ImGui::SliderFloat3(
+        changed = ImGui::SliderFloat3(
             name.c_str(),
             glm::value_ptr(value),
             min,
             max,
-            "%.5f"
+            "%.5f",
+            p->exponent()
         );
     }
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
-    if (value != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                std::to_string(value.y) + "," +
-                std::to_string(value.z) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -456,7 +577,8 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
 }
 
 void renderVec4Property(Property* prop, const std::string& ownerName,
-                        IsRegularProperty isRegular)
+                        IsRegularProperty isRegular, ShowToolTip showTooltip,
+                        double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     Vec4Property* p = static_cast<Vec4Property*>(prop);
@@ -464,36 +586,34 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec4Property::ValueType value = *p;
-    float min = std::min(std::min(std::min(
-        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
-    float max = std::max(std::max(std::max(
-        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
+    float min = static_cast<float>(glm::compMin(p->minValue()));
+    float max = static_cast<float>(glm::compMax(p->maxValue()));
 
+    bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
-        ImGui::ColorEdit4(
+        changed = ImGui::ColorEdit4(
             name.c_str(),
             glm::value_ptr(value)
         );
     }
     else {
-        ImGui::SliderFloat4(
+        changed = ImGui::SliderFloat4(
             name.c_str(),
             glm::value_ptr(value),
             min,
             max,
-            "%.5f"
+            "%.5f",
+            p->exponent()
         );
     }
-
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                std::to_string(value.y) + "," +
-                std::to_string(value.z) + "," +
-                std::to_string(value.w) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -502,7 +622,8 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
 }
 
 void renderDVec2Property(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DVec2Property* p = static_cast<DVec2Property*>(prop);
@@ -510,21 +631,24 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
-    float min = static_cast<float>(std::min(p->minValue().x, p->minValue().y));
-    float max = static_cast<float>(std::max(p->maxValue().x, p->maxValue().y));
-    ImGui::SliderFloat2(
+    float min = static_cast<float>(glm::compMin(p->minValue()));
+    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
-    if (glm::dvec2(value) != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -533,7 +657,8 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
 }
 
 void renderDVec3Property(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DVec3Property* p = static_cast<DVec3Property*>(prop);
@@ -541,28 +666,25 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
-    float min = static_cast<float>(
-        std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z)
-    );
-    float max = static_cast<float>(
-        std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z)
-    );
+    float min = static_cast<float>(glm::compMin(p->minValue()));
+    float max = static_cast<float>(glm::compMax(p->maxValue()));
 
     bool changed = ImGui::SliderFloat3(
         name.c_str(),
         glm::value_ptr(value),
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
     if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                std::to_string(value.y) + "," +
-                std::to_string(value.z) + "}",
+            std::to_string(value),
             isRegular
         );
     }
@@ -571,7 +693,8 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
 }
 
 void renderDVec4Property(Property* prop, const std::string& ownerName,
-                         IsRegularProperty isRegular)
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DVec4Property* p = static_cast<DVec4Property*>(prop);
@@ -579,33 +702,226 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
-    float min = static_cast<float>(
-        std::min(std::min(std::min(
-            p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
-        )
-    );
-    float max = static_cast<float>(
-        std::max(std::max(std::max(
-            p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
-        )
-    );
+    float min = static_cast<float>(glm::compMin(p->minValue()));
+    float max = static_cast<float>(glm::compMax(p->maxValue()));
 
-    ImGui::SliderFloat4(
+    bool changed = ImGui::SliderFloat4(
         name.c_str(),
         &value.x,
         min,
         max,
-        "%.5f"
+        "%.5f",
+        p->exponent()
     );
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
-    if (glm::dvec4(value) != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                std::to_string(value.y) + "," +
-                std::to_string(value.z) + "," +
-                std::to_string(value.w) + "}",
+            std::to_string(value),
+            isRegular
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDMat2Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    DMat2Property* p = static_cast<DMat2Property*>(prop);
+
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::Text("%s", name.c_str());
+
+    glm::mat2 value = glm::dmat2(*p);
+    glm::dvec2 minValues = {
+        glm::compMin(p->minValue()[0]),
+        glm::compMin(p->minValue()[1])
+    };
+    float min = static_cast<float>(glm::compMin(minValues));
+
+    glm::dvec2 maxValues = {
+        glm::compMax(p->maxValue()[0]),
+        glm::compMax(p->maxValue()[1])
+    };
+    float max = static_cast<float>(glm::compMax(maxValues));
+
+    bool changed = false;
+    changed |= ImGui::SliderFloat2(
+        "[0]",
+        glm::value_ptr(value[0]),
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    changed |= ImGui::SliderFloat2(
+        "[1]",
+        glm::value_ptr(value[1]),
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            std::to_string(value),
+            isRegular
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDMat3Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    DMat3Property* p = static_cast<DMat3Property*>(prop);
+
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::Text("%s", name.c_str());
+
+    glm::mat3 value = glm::dmat3(*p);
+    glm::dvec3 minValues = {
+        glm::compMin(p->minValue()[0]),
+        glm::compMin(p->minValue()[1]),
+        glm::compMin(p->minValue()[2])
+    };
+    float min = static_cast<float>(glm::compMin(minValues));
+
+    glm::dvec3 maxValues = {
+        glm::compMax(p->maxValue()[0]),
+        glm::compMax(p->maxValue()[1]),
+        glm::compMax(p->maxValue()[2])
+    };
+    float max = static_cast<float>(glm::compMax(maxValues));
+
+    bool changed = false;
+    changed |= ImGui::SliderFloat3(
+        "[0]",
+        &value[0].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    changed |= ImGui::SliderFloat3(
+        "[1]",
+        &value[1].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    changed |= ImGui::SliderFloat3(
+        "[2]",
+        &value[2].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            std::to_string(value),
+            isRegular
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDMat4Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular, ShowToolTip showTooltip,
+                         double tooltipDelay)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
+    DMat4Property* p = static_cast<DMat4Property*>(prop);
+
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::Text("%s", name.c_str());
+
+    glm::mat4 value = glm::dmat4(*p);
+    glm::dvec4 minValues = {
+        glm::compMin(p->minValue()[0]),
+        glm::compMin(p->minValue()[1]),
+        glm::compMin(p->minValue()[2]),
+        glm::compMin(p->minValue()[3])
+    };
+    float min = static_cast<float>(glm::compMin(minValues));
+
+    glm::dvec4 maxValues = {
+        glm::compMax(p->maxValue()[0]),
+        glm::compMax(p->maxValue()[1]),
+        glm::compMax(p->maxValue()[2]),
+        glm::compMax(p->maxValue()[3])
+    };
+    float max = static_cast<float>(glm::compMax(maxValues));
+
+    bool changed = false;
+    changed |= ImGui::SliderFloat4(
+        "[0]",
+        &value[0].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    changed |= ImGui::SliderFloat4(
+        "[1]",
+        &value[1].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    changed |= ImGui::SliderFloat4(
+        "[2]",
+        &value[2].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+    changed |= ImGui::SliderFloat4(
+        "[3]",
+        &value[3].x,
+        min,
+        max,
+        "%.5f",
+        p->exponent()
+    );
+
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
+
+    if (changed) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            std::to_string(value),
             isRegular
         );
     }
@@ -614,7 +930,8 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
 }
 
 void renderTriggerProperty(Property* prop, const std::string& ownerName,
-                           IsRegularProperty isRegular)
+                           IsRegularProperty isRegular, ShowToolTip showTooltip,
+                           double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
     std::string name = prop->guiName();
@@ -624,7 +941,9 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName,
     if (pressed) {
         executeScript(prop->fullyQualifiedIdentifier(), "nil", isRegular);
     }
-    renderTooltip(prop);
+    if (showTooltip) {
+        renderTooltip(prop, tooltipDelay);
+    }
 
     ImGui::PopID();
 }

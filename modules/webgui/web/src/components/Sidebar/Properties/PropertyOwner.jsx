@@ -8,7 +8,6 @@ import OptionProperty from './OptionProperty';
 import TriggerProperty from './TriggerProperty';
 import VecProperty from './VectorProperty';
 import MatrixProperty from './MatrixProperty';
-import TransferFunctionEditor from './TransferFunctionEditor'
 
 const types = {
   BoolProperty,
@@ -24,19 +23,13 @@ const types = {
   MatrixProperty,
   DMat4Property: MatrixProperty,
   defaultProperty: Property,
-  TransferFunctionHandler: TransferFunctionEditor,
 };
 
 const PropertyOwner = ({ name, properties, subowners }) => (
   <ToggleContent title={name}>
-    { subowners.map(subowner => {
-      if (subowner.name in types) {
-        var ReturnType = types[subowner.name];
-        return < ReturnType {...subowner} key={subowner.name} />
-      }
-      else
-        return <PropertyOwner {...subowner} key={subowner.name} />
-    }) }
+    { subowners.map(subowner => (
+      <PropertyOwner {...subowner} key={subowner.name} />
+    )) }
     { properties.map((prop) => {
       const { Description } = prop;
       const Type = types[Description.Type] || types.defaultProperty;

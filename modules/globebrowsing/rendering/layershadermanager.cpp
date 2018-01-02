@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,17 +33,20 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace openspace::globebrowsing {
 
-bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
-    const LayerGroupPreprocessingData& other) const {
+bool
+LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
+    const LayerGroupPreprocessingData& other) const
+{
     return layerType == other.layerType &&
-        blendMode == other.blendMode &&
-        layerAdjustmentType == other.layerAdjustmentType &&
-        lastLayerIdx == other.lastLayerIdx &&
-        layerBlendingEnabled == other.layerBlendingEnabled;
+           blendMode == other.blendMode &&
+           layerAdjustmentType == other.layerAdjustmentType &&
+           lastLayerIdx == other.lastLayerIdx &&
+           layerBlendingEnabled == other.layerBlendingEnabled;
 }
 
 bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
@@ -77,7 +80,7 @@ LayerShaderManager::LayerShaderPreprocessingData
 
         const LayerGroup& layerGroup = layerManager->layerGroup(i);
         std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
-        
+
         // This check was implicit before;  not sure if it will fire or will be handled
         // elsewhere
         //ghoul_assert(
@@ -92,21 +95,31 @@ LayerShaderManager::LayerShaderPreprocessingData
         for (const std::shared_ptr<Layer>& layer : layers) {
             layeredTextureInfo.layerType.push_back(layer->type());
             layeredTextureInfo.blendMode.push_back(layer->blendMode());
-            layeredTextureInfo.layerAdjustmentType.push_back(layer->layerAdjustment().type());
+            layeredTextureInfo.layerAdjustmentType.push_back(
+                layer->layerAdjustment().type()
+            );
         }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
     }
-        
+
     const RenderableGlobe::GeneralProperties& generalProps = globe.generalProperties();
     const RenderableGlobe::DebugProperties& debugProps = globe.debugProperties();
     auto& pairs = preprocessingData.keyValuePairs;
-        
+
     pairs.emplace_back("useAccurateNormals",
         std::to_string(generalProps.useAccurateNormals)
     );
     pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
     pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
+    pairs.emplace_back(
+        "useEclipseShadows",
+        std::to_string(generalProps.eclipseShadowsEnabled)
+    );
+    pairs.emplace_back(
+        "useEclipseHardShadows",
+        std::to_string(generalProps.eclipseHardShadows)
+    );
     pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
     pairs.emplace_back("showHeightResolution",
         std::to_string(debugProps.showHeightResolution)
@@ -127,7 +140,7 @@ LayerShaderManager::LayerShaderManager(const std::string& shaderName,
     , _fsPath(fsPath)
     , _updatedOnLastCall(false)
 {}
-    
+
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -173,7 +186,10 @@ void LayerShaderManager::recompileShaderProgram(
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "LayerType";
-            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].layerType[j]));
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].layerType[j])
+            );
         }
 
         // This is to avoid errors from shader preprocessor
@@ -182,7 +198,10 @@ void LayerShaderManager::recompileShaderProgram(
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "BlendMode";
-            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].blendMode[j]));
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].blendMode[j])
+            );
         }
 
         // This is to avoid errors from shader preprocessor
@@ -191,7 +210,10 @@ void LayerShaderManager::recompileShaderProgram(
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "LayerAdjustmentType";
-            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].layerAdjustmentType[j]));
+            shaderDictionary.setValue(
+                key,
+                static_cast<int>(textureTypes[i].layerAdjustmentType[j])
+            );
         }
     }
 
@@ -212,14 +234,15 @@ void LayerShaderManager::recompileShaderProgram(
 
     _programObject = OsEng.renderEngine().buildRenderProgram(
         _shaderName,
-        _vsPath,
-        _fsPath,
+        absPath(_vsPath),
+        absPath(_fsPath),
         shaderDictionary
     );
 
     ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
     using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
     _updatedOnLastCall = true;
 }
 

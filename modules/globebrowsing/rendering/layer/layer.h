@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,7 +53,11 @@ public:
         properties::Vec3Property color;
     };
 
-    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
+    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
+        LayerGroup& parent);
+
+    void initialize();
+    void deinitialize();
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status getTileStatus(const TileIndex& index) const;
@@ -66,26 +70,28 @@ public:
     const OtherTypesProperties& otherTypesProperties() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
-    
+
     void onChange(std::function<void(void)> callback);
-    
+
     void update();
 
     glm::ivec2 tilePixelStartOffset() const;
     glm::ivec2 tilePixelSizeDifference() const;
     glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
-                                              glm::uvec2 resolution, glm::vec2 tileUV);
+        glm::uvec2 resolution, glm::vec2 tileUV);
     glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-                                            glm::vec2 tileUV, glm::uvec2 resolution);
+        glm::vec2 tileUV, glm::uvec2 resolution);
 
 private:
-    layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
+    layergroupid::TypeID parseTypeIdFromDictionary(
+        const ghoul::Dictionary& initDict) const;
+
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void addVisibleProperties();
     void removeVisibleProperties();
 
     LayerGroup& _parent;
-    
+
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
     properties::BoolProperty _enabled;
@@ -102,7 +108,7 @@ private:
     glm::ivec2 _padTilePixelSizeDifference;
 
     const layergroupid::GroupID _layerGroupId;
-  
+
     std::function<void(void)> _onChangeCallback;
   };
 

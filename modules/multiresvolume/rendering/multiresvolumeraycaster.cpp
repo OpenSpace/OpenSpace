@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,30 +53,30 @@ MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
     , _transferFunction(transferFunction)
     , _boundingBox(glm::vec3(1.0))
 {}
-    
+
 MultiresVolumeRaycaster::~MultiresVolumeRaycaster() {}
 
 void MultiresVolumeRaycaster::initialize() {
     _boundingBox.initialize();
 }
-    
+
 void MultiresVolumeRaycaster::deinitialize() {}
-    
+
 void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data,
                                                 ghoul::opengl::ProgramObject& program)
 {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     Renderable::setPscUniforms(program, data.camera, data.position);
-    
+
     // Cull back face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     // Render bounding geometry
     _boundingBox.render();
 }
-    
+
 void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
                                                ghoul::opengl::ProgramObject& program)
 {
@@ -88,14 +88,14 @@ void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data,
     // Cull front face
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
-    
+
     // Render bounding geometry
     _boundingBox.render();
-    
+
     // Restore defaults
     glCullFace(GL_BACK);
 }
-    
+
 void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
                                          ghoul::opengl::ProgramObject& program)
 {
@@ -110,7 +110,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
     _tfUnit->activate();
     _transferFunction->getTexture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
-    
+
     _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _atlasUnit->activate();
     _atlasManager->textureAtlas().bind();
@@ -125,7 +125,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
         _atlasManager->atlasMapBuffer()
     );
     program.setSsboBinding("atlasMapBlock_" + id, _atlasMapBinding->bindingNumber());
-    
+
     program.setUniform("gridType_" + id, static_cast<int>(_tsp->header().gridType_));
     program.setUniform(
         "maxNumBricksPerAxis_" + id,
@@ -135,12 +135,12 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
         "paddedBrickDim_" + id,
         static_cast<unsigned int>(_tsp->paddedBrickDim())
     );
-    
+
     glm::size3_t size = _atlasManager->textureSize();
     glm::ivec3 atlasSize(size.x, size.y, size.z);
     program.setUniform("atlasSize_" + id, atlasSize);
 }
-    
+
 bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
@@ -176,11 +176,11 @@ void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
     _atlasUnit = nullptr;
     _tfUnit = nullptr;
 }
-    
+
 std::string MultiresVolumeRaycaster::getBoundsVsPath() const {
     return GlslBoundsVsPath;
 }
-    
+
 std::string MultiresVolumeRaycaster::getBoundsFsPath() const {
     return GlslBoundsFsPath;
 }
@@ -196,9 +196,9 @@ std::string MultiresVolumeRaycaster::getHelperPath() const {
 void MultiresVolumeRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = transform;
 }
-    
+
 void MultiresVolumeRaycaster::setStepSizeCoefficient(float stepSizeCoefficient) {
     _stepSizeCoefficient = stepSizeCoefficient;
 }
-    
+
 } // namespace openspace

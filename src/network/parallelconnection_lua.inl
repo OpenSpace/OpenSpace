@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@ int connect(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
 
     if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
+        OsEng.parallelConnection().clientConnect();
     }
     return 0;
 }
@@ -39,7 +39,7 @@ int disconnect(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
 
     if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
+        OsEng.parallelConnection().signalDisconnect();
     }
     return 0;
 }

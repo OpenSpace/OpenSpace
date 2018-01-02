@@ -1,22 +1,32 @@
 import React from 'react';
 import Property from './Property';
 import Checkbox from '../../common/Input/Checkbox/Checkbox';
+import { connectProperty } from './connectProperty.js'
 
 class BoolProperty extends Property {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
+  
   onChange(value) {
     // convert to Lua compatible value
-    this.saveValue(value ? '1' : '0');
+    this.props.ChangeValue(value ? '1' : '0');
+  }
 
-    // optimistic UI change!
-    this.setState({ value });
+  componentDidMount() {
+    this.props.StartListening(this.props.Description.Identifier)
+  }
+
+  componentWillUnmount() {
+    this.props.StopListening(this.props.Description.Identifier)
   }
 
   render() {
-    const { Description } = this.props;
-    const { value } = this.state;
+    const { Description, Value } = this.props;
     return (
       <Checkbox
-        checked={value === 'true'}
+        checked={Value === 'true'}
         label={(<span>{Description.Name} {this.descriptionPopup}</span>)}
         onChange={this.onChange}
         disabled={this.disabled}
@@ -25,4 +35,5 @@ class BoolProperty extends Property {
   }
 }
 
+BoolProperty = connectProperty(BoolProperty)
 export default BoolProperty;

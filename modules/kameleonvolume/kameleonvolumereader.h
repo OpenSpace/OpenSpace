@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,7 +84,9 @@ public:
     std::vector<std::string> globalAttributeNames() const;
 
 private:
-    static void addAttributeToDictionary(ghoul::Dictionary& dictionary, const std::string& key, ccmc::Attribute& attr);
+    static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
+        const std::string& key, ccmc::Attribute& attr);
+
     std::string _path;
     ccmc::Kameleon _kameleon;
     ccmc::Model* _model;

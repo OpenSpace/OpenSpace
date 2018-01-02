@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,11 +52,16 @@ public:
     virtual ~GalaxyRaycaster();
     void initialize();
     void deinitialize();
-    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
-    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+    void renderEntryPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data,
+        ghoul::opengl::ProgramObject& program) override;
+    bool cameraIsInside(const RenderData& data,
+        glm::vec3& localPosition) override;
 
 
     std::string getBoundsVsPath() const override;

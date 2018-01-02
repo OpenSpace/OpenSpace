@@ -20,14 +20,14 @@ class SceneGraphNode extends Component {
   }
 
   render() {
-    const { name, subproperties } = this.props;
+    const { name, subowners } = this.props;
 
     return (
       <ToggleContent title={name}>
         <Button onClick={this.focusOnThis}>
           <Icon icon="gps_fixed" /> Focus
         </Button>
-        { subproperties.map(sub => (
+        { subowners.map(sub => (
           <PropertyOwner
             key={sub.name}
             {...sub}
@@ -41,7 +41,7 @@ class SceneGraphNode extends Component {
 SceneGraphNode.propTypes = {
   name: PropTypes.string.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
-  subproperties: PropTypes.arrayOf(PropTypes.shape({
+  subowners: PropTypes.arrayOf(PropTypes.shape({
     name: PropTypes.string,
     description: PropTypes.string,
     properties: PropTypes.arrayOf(PropTypes.object),
@@ -50,7 +50,7 @@ SceneGraphNode.propTypes = {
 
 SceneGraphNode.defaultProps = {
   properties: [],
-  subproperties: [],
+  subowners: [],
 };
 
 export default SceneGraphNode;

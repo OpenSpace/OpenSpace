@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,8 +82,7 @@ public:
     static bool futureReady(std::future<R> const& f)
     { return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
 
-    DownloadManager(std::string requestURL, int applicationVersion,
-        bool useMultithreadedDownload = true);
+    DownloadManager(bool useMultithreadedDownload = true);
 
     //downloadFile
     // url - specifies the target of the download
@@ -103,27 +102,14 @@ public:
     );
 
     std::future<MemoryFile> fetchFile(
-    const std::string& url,
-    SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());
-
-    std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(const std::string& identifier,
-        const ghoul::filesystem::Directory& destination, int version,
-        bool overrideFiles = true,
-        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
-        DownloadProgressCallback progressCallback = DownloadProgressCallback()
-    );
-
-    void downloadRequestFilesAsync(const std::string& identifier,
-        const ghoul::filesystem::Directory& destination, int version,
-        bool overrideFiles, AsyncDownloadFinishedCallback callback
-    );
+        const std::string& url,
+        SuccessCallback successCallback = SuccessCallback(),
+        ErrorCallback errorCallback = ErrorCallback());
 
     void getFileExtension(const std::string& url,
         RequestFinishedCallback finishedCallback = RequestFinishedCallback());
 
 private:
-    std::vector<std::string> _requestURL;
-    int _applicationVersion;
     bool _useMultithreadedDownload;
 };
 

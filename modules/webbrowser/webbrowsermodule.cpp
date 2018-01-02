@@ -65,12 +65,12 @@ void WebBrowserModule::deinitialize() {
  */
 std::string WebBrowserModule::findHelperExecutable() {
     if (OsEng.configurationManager().hasKey(ConfigurationManager::KeyWebHelperLocation)) {
-        auto execLocation = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation) + SUBPROCESS_ENDING;
+        auto execLocation = absPath(OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyWebHelperLocation) + SUBPROCESS_ENDING);
         if (!FileSys.fileExists(execLocation)) {
             LERROR("Could not find web helper executable at location: " + execLocation);
         }
-        return FileSys.absolutePath(execLocation);
+        return execLocation;
     }
     else {
         std::string subprocessName = SUBPROCESS_NAME;
@@ -78,7 +78,7 @@ std::string WebBrowserModule::findHelperExecutable() {
         LWARNING("Assuming web helper name is " + subprocessName);
         auto subLength = (int)subprocessName.length();
 
-        Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
+        Directory binDir("${BASE}/bin/openspace", Directory::AbsolutePath::No);
         std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
 
         // find files matching the given file name

@@ -1,13 +1,12 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types';
-import Draggable from 'react-draggable'
 import { connect } from 'react-redux';
 import EnvelopeCanvas from '../presentational/EnvelopeCanvas'
 import styles from '../style/Envelope.scss'
 import GraphBody from '../../../common/Graph/GraphBody'
 import Point from '../presentational/Point'
-import PointPositionGraph from './PointPositionGraph'
-import { toggleActiveEnvelope, toggleActivePoint, movePoint, swapPoints } from '../actions';
+import PointPosition from '../presentational/PointPosition'
+import { toggleActiveEnvelope, toggleActivePoint, movePoint, swapPoints } from '../../../../api/Actions/transferFunctionActions.js';
 
 class Envelope extends Component {
   constructor(props) {
@@ -15,6 +14,7 @@ class Envelope extends Component {
     this.handleDrag = this.handleDrag.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.checkForSwap = this.checkForSwap.bind(this);
+    this.getPointPositions = this.getPointPositions.bind(this);
   }
 
   checkForSwap(position, points, index) {
@@ -22,10 +22,10 @@ class Envelope extends Component {
       return -1;
 
     if (position.x < points[index - 1].position.x){
-      return points[index - 1].anchor ? -1 : points[index].id;
+      return points[index - 1].anchor ? -1 : (index - 1);
     }
     else if (position.x > points[index + 1].position.x){
-      return points[index + 1].anchor ? -1 : points[index].id;
+      return points[index + 1].anchor ? -1 : (index + 1);
     }
     else
       return -1;
@@ -45,12 +45,11 @@ class Envelope extends Component {
     if(!envelope.points[index].anchor)
       position.y = position.y + ui.deltaY;
 
-    this.props.MovePoint(position, id, envelope.id);
+    this.props.MovePoint(position, id, envelope.id, this.props.URI);
     var swapMate = this.checkForSwap(position, envelope.points, index);
 
     if(swapMate !== -1) {
-      //console.log("swap " + id + "  " + swapMate );
-      this.props.SwapPoints(id, swapMate, envelope.id);
+      this.props.SwapPoints(index, swapMate, envelope.id, this.props.URI);
     }
   }
 
@@ -60,13 +59,13 @@ class Envelope extends Component {
     }
     else {
       if (envelope.active === true) {
-        this.props.TogglePoint(envelope.id, pointId);
+        this.props.TogglePoint(envelope.id, pointId, this.props.URI);
       }
       else if(this.hasActiveChild(envelope)) {
-        this.props.TogglePoint(envelope.id, pointId);
+        this.props.TogglePoint(envelope.id, pointId, this.props.URI);
       }
       else {
-        this.props.ToggleEnvelope(envelope.id);
+        this.props.ToggleEnvelope(envelope.id, this.props.URI);
       }
     }
   }
@@ -102,14 +101,35 @@ class Envelope extends Component {
     return convertedData;
   }
 
+  getPointPositions(envelopes, height) {
+    let convertedPoints = [];
+    if(envelopes.length !== 0) {
+      envelopes.map(envelope =>
+          envelope.points.map(point =>
+            convertedPoints.push(
+              Object.assign({},
+                {x1: point.position.x,
+                 y1: point.position.y,
+                 x2: point.position.x,
+                 y2: height}
+              )
+            )
+        )
+      )
+      return convertedPoints;
+    }
+  }
+
   render() {
-    const { height, width, active, envelopes, minValue, maxValue} = this.props;
+    const { height, width, active, envelopes, minValue, maxValue, URI} = this.props;
     return (
       <div className={styles.Envelope}>
-      {(envelopes != undefined) && (
+      {(envelopes.length !== 0) && (
         <div>
-        <PointPositionGraph className={styles.Envelope}
-          {...this.props}
+        <PointPosition className={styles.Envelope}
+          points={this.getPointPositions(envelopes, height)}
+          width={width}
+          height={height}
           envelopes={envelopes}
           minValue={minValue}
           maxValue={maxValue}
@@ -166,16 +186,20 @@ class Envelope extends Component {
 }*/
 
 const mapStateToProps = (state, ownProps) => {
-  var envelopes, minValue, maxValue;
-  state.transferfunctions.map(transferfunction => {
-          if(transferfunction.id === ownProps.activeVolume){
-            envelopes = transferfunction.data.TransferFunction.envelopes;
-            minValue = transferfunction.data.MinValue.value;
-            maxValue = transferfunction.data.MaxValue.value;
+  let envelopes, URI, minValue, maxValue;
+  state.sceneGraph.map(element => {
+          if(element.name === "Enlil Sequence") {
+            envelopes = element.subowners[1].subowners[1].properties[1].Value;
+            URI = element.subowners[1].subowners[1].properties[1].Description.Identifier;
+            console.log(element.subowners[1].subowners[1].properties[4].Value)
+            console.log(element.subowners[1].subowners[1].properties[5].Value)
+            minValue = Number(element.subowners[1].subowners[1].properties[4].Value);
+            maxValue = Number(element.subowners[1].subowners[1].properties[5].Value);
           }
         })
     return {
       envelopes,
+      URI,
       minValue,
       maxValue
     };
@@ -183,17 +207,17 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    ToggleEnvelope: (id) => {
-      dispatch(toggleActiveEnvelope(id, ownProps.activeVolume));
+    ToggleEnvelope: (id, URI) => {
+      dispatch(toggleActiveEnvelope(id, URI));
     },
-    TogglePoint: (envelopeId, pointId) => {
-      dispatch(toggleActivePoint(envelopeId, pointId, ownProps.activeVolume));
+    TogglePoint: (envelopeId, pointId, URI) => {
+      dispatch(toggleActivePoint(envelopeId, pointId, URI));
     },
-    MovePoint: (position, id, envelopeId) => {
-      dispatch(movePoint(id, envelopeId, position, ownProps.activeVolume));
+    MovePoint: (position, id, envelopeId, URI) => {
+      dispatch(movePoint(id, envelopeId, position, URI));
     },
-    SwapPoints: ( id, swapId, envelopeId) => {
-      dispatch(swapPoints(id, swapId, envelopeId, ownProps.activeVolume));
+    SwapPoints: ( id, swapId, envelopeId, URI) => {
+      dispatch(swapPoints(id, swapId, envelopeId, URI));
     },
   }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
@@ -30,6 +30,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <string>
@@ -54,6 +55,12 @@ namespace documentation { struct Documentation; }
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
+    enum class State : int {
+        Loaded,
+        Initialized,
+        GLInitialized
+    };
+
     using UpdateScene = ghoul::Boolean;
 
     struct PerformanceRecord {
@@ -69,14 +76,17 @@ public:
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
     static const std::string KeyTag;
-    
+
     SceneGraphNode();
     ~SceneGraphNode();
 
-    static std::unique_ptr<SceneGraphNode> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<SceneGraphNode> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     void initialize();
+    void initializeGL();
     void deinitialize();
+    void deinitializeGL();
 
     void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
@@ -84,16 +94,18 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
-    void attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene = UpdateScene::Yes);
-    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child, UpdateScene updateScene = UpdateScene::Yes);
-    void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
+    void attachChild(std::unique_ptr<SceneGraphNode> child);
+    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
+    void clearChildren();
+    void setParent(SceneGraphNode& parent);
 
-    void addDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
-    void removeDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
-    void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);
-    void setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene = UpdateScene::Yes);
+    void addDependency(SceneGraphNode& dependency);
+    void removeDependency(SceneGraphNode& dependency);
+    void clearDependencies();
+    void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
+
     SurfacePositionHandle calculateSurfacePositionHandle(
-                                                      const glm::dvec3& targetModelSpace);
+        const glm::dvec3& targetModelSpace);
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;
@@ -124,6 +136,8 @@ public:
     const Renderable* renderable() const;
     Renderable* renderable();
 
+    const std::string& guiPath() const;
+
     static documentation::Documentation Documentation();
 
 private:
@@ -131,6 +145,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
+    std::atomic<State> _state;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
     SceneGraphNode* _parent;
     std::vector<SceneGraphNode*> _dependencies;
@@ -140,6 +155,8 @@ private:
     PerformanceRecord _performanceRecord;
 
     std::unique_ptr<Renderable> _renderable;
+
+    std::string _guiPath;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ class Property;
  * sub-owners must be unique to this PropertyOwner. A Property cannot have the same name
  * as a PropertyOwner owned by this PropertyOwner.
  * Propertys can be added using the Property::addProperty methods and be removed by the
- * Property::removeProperty method. The same holds true for sub-owners 
+ * Property::removeProperty method. The same holds true for sub-owners
  * (Property::addPropertySubOwner, Property::removePropertySubOwner). These methods will
  * inform the passed object about the new ownership automatically.
  * Stored properties can be accessed using the Property::properties method or the
@@ -56,7 +56,7 @@ public:
         std::string name;
         std::string description = "";
     };
-    
+
     /// The constructor initializing the PropertyOwner's name to <code>""</code>
     PropertyOwner(PropertyOwnerInfo info);
 
@@ -85,7 +85,6 @@ public:
     void setDescription(std::string description);
 
     std::string description() const;
-    
 
     /**
      * Returns a list of all Propertys directly owned by this PropertyOwner. This list not
@@ -123,7 +122,7 @@ public:
      * <code>false</code> otherwise.
      */
     bool hasProperty(const std::string& URI) const;
-    
+
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
     PropertyOwner* owner() const { return _owner; }
 
@@ -171,7 +170,7 @@ public:
      * <code>groupID</code>
      */
     std::string propertyGroupName(const std::string& groupID) const;
-    
+
     /**
      * Assigns the Property <code>prop</code> to this PropertyOwner. This method will
      * check if the name of the Property is unique amongst Propertys and sub-owners in
@@ -180,10 +179,10 @@ public:
      * \param prop The Property whose ownership is changed.
      */
     void addProperty(Property* prop);
-    
+
     /// \see Property::addProperty(Property*)
     void addProperty(Property& prop);
-    
+
     /**
      * Adds the provided PropertyOwner to the list of sub-owners for this PropertyOwner.
      * This means that the name of the <code>owner</code> has to be unique amonst the
@@ -206,7 +205,7 @@ public:
 
     /// \see PropertyOwner::removeProperty(Property*)
     void removeProperty(Property& prop);
-    
+
     /**
      * Removes the sub-owner from this PropertyOwner.
      * \param owner The PropertyOwner that should be removed
@@ -224,11 +223,19 @@ public:
     std::vector<std::string> tags() const;
 
     /**
-     * Adds a tag to the Property's list of assigned tags. Tags are useful for creating
-     * groups of Properties that can be used in batch operations.
+     * Adds a tag to the PropertyOwner's list of assigned tags. Tags are useful for
+     * creating oups of Properties that can be used in batch operations or to mark up
+     * PropertyOwners for other usages (such signalling to GUI applications).
      * \param tag The string that is to be assigned to the Property
      */
     void addTag(std::string tag);
+
+    /**
+     * Removes a tag from this PropertyOwner. No error is reported if the tag does not
+     * exist
+     * @param tag The tag is that is to be removed from this PropertyOwner
+     */
+    void removeTag(const std::string& tag);
 
 private:
     /// The name of this PropertyOwner

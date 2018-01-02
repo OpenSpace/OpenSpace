@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <string>
 
@@ -40,7 +40,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
-    
+
 private:
     std::string _inputPath;
     std::string _rawVolumeOutputPath;
@@ -57,4 +57,4 @@ private:
 } // namespace kameleon
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATORAWTASK___H__
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETORAWTASK___H__

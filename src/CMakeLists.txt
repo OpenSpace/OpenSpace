@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -68,6 +68,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/stringlistproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
@@ -120,21 +121,31 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/properties/vector/vec4property.cpp
     ${OPENSPACE_BASE_DIR}/src/query/query.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/dashboard.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/dashboard_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/rendering/dashboarditem.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scene/assetmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
-    ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
-    ${OPENSPACE_BASE_DIR}/src/scene/scenemanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/sceneinitializer.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenelicense.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenelicensewriter.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -146,29 +157,40 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/distanceconversion.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/httprequest.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
     ${OPENSPACE_BASE_DIR}/src/util/progressbar.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/resourcesynchronization.cpp
     ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/synchronizationwatcher.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/task.cpp
     ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
     ${OPENSPACE_BASE_DIR}/src/util/threadpool.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/timeconversion.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timeline.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
     ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/gpudata.cpp
 )
+
+if (APPLE)
+    set(OPENSPACE_SOURCE
+        ${OPENSPACE_SOURCE}
+        ${OPENSPACE_BASE_DIR}/src/interaction/touchbar.mm
+    )
+endif ()
 
 set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
@@ -219,6 +241,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalarproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
@@ -274,7 +297,12 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec4property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboard.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/dashboarditem.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
@@ -282,14 +310,19 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneinitializer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicense.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
@@ -303,8 +336,11 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentjobmanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/concurrentqueue.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconstants.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/distanceconversion.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
@@ -312,13 +348,16 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledscalar.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/progressbar.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/synchronizationwatcher.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timeconversion.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timeline.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
@@ -329,6 +368,13 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
+
+if (APPLE)
+    set(OPENSPACE_HEADER
+        ${OPENSPACE_HEADER}
+        ${OPENSPACE_BASE_DIR}/include/openspace/interaction/touchbar.h
+    )
+endif ()
 
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
@@ -367,6 +413,12 @@ target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/in
 configure_file(
     ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template
     ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
+    @ONLY IMMEDIATE
+)
+
+configure_file(
+    ${OPENSPACE_CMAKE_EXT_DIR}/commit.template
+    ${OPENSPACE_BASE_DIR}/COMMIT.md
     @ONLY IMMEDIATE
 )
 

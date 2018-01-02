@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,30 +30,32 @@
 #include <openspace/engine/openspaceengine.h>
 
 namespace {
-    const char* _loggerCat = "ScreenSpaceCygnet";
+    constexpr const char* _loggerCat = "ScreenSpaceCygnet";
 } // namespace
 
 namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceImage(dictionary)
+    : ScreenSpaceImageOnline(dictionary)
 {
     // hacky, have to first get as float and then cast to int.
     float cygnetid;
     dictionary.getValue("CygnetId", cygnetid);
     _cygnetId = (int)cygnetid;
-    
+
     float interval;
     dictionary.getValue("UpdateInterval", interval);
     _updateTime = (int) interval;
 
     _downloadImage = true;
-    _url = IswaManager::ref().iswaUrl(_cygnetId);
-        
+    _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
+
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
 
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    );
     _lastUpdateRealTime = _realTime;
      _minRealTimeUpdateInterval = 100;
 
@@ -67,24 +69,22 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
 
 }
 
-ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
+ScreenSpaceCygnet::~ScreenSpaceCygnet() {}
 
-void ScreenSpaceCygnet::update(){
+void ScreenSpaceCygnet::update() {
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    );
 
-    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateTime &&
-                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    bool timeToUpdate =
+        (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateTime &&
+        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
-    if((OsEng.timeManager().time().timeJumped() || timeToUpdate )){
-        _url = IswaManager::ref().iswaUrl(_cygnetId);
-        updateTexture();
+    if ((OsEng.timeManager().time().timeJumped() || timeToUpdate )) {
+        _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
-
-    if(_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {
-        loadTexture();
     }
 }
 }

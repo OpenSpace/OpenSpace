@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,7 @@ public:
             std::vector<layergroupid::AdjustmentTypeID> layerAdjustmentType;
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
-        
+
         std::array<LayerGroupPreprocessingData, layergroupid::NUM_LAYER_GROUPS>
         layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
@@ -72,7 +72,7 @@ public:
 
         static LayerShaderPreprocessingData get(const RenderableGlobe&);
     };
-    
+
     LayerShaderManager(
         const std::string& shaderName,
         const std::string& vsPath,
@@ -85,11 +85,10 @@ public:
     ghoul::opengl::ProgramObject* programObject() const;
 
     bool updatedOnLastCall();
-    
+
     void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
 private:
-        
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     LayerShaderPreprocessingData _preprocessingData;
 

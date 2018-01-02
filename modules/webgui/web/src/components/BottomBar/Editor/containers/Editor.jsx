@@ -2,17 +2,14 @@ import React, {Component} from 'react';
 import Draggable from 'react-draggable';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { addEnvelope, deleteEnvelope, clearEnvelopes, addPoint, changeColor } from '../actions';
+import { addEnvelope, deleteEnvelope, clearEnvelopes, addPoint, changeColor } from '../../../../api/Actions/transferFunctionActions.js';
 import EditorContainer from '../presentational/EditorContainer'
-import styles from '../style/EditorCanvas.scss';
-import DataManager from '../../../../api/DataManager';
-import { TransferFunctionKey } from '../../../../api/keys';
 
 class Editor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeVolume: this.props.volumes[0],
+      URI: this.props.volumes[0],
       height: 600,
       width: 800,
     }
@@ -21,24 +18,24 @@ class Editor extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.props.color !== prevProps.color) {
-      this.props.ChangeColor(this.props.color, this.state.activeVolume);
+      this.props.ChangeColor(this.props.color, this.props.URI);
     }
   }
 
   handleVolumeChange(event) {
-    this.setState({activeVolume: event.target.value});
+    this.setState({URI: event.target.value});
   }
 
   render() {
-    const {height, width, activeVolume } = this.state;
-    const { color } = this.props;
+    const {height, width } = this.state;
+    const { color, URI, volumes } = this.props;
     let defaultEnvelopePoints = [{color: color, position : { x: 0, y: height}}, {color: color, position : { x: 30, y: 0}},
                     {color: color, position : { x: 70, y: 0}}, {color: color, position : { x: 100, y: height}}];
     return (
       <div>
-        <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints, activeVolume)}>Add Envelope</button>
-        <button onClick={() => this.props.DeleteEnvelope(activeVolume)}>Delete Envelope</button>
-        <button onClick={() => this.props.AddPoint(activeVolume)}>Add Point</button>
+        <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints, URI)}>Add Envelope</button>
+        <button onClick={() => this.props.DeleteEnvelope(URI)}>Delete Envelope</button>
+        <button onClick={() => this.props.AddPoint(color, URI)}>Add Point</button>
         <select onChange={this.handleVolumeChange}>{
           this.props.volumes.map((volume, index) =>
             <option key={index} value={volume}>{volume}</option>
@@ -48,7 +45,7 @@ class Editor extends Component {
         <EditorContainer
           height={height}
           width={width}
-          activeVolume={this.state.activeVolume}
+          URI={this.state.URI}
         />
       </div>
     );
@@ -62,30 +59,32 @@ Editor.propTypes = {
 }
 
 const mapStateToProps = (state) => {
-  let volumes = state.transferfunctions.map(transferfunction => {
-      return transferfunction.id;
-    })
+  let volumes = state.sceneGraph.map(node => {
+      if(node.name === "Enlil Sequence")
+        return node.id;
+      })
     return {
-      volumes
+      volumes,
+      URI: "Enlil Sequence.renderable.TransferFunctionHandler.TransferFunction"
     }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    AddEnvelope: (envelope, activeVolume) => {
-      dispatch(addEnvelope(envelope, activeVolume));
+    AddEnvelope: (envelope, URI) => {
+      dispatch(addEnvelope(envelope, URI));
     },
-    AddPoint: (color, activeVolume) => {
-      dispatch(addPoint(color, activeVolume));
+    AddPoint: (color, URI) => {
+      dispatch(addPoint(color, URI));
     },
-    DeleteEnvelope: (activeVolume) => {
-      dispatch(deleteEnvelope(activeVolume));
+    DeleteEnvelope: (URI) => {
+      dispatch(deleteEnvelope(URI));
     },
-    ClearEnvelopes: (activeVolume) => {
-      dispatch(clearEnvelopes(activeVolume));
+    ClearEnvelopes: (URI) => {
+      dispatch(clearEnvelopes(URI));
     },
-    ChangeColor: (color, activeVolume) => {
-      dispatch(changeColor(color, activeVolume));
+    ChangeColor: (color, URI) => {
+      dispatch(changeColor(color, URI));
     },
   }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,120 +30,118 @@
 #include <sstream>
 #include <vector>
 
-using std::numeric_limits;
+namespace {
+
+glm::dmat3x3 fromLuaConversion(lua_State* state, bool& success) {
+    glm::dmat3x3 result;
+    lua_pushnil(state);
+    int number = 1;
+    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
+        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
+            int hasNext = lua_next(state, -2);
+            if (hasNext != 1) {
+                success = false;
+                return glm::dmat3x3(0);
+            }
+            if (lua_isnumber(state, -1) != 1) {
+                success = false;
+                return glm::dmat3x3(0);
+            }
+            else {
+                result[i][j] = lua_tonumber(state, -1);
+                lua_pop(state, 1);
+                ++number;
+            }
+        }
+    }
+    success = true;
+    return result;
+}
+
+bool toLuaConversion(lua_State* state, glm::dmat3x3 value) {
+    lua_newtable(state);
+    int number = 1;
+    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
+        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
+            lua_pushnumber(state, value[i][j]);
+            lua_setfield(state, -2, std::to_string(number).c_str());
+            ++number;
+        }
+    }
+    return true;
+}
+
+glm::dmat3x3 fromStringConversion(std::string val, bool& success) {
+    glm::dmat3x3 result;
+    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
+    if (tokens.size() !=
+        (ghoul::glm_rows<glm::dmat3x3>::value * ghoul::glm_cols<glm::dmat3x3>::value))
+    {
+        success = false;
+        return result;
+    }
+    int number = 0;
+    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
+        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
+            std::stringstream s(tokens[number]);
+            glm::dmat3x3::value_type v;
+            s >> v;
+            if (s.fail()) {
+                success = false;
+                return result;
+            }
+            else {
+                result[i][j] = v;
+                ++number;
+            }
+        }
+    }
+    success = true;
+    return result;
+}
+
+bool toStringConversion(std::string& outValue, glm::dmat3x3 inValue) {
+    outValue = "";
+    for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat3x3>::value; ++i) {
+        for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat3x3>::value; ++j) {
+            outValue += std::to_string(inValue[i][j]) + ",";
+        }
+        outValue.pop_back();
+    }
+    return true;
+}
+
+
+} // namespace
 
 namespace openspace::properties {
 
-#define DEFAULT_FROM_LUA_LAMBDA(__TYPE__)                                                \
-    [](lua_State* state, bool& success) -> __TYPE__ {                                    \
-        __TYPE__ result;                                                                 \
-        int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
-                lua_getfield(state, -1, std::to_string(number).c_str());                 \
-                if (lua_isnumber(state, -1) != 1) {                                      \
-                    success = false;                                                     \
-                    return __TYPE__(0);                                                  \
-                } else {                                                                 \
-                    result[i][j]                                                         \
-                          = static_cast<__TYPE__::value_type>(lua_tonumber(state, -1));  \
-                    lua_pop(state, 1);                                                   \
-                    ++number;                                                            \
-                }                                                                        \
-            }                                                                            \
-        }                                                                                \
-        success = true;                                                                  \
-        return result;                                                                   \
-    }
+using nl = std::numeric_limits<double>;
 
-#define DEFAULT_TO_LUA_LAMBDA(__TYPE__)                                                  \
-    [](lua_State* state, __TYPE__ value) -> bool {                                       \
-        lua_newtable(state);                                                             \
-        int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
-                lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));             \
-                lua_setfield(state, -2, std::to_string(number).c_str());                 \
-                ++number;                                                                \
-            }                                                                            \
-        }                                                                                \
-        return true;                                                                     \
-    }
-
-#define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string v, bool& success) -> __TYPE__ {                                       \
-        __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(v, ',');                 \
-        if (tokens.size() !=                                                             \
-            (ghoul::glm_rows<__TYPE__>::value * ghoul::glm_cols<__TYPE__>::value))       \
-        {                                                                                \
-            success = false;                                                             \
-            return result;                                                               \
-        }                                                                                \
-        int number = 0;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
-                std::stringstream s(tokens[number]);                                     \
-                __TYPE__::value_type v;                                                  \
-                s >> v;                                                                  \
-                if (s.fail()) {                                                          \
-                    success = false;                                                     \
-                    return result;                                                       \
-                }                                                                        \
-                else {                                                                   \
-                    result[i][j] = v;                                                    \
-                    ++number;                                                            \
-                }                                                                        \
-            }                                                                            \
-        }                                                                                \
-        success = true;                                                                  \
-        return result;                                                                   \
-    }
-
-#define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
-    [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
-        outValue = "";                                                                   \
-        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
-                outValue += std::to_string(inValue[i][j]) + ",";                         \
-            }                                                                            \
-        }                                                                                \
-        outValue.pop_back();                                                             \
-        return true;                                                                     \
-    }
-
-REGISTER_NUMERICALPROPERTY_SOURCE(DMat3Property, glm::dmat3x3, glm::dmat3x3(0),
-                                  glm::dmat3x3(
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest(),
-                                    numeric_limits<double>::lowest()
-                                  ),
-                                  glm::dmat3x3(
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max(),
-                                    numeric_limits<double>::max()
-                                  ),
-                                  glm::dmat3x3(
-                                    0.01, 0.01, 0.01, 
-                                    0.01, 0.01, 0.01, 
-                                    0.01, 0.01, 0.01
-                                  ),
-                                  DEFAULT_FROM_LUA_LAMBDA(glm::dmat3x3),
-                                  DEFAULT_TO_LUA_LAMBDA(glm::dmat3x3),
-                                  DEFAULT_FROM_STRING_LAMBDA(glm::dmat3x3),
-                                  DEFAULT_TO_STRING_LAMBDA(glm::dmat3x3),
-                                  LUA_TTABLE);
+REGISTER_NUMERICALPROPERTY_SOURCE(
+    DMat3Property,
+    glm::dmat3x3,
+    glm::dmat3x3(0),
+    glm::dmat3x3(
+        nl::lowest(), nl::lowest(), nl::lowest(),
+        nl::lowest(), nl::lowest(), nl::lowest(),
+        nl::lowest(), nl::lowest(), nl::lowest()
+    ),
+    glm::dmat3x3(
+        nl::max(), nl::max(), nl::max(),
+        nl::max(), nl::max(), nl::max(),
+        nl::max(), nl::max(), nl::max()
+    ),
+    glm::dmat3x3(
+        0.01, 0.01, 0.01,
+        0.01, 0.01, 0.01,
+        0.01, 0.01, 0.01
+    ),
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
+    LUA_TTABLE
+)
 
 }  // namespace openspace::properties

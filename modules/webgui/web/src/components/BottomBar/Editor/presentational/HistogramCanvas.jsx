@@ -1,9 +1,6 @@
 import React from 'react';
 import GraphBody from '../../../common/Graph/GraphBody';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import PointPositionGraph from '../containers/PointPositionGraph';
-import styles from '../style/Histogram.scss'
 
 const HistogramCanvas = ({
   histogram,

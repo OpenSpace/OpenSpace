@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 namespace openspace::properties {
 
 /**
- * The OptionProperty is a property that provides a number of predefined (using the 
+ * The OptionProperty is a property that provides a number of predefined (using the
  * addOption method) options consisting of a <code>description</code> and a
  * <code>value</code>. The available options can be queried using the options method.
  * Only values representing valid options can be used to set this property, or an error
@@ -118,8 +118,14 @@ public:
     void setValue(int value) override;
 
     /**
+     * Returns the currently selected option.
+     * \return The currently selected option
+     */
+    const Option& option() const;
+
+    /**
     * Get the description of the option that matches <code>value</code>
-    * \param value The value of the option 
+    * \param value The value of the option
     */
     std::string getDescriptionByValue(int value);
 

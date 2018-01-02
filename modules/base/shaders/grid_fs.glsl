@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,16 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 in float vs_screenSpaceDepth;
+in vec4 vs_positionViewSpace;
 
 uniform vec4 gridColor;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = gridColor;
-    frag.depth = vs_screenSpaceDepth;
+    frag.color      = gridColor;
+    frag.depth      = vs_screenSpaceDepth;
+    frag.gPosition  = vs_positionViewSpace;
+    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     return frag;
 }

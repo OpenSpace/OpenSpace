@@ -7,32 +7,6 @@ import InfoBox from '../../common/InfoBox/InfoBox';
 class Property extends Component {
   constructor(props) {
     super(props);
-
-    this.state = { value: props.Value };
-
-    this.onChange = this.onChange.bind(this);
-    this.updateValue = this.updateValue.bind(this);
-  }
-
-  componentDidMount() {
-    if (this.props.subscribe) {
-      this.subscribeIfNeeded();
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.isSubscribed) {
-      DataManager.unsubscribe(this.uri, this.updateValue);
-    }
-  }
-
-  onChange(event) {
-    const { value } = event.currentTarget;
-
-    this.saveValue(value);
-
-    // optimistic UI change!
-    this.setState({ value });
   }
 
   get uri() {
@@ -58,39 +32,15 @@ class Property extends Component {
     return this.props.Description.MetaData.isReadOnly;
   }
 
-  subscribeIfNeeded() {
-    if (!this.isSubscribed) {
-      DataManager.subscribe(this.uri, this.updateValue);
-      this.isSubscribed = true;
-    }
-  }
-
-  /**
-   * Send value to OpenSpace
-   */
-  saveValue(value) {
-    this.subscribeIfNeeded();
-    DataManager.setValue(this.uri, value);
-  }
-
-  /**
-   * New value received from OpenSpace
-   * @param Value - the value
-   */
-  updateValue({ Value }) {
-    this.setState({ value: Value });
-  }
-
   render() {
-    const { Description } = this.props;
-    const { value } = this.state;
+    const { Description, Value } = this.props;
     const PropInput = this.inputType;
     const placeholder = (<span>
       { Description.Name } { this.descriptionPopup }
     </span>);
     return (
       <PropInput
-        value={value}
+        value={Value}
         label={placeholder}
         placeholder={Description.Name}
         onChange={this.onChange}
@@ -116,5 +66,4 @@ Property.propTypes = {
 Property.defaultProps = {
   subscribe: false,
 };
-
 export default Property;

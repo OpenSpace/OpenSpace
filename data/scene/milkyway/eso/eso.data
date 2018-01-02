@@ -1,5 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "milkyway-eso_textures", Destination = "textures", Version = 1 }
-    },
-}

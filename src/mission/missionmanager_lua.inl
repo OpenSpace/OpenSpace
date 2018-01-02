@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,28 +25,65 @@
 namespace openspace::luascriptfunctions {
 
 int loadMission(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     std::string missionFileName = luaL_checkstring(L, -1);
     if (missionFileName.empty()) {
-        return luaL_error(L, "filepath string is empty");
+        return luaL_error(L, "Filepath is empty");
     }
-    MissionManager::ref().loadMission(absPath(missionFileName));
-    return 0;
+    std::string name = MissionManager::ref().loadMission(absPath(missionFileName));
+    lua_pushstring(L, name.c_str());
+    return 1;
 }
 
-int setCurrentMission(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
+int unloadMission(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     std::string missionName = luaL_checkstring(L, -1);
     if (missionName.empty()) {
-        return luaL_error(L, "mission name string is empty");
+        return luaL_error(L, "Missing name is empty");
+    }
+
+    if (!MissionManager::ref().hasMission(missionName)) {
+        return luaL_error(L, "Mission was not previously loaded");
+    }
+
+    MissionManager::ref().unloadMission(missionName);
+    return 0;
+}
+
+int hasMission(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string missionName = luaL_checkstring(L, -1);
+    if (missionName.empty()) {
+        return luaL_error(L, "Missing name is empty");
+    }
+
+    bool hasMission = MissionManager::ref().hasMission(missionName);
+
+    lua_pushboolean(L, hasMission);
+    return 1;
+}
+
+int setCurrentMission(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string missionName = luaL_checkstring(L, -1);
+    if (missionName.empty()) {
+        return luaL_error(L, "Mission name is empty");
     }
     MissionManager::ref().setCurrentMission(missionName);
     return 0;

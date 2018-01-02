@@ -25,6 +25,11 @@
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
 #include <ghoul/logging/logmanager.h>
 
+#ifdef WIN32
+#include <Windows.h>
+#include <shellapi.h>
+#endif
+
 namespace {
 const char* _loggerCat = "DefaultBrowserLauncher";
 }

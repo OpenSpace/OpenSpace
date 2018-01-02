@@ -87,6 +87,7 @@ thead th:first-child {
 
 .summary {
   padding: 5px;
+  cursor: pointer;
 }
 .summary-warning {
   background-color: #fef8c3;

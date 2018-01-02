@@ -1,15 +1,28 @@
 import React from 'react';
 import Property from './Property';
 import Select from '../../common/Input/Select/Select';
+import { connectProperty } from './connectProperty.js'
 
 class OptionProperty extends Property {
+  constructor(props) {
+    super(props);
+    this.onChange = this.onChange.bind(this);
+  }
+  
   onChange({ value }) {
-    this.saveValue(value);
-    this.setState({ value });
+    this.props.ChangeValue(value);
+  }
+
+  componentDidMount() {
+    this.props.StartListening(this.props.Description.Identifier)
+  }
+
+  componentWillUnmount() {
+    this.props.StopListening(this.props.Description.Identifier)
   }
 
   render() {
-    const { Description } = this.props;
+    const { Description, Value } = this.props;
     const label = (
       <span>
         { Description.Name } { this.descriptionPopup }
@@ -21,12 +34,12 @@ class OptionProperty extends Property {
       <Select
         label={label}
         options={options}
-        value={this.state.value}
+        value={Value}
         onChange={this.onChange}
         disabled={this.disabled}
       />
     );
   }
 }
-
+OptionProperty = connectProperty(OptionProperty)
 export default OptionProperty;

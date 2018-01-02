@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,8 @@ in vec2 vs_st;
 in vec4 vs_normal;
 in vec4 vs_position;
 in vec4 vs_posWorld;
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
 
 const uint numberOfShadows = 1;
 
@@ -51,8 +53,7 @@ uniform float transparency;
 
 uniform sampler2D texture1;
 
-
-vec4 butterworthFunc(float d, float r, float n) {
+vec4 butterworthFunc(const float d, const float r, const float n) {
     return vec4(vec3(sqrt(r / (r + pow(d, 2 * n)))), 1.0);
 }
 
@@ -109,6 +110,10 @@ Fragment getFragment() {
     
     frag.color = vec4(diffuse.rgb, transparency);
     frag.depth = depth;
-
+    
+    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    frag.gNormal    = vec4(vs_gNormal, 1.0);
+    
     return frag;
 }

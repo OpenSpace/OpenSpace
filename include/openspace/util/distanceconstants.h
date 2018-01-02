@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,14 @@
 #ifndef __OPENSPACE_CORE___DISTANCECONSTANTS___H__
 #define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
 
-namespace openspace {
-
-namespace distanceconstants {
-    const float EarthRadius = 6371;
-    const float LightYear = 9.4607304725808E15;
-    const float AstronomicalUnit = 1.495978707E11;
-    const float Parsec = 3.0856776E16;
-}
-
-}
+namespace openspace::distanceconstants {
+    constexpr double EarthRadius = 6371;
+    constexpr double LightYear = 9.4607304725808E15;
+    constexpr double LightMonth = LightYear / 12;
+    constexpr double LightDay = LightYear / 365;
+    constexpr double LightHour = LightDay / 24;
+    constexpr double AstronomicalUnit = 1.495978707E11;
+    constexpr double Parsec = 3.0856776E16;
+} // openspace::distanceconstants
 
 #endif // __OPENSPACE_CORE___DISTANCECONSTANTS___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,11 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace::globebrowsing {
-   
+
 PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
                          const PixelRange& numberOfPixels)
     : start(pixelStart)
-    , numPixels(numberOfPixels) 
+    , numPixels(numberOfPixels)
 {}
 
 PixelRegion::PixelRegion(const PixelRegion& o)
@@ -91,20 +91,20 @@ void PixelRegion::align(Side side, int pos) {
     }
 }
 
-void PixelRegion::alignLeft(int x) { 
-    start.x = x; 
-}
-    
-void PixelRegion::alignTop(int y) { 
-    start.y = y; 
+void PixelRegion::alignLeft(int x) {
+    start.x = x;
 }
 
-void PixelRegion::alignRight(int x) { 
-    start.x = x - numPixels.x; 
+void PixelRegion::alignTop(int y) {
+    start.y = y;
 }
 
-void PixelRegion::alignBottom(int y) { 
-    start.y = y - numPixels.y; 
+void PixelRegion::alignRight(int x) {
+    start.x = x - numPixels.x;
+}
+
+void PixelRegion::alignBottom(int y) {
+    start.y = y - numPixels.y;
 }
 
 void PixelRegion::scale(const glm::dvec2& s) {
@@ -118,12 +118,12 @@ void PixelRegion::scale(double s) {
 
 void PixelRegion::downscalePow2(int exponent, PixelCoordinate wrt) {
     start += wrt;
-    start.x = ceil(start.x / static_cast<float>(pow(2, exponent)));// >>= exponent;
-    start.y = ceil(start.y / static_cast<float>(pow(2, exponent)));// >>= exponent;
+    start.x = static_cast<int>(ceil(start.x / static_cast<float>(pow(2, exponent))));
+    start.y = static_cast<int>(ceil(start.y / static_cast<float>(pow(2, exponent))));
     numPixels.x =
-        ceil(numPixels.x / static_cast<float>(pow(2, exponent)));// >>= exponent;
+        static_cast<int>(ceil(numPixels.x / static_cast<float>(pow(2, exponent))));
     numPixels.y =
-        ceil(numPixels.y / static_cast<float>(pow(2, exponent)));// >>= exponent;
+        static_cast<int>(ceil(numPixels.y / static_cast<float>(pow(2, exponent))));
     start -= wrt;
 }
 

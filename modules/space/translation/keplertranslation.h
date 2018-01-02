@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 #include <ghoul/misc/exception.h>
 
 namespace openspace {
-    
+
 /**
  * The KeplerTranslation is a concrete Translation implementation that uses the 6
  * Keplerian elements (eccentricity, semi-major axis, inclination, right ascension of the
@@ -44,10 +44,10 @@ class KeplerTranslation : public Translation {
 public:
     struct RangeError : public ghoul::RuntimeError {
         explicit RangeError(std::string offender);
-        
+
         std::string offender;
     };
-    
+
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for
@@ -57,10 +57,10 @@ public:
      * Keplerian elements (see Documentation)
      */
     KeplerTranslation(const ghoul::Dictionary& dictionary);
-    
+
     /// Default destructor
     virtual ~KeplerTranslation() = default;
-    
+
     /**
      * This method returns the position of the object at the time that was passed to the
      * last call of the #update method. The KeplerTranslation caches its position, thus
@@ -68,7 +68,7 @@ public:
      * \return The position of the object at the time of last call to the #update method
      */
     virtual glm::dvec3 position() const override;
-    
+
     /**
      * Updates the cached position of the object to correspond to the time passed in the
      * \p data.
@@ -76,7 +76,7 @@ public:
      * this Translation
      */
     void update(const UpdateData& data) override;
-    
+
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
      * that can be passed to the constructor.
@@ -84,11 +84,11 @@ public:
      * be passed to the constructor
      */
     static documentation::Documentation Documentation();
-    
+
 protected:
     /// Default construct that initializes all the properties and member variables
     KeplerTranslation();
-    
+
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
      * the form YYYY MM DD HH:mm:ss.
@@ -109,7 +109,7 @@ protected:
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, const std::string& epoch
     );
-    
+
     /**
      * Sets the internal values for the Keplerian elements and the epoch as seconds past
      * J2000 epoch.
@@ -171,7 +171,7 @@ private:
     /// The cached position for the last time with which the update method was called
     glm::dvec3 _position;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___KEPLERTRANSLATION___H__
