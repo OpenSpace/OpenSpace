@@ -63,7 +63,9 @@ StaticScale::StaticScale()
 {
     addProperty(_scaleValue);
 
-    _scaleValue.onChange([&](){ _scale = _scaleValue; });
+    _scaleValue.onChange([this]() {
+        requireUpdate();
+    });
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)

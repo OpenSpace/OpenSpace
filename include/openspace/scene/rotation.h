@@ -55,8 +55,12 @@ public:
 
 protected:
     Rotation();
+    void requireUpdate();
 
-    glm::dmat3 _matrix;
+private:
+    bool _needsUpdate;
+    double _cachedTime;
+    glm::dmat3 _cachedMatrix;
 };
 
 }  // namespace openspace

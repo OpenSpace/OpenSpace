@@ -195,6 +195,7 @@ KeplerTranslation::KeplerTranslation()
 {
     auto update = [this]() {
         _orbitPlaneDirty = true;
+        requireUpdate();
     };
 
     // Only the eccentricity, semimajor axis, inclination, and location of ascending node

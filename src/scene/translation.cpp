@@ -73,7 +73,8 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
 
 Translation::Translation()
     : properties::PropertyOwner({ "Translation" })
-    , _positionValue(glm::dvec3(0.0))
+    , _cachedPosition(glm::dvec3(0.0))
+    , _needsUpdate(true)
 {}
 
 bool Translation::initialize() {
@@ -81,21 +82,31 @@ bool Translation::initialize() {
 }
 
 void Translation::update(const Time& time) {
-    glm::dvec3 oldPosition = _positionValue;
-    _positionValue = position(time);
-    if (oldPosition != _positionValue) {
+    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+        return;
+    }
+    glm::dvec3 oldPosition = _cachedPosition;
+    _cachedPosition = position(time);
+    _cachedTime = time.j2000Seconds();
+    _needsUpdate = false;
+
+    if (oldPosition != _cachedPosition) {
         notifyObservers();
     }
 }
 
 glm::dvec3 Translation::position() const {
-    return _positionValue;
+    return _cachedPosition;
 }
 
 void Translation::notifyObservers() const {
     if (_onParameterChangeCallback) {
         _onParameterChangeCallback();
     }
+}
+
+void Translation::requireUpdate() {
+    _needsUpdate = true;
 }
 
 void Translation::onParameterChange(std::function<void()> callback) {

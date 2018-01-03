@@ -49,9 +49,8 @@ public:
 
 private:
     properties::StringProperty _luaScriptFile;
-    ghoul::lua::LuaState _state;
-
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;
+    ghoul::lua::LuaState _state;
 };
 
 } // namespace openspace

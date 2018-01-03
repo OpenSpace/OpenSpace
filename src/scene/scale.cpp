@@ -58,6 +58,10 @@ documentation::Documentation Scale::Documentation() {
     };
 }
 
+void Scale::requireUpdate() {
+    _needsUpdate = true;
+}
+
 
 std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
@@ -72,7 +76,8 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 
 Scale::Scale()
     : properties::PropertyOwner({ "Scale" })
-    , _scale(1.0)
+    , _cachedScale(1.0)
+    , _needsUpdate(true)
 {}
 
 bool Scale::initialize() {
@@ -81,11 +86,16 @@ bool Scale::initialize() {
 
 double Scale::scaleValue() const
 {
-    return _scale;
+    return _cachedScale;
 }
 
 void Scale::update(const Time& time) {
-    _scale = scaleValue(time);
+    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+        return;
+    }
+    _cachedScale = scaleValue(time);
+    _cachedTime = time.j2000Seconds();
+    _needsUpdate = false;
 }
 
 } // namespace openspace

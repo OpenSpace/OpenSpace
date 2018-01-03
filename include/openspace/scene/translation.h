@@ -62,9 +62,12 @@ public:
 
 protected:
     void notifyObservers() const;
+    void requireUpdate();
 
 private:
-    glm::dvec3 _positionValue;
+    bool _needsUpdate;
+    double _cachedTime;
+    glm::dvec3 _cachedPosition;
     std::function<void()> _onParameterChangeCallback;
 };
 

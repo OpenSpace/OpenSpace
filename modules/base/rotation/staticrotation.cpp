@@ -67,7 +67,9 @@ StaticRotation::StaticRotation()
     : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
 {
     addProperty(_rotationMatrix);
-    _rotationMatrix.onChange([this]() { _matrix = _rotationMatrix; });
+    _rotationMatrix.onChange([this]() {
+        requireUpdate();
+    });
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)

@@ -159,6 +159,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     }
 
     auto update = [this](){
+        requireUpdate();
         notifyObservers();
     };
 

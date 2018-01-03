@@ -119,6 +119,13 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
+
+    auto update = [this]() {
+        requireUpdate();
+    };
+
+    _sourceFrame.onChange(update);
+    _destinationFrame.onChange(update);
 }
 
 glm::dmat3 SpiceRotation::matrix(const Time& time) const {

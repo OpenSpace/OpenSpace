@@ -53,9 +53,13 @@ public:
     virtual void update(const Time& data);
 
     static documentation::Documentation Documentation();
-
 protected:
-    double _scale;
+    void requireUpdate();
+
+private:
+    bool _needsUpdate;
+    double _cachedTime;
+    double _cachedScale;
 };
 
 }  // namespace openspace

@@ -71,6 +71,7 @@ StaticTranslation::StaticTranslation()
     addProperty(_position);
 
     _position.onChange([this]() {
+        requireUpdate();
         notifyObservers();
     });
 }
