@@ -38,12 +38,12 @@ class PerformanceManager;
 class PerformanceMeasurement {
 public:
     PerformanceMeasurement(std::string identifier,
-        performance::PerformanceManager* manager);
+        std::shared_ptr<performance::PerformanceManager> manager);
     ~PerformanceMeasurement();
 
 private:
     std::string _identifier;
-    performance::PerformanceManager* _manager;
+    std::weak_ptr<performance::PerformanceManager> _manager;
 
     std::chrono::high_resolution_clock::time_point _startTime;
 };
