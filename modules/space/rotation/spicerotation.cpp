@@ -121,16 +121,16 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     addProperty(_destinationFrame);
 }
 
-void SpiceRotation::update(const UpdateData& data) {
+glm::dmat3 SpiceRotation::matrix(const Time& time) const {
     try {
-        _matrix = SpiceManager::ref().positionTransformMatrix(
+        return SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
             _destinationFrame,
-            data.time.j2000Seconds()
+            time.j2000Seconds()
         );
     }
     catch (const SpiceManager::SpiceException&) {
-        _matrix = glm::dmat3(1.0);
+        return glm::dmat3(1.0);
     }
 }
 

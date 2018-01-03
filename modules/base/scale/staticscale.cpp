@@ -54,6 +54,10 @@ documentation::Documentation StaticScale::Documentation() {
     };
 }
 
+double StaticScale::scaleValue(const Time&) const {
+    return _scaleValue;
+}
+
 StaticScale::StaticScale()
     : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
 {

@@ -43,7 +43,7 @@ public:
     LuaTranslation();
     LuaTranslation(const ghoul::Dictionary& dictionary);
 
-    virtual void update(const UpdateData& data) override;
+    glm::dvec3 position(const Time& time) const override;
 
     static documentation::Documentation Documentation();
 

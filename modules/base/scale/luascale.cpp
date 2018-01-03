@@ -79,7 +79,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-void LuaScale::update(const UpdateData& data) {
+double LuaScale::scaleValue(const Time& time) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -90,11 +90,11 @@ void LuaScale::update(const UpdateData& data) {
             "LuaScale",
             "Script '" << _luaScriptFile << "' does not have a function 'scale'"
         );
-        return;
+        return 0.0;
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    lua_pushnumber(_state, data.time.j2000Seconds());
+    lua_pushnumber(_state, time.j2000Seconds());
 
     // Second argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
@@ -115,7 +115,7 @@ void LuaScale::update(const UpdateData& data) {
         );
     }
 
-    _scale = luaL_checknumber(_state, -1);
+    return luaL_checknumber(_state, -1);
 }
 
 } // namespace openspace

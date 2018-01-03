@@ -241,10 +241,6 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     );
 }
 
-glm::dvec3 KeplerTranslation::position() const {
-    return _position;
-}
-
 double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     // Compute the eccentric anomaly (the location of the spacecraft taking the
     // eccentricity of the orbit into account) using different solves for the regimes in
@@ -292,13 +288,13 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
 }
 
-void KeplerTranslation::update(const UpdateData& data) {
+glm::dvec3 KeplerTranslation::position(const Time& time) const {
     if (_orbitPlaneDirty) {
         computeOrbitPlane();
         _orbitPlaneDirty = false;
     }
 
-    double t = data.time.j2000Seconds() - _epoch;
+    double t = time.j2000Seconds() - _epoch;
     double meanMotion = 2.0 * glm::pi<double>() / _period;
     double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     double e = eccentricAnomaly(meanAnomaly);
@@ -310,10 +306,10 @@ void KeplerTranslation::update(const UpdateData& data) {
         a * sqrt(1.0 - _eccentricity * _eccentricity) * sin(e),
         0.0
     };
-    _position = _orbitPlaneRotation * p;
+    return _orbitPlaneRotation * p;
 }
 
-void KeplerTranslation::computeOrbitPlane() {
+void KeplerTranslation::computeOrbitPlane() const {
     // We assume the following coordinate system:
     // z = axis of rotation
     // x = pointing towards the first point of Aries

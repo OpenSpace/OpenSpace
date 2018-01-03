@@ -40,7 +40,7 @@ public:
     LuaScale();
     LuaScale(const ghoul::Dictionary& dictionary);
 
-    void update(const UpdateData& data) override;
+    double scaleValue(const Time& time) const override;
 
     static documentation::Documentation Documentation();
 

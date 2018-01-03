@@ -79,10 +79,13 @@ bool Scale::initialize() {
     return true;
 }
 
-double Scale::scaleValue() const {
+double Scale::scaleValue() const
+{
     return _scale;
 }
 
-void Scale::update(const UpdateData&) {}
+void Scale::update(const Time& time) {
+    _scale = scaleValue(time);
+}
 
 } // namespace openspace

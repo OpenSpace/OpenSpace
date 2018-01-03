@@ -80,23 +80,19 @@ bool Translation::initialize() {
     return true;
 }
 
-void Translation::update(const UpdateData&) {}
+void Translation::update(const Time& time) {
+    glm::dvec3 oldPosition = _positionValue;
+    _positionValue = position(time);
+    if (oldPosition != _positionValue) {
+        notifyObservers();
+    }
+}
 
 glm::dvec3 Translation::position() const {
     return _positionValue;
 }
 
-glm::dvec3 Translation::position(double time) {
-    update({
-        {},
-        time,
-        false
-    });
-
-    return position();
-}
-
-void Translation::notifyObservers() {
+void Translation::notifyObservers() const {
     if (_onParameterChangeCallback) {
         _onParameterChangeCallback();
     }

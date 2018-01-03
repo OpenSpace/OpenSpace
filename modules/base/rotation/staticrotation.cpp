@@ -92,4 +92,8 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
 
 }
 
+glm::dmat3 StaticRotation::matrix(const Time&) const {
+    return _rotationMatrix;
+}
+
 } // namespace openspace

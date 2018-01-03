@@ -84,6 +84,8 @@ const glm::dmat3& Rotation::matrix() const {
     return _matrix;
 }
 
-void Rotation::update(const UpdateData&) {}
+void Rotation::update(const Time& time) {
+    _matrix = matrix(time);
+}
 
 } // namespace openspace

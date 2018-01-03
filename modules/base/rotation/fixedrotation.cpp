@@ -533,10 +533,9 @@ bool FixedRotation::initialize() {
     return res;
 }
 
-void FixedRotation::update(const UpdateData&) {
+glm::dmat3 FixedRotation::matrix(const Time& time) const {
     if (!_enabled) {
-        _matrix = glm::dmat3();
-        return;
+        return glm::dmat3();
     }
 
     glm::vec3 x = xAxis();
@@ -554,10 +553,10 @@ void FixedRotation::update(const UpdateData&) {
             "Dangerously collinear vectors detected: " <<
             "x: " << x << "  y: " << y << "  z: " << z
         );
-        _matrix = glm::dmat3();
+        return glm::dmat3();
     }
     else {
-        _matrix = {
+        return {
             x.x, x.y, x.z,
             y.x, y.y, y.z,
             z.x, z.y, z.z

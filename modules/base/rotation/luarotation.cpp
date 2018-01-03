@@ -88,7 +88,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-void LuaRotation::update(const UpdateData& data) {
+glm::dmat3 LuaRotation::matrix(const Time& time) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -99,11 +99,11 @@ void LuaRotation::update(const UpdateData& data) {
             "LuaRotation",
             "Script '" << _luaScriptFile << "' does not have a function 'rotation'"
         );
-        return;
+        return glm::dmat3(1.0);
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    lua_pushnumber(_state, data.time.j2000Seconds());
+    lua_pushnumber(_state, time.j2000Seconds());
 
     // Second argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
@@ -129,7 +129,7 @@ void LuaRotation::update(const UpdateData& data) {
         values[i] = luaL_checknumber(_state, -1 - i);
     }
 
-    _matrix = glm::make_mat3(values);
+    return glm::make_mat3(values);
 }
 
 } // namespace openspace

@@ -35,7 +35,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-struct UpdateData;
+class Time;
 
 namespace documentation { struct Documentation; }
 
@@ -48,7 +48,8 @@ public:
     virtual ~Rotation() = default;
     virtual bool initialize();
     const glm::dmat3& matrix() const;
-    virtual void update(const UpdateData& data);
+    virtual glm::dmat3 matrix(const Time& time) const = 0;
+    void update(const Time& time);
 
     static documentation::Documentation Documentation();
 
