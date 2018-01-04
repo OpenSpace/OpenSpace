@@ -396,7 +396,13 @@ void OpenSpaceEngine::create(int argc, char** argv,
     }
 
     // Create the cachemanager
-    FileSys.createCacheManager(cacheFolder, CacheVersion);
+    try {
+        FileSys.createCacheManager(cacheFolder, CacheVersion);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATAL("Could not create Cache Manager");
+        LFATALC(e.component, e.message);
+    }
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
