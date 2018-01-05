@@ -138,7 +138,7 @@ LayerShaderManager::LayerShaderManager(const std::string& shaderName,
     : _shaderName(shaderName)
     , _vsPath(vsPath)
     , _fsPath(fsPath)
-    , _updatedOnLastCall(false)
+    , _updatedSinceLastCall(false)
 {}
 
 LayerShaderManager::~LayerShaderManager() {
@@ -243,11 +243,13 @@ void LayerShaderManager::recompileShaderProgram(
     using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
-    _updatedOnLastCall = true;
+    _updatedSinceLastCall = true;
 }
 
-bool LayerShaderManager::updatedOnLastCall() {
-    return _updatedOnLastCall;
+bool LayerShaderManager::updatedSinceLastCall() {
+    const bool updated = _updatedSinceLastCall;
+    _updatedSinceLastCall = false;
+    return updated;
 }
 
 } // namespace openspace::globebrowsing

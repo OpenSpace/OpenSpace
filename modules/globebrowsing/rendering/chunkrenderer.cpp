@@ -91,7 +91,7 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
 
-    if (layeredShaderManager->updatedOnLastCall()) {
+    if (layeredShaderManager->updatedSinceLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);
     }
 
