@@ -68,8 +68,6 @@ Fragment getFragment() {
 
     frag.color = vec4(diffuse.rgb, transparency);
     frag.depth = vs_position.w;
-
-    frag.gOtherData = vec4(diffuse.xyz, 1.0);
     frag.gPosition  = vs_gPosition;
     frag.gNormal    = vec4(vs_gNormal, 1.0);
 

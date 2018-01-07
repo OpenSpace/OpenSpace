@@ -89,7 +89,6 @@ Fragment getFragment() {
     frag.color = diffuse;
     frag.depth = vs_position.w;
 
-    //frag.gOtherData = diffuse;
     //frag.gPosition  = vs_gPosition;
     //frag.gNormal    = vs_gNormal;
 

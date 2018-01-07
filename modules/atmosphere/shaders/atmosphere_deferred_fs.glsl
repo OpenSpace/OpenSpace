@@ -83,7 +83,6 @@ uniform sampler3D inscatterTexture;
 uniform sampler2DMS mainPositionTexture;
 uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
-uniform sampler2DMS otherDataTexture;
 
 // Model Transform Matrix Used for Globe Rendering
 uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
@@ -596,7 +595,6 @@ void main() {
             vec4 color      = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
             // Data in the mainPositionTexture are written in view space (view plus camera rig)
             vec4 position   = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
-            vec4 otherData  = texelFetch(otherDataTexture, ivec2(gl_FragCoord), i);
             
             // Ray in object space
             dRay ray;
@@ -708,7 +706,7 @@ void main() {
                                                             color, sunIntensityInscatter); 
                     vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
                                                       color, normal.xyz, irradianceFactor, 
-                                                      otherData.r, sunIntensityGround);                                                                
+                                                      normal.a, sunIntensityGround);
                     vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
                     
                     // Final Color of ATM plus terrain:

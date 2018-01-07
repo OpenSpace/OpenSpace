@@ -88,7 +88,6 @@ Fragment getFragment() {
     frag.depth = pscDepth(position);
 
     // G-Buffer
-    frag.gOtherData = vec4(fullColor.xyz, 1.0);
     frag.gPosition  = ge_gPosition;
     // There is no normal here
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
