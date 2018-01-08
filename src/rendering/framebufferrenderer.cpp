@@ -131,7 +131,6 @@ void FramebufferRenderer::initialize() {
 
     // Deferred framebuffer
     glGenTextures(1, &_deferredColorTexture);
-    glGenTextures(1, &_mainOtherDataTexture);
     glGenTextures(1, &_mainPositionTexture);
     glGenTextures(1, &_mainNormalTexture);
     glGenFramebuffers(1, &_deferredFramebuffer);
@@ -153,19 +152,12 @@ void FramebufferRenderer::initialize() {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D_MULTISAMPLE,
-        _mainOtherDataTexture,
-        0
-    );
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT2,
-        GL_TEXTURE_2D_MULTISAMPLE,
         _mainPositionTexture,
         0
     );
     glFramebufferTexture2D(
         GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT3,
+        GL_COLOR_ATTACHMENT2,
         GL_TEXTURE_2D_MULTISAMPLE,
         _mainNormalTexture,
         0
@@ -251,7 +243,6 @@ void FramebufferRenderer::deinitialize() {
 
     // DEBUG: deferred g-buffer
     glDeleteTextures(1, &_deferredColorTexture);
-    glDeleteTextures(1, &_mainOtherDataTexture);
     glDeleteTextures(1, &_mainPositionTexture);
     glDeleteTextures(1, &_mainNormalTexture);
 
@@ -373,16 +364,6 @@ void FramebufferRenderer::updateResolution() {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
-
-    glTexImage2DMultisample(
-        GL_TEXTURE_2D_MULTISAMPLE,
-        _nAaSamples,
-        GL_RGBA32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
-        true);
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
 
@@ -945,8 +926,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
     Time time = OsEng.timeManager().time();
 
@@ -959,14 +939,18 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     // deferred g-buffer
-    GLenum textureBuffers[4] = {
+    GLenum textureBuffers[3] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
         GL_COLOR_ATTACHMENT2,
-        GL_COLOR_ATTACHMENT3
     };
-    glDrawBuffers(4, textureBuffers);
+    glDrawBuffers(3, textureBuffers);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glDisablei(GL_BLEND, 2);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
     _scene->render(data, tasks);
@@ -1090,14 +1074,6 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                 deferredcastProgram->setUniform(
                     "mainColorTexture",
                     mainDColorTextureUnit
-                );
-
-                ghoul::opengl::TextureUnit otherDataTextureUnit;
-                otherDataTextureUnit.activate();
-                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
-                deferredcastProgram->setUniform(
-                    "otherDataTexture",
-                    otherDataTextureUnit
                 );
 
                 ghoul::opengl::TextureUnit mainPositionTextureUnit;

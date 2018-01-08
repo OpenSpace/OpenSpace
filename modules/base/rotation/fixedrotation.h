@@ -48,7 +48,7 @@ public:
 
     static documentation::Documentation Documentation();
 
-    void update(const UpdateData& data) override;
+    glm::dmat3 matrix(const Time& time) const override;
 
 private:
     glm::vec3 xAxis() const;

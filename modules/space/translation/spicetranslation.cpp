@@ -159,6 +159,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     }
 
     auto update = [this](){
+        requireUpdate();
         notifyObservers();
     };
 
@@ -172,18 +173,14 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_frame);
 }
 
-glm::dvec3 SpiceTranslation::position() const {
-    return _position;
-}
-
-void SpiceTranslation::update(const UpdateData& data) {
+glm::dvec3 SpiceTranslation::position(const Time& time) const {
     double lightTime = 0.0;
-    _position = SpiceManager::ref().targetPosition(
+    return SpiceManager::ref().targetPosition(
         _target,
         _observer,
         _frame,
         {},
-        data.time.j2000Seconds(),
+        time.j2000Seconds(),
         lightTime
     ) * glm::pow(10.0, 3.0);
 }

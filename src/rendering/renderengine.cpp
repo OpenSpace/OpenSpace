@@ -263,7 +263,7 @@ RenderEngine::RenderEngine()
                     prefix = OsEng.configurationManager().value<std::string>(KeyPrefix);
                 }
 
-                _performanceManager = std::make_unique<performance::PerformanceManager>(
+                _performanceManager = std::make_shared<performance::PerformanceManager>(
                     loggingDir,
                     prefix
                 );
@@ -918,8 +918,8 @@ bool RenderEngine::doesPerformanceMeasurements() const {
     return _performanceManager != nullptr;
 }
 
-performance::PerformanceManager* RenderEngine::performanceManager() {
-    return _performanceManager.get();
+std::shared_ptr<performance::PerformanceManager> RenderEngine::performanceManager() {
+    return _performanceManager;
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s) {

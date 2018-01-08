@@ -53,7 +53,6 @@ Fragment getFragment() {
     }
 
     // G-Buffer 
-    frag.gOtherData = vec4(frag.color.xyz, 1.0);
     frag.gPosition  = vs_gPosition;
     frag.gNormal    = vec4(vs_gNormal, 1.0);
     

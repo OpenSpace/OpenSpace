@@ -35,7 +35,6 @@ Fragment getFragment() {
     frag.color      = gridColor;
     frag.depth      = vs_screenSpaceDepth;
     frag.gPosition  = vs_positionViewSpace;
-    frag.gOtherData = vec4(0.0, 0.0, 0.0, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     return frag;
 }

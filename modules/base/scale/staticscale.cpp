@@ -54,12 +54,18 @@ documentation::Documentation StaticScale::Documentation() {
     };
 }
 
+double StaticScale::scaleValue(const Time&) const {
+    return _scaleValue;
+}
+
 StaticScale::StaticScale()
     : _scaleValue(ScaleInfo, 1.0, 1.0, 1e6)
 {
     addProperty(_scaleValue);
 
-    _scaleValue.onChange([&](){ _scale = _scaleValue; });
+    _scaleValue.onChange([this]() {
+        requireUpdate();
+    });
 }
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)

@@ -41,6 +41,9 @@
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
+
+#include <openspace/performance/performancemeasurement.h>
+
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/loadingscreen.h>
@@ -1209,6 +1212,15 @@ void OpenSpaceEngine::initializeGL() {
 
 void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
+
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (OsEng.renderEngine().performanceManager()) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "OpenSpaceEngine::preSynchronization",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
+
     FileSys.triggerFilesystemEvents();
 
     if (_hasScheduledAssetLoading) {
@@ -1257,6 +1269,14 @@ void OpenSpaceEngine::preSynchronization() {
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
+
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (OsEng.renderEngine().performanceManager()) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "OpenSpaceEngine::postSynchronizationPreDraw",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
 
     bool master = _windowWrapper->isMaster();
     _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
@@ -1315,6 +1335,15 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& projectionMatrix)
 {
     LTRACE("OpenSpaceEngine::render(begin)");
+
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (OsEng.renderEngine().performanceManager()) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "OpenSpaceEngine::render",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
+
     OnExit([] {
         LTRACE("OpenSpaceEngine::render(end)");
     });
@@ -1339,6 +1368,14 @@ void OpenSpaceEngine::drawOverlays() {
     OnExit([] {
         LTRACE("OpenSpaceEngine::drawOverlays(end)");
     });
+
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (OsEng.renderEngine().performanceManager()) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "OpenSpaceEngine::drawOverlays",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
 
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
@@ -1367,6 +1404,14 @@ void OpenSpaceEngine::drawOverlays() {
 
 void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
+
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (OsEng.renderEngine().performanceManager()) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "OpenSpaceEngine::postDraw",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
 
     _renderEngine->postDraw();
 

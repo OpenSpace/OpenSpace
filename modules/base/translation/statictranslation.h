@@ -38,6 +38,7 @@ public:
     StaticTranslation();
     StaticTranslation(const ghoul::Dictionary& dictionary);
 
+    glm::dvec3 position(const Time& time) const;
     static documentation::Documentation Documentation();
 
 private:
