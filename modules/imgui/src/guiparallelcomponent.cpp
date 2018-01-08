@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,6 @@ void GuiParallelComponent::renderDisconnected() {
 }
 
 void GuiParallelComponent::renderClientWithHost() {
-
     ParallelConnection& parallel = OsEng.parallelConnection();
 
     std::string connectionInfo = "Session hosted by \"" + parallel.hostName() + "\"\n";
@@ -78,12 +77,14 @@ void GuiParallelComponent::renderClientWithHost() {
     ImGui::Text("%s", connectionInfo.c_str());
     renderClientCommon();
 
-    const size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
-    const size_t nCameraKeyframes = OsEng.navigationHandler().keyframeNavigator().nKeyframes();
+    size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
+    size_t nCameraKeyframes = OsEng.navigationHandler().keyframeNavigator().nKeyframes();
 
     std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
-    std::string cameraKeyframeInfo = "CameraKeyframes : " + std::to_string(nCameraKeyframes);
-    std::string latencyStandardDeviation = "Latency standard deviation: " + std::to_string(parallel.latencyStandardDeviation()) + " s";
+    std::string cameraKeyframeInfo = "CameraKeyframes : " +
+                                     std::to_string(nCameraKeyframes);
+    std::string latencyStandardDeviation = "Latency standard deviation: " +
+                               std::to_string(parallel.latencyStandardDeviation()) + " s";
 
     const bool resetTimeOffset = ImGui::Button("Reset time offset");
 
@@ -158,9 +159,11 @@ void GuiParallelComponent::renderHost() {
 
 
 void GuiParallelComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin("Parallel Connection", &v);
     _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     ParallelConnection::Status status = OsEng.parallelConnection().status();
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #pragma clang diagnostic ignored "-Wundef"
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma clang diagnostic ignored "-Wshift-sign-overflow"
+#pragma clang diagnostic ignored "-Wsign-compare"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wundef"
@@ -56,7 +57,7 @@
 // test files
 #include <test_common.inl>
 #include <test_spicemanager.inl>
-#include <test_sceneloader.inl>
+#include <test_assetloader.inl>
 #include <test_timeline.inl>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
@@ -112,7 +113,19 @@ namespace {
 int main(int argc, char** argv) {
     std::vector<std::string> args;
     bool close;
-    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args, close);
+    bool consoleLog = false;
+
+    // Workaround for Visual Studio Google Test Adapter:
+    // Do not try to initialize osengine if gtest is just listing tests
+    bool skipOsEng = false;
+    std::vector<std::string> gtestArgs(argv, argv + argc);
+    if (std::find(gtestArgs.begin(), gtestArgs.end(), "--gtest_list_tests") != gtestArgs.end()) {
+        skipOsEng = true;
+    }
+
+    if (!skipOsEng) {
+        openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args, close, consoleLog);
+    }
 
     testing::InitGoogleTest(&argc, argv);
 
@@ -120,8 +133,18 @@ int main(int argc, char** argv) {
     testing::internal::CaptureStdout();
     testing::internal::CaptureStderr();
 #endif
-    
-    openspace::SpiceManager::deinitialize();
+
+#ifdef PRINT_OUTPUT
+
+    // Stop capturing std out
+    std::string output = testing::internal::GetCapturedStdout();
+    std::string error = testing::internal::GetCapturedStderr();
+
+    //std::cout << output;
+    //std::cerr << error;
+#endif
+        
+    //openspace::SpiceManager::deinitialize();
 
     bool b = RUN_ALL_TESTS();
 
@@ -134,8 +157,7 @@ int main(int argc, char** argv) {
 
     std::ofstream e("error.txt");
     e << error;
-#endif
-
+#endif   
     return b;
 }
 

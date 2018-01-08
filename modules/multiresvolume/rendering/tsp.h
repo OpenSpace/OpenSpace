@@ -1,8 +1,8 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,6 @@ public:
         size_t xNumBricks_;
         size_t yNumBricks_;
         size_t zNumBricks_;
-
     };
 
     enum NodeData {
@@ -77,7 +76,7 @@ public:
 
     bool closeMemoryMap();
 
-    // load performs readHeader, readCache, writeCache and construct 
+    // load performs readHeader, readCache, writeCache and construct
     // in the correct sequence
     bool load();
 
@@ -121,6 +120,7 @@ public:
 
     float getMaxError(NodeType type);
     float getMinError(NodeType type);
+
 protected:
     // Returns a list of the octree leaf nodes that a given input 
     // brick covers. If the input is already a leaf, the list will

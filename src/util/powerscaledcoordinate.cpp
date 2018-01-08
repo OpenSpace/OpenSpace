@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -118,8 +118,9 @@ glm::dvec4 PowerScaledCoordinate::dvec4() const
 
 glm::dvec3 PowerScaledCoordinate::dvec3() const
 {
-    return glm::dvec3(_vec[0] * pow(k, _vec[3]), _vec[1] * pow(k, _vec[3]),
-        _vec[2] * pow(k, _vec[3]));
+    double p = pow(static_cast<double>(k), static_cast<double>(_vec[3]));
+    return glm::dvec3( static_cast<double>(_vec[0]) * p, static_cast<double>(_vec[1]) * p,
+        static_cast<double>(_vec[2]) * p);
 }
 
 PowerScaledScalar PowerScaledCoordinate::length() const

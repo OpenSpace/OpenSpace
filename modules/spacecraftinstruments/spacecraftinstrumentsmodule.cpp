@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
+
+#include <modules/spacecraftinstruments/dashboard/dashboarditeminstruments.h>
 
 #include <modules/spacecraftinstruments/rendering/renderablecrawlingline.h>
 #include <modules/spacecraftinstruments/rendering/renderablefov.h>
@@ -45,13 +47,18 @@ namespace openspace {
 
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
-void SpacecraftInstrumentsModule::internalInitialize() {
+void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     ImageSequencer::initialize();
 
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Decoder>>(),
         "Decoder"
     );
+
+    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul_assert(fDashboard, "Dashboard factory was not created");
+
+    fDashboard->registerClass<DashboardItemInstruments>("DashboardItemInstruments");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
@@ -66,6 +73,10 @@ void SpacecraftInstrumentsModule::internalInitialize() {
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
+}
+
+void SpacecraftInstrumentsModule::internalDeinitialize() {
+    ImageSequencer::deinitialize();
 }
 
 std::vector<documentation::Documentation>

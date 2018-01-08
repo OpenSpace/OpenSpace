@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,9 +28,9 @@ project(OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 10)
+set(OPENSPACE_VERSION_MINOR 11)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "prerelease-15 (ASTC)")
+set(OPENSPACE_VERSION_STRING "Beta-1")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,9 +38,7 @@
 
 namespace openspace {
 
-IswaModule::IswaModule()
-    : OpenSpaceModule(Name)
-{
+IswaModule::IswaModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
         [](){
@@ -48,12 +46,8 @@ IswaModule::IswaModule()
         }
     );
 }
-    
-scripting::LuaLibrary IswaModule::luaLibrary() const {
-    return IswaManager::luaLibrary();
-}
 
-void IswaModule::internalInitialize(){
+void IswaModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
@@ -66,6 +60,10 @@ void IswaModule::internalInitialize(){
     ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
 
     fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
+}
+
+scripting::LuaLibrary IswaModule::luaLibrary() const {
+    return IswaManager::luaLibrary();
 }
 
 } // namespace openspace

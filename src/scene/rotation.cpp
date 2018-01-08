@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/time.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -57,7 +58,9 @@ documentation::Documentation Rotation::Documentation() {
     };
 }
 
-std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Rotation> Rotation::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     std::string rotationType = dictionary.value<std::string>(KeyType);
@@ -66,22 +69,34 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary
     return result;
 }
 
-Rotation::Rotation() 
+Rotation::Rotation()
     : properties::PropertyOwner({ "Rotation" })
+    , _needsUpdate(true)
 {}
-    
+
+void Rotation::requireUpdate() {
+    _needsUpdate = true;
+}
+
 Rotation::Rotation(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "Rotation" })
 {}
-    
+
 bool Rotation::initialize() {
     return true;
 }
-    
+
 const glm::dmat3& Rotation::matrix() const {
-    return _matrix;
+    return _cachedMatrix;
 }
 
-void Rotation::update(const UpdateData&) {}
+void Rotation::update(const Time& time) {
+    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+        return;
+    }
+    _cachedMatrix = matrix(time);
+    _cachedTime = time.j2000Seconds();
+    _needsUpdate = false;
+}
 
 } // namespace openspace

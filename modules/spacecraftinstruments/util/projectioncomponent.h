@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -70,11 +70,11 @@ public:
         const std::string& texturePath,
         bool isPlaceholder = false
     );
-    
+
     glm::mat4 computeProjectorMatrix(
         const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up,
         const glm::dmat3& instrumentMatrix,
-        float fieldOfViewY, 
+        float fieldOfViewY,
         float aspectRatio,
         float nearPlane,
         float farPlane,

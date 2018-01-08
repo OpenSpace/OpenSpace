@@ -1,0 +1,62 @@
+local transforms = asset.require('../transforms')
+local assetHelper = asset.require('util/asset_helper')
+local kernels = asset.require('../mar097').Kernels
+
+
+-- local textures = asset.syncedResource({
+--     Name = "Mars Textures",
+--     Type = "HttpSynchronization",
+--     Identifier = "mars_textures",
+--     Version = 1
+-- })
+
+
+local Deimos = {
+    Name = "Deimos",
+    Parent = transforms.MarsBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_DEIMOS",
+            DestinationFrame = "GALACTIC",
+            Kernels = kernels
+        },
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "DEIMOS",
+            Observer = "MARS BARYCENTER",
+            Kernels = kernels
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 15, 12.2, 11 },
+        SegmentsPerPatch = 90,
+        Layers = {
+        }
+    },
+    Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
+    GuiPath = "/Solar System/Planets/Mars"
+}
+
+local DeimosTrail = {
+    Name = "DeimosTrail",
+    Parent = transforms.MarsBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "DEIMOS",
+            Observer = "MARS BARYCENTER"
+        },
+        Color = { 1.0, 0.605, 0.420 },
+        Period = 1.263,
+        Resolution = 1000
+    },
+    Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+    GuiPath = "/Solar System/Planets/Mars"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Deimos, DeimosTrail })

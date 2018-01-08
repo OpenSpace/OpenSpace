@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@
 #include <vector>
 
 namespace openspace {
-    
+
 class OpenSpaceModule;
 
 class SettingsEngine : public properties::PropertyOwner {
@@ -42,7 +42,7 @@ public:
     SettingsEngine();
 
     void initialize();
-    
+
     void setModules(const std::vector<OpenSpaceModule*>& modules);
 
 private:

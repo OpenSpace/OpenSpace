@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,22 +30,24 @@
 #include <openspace/properties/stringproperty.h>
 
 #include <ghoul/lua/luastate.h>
+#include <ghoul/filesystem/file.h>
 
 namespace openspace {
-    
+
 namespace documentation { struct Documentation; }
-    
+
 class LuaRotation : public Rotation {
 public:
     LuaRotation();
     LuaRotation(const ghoul::Dictionary& dictionary);
 
-    void update(const UpdateData& data) override;
+    glm::dmat3 matrix(const Time& data) const override;
 
     static documentation::Documentation Documentation();
 
 private:
     properties::StringProperty _luaScriptFile;
+    std::unique_ptr<ghoul::filesystem::File> _fileHandle;
     ghoul::lua::LuaState _state;
 };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -86,7 +86,6 @@ struct ProviderTileHasher {
 class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
     MemoryAwareTileCache();
-    ~MemoryAwareTileCache();
 
     void clear();
     void setSizeEstimated(size_t estimatedSize);
@@ -107,7 +106,7 @@ private:
     void createDefaultTextureContainers();
     void assureTextureContainerExists(const TileTextureInitData& initData);
     void resetTextureContainerSize(size_t numTexturesPerTextureType);
-    
+
     using TileCache = LRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
     using TextureContainerTileCache =
         std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;

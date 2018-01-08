@@ -1,0 +1,87 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local kernels = asset.require('./kernels').Kernels
+
+
+
+local textures = asset.syncedResource({
+    Name = "Hydra Textures",
+    Type = "HttpSynchronization",
+    Identifier = "hydra_textures",
+    Version = 1
+})
+
+local Hydra = {
+    Name = "Hydra",
+    Parent = transforms.PlutoBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "HYDRA",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_HYDRA",
+            DestinationFrame = "GALACTIC"
+        },
+    },
+    Renderable = {
+        Type = "RenderablePlanet",
+        Frame = "IAU_PLUTO",
+        Body = "HYDRA",
+        Radius = hydra_radius,
+        Geometry = {
+            Type = "SimpleSphere",
+            Radius = 0.53E5,
+            Segments = 100
+        },
+        ColorTexture = textures .. "/gray.jpg"
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local HydraText = {
+    Name = "HydraText",
+    Parent = Hydra.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 1000000, 0, 1000000 },
+        },
+    },
+    Renderable = {
+        Type = "RenderablePlane",
+        Size = 10.0^6.3,
+        Origin = "Center",
+        Billboard = true,
+        Texture = textures .. "/Hydra-Text.png"
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local HydraTrail = {
+    Name = "HydraTrail",
+    Parent = transforms.PlutoBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "HYDRA",
+            Observer = "PLUTO BARYCENTER",
+        },
+        Color = { 0.00, 0.62, 1.00 },
+        Period = 38.20177,
+        Resolution = 1000
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Hydra,
+    HydraText,
+    HydraTrail
+})

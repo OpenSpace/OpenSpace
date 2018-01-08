@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@
 namespace openspace {
 
 /**
- * A helper class for quick rendering of vertices IN clipping space. 
+ * A helper class for quick rendering of vertices IN clipping space.
  * The class is practically stateless. It only stores a ghoul::opengl::ProgramObject
  * which can be reused despite the fact that rendering calls are invoked from different
  * callers. Therefore a static reference is provided for convenience which is accessed
@@ -77,7 +77,7 @@ public:
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
      *  The box corners should be ordered from smaller to larger,
-     *  first by x, the, y and finally z. 
+     *  first by x, the, y and finally z.
      *
      *  6-------7
      *  |\      |\
@@ -89,11 +89,11 @@ public:
      */
     void renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
         RGBA rgba = { 1, 0, 0, 1 }) const;
-        
+
     /**
      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
      *  The box corners should be ordered from smaller to larger,
-     *  first by x, the, y and finally z. 
+     *  first by x, the, y and finally z.
      *
      *  6-------7
      *  |\      |\
@@ -124,7 +124,7 @@ public:
 
     /**
      *  Input arguments:
-     *  1. const RenderData& data:     defines position and camera that we will see the 
+     *  1. const RenderData& data:     defines position and camera that we will see the
      *                                 other cameras view frustum from
      *  2. const Camera& otherCamera:  The camera who's view frustum is to be rendered
      *  3. RGBA rgba                   Color to draw the view frustum with
@@ -140,16 +140,16 @@ public:
         RGBA rgba = { 1, 1, 1, 0.3 }) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
-        
+
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     /**
-      * Takes a AABB3 in screen space and returns vertices representing the corner points 
+      * Takes a AABB3 in screen space and returns vertices representing the corner points
       * of the AABB. The ordering of the corner points is compatible with the box
       * rendering methods in this class.
       */
     const Vertices verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        
+
 protected:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 

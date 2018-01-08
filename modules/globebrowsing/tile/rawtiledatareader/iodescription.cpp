@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
 
     PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
     PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
-        
+
     if (cutSize.x == 0 || cutSize.y == 0) {
         ghoul_assert(
             read.region.equals(readPreCut),

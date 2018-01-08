@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,6 @@
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-in vec4 vs_position;
-in vec3 ge_brightness;
-in vec3 ge_velocity;
-in float ge_speed;
-in vec2 texCoord;
-in float billboardSize;
-
-
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
 const int COLOROPTION_VELOCITY = 1; 
@@ -44,6 +36,17 @@ uniform float minBillboardSize;
 
 uniform float alphaValue;
 uniform int colorOption;
+
+in vec4 vs_position;
+in vec4 ge_gPosition;
+in vec3 ge_brightness;
+in vec3 ge_velocity;
+in float ge_speed;
+in vec2 texCoord;
+in float billboardSize;
+
+#include "fragment.glsl"
+//#include "PowerScaling/powerScaling_fs.hglsl"
 
 uniform vec2 magnitudeClamp;
 
@@ -84,6 +87,11 @@ Fragment getFragment() {
     frag.color = fullColor;
     frag.depth = pscDepth(position);
 
+    // G-Buffer
+    frag.gPosition  = ge_gPosition;
+    // There is no normal here
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+    
     if (fullColor.a == 0) {
         discard;
     }

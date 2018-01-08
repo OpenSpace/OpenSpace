@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,11 +37,11 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "Renderable";
-    const char* keyStart = "StartTime";
-    const char* keyEnd = "EndTime";
-    const char* KeyType = "Type";
-    const char* KeyTag = "Tag";
+    constexpr const char* _loggerCat = "Renderable";
+    constexpr const char* keyStart = "StartTime";
+    constexpr const char* keyEnd = "EndTime";
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyTag = "Tag";
 
     static const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
@@ -63,8 +63,8 @@ documentation::Documentation Renderable::Documentation() {
             KeyType,
             new StringAnnotationVerifier("A valid Renderable created by a factory"),
             Optional::No,
-            "This key specifies the type of Renderable that gets created. It has to be one"
-            "of the valid Renderables that are available for creation (see the "
+            "This key specifies the type of Renderable that gets created. It has to be "
+            "one of the valid Renderables that are available for creation (see the "
             "FactoryDocumentation for a list of possible Renderables), which depends on "
             "the configration of the application"
         },
@@ -151,7 +151,11 @@ Renderable::~Renderable() {}
 
 void Renderable::initialize() {}
 
+void Renderable::initializeGL() {}
+
 void Renderable::deinitialize() {}
+
+void Renderable::deinitializeGL() {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;

@@ -1,8 +1,8 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -99,10 +99,14 @@ void GuiPerformanceComponent::render() {
     using ghoul::SharedMemory;
     using namespace performance;
 
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin("Performance", &v);
     _isEnabled = v;
-    PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
+    _isCollapsed = ImGui::IsWindowCollapsed();
+
+    RenderEngine& re = OsEng.renderEngine();
+    PerformanceLayout* layout = re.performanceManager()->performanceData();
 
     v = _sceneGraphIsEnabled;
     ImGui::Checkbox("SceneGraph", &v);
@@ -127,7 +131,7 @@ void GuiPerformanceComponent::render() {
         bool sge = _sceneGraphIsEnabled;
         ImGui::Begin("SceneGraph", &sge);
         _sceneGraphIsEnabled = sge;
-        
+
         // The indices correspond to the index into the average array further below
         ImGui::Text("Sorting");
         int sorting = _sortingSelection;
@@ -195,17 +199,17 @@ void GuiPerformanceComponent::render() {
             layout->nScaleGraphEntries,
             { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
         );
-            
+
         std::vector<std::array<std::pair<float, float>, 7>> minMax(
             layout->nScaleGraphEntries
         );
-            
+
         for (int i = 0; i < layout->nScaleGraphEntries; ++i) {
             const PerformanceLayout::SceneGraphPerformanceLayout& entry =
                 layout->sceneGraphEntries[i];
 
             int nValues[7] = { 0, 0, 0, 0, 0, 0, 0};
-                
+
             // Compute the averages and count the number of values so we don't divide
             // by 0 later
             for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
@@ -282,7 +286,7 @@ void GuiPerformanceComponent::render() {
                 *(minmaxScaling.first),
                 *(minmaxScaling.second)
             );
-                
+
             auto minmaxUpdateRenderable = std::minmax_element(
                 std::begin(entry.updateRenderable),
                 std::end(entry.updateRenderable)
@@ -318,9 +322,8 @@ void GuiPerformanceComponent::render() {
                 *(minmaxTotal.first),
                 *(minmaxTotal.second)
             );
-
         }
-            
+
         // If we don't want to sort, we will leave the indices list alone, thus
         // leaving them in the regular ordering
         Sorting selection = Sorting(sorting);
@@ -366,7 +369,8 @@ void GuiPerformanceComponent::render() {
                 indices.begin(),
                 indices.end(),
                 [layout](size_t a, size_t b) {
-                    return std::string(layout->sceneGraphEntries[a].name) < std::string(layout->sceneGraphEntries[b].name);
+                    return std::string(layout->sceneGraphEntries[a].name) <
+                           std::string(layout->sceneGraphEntries[b].name);
                 }
             );
         }
@@ -509,17 +513,17 @@ void GuiPerformanceComponent::render() {
         }
         ImGui::End();
     }
-        
+
     if (_functionsIsEnabled) {
         bool fe = _functionsIsEnabled;
         ImGui::Begin("Functions", &fe);
         _functionsIsEnabled = fe;
         using namespace performance;
-            
+
         for (int i = 0; i < layout->nFunctionEntries; ++i) {
             const PerformanceLayout::FunctionPerformanceLayout& entry =
                 layout->functionEntries[i];
-                
+
             float avg = 0.f;
             int count = 0;
             for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
@@ -528,12 +532,12 @@ void GuiPerformanceComponent::render() {
                     ++count;
             }
             avg /= count;
-                
+
             auto minmax = std::minmax_element(
                 std::begin(layout->functionEntries[i].time),
                 std::end(layout->functionEntries[i].time)
             );
-                
+
             std::string renderTime = std::to_string(
                 entry.time[PerformanceLayout::NumberValues - 1]
             ) + "us";

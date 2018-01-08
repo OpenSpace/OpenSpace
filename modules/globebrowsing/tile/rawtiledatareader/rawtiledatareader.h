@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,13 +61,13 @@ public:
     TileDepthTransform getDepthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     const PixelRegion::PixelRange fullPixelSize() const;
-    
+
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value
      * between 2 and 31.
      */
     virtual int maxChunkLevel() const = 0;
-    
+
     /**
      * Reset the dataset to its initial state. This is the place to clear any cache used.
      */
@@ -79,14 +79,13 @@ public:
     virtual float depthOffset() const;
     virtual float depthScale() const;
     PixelRegion fullPixelRegion() const;
-  
+
     /**
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData() const;
 
 protected:
-
     /**
      * This function should set the variables <code>_cached</code>,
      * <code>_dataLayout</code> and <code>_depthTransform</code>.
@@ -98,7 +97,7 @@ protected:
      * the pixel coordinates to cover the whole geodetic lat long space.
      */
     virtual std::array<double, 6> getGeoTransform() const;
-    
+
     /**
      * Read image data as described by the given <code>IODescription</code>.
      * \param <code>io</code> describes how to read the data.
@@ -156,7 +155,8 @@ protected:
     std::shared_ptr<TileMetaData> getTileMetaData(
         std::shared_ptr<RawTile> result, const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
-    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult) const;
+    RawTile::ReadError postProcessErrorCheck(
+        std::shared_ptr<const RawTile> ioResult) const;
 
     struct Cached {
         int _maxLevel = -1;

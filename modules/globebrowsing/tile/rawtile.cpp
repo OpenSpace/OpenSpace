@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ RawTile RawTile::createDefault(const TileTextureInitData& initData) {
     defaultRes.textureInitData = std::make_shared<TileTextureInitData>(initData);
     defaultRes.imageData = new char[initData.totalNumBytes()];
     std::fill_n(
-        static_cast<char*>(defaultRes.imageData),
+        defaultRes.imageData,
         initData.totalNumBytes(),
         char(0)
     );

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,71 +35,69 @@
 namespace openspace {
 
 /**
- * Very simple class maintaining a uniform location.
- */
-class UniformLocation {
-public:
-
-    /**
-    * Updates the uniform location of the uniform variable named <name> 
-    * in the provided shader program.
-    */
-    void bind(ghoul::opengl::ProgramObject* program, const std::string& name);
-    
-protected:
-    GLint _uniformLocation = -1;
-};
-
-    
-/**
  * Manages a GPU representation of the templated data type T.
- * This class provides a simple interface setting the value of 
+ * This class provides a simple interface setting the value of
  * the binded GLSL variable.
  */
 template<typename T>
-class GPUData : public UniformLocation{
+class GPUData {
 public:
-    
+    /**
+    * Updates the uniform location of the uniform variable named <name>
+    * in the provided shader program.
+    */
+    void bind(ghoul::opengl::ProgramObject* program, const std::string& name) {
+        _uniformLocation = program->uniformLocation(name);
+    }
+
     /**
      * Sets the value of T to its corresponding GPU value.
      * OBS! Users must ensure bind has been called before using this method
      */
-    void setValue(ghoul::opengl::ProgramObject* program, T val){
+    void setValue(ghoul::opengl::ProgramObject* program, T val) {
         program->setUniform(_uniformLocation, val);
     }
 
+protected:
+    GLint _uniformLocation = -1;
 };
 
 /**
  * Manages a Texture on the GPU.
- * This class provides a simple interface binding texture to the 
+ * This class provides a simple interface binding texture to the
  * named uniform.
  */
-class GPUTexture : public UniformLocation{
+class GPUTexture {
 public:
+    /**
+    * Updates the uniform location of the uniform variable named <name>
+    * in the provided shader program.
+    */
+    void bind(ghoul::opengl::ProgramObject* program, const std::string& name) {
+        _uniformLocation = program->uniformLocation(name);
+    }
 
     /**
-     * Sets and assignes a texture unit within the provided shader 
+     * Sets and assignes a texture unit within the provided shader
      * program.
      * OBS! Users must ensure bind has been called before using this method.
      */
     void setValue(ghoul::opengl::ProgramObject* program, ghoul::opengl::Texture* texture){
         _texUnit = std::make_unique<ghoul::opengl::TextureUnit>();
         _texUnit->activate();
-		if (texture) {
-			texture->bind();
-		}
+        if (texture) {
+            texture->bind();
+        }
         program->setUniform(_uniformLocation, *_texUnit);
     }
 
-    void deactivate(){
+    void deactivate() {
         _texUnit = nullptr;
     }
 
 private:
-
     std::unique_ptr<ghoul::opengl::TextureUnit> _texUnit;
-
+    GLint _uniformLocation = -1;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,8 @@ namespace openspace::globebrowsing::tileprovider {
 unsigned int TileProvider::_numTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
-    layergroupid::TypeID layerTypeID,
-    const ghoul::Dictionary& dictionary)
+                                                         layergroupid::TypeID layerTypeID,
+                                                      const ghoul::Dictionary& dictionary)
 {
     std::string type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
@@ -55,17 +55,13 @@ TileProvider::TileProvider()
     : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 TileProvider::TileProvider(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "tileProvider" })
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
-{
-    initialize();
-}
+{}
 
 float TileProvider::noDataValueAsFloat() {
     ghoul_assert(_initialized, "TileProvider was not initialized.");
@@ -84,7 +80,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     }
     maxParents -= parents;
 
-    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
+    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
     //         the range of defined data.
     int maximumLevel = maxLevel();
     while (tileIndex.level > maximumLevel){
@@ -94,9 +90,9 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     if(maxParents < 0){
         return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     }
-    
-    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
-    //         has a loaded tile ready to use. 
+
+    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
+    //         has a loaded tile ready to use.
     while (tileIndex.level > 1) {
         Tile tile = getTile(tileIndex);
         if (tile.status() != Tile::Status::OK) {
@@ -110,7 +106,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
             return ChunkTile{ tile, uvTransform, TileDepthTransform() };
         }
     }
-    
+
     return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
 }
 
@@ -150,7 +146,7 @@ bool TileProvider::initialize() {
         _numTileProviders--;
         return false;
     }
-  
+
     _initialized = true;
     return true;
 }
@@ -159,7 +155,7 @@ void TileProvider::initializeDefaultTile() {
     ghoul_assert(_defaultTile.texture() == nullptr,
         "Default tile should not have been created");
     using namespace ghoul::opengl;
-        
+
     // Create pixel data
     TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA,
                                  false,

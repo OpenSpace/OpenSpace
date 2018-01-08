@@ -1,7 +1,7 @@
 """
 OpenSpace
 
-Copyright (c) 2014-2017
+Copyright (c) 2014-2018
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -41,6 +41,9 @@ guards for correctness. At the moment this includes:
  * Checking for duplicates between all files
  * Checking that no file includes glm header directly
  * Checking whether any files starts with the UTF-8 Byte-order mark
+ * Checking whether a file as empty-only lines
+ * Checking whether the default assert macros are used anywhere instead of the
+   ghoul_assert macro
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -53,7 +56,8 @@ import os
 import re
 import sys
 
-current_year = '2017'
+current_year = '2018'
+is_strict_mode = False
 
 def get_ifndef_symbol(lines):
     index = [i for i,s in enumerate(lines) if '#ifndef ' in s]
@@ -148,6 +152,8 @@ def check_comment(lines):
     endif_line = lines[index[-1]].strip()
 
     if endif_line != '#endif // ' + ifndef_symbol:
+        print(ifndef_symbol)
+        print(endif_line)
         return '#endif line is not correctly formatted'
     else:
         return ''
@@ -207,8 +213,10 @@ def check_naming_convention_subcomponent(lines, component, file):
     subcomponent_part = subcomponent_part[: subcomponent_part.find('_')]
 
     path_part = file.split(os.sep)[1]
+    second_path_part = file.split(os.sep)[2]
 
-    if path_part.upper() != subcomponent_part:
+
+    if (path_part.upper() != subcomponent_part) and (second_path_part.upper() != subcomponent_part):
         return 'Subcomponent naming convention broken: ' + ifndef_symbol
     else:
         return ''
@@ -275,9 +283,59 @@ def check_end_of_line(lines):
         return ''
 
 
+
+def check_empty_only_line(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if s.translate({ord(c): None for c in '\n\r'}).isspace()]
+    if len(index) > 0:
+        return index
+    else:
+        return ''
+
+
+
+def check_assert_usage(lines):
+    # _assert checks for both ghoul_assert and static_assert, which are both reasonable
+    index = [i + 1 for i,s in enumerate(lines) if ('assert(' in s and not '_assert(' in s) and s.strip()[0:2] != '//']
+    if len(index) > 0:
+        return index
+    else:
+        return '';
+
+
+
+def check_line_length(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if len(s) > (90 + 1)]
+    if len(index) > 0:
+        return index
+    else:
+        return ''
+
+
+
+def check_empty_character_at_end(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if len(s) > 1 and s[-2] == ' ' and not s.strip() == '']
+    if len(index) > 0:
+        return index
+    else:
+        return ''
+
+
+
 previousSymbols  = {}
 def check_header_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         correctness = check_correctness(lines)
@@ -351,10 +409,26 @@ def check_header_file(file, component):
         if bom:
             print(file, '\t', 'Byte order mark failed:', bom)
 
+        empty_only_lines = check_empty_only_line(lines)
+        if empty_only_lines:
+            print(file, '\t', 'Empty only line: ', empty_only_lines)
+
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
+        empty_character_at_end = check_empty_character_at_end(lines)
+        if empty_character_at_end:
+            print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
 
 
 def check_inline_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         copyright = check_copyright(lines)
@@ -378,6 +452,14 @@ def check_inline_file(file, component):
         if bom:
             print(file, '\t', 'Byte order mark failed:', bom)
 
+        empty_only_lines = check_empty_only_line(lines)
+        if empty_only_lines:
+            print(file, '\t', 'Empty only line: ', empty_only_lines)
+
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
         if (not '_doc.inl' in file):
             # The _doc.inl files are allowed to use using namespace as they are inclued
             # from the cpp files and thus don't leak it
@@ -385,10 +467,22 @@ def check_inline_file(file, component):
             if using_namespaces:
                 print(file, '\t', 'Using namespace found in inline file')
 
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
+        empty_character_at_end = check_empty_character_at_end(lines)
+        if empty_character_at_end:
+            print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
 
 
 def check_source_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         header = check_glm_header(lines, file)
@@ -412,6 +506,22 @@ def check_source_file(file, component):
         if bom:
             print(file, '\t', 'Byte order mark failed:', bom)
 
+        empty_only_lines = check_empty_only_line(lines)
+        if empty_only_lines:
+            print(file, '\t', 'Empty only line: ', empty_only_lines)
+
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
+        empty_character_at_end = check_empty_character_at_end(lines)
+        if empty_character_at_end:
+            print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
 
 
 def check_files(positiveList, negativeList, component, check_function):
@@ -429,7 +539,12 @@ def check_files(positiveList, negativeList, component, check_function):
 
 basePath = './'
 if len(sys.argv) > 1:
-    basePath = sys.argv[1] + '/'
+    if sys.argv[1] != "strict":
+        basePath = sys.argv[1] + '/'
+
+for a in sys.argv:
+    if a == "strict":
+        is_strict_mode = True
 
 # Check header files
 print("Checking header files")

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2017                                                                #
+# Copyright (c) 2014-2018                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,6 +25,14 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemangle.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdistance.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemmission.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemparallelconnection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
@@ -34,11 +42,13 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacedashboard.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
@@ -47,6 +57,14 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemangle.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdate.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemdistance.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemmission.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemparallelconnection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
@@ -56,11 +74,13 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacedashboard.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimagelocal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimageonline.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/luatranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp

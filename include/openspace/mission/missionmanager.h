@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@ namespace openspace {
 namespace scripting { struct LuaLibrary; }
 
 /**
-* Singleton class keeping track of space missions. 
+* Singleton class keeping track of space missions.
 */
 class MissionManager : public ghoul::Singleton<MissionManager> {
 public:
@@ -50,13 +50,23 @@ public:
 
     /**
     * Reads a mission from file and maps the mission name to the Mission object. If
-    * this is the first mission to be loaded, the mission will also be set as the 
+    * this is the first mission to be loaded, the mission will also be set as the
     * current active mission.
+    * \param filename The file that contains the mission that is to be loaded
+    * \return The name of the mission that was loaded
     * \pre \p filename must not be empty
     * \pre \p filename must not contain tokens
     * \pre \p filename must exist
     */
-    void loadMission(const std::string& filename);
+    std::string loadMission(const std::string& filename);
+
+    /**
+     * Unloads a previously loaded mission identified by the provided \p missionName.
+     * \param missionName The name of the mission that should be unloded
+     * \pre \p filename must not be empty
+     * \pre \p missionName must be a valid mission that has previously been loaded
+     */
+    void unloadMission(const std::string& missionName);
 
     /**
      * Returns whether the provided \p missionName has previously been added to the
@@ -79,8 +89,8 @@ public:
     bool hasCurrentMission() const;
 
     /**
-    * Returns the latest mission specified to `setCurrentMission()`. If no mission has 
-    * been specified, the first mission loaded will be returned. If no mission has been 
+    * Returns the latest mission specified to `setCurrentMission()`. If no mission has
+    * been specified, the first mission loaded will be returned. If no mission has been
     * loaded, a warning will be printed and a dummy mission will be returned.
     */
     const Mission& currentMission();

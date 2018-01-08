@@ -1,8 +1,8 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,16 +32,16 @@
 namespace openspace::globebrowsing {
 
 namespace {
-    const char* _loggerCat = "Layer";
+    constexpr const char* _loggerCat = "Layer";
 
-    const char* keyName = "Name";
-    const char* keyDescription = "Description";
-    const char* keyEnabled = "Enabled";
-    const char* keyLayerGroupID = "LayerGroupID";
-    const char* keySettings = "Settings";
-    const char* keyAdjustment = "Adjustment";
-    const char* KeyBlendMode = "BlendMode";
-    const char* KeyPadTiles = "PadTiles";
+    constexpr const char* keyName = "Name";
+    constexpr const char* keyDescription = "Description";
+    constexpr const char* keyEnabled = "Enabled";
+    constexpr const char* keyLayerGroupID = "LayerGroupID";
+    constexpr const char* keySettings = "Settings";
+    constexpr const char* keyAdjustment = "Adjustment";
+    constexpr const char* KeyBlendMode = "BlendMode";
+    constexpr const char* KeyPadTiles = "PadTiles";
 
     static const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -91,7 +91,9 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
              LayerGroup& parent)
     : properties::PropertyOwner({
         layerDict.value<std::string>(keyName),
-        layerDict.hasKey(keyDescription) ? layerDict.value<std::string>(keyDescription) : ""
+        layerDict.hasKey(keyDescription) ?
+            layerDict.value<std::string>(keyDescription) :
+            ""
     })
     , _parent(parent)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
@@ -118,7 +120,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     bool padTiles = true;
     layerDict.getValue<bool>(KeyPadTiles, padTiles);
-    
+
     TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
                                                                         padTiles);
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
@@ -171,12 +173,16 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         }
     });
 
-    _remove.onChange([&](){
-        if (_tileProvider) {
-            _tileProvider->reset();
+    _remove.onChange([&]() {
+        try {
+            if (_tileProvider) {
+                _tileProvider->reset();
+            }
         }
-
-        _parent.deleteLayer(name());
+        catch (...) {
+            _parent.deleteLayer(name());
+            throw;
+        }
     });
 
     _typeOption.onChange([&](){
@@ -219,11 +225,23 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     addPropertySubOwner(_layerAdjustment);
 }
 
+void Layer::initialize() {
+    if (_tileProvider) {
+        _tileProvider->initialize();
+    }
+}
+
+void Layer::deinitialize() {
+    if (_tileProvider) {
+        _tileProvider->deinitialize();
+    }
+}
+
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     if (_tileProvider) {
         return _tileProvider->getChunkTilePile(tileIndex, pileSize);
     }
-    else {   
+    else {
         ChunkTilePile chunkTilePile;
         chunkTilePile.resize(pileSize);
         for (int i = 0; i < pileSize; ++i) {
@@ -299,7 +317,8 @@ glm::ivec2 Layer::tilePixelSizeDifference() const {
     return _padTilePixelSizeDifference;
 }
 
-glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
+glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset,
+                                                 glm::vec2 sizeDiff,
                                                  glm::uvec2 resolution, glm::vec2 tileUV)
 {
     glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
@@ -333,7 +352,8 @@ layergroupid::TypeID Layer::parseTypeIdFromDictionary(
     }
 }
 
-void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict) {
+void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict)
+{
     switch (typeId) {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
@@ -350,10 +370,13 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             if (tileProviderInitDict.hasKeyAndValue<std::string>(keyName)) {
                 std::string name;
                 tileProviderInitDict.getValue(keyName, name);
-                LDEBUG("Initializing tile provider for layer: '" + name + "'"); 
+                LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
-                tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict)
+                tileprovider::TileProvider::createFromDictionary(
+                    typeId,
+                    tileProviderInitDict
+                )
             );
             break;
         }

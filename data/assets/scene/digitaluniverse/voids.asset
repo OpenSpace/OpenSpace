@@ -1,0 +1,30 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local speck = asset.syncedResource({
+    Name = "Voids Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_voids_speck",
+    Version = 1
+})
+
+local object = {
+    Name = "Voids",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.65,
+        LabelFile = speck .. "/voids.label",
+        TextColor = { 0.0, 0.4, 0.7, 1.0 },
+        TextSize = 21.9,
+        TextMinSize = 8.0,
+        Unit = "Mpc"
+    },
+    GuiPath = "/Universe/Galaxies"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef GLOBEBROWSING_USE_GDAL
-
 #ifndef __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
 #define __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
+
+#ifdef GLOBEBROWSING_USE_GDAL
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
@@ -49,7 +49,6 @@ private:
 
 } // namespace openspace::gui
 
+#endif // GLOBEBROWSING_USE_GDAL
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__
-
-#endif // GLOBEBROWSING_USE_GDAL

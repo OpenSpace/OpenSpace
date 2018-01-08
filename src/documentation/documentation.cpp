@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +65,33 @@ struct WarningCompare {
 // so we have to include one ourselves
 namespace std {
 std::string to_string(std::string value) {
-    return value; 
+    return value;
+}
+
+std::string to_string(openspace::documentation::TestResult testResult) {
+    using namespace openspace::documentation;
+
+    if (testResult.success) {
+        return "Success";
+    }
+    else {
+        std::stringstream stream;
+        stream << "Failure." << '\n';
+
+        for (const TestResult::Offense& offense : testResult.offenses) {
+            stream << "  " << std::to_string(offense) << '\n';
+        }
+
+        for (const TestResult::Warning& warning : testResult.warnings) {
+            stream << "  " << std::to_string(warning) << '\n';
+        }
+
+        return stream.str();
+    }
+}
+
+std::string to_string(openspace::documentation::TestResult::Offense offense) {
+    return offense.offender + ": " + std::to_string(offense.reason);
 }
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {
@@ -84,7 +110,11 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
             throw ghoul::MissingCaseException();
     }
 }
-    
+
+std::string to_string(openspace::documentation::TestResult::Warning warning) {
+    return warning.offender + ": " + std::to_string(warning.reason);
+}
+
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
@@ -106,7 +136,7 @@ SpecificationError::SpecificationError(TestResult res, std::string comp)
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
-    
+
     message += " (";
     for (const TestResult::Offense& o : result.offenses) {
         message += o.offender + ',';

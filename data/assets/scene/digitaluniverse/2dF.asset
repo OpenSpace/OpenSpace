@@ -1,0 +1,39 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "2dF Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_2dF_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "2dF Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_2dF_speck",
+    Version = 1
+})
+
+local object = {
+    Name = "2dF Galaxies",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 1.0,
+        File = speck .. "/2dF.speck",
+        Texture = textures .. "/point3.png",
+        ColorMap = speck .. "/lss.cmap",
+        ColorOption = { "redshift", "prox5Mpc" },
+        ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
+        Unit = "Mpc",
+        ScaleFactor = 508.0
+    },
+    GuiPath = "/Universe/Galaxies"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

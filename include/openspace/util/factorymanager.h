@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,20 +53,20 @@ public:
          * \pre \p type must not be empty
          */
         explicit FactoryNotFoundError(std::string type);
-        
+
         /// The type describing the ghoul::TemplateFactory that could not be found
         std::string type;
     };
 
     FactoryManager();
-    
+
     /**
      * Static initializer that initializes the static member. This needs to be done before
      * the FactoryManager can be used.
      * \pre The FactoryManager must not have been initialized before
      */
     static void initialize();
-    
+
     /**
      * Deinitializes the static member and all the registered ghoul::TemplateFactory%s.
      * \pre The FactoryManager must have been initialized before
@@ -79,7 +79,7 @@ public:
      * \return The initialization status of the static FactoryManager
      */
     static bool isInitialized();
-    
+
     /**
      * This method returns a reference to the initialized FactoryManager.
      * \return An initialized reference to the singleton manager

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,8 +51,8 @@ class RenderableConstellationBounds : public Renderable {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
@@ -103,12 +103,12 @@ private:
 
     /// Determines the color of the constellation lines
     properties::Vec3Property _color;
-    
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
-    
+
     using Vertex = std::array<float, 3>;
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
 

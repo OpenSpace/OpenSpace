@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
@@ -35,6 +35,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <memory>
 
@@ -44,7 +45,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * The base class for screen space images and screen space framebuffers.
- * This base class handles general functionality specific to planes that are rendered in 
+ * This base class handles general functionality specific to planes that are rendered in
  * front of the camera. It implements protected methods and properties for converting
  * the planes from Spherical to Euclidean coordinates and back. It also specifies the
  * interface that its children need to implement.
@@ -58,17 +59,20 @@ public:
     virtual ~ScreenSpaceRenderable() = default;
 
     virtual void render();
-    
+
     virtual bool initialize();
+    virtual bool initializeGL();
     virtual bool deinitialize();
-    virtual void update() = 0;
+    virtual bool deinitializeGL();
+
+    virtual void update();
     virtual bool isReady() const;
     bool isEnabled() const;
-    
+
     glm::vec3 euclideanPosition() const;
     glm::vec3 sphericalPosition() const;
     float depth() const;
-    
+
     static documentation::Documentation Documentation();
 
 protected:
@@ -79,7 +83,7 @@ protected:
      * Converts Spherical coordinates to Euclidean.
      * \param spherical The coordinates theta and phi
      * \param radius The radius position value of the plane
-     * \return The x and y position value of the plane 
+     * \return The x and y position value of the plane
      */
     glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
 
@@ -109,6 +113,7 @@ protected:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
     std::unique_ptr<ghoul::opengl::Texture>  _texture;
+    UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
     bool _useEuclideanCoordinates;

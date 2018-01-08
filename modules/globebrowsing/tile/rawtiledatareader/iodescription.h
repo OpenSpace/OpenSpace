@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,13 +41,13 @@ struct IODescription {
         PixelRegion region;
         PixelRegion fullRegion;
     } read;
-    
+
     struct WriteData {
         PixelRegion region;
         size_t bytesPerLine;
         size_t totalNumBytes;
     } write;
-    
+
     IODescription cut(PixelRegion::Side side, int pos);
 };
 

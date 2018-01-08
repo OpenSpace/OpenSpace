@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,8 @@ bool TouchModule::hasNewInput() {
     // Get new input from listener
     listOfContactPoints = ear.getInput();
     ear.clearInput();
-    touch.touchActive(!listOfContactPoints.empty()); // Set touch property to active (to void mouse input, mainly for mtdev bridges)
+     // Set touch property to active (to void mouse input, mainly for mtdev bridges)
+    touch.touchActive(!listOfContactPoints.empty());
 
     // Erase old input id's that no longer exists
     lastProcessed.erase(
@@ -71,16 +72,27 @@ bool TouchModule::hasNewInput() {
         touch.tap();
         return true;
     }
-    
+
     // Return true if we got new input
-    if (listOfContactPoints.size() == lastProcessed.size() && !listOfContactPoints.empty()) {
+    if (listOfContactPoints.size() == lastProcessed.size() &&
+        !listOfContactPoints.empty())
+    {
         bool newInput = true;
-        // go through list and check if the last registrered time is newer than the one in lastProcessed (last frame)
-        std::for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
-            std::vector<TuioCursor>::iterator cursor = std::find_if(listOfContactPoints.begin(), listOfContactPoints.end(), 
-                [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
+        // go through list and check if the last registrered time is newer than the one in
+        // lastProcessed (last frame)
+        std::for_each(
+            lastProcessed.begin(),
+            lastProcessed.end(),
+            [this, &newInput](Point& p) {
+                std::vector<TuioCursor>::iterator cursor = std::find_if(
+                    listOfContactPoints.begin(),
+                    listOfContactPoints.end(),
+                    [&p](const TuioCursor& c) { return c.getSessionID() == p.first; }
+            );
             double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
-            if (!cursor->isMoving()) { // if current cursor isn't moving, we want to interpret that as new input for interaction purposes
+            if (!cursor->isMoving()) {
+                 // if current cursor isn't moving, we want to interpret that as new input
+                 // for interaction purposes
                 newInput = true;
             }
             else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
@@ -99,6 +111,10 @@ TouchModule::TouchModule()
 {
     addPropertySubOwner(touch);
     addPropertySubOwner(markers);
+
+    if (!OpenSpaceEngine::isCreated()) {
+        return;
+    }
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::InitializeGL,
@@ -134,16 +150,20 @@ TouchModule::TouchModule()
         for (const TuioCursor& c : listOfContactPoints) {
             lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
         }
-        touch.unitTest(); // used to save data from solver, only calculated for one frame when user chooses in GUI
-        touch.step(OsEng.windowWrapper().deltaTime()); // calculate the new camera state for this frame
+         // used to save data from solver, only calculated for one frame when user chooses
+         // in GUI
+        touch.unitTest();
+         // calculate the new camera state for this frame
+        touch.step(OsEng.windowWrapper().deltaTime());
     }
     );
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Render,
         [&]() {
-        markers.render(listOfContactPoints); // render markers, customizable through the GUI
-    }
+             // render markers, customizable through the GUI
+            markers.render(listOfContactPoints);
+        }
     );
 }
 

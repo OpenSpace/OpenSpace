@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,16 +37,16 @@
 #include <vector>
 
 namespace openspace::globebrowsing::tileprovider {
-    
+
 /**
- * Interface for providing <code>Tile</code>s given a 
- * <code>TileIndex</code>. 
+ * Interface for providing <code>Tile</code>s given a
+ * <code>TileIndex</code>.
  */
 class TileProvider : public properties::PropertyOwner {
 public:
     /**
-     * Factory method for instantiating different implementations of 
-     * <code>TileProviders</code>. The provided dictionary must 
+     * Factory method for instantiating different implementations of
+     * <code>TileProviders</code>. The provided dictionary must
      * define a key specifying what implementation of TileProvider
      * to be instantiated.
      */
@@ -54,15 +54,15 @@ public:
         layergroupid::TypeID layerTypeID,
         const ghoul::Dictionary& dictionary);
 
-    /** 
-     * Default constructor. 
+    /**
+     * Default constructor.
      */
     TileProvider();
 
     /**
-     * Implementations of the TileProvider interface must implement 
-     * a constructor taking a dictionary as input. The provided 
-     * dictionary must define a key specifying what implementation 
+     * Implementations of the TileProvider interface must implement
+     * a constructor taking a dictionary as input. The provided
+     * dictionary must define a key specifying what implementation
      * of TileProvider to be instantiated.
      */
     TileProvider(const ghoul::Dictionary& dictionary);
@@ -80,16 +80,16 @@ public:
      * Method for querying tiles, given a specified <code>TileIndex</code>.
      *
      * This method is expected to be invoked multiple times per frame,
-     *  and should therefore return quickly, e.g. not perform heavy I/O 
+     *  and should therefore return quickly, e.g. not perform heavy I/O
      * operations. However, invoking this method may spawn separate threads
-     * to perform such operations. Therefore, programmers shoud 
-     *  note that there is no guarantee that the <code>Tile</code> 
+     * to perform such operations. Therefore, programmers shoud
+     *  note that there is no guarantee that the <code>Tile</code>
      * status and texture will be consistent over different invocations
      * of this method.
-     * 
-     * \param tileIndex specifying a region of a map for which 
+     *
+     * \param tileIndex specifying a region of a map for which
      * we want tile data.
-     * 
+     *
      * \returns The tile corresponding to the TileIndex by the time
      * the method was invoked.
      */
@@ -113,7 +113,7 @@ public:
 
     /**
      * Get the associated depth transform for this TileProvider.
-     * This is necessary for TileProviders serving height map 
+     * This is necessary for TileProviders serving height map
      * data, in order to correcly map pixel values to meters.
      */
     virtual TileDepthTransform depthTransform() = 0;
@@ -125,8 +125,8 @@ public:
     virtual void update() = 0;
 
     /**
-     * Provides a uniform way of all TileProviders to reload or 
-     * restore all of its internal state. This is mainly useful 
+     * Provides a uniform way of all TileProviders to reload or
+     * restore all of its internal state. This is mainly useful
      * for debugging purposes.
      */
     virtual void reset() = 0;
@@ -136,7 +136,7 @@ public:
      * that this TileProvider is able provide.
      */
     virtual int maxLevel() = 0;
-        
+
     /**
      * \returns the no data value for the dataset. Default is the minimum float avalue.
      */
@@ -145,19 +145,20 @@ public:
     /**
      * \returns a unique identifier for the <code>TileProvider<\code>. All
      * <code>TileProviders<\code> have an ID starting at 0 from the first created.
-     * The maximum number of unique identifiers is UINT_MAX 
+     * The maximum number of unique identifiers is UINT_MAX
      */
     unsigned int uniqueIdentifier() const;
 
 protected:
     std::string _name;
+
 private:
     void initializeDefaultTile();
 
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;
     bool _initialized;
-  
+
     std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
     Tile _defaultTile;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 #include <functional>
 
 namespace openspace::globebrowsing {
-    
+
 struct LayerGroup;
 
 /**
@@ -45,7 +45,11 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
 
-    void addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict);
+    void initialize();
+    void deinitialize();
+
+    std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId,
+        ghoul::Dictionary layerDict);
     void deleteLayer(layergroupid::GroupID groupId, std::string layerName);
 
     const LayerGroup& layerGroup(size_t groupId);

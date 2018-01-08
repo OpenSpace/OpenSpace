@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
     std::unique_ptr<Decoder> result = factory->create(type, dictionary);
 
-    if (result == nullptr) {
+    if (!result) {
         throw ghoul::RuntimeError(
             "Failed creating payload object of type '" + type + '"',
             "Decoder"
@@ -47,5 +47,5 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
 }
 
 Decoder::~Decoder() {}
-    
+
 } // namespace openspace

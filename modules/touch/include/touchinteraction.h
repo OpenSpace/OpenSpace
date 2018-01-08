@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ class SceneGraphNode;
 class TouchInteraction : public properties::PropertyOwner {
 public:
     using Point = std::pair<int, TUIO::TuioPoint>;
-    
+
     TouchInteraction();
 
     // for interpretInteraction()
@@ -72,7 +72,7 @@ public:
         std::vector<glm::dvec3> selectedPoints;
         std::vector<glm::dvec2> screenPoints;
         int nDOF;
-        glm::dvec2(*castToNDC)(glm::dvec3, Camera&, SceneGraphNode*);
+        glm::dvec2(*castToNDC)(const glm::dvec3&, Camera&, SceneGraphNode*);
         double(*distToMinimize)(double* par, int x, void* fdata, LMstat* lmstat);
         Camera* camera;
         SceneGraphNode* node;
@@ -86,12 +86,12 @@ public:
      * 3 Continues if GUI isn't on
      * 4 If the node in focus is large enough and all contact points have selected it,
      * calls directControl() function for direct-manipulation
-     * 5 Updates std::vector<SelectedBody> _selected (only if LMA successfully 
+     * 5 Updates std::vector<SelectedBody> _selected (only if LMA successfully
      * converged, avoids interaction to snap on LMA fails)
-     * 6 If directControl() wasn't called this frame, interpret the incoming 
+     * 6 If directControl() wasn't called this frame, interpret the incoming
      * list and decide what type of interaction this frame should do
      * 7 Compute the new total velocities after interaction
-     * 8 Evaluate if directControl should be called next frame- true if all contact points 
+     * 8 Evaluate if directControl should be called next frame- true if all contact points
      * select the same node and said node is larger than _nodeRadiusThreshold
     */
     void updateStateFromInput(const std::vector<TUIO::TuioCursor>& list,
@@ -100,10 +100,10 @@ public:
     // Calculates the new camera state with velocities and time since last frame
     void step(double dt);
 
-    // Used to save LMA data for one frame if the user chose to 
+    // Used to save LMA data for one frame if the user chose to
     void unitTest();
 
-    // Called each frame we have no new input, used to reset data 
+    // Called each frame we have no new input, used to reset data
     void resetAfterInput();
 
     // Sets _tap to true, called if tap occured current frame (called from touchmodule)
@@ -125,7 +125,7 @@ private:
     bool guiMode(const std::vector<TUIO::TuioCursor>& list);
 
     /* Function that calculates the new camera state such that it minimizes the L2 error
-     * in screenspace 
+     * in screenspace
      * between contact points and surface coordinates projected to clip space using LMA
      */
     void directControl(const std::vector<TUIO::TuioCursor>& list);
@@ -136,7 +136,7 @@ private:
      */
     void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
 
-    /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used, 
+    /* Returns an int (ROT = 0, PINCH, PAN, ROLL, PICK) for what interaction to be used,
      * depending on what input was gotten
      */
     int interpretInteraction(const std::vector<TUIO::TuioCursor>& list,

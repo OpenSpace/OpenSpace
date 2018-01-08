@@ -1,0 +1,25 @@
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("./transforms")
+local textures = asset.require('./sun_textures').TexturesPath
+asset.require("spice/base")
+
+
+
+local SunMarker = {
+    Name = "SunMarker",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Enabled = false,
+        Type = "RenderablePlane",
+        Size = 3.0E11,
+        Origin = "Center",
+        Billboard = true,
+        Texture = textures .. "/marker.png",
+        BlendMode = "Additive"
+    },
+    GuiPath = "/Solar System/Sun"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { SunMarker })

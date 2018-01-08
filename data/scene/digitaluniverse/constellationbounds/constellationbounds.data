@@ -1,5 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "digitaluniverse_constellationbounds_data", Destination = "data", Version = 1 }
-    }
-}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace::globebrowsing::cache {
-    
+
 template<typename KeyType, typename ValueType, typename HasherType>
 LRUCache<KeyType, ValueType, HasherType>::LRUCache(size_t size)
     : _maximumCacheSize(size)
@@ -56,7 +56,7 @@ LRUCache<KeyType, ValueType, HasherType>::putAndFetchPopped(const KeyType& key,
 
 template<typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
-    return _itemMap.count(key) > 0;
+    return (_itemMap.count(key) > 0);
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
@@ -78,7 +78,7 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::isEmpty() const {
-    return _itemMap.size() == 0;
+    return (_itemMap.size() == 0);
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
@@ -92,8 +92,10 @@ ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU() {
-    ghoul_assert(_itemList.size() > 0,
-        "Can not pop from LRU cache. Ensure cache is not empty.");
+    ghoul_assert(
+        _itemList.size() > 0,
+        "Can not pop from LRU cache. Ensure cache is not empty."
+    );
     auto first_it = _itemList.begin();
     _itemMap.erase(first_it->first);
     std::pair<KeyType, ValueType> toReturn = _itemList.front();
@@ -103,8 +105,10 @@ std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU()
 
 template<typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU() {
-    ghoul_assert(_itemList.size() > 0,
-        "Can not pop from LRU cache. Ensure cache is not empty.");
+    ghoul_assert(
+        _itemList.size() > 0,
+        "Can not pop from LRU cache. Ensure cache is not empty."
+    );
     auto lastIt = _itemList.end();
     lastIt--;
     _itemMap.erase(lastIt->first);

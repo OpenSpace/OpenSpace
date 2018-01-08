@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <modules/spacecraftinstruments/util/decoder.h>
 
 namespace openspace {
-    
+
 class TargetDecoder : public Decoder {
 public:
     TargetDecoder(const ghoul::Dictionary& dictionary);
@@ -40,7 +40,7 @@ private:
     std::string _type;
     std::vector<std::string> _names;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___TARGETDECODER___H__

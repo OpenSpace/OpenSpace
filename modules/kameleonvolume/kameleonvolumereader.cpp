@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@
 #endif // WIN32
 
 namespace {
-    const char* _loggerCat = "KameleonVolumeReader";
+    constexpr const char* _loggerCat = "KameleonVolumeReader";
 } // namespace
 
 namespace openspace {
@@ -78,7 +78,14 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 & upperDomainBound) const
 {
     float min, max;
-    return readFloatVolume(dimensions, variable, lowerDomainBound, upperDomainBound, min, max);
+    return readFloatVolume(
+        dimensions,
+        variable,
+        lowerDomainBound,
+        upperDomainBound,
+        min,
+        max
+    );
 }
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
@@ -130,20 +137,30 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
 std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {
     // get the grid system string
-    std::string gridSystem = _model->getGlobalAttribute("grid_system_1").getAttributeString();
+    std::string gridSystem =
+        _model->getGlobalAttribute("grid_system_1").getAttributeString();
 
     // remove leading and trailing brackets
     gridSystem = gridSystem.substr(1, gridSystem.length() - 2);
 
     // remove all whitespaces
-    gridSystem.erase(remove_if(gridSystem.begin(), gridSystem.end(), isspace), gridSystem.end());
+    gridSystem.erase(
+        remove_if(
+            gridSystem.begin(),
+            gridSystem.end(),
+            isspace),
+        gridSystem.end()
+    );
 
     // replace all comma signs with whitespaces
     std::replace(gridSystem.begin(), gridSystem.end(), ',', ' ');
 
     // tokenize
     std::istringstream iss(gridSystem);
-    std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},std::istream_iterator<std::string>{} };
+    std::vector<std::string> tokens{
+        std::istream_iterator<std::string>{iss},
+        std::istream_iterator<std::string>{}
+    };
 
     // validate
     if (tokens.size() != 3) {
@@ -185,7 +202,7 @@ std::vector<std::string> KameleonVolumeReader::variableNames() const {
     }
     return variableNames;
 }
-    
+
 std::vector<std::string> KameleonVolumeReader::variableAttributeNames() const {
     return _model->getVariableAttributeNames();
 }
@@ -199,18 +216,21 @@ std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
     return attributeNames;
 }
 
-void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary, const std::string& key, ccmc::Attribute& attr) {
+void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary,
+                                                    const std::string& key,
+                                                    ccmc::Attribute& attr)
+{
     ccmc::Attribute::AttributeType type = attr.getAttributeType();
     switch (type) {
-    case ccmc::Attribute::AttributeType::FLOAT:
-        dictionary.setValue<float>(key, attr.getAttributeFloat());
-        return;
-    case ccmc::Attribute::AttributeType::INT:
-        dictionary.setValue<int>(key, attr.getAttributeInt());
-        return;
-    case ccmc::Attribute::AttributeType::STRING:
-        dictionary.setValue<std::string>(key, attr.getAttributeString());
-        return;
+        case ccmc::Attribute::AttributeType::FLOAT:
+            dictionary.setValue<float>(key, attr.getAttributeFloat());
+            return;
+        case ccmc::Attribute::AttributeType::INT:
+            dictionary.setValue<int>(key, attr.getAttributeInt());
+            return;
+        case ccmc::Attribute::AttributeType::STRING:
+            dictionary.setValue<std::string>(key, attr.getAttributeString());
+            return;
     }
 }
 
@@ -226,15 +246,22 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     for (const std::string& variableName : variableNames()) {
         ghoul::Dictionary variableAttributesDictionary;
         for (const std::string& attributeName : varAttrNames) {
-            ccmc::Attribute attribute = _model->getVariableAttribute(variableName, attributeName);
-            addAttributeToDictionary(variableAttributesDictionary, attributeName, attribute);
+            ccmc::Attribute attribute = _model->getVariableAttribute(
+                variableName,
+                attributeName
+            );
+            addAttributeToDictionary(
+                variableAttributesDictionary,
+                attributeName,
+                attribute
+            );
         }
         variableDictionary.setValue(variableName, variableAttributesDictionary);
     }
 
     return {
-        {"globalAttributes", std::move(globalAttributesDictionary) },
-        {"variableAttributes", std::move(variableDictionary) }
+        { "globalAttributes", std::move(globalAttributesDictionary) },
+        { "variableAttributes", std::move(variableDictionary) }
     };
 }
 

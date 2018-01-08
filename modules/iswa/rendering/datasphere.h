@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ namespace openspace {
 class PowerScaledSphere;
 
 /**
- * DataSphere is a concrete IswaCygnet with data files as its input source. 
+ * DataSphere is a concrete IswaCygnet with data files as its input source.
  * The class handles creation, destruction and rendering of a sphere geometry.
  * It also specifies what uniforms to use and what GUI properties it needs.
  */
@@ -57,6 +57,6 @@ protected:
     float _radius;
 };
 
-} // namespace openspace 
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___DATASPHERE___H__

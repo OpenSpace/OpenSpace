@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,8 +67,6 @@
 #include <algorithm>
 #include <chrono>
 
-
-
 namespace {
     const char* _loggerCat = "RenderableMultiresVolume";
     const char* KeyDataSource = "Source";
@@ -85,6 +83,7 @@ namespace {
     const char* GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
     const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
     const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
+
     bool registeredGlslHelpers = false;
 
     static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
@@ -445,7 +444,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     return true;
 }
 
-void RenderableMultiresVolume::initialize() {
+void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
     unsigned int maxNumBricks = _tsp->header().xNumBricks_ * _tsp->header().yNumBricks_ * _tsp->header().zNumBricks_;
@@ -521,7 +520,7 @@ void RenderableMultiresVolume::initialize() {
     }
 }
 
-void RenderableMultiresVolume::deinitialize() {
+void RenderableMultiresVolume::deinitializeGL() {
     _tsp = nullptr;
     _transferFunction = nullptr;
 }
@@ -644,7 +643,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
     }
     else if (_useGlobalTime) {
         double t = (_time - _startTime) / (_endTime - _startTime);
-        currentTimestep = t * numTimesteps;
+        currentTimestep = static_cast<int>(t * numTimesteps);
         visible = currentTimestep >= 0 && currentTimestep < numTimesteps;
     }
     else {
@@ -701,7 +700,6 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.z, glm::vec3(0, 0, 1));
         transform = glm::scale(transform, static_cast<glm::vec3>(_scaling) * std::pow(10.0f, static_cast<float>(_scalingExponent)));
 
-    
         _raycaster->setStepSizeCoefficient(_stepSizeCoefficient);
         _raycaster->setModelTransform(transform);
     }

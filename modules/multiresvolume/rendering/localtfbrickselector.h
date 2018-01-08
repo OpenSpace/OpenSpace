@@ -1,8 +1,8 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,8 +71,10 @@ public:
 
     void selectBricks(int timestep, std::vector<int>& bricks);
     bool calculateBrickErrors();
- 
+
 private:
+    TSP* _tsp;
+
     LocalErrorHistogramManager* _histogramManager;
     std::vector<Error> _brickErrors;
 

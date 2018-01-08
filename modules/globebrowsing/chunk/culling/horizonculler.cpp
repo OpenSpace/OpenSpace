@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
 
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
     const GeodeticPatch& patch = chunk.surfacePatch();
-    float maxHeight = chunk.getBoundingHeights().max;
+    float maxHeight = chunk.boundingHeights().max;
     glm::dvec3 globePosition = glm::dvec3(0,0,0); // In model space it is 0
     double minimumGlobeRadius = ellipsoid.minimumRadius();
 
@@ -74,12 +74,12 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
             objectPosition = corners[i];
         }
     }
-        
+
     return isCullable(cameraPosition, globePosition, objectPosition,
                         maxHeight, minimumGlobeRadius);
 }
 
-bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition, 
+bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
                                const glm::dvec3& globePosition,
                                const glm::dvec3& objectPosition,
                                double objectBoundingSphereRadius,
@@ -88,16 +88,16 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
     double distanceToHorizon =
         sqrt(pow(length(cameraPosition - globePosition), 2) -
         pow(minimumGlobeRadius, 2));
-    
+
     double minimumAllowedDistanceToObjectFromHorizon = sqrt(
         pow(length(objectPosition - globePosition), 2) -
         pow(minimumGlobeRadius - objectBoundingSphereRadius, 2));
-    
+
     // Minimum allowed for the object to be occluded
     double minimumAllowedDistanceToObjectSquared =
         pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2)
         + pow(objectBoundingSphereRadius, 2);
-    
+
     double distanceToObjectSquared = pow(length(objectPosition - cameraPosition), 2);
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
 }

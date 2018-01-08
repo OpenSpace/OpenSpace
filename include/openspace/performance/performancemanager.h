@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,19 +43,21 @@ class PerformanceManager {
 public:
     static void createGlobalSharedMemory();
     static void destroyGlobalSharedMemory();
-    
-    PerformanceManager(std::string loggingDirectory = "${BASE_PATH}",
+
+    PerformanceManager(std::string loggingDirectory = "${BASE}",
         std::string prefix = "PM-");
-    
+
     ~PerformanceManager();
 
     void resetPerformanceMeasurements();
-    
+
     bool isMeasuringPerformance() const;
 
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
-    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
-    
+    void storeIndividualPerformanceMeasurement(std::string identifier,
+        long long nanoseconds);
+    void storeScenePerformanceMeasurements(
+        const std::vector<SceneGraphNode*>& sceneNodes);
+
     void outputLogs();
 
     void writeData(std::ofstream& out, const std::vector<float>& data);
@@ -86,13 +88,13 @@ private:
     std::string _prefix;
     std::string _suffix;
     std::string _ext;
-    
+
     std::map<std::string, size_t> individualPerformanceLocations;
-    
+
     std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
 
     size_t _tick;
-    
+
     void tick();
     bool createLogDir();
 };

@@ -1,0 +1,45 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('./kernels')
+
+
+
+local PlutoBarycenter = {
+    Name = "PlutoBarycenter",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO BARYCENTER",
+            Observer = "SUN",
+            Kernels = kernels.PlutoKernels
+        },
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local NewHorizonsPosition = {
+    Name = "NewHorizonsPosition",
+    Parent = PlutoBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "NEW HORIZONS",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = kernels.NewHorizonsKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "NH_SPACECRAFT",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GuiPath = "/Solar System/Missions/New Horizons"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    PlutoBarycenter,
+    NewHorizonsPosition 
+})

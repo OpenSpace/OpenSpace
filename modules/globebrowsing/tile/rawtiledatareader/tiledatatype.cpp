@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,19 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
 #ifdef GLOBEBROWSING_USE_GDAL
+#ifdef _MSC_VER
+#pragma warning (push)
+ // CPL throws warning about missing DLL interface
+#pragma warning (disable : 4251)
+#endif // _MSC_VER
+
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #endif // GLOBEBROWSING_USE_GDAL
 
 #include <ghoul/logging/logmanager.h>
@@ -41,7 +52,7 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "TileDataType";
+    constexpr const char* _loggerCat = "TileDataType";
 } // namespace
 
 namespace openspace::globebrowsing::tiledatatype {
@@ -138,9 +149,10 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 2:
@@ -169,6 +181,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                     break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 3:
@@ -192,12 +205,13 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 case GDT_Float32:
                     format.glFormat = GL_RGB32F;
                     break;
-                // No representation of 64 bit float? 
+                // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 4:
@@ -224,14 +238,15 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         default:
             LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
-            break;
+            throw ghoul::MissingCaseException();
     }
     return format;
 }
@@ -264,9 +279,10 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 2:
@@ -295,6 +311,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                     break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 3:
@@ -306,7 +323,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 case GDT_UInt16:
                     format.glFormat = GL_RGB16UI;
                     break;
-                case GDT_Int16: 
+                case GDT_Int16:
                     format.glFormat = GL_RGB16_SNORM;
                     break;
                 case GDT_UInt32:
@@ -318,12 +335,13 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 case GDT_Float32:
                     format.glFormat = GL_RGB32F;
                     break;
-                // No representation of 64 bit float? 
+                // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
                 //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         case 4:
@@ -350,14 +368,15 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
                 // No representation of 64 bit float?
                 //case GDT_Float64:
                 //    format.glFormat = GL_RED;
-                //    break; 
+                //    break;
                 default:
                     LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                    throw ghoul::MissingCaseException();
             }
             break;
         default:
             LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
-            break;
+            throw ghoul::MissingCaseException();
     }
     return format;
 }
@@ -380,7 +399,7 @@ GLenum getOpenGLDataType(GDALDataType gdalType) {
             return GL_DOUBLE;
         default:
             LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            return GL_UNSIGNED_BYTE;
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -402,7 +421,7 @@ GDALDataType getGdalDataType(GLenum glType) {
             return GDT_Float64;
         default:
             LERROR("OpenGL data type unknown to GDAL: " << glType);
-            return GDT_Unknown;
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -410,12 +429,16 @@ GDALDataType getGdalDataType(GLenum glType) {
 
 size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
     switch (format) {
-        case ghoul::opengl::Texture::Format::Red: return 1;
-        case ghoul::opengl::Texture::Format::RG: return 2;
-        case ghoul::opengl::Texture::Format::RGB:;
-        [[fallthrough]]; case ghoul::opengl::Texture::Format::BGR: return 3;
-        case ghoul::opengl::Texture::Format::RGBA:;
-        [[fallthrough]]; case ghoul::opengl::Texture::Format::BGRA: return 4;
+        case ghoul::opengl::Texture::Format::Red:
+            return 1;
+        case ghoul::opengl::Texture::Format::RG:
+            return 2;
+        case ghoul::opengl::Texture::Format::RGB:
+        case ghoul::opengl::Texture::Format::BGR:
+            return 3;
+        case ghoul::opengl::Texture::Format::RGBA:
+        case ghoul::opengl::Texture::Format::BGRA:
+            return 4;
         default: {
             ghoul_assert(false, "Unknown format");
             return 0;
@@ -436,7 +459,7 @@ size_t numberOfBytes(GLenum glType) {
         case GL_DOUBLE: return sizeof(GLdouble);
         default: {
             ghoul_assert(false, "Unknown data type");
-            return 0;
+            throw ghoul::MissingCaseException();
         }
     }
 }
@@ -455,7 +478,7 @@ size_t getMaximumValue(GLenum glType) {
             return 1ULL << 31ULL;
         default: {
             ghoul_assert(false, "Unknown data type");
-            return 0ULL;
+            throw ghoul::MissingCaseException();
         }
     }
 }
@@ -480,7 +503,7 @@ float interpretFloat(GLenum glType, const char* src) {
             return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
         default: {
             ghoul_assert(false, "Unknown data type");
-            return 0;
+            throw ghoul::MissingCaseException();
         }
     }
 }
@@ -504,7 +527,7 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return GLenum(0);
+                    throw ghoul::MissingCaseException();
             }
         case ghoul::opengl::Texture::Format::RG:
             switch (glType) {
@@ -523,7 +546,7 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return GLenum(0);
+                    throw ghoul::MissingCaseException();
             }
         case ghoul::opengl::Texture::Format::RGB:
             switch (glType) {
@@ -542,7 +565,7 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return GLenum(0);
+                    throw ghoul::MissingCaseException();
             }
         case ghoul::opengl::Texture::Format::RGBA:
             switch (glType) {
@@ -561,7 +584,7 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return GLenum(0);
+                    throw ghoul::MissingCaseException();
             }
         case ghoul::opengl::Texture::Format::BGR:
             switch (glType) {
@@ -580,7 +603,7 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return GLenum(0);
+                    throw ghoul::MissingCaseException();
             }
         case ghoul::opengl::Texture::Format::BGRA:
             switch (glType) {
@@ -599,16 +622,16 @@ GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return GLenum(0);
+                    throw ghoul::MissingCaseException();
             }
         default:
             LERROR(
                 "Unknown format for OpenGL texture: " <<
-                static_cast<std::underlying_type_t<
-                    ghoul::opengl::Texture::Format>
-                >(format)
+                static_cast<std::underlying_type_t<ghoul::opengl::Texture::Format>>(
+                    format
+                )
             );
-            return GLenum(0);
+            throw ghoul::MissingCaseException();
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ struct UpdateData;
 struct RendererTasks;
 struct SurfacePositionHandle;
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 // Forward declare to minimize dependencies
 
@@ -58,14 +58,17 @@ public:
         Overlay = 8
     };
 
-    static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Renderable> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 
     virtual void initialize();
+    virtual void initializeGL();
     virtual void deinitialize();
+    virtual void deinitializeGL();
 
     virtual bool isReady() const = 0;
     bool isEnabled() const;
@@ -83,19 +86,20 @@ public:
     bool matchesRenderBinMask(int binMask);
 
     bool isVisible() const;
-    
+
     bool hasTimeInterval();
     bool getInterval(double& start, double& end);
-    
+
     void onEnabledChange(std::function<void(bool)> callback);
 
-    static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
+    static void setPscUniforms(ghoul::opengl::ProgramObject& program,
+        const Camera& camera, const PowerScaledCoordinate& position);
 
     static documentation::Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;
-    
+
 private:
     RenderBin _renderBin;
     float _boundingSphere;

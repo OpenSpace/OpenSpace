@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -125,8 +125,7 @@ class ParallelConnection : public properties::PropertyOwner {
     int nConnections();
     std::shared_ptr<ghoul::Event<>> connectionEvent();
 
-            
-            
+
 private:
     //@TODO change this into the ghoul hasher for client AND server
     uint32_t hash(const std::string &val);
@@ -171,7 +170,7 @@ private:
 
     double _lastTimeKeyframeTimestamp;
     double _lastCameraKeyframeTimestamp;
-            
+
     _SOCKET _clientSocket;
 
     std::atomic<bool> _isConnected;
@@ -186,14 +185,14 @@ private:
 
     std::condition_variable _disconnectCondition;
     std::mutex _disconnectMutex;
-            
+
     std::condition_variable _sendCondition;
     std::deque<Message> _sendBuffer;
     std::mutex _sendBufferMutex;
 
     std::deque<Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;
-            
+
     std::atomic<bool> _timeJumped;
     std::mutex _latencyMutex;
     std::deque<double> _latencyDiffs;

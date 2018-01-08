@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,14 @@ layout(points) in;
 in vec4 psc_position[];
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
+in vec4 vs_gPosition[];
 in float vs_speed[];
 in vec4 cam_position[];
 
 layout(triangle_strip, max_vertices = 4) out;
+
 out vec4 vs_position;
+out vec4 ge_gPosition;               
 out vec3 ge_brightness;
 out vec3 ge_velocity;
 out float ge_speed;
@@ -56,12 +59,13 @@ const vec2 corners[4] = vec2[4](
 
 
 void main() {
-    if ((psc_position[0].x == 0.0) &&
-        (psc_position[0].y == 0.0) &&
-        (psc_position[0].z == 0.0))
-    {
-        return;
-    }
+    // JCC: We want to display the Sun.
+    // if ((psc_position[0].x == 0.0) &&
+    //     (psc_position[0].y == 0.0) &&
+    //     (psc_position[0].z == 0.0))
+    // {
+    //     return;
+    // }
 
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
@@ -92,9 +96,13 @@ void main() {
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projPos[i];
-        texCoord = corners[i];
+        texCoord    = corners[i];
+
+        // G-Buffer
+        ge_gPosition  = vs_gPosition[0];
         billboardSize = sizeInPixels;
-      EmitVertex();
+        EmitVertex();
     }
+
     EndPrimitive();
 }

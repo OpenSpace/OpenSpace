@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,7 +89,12 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
     else {
         static int id = 0;
-        setName("ScreenSpaceImageOnline " + std::to_string(id));
+        if (id == 0) {
+            setName("ScreenSpaceImageOnline");
+        }
+        else {
+            setName("ScreenSpaceImageOnline " + std::to_string(id));
+        }
         ++id;
     }
 
@@ -106,7 +111,9 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 void ScreenSpaceImageOnline::update() {
     if (_textureIsDirty) {
         if (!_imageFuture.valid()) {
-            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(_texturePath);
+            std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
+                _texturePath
+            );
             if (future.valid()) {
                 _imageFuture = std::move(future);
             }
@@ -137,7 +144,8 @@ void ScreenSpaceImageOnline::update() {
 
                 texture->uploadTexture();
 
-                // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+                // Textures of planets looks much smoother with AnisotropicMipMap rather
+                // than linear
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
                 _texture = std::move(texture);

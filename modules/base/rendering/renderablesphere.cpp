@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,6 +84,19 @@ namespace {
         "This value determines percentage of the sphere is visible before starting "
         "fading-out it."
     };
+
+    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
+        "FadeInThreshould",
+        "Fade-In Threshould",
+        "Distance from center of MilkyWay from where the astronomical object starts to "
+        "fade in."
+    };
+
+    static const openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
+        "DisableFadeInOu",
+        "Disable Fade-In/Fade-Out effects",
+        "Enables/Disables the Fade-In/Out effects."
+    };
 } // namespace
 
 namespace openspace {
@@ -129,7 +142,19 @@ documentation::Documentation RenderableSphere::Documentation() {
                 new DoubleInRangeVerifier(0.0, 1.0),
                 Optional::Yes,
                 FadeOutThreshouldInfo.description
-            }
+            },
+            {
+                FadeInThreshouldInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                FadeInThreshouldInfo.description
+            },
+            {
+                DisableFadeInOuInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                DisableFadeInOuInfo.description
+            },
         }
     };
 }
@@ -142,7 +167,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _transparency(TransparencyInfo, 1.f, 0.f, 1.f)
+    , _disableFadeInDistance(DisableFadeInOuInfo, true)
     , _fadeOutThreshold(-1.0)
+    , _fadeInThreshold(0.0)
     , _shader(nullptr)
     , _texture(nullptr)
     , _sphere(nullptr)
@@ -209,7 +236,21 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     _texturePath.onChange([this]() { loadTexture(); });
 
     if (dictionary.hasKey(FadeOutThreshouldInfo.identifier)) {
-        _fadeOutThreshold = static_cast<float>(dictionary.value<double>(FadeOutThreshouldInfo.identifier));
+        _fadeOutThreshold = static_cast<float>(
+            dictionary.value<double>(FadeOutThreshouldInfo.identifier)
+        );
+    }
+
+    if (dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+        _fadeInThreshold = static_cast<float>(
+            dictionary.value<double>(FadeInThreshouldInfo.identifier)
+        );
+    }
+
+    if (dictionary.hasKey(FadeOutThreshouldInfo.identifier) ||
+        dictionary.hasKey(FadeInThreshouldInfo.identifier)) {
+        _disableFadeInDistance.set(false);
+        addProperty(_disableFadeInDistance);
     }
 
 }
@@ -218,21 +259,23 @@ bool RenderableSphere::isReady() const {
     return _shader && _texture;
 }
 
-void RenderableSphere::initialize() {
+void RenderableSphere::initializeGL() {
     _sphere = std::make_unique<PowerScaledSphere>(
         PowerScaledScalar::CreatePSS(_size), _segments
     );
     _sphere->initialize();
 
     // pscstandard
-    _shader = OsEng.renderEngine().buildRenderProgram("Sphere",
-        "${MODULE_BASE}/shaders/sphere_vs.glsl",
-        "${MODULE_BASE}/shaders/sphere_fs.glsl");
+    _shader = OsEng.renderEngine().buildRenderProgram(
+        "Sphere",
+        absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+    );
 
     loadTexture();
 }
 
-void RenderableSphere::deinitialize() {
+void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
     if (_shader) {
@@ -256,16 +299,36 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     setPscUniforms(*_shader.get(), data.camera, data.position);
 
+    float adjustedTransparency = _transparency;
+
+    if (_fadeInThreshold > 0.0) {
+        float distCamera = glm::length(data.camera.positionVec3());
+        float funcValue = static_cast<float>(
+            (1.0 / double(_fadeInThreshold/1E24))*(distCamera / 1E24)
+        );
+
+        adjustedTransparency *= funcValue > 1.0 ? 1.0 : funcValue;
+    }
+
     if (_fadeOutThreshold > -1.0) {
-        float distCamera = glm::distance(data.camera.positionVec3(), data.position.dvec3());
-        double term = std::exp((-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold));
-        
-        _shader->setUniform("alpha", _transparency * static_cast<float>(term / (term + 1.0)));
+        float distCamera = glm::distance(
+            data.camera.positionVec3(),
+            data.position.dvec3()
+        );
+        double term = std::exp(
+            (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
+        );
+
+        adjustedTransparency *= static_cast<float>(term / (term + 1.0));
     }
-    else {
-        _shader->setUniform("alpha", _transparency);
+
+    // Performance wise
+    if (adjustedTransparency < 0.01) {
+        return;
     }
-    
+
+    _shader->setUniform("alpha", adjustedTransparency);
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
@@ -273,12 +336,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::Framebuffer;
 
     bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", true);
@@ -314,7 +379,10 @@ void RenderableSphere::update(const UpdateData&) {
 
 void RenderableSphere::loadTexture() {
     if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+        using TR = ghoul::io::TextureReader;
+        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
+            _texturePath
+        );
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
@@ -322,7 +390,8 @@ void RenderableSphere::loadTexture() {
             );
             texture->uploadTexture();
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than
+            // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

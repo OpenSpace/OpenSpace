@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "TriangleSoup";
+    constexpr const char* _loggerCat = "TriangleSoup";
 }
 
 namespace openspace::globebrowsing {
@@ -55,10 +55,10 @@ void TriangleSoup::setVertexPositions(std::vector<glm::vec4> positions) {
     _gpuDataNeedUpdate = true;
     _vertexData.resize(positions.size());
     for (size_t i = 0; i < positions.size(); i++) {
-        _vertexData[i].position[0] = static_cast<GLfloat>(positions[i].x);
-        _vertexData[i].position[1] = static_cast<GLfloat>(positions[i].y);
-        _vertexData[i].position[2] = static_cast<GLfloat>(positions[i].z);
-        _vertexData[i].position[3] = static_cast<GLfloat>(positions[i].w);
+        _vertexData[i].position[0] = positions[i].x;
+        _vertexData[i].position[1] = positions[i].y;
+        _vertexData[i].position[2] = positions[i].z;
+        _vertexData[i].position[3] = positions[i].w;
     }
 }
 
@@ -67,8 +67,8 @@ void TriangleSoup::setVertexTextureCoordinates(std::vector<glm::vec2> textures) 
     _gpuDataNeedUpdate = true;
     _vertexData.resize(textures.size());
     for (size_t i = 0; i < textures.size(); i++) {
-        _vertexData[i].texture[0] = static_cast<GLfloat>(textures[i].s);
-        _vertexData[i].texture[1] = static_cast<GLfloat>(textures[i].t);
+        _vertexData[i].texture[0] = textures[i].s;
+        _vertexData[i].texture[1] = textures[i].t;
     }
 }
 
@@ -77,9 +77,9 @@ void TriangleSoup::setVertexNormals(std::vector<glm::vec3> normals) {
     _gpuDataNeedUpdate = true;
     _vertexData.resize(normals.size());
     for (size_t i = 0; i < normals.size(); i++) {
-        _vertexData[i].normal[0] = static_cast<GLfloat>(normals[i].x);
-        _vertexData[i].normal[1] = static_cast<GLfloat>(normals[i].y);
-        _vertexData[i].normal[2] = static_cast<GLfloat>(normals[i].z);
+        _vertexData[i].normal[0] = normals[i].x;
+        _vertexData[i].normal[1] = normals[i].y;
+        _vertexData[i].normal[2] = normals[i].z;
     }
 }
 
@@ -87,7 +87,7 @@ void TriangleSoup::setElements(std::vector<unsigned int> elements) {
     _elementData.resize(elements.size());
     _gpuDataNeedUpdate = true;
     for (size_t i = 0; i < elements.size(); i++) {
-        _elementData[i] = static_cast<GLuint>(elements[i]);
+        _elementData[i] = elements[i];
     }
 }
 
@@ -128,8 +128,8 @@ bool TriangleSoup::updateDataOnGPU() {
     // Positions at location 0
     if (_useVertexPositions) {
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, position)));
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+            //reinterpret_cast<const GLvoid*>(offsetof(Vertex, position)));
     }
     // Textures at location 1
     if (_useTextureCoordinates) {

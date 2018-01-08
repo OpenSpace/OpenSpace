@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ struct Job {
     virtual std::shared_ptr<P> product() = 0;
 };
 
-/* 
+/*
  * Templated Concurrent Job Manager
  * This class is used execute specific jobs on one (1) parallell thread
  */

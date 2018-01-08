@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/rotation.h>
@@ -51,13 +52,12 @@
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
-    engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(ConfigurationManager::Documentation());
+    engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());
-    engine.addDocumentation(Scene::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
@@ -65,19 +65,19 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
 }
 
 void registerCoreClasses(scripting::ScriptEngine& engine) {
+    engine.addLibrary(Dashboard::luaLibrary());
+    engine.addLibrary(MissionManager::luaLibrary());
+    engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(OpenSpaceEngine::luaLibrary());
-    engine.addLibrary(SpiceManager::luaLibrary());
+    engine.addLibrary(ParallelConnection::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
+    engine.addLibrary(SpiceManager::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
+    engine.addLibrary(WindowWrapper::luaLibrary());
     engine.addLibrary(interaction::KeyBindingManager::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
-    engine.addLibrary(ParallelConnection::luaLibrary());
-    engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
-    engine.addLibrary(WindowWrapper::luaLibrary());
-    engine.addLibrary(MissionManager::luaLibrary());
-    
     engine.addLibrary(scripting::generalSystemCapabilities());
     engine.addLibrary(scripting::openglSystemCapabilities());
 }

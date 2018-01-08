@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,16 +37,17 @@ class PerformanceManager;
 
 class PerformanceMeasurement {
 public:
-    PerformanceMeasurement(std::string identifier, performance::PerformanceManager* manager);
+    PerformanceMeasurement(std::string identifier,
+        std::shared_ptr<performance::PerformanceManager> manager);
     ~PerformanceMeasurement();
 
 private:
     std::string _identifier;
-    performance::PerformanceManager* _manager;
+    std::weak_ptr<performance::PerformanceManager> _manager;
 
     std::chrono::high_resolution_clock::time_point _startTime;
 };
-    
+
 #define __MERGE(a,b)  a##b
 #define __LABEL(a) __MERGE(unique_name_, a)
 
@@ -57,7 +58,7 @@ private:
             (name), \
             OsEng.renderEngine().performanceManager() \
         )
-    
+
 } // namespace openspace::performance
 
 #endif // __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,14 +36,14 @@ namespace openspace {
 
 DebuggingModule::DebuggingModule() : OpenSpaceModule(Name) {}
 
-void DebuggingModule::internalInitialize() {
+void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
 }
 
-std::vector<documentation::Documentation> DebuggingModule::documentations() const { 
+std::vector<documentation::Documentation> DebuggingModule::documentations() const {
     return {
         RenderableDebugPlane::Documentation()
     };
