@@ -135,7 +135,7 @@ bool DataCygnet::updateTexture(){
 
             if (texture) {
                 texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                 _textures[option] = std::move(texture);
             }
         } else {

@@ -51,7 +51,7 @@ bool TextureCygnet::updateTexture() {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
         texture->uploadTexture();
         // Textures of planets looks much smoother with AnisotropicMipMap
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         _textures[0]  = std::move(texture);
     }
 

@@ -169,7 +169,7 @@ void TileProvider::initializeDefaultTile() {
     _defaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
     _defaultTileTexture->setPixelData(pixels);
     _defaultTileTexture->uploadTexture();
-    _defaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    _defaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
     // Create tile
     _defaultTile = Tile(_defaultTileTexture.get(), nullptr, Tile::Status::OK);

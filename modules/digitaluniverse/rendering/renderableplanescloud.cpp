@@ -943,7 +943,7 @@ bool RenderablePlanesCloud::loadTextures() {
                 );
                 auto it = p.first;
                 it->second->uploadTexture();
-                it->second->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                it->second->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             }
         }
     }

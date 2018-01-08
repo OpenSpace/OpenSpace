@@ -711,7 +711,7 @@ void RenderablePlanetProjection::loadColorTexture() {
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
-            _baseTexture->setFilter(Texture::FilterMode::Linear);
+            _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
             _baseTexture->uploadTexture();
         }
     }

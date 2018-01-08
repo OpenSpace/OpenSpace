@@ -405,7 +405,7 @@ bool ProjectionComponent::initializeGL() {
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setFilter(Texture::FilterMode::Linear);
+        texture->setFilter(Texture::FilterMode::LinearMipMap);
         texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     _placeholderTexture = std::move(texture);
@@ -957,7 +957,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setFilter(Texture::FilterMode::Linear);
+        texture->setFilter(Texture::FilterMode::LinearMipMap);
         texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     return std::move(texture);
