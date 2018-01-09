@@ -59,7 +59,6 @@ ImageSequencer* ImageSequencer::_instance = nullptr;
 
 ImageSequencer::ImageSequencer()
     : _currentTime(0.0)
-    , _previousTime(0.0)
     , _intervalLength(0.0)
     , _nextCapture(0.0)
     , _hasData(false)
@@ -86,10 +85,7 @@ bool ImageSequencer::isReady() {
 }
 
 void ImageSequencer::updateSequencer(const Time& time) {
-    if (_currentTime != time.j2000Seconds()) {
-        _previousTime = _currentTime;
-        _currentTime = time.j2000Seconds();
-    }
+    _currentTime = time.j2000Seconds();
 }
 
 std::pair<double, std::string> ImageSequencer::getNextTarget() {
@@ -275,7 +271,8 @@ float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) cons
 
 bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
                                     std::string projectee,
-                                    std::string instrumentRequest){
+                                    std::string instrumentRequest,
+                                    double sinceTime) {
 
     // check if this instance is either in range or
     // a valid candidate to recieve data
@@ -286,7 +283,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
 
     //if (!Time::ref().timeJumped() && projectee == getCurrentTarget().second)
     if (_subsetMap[projectee]._range.includes(_currentTime) ||
-        _subsetMap[projectee]._range.includes(_previousTime)){
+        _subsetMap[projectee]._range.includes(sinceTime)){
         auto compareTime = [](const Image &a,
                               const Image &b)->bool{
             return a.timeRange.start < b.timeRange.start;
@@ -299,7 +296,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
         std::vector<Image> captureTimes;
         // what to look for
         Image findPrevious, findCurrent;
-        findPrevious.timeRange.start = _previousTime;
+        findPrevious.timeRange.start = sinceTime;
         findCurrent.timeRange.start = _currentTime;
 
         // find the two iterators that correspond to the latest time jump

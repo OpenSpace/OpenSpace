@@ -120,7 +120,7 @@ void ScreenSpaceImageLocal::update() {
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than
             // linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
             _texture = std::move(texture);
             _textureIsDirty = false;

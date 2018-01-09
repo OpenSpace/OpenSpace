@@ -126,8 +126,9 @@ public:
      * returns false and no projections will occur.
      */
     bool getImagePaths(std::vector<Image>& captures,
-                                        std::string projectee,
-                                        std::string instrumentRequest);
+                       std::string projectee,
+                       std::string instrumentRequest,
+                       double sinceTime);
 
     /*
      * returns true if instrumentID is within a capture range.
