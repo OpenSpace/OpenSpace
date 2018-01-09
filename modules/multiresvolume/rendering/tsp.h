@@ -76,7 +76,7 @@ public:
 
     bool closeMemoryMap();
 
-    // load performs readHeader, readCache, writeCache and construct
+    // load performs readHeader, readCache, writeCache and construct 
     // in the correct sequence
     bool load();
 

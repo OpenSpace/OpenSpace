@@ -111,8 +111,7 @@ private:
 
     properties::BoolProperty _useGlobalTime;
     properties::BoolProperty _loop;
-    // used to vary time, if not using global time nor looping
-    properties::IntProperty _currentTime;
+    properties::IntProperty _currentTime; // used to vary time, if not using global time nor looping
     properties::IntProperty _memoryBudget;
     properties::IntProperty _streamingBudget;
     properties::IntProperty _histogramBins;

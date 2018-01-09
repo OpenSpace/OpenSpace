@@ -1,4 +1,4 @@
-/*****************************************************************************************
+﻿/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -47,7 +47,6 @@ public:
 protected:
     ErrorHistogramManager* _histogramManager;
     std::vector<float> _brickErrors;
-
     virtual float spatialSplitPoints(unsigned int brickIndex);
     virtual float temporalSplitPoints(unsigned int brickIndex);
     virtual float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);

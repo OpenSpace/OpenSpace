@@ -205,7 +205,7 @@ void PerformanceManager::resetPerformanceMeasurements() {
 bool PerformanceManager::isMeasuringPerformance() const {
     return _doPerformanceMeasurements;
 }
-
+    
 void PerformanceManager::outputLogs() {
 
     if (_clearLogs) {
@@ -238,7 +238,7 @@ void PerformanceManager::outputLogs() {
         // Open file
         const std::string filename = formatLogName(node.name);
         std::ofstream out(absPath(filename), std::ofstream::out | std::ofstream::app);
-        
+
         // Comma separate data
         for (size_t i = writeStart; i < PerformanceLayout::NumberValues; i++) {
             const std::vector<float> data = {
@@ -412,7 +412,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-
         entry.renderTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.renderTime).count();
 
         std::rotate(
@@ -420,7 +419,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-
         entry.updateTranslation[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeTranslation).count();
 
         std::rotate(
@@ -428,7 +426,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-
         entry.updateRotation[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeRotation).count();
 
         std::rotate(
@@ -436,7 +433,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-
         entry.updateScaling[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeScaling).count();
 
         std::rotate(
@@ -444,7 +440,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-
         entry.updateRenderable[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.updateTimeRenderable).count();
 
         std::rotate(
@@ -462,7 +457,6 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         entry.totalTime[PerformanceLayout::NumberValues - 1] = std::chrono::duration<float, std::micro>(r.totalTime).count();
         // Reset the total after we log it
         node->clearPerformanceTotalTime();
-
     }
     _performanceMemory->releaseLock();
 

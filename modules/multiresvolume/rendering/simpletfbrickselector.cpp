@@ -289,7 +289,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             float sample = histogram->interpolate(x);
 
             ghoul_assert(sample >= 0, "@MISSING");
-            
+
             // Sample index from transfer function's alpha, multiply by histogram value, and sum
             importance += sample * tf->sample(i).w;
         }

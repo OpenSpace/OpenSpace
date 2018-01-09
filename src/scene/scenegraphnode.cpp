@@ -259,12 +259,12 @@ void SceneGraphNode::update(const UpdateData& data) {
         glFinish();
         startUpdate = std::chrono::high_resolution_clock::now();
     }
-    
+
     State s = _state;
     if (s != State::Initialized && _state != State::GLInitialized) {
         return;
-
     }
+
     if (_transform.translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
