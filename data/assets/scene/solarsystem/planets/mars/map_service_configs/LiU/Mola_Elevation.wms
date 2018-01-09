@@ -11,4 +11,5 @@
     <YOrigin>bottom</YOrigin>
   </DataWindow>
   <OfflineMode>false</OfflineMode>
+  <Timeout>5</Timeout>
 </GDAL_WMS>
