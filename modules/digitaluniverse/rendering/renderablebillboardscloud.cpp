@@ -710,7 +710,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glDepthMask(false);
 
     // Saving current OpenGL state
-    GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
     GLenum blendEquationRGB;
     GLenum blendEquationAlpha;
     GLenum blendDestAlpha;
@@ -725,7 +725,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
-    glEnable(GL_BLEND);
+    glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -807,7 +807,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
 
     if (!blendEnabled) {
-        glDisable(GL_BLEND);
+        glDisablei(GL_BLEND, 0);
     }
 
     glDepthMask(true);
