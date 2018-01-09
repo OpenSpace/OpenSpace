@@ -24,5 +24,6 @@
         <UnsafeSSL>true</UnsafeSSL>
         <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
         <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
+        <Timeout>5</Timeout>
     </GDAL_WMS>
 </OpenSpaceTemporalGDALDataset>
