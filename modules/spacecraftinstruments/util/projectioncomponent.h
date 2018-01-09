@@ -83,11 +83,13 @@ public:
 
     bool doesPerformProjection() const;
     bool needsClearProjection() const;
+    bool needsMipMapGeneration() const;
     float projectionFading() const;
 
     bool needsShadowMap() const;
 
     void clearAllProjections();
+    void generateMipMap();
 
     ghoul::opengl::Texture& projectionTexture() const;
 
@@ -113,6 +115,7 @@ protected:
     properties::IVec2Property _textureSize;
     properties::TriggerProperty _applyTextureSize;
     bool _textureSizeDirty;
+    bool _mipMapDirty;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
     std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;

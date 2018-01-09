@@ -14,4 +14,5 @@
     <MaxConnections>5</MaxConnections>
     <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
     <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
+    <Timeout>5</Timeout>
 </GDAL_WMS>

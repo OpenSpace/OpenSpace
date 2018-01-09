@@ -182,14 +182,15 @@ local Pluto = {
 }
 
 local PlutoBarycenterLabel = {
-   Name = "PlutoBarycenterLabel",
-   Parent = transforms.PlutoBarycenter.Name,
-   Renderable = {
-       Type = "RenderablePlane",
-       Billboard = true,
-       Size = 5E4,
-       Texture = encounterTextures .. "/barycenter.png"
-   },
+    Name = "PlutoBarycenterLabel",
+    Parent = transforms.PlutoBarycenter.Name,
+    Renderable = {
+        Type = "RenderablePlane",
+        Billboard = true,
+        Size = 5E4,
+        Texture = encounterTextures .. "/barycenter.png",
+        BlendMode = "Additive"
+    },
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 

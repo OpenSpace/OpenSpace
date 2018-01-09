@@ -47,7 +47,8 @@ local NixText = {
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,
-        Texture = textures .. "/Nix-Text.png"
+        Texture = textures .. "/Nix-Text.png",
+        BlendMode = "Additive"
     },
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }

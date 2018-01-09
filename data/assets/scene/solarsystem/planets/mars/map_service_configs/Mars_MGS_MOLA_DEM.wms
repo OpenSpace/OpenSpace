@@ -14,4 +14,5 @@
     <BlockSizeX>256</BlockSizeX>
     <BlockSizeY>256</BlockSizeY>
     <BandsCount>2</BandsCount>
+    <Timeout>5</Timeout>
 </GDAL_WMS>

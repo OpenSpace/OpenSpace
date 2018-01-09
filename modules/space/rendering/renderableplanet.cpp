@@ -637,7 +637,7 @@ void RenderablePlanet::loadTexture() {
             // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         }
     }
 
@@ -650,7 +650,7 @@ void RenderablePlanet::loadTexture() {
             if (_nightTexture) {
                 LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
                 _nightTexture->uploadTexture();
-                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                 //_nightTexture->setFilter(
                 //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
                 //);
