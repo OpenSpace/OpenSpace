@@ -393,17 +393,22 @@ void RenderableModelProjection::update(const UpdateData& data) {
         );
     }
 
-    _time = data.time.j2000Seconds();
+    const double time = data.time.j2000Seconds();
 
-    if (openspace::ImageSequencer::ref().isReady()) {
-        openspace::ImageSequencer::ref().updateSequencer(_time);
-        if (_projectionComponent.doesPerformProjection()) {
-            _capture = openspace::ImageSequencer::ref().getImagePaths(
-                _imageTimes,
-                _projectionComponent.projecteeId(),
-                _projectionComponent.instrumentId()
-            );
+    // Only project new images if time changed since last update.
+    if (time != _time) {
+        if (openspace::ImageSequencer::ref().isReady()) {
+            openspace::ImageSequencer::ref().updateSequencer(time);
+            if (_projectionComponent.doesPerformProjection()) {
+                _capture = openspace::ImageSequencer::ref().getImagePaths(
+                    _imageTimes,
+                    _projectionComponent.projecteeId(),
+                    _projectionComponent.instrumentId(),
+                    _time
+                );
+            }
         }
+        _time = time;
     }
 
     _stateMatrix = data.modelTransform.rotation;

@@ -533,6 +533,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _projectionComponent.clearAllProjections();
     }
 
+    if (_projectionComponent.needsMipMapGeneration()) {
+        _projectionComponent.generateMipMap();
+    }
+
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVectorCameraSpace();
 
@@ -681,18 +685,22 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 
     _projectionComponent.update();
 
-    _time = data.time.j2000Seconds();
-    _capture = false;
+    const double time = data.time.j2000Seconds();
 
-    if (openspace::ImageSequencer::ref().isReady()){
-        openspace::ImageSequencer::ref().updateSequencer(_time);
-        if (_projectionComponent.doesPerformProjection()) {
-            _capture = openspace::ImageSequencer::ref().getImagePaths(
-                _imageTimes,
-                _projectionComponent.projecteeId(),
-                _projectionComponent.instrumentId()
-            );
+    // Only project new images if time changed since last update.
+    if (time != _time) {
+        if (openspace::ImageSequencer::ref().isReady()) {
+            openspace::ImageSequencer::ref().updateSequencer(time);
+            if (_projectionComponent.doesPerformProjection()) {
+                _capture = openspace::ImageSequencer::ref().getImagePaths(
+                    _imageTimes,
+                    _projectionComponent.projecteeId(),
+                    _projectionComponent.instrumentId(),
+                    _time
+                );
+            }
         }
+        _time = time;
     }
 
     _stateMatrix = data.modelTransform.rotation;
@@ -711,8 +719,8 @@ void RenderablePlanetProjection::loadColorTexture() {
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
-            _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
             _baseTexture->uploadTexture();
+            _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
         }
     }
 }

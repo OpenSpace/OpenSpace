@@ -731,6 +731,8 @@ void ProjectionComponent::imageProjectEnd() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+
+    _mipMapDirty = true;
 }
 
 void ProjectionComponent::update() {
@@ -867,6 +869,10 @@ bool ProjectionComponent::needsClearProjection() const {
     return _clearAllProjections;
 }
 
+bool ProjectionComponent::needsMipMapGeneration() const {
+    return _mipMapDirty;
+}
+
 float ProjectionComponent::projectionFading() const {
     return _projectionFading;
 }
@@ -934,6 +940,12 @@ void ProjectionComponent::clearAllProjections() {
                m_viewport[2], m_viewport[3]);
 
     _clearAllProjections = false;
+    _mipMapDirty = true;
+}
+
+void ProjectionComponent::generateMipMap() {
+    _projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _mipMapDirty = false;
 }
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
