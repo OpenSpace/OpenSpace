@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,7 @@ ghoul::TemplateFactory<T>* FactoryManager::factory() const {
         if (f.factory->baseClassType() == typeid(T))
             return dynamic_cast<ghoul::TemplateFactory<T>*>(f.factory.get());
     }
-    
+
     throw FactoryNotFoundError(typeid(T).name());
 }
 

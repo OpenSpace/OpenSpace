@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 namespace {
-    const char* _loggerCat = "LayerManager";
+    constexpr const char* _loggerCat = "LayerManager";
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -51,7 +51,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     // Create all the layer groups
     for (const std::string& groupName : layerGroupNamesInDict) {
         layergroupid::GroupID groupId = layergroupid::getGroupIDFromName(groupName);
-        
+
         if (groupId != layergroupid::GroupID::Unknown) {
             ghoul::Dictionary layerGroupDict =
                 layerGroupsDict.value<ghoul::Dictionary>(groupName);
@@ -62,15 +62,29 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
             LWARNING("Unknown layer group: " + groupName);
         }
     }
-        
+
     for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
         addPropertySubOwner(layerGroup.get());
     }
 }
 
-void LayerManager::addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict) {
+void LayerManager::initialize() {
+    for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
+        lg->initialize();
+    }
+}
+
+void LayerManager::deinitialize() {
+    for (const std::shared_ptr<LayerGroup>& lg : _layerGroups) {
+        lg->deinitialize();
+    }
+}
+
+std::shared_ptr<Layer> LayerManager::addLayer(layergroupid::GroupID groupId,
+                                              ghoul::Dictionary layerDict)
+{
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    _layerGroups[groupId]->addLayer(layerDict);
+    return _layerGroups[groupId]->addLayer(layerDict);
 }
 
 void LayerManager::deleteLayer(layergroupid::GroupID groupId, std::string layerName) {

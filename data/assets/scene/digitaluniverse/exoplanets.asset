@@ -1,0 +1,42 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Exoplanets Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_exoplanets_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "Exoplanets Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_exoplanets_speck",
+    Version = 1
+})
+
+local object = {
+    Name = "Exoplanets",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.65,
+        ScaleFactor = 10.0,
+        Texture = textures .. "/target-blue.pbm",
+        File = speck .. "/expl.speck",
+        LabelFile = speck .. "/expl.label",
+        ScaleFactor = 380.0,
+        TextColor = { 0.3, 0.3, 0.8, 1.0 },
+        TextSize = 14.8,
+        TextMaxSize = 200.0,
+        TextMinSize = 10.0,
+        Unit = "pc"
+    },
+    GuiPath = "/Milky Way/Exoplanets"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

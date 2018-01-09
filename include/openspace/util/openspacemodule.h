@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,12 @@
 #include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 namespace documentation {  struct Documentation; }
+
+class ModuleEngine;
 
 /**
  * This class is the base class for an OpenSpace module. A module groups functionality
@@ -45,13 +49,13 @@ namespace documentation {  struct Documentation; }
 class OpenSpaceModule : public properties::PropertyOwner {
 public:
     /**
-     * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the 
+     * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the
      * \p name will be checked at a later stage.
      * \param name The name of this OpenSpace module
      * \pre \p name must not be empty
      */
     OpenSpaceModule(std::string name);
-    
+
     /// Default destructor
     virtual ~OpenSpaceModule() = default;
 
@@ -61,8 +65,9 @@ public:
      * is set in the OpenSpaceModule constructor. This method will call the
      * internalInitialize method for further customization for each subclass.
      */
-    void initialize();
-    
+    void initialize(const ModuleEngine* moduleEngine,
+                    const ghoul::Dictionary& configuration);
+
     /**
      * Empty deinitialization method that will call the internalDeinitialize method for
      * module-specific customization.
@@ -74,13 +79,22 @@ public:
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
     virtual std::vector<documentation::Documentation> documentations() const;
-    
+
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
      * implementation returns an empty library.
      * \return The Lua library with functions defined by this OpenSpaceModule
      */
     virtual scripting::LuaLibrary luaLibrary() const;
+
+    /**
+     * Returns the Lua libraries that are defined by objects contained in this
+     * OpenSpaceModule. Note that the #luaLibrary library is *not* contained in this list
+     * as this is solely the list of libraries as defined by, for example Renderables,
+     * defined in the OpenSpaceModule.
+     * \return A list of libraries defined by items contained in this OpenSpaceModule
+     */
+    virtual std::vector<scripting::LuaLibrary> luaLibraries() const;
 
     /**
      * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
@@ -92,21 +106,31 @@ public:
 protected:
     /**
      * Customization point for each derived class. The internalInitialize method is called
-     * by the initiailze method.
+     * by the initialize method.
+     * \param configuration The configuration options that were read from the
+     * configuration file
      */
-    virtual void internalInitialize();
-    
+    virtual void internalInitialize(const ghoul::Dictionary& configuration);
+
     /**
      * Customization point for each derived class. The internalDeinitialize method is
      * called by the deinitialize method.
      */
     virtual void internalDeinitialize();
-    
+
     /**
      * Returns the path for this module, possibly containing ghoul::filesystem::FileSystem
      * path tokens.
      */
     std::string modulePath() const;
+
+    /**
+     * Returns a const pointer to the module engine
+     */
+    const ModuleEngine* moduleEngine() const;
+
+private:
+    const ModuleEngine* _moduleEngine;
 };
 
 } // namespace openspace

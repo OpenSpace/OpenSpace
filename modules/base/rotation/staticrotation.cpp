@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,10 +64,12 @@ documentation::Documentation StaticRotation::Documentation() {
 }
 
 StaticRotation::StaticRotation()
-    : _rotationMatrix(RotationInfo, glm::dmat3(1.0))
+    : _rotationMatrix(RotationInfo, glm::dmat3(1.0), glm::dmat3(-1.0), glm::dmat3(1.0))
 {
     addProperty(_rotationMatrix);
-    _rotationMatrix.onChange([this]() { _matrix = _rotationMatrix; });
+    _rotationMatrix.onChange([this]() {
+        requireUpdate();
+    });
 }
 
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
@@ -90,6 +92,10 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
         _rotationMatrix = dictionary.value<glm::dmat3>(RotationInfo.identifier);
     }
 
+}
+
+glm::dmat3 StaticRotation::matrix(const Time&) const {
+    return _rotationMatrix;
 }
 
 } // namespace openspace

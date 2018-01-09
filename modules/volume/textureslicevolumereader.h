@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,10 @@ class TextureSliceVolumeReader {
 public:
     using VoxelType = Type;
 
-    TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems, size_t sliceCacheSize);
+    TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems,
+        size_t sliceCacheSize);
+    virtual ~TextureSliceVolumeReader() = default;
+
     VoxelType get(const glm::ivec3& coordinates) const;
     virtual glm::ivec3 dimensions() const;
     void setPaths(const std::vector<std::string> paths);

@@ -1,0 +1,203 @@
+local assetHelper = asset.require('util/asset_helper')
+local proceduralGlobes = asset.require('util/procedural_globe')
+local transforms = asset.require('./transforms')
+local kernels091 = asset.require('./ura091').Kernels
+
+
+
+local parentName = transforms.UranusBarycenter.Name
+local parentSpice = "URANUS BARYCENTER"
+local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_inner" }
+local trailColor = { 0.60, 0.65, 0.84 }
+
+local innerMoons = {
+    {
+        Name = "Cordelia",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "CORDELIA",
+        Radii = { 40000, 40000, 40000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.335034,
+        Kernels = kernels091
+    },
+    {
+        Name = "Ophelia",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "OPHELIA",
+        Radii = { 43000, 43000, 43000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.376400,
+        Kernels = kernels091
+    },
+    {
+        Name = "Bianca",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "BIANCA",
+        Radii = { 51000, 51000, 51000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.434579,
+        Kernels = kernels091
+    },
+    {
+        Name = "Cressida",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "CRESSIDA",
+        Radii = { 80000, 80000, 80000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.463570,
+        Kernels = kernels091
+    },
+    {
+        Name = "Desdemona",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "DESDEMONA",
+        Radii = { 64000, 64000, 64000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.473650,
+        Kernels = kernels091
+    },
+    {
+        Name = "Juliet",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "JULIET",
+        Radii = { 94000, 94000, 94000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.493065,
+        Kernels = kernels091
+    },
+    {
+        Name = "Portia",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "PORTIA",
+        Radii = { 135000, 135000, 135000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.513196,
+        Kernels = kernels091
+    },
+    {
+        Name = "Rosalind",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "ROSALIND",
+        Radii = { 72000, 72000, 72000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.558460,
+        Kernels = kernels091
+    },
+    {
+        Name = "Cupid",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "CUPID",
+        Radii = { 18000, 18000, 18000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.618,
+        Kernels = kernels091
+    },
+    {
+        Name = "Belinda",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "BELINDA",
+        Radii = { 90000, 90000, 90000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.623527,
+        Kernels = kernels091
+    },
+    {
+        Name = "Perdita",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "PERDITA",
+        Radii = { 30000, 30000, 30000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.638,
+        Kernels = kernels091
+    },
+    {
+        Name = "Puck",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "PUCK",
+        Radii = { 162000, 162000, 162000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.761833,
+        Kernels = kernels091
+    },
+    {
+        Name = "Mab",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "MAB",
+        Radii = { 25000, 25000, 25000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 0.923,
+        Kernels = kernels091
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(
+    asset,
+    proceduralGlobes.createGlobes(innerMoons)
+)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,7 +88,7 @@ namespace {
 
 namespace openspace::interaction {
 
-OrbitalNavigator::Friction::Friction() 
+OrbitalNavigator::Friction::Friction()
     : properties::PropertyOwner({ "Friction" })
     , roll(RollFrictionInfo, true)
     , rotational(RotationalFrictionInfo, true)
@@ -103,12 +103,12 @@ OrbitalNavigator::Friction::Friction()
 
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
-    , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 2.0f, 0.0f, 10.f)
+    , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
 {
-    auto smoothStep = 
+    auto smoothStep =
         [](double t) {
             double res = 3.0 * t*t  - 2.0 * t*t*t;
             return glm::clamp(res, 0.0, 1.0);
@@ -261,7 +261,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
         );
 
         // Update the camera state
-        camera.setPositionVec3(camPos); 
+        camera.setPositionVec3(camPos);
         camera.setRotation(camRot.globalRotation * camRot.localRotation);
     }
 }
@@ -402,8 +402,8 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Vector logic
     glm::dvec3 posDiff = cameraPosition - objectPosition;
-    glm::dvec3 centerToReferenceSurface = glm::dmat3(modelTransform) *
-        positionHandle.centerToReferenceSurface;
+    // glm::dvec3 centerToReferenceSurface = glm::dmat3(modelTransform) *
+        // positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace = positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
     glm::dvec3 centerToActualSurface = glm::dmat3(modelTransform) *
@@ -488,8 +488,8 @@ glm::dvec3 OrbitalNavigator::translateVertically(
 
     glm::dvec3 posDiff = cameraPosition - objectPosition;
 
-    glm::dvec3 centerToReferenceSurface =
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
+    // glm::dvec3 centerToReferenceSurface =
+        // glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace =
         positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;
@@ -504,7 +504,7 @@ glm::dvec3 OrbitalNavigator::translateVertically(
 glm::dquat OrbitalNavigator::rotateHorizontally(
     double deltaTime,
     const glm::dquat& globalCameraRotation,
-    const glm::dvec3& /*cameraPosition*/, 
+    const glm::dvec3& /*cameraPosition*/,
     const SurfacePositionHandle& positionHandle) const
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -533,8 +533,8 @@ glm::dvec3 OrbitalNavigator::pushToSurface(
     glm::dvec3 posDiff = cameraPosition - objectPosition;
     glm::dvec3 referenceSurfaceOutDirection =
         glm::dmat3(modelTransform) * positionHandle.referenceSurfaceOutDirection;
-    glm::dvec3 centerToReferenceSurface =
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
+    // glm::dvec3 centerToReferenceSurface =
+        // glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace =
         positionHandle.centerToReferenceSurface +
         positionHandle.referenceSurfaceOutDirection * positionHandle.heightToSurface;

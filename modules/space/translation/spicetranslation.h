@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,13 +30,12 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-    
+
 class SpiceTranslation : public Translation {
 public:
     SpiceTranslation(const ghoul::Dictionary& dictionary);
-    
-    glm::dvec3 position() const override;
-    void update(const UpdateData& data) override;
+
+    glm::dvec3 position(const Time& time) const override;
 
     static documentation::Documentation Documentation();
 
@@ -47,7 +46,7 @@ private:
 
     glm::dvec3 _position;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___SPICETRANSLATION___H__

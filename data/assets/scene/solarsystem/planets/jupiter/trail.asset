@@ -1,0 +1,27 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require("spice/base")
+
+
+
+local JupiterTrail = {
+    Name = "JupiterTrail",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "JUPITER BARYCENTER",
+            Observer = "SUN"
+        },
+        Color = { 0.8, 0.7, 0.7 },
+        Period = 4330.595,
+        Resolution = 1000
+    },
+    Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
+    GuiPath = "/Solar System/Planets/Jupiter"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterTrail })

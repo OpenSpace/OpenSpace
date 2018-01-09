@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,15 +33,15 @@
 #include <sstream>
 
 namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/factories/main.hbs";
-    const char* FactoryTemplateFilename = "${OPENSPACE_DATA}/web/factories/factory.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/factories/script.js";
+    const char* MainTemplateFilename = "${WEB}/factories/main.hbs";
+    const char* FactoryTemplateFilename = "${WEB}/factories/factory.hbs";
+    const char* JsFilename = "${WEB}/factories/script.js";
 } // namespace
 
 namespace openspace {
 
 FactoryManager* FactoryManager::_manager = nullptr;
-    
+
 FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
     : ghoul::RuntimeError("Could not find TemplateFactory for type '" + t + "'")
     , type(std::move(t))
@@ -71,7 +71,7 @@ void FactoryManager::deinitialize() {
     delete _manager;
     _manager = nullptr;
 }
-    
+
 bool FactoryManager::isInitialized() {
     return _manager != nullptr;
 }
@@ -81,11 +81,11 @@ FactoryManager& FactoryManager::ref() {
     return *_manager;
 }
 
-void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory,
+void FactoryManager::addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> f,
                                 std::string name
 ) {
-    ghoul_assert(factory, "Factory must not be nullptr");
-    _factories.push_back({ std::move(factory), std::move(name) });
+    ghoul_assert(f, "Factory must not be nullptr");
+    _factories.push_back({ std::move(f), std::move(name) });
 }
 
 std::string FactoryManager::generateJson() const {
@@ -97,8 +97,8 @@ std::string FactoryManager::generateJson() const {
         json << "\"name\": \"" << factoryInfo.name << "\",";
         json << "\"classes\": [";
 
-        ghoul::TemplateFactoryBase* factory = factoryInfo.factory.get();
-        const std::vector<std::string>& registeredClasses = factory->registeredClasses();
+        ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
+        const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
             json << "\"" << c << "\"";
             if (&c != &registeredClasses.back()) {

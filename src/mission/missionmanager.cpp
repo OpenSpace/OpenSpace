@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,10 +57,10 @@ bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
 
-void MissionManager::loadMission(const std::string& filename) {
+std::string MissionManager::loadMission(const std::string& filename) {
     ghoul_assert(!filename.empty(), "filename must not be empty");
     ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
-    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
+    ghoul_assert(FileSys.fileExists(filename), "filename " + filename + " must exist");
 
     // Changing the values might invalidate the _currentMission iterator
     std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";
@@ -75,6 +75,19 @@ void MissionManager::loadMission(const std::string& filename) {
     if (!currentMission.empty()) {
         setCurrentMission(currentMission);
     }
+
+    return missionName;
+}
+
+void MissionManager::unloadMission(const std::string& missionName) {
+    ghoul_assert(!missionName.empty(), "missionName must not be empty");
+    auto it = _missionMap.find(missionName);
+    ghoul_assert(
+        it != _missionMap.end(),
+        "missionName must name a previously loaded mission"
+    );
+
+    _missionMap.erase(it);
 }
 
 bool MissionManager::hasMission(const std::string& missionName) {
@@ -95,12 +108,28 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
             {
                 "loadMission",
                 &luascriptfunctions::loadMission,
+                {},
                 "string",
                 "Load mission phases from file"
             },
             {
+                "unloadMission",
+                &luascriptfunctions::unloadMission,
+                {},
+                "string",
+                "Unloads a previously loaded mission"
+            },
+            {
+                "hasMission",
+                &luascriptfunctions::hasMission,
+                {},
+                "string",
+                "Returns whether a mission with the provided name has been loaded"
+            },
+            {
                 "setCurrentMission",
                 &luascriptfunctions::setCurrentMission,
+                {},
                 "string",
                 "Set the currnet mission"
             },

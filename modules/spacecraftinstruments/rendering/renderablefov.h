@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -48,15 +49,15 @@ namespace documentation { struct Documentation; }
 class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
-    
-    void initialize() override;
-    void deinitialize() override;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
-    
+
     static documentation::Documentation Documentation();
 
 private:
@@ -81,16 +82,20 @@ private:
         return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
     }
 
-    void computeIntercepts(const UpdateData& data, const std::string& target , bool inFOV);
-    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time, const std::string& target) const;
-    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time, const std::string& target) const;
-    //glm::dvec3 bisection(const glm::dvec3& p1, const glm::dvec3& p2, double time, const std::string& target, const glm::dvec3& previousHalf = glm::dvec3(0.0)) const;
+    void computeIntercepts(const UpdateData& data, const std::string& target, bool inFOV);
+    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time,
+        const std::string& target) const;
+    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time,
+        const std::string& target) const;
 
     // properties
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
+        targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
+        squareColor, interpolation) _uniformCache;
 
     // instance variables
     bool _rebuild = false;
@@ -116,7 +121,7 @@ private:
     float _interpolationTime;
 
     struct RenderInformation {
-        // Differentiating different vertex types 
+        // Differentiating different vertex types
         using VertexColorType = int32_t;
         // This needs to be synced with the fov_vs.glsl shader
         static const VertexColorType VertexColorTypeDefaultStart = 0;
@@ -152,7 +157,7 @@ private:
         properties::Vec4Property square; // Color for the orthogonal square
     } _colors;
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEFOV___H__

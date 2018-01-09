@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::chunklevelevaluator {
-    
+
 int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
@@ -43,19 +43,19 @@ int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const 
 
     glm::dvec3 cameraPosition =
         glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-        
+
     Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
         ellipsoid.cartesianToGeodetic2(cameraPosition)
     );
     glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
-        
-    Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+
+    Chunk::BoundingHeights heights = chunk.boundingHeights();
     double heightToChunk = heights.min;
 
     // Offset position according to height
     patchPosition += patchNormal * heightToChunk;
-    
+
     glm::dvec3 cameraToChunk = patchPosition - cameraPosition;
 
     // Calculate desired level based on distance

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,10 +48,11 @@ public:
     // Sets the power scaled coordinates with w = 0
     PowerScaledCoordinate(glm::vec3 v);
 
-    static PowerScaledCoordinate CreatePowerScaledCoordinate(double d1, double d2, double d3);
+    static PowerScaledCoordinate CreatePowerScaledCoordinate(double d1, double d2,
+        double d3);
 
     // get functions
-    // return the full, unmodified PSC 
+    // return the full, unmodified PSC
     const glm::vec4& vec4() const;
 
     // returns the rescaled, "normal" coordinates

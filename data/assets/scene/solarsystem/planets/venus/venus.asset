@@ -1,0 +1,50 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+asset.require("spice/base")
+asset.request('./trail')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Venus Textures",
+    Type = "HttpSynchronization",
+    Identifier = "venus_textures",
+    Version = 1
+})
+
+local Venus = {
+    Name = "Venus",
+    Parent = transforms.VenusBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_VENUS",
+            DestinationFrame = "GALACTIC"
+        },
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "VENUS",
+            Observer = "VENUS BARYCENTER"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 6051900.0, 6051900.0, 6051800.0 },
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Name = "Venus Texture",
+                    FilePath = textures .. "/venus.jpg",
+                    Enabled = true
+                }
+            }
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GuiPath = "/Solar System/Planets/Venus"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Venus })

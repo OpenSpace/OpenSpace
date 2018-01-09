@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@ namespace openspace {
 
 GalaxyModule::GalaxyModule() : OpenSpaceModule(Name) {}
 
-void GalaxyModule::internalInitialize() {
+void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGalaxy>("RenderableGalaxy");
@@ -44,5 +44,5 @@ void GalaxyModule::internalInitialize() {
     fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
 }
- 
+
 } // namespace openspace

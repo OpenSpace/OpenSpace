@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,14 +115,16 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                 y * _initData.bytesPerLine() +
                 x * _initData.bytesPerPixel();
 
-            int xInSource =
+            int xInSource = static_cast<int>(
                 io.read.region.start.x +
                 static_cast<float>(x) / io.write.region.numPixels.x *
-                io.read.region.numPixels.x;
-            int yInSource =
+                io.read.region.numPixels.x
+            );
+            int yInSource = static_cast<int>(
                 io.read.region.start.y +
                 static_cast<float>(y) / io.write.region.numPixels.y *
-                io.read.region.numPixels.y;
+                io.read.region.numPixels.y
+            );
 
             glm::vec4 sourceTexel = _dataTexture->texelAsFloat(xInSource, yInSource);
 
@@ -141,7 +143,7 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
                     char value = static_cast<char>(
                         sourceTexel[rasterBand - 1] * 255
                     );
-                    *reinterpret_cast<char*>(pixelWriteDestination) = value;
+                    *pixelWriteDestination = value;
                     break;
                 }
                 case GL_UNSIGNED_SHORT: {
@@ -187,14 +189,15 @@ RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     return RawTile::ReadError::None;
 }
 
-IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& io) const {
+IODescription SimpleRawTileDataReader::adjustIODescription(const IODescription& io) const
+{
     // Modify to match OpenGL texture layout
     IODescription modifiedIO = io;
     modifiedIO.read.region.start.y =
         modifiedIO.read.fullRegion.numPixels.y -
         modifiedIO.read.region.numPixels.y -
         modifiedIO.read.region.start.y;
-  
+
     return modifiedIO;
 }
 

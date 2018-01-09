@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,7 +87,7 @@ documentation::Documentation MissionPhase::Documentation() {
 MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     _name = dict.value<std::string>(KeyName);
     dict.getValue(KeyDescription, _description);
-    
+
     ghoul::Dictionary childDicts;
     if (dict.getValue(KeyPhases, childDicts)) {
         // This is a nested mission phase
@@ -125,8 +125,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
             _timeRange.include(overallTimeRange);
         }
         else {
-            // Its OK to not specify an overall time range, the time range for the 
-            // subphases will simply be used. 
+            // Its OK to not specify an overall time range, the time range for the
+            // subphases will simply be used.
             _timeRange.include(timeRangeSubPhases);
         }
     }
@@ -171,7 +171,7 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
     //ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
-    
+
     if (maxDepth == 0) {
         return;
     }

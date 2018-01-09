@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 namespace openspace::properties {
 
 namespace {
-    const char* _loggerCat = "PropertyOwner";
+    constexpr const char* _loggerCat = "PropertyOwner";
 } // namespace
 
 
@@ -81,7 +81,7 @@ Property* PropertyOwner::property(const std::string& id) const {
         else {
             const std::string ownerName = id.substr(0, ownerSeparator);
             const std::string propertyName = id.substr(ownerSeparator + 1);
-            
+
             PropertyOwner* owner = propertySubOwner(ownerName);
             if (owner == nullptr) {
                 return nullptr;
@@ -96,11 +96,11 @@ Property* PropertyOwner::property(const std::string& id) const {
         return *it;
     }
 }
-    
+
 bool PropertyOwner::hasProperty(const std::string& id) const {
     return property(id) != nullptr;
 }
-    
+
 std::vector<PropertyOwner*> PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
@@ -111,7 +111,7 @@ PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
         _subOwners.end(),
         [&name](PropertyOwner* owner) { return owner->name() == name;  }
     );
-    
+
     if (it == _subOwners.end() || (*it)->name() != name) {
         return nullptr;
     }
@@ -119,7 +119,7 @@ PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
         return *it;
     }
 }
-    
+
 bool PropertyOwner::hasPropertySubOwner(const std::string& name) const {
     return propertySubOwner(name) != nullptr;
 }
@@ -127,7 +127,7 @@ bool PropertyOwner::hasPropertySubOwner(const std::string& name) const {
 void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) {
     _groupNames[std::move(groupID)] = std::move(name);
 }
-    
+
 std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
     auto it = _groupNames.find(groupID);
     if (it == _groupNames.end()) {
@@ -149,7 +149,7 @@ void PropertyOwner::addProperty(Property* prop) {
     std::vector<Property*>::const_iterator it = std::find_if(
         _properties.begin(),
         _properties.end(),
-        [id = prop->identifier()](Property* prop) { return prop->identifier() == id; }
+        [id = prop->identifier()](Property* p) { return p->identifier() == id; }
     );
 
     // If we found the property identifier, we need to bail out
@@ -164,7 +164,7 @@ void PropertyOwner::addProperty(Property* prop) {
             LERROR("Property identifier '" << prop->identifier() << "' already names a "
                 << "registed PropertyOwner");
             return;
-        }                    
+        }
         else {
             _properties.push_back(prop);
             prop->setPropertyOwner(this);
@@ -175,18 +175,18 @@ void PropertyOwner::addProperty(Property* prop) {
 void PropertyOwner::addProperty(Property& prop) {
     addProperty(&prop);
 }
-    
+
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
     ghoul_assert(owner != nullptr, "owner must not be nullptr");
     ghoul_assert(!owner->name().empty(), "PropertyOwner must have a name");
-    
+
     // See if we can find the name of the propertyowner to add using the lower bound
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* owner) { return owner->name() == name;  }
+        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
     );
-    
+
     // If we found the propertyowner's name, we need to bail out
     if (it != _subOwners.end() && (*it)->name() == owner->name()) {
         LERROR("PropertyOwner '" << owner->name() <<
@@ -206,7 +206,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         }
     }
 }
-    
+
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& owner) {
     addPropertySubOwner(&owner);
 }
@@ -218,7 +218,7 @@ void PropertyOwner::removeProperty(Property* prop) {
     std::vector<Property*>::const_iterator it = std::find_if(
         _properties.begin(),
         _properties.end(),
-        [id = prop->identifier()](Property* prop) { return prop->identifier() == id; }
+        [id = prop->identifier()](Property* p) { return p->identifier() == id; }
     );
 
     // If we found the property identifier, we can delete it
@@ -234,17 +234,17 @@ void PropertyOwner::removeProperty(Property* prop) {
 void PropertyOwner::removeProperty(Property& prop) {
     removeProperty(&prop);
 }
-    
+
 void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner* owner) {
     ghoul_assert(owner != nullptr, "owner must not be nullptr");
-    
+
     // See if we can find the name of the propertyowner to add
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* owner) { return owner->name() == name;  }
+        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
     );
-    
+
     // If we found the propertyowner, we can delete it
     if (it != _subOwners.end() && (*it)->name() == owner->name()) {
         _subOwners.erase(it);
@@ -253,7 +253,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
             "' not found for removal.");
     }
 }
-    
+
 void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner& owner) {
     removePropertySubOwner(&owner);
 }

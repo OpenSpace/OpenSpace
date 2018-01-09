@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@
 #include <unordered_map>
 
 namespace openspace::globebrowsing {
-    
+
 //class GlobeBrowsingModule;
 struct RawTile;
 class RawTileDataReader;
@@ -114,7 +114,7 @@ private:
     GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
-    
+
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey>
         _concurrentJobManager;
 

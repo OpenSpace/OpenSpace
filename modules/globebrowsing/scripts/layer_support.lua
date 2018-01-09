@@ -174,7 +174,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
 
     local height = nil
     if HeightFile then
-        local height = {
+        height = {
             Name = Name,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
@@ -189,13 +189,15 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     local files = openspace.walkDirectoryFiles(dir, true, true)
 
     for _, file in pairs(files) do
-        if file:find('.info') then
+        if file and file:find('.info') then
             c, h = openspace.globebrowsing.parseInfoFile(file)
 
             if c then
+                openspace.printInfo("Adding color layer '" .. c["Name"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "ColorLayers", c)
             end
             if h then
+                openspace.printInfo("Adding height layer '" .. h["Name"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
             end
         end

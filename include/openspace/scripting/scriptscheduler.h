@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ namespace openspace::documentation { struct Documentation; }
 namespace openspace::scripting {
 
 /**
- * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple 
+ * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple
  * interface for retrieveing scheduled scripts
  */
 class ScriptScheduler {
@@ -45,13 +45,12 @@ public:
     struct ScheduledScript {
         ScheduledScript() = default;
         ScheduledScript(const ghoul::Dictionary& dict);
-        
+
         double time;
         std::string forwardScript;
         std::string backwardScript;
     };
 
-    
     /**
     * Load a schedule from a ghoul::Dictionary \p dictionary and adds the
      * ScheduledScript%s to the list of stored scripts.
@@ -73,8 +72,8 @@ public:
     void clearSchedule();
 
     /**
-    * Progresses the script schedulers time and returns all scripts that has been 
-    * scheduled to run between \param newTime and the time provided in the last invocation 
+    * Progresses the script schedulers time and returns all scripts that has been
+    * scheduled to run between \param newTime and the time provided in the last invocation
     * of this method.
     *
     * \param newTime A j2000 time value specifying the new time stamp that
@@ -95,9 +94,9 @@ public:
     std::pair<
         std::vector<std::string>::const_iterator, std::vector<std::string>::const_iterator
     > progressTo(double newTime);
-    
+
     /**
-    * Returns the the j2000 time value that the script scheduler is currently at 
+    * Returns the the j2000 time value that the script scheduler is currently at
     */
     double currentTime() const;
 
@@ -108,17 +107,16 @@ public:
 
 
     static LuaLibrary luaLibrary();
-    
+
     static documentation::Documentation Documentation();
 
 private:
     std::vector<double> _timings;
     std::vector<std::string> _forwardScripts;
     std::vector<std::string> _backwardScripts;
-    
-    int _currentIndex = 0;
-    double _currentTime;
 
+    int _currentIndex = 0;
+    double _currentTime = 0;
 };
 
 } // namespace openspace::scripting

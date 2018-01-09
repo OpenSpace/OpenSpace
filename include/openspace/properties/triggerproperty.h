@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ public:
     /**
      * Accepts only the <code>LUA_TNIL</code> type and will notify all the listeners
      * that the event has been triggered.
-     * \param state The unused Lua state 
+     * \param state The unused Lua state
      * \return Returns always <code>true</code>
      */
     bool setLuaValue(lua_State* state) override;

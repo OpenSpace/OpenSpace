@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,9 +47,9 @@ namespace {
     const char* valueHtmlLog = "html";
     const char* valueTextLog = "Text";
 
-    const char* BootstrapPath = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssPath = "${OPENSPACE_DATA}/web/log/style.css";
-    const char* JsPath = "${OPENSPACE_DATA}/web/log/script.js";
+    const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
+    const char* CssPath = "${WEB}/log/style.css";
+    const char* JsPath = "${WEB}/log/script.js";
 } // namespace
 
 namespace openspace {
@@ -216,5 +216,5 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
         throw ghoul::MissingCaseException();
     }
 }
-    
+
 } // namespace openspace

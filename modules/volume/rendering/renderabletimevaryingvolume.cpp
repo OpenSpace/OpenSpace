@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,8 +44,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace {
-    const char* _loggerCat = "RenderableTimeVaryingVolume";
-}
+    constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
+} // namespace
 
 namespace {
     const char* KeyDimensions = "Dimensions";
@@ -64,28 +64,113 @@ namespace {
     const char* KeyMaxValue = "MaxValue";
     const char* KeyTime = "Time";
     const float SecondsInOneDay = 60 * 60 * 24;
-}
+
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+        "stepSize",
+        "Step Size",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+        "gridType",
+        "Grid Type",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
+        "secondsBefore",
+        "Seconds before",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
+        "secondsAfter",
+        "Seconds after",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
+        "sourceDirectory",
+        "Source Directory",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+        "transferFunctionPath",
+        "Transfer Function Path",
+        ""
+    };
+
+    static const openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
+        "triggerTimeJump",
+        "Jump",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
+        "jumpToTimestep",
+        "Jump to timestep",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
+        "currentTimestep",
+        "Current timestep",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "opacity",
+        "Opacity",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo rNormalizationInfo = {
+        "rNormalization",
+        "Radius normalization",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
+        "rUpperBound",
+        "Radius upper bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo lowerValueBoundInfo = {
+        "lowerValueBound",
+        "Lower value bound",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo upperValueBoundInfo = {
+        "upperValueBound",
+        "Upper value bound",
+        "" // @TODO Missing documentation
+    };
+} // namespace
 
 namespace openspace {
 namespace volume {
 
-RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary)
+RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _clipPlanes(nullptr)
-    , _stepSize({ "stepSize", "Step Size", "" }, 0.02, 0.01, 1)
-    , _gridType({ "gridType", "Grid Type", "" }, properties::OptionProperty::DisplayType::Dropdown)
-    , _secondsBefore({ "secondsBefore", "Seconds before", "" }, 0.0, 0.01, SecondsInOneDay)
-    , _secondsAfter({ "secondsAfter", "Seconds after", "" }, 0.0, 0.01, SecondsInOneDay)
-    , _sourceDirectory({ "sourceDirectory", "Source Directory", "" })
-    , _transferFunctionPath({"transferFunctionPath", "Transfer Function Path", "" })
-    , _triggerTimeJump({"triggerTimeJump", "Jump", "" })
-    , _jumpToTimestep({"jumpToTimestep", "Jump to timestep", "" }, 0, 0, 256)
-    , _currentTimestep({"currentTimestep", "Current timestep", "" }, 0, 0, 256)
-    , _opacity({"opacity", "Opacity", "" }, 10.0f, 0.0f, 50.0f)
-    , _rNormalization({"rNormalization", "Radius normalization", "" }, 0.0f, 0.0f, 2.0f)
-    , _rUpperBound({"rUpperBound", "Radius upper bound", "" }, 1.0f, 0.0f, 2.0f)
-    , _lowerValueBound({"lowerValueBound", "Lower value bound", "" }, 0.0f, 0.0f, 1000000.0f)
-    , _upperValueBound({"upperValueBound", "Upper value bound", "" }, 0.0f, 0.0f, 1000000.0f)
+    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
+    , _sourceDirectory(SourceDirectoryInfo)
+    , _transferFunctionPath(TransferFunctionInfo)
+    , _triggerTimeJump(TriggerTimeJumpInfo)
+    , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
+    , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
+    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
+    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
+    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
+    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -101,10 +186,15 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
+    _gridType.addOptions({
+        { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
+        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" },
+    });
     _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
+    if (dictionary.hasValue<float>(KeyStepSize)) {
+        _stepSize = dictionary.value<float>(KeyStepSize);
+    }
 
     if (dictionary.hasValue<float>(KeySecondsBefore)) {
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
@@ -117,14 +207,16 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _clipPlanes->setName("clipPlanes");
 
     if (dictionary.hasValue<std::string>(KeyGridType)) {
-        VolumeGridType gridType = volume::parseGridType(dictionary.value<std::string>(KeyGridType));
+        VolumeGridType gridType = volume::parseGridType(
+            dictionary.value<std::string>(KeyGridType)
+        );
         _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
     }
 }
-    
+
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
-void RenderableTimeVaryingVolume::initialize() {
+void RenderableTimeVaryingVolume::initializeGL() {
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
@@ -147,10 +239,12 @@ void RenderableTimeVaryingVolume::initialize() {
     }
 
 
-    // TODO: defer loading of data to later. (separate thread or at least not when loading)
+    // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (auto& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        std::string path = FileSys.pathByAppendingComponent(_sourceDirectory, t.baseName) + ".rawvolume";
+        std::string path = FileSys.pathByAppendingComponent(
+            _sourceDirectory, t.baseName
+        ) + ".rawvolume";
         RawVolumeReader<float> reader(path, t.dimensions);
         t.rawVolume = reader.read();
 
@@ -172,13 +266,20 @@ void RenderableTimeVaryingVolume::initialize() {
             ghoul::opengl::Texture::WrappingMode::Clamp
         );
 
-        t.texture->setPixelData(reinterpret_cast<void*>(data), ghoul::opengl::Texture::TakeOwnership::No);
+        t.texture->setPixelData(
+            reinterpret_cast<void*>(data),
+            ghoul::opengl::Texture::TakeOwnership::No
+        );
         t.texture->uploadTexture();
     }
 
     _clipPlanes->initialize();
     _transferFunction->update();
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunction, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        nullptr,
+        _transferFunction,
+        _clipPlanes
+    );
     _raycaster->initialize();
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
     auto onChange = [&](bool enabled) {
@@ -198,7 +299,9 @@ void RenderableTimeVaryingVolume::initialize() {
         jumpToTimestep(_jumpToTimestep);
     });
 
-    const int lastTimestep = (_volumeTimesteps.size() > 0) ? (_volumeTimesteps.size() - 1) : 0;
+    const int lastTimestep = (_volumeTimesteps.size() > 0) ?
+                             static_cast<int>(_volumeTimesteps.size() - 1) :
+                             0;
     _currentTimestep.setMaxValue(lastTimestep);
     _jumpToTimestep.setMaxValue(lastTimestep);
 
@@ -215,16 +318,34 @@ void RenderableTimeVaryingVolume::initialize() {
     addProperty(_lowerValueBound);
     addProperty(_upperValueBound);
 
-    _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
+    _raycaster->setGridType(
+        (_gridType.value() == 1) ?
+        VolumeGridType::Spherical :
+        VolumeGridType::Cartesian
+    );
     _gridType.onChange([this] {
-        _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
+        _raycaster->setGridType(
+            (_gridType.value() == 1) ?
+            VolumeGridType::Spherical :
+            VolumeGridType::Cartesian
+        );
+    });
+
+    _transferFunctionPath.onChange([this] {
+        _transferFunction =
+            std::make_shared<TransferFunction>(_transferFunctionPath);
+        _raycaster->setTransferFunction(_transferFunction);
     });
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
     ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
     try {
-        documentation::testSpecificationAndThrow(TimestepDocumentation(), dictionary, "TimeVaryingVolumeTimestep");
+        documentation::testSpecificationAndThrow(
+            TimestepDocumentation(),
+            dictionary,
+            "TimeVaryingVolumeTimestep"
+        );
     } catch (const documentation::SpecificationError& e) {
         LERROR(e.message << e.component);
         return;
@@ -242,11 +363,12 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.time = Time::convertTime(timeString);
     t.inRam = false;
     t.onGpu = false;
-    
+
     _volumeTimesteps[t.time] = std::move(t);
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
+    using TimeStep = RenderableTimeVaryingVolume::Timestep;
     if (_volumeTimesteps.size() == 0) {
         return nullptr;
     }
@@ -256,14 +378,14 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
     if (currentTimestepIt == _volumeTimesteps.end()) {
         // No such timestep was found: show last timestep if it is within the time margin.
-        RenderableTimeVaryingVolume::Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
+        Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
         double threshold = lastTimestep->time + static_cast<double>(_secondsAfter);
         return currentTime < threshold ? lastTimestep : nullptr;
     }
 
     if (currentTimestepIt == _volumeTimesteps.begin()) {
-        // No such timestep was found: show first timestep if it is within the time margin.
-        RenderableTimeVaryingVolume::Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
+        // No such timestep was found: show first timestep if it is within the time margin
+        Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
         double threshold = firstTimestep->time - static_cast<double>(_secondsBefore);
         return currentTime >= threshold ? firstTimestep : nullptr;
     }
@@ -273,7 +395,9 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     return &(currentTimestepIt->second);
 }
 
-int RenderableTimeVaryingVolume::timestepIndex(const RenderableTimeVaryingVolume::Timestep* t) const {
+int RenderableTimeVaryingVolume::timestepIndex(
+                                     const RenderableTimeVaryingVolume::Timestep* t) const
+{
     if (!t) {
         return -1;
     }
@@ -287,8 +411,12 @@ int RenderableTimeVaryingVolume::timestepIndex(const RenderableTimeVaryingVolume
     return -1;
 }
 
-RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFromIndex(int target) {
-    if (target < 0) target = 0;
+RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFromIndex(
+                                                                               int target)
+{
+    if (target < 0) {
+        target = 0;
+    }
     int index = 0;
     for (auto& it : _volumeTimesteps) {
         if (index == target) {
@@ -307,14 +435,16 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     OsEng.timeManager().setTimeNextFrame(t->time);
 }
 
-void RenderableTimeVaryingVolume::update(const UpdateData& data) {
+void RenderableTimeVaryingVolume::update(const UpdateData&) {
+    _transferFunction->update();
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
         if (t && t->texture) {
             if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
                 glm::dvec3 scale = t->upperDomainBound - t->lowerDomainBound;
-                glm::dvec3 translation = (t->lowerDomainBound + t->upperDomainBound) * 0.5f;
+                glm::dvec3 translation =
+                    (t->lowerDomainBound + t->upperDomainBound) * 0.5f;
 
                 glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
                 glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
@@ -330,12 +460,16 @@ void RenderableTimeVaryingVolume::update(const UpdateData& data) {
             }
             _raycaster->setVolumeTexture(t->texture);
 
-            // Remap volume value to that TF value 0 is sampled for lowerValueBound, and 1 is sampled for upperLowerBound.
-            // This means that volume values = 0 need to be remapped to how localMin relates to the global range.
-            float zeroMap = (t->minValue - _lowerValueBound) / (_upperValueBound - _lowerValueBound);
+            // Remap volume value to that TF value 0 is sampled for lowerValueBound, and 1
+            // is sampled for upperLowerBound.
+            // This means that volume values = 0 need to be remapped to how localMin
+            // relates to the global range.
+            float zeroMap = (t->minValue - _lowerValueBound) /
+                            (_upperValueBound - _lowerValueBound);
 
             // Volume values = 1 are mapped to how localMax relates to the global range.
-            float oneMap = (t->maxValue - _lowerValueBound) / (_upperValueBound - _lowerValueBound);
+            float oneMap = (t->maxValue - _lowerValueBound) /
+                           (_upperValueBound - _lowerValueBound);
             _raycaster->setValueRemapping(zeroMap, oneMap);
         } else {
             _raycaster->setVolumeTexture(nullptr);
@@ -353,14 +487,11 @@ void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& 
     }
 }
 
- 
-
 bool RenderableTimeVaryingVolume::isReady() const {
     return true;
 }
 
-
-void RenderableTimeVaryingVolume::deinitialize() {
+void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
@@ -383,14 +514,14 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
                 KeyTransferFunction,
                 new StringVerifier,
                 Optional::No,
-                "Specifies the transfer function file path",
+                "Specifies the transfer function file path"
             },
             {
                 KeyLowerValueBound,
                 new DoubleVerifier,
                 Optional::No,
                 "Specifies the lower value bound."
-                "This number will be mapped to 0 before uploadin to the GPU.",
+                "This number will be mapped to 0 before uploadin to the GPU."
             },
             {
                 KeyUpperValueBound,
@@ -409,15 +540,16 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
                 KeySecondsBefore,
                 new DoubleVerifier,
                 Optional::Yes,
-                "Specifies the number of seconds to show the the first timestep before its actual time."
-                "The default value is 0.",
+                "Specifies the number of seconds to show the the first timestep before "
+                "its actual time. The default value is 0."
             },
             {
                 KeySecondsAfter,
                 new DoubleVerifier,
                 Optional::No,
-                "Specifies the number of seconds to show the the last timestep after its actual time",
-            },
+                "Specifies the number of seconds to show the the last timestep after its "
+                "actual time"
+            }
         }
     };
 }

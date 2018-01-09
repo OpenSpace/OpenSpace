@@ -1,0 +1,142 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets')
+asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
+asset.require('scene/solarsystem/missions/rosetta/67p')
+asset.require('scene/solarsystem/missions/rosetta/rosetta')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+
+-- Custom Keybindings
+local Keybindings = {
+    {
+        Key = "a",
+        Command = "openspace.setPropertyValue('NavigationHandler.Origin', '67P')",
+        Documentation = "Sets the focus of the camera on '67P'.",
+        Local = false
+    },
+    {
+        Key = "s",
+        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Rosetta')",
+        Documentation = "Sets the focus of the camera on 'Rosetta'",
+        Local = false
+    },
+    {
+        Key = "F5",
+        Command = "openspace.time.setTime('2014-08-01T03:05:18.101')",
+        Documentation = "Jumps to the time of initial approach of Rosetta to 67P.",
+        Local = false
+    },
+    {
+        Key = "F6",
+        Command = "openspace.time.setTime('2014-11-12T08:20:00.00')",
+        Documentation = "Jumps to the time when the Philae lander is released.",
+        Local = false
+    },
+    {
+        Key = "F8",
+        Command = "openspace.setPropertyValue('67P.renderable.ProjectionComponent.clearAllProjections', true)",
+        Documentation = "Removes all image projections from 67P.",
+        Local = false
+    },
+    {
+        Key = "q",
+        Command = sceneHelper.property.invert('SunMarker.renderable.Enabled'),
+        Documentation = "Toggles the visibility of the text marking the location of the Sun.",
+        Local = false
+    },
+    {
+        Key = "e",
+        Command = helper.renderable.toggle('JupiterTrail') .. helper.renderable.toggle('SaturnTrail') ..
+                  helper.renderable.toggle('UranusTrail') .. helper.renderable.toggle('NeptuneTrail'),
+        Documentation = "Toggles the visibility of all trails further from the Sun than 67P.",
+        Local = false
+    },
+    {
+        Key = "i",
+        Command = sceneHelper.renderable.toggle('ImagePlaneRosetta'),
+        Documentation = "Toggles the visibility of the free floating image plane.",
+        Local = false
+    },
+    {
+        Key = "f",
+        Command = sceneHelper.renderable.toggle('PhilaeTrail'),
+        Documentation = "Toggles the visibility of Philae's trail.",
+        Local = false
+    },
+    {
+        Key = "p",
+        Command = sceneHelper.property.invert('67P.renderable.ProjectionComponent.performProjection'),
+        Documentation = "Enables or disables the image projection on 67P.",
+        Local = false
+    }
+}
+
+local Comet67PAsset = asset.require('scene/solarsystem/missions/rosetta/67p')
+
+asset.onInitialize(function ()
+    openspace.time.setTime("2014-08-01T03:05:00.000")
+    sceneHelper.bindKeys(Keybindings)
+
+    openspace.setDefaultDashboard()
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemSpacing",
+        Spacing = 25
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemDistance",
+        SourceType = "Node",
+        SourceNodeName = "Rosetta",
+        DestinationType = "Node",
+        DestinationNodeName = "67P"
+    })
+
+    openspace.dashboard.addDashboardItem({
+        Type = "DashboardItemInstruments"
+    })
+
+    openspace.setDefaultGuiSorting()
+
+    sceneHelper.setDeltaTimeKeys({
+        1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
+        28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
+    })
+
+    openspace.markInterestingNodes({
+        "67P", "Rosetta", "Philae"
+    })
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.navigation.setCameraState({
+        Focus = Comet67PAsset.Comet67P.Name,
+        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
+        Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
+    })
+
+    openspace.setPropertyValue('67P.renderable.PerformShading', false);
+end)
+
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeInterestingNodes({
+        "67PBarycenter", "Rosetta", "Philae"
+    })
+end)

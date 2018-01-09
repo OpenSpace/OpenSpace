@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +65,7 @@ public:
     bool operator>(const PowerScaledScalar& other) const;
     bool operator<=(const PowerScaledScalar& other) const;
     bool operator>=(const PowerScaledScalar& other) const;
-    
+
     bool operator==(double other) const;
     bool operator<(double other) const;
     bool operator>(double other) const;
@@ -75,19 +75,18 @@ public:
     // glm integration
     PowerScaledScalar& operator=(const glm::vec2& rhs);
     PowerScaledScalar& operator=(float rhs);
-    
+
     friend std::ostream& operator<<(std::ostream& os, const PowerScaledScalar& rhs);
-    
+
     // allow the power scaled coordinates to access private members
     friend class PowerScaledCoordinate;
+
 private:
     // float vector used when returning float values
     glm::vec2 _data;
-
 };
 
 typedef PowerScaledScalar pss;
-
 
 } // namespace openspace
 

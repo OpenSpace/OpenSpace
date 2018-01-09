@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,24 +67,25 @@
 #include <algorithm>
 #include <chrono>
 
-
-
 namespace {
-    const char* _loggerCat = "RenderableMultiresVolume";
-    const char* KeyDataSource = "Source";
-    const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
-    const char* KeyHints = "Hints";
-    const char* KeyTransferFunction = "TransferFunction";
-    const char* KeyTspType = "TspType";
-    const char* KeyAtlasType = "AtlasType";
+    constexpr const char* _loggerCat = "RenderableMultiresVolume";
+    constexpr const char* KeyDataSource = "Source";
+    constexpr const char* KeyErrorHistogramsSource = "ErrorHistogramsSource";
+    constexpr const char* KeyHints = "Hints";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* KeyTspType = "TspType";
+    constexpr const char* KeyAtlasType = "AtlasType";
 
-    const char* KeyVolumeName = "VolumeName";
-    const char* KeyBrickSelector = "BrickSelector";
-    const char* KeyStartTime = "StartTime";
-    const char* KeyEndTime = "EndTime";
-    const char* GlslHelpersPath = "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
-    const char* GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const char* GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
+    constexpr const char* KeyVolumeName = "VolumeName";
+    constexpr const char* KeyBrickSelector = "BrickSelector";
+    constexpr const char* KeyStartTime = "StartTime";
+    constexpr const char* KeyEndTime = "EndTime";
+    constexpr const char* GlslHelpersPath =
+        "${MODULES}/multiresvolume/shaders/helpers_fs.glsl";
+    constexpr const char* GlslHelperPath =
+        "${MODULES}/multiresvolume/shaders/helper.glsl";
+    constexpr const char* GlslHeaderPath =
+        "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
 
     static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
@@ -445,7 +446,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     return true;
 }
 
-void RenderableMultiresVolume::initialize() {
+void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
     unsigned int maxNumBricks = _tsp->header().xNumBricks_ * _tsp->header().yNumBricks_ * _tsp->header().zNumBricks_;
@@ -521,7 +522,7 @@ void RenderableMultiresVolume::initialize() {
     }
 }
 
-void RenderableMultiresVolume::deinitialize() {
+void RenderableMultiresVolume::deinitializeGL() {
     _tsp = nullptr;
     _transferFunction = nullptr;
 }
@@ -644,7 +645,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
     }
     else if (_useGlobalTime) {
         double t = (_time - _startTime) / (_endTime - _startTime);
-        currentTimestep = t * numTimesteps;
+        currentTimestep = static_cast<int>(t * numTimesteps);
         visible = currentTimestep >= 0 && currentTimestep < numTimesteps;
     }
     else {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,21 +26,20 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
+
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing {
-
-const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
 Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool initVisible)
     : _owner(owner)
     , _tileIndex(tileIndex)
     , _isVisible(initVisible)
-    , _surfacePatch(tileIndex) 
+    , _surfacePatch(tileIndex)
 {}
 
 const GeodeticPatch& Chunk::surfacePatch() const {
@@ -62,7 +61,14 @@ bool Chunk::isVisible() const {
 Chunk::Status Chunk::update(const RenderData& data) {
     const auto& savedCamera = _owner.savedCamera();
     const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
-    RenderData myRenderData = { camRef, data.position, data.time, data.doPerformanceMeasurement, data.renderBinMask, data.modelTransform };
+    RenderData myRenderData = {
+        camRef,
+        data.position,
+        data.time,
+        data.doPerformanceMeasurement,
+        data.renderBinMask,
+        data.modelTransform
+    };
 
     _isVisible = true;
     if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
@@ -83,7 +89,7 @@ Chunk::Status Chunk::update(const RenderData& data) {
     }
 }
 
-Chunk::BoundingHeights Chunk::getBoundingHeights() const {
+Chunk::BoundingHeights Chunk::boundingHeights() const {
     using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
 
     BoundingHeights boundingHeights {
@@ -93,17 +99,15 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    std::shared_ptr<LayerManager> layerManager =
-        owner().chunkedLodGlobe()->layerManager();
+    std::shared_ptr<LayerManager> lm = owner().chunkedLodGlobe()->layerManager();
 
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = layerManager->layerGroup(layergroupid::GroupID::HeightLayers);
+    const LayerGroup& heightmaps = lm->layerGroup(layergroupid::GroupID::HeightLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
-        tileselector::getTilesAndSettingsUnsorted(
-            heightmaps, _tileIndex);
+        tileselector::getTilesAndSettingsUnsorted(heightmaps, _tileIndex);
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
@@ -115,21 +119,17 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
         if (goodTile && hasTileMetaData) {
             std::shared_ptr<TileMetaData> tileMetaData = chunkTile.tile.metaData();
 
-            float minValue =
-                settings->performLayerSettings(tileMetaData->minValues[HeightChannel]);
-            float maxValue =
-                settings->performLayerSettings(tileMetaData->maxValues[HeightChannel]);
+            float minValue = settings->performLayerSettings(
+                tileMetaData->minValues[HeightChannel]
+            );
+            float maxValue = settings->performLayerSettings(
+                tileMetaData->maxValues[HeightChannel]
+            );
 
             if (!boundingHeights.available) {
                 if (tileMetaData->hasMissingData[HeightChannel]) {
-                    boundingHeights.min = std::min(
-                        DEFAULT_HEIGHT,
-                        minValue
-                    );
-                    boundingHeights.max = std::max(
-                        DEFAULT_HEIGHT,
-                        maxValue
-                    );
+                    boundingHeights.min = std::min(DEFAULT_HEIGHT, minValue);
+                    boundingHeights.max = std::max(DEFAULT_HEIGHT, maxValue);
                 }
                 else {
                     boundingHeights.min = minValue;
@@ -138,14 +138,8 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
                 boundingHeights.available = true;
             }
             else {
-                boundingHeights.min = std::min(
-                    boundingHeights.min,
-                    minValue
-                );
-                boundingHeights.max = std::max(
-                    boundingHeights.max,
-                    maxValue
-                );
+                boundingHeights.min = std::min(boundingHeights.min, minValue);
+                boundingHeights.max = std::max(boundingHeights.max, maxValue);
             }
             lastHadMissingData = tileMetaData->hasMissingData[HeightChannel];
         }
@@ -155,15 +149,15 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
             break;
         }
     }
-        
+
     return boundingHeights;
 }
 
-std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
+std::vector<glm::dvec4> Chunk::boundingPolyhedronCorners() const {
     const Ellipsoid& ellipsoid = owner().ellipsoid();
     const GeodeticPatch& patch = surfacePatch();
 
-    BoundingHeights boundingHeight = getBoundingHeights();
+    BoundingHeights boundingHeight = boundingHeights();
 
     // assume worst case
     double patchCenterRadius = ellipsoid.maximumRadius();
@@ -171,8 +165,8 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     double maxCenterRadius = patchCenterRadius + boundingHeight.max;
     Geodetic2 halfSize = patch.halfSize();
 
-    // As the patch is curved, the maximum height offsets at the corners must be long 
-    // enough to cover large enough to cover a boundingHeight.max at the center of the 
+    // As the patch is curved, the maximum height offsets at the corners must be long
+    // enough to cover large enough to cover a boundingHeight.max at the center of the
     // patch.
     // Approximating scaleToCoverCenter by assuming the latitude and longitude angles
     // of "halfSize" are equal to the angles they create from the center of the
@@ -184,19 +178,19 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     double y1 = tan(halfSize.lat);
     double y2 = tan(halfSize.lon);
     double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
-        
+
     double maxCornerHeight = maxCenterRadius * scaleToCoverCenter - patchCenterRadius;
 
     bool chunkIsNorthOfEquator = patch.isNorthern();
 
-    // The minimum height offset, however, we can simply 
+    // The minimum height offset, however, we can simply
     double minCornerHeight = boundingHeight.min;
     std::vector<glm::dvec4> corners(8);
-        
+
     double latCloseToEquator = patch.edgeLatitudeNearestEquator();
     Geodetic3 p1Geodetic = { { latCloseToEquator, patch.minLon() }, maxCornerHeight };
     Geodetic3 p2Geodetic = { { latCloseToEquator, patch.maxLon() }, maxCornerHeight };
-        
+
     glm::vec3 p1 = ellipsoid.cartesianPosition(p1Geodetic);
     glm::vec3 p2 = ellipsoid.cartesianPosition(p2Geodetic);
     glm::vec3 p = 0.5f * (p1 + p2);
@@ -207,7 +201,7 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
         Quad q = static_cast<Quad>(i % 4);
         double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
         Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
-            
+
         bool cornerIsNorthern = !((i / 2) % 2);
         bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
         if (cornerCloseToEquator) {

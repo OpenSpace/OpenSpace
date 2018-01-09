@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,6 +74,14 @@ LuaRotation::LuaRotation()
     , _state(false)
 {
     addProperty(_luaScriptFile);
+
+    _luaScriptFile.onChange([&]() {
+        requireUpdate();
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
+        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+            requireUpdate();
+        });
+    });
 }
 
 LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
@@ -88,7 +96,7 @@ LuaRotation::LuaRotation(const ghoul::Dictionary& dictionary)
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-void LuaRotation::update(const UpdateData& data) {
+glm::dmat3 LuaRotation::matrix(const Time& time) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -99,20 +107,22 @@ void LuaRotation::update(const UpdateData& data) {
             "LuaRotation",
             "Script '" << _luaScriptFile << "' does not have a function 'rotation'"
         );
-        return;
+        return glm::dmat3(1.0);
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    lua_pushnumber(_state, data.time.j2000Seconds());
+    lua_pushnumber(_state, time.j2000Seconds());
 
     // Second argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
     lua_pushnumber(
         _state,
-        duration_cast<milliseconds>(now.time_since_epoch()).count()
+        static_cast<lua_Number>(
+            duration_cast<milliseconds>(now.time_since_epoch()).count()
+        )
     );
-    
+
     // Execute the scaling function
     int success = lua_pcall(_state, 2, 9, 0);
     if (success != 0) {
@@ -127,7 +137,7 @@ void LuaRotation::update(const UpdateData& data) {
         values[i] = luaL_checknumber(_state, -1 - i);
     }
 
-    _matrix = glm::make_mat3(values);
+    return glm::make_mat3(values);
 }
 
 } // namespace openspace

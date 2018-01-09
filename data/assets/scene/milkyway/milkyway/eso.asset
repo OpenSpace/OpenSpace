@@ -1,0 +1,28 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "ESO Milky Way Textures",
+    Type = "HttpSynchronization",
+    Identifier = "milkyway-eso_textures",
+    Version = 1
+})
+
+local object = {
+    Name = "MilkyWay (ESO)",
+    Renderable = {
+        Type = "RenderableSphere",
+        Size = 9.2E20,
+        Segments = 40,
+        Alpha = 0.4,
+        Texture = textures .. "/eso0932a_blend.png",
+        Orientation = "Inside/Outside",
+        FadeOutThreshould = 0.01
+    },
+    GuiPath = "/Milky Way/Milky Way"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

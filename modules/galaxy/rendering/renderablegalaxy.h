@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,14 @@
 namespace openspace {
 
 struct RenderData;
-    
+
 class RenderableGalaxy : public Renderable {
 public:
     RenderableGalaxy(const ghoul::Dictionary& dictionary);
     ~RenderableGalaxy();
-    
-    void initialize() override;
-    void deinitialize() override;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;

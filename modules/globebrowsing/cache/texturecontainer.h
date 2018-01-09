@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ public:
 
     void reset();
     void reset(size_t numTextures);
-    
+
     /**
      * \returns a pointer to a texture if there is one texture never used before.
      * If there are no textures left, nullptr is returned. TextureContainer still owns
@@ -57,7 +57,7 @@ public:
     ghoul::opengl::Texture* getTextureIfFree();
 
     const TileTextureInitData& tileTextureInitData() const;
-    
+
     /**
      * \returns the number of textures in this TextureContainer
      */

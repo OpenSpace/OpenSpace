@@ -1,0 +1,39 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+
+
+
+local textures = asset.syncedResource({
+    Name = "New Horizons Textures",
+    Type = "HttpSynchronization",
+    Identifier = "newhorizons_textures",
+    Version = 2
+})
+
+local models = asset.syncedResource({
+    Name = "New Horizons Model",
+    Type = "HttpSynchronization",
+    Identifier = "newhorizons_model",
+    Version = 1
+})
+
+local NewHorizons = {
+    Name = "NewHorizons",
+    Parent = transforms.NewHorizonsPosition.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "NEW HORIZONS",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+        }, 
+        ColorTexture = textures .. "/NHTexture.jpg"
+    },
+    GuiPath = "/Solar System/Missions/New Horizons"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { NewHorizons })
+asset.export("NewHorizonsTextures", textures)
+asset.export("NewHorizonsModels", models)

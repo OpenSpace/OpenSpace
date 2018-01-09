@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -109,7 +109,7 @@ void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>&
     // Loop through nodes in breadths first order
     Q.push(this);
     while (Q.size() > 0) {
-        const ChunkNode* node = Q.front(); 
+        const ChunkNode* node = Q.front();
         Q.pop();
 
         // Add node to future stack
@@ -126,7 +126,7 @@ void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>&
         }
     }
 
-    // Loop through all nodes in stack, this will be reversed breadth first 
+    // Loop through all nodes in stack, this will be reversed breadth first
     while (S.size() > 0) {
         f(*S.top());
         S.pop();
@@ -177,7 +177,7 @@ void ChunkNode::merge() {
         }
         _children[i] = nullptr;
     }
-    
+
     ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
 }
 

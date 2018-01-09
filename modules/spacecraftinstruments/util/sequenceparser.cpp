@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,9 +32,9 @@
 #include <cstring>
 
 namespace {
-    const char* _loggerCat = "SequenceParser";
+    constexpr const char* _loggerCat = "SequenceParser";
 
-    const char* PlaybookIdentifierName = "Playbook";
+    constexpr const char* PlaybookIdentifierName = "Playbook";
 } // namespace
 
 namespace openspace {
@@ -61,12 +61,18 @@ void writeToBuffer(std::vector<char>& buffer, size_t& currentWriteLocation, T va
     if ((currentWriteLocation + sizeof(T)) > buffer.size())
         buffer.resize(2 * buffer.size());
 
-    std::memmove(buffer.data() + currentWriteLocation, reinterpret_cast<const void*>(&value), sizeof(T));
+    std::memmove(
+        buffer.data() + currentWriteLocation,
+        reinterpret_cast<const void*>(&value),
+        sizeof(T)
+    );
     currentWriteLocation += sizeof(T);
 }
 
 template <>
-void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteLocation, std::string value) {
+void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteLocation,
+                                std::string value)
+{
     if ((currentWriteLocation + sizeof(uint8_t) + value.size()) > buffer.size())
         buffer.resize(2 * buffer.size());
 
@@ -92,7 +98,8 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
     // 1 byte : Number of Instruments (i)
     // i times: 1 byte (id), 1 byte (length j of name), j bytes (name)
     // 4 byte: Number (n) of images
-    // n times: 8 byte (beginning time), 8 byte (ending time), 1 byte (target id), 2 byte (instrument id)
+    // n times: 8 byte (beginning time), 8 byte (ending time), 1 byte (target id),
+    //          2 byte (instrument id)
 
     std::map<std::string, uint8_t> targetMap;
     uint8_t currentTargetId = 0;
@@ -136,8 +143,12 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
             writeToBuffer(buffer, currentWriteLocation, image.timeRange.start);
             writeToBuffer(buffer, currentWriteLocation, image.timeRange.end);
 
-            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(image.timeRange.start);
-            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(image.timeRange.end);
+            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(
+                image.timeRange.start
+            );
+            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(
+                image.timeRange.end
+            );
 
             writeToBuffer(buffer, currentWriteLocation, timeBegin);
             writeToBuffer(buffer, currentWriteLocation, timeEnd);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,34 +43,33 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
-    const char* keyPotentialTargets = "PotentialTargets";
+    constexpr const char* keyPotentialTargets = "PotentialTargets";
 
-    const char* keyInstrument = "Instrument.Name";
-    const char* keyInstrumentFovy = "Instrument.Fovy";
-    const char* keyInstrumentAspect = "Instrument.Aspect";
+    constexpr const char* keyInstrument = "Instrument.Name";
+    constexpr const char* keyInstrumentFovy = "Instrument.Fovy";
+    constexpr const char* keyInstrumentAspect = "Instrument.Aspect";
 
-    const char* keyTranslation = "DataInputTranslation";
+    constexpr const char* keyTranslation = "DataInputTranslation";
 
-    const char* keyProjObserver = "Observer";
-    const char* keyProjTarget = "Target";
-    const char* keyProjAberration = "Aberration";
+    constexpr const char* keyProjObserver = "Observer";
+    constexpr const char* keyProjTarget = "Target";
+    constexpr const char* keyProjAberration = "Aberration";
 
-    const char* keySequenceDir = "Sequence";
-    const char* keySequenceType = "SequenceType";
+    constexpr const char* keySequenceDir = "Sequence";
+    constexpr const char* keySequenceType = "SequenceType";
 
-    const char* keyNeedsTextureMapDilation = "TextureMap";
-    const char* keyNeedsShadowing = "ShadowMap";
-    const char* keyTextureMapAspectRatio = "AspectRatio";
+    constexpr const char* keyNeedsTextureMapDilation = "TextureMap";
+    constexpr const char* keyNeedsShadowing = "ShadowMap";
+    constexpr const char* keyTextureMapAspectRatio = "AspectRatio";
 
-    const char* sequenceTypeImage = "image-sequence";
-    const char* sequenceTypePlaybook = "playbook";
-    const char* sequenceTypeHybrid = "hybrid";
-    const char* sequenceTypeInstrumentTimes = "instrument-times";
+    constexpr const char* sequenceTypeImage = "image-sequence";
+    constexpr const char* sequenceTypePlaybook = "playbook";
+    constexpr const char* sequenceTypeHybrid = "hybrid";
+    constexpr const char* sequenceTypeInstrumentTimes = "instrument-times";
 
-    const char* placeholderFile =
-        "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
+    const char* placeholderFile = "${DATA}/placeholder.png";
 
-    const char* _loggerCat = "ProjectionComponent";
+    constexpr const char* _loggerCat = "ProjectionComponent";
 
     static const openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
@@ -122,6 +121,17 @@ documentation::Documentation ProjectionComponent::Documentation() {
         "Projection Component",
         "newhorizons_projectioncomponent",
         {
+            {
+                keySequenceDir,
+                new OrVerifier(
+                    new StringVerifier,
+                    new StringListVerifier
+                ),
+                Optional::Yes,
+                "This value specifies one or more directories from which images are "
+                "being used for image projections. If the sequence type is set to "
+                "'playbook', this value is ignored"
+            },
             {
                 keyInstrument,
                 new StringAnnotationVerifier("A SPICE name of an instrument"),
@@ -273,61 +283,77 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
 
     std::vector<SequenceParser*> parsers;
 
-    std::string sequenceSource;
-    std::string sequenceType;
-    bool foundSequence = dictionary.getValue(keySequenceDir, sequenceSource);
-    if (foundSequence) {
-        sequenceSource = absPath(sequenceSource);
+    if (dictionary.hasKey(keySequenceDir)) {
+        std::vector<std::string> sequenceSources;
+        // Due to the documentation check above it must either be one or the other
+        if (dictionary.hasValue<std::string>(keySequenceDir)) {
+            sequenceSources.push_back(
+                absPath(dictionary.value<std::string>(keySequenceDir))
+            );
+        }
+        else {
+            ghoul::Dictionary sourcesDict = dictionary.value<ghoul::Dictionary>(
+                keySequenceDir
+            );
+            for (int i = 1; i <= static_cast<int>(sourcesDict.size()); ++i) {
+                sequenceSources.push_back(
+                    absPath(sourcesDict.value<std::string>(std::to_string(i)))
+                );
+            }
+        }
 
-        dictionary.getValue(keySequenceType, sequenceType);
+        std::string sequenceType = dictionary.value<std::string>(keySequenceType);
         //Important: client must define translation-list in mod file IFF playbook
         if (dictionary.hasKey(keyTranslation)) {
             ghoul::Dictionary translationDictionary;
             //get translation dictionary
             dictionary.getValue(keyTranslation, translationDictionary);
 
-            if (sequenceType == sequenceTypePlaybook) {
-                parsers.push_back(new HongKangParser(
-                    name,
-                    sequenceSource,
-                    _projectorID,
-                    translationDictionary,
-                    _potentialTargets));
-            }
-            else if (sequenceType == sequenceTypeImage) {
-                parsers.push_back(new LabelParser(
-                    name,
-                    sequenceSource,
-                    translationDictionary));
-            }
-            else if (sequenceType == sequenceTypeHybrid) {
-                //first read labels
-                parsers.push_back(new LabelParser(
-                    name,
-                    sequenceSource,
-                    translationDictionary));
-
-                std::string _eventFile;
-                bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
-                if (foundEventFile) {
-                    //then read playbook
-                    _eventFile = absPath(_eventFile);
+            for (std::string& sequenceSource : sequenceSources) {
+                if (sequenceType == sequenceTypePlaybook) {
                     parsers.push_back(new HongKangParser(
                         name,
-                        _eventFile,
+                        std::move(sequenceSource),
                         _projectorID,
                         translationDictionary,
                         _potentialTargets));
                 }
-                else {
-                    LWARNING("No eventfile has been provided, please check modfiles");
+                else if (sequenceType == sequenceTypeImage) {
+                    parsers.push_back(new LabelParser(
+                        name,
+                        std::move(sequenceSource),
+                        translationDictionary));
                 }
-            }
-            else if (sequenceType == sequenceTypeInstrumentTimes) {
-                parsers.push_back(new InstrumentTimesParser(
-                    name,
-                    sequenceSource,
-                    translationDictionary));
+                else if (sequenceType == sequenceTypeHybrid) {
+                    //first read labels
+                    parsers.push_back(new LabelParser(
+                        name,
+                        std::move(sequenceSource),
+                        translationDictionary));
+
+                    std::string _eventFile;
+                    bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
+                    if (foundEventFile) {
+                        //then read playbook
+                        _eventFile = absPath(_eventFile);
+                        parsers.push_back(new HongKangParser(
+                            name,
+                            _eventFile,
+                            _projectorID,
+                            translationDictionary,
+                            _potentialTargets));
+                    }
+                    else {
+                        LWARNING("No eventfile has been provided, please check modfiles");
+                    }
+                }
+                else if (sequenceType == sequenceTypeInstrumentTimes) {
+                    parsers.push_back(new InstrumentTimesParser(
+                        name,
+                        std::move(sequenceSource),
+                        translationDictionary)
+                    );
+                }
             }
 
             for (SequenceParser* parser : parsers) {
@@ -336,7 +362,10 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             }
         }
         else {
-            LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
+            LWARNING(
+                "No playbook translation provided, please make sure \
+                all spice calls match playbook!"
+            );
         }
     }
 }
@@ -369,23 +398,25 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::opengl::Texture;
     using ghoul::io::TextureReader;
 
-    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(placeholderFile));
+    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        absPath(placeholderFile)
+    );
     if (texture) {
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setFilter(Texture::FilterMode::Linear);
+        texture->setFilter(Texture::FilterMode::LinearMipMap);
         texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     _placeholderTexture = std::move(texture);
-    
+
     if (_dilation.isEnabled) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
             "Dilation",
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl",
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl"
+            absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_vs.glsl"),
+            absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl")
         );
-        
+
         const GLfloat plane[] = {
             -1, -1,
             1,  1,
@@ -460,7 +491,7 @@ void ProjectionComponent::imageProjectBegin() {
         // Generate the new textures
         generateProjectionLayerTexture(_textureSize);
 
-        if (_shadowing.isEnabled) { 
+        if (_shadowing.isEnabled) {
             generateDepthTexture(_textureSize);
         }
 
@@ -694,12 +725,14 @@ void ProjectionComponent::imageProjectEnd() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         _dilation.program->deactivate();
-    
+
         glEnable(GL_BLEND);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+
+    _mipMapDirty = true;
 }
 
 void ProjectionComponent::update() {
@@ -814,12 +847,16 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
     glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
     glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
 
-    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
-                                         e1.y, e2.y, e3.y, 0.f,
-                                         e1.z, e2.z, e3.z, 0.f,
-                                         glm::dot(e1, -loc), glm::dot(e2, -loc), glm::dot(e3, -loc), 1.f);
+    glm::mat4 projViewMatrix = glm::mat4(
+        e1.x, e2.x, e3.x, 0.f,
+        e1.y, e2.y, e3.y, 0.f,
+        e1.z, e2.z, e3.z, 0.f,
+        glm::dot(e1, -loc), glm::dot(e2, -loc), glm::dot(e3, -loc), 1.f
+    );
     // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane);
+    glm::mat4 projProjectionMatrix = glm::perspective(
+        glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
+    );
 
     return projProjectionMatrix*projViewMatrix;
 }
@@ -830,6 +867,10 @@ bool ProjectionComponent::doesPerformProjection() const {
 
 bool ProjectionComponent::needsClearProjection() const {
     return _clearAllProjections;
+}
+
+bool ProjectionComponent::needsMipMapGeneration() const {
+    return _mipMapDirty;
 }
 
 float ProjectionComponent::projectionFading() const {
@@ -877,7 +918,12 @@ void ProjectionComponent::clearAllProjections() {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     //counter = 0;
-    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
+    glViewport(
+        0,
+        0,
+        static_cast<GLsizei>(_projectionTexture->width()),
+        static_cast<GLsizei>(_projectionTexture->height())
+    );
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 
@@ -894,6 +940,12 @@ void ProjectionComponent::clearAllProjections() {
                m_viewport[2], m_viewport[3]);
 
     _clearAllProjections = false;
+    _mipMapDirty = true;
+}
+
+void ProjectionComponent::generateMipMap() {
+    _projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _mipMapDirty = false;
 }
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
@@ -917,7 +969,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setFilter(Texture::FilterMode::Linear);
+        texture->setFilter(Texture::FilterMode::LinearMipMap);
         texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     return std::move(texture);
@@ -933,9 +985,11 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
     );
     if (_projectionTexture) {
         _projectionTexture->uploadTexture();
-        //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        //_projectionTexture->setFilter(
+        //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        //);
     }
-    
+
     if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
@@ -944,7 +998,9 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
 
         if (_dilation.texture) {
             _dilation.texture->uploadTexture();
-            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            //_dilation.texture->setFilter(
+            //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            //);
         }
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
@@ -956,7 +1012,9 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
 
         if (_dilation.stencilTexture) {
             _dilation.stencilTexture->uploadTexture();
-            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            //_dilation.texture->setFilter(
+            //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+            //);
         }
     }
 

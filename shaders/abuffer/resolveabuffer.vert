@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,5 +29,5 @@ out vec2 texCoord;
 
 void main() {
     gl_Position = position;
-    texCoord = 0.5 + position.xy / 2.0;
+    texCoord = 0.5 + position.xy * 0.5;
 }

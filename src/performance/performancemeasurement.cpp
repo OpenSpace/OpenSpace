@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,12 @@
 namespace openspace::performance {
 
 PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
-                                     performance::PerformanceManager* manager)
+    std::shared_ptr<performance::PerformanceManager> manager
+)
     : _identifier(std::move(identifier))
     , _manager(manager)
 {
-    if (_manager) {
+    if (_manager.lock()) {
         glFinish();
 
         _startTime = std::chrono::high_resolution_clock::now();
@@ -50,8 +51,8 @@ PerformanceMeasurement::~PerformanceMeasurement() {
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
         endTime - _startTime).count();
 
-    if (_manager) {
-        _manager->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
+    if (std::shared_ptr<performance::PerformanceManager> m = _manager.lock()) {
+        m->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
     }
 }
 

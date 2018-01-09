@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -234,11 +234,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
         useEuclideanCoordinates(_useFlatScreen);
     });
-   
+
     addProperty(_depth);
     addProperty(_scale);
     addProperty(_alpha);
-    addProperty(_delete);
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
         _enabled = dictionary.value<bool>(EnabledInfo.identifier);
@@ -248,7 +247,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         _useFlatScreen = dictionary.value<bool>(FlatScreenInfo.identifier);
     }
     useEuclideanCoordinates(_useFlatScreen);
-    
+
     if (_useFlatScreen) {
         if (dictionary.hasKey(EuclideanPositionInfo.identifier)) {
             _euclideanPosition = dictionary.value<glm::vec2>(
@@ -294,16 +293,21 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     }
 
     _delete.onChange([this](){
-        std::string script = 
-            "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
+        std::string script =
+            "openspace.removeScreenSpaceRenderable('" + name() + "');";
         OsEng.scriptEngine().queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     });
+    addProperty(_delete);
 }
 
 bool ScreenSpaceRenderable::initialize() {
+    return true;
+}
+
+bool ScreenSpaceRenderable::initializeGL() {
     _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
 
     createPlane();
@@ -313,6 +317,10 @@ bool ScreenSpaceRenderable::initialize() {
 }
 
 bool ScreenSpaceRenderable::deinitialize() {
+    return true;
+}
+
+bool ScreenSpaceRenderable::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -337,6 +345,8 @@ void ScreenSpaceRenderable::render() {
 bool ScreenSpaceRenderable::isReady() const {
     return _shader && _texture;
 }
+
+void ScreenSpaceRenderable::update() {}
 
 bool ScreenSpaceRenderable::isEnabled() const {
     return _enabled;
@@ -380,7 +390,7 @@ void ScreenSpaceRenderable::createPlane() {
         sizeof(GLfloat) * 4,
         nullptr
     );
-    
+
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
@@ -404,7 +414,7 @@ void ScreenSpaceRenderable::useEuclideanCoordinates(bool b) {
 glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r) {
     float x = r * sin(spherical[0]) * sin(spherical[1]);
     float y = r * cos(spherical[1]);
-    
+
     return glm::vec2(x, y);
 }
 
@@ -435,6 +445,12 @@ void ScreenSpaceRenderable::createShaders() {
             "${SHADERS}/render.frag",
             dict
         );
+
+        _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
+        _uniformCache.alpha = _shader->uniformLocation("Alpha");
+        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
+        _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
+        _uniformCache.texture = _shader->uniformLocation("texture1");
     }
 }
 
@@ -444,7 +460,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
     //to scale the plane
     float textureRatio =
         static_cast<float>(_texture->height()) / static_cast<float>(_texture->width());
-        
+
     float scalingRatioX = _originalViewportSize.x / resolution.x;
     float scalingRatioY = _originalViewportSize.y / resolution.y;
     return glm::scale(
@@ -454,7 +470,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
             _scale * scalingRatioY * textureRatio,
             1.f
         )
-    ); 
+    );
 }
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
@@ -493,22 +509,23 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
-    _shader->setUniform("OcclusionDepth", 1.f - _depth);
-    _shader->setUniform("Alpha", _alpha);
-    _shader->setUniform("ModelTransform", modelTransform);
+    _shader->setUniform(_uniformCache.occlusionDepth, 1.f - _depth);
+    _shader->setUniform(_uniformCache.alpha, _alpha);
+    _shader->setUniform(_uniformCache.modelTransform, modelTransform);
+
     _shader->setUniform(
-        "ViewProjectionMatrix",
+        _uniformCache.viewProj,
         OsEng.renderEngine().camera()->viewProjectionMatrix()
     );
-    
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform(_uniformCache.texture, unit);
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    
+
     glEnable(GL_CULL_FACE);
 
     _shader->deactivate();

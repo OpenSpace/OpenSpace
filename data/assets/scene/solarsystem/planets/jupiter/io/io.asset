@@ -1,0 +1,53 @@
+local transforms = asset.require('../transforms')
+local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+asset.request('./trail')
+local kernels = asset.require('../jup310').Kernels
+
+
+
+local textures = asset.syncedResource({
+    Name = "Io Textures",
+    Type = "HttpSynchronization",
+    Identifier = "io_textures",
+    Version = 1
+})
+
+local Io = {
+    Name = "Io",
+    Parent = transforms.JupiterBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_IO",
+            DestinationFrame = "GALACTIC",
+            Kernels = kernels
+        },
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "IO",
+            Observer = "JUPITER BARYCENTER",
+            Kernels = kernels
+        },
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = 1821600,
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Name = "Io Texture",
+                    FilePath = textures .. "/io.jpg",
+                    Enabled = true
+                }
+            }
+        }
+    },
+    Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
+    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Io })

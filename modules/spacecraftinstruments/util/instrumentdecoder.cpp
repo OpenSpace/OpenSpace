@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +29,14 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* _loggerCat  = "InstrumentDecoder";
-    const char* keyDetector = "DetectorType";
-    const char* keySpice    = "Spice";
-    const char* keyStopCommand = "StopCommand";
+    constexpr const char* _loggerCat  = "InstrumentDecoder";
+    constexpr const char* keyDetector = "DetectorType";
+    constexpr const char* keySpice    = "Spice";
+    constexpr const char* keyStopCommand = "StopCommand";
 } // namespace
 
 namespace openspace {
-   
+
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     bool success = dictionary.getValue(keyDetector, _type);
     ghoul_assert(success, "Instrument has not provided detector type");
@@ -55,7 +55,6 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary spiceDictionary;
     success = dictionary.getValue(keySpice, spiceDictionary);
     ghoul_assert(success, "Instrument did not provide spice ids");
-
 
     _spiceIDs.resize(spiceDictionary.size());
     for (size_t i = 0; i < _spiceIDs.size(); ++i) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -177,7 +177,6 @@ ControlWidget::ControlWidget(QWidget* parent)
 
         _setDelta->setObjectName("background");
         layout->addWidget(_setDelta, 4, 0, 1, 2);
-        
 
         QWidget* controlContainer = new QWidget;
         controlContainer->setObjectName("background");
@@ -254,7 +253,8 @@ void ControlWidget::onDateChange() {
         QString script =
             "openspace.time.setTime('" + date + "');\
              openspace.setPropertyValue('Interaction.origin', '" + focus + "');\
-             openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "')";
+             openspace.setPropertyValue('Interaction.coordinateSystem', '" +
+             coordinateSystem + "')";
         emit scriptActivity(script);
     }
     _setTime->blockSignals(true);
@@ -266,18 +266,28 @@ void ControlWidget::onFocusChange() {
     int index = _focusNode->currentIndex();
     QString name = FocusNodes[index].name;
     QString coordinateSystem = FocusNodes[index].coordinateSystem;
-    QString script = "openspace.setPropertyValue('Interaction.origin', '" + name + "');openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "');";
+    QString script = "openspace.setPropertyValue('Interaction.origin', '" + name +
+                     "');openspace.setPropertyValue('Interaction.coordinateSystem', '" +
+                     coordinateSystem + "');";
     emit scriptActivity(script);
 }
 
 void ControlWidget::onFocusToTargetButton() {
     std::string target = reinterpret_cast<MainWindow*>(parent())->nextTarget();
     if (!target.empty()) {
-        auto it = std::find_if(std::begin(FocusNodes), std::end(FocusNodes), [target](const FocusNode& n) { return n.guiName.toLower() == QString::fromStdString(target).toLower(); });
+        auto it = std::find_if(
+            std::begin(FocusNodes),
+            std::end(FocusNodes),
+            [target](const FocusNode& n) {
+                return n.guiName.toLower() == QString::fromStdString(target).toLower();
+            });
         if (it != std::end(FocusNodes)) {
             QString name = it->name;
             QString coordinateSystem = it->coordinateSystem;
-            QString script = "openspace.setPropertyValue('Interaction.origin', '" + name + "');openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "');";
+            QString script =
+                "openspace.setPropertyValue('Interaction.origin', '" + name +
+                "');openspace.setPropertyValue('Interaction.coordinateSystem', '" +
+                coordinateSystem + "');";
             emit scriptActivity(script);
         }
     }
@@ -293,7 +303,9 @@ void ControlWidget::onFocusToNewHorizonsButton() {
     else
         coordinateSystem = "Pluto";
 
-    QString script = "openspace.setPropertyValue('Interaction.origin', 'NewHorizons');openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem + "');";
+    QString script = "openspace.setPropertyValue('Interaction.origin', 'NewHorizons');\
+        openspace.setPropertyValue('Interaction.coordinateSystem', '" + coordinateSystem +
+        "');";
     emit scriptActivity(script);
 }
 

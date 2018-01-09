@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <modules/space/translation/keplertranslation.h>
 
 namespace openspace {
-    
+
 /**
  * A specialization of the KeplerTranslation that extracts the Keplerian elements from a
  * two-line element as described by the US Space Command
@@ -50,7 +50,7 @@ public:
      * \param The ghoul::Dictionary that contains the information for this TLETranslation
      (*/
     TLETranslation(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
-    
+
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
      * that can be passed to the constructor.
@@ -63,7 +63,7 @@ private:
     /**
      * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
      * method with the correct values. If \p filename is a valid TLE file but contains
-     * disallowed values (see KeplerTranslation::setKeplerElements), a 
+     * disallowed values (see KeplerTranslation::setKeplerElements), a
      * KeplerTranslation::RangeError is thrown.
      * \param filename The path to the file that contains the TLE file.
      * \param lineNum The line number in the file where the set of 3 TLE lines starts
@@ -75,7 +75,7 @@ private:
      */
     void readTLEFile(const std::string& filename, int lineNum);
 };
-    
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__

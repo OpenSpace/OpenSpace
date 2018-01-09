@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,11 +37,21 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+ // CPL throws warning about missing DLL interface
+#pragma warning (disable : 4251)
+#endif // _MSC_VER
+
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
 #include <cpl_virtualmem.h>
 
 #include <gdal_priv.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
 
 #include <algorithm>
 
@@ -53,16 +63,16 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
 }
 
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
-        const TileTextureInitData& initData,
-        const std::string& baseDirectory,
-        RawTileDataReader::PerformPreprocessing preprocess)
+                                             const TileTextureInitData& initData,
+                                       RawTileDataReader::PerformPreprocessing preprocess)
     : RawTileDataReader(initData, preprocess)
     , _dataset(nullptr)
 {
-    _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
+    // _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
     _datasetFilePath = filePath;
 
-    { // Aquire lock
+    {
+        // Aquire lock
         std::lock_guard<std::mutex> lockGuard(_datasetLock);
         initialize();
     }
@@ -126,13 +136,20 @@ void GdalRawTileDataReader::initialize() {
 
     // Assume all raster bands have the same data type
     _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
-    _gdalDatasetMetaDataCached.scale = _dataset->GetRasterBand(1)->GetScale();
-    _gdalDatasetMetaDataCached.offset = _dataset->GetRasterBand(1)->GetOffset();
+    _gdalDatasetMetaDataCached.scale = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetScale()
+    );
+    _gdalDatasetMetaDataCached.offset = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetOffset()
+    );
     _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
     _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
-    _gdalDatasetMetaDataCached.noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
-    _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(_initData.glType());
-    
+    _gdalDatasetMetaDataCached.noDataValue = static_cast<float>(
+        _dataset->GetRasterBand(1)->GetNoDataValue()
+    );
+    _gdalDatasetMetaDataCached.dataType =
+        tiledatatype::getGdalDataType(_initData.glType());
+
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {
         _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::getGeoTransform();
@@ -143,7 +160,7 @@ void GdalRawTileDataReader::initialize() {
         calculateTileLevelDifference(_initData.dimensions().x);
 
     int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    _cached._maxLevel = -_cached._tileLevelDifference;
+    _cached._maxLevel = static_cast<int>(-_cached._tileLevelDifference);
     if (numOverviews > 0) {
         _cached._maxLevel += numOverviews - 1;
     }
@@ -160,22 +177,22 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     );
 
     PixelRegion::PixelCoordinate end = io.write.region.end();
-    size_t largestIndex =
+    [[maybe_unused]] size_t largestIndex =
         (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _initData.bytesPerPixel();
     ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
 
     char* dataDest = dataDestination;
 
     // GDAL reads pixels top to bottom, but we want our pixels bottom to top.
-    // Therefore, we increment the destination pointer to the last line on in the 
-    // buffer, and the we specify in the rasterIO call that we want negative line 
+    // Therefore, we increment the destination pointer to the last line on in the
+    // buffer, and the we specify in the rasterIO call that we want negative line
     // spacing. Doing this compensates the flipped Y axis
     dataDest += (io.write.totalNumBytes - io.write.bytesPerLine);
 
     // handle requested write region. Note -= since flipped y axis
     dataDest -= io.write.region.start.y * io.write.bytesPerLine;
     dataDest += io.write.region.start.x * _initData.bytesPerPixel();
-  
+
     GDALRasterBand* gdalRasterBand = _dataset->GetRasterBand(rasterBand);
     CPLErr readError = CE_Failure;
     readError = gdalRasterBand->RasterIO(
@@ -189,9 +206,9 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         io.write.region.numPixels.y,    // width to write y in destination
         _gdalDatasetMetaDataCached.dataType,         // Type
         static_cast<int>(_initData.bytesPerPixel()), // Pixel spacing
-        static_cast<int>(-io.write.bytesPerLine)     // Line spacing
+        -static_cast<int>(io.write.bytesPerLine)     // Line spacing
     );
-  
+
     // Convert error to RawTile::ReadError
     RawTile::ReadError error;
     switch (readError) {
@@ -207,14 +224,15 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
     GDALDataset* dataset = static_cast<GDALDataset*>(
-        GDALOpen(filePath.c_str(), GA_ReadOnly));
+        GDALOpen(filePath.c_str(), GA_ReadOnly)
+    );
     if (!dataset) {
         using namespace ghoul::filesystem;
-        std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
-            _initDirectory, filePath
-        );
+        // std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
+        //     _initDirectory, filePath
+        // );
 
-        dataset = static_cast<GDALDataset*>(GDALOpen(correctedPath.c_str(), GA_ReadOnly));
+        dataset = static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
         if (!dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + filePath);
         }
@@ -234,7 +252,7 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) co
     }
     int sizeLevel0 = maxOverview->GetXSize();
     double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    return diff;
+    return static_cast<int>(diff);
 }
 
 } // namespace openspace::globebrowsing

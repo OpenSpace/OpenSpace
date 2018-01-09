@@ -1,0 +1,64 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local sphereTextures = asset.syncedResource({
+    Name = "Milky Way Sphere Textures",
+    Type = "HttpSynchronization",
+    Identifier = "milkyway_textures",
+    Version = 2
+})
+
+local planeTextures = asset.syncedResource({
+    Name = "Milky Way Plane Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_milkyway_textures",
+    Version = 1
+})
+
+local planeSpeck = asset.syncedResource({
+    Name = "Milky Way Plane Speck",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_milkyway_speck",
+    Version = 1
+})
+
+local sphere = {
+    Name = "MilkyWay",
+    Renderable = {
+        Type = "RenderableSphere",
+        Size = 9.2E20,
+        Segments = 40,
+        Alpha = 0.4,
+        Texture = sphereTextures .. "/DarkUniverse_mellinger_4k.jpg",
+        Orientation = "Inside/Outside",
+        FadeOutThreshould = 0.25
+    },
+    GuiPath = "/Milky Way/Milky Way"
+}
+
+local plane = {
+    Name = "Milky Way Galaxy Image",
+    Parent = "Root",
+    Renderable = {
+        Type = "RenderablePlanesCloud",
+        Enabled = true,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.90,
+        ScaleFactor = 2.8,
+        File = planeSpeck .. "/galaxy.speck",
+        TexturePath = planeTextures,
+        Luminosity = "size",
+        ScaleLuminosity = 1.0,
+        -- Fade in value in the same unit as "Unit"
+        FadeInThreshould = 119441,
+        FadeInDistances = { 1400.0, 119441.0 },
+        PlaneMinSize = 5.0,
+        Unit = "pc"
+    },
+    GuiPath = "/Universe/Galaxies"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { sphere, plane })

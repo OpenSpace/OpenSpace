@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ namespace {
         UpperRight,
         Center
     };
-    
+
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
@@ -190,7 +190,7 @@ bool RenderableDebugPlane::isReady() const {
     return ready;
 }
 
-void RenderableDebugPlane::initialize() {
+void RenderableDebugPlane::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -198,13 +198,13 @@ void RenderableDebugPlane::initialize() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_BASE}/shaders/plane_vs.glsl",
-            "${MODULE_BASE}/shaders/plane_fs.glsl"
-            );
+            absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
+            absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
+        );
     }
 }
 
-void RenderableDebugPlane::deinitialize() {
+void RenderableDebugPlane::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -259,13 +259,13 @@ void RenderableDebugPlane::createPlane() {
     const GLfloat size = _size;
 
     const GLfloat vertex_data[] = {
-        //      x      y     z     w     s     t
+        //  x      y    z    w    s    t
         -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
+         size,  size, 0.f, 0.f, 1.f, 1.f,
+        -size,  size, 0.f, 0.f, 0.f, 1.f,
         -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
+         size, -size, 0.f, 0.f, 1.f, 0.f,
+         size,  size, 0.f, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array
@@ -274,7 +274,14 @@ void RenderableDebugPlane::createPlane() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 }
 
 } // namespace openspace

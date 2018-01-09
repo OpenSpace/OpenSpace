@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,8 @@ out vec4 psc_position;
 out vec3 vs_brightness;
 out vec3 vs_velocity;
 out float vs_speed;
-out vec4 cam_position;
+out vec4 vs_gPosition;
 
-uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -48,8 +47,14 @@ void main() {
     vs_brightness = in_brightness;
     vs_velocity = in_velocity;
     vs_speed = in_speed;
-    cam_position  = campos;
 
     vec4 tmp = p;
-    gl_Position = view * pscTransform(tmp, mat4(1.0));
+    vec4 position = pscTransform(tmp, mat4(1.0));
+    
+    // G-Buffer
+    vs_gPosition = position;
+    
+    position = view * position;
+    
+    gl_Position = position;
 }

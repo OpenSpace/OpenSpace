@@ -1,9 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "juno_model", Destination = ".", Version = 1 },
-        { Identifier = "juno_textures", Destination = "textures", Version = 1 }
-    },
-    TorrentFiles = {
-        { File = "Juno.torrent", Destination = "${SPICE}" },
-    }
-}

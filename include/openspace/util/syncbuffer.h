@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,11 +48,15 @@ public:
     ~SyncBuffer();
 
     void encode(const std::string& s) {
-        const size_t size = sizeof(char) * s.size() + sizeof(int32_t);
+        [[ maybe_unused ]] size_t size = sizeof(char) * s.size() + sizeof(int32_t);
         ghoul_assert(_encodeOffset + size < _n, "");
 
         int32_t length = static_cast<int32_t>(s.length());
-        memcpy(_dataStream.data() + _encodeOffset, reinterpret_cast<const char*>(&length), sizeof(int32_t));
+        memcpy(
+            _dataStream.data() + _encodeOffset,
+            reinterpret_cast<const char*>(&length),
+            sizeof(int32_t)
+        );
         _encodeOffset += sizeof(int32_t);
         memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
         _encodeOffset += length;
@@ -69,7 +73,11 @@ public:
 
     std::string decode() {
         int32_t length;
-        memcpy(reinterpret_cast<char*>(&length), _dataStream.data() + _decodeOffset, sizeof(int32_t));
+        memcpy(
+            reinterpret_cast<char*>(&length),
+            _dataStream.data() + _decodeOffset,
+            sizeof(int32_t)
+        );
         char* tmp = new char[length + 1];
         _decodeOffset += sizeof(int32_t);
         memcpy(tmp, _dataStream.data() + _decodeOffset, length);

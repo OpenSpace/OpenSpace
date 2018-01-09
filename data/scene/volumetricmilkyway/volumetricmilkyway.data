@@ -1,5 +1,0 @@
-return {
-    TorrentFiles = {
-        { File = "milkyway.torrent", Destination = "." }
-    }
-}

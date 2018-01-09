@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,15 +40,15 @@ namespace openspace::globebrowsing::tileprovider {
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
-  
+
     layergroupid::GroupID layerGroupID;
     dictionary.getValue(KeyLayerGroupID, layerGroupID);
-  
+
     ghoul::Dictionary providers;
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyProviders)) {
         providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
     }
-    
+
     for (size_t i = 0; i < providers.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
@@ -61,10 +61,11 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 "Must define key '" + std::string(KeyMaxLevel) + "'"
             );
         }
-        maxLevel = std::round(floatMaxLevel);
-            
+        maxLevel = static_cast<int>(std::round(floatMaxLevel));
+
         ghoul::Dictionary providerDict;
-        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
+        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict))
+        {
             throw std::runtime_error(
                 "Must define key '" + std::string(KeyTileProvider) + "'"
             );
@@ -86,19 +87,22 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         }
 
         _levelTileProviders.push_back(
-            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(typeID, providerDict))
+            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(
+                typeID,
+                providerDict
+            ))
         );
 
         std::string providerName;
         providerDict.getValue("Name", providerName);
         _levelTileProviders.back()->setName(providerName);
         addPropertySubOwner(_levelTileProviders.back().get());
-        
+
         // Ensure we can represent the max level
         if (static_cast<int>(_providerIndices.size()) < maxLevel) {
             _providerIndices.resize(maxLevel+1, -1);
         }
-            
+
         // map this level to the tile provider index
         _providerIndices[maxLevel] = static_cast<int>(_levelTileProviders.size()) - 1;
     }
@@ -109,6 +113,24 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             _providerIndices[i] = _providerIndices[i+1];
         }
     }
+}
+
+bool TileProviderByLevel::initialize() {
+    bool success = TileProvider::initialize();
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->initialize();
+    }
+
+    return success;
+}
+
+bool TileProviderByLevel::deinitialize() {
+    bool success = true;
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->deinitialize();
+    }
+
+    return TileProvider::deinitialize() && success;
 }
 
 Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {

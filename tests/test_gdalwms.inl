@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,17 +45,17 @@
 class GdalWmsTest : public testing::Test {};
 
 TEST_F(GdalWmsTest, Simple) {
-    GDALDataset *poDataset;
-    GDALAllRegister();
+    //GDALDatasetH poDataset;
+    //GDALAllRegister();
 
-    
-    std::string res = GDALVersionInfo("format");
-    
-    std::cout << res << std::endl;
+    //
+    //std::string res = GDALVersionInfo("format");
+    //
+    //std::cout << res << std::endl;
 
-    std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
+    //std::string testFile = absPath("${TESTDIR}/gdal/TERRA_CR_B143_2016-04-12.wms");
 
-    poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
+    //poDataset = GDALOpen(testFile.c_str(), GA_ReadOnly);
 
     // This assertion fails
     //ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,6 +47,8 @@ Fragment getFragment() {
     
     //frag.depth = gs_screenSpaceDepth;
     frag.depth = vs_screenSpaceDepth;
+    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;
 }

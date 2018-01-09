@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ public:
      * is already mapped or if something else failed.
      */
     void* mapBuffer(KeyType key, PixelBuffer::Access access);
-    
+
     /**
      * Finds a Pixel buffer and maps a range of it if it is available.
      * \param key is the identifier for the pixel buffer which can be used later when
@@ -92,15 +92,15 @@ public:
     bool unMapBuffer(KeyType key);
 
     /**
-     * \returns the <code>GLuint</code> id of a pixel buffer identified by <code>key</code>
-     * if it currently is mapped.
+     * \returns the <code>GLuint</code> id of a pixel buffer identified by
+     * <code>key</code> if it currently is mapped.
      */
     GLuint idOfMappedBuffer(KeyType key);
 private:
     const globebrowsing::PixelBuffer::Usage _usage;
 
     std::vector<std::unique_ptr<PixelBuffer>> _pixelBuffers;
-    
+
     // Maps from KeyType to index of mapped buffers
     std::map<KeyType, int> _indexMap;
 };

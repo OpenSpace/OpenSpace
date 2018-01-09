@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,9 +34,10 @@
 #include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::filesystem { 
-    class File; 
+namespace ghoul::filesystem {
+    class File;
 }
 
 namespace ghoul::opengl {
@@ -54,7 +55,8 @@ namespace openspace {
         ~RenderablePoints() = default;
 
         void initialize() override;
-        void deinitialize() override;
+        void initializeGL() override;
+        void deinitializeGL() override;
 
         bool isReady() const override;
 
@@ -64,7 +66,7 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     private:
-        
+
         enum Unit {
             Meter = 0,
             Kilometer = 1,
@@ -93,10 +95,12 @@ namespace openspace {
         properties::FloatProperty _scaleFactor;
         properties::Vec3Property _pointColor;
         properties::StringProperty _spriteTexturePath;
-        
+
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+        UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
+            spriteTexture, hasColorMap) _uniformCache;
 
         std::string _speckFile;
         std::string _colorMapFile;

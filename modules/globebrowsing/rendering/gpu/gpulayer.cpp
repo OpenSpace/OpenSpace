@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
 {
     gpuRenderSettings.setValue(programObject, layer.renderSettings());
     gpuLayerAdjustment.setValue(programObject, layer.layerAdjustment());
-    
+
     switch (layer.type()) {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
@@ -46,7 +46,10 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
             ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
             gpuChunkTilePile.setValue(programObject, chunkTilePile);
             paddingStartOffset.setValue(programObject, layer.tilePixelStartOffset());
-            paddingSizeDifference.setValue(programObject, layer.tilePixelSizeDifference());
+            paddingSizeDifference.setValue(
+                programObject,
+                layer.tilePixelSizeDifference()
+            );
             break;
         }
         case layergroupid::TypeID::SolidColor:
@@ -60,9 +63,17 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
 void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                     const std::string& nameBase, int pileSize)
 {
-    gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
-    gpuLayerAdjustment.bind(layer.layerAdjustment(), programObject, nameBase + "adjustment.");
-    
+    gpuRenderSettings.bind(
+        layer.renderSettings(),
+        programObject,
+        nameBase + "settings."
+    );
+    gpuLayerAdjustment.bind(
+        layer.layerAdjustment(),
+        programObject,
+        nameBase + "adjustment."
+    );
+
     switch (layer.type()) {
         // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
@@ -74,7 +85,10 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
         case layergroupid::TypeID::ByLevelTileLayer: {
             gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
             paddingStartOffset.bind(programObject, nameBase + "padding.startOffset");
-            paddingSizeDifference.bind(programObject, nameBase + "padding.sizeDifference");
+            paddingSizeDifference.bind(
+                programObject,
+                nameBase + "padding.sizeDifference"
+            );
             break;
         }
         case layergroupid::TypeID::SolidColor:

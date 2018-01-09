@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/properties/scalarproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -46,10 +47,11 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    
+
 private:
     const RenderableGlobe& _owner;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(lightIntensityClamped, modelView, projection) _uniformCache;
 
     GLuint _vertexBufferID;
     GLuint _vaoID;

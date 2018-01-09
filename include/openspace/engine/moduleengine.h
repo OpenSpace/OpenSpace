@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,8 +56,8 @@ public:
      * \throw ghoul::RuntimeError If two modules in the default modules have the same
      * name
     */
-    void initialize();
-    
+    void initialize(const ghoul::Dictionary& moduleConfigurations);
+
     /**
      * Deinitializes all of the contained OpenSpaceModule%s by calling the
      * OpenSpaceModule::deinitialize methods.
@@ -68,19 +68,20 @@ public:
      * Registers the passed \p module with this ModuleEngine. The OpenSpaceModule::create
      * method will be called on the \p module in the process.
      * \param module The OpenSpaceModule that is to be registered
-     * \throw ghoul::RuntimeError If the name of the \p module was already registered 
+     * \throw ghoul::RuntimeError If the name of the \p module was already registered
      * previously
      * \pre \p module must not be nullptr
      */
-    void registerModule(std::unique_ptr<OpenSpaceModule> module);
-    
+    void registerModule(std::unique_ptr<OpenSpaceModule> module,
+                        const ghoul::Dictionary& configuration);
+
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with
      * this ModuleEngine. All returned OpenSpaceModule%s are guaranteed to be initialized.
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
-    
+
     /**
      * Get the module subclass with given template argument. Requires the module subclass
      * to have the public static member variable <code>name</code> which must be equal to
