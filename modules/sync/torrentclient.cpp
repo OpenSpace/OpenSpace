@@ -57,8 +57,10 @@ TorrentClient::TorrentClient()
 {}
 
 TorrentClient::~TorrentClient() {
+    std::lock_guard<std::mutex> guard(_mutex);
     _keepRunning = false;
     _torrentThread.join();
+    _session = nullptr;
 }
 
 void TorrentClient::initialize() {
