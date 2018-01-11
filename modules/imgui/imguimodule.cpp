@@ -169,8 +169,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
             if (wrapper.isMaster() && showGui) {
+                const glm::ivec2 windowSize = wrapper.currentWindowSize();
+                const glm::ivec2 resolution = wrapper.currentWindowResolution();
+
                 glm::vec2 mousePosition = wrapper.mousePosition();
-                glm::ivec2 windowSize = wrapper.currentWindowSize();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);
@@ -183,7 +185,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
-                    wrapper.dpiScaling(),
+                    resolution / windowSize,
                     mousePosition,
                     mouseButtons
                 );
