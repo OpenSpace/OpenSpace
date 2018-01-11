@@ -207,9 +207,7 @@ void TorrentClient::notify(TorrentId id) {
 
     TorrentProgress progress;
 
-    progress.finished = status.state == libtorrent::torrent_status::state_t::finished ||
-        status.state == libtorrent::torrent_status::state_t::seeding;
-
+    progress.finished = status.is_finished;
     progress.nTotalBytesKnown = status.total_wanted > 0;
     progress.nTotalBytes = status.total_wanted;
     progress.nDownloadedBytes = status.total_wanted_done;

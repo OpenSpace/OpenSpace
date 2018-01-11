@@ -705,7 +705,8 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 resourceSyncs.insert(s);
                 _loadingScreen->updateItem(
                     s->name(),
-                    LoadingScreen::ItemStatus::Started
+                    LoadingScreen::ItemStatus::Started,
+                    s->progress()
                 );
             }
         }
@@ -721,13 +722,19 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         auto it = resourceSyncs.begin();
         while (it != resourceSyncs.end()) {
             if ((*it)->state() == ResourceSynchronization::State::Syncing) {
-                ++it;
                 loading = true;
+                _loadingScreen->updateItem(
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Started,
+                    (*it)->progress()
+                );
+                ++it;
             } else {
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
                     (*it)->name(),
-                    LoadingScreen::ItemStatus::Finished
+                    LoadingScreen::ItemStatus::Finished,
+                    1.0f
                 );
                 it = resourceSyncs.erase(it);
             }

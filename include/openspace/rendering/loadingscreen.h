@@ -84,7 +84,7 @@ public:
         Failed
     };
 
-    void updateItem(const std::string& itemName, ItemStatus newStatus);
+    void updateItem(const std::string& itemName, ItemStatus newStatus, float progress);
 
 private:
     bool _showMessage;
@@ -124,6 +124,7 @@ private:
     struct Item {
         std::string name;
         ItemStatus status;
+        float progress;
 
         bool hasLocation;
         glm::vec2 ll;
