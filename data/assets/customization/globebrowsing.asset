@@ -1,3 +1,7 @@
+-- Add require statements for assets exporting the neccessary globes
+-- example:
+-- asset.require('../scene/solarsystem/planets/mars/mars')
+
 -- Add folders to this list that contain .info files describing HiRISE patches
 local vrt_folders = {
     Mars = {
