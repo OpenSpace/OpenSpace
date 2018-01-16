@@ -1,4 +1,26 @@
-import * as helperFunctions from './sceneGraphHelperFunctions.js'
+import * as helperFunctions from '../sceneGraphHelperFunctions.js'
+
+export const setPropertyValue = (state, action) => {
+  switch(action.type) {
+    case 'PROPERTYOWNER_ADD_OWNER':
+        if (action.payload.property.Description.Type === "TransferFunctionProperty") {
+          return envelopes(undefined, action);
+        }
+        else {
+          return action.payload.property.Value;
+        }
+    case 'SCENEGRAPH_UPDATE_PROPERTY':
+    case 'SCENEGRAPH_CHANGE_PROPERTY':
+        if (state.Description.Type === "TransferFunctionProperty") {
+          return envelopes(state.Value, action);
+        }
+        else {
+          return action.payload.value;
+        }
+    default:
+      return action.payload.Value;
+  }
+}
 
 const property = (state={}, action) => {  // state refers to a single property
   switch(action.type) {
@@ -6,14 +28,14 @@ const property = (state={}, action) => {  // state refers to a single property
       return {
         id: helperFunctions.getIdOfProperty(action.payload.property.Description.Identifier),
         Description: action.payload.property.Description,
-        Value: helperFunctions.setPropertyValue(undefined, action),
+        Value: setPropertyValue(undefined, action),
         listeners: 0,
       }
     case 'SCENEGRAPH_UPDATE_PROPERTY':
     case 'SCENEGRAPH_CHANGE_PROPERTY':
       return {
         ...state,
-        Value: helperFunctions.setPropertyValue(state, action)
+        Value: setPropertyValue(state, action)
       }
     case 'SCENEGRAPH_START_LISTENING':
     case 'SCENEGRAPH_STOP_LISTENING':

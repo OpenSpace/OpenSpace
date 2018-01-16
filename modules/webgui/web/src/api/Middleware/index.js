@@ -1,5 +1,5 @@
 import { applyMiddleware } from 'redux'
-import updateBackend from './Transferfunction'
+import updateBackend from './sceneGraph'
 import logger from './logger'
 //Add more reducers here
 

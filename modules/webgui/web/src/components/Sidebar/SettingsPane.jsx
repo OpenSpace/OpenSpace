@@ -16,11 +16,6 @@ class SettingsPane extends Component {
 
   }
 
-  componentDidMount() {
-    DataManager.getValue(AllPropertiesKey, this.props.InsertSettings);
-    DataManager.getValue(AllScreenSpaceRenderablesKey, this.props.InsertSettings);
-  }
-
   render() {
     const properties = this.props.properties.concat(this.state.screenSpaceRenderables)
       .map(prop => Object.assign(prop, { key: prop.name }));
