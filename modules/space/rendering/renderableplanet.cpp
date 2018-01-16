@@ -236,6 +236,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
+    addProperty(_performShading);
 
     addPropertySubOwner(_geometry.get());
 
@@ -255,11 +256,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         );
     }
     addProperty(_heightExaggeration);
-
-    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
-        _performShading = dictionary.value<bool>(HeightExaggerationInfo.identifier);
-    }
-    addProperty(_performShading);
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
