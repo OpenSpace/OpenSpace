@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,9 @@ public:
     TileProviderByLevel(const ghoul::Dictionary& dictionary);
     TileProviderByLevel(const std::string& imagePath);
     virtual ~TileProviderByLevel() = default;
+
+    bool initialize() override;
+    bool deinitialize() override;
 
     virtual Tile getTile(const TileIndex& tileIndex) override;
     virtual Tile::Status getTileStatus(const TileIndex& index) override;

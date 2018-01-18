@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
     vertexPosition = psc_addition(vec4(local_vertex_pos,vertexPosition.w),objpos);
     //position = psc_addition(lvp,objpos);
     
-    // PSC addition; rotated and viewscaled vertex and the cmaeras negative position
+    // PSC addition; rotated and viewscaled vertex and the cameras negative position
     vertexPosition = psc_addition(vertexPosition,vec4(-campos.xyz,campos.w));
     
     // rotate the camera

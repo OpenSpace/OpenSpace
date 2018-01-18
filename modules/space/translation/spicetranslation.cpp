@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -147,18 +147,19 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         // Due to the specification, we can be sure it is either a Dictionary or a string
         if (dictionary.hasValue<std::string>(KeyKernels)) {
             std::string kernel = dictionary.value<std::string>(KeyKernels);
-            loadKernel(kernel);
+            loadKernel(absPath(kernel));
         }
         else {
             ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
             for (size_t i = 1; i <= kernels.size(); ++i) {
                 std::string kernel = kernels.value<std::string>(std::to_string(i));
-                loadKernel(kernel);
+                loadKernel(absPath(kernel));
             }
         }
     }
 
     auto update = [this](){
+        requireUpdate();
         notifyObservers();
     };
 
@@ -172,18 +173,14 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     addProperty(_frame);
 }
 
-glm::dvec3 SpiceTranslation::position() const {
-    return _position;
-}
-
-void SpiceTranslation::update(const UpdateData& data) {
+glm::dvec3 SpiceTranslation::position(const Time& time) const {
     double lightTime = 0.0;
-    _position = SpiceManager::ref().targetPosition(
+    return SpiceManager::ref().targetPosition(
         _target,
         _observer,
         _frame,
         {},
-        data.time.j2000Seconds(),
+        time.j2000Seconds(),
         lightTime
     ) * glm::pow(10.0, 3.0);
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@
 #include <queue>
 
 namespace {
-    const char* _loggerCat = "TSP";
+    constexpr const char* _loggerCat = "TSP";
 } // namespace
 
 namespace openspace {
@@ -151,7 +151,7 @@ bool TSP::construct() {
     // Loop over the OTs (one per BST node)
     for (unsigned int OT = 0; OT<numBSTNodes_; ++OT) {
 
-        // Start at the root of each OT  
+        // Start at the root of each OT
         unsigned int OTNode = OT*numOTNodes_;
 
         // Calculate BST level (first level is level 0)

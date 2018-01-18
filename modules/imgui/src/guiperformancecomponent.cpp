@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,10 +97,14 @@ void GuiPerformanceComponent::render() {
     using ghoul::SharedMemory;
     using namespace performance;
 
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin("Performance", &v);
     _isEnabled = v;
-    PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
+    _isCollapsed = ImGui::IsWindowCollapsed();
+
+    RenderEngine& re = OsEng.renderEngine();
+    PerformanceLayout* layout = re.performanceManager()->performanceData();
 
     v = _sceneGraphIsEnabled;
     ImGui::Checkbox("SceneGraph", &v);
@@ -321,7 +325,8 @@ void GuiPerformanceComponent::render() {
                 indices.begin(),
                 indices.end(),
                 [layout](size_t a, size_t b) {
-                    return std::string(layout->sceneGraphEntries[a].name) < std::string(layout->sceneGraphEntries[b].name);
+                    return std::string(layout->sceneGraphEntries[a].name) <
+                           std::string(layout->sceneGraphEntries[b].name);
                 }
             );
         }

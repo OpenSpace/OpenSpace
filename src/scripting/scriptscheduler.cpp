@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -244,13 +244,13 @@ ScriptScheduler::progressTo(double newTime)
 }
 
 double ScriptScheduler::currentTime() const {
-    return _currentTime; 
+    return _currentTime;
 }
 
 std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
     std::vector<ScheduledScript> result;
     for (size_t i = 0; i < _timings.size(); ++i) {
-        ScheduledScript script;        
+        ScheduledScript script;
         script.time = _timings[i];
         script.forwardScript = _forwardScripts[i];
         script.backwardScript = _backwardScripts[i];
@@ -267,6 +267,7 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "loadFile",
                 &luascriptfunctions::loadFile,
+                {},
                 "string",
                 "Load timed scripts from a Lua script file that returns a list of "
                 "scheduled scripts."
@@ -274,6 +275,7 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "loadScheduledScript",
                 &luascriptfunctions::loadScheduledScript,
+                {},
                 "string, string, (string, string)",
                 "Load a single scheduled script. The first argument is the time at which "
                 "the scheduled script is triggered, the second argument is the script "
@@ -285,6 +287,7 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "clear",
                 &luascriptfunctions::clear,
+                {},
                 "",
                 "Clears all scheduled scripts."
             },

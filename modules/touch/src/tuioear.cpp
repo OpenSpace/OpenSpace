@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,8 @@ void TuioEar::removeTuioObject(TuioObject*) { }
 void TuioEar::addTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     _tap = false;
-    // find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
+    // find same id in _list if it exists in _removeList (new input with same ID as a
+    // previously stored)
     int i = tcur->getSessionID();
     std::vector<int>::iterator foundID = std::find_if(
         _removeList.begin(),
@@ -93,7 +94,10 @@ void TuioEar::removeTuioCursor(TuioCursor* tcur) {
     }
     dist /= tcur->getPath().size();
 
-    double heldTime = tcur->getPath().back().getTuioTime().getTotalMilliseconds() - tcur->getPath().front().getTuioTime().getTotalMilliseconds();
+    double heldTime =
+        tcur->getPath().back().getTuioTime().getTotalMilliseconds() -
+        tcur->getPath().front().getTuioTime().getTotalMilliseconds();
+
     if (heldTime < 180 && dist < 0.0004 && _list.size() == 1 && _removeList.size() == 1) {
         _tapCo = TuioCursor(*tcur);
         _tap = true;

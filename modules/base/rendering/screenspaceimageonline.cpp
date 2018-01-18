@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,7 +89,12 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
     else {
         static int id = 0;
-        setName("ScreenSpaceImageOnline " + std::to_string(id));
+        if (id == 0) {
+            setName("ScreenSpaceImageOnline");
+        }
+        else {
+            setName("ScreenSpaceImageOnline " + std::to_string(id));
+        }
         ++id;
     }
 
@@ -141,7 +146,7 @@ void ScreenSpaceImageOnline::update() {
 
                 // Textures of planets looks much smoother with AnisotropicMipMap rather
                 // than linear
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
                 _texture = std::move(texture);
                 _textureIsDirty = false;

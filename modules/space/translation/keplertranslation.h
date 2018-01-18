@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,20 +62,10 @@ public:
     virtual ~KeplerTranslation() = default;
 
     /**
-     * This method returns the position of the object at the time that was passed to the
-     * last call of the #update method. The KeplerTranslation caches its position, thus
-     * repeated calls to this function are cheap.
-     * \return The position of the object at the time of last call to the #update method
-     */
-    virtual glm::dvec3 position() const override;
-
-    /**
-     * Updates the cached position of the object to correspond to the time passed in the
-     * \p data.
-     * \param data The UpdateData struct that contains all information necessary to update
-     * this Translation
-     */
-    void update(const UpdateData& data) override;
+    * Method returning the translation vector at a given time
+    * \param time The time to use when doing the position lookup
+    */
+    glm::dvec3 position(const Time& time) const override;
 
     /**
      * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
@@ -133,7 +123,7 @@ protected:
 
 private:
     /// Recombutes the rotation matrix used in the update method
-    void computeOrbitPlane();
+    void computeOrbitPlane() const;
 
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
@@ -164,9 +154,9 @@ private:
     properties::DoubleProperty _period;
 
     /// Dirty flag for the _orbitPlaneRotation parameters
-    bool _orbitPlaneDirty;
+    mutable bool _orbitPlaneDirty;
     /// The rotation matrix that defines the plane of the orbit
-    glm::dmat3 _orbitPlaneRotation;
+    mutable glm::dmat3 _orbitPlaneRotation;
 
     /// The cached position for the last time with which the update method was called
     glm::dvec3 _position;

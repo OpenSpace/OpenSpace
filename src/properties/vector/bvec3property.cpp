@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,86 +30,87 @@
 
 #include <limits>
 
-using std::numeric_limits;
+namespace {
+
+glm::bvec3 fromLuaConversion(lua_State* state, bool& success) {
+    glm::bvec3 result;
+    lua_pushnil(state);
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec3>::value; ++i) {
+        int hasNext = lua_next(state, -2);
+        if (hasNext != 1) {
+            success = false;
+            return glm::bvec3(0);
+        }
+        if (lua_isboolean(state, -1) != 1) {
+            success = false;
+            return glm::bvec3(0);
+        }
+        else {
+            result[i] = static_cast<glm::bvec3::value_type>(lua_toboolean(state, -1));
+            lua_pop(state, 1);
+        }
+    }
+    success = true;
+    return result;
+}
+
+bool toLuaConversion(lua_State* state, glm::bvec3 val) {
+    lua_newtable(state);
+    int number = 1;
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec3>::value; ++i) {
+        lua_pushnumber(state, static_cast<lua_Number>(val[i]));
+        lua_setfield(state, -2, std::to_string(number).c_str());
+        ++number;
+    }
+    return true;
+}
+
+glm::bvec3 fromStringConversion(std::string val, bool& success) {
+    glm::bvec3 result;
+    std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
+    if (tokens.size() != static_cast<size_t>(result.length())) {
+        success = false;
+        return result;
+    }
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec3>::value; ++i) {
+        std::stringstream s(tokens[i]);
+        glm::bvec3::value_type v;
+        s >> v;
+        if (s.fail()) {
+            success = false;
+            return result;
+        }
+        else {
+            result[i] = v;
+        }
+    }
+    success = true;
+    return result;
+}
+
+bool toStringConversion(std::string& outValue, glm::bvec3 inValue) {
+    outValue = "{";
+    for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec3>::value; ++i) {
+        outValue += std::to_string(inValue[i]) + ",";
+    }
+    outValue.pop_back();
+    outValue += "}";
+    return true;
+}
+
+} // namespace
 
 namespace openspace::properties {
 
-#define DEFAULT_FROM_LUA_LAMBDA(__TYPE__, __CONVFUNC__, __TESTFUNC__)                    \
-    [](lua_State * state, bool& success) -> __TYPE__ {                                   \
-        __TYPE__ result;                                                                 \
-        lua_pushnil(state);                                                              \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            int hasNext = lua_next(state, -2);                                           \
-            if (hasNext != 1) {                                                          \
-                success = false;                                                         \
-                return __TYPE__(0);                                                      \
-            }                                                                            \
-            if (__TESTFUNC__(state, -1) != 1) {                                          \
-                success = false;                                                         \
-                return __TYPE__(0);                                                      \
-            } else {                                                                     \
-                result[i] = static_cast<__TYPE__::value_type>(__CONVFUNC__(state, -1));  \
-                lua_pop(state, 1);                                                       \
-            }                                                                            \
-        }                                                                                \
-        success = true;                                                                  \
-        return result;                                                                   \
-    }
-
-#define DEFAULT_TO_LUA_LAMBDA(__TYPE__)                                                  \
-    [](lua_State * state, __TYPE__ value) -> bool {                                      \
-        lua_newtable(state);                                                             \
-        int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            lua_pushnumber(state, static_cast<lua_Number>(value[i]));                    \
-            lua_setfield(state, -2, std::to_string(number).c_str());                     \
-            ++number;                                                                    \
-        }                                                                                \
-        return true;                                                                     \
-    }
-
-#define DEFAULT_FROM_STRING_LAMBDA(__TYPE__)                                             \
-    [](std::string val, bool& success) -> __TYPE__ {                                     \
-        __TYPE__ result;                                                                 \
-        std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');               \
-        if (tokens.size() != static_cast<size_t>(result.length())) {                     \
-            success = false;                                                             \
-            return result;                                                               \
-        }                                                                                \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-                std::stringstream s(tokens[i]);                                          \
-                __TYPE__::value_type v;                                                  \
-                s >> v;                                                                  \
-                if (s.fail()) {                                                          \
-                    success = false;                                                     \
-                    return result;                                                       \
-                }                                                                        \
-                else {                                                                   \
-                    result[i] = v;                                                       \
-                }                                                                        \
-        }                                                                                \
-        success = true;                                                                  \
-        return result;                                                                   \
-    }
-
-#define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
-    [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
-        outValue = "{";                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            outValue += std::to_string(inValue[i]) + ",";                                \
-        }                                                                                \
-        outValue.pop_back();                                                             \
-        outValue += "}";                                                                 \
-        return true;                                                                     \
-    }
-
-
-REGISTER_TEMPLATEPROPERTY_SOURCE(BVec3Property, glm::bvec3, glm::bvec3(false),
-                                 DEFAULT_FROM_LUA_LAMBDA(glm::bvec3, lua_toboolean,
-                                                         lua_isboolean),
-                                 DEFAULT_TO_LUA_LAMBDA(glm::bvec3),
-                                 DEFAULT_FROM_STRING_LAMBDA(glm::bvec3),
-                                 DEFAULT_TO_STRING_LAMBDA(glm::bvec3),
-                                 LUA_TTABLE);
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    BVec3Property,
+    glm::bvec3,
+    glm::bvec3(false),
+    fromLuaConversion,
+    toLuaConversion,
+    fromStringConversion,
+    toStringConversion,
+    LUA_TTABLE
+)
 
 } // namespace openspace::properties

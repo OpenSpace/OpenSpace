@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/spacecraftinstruments/util/projectioncomponent.h>
-
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
+#include <modules/spacecraftinstruments/util/projectioncomponent.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-
 #include <openspace/util/powerscaledcoordinate.h>
+
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -43,7 +43,7 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; } 
+namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;
@@ -55,8 +55,8 @@ public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection();
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
@@ -79,8 +79,14 @@ private:
     properties::StringProperty _colorTexturePath;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    UniformCache(performShading, directionToSunViewSpace, modelViewTransform,
+        projectionTransform, projectionFading, baseTexture,
+        projectionTexture) _mainUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    UniformCache(projectionTexture, needShadowMap, ProjectorMatrix, ModelTransform,
+        boresight) _fboUniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
+    UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
 

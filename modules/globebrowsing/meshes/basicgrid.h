@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ public:
      * \param useNormals determines whether or not to upload any vertex normal data
      * to the GPU.
     */
-    BasicGrid(unsigned int xSegments, unsigned int ySegments, 
+    BasicGrid(unsigned int xSegments, unsigned int ySegments,
         TriangleSoup::Positions usePositions,
         TriangleSoup::TextureCoordinates useTextureCoordinates,
         TriangleSoup::Normals useNormals);

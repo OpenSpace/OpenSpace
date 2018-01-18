@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,30 +46,37 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+struct TransformData;
+
+namespace planetgeometry {
+class PlanetGeometry;
+}
+
 namespace documentation { struct Documentation; }
 namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanet : public Renderable {
 public:
     // Shadow structure
-    typedef struct {
+    struct ShadowConfiguration {
         std::pair<std::string, float> source;
         std::pair<std::string, float> caster;
-    } ShadowConf;
+    };
 
     struct ShadowRenderingStruct {
-        float xu, xp;
-        float rs, rc;
+        float xu;
+        float xp;
+        float rs;
+        float rc;
         glm::vec3 sourceCasterVec;
         glm::vec3 casterPositionVec;
         bool isShadowing;
     };
 
-public:
     RenderablePlanet(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -81,6 +88,8 @@ protected:
     void loadTexture();
 
 private:
+    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& transformData);
+
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
@@ -88,22 +97,24 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
+    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
     properties::FloatProperty _heightExaggeration;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     properties::BoolProperty _performShading;
-    float _alpha;
-    std::vector< ShadowConf > _shadowConfArray;
-    float _planetRadius;
 
-    glm::dmat3 _stateMatrix;
+    float _alpha;
+    float _planetRadius;
     bool _hasNightTexture;
     bool _hasHeightTexture;
     bool _shadowEnabled;
     double _time;
+
+    glm::dmat3 _stateMatrix;
+
+    std::vector<ShadowConfiguration> _shadowConfArray;
 };
 
 } // namespace openspace

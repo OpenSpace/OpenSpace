@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@ uniform sampler2D stencil;
 
 // We conside the 8-neighborhood of a texel, so going a stepsize of '1' in both
 // directions
-vec2 offsets[8] = {
+vec2 offsets[8] = vec2[](
     vec2(-1.0, -1.0),
     vec2(-1.0,  0.0),
     vec2(-1.0,  1.0),
@@ -41,7 +41,7 @@ vec2 offsets[8] = {
     vec2(1.0,  -1.0),
     vec2(1.0,   0.0),
     vec2(1.0,   1.0)
-};
+);
 
 // Collect the contributing colors from the neighboring texels and return the
 // averaged value of all texels that passed the masking test based on 'stencil'

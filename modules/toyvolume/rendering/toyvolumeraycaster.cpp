@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,9 @@ void ToyVolumeRaycaster::initialize() {
 void ToyVolumeRaycaster::deinitialize() {
 }
 
-void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
+void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
+                                           ghoul::opengl::ProgramObject& program)
+{
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
     Renderable::setPscUniforms(program, data.camera, data.position);
@@ -67,7 +69,9 @@ void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl
     _boundingBox.render();
 }
 
-void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
+void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
+                                          ghoul::opengl::ProgramObject& program)
+{
     // Uniforms
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
@@ -84,7 +88,9 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl:
     glCullFace(GL_BACK);
 }
 
-void ToyVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+void ToyVolumeRaycaster::preRaycast(const RaycastData& data,
+                                    ghoul::opengl::ProgramObject& program)
+{
     std::string colorUniformName = "color" + std::to_string(data.id);
     std::string timeUniformName = "time" + std::to_string(data.id);
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);

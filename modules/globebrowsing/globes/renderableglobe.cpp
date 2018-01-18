@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,11 +29,15 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
+
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
+    const char* keyShadowGroup = "ShadowGroup";
+    const char* keyShadowSource = "Source";
+    const char* keyShadowCaster = "Caster";
 
     static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
@@ -131,6 +135,18 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    static const openspace::properties::Property::PropertyInfo EclipseInfo = {
+        "Eclipse",
+        "Eclipse",
+        "Enables/Disable Eclipse shadows"
+    };
+
+    static const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+        "EclipseHardShadows",
+        "Eclipse Hard Shadows",
+        "Enables the rendering of eclipse shadows using hard shadows"
+    };
+
     static const openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
         "LodScaleFactor",
         "Level of Detail Scale Factor",
@@ -157,15 +173,15 @@ namespace openspace::globebrowsing {
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _debugProperties({
-        BoolProperty(SaveOrThrowInfo, false), 
+        BoolProperty(SaveOrThrowInfo, false),
         BoolProperty(ShowChunkEdgeInfo, false),
         BoolProperty(ShowChunkBoundsInfo, false),
         BoolProperty(ShowChunkAABBInfo, false),
-        BoolProperty(HeightResolutionInfo, false), 
+        BoolProperty(HeightResolutionInfo, false),
         BoolProperty(HeightIntensityInfo, false),
         BoolProperty(FrustumCullingInfo, true),
         BoolProperty(HorizonCullingInfo, true),
-        BoolProperty(LevelProjectedAreaInfo, true),
+        BoolProperty(LevelProjectedAreaInfo, false),
         BoolProperty(ResetTileProviderInfo, false),
         BoolProperty(CollectStatsInfo, false),
         BoolProperty(LimitLevelInfo, true),
@@ -175,6 +191,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(PerformShadingInfo, true),
         BoolProperty(AtmosphereInfo, false),
         BoolProperty(AccurateNormalsInfo, false),
+        BoolProperty(EclipseInfo, false),
+        BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
@@ -223,6 +241,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
+    addProperty(_generalProperties.eclipseShadowsEnabled);
+    addProperty(_generalProperties.eclipseHardShadows);
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
@@ -248,6 +268,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     };
     _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
     _generalProperties.useAccurateNormals.onChange(notifyShaderRecompilation);
+    _generalProperties.eclipseShadowsEnabled.onChange(notifyShaderRecompilation);
+    _generalProperties.eclipseHardShadows.onChange(notifyShaderRecompilation);
     _generalProperties.performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
     _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
@@ -259,24 +281,103 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_layerManager.get());
     //addPropertySubOwner(_pointGlobe.get());
 
+    //================================================================
+    //======== Reads Shadow (Eclipses) Entries in mod file ===========
+    //================================================================
+    ghoul::Dictionary shadowDictionary;
+    bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool disableShadows = false;
+    if (success) {
+        std::vector<std::pair<std::string, double>> sourceArray;
+        unsigned int sourceCounter = 1;
+        while (success) {
+            std::string sourceName;
+            success = shadowDictionary.getValue(keyShadowSource +
+                std::to_string(sourceCounter) + ".Name", sourceName);
+            if (success) {
+                double sourceRadius;
+                success = shadowDictionary.getValue(keyShadowSource +
+                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
+                if (success) {
+                    sourceArray.emplace_back(sourceName, sourceRadius);
+                }
+                else {
+                    //LWARNING("No Radius value expecified for Shadow Source Name "
+                    //    << sourceName << " from " << name
+                    //    << " planet.\nDisabling shadows for this planet.");
+                    disableShadows = true;
+                    break;
+                }
+            }
+            sourceCounter++;
+        }
+
+        if (!disableShadows && !sourceArray.empty()) {
+            success = true;
+            std::vector<std::pair<std::string, double>> casterArray;
+            unsigned int casterCounter = 1;
+            while (success) {
+                std::string casterName;
+                success = shadowDictionary.getValue(keyShadowCaster +
+                    std::to_string(casterCounter) + ".Name", casterName);
+                if (success) {
+                    double casterRadius;
+                    success = shadowDictionary.getValue(keyShadowCaster +
+                        std::to_string(casterCounter) + ".Radius", casterRadius);
+                    if (success) {
+                        casterArray.emplace_back(casterName, casterRadius);
+                    }
+                    else {
+                        //LWARNING("No Radius value expecified for Shadow Caster Name "
+                        //    << casterName << " from " << name
+                        //    << " planet.\nDisabling shadows for this planet.");
+                        disableShadows = true;
+                        break;
+                    }
+                }
+
+                casterCounter++;
+            }
+
+            std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
+            if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
+                for (const auto & source : sourceArray) {
+                    for (const auto & caster : casterArray) {
+                        Ellipsoid::ShadowConfiguration sc;
+                        sc.source = source;
+                        sc.caster = caster;
+                        shadowConfArray.push_back(sc);
+                    }
+                }
+                _ellipsoid.setShadowConfigurationArray(shadowConfArray);
+            }
+        }
+    }
+}
+
+void RenderableGlobe::initializeGL() {
+    _layerManager->initialize();
+
+    _layerManager->update();
+
+    _distanceSwitch.initializeGL();
+
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     _chunkedLodGlobe->recompileShaders();
 }
 
-void RenderableGlobe::initialize() {
-    _distanceSwitch.initialize();
-}
+void RenderableGlobe::deinitializeGL() {
+    _distanceSwitch.deinitializeGL();
 
-void RenderableGlobe::deinitialize() {
-    _distanceSwitch.deinitialize();
+    _layerManager->deinitialize();
 }
 
 bool RenderableGlobe::isReady() const {
     return true;
 }
 
-void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
+void RenderableGlobe::render(const RenderData& data, RendererTasks& renderTask) {
     bool statsEnabled = _debugProperties.collectStats.value();
     _chunkedLodGlobe->stats.setEnabled(statsEnabled);
 
@@ -291,7 +392,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
                 setSaveCamera(nullptr);
             }
         }
-        _distanceSwitch.render(data, tasks);
+        _distanceSwitch.render(data, renderTask);
     }
     if (_savedCamera != nullptr) {
         DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
@@ -368,7 +469,7 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace) 
+                                                       const glm::dvec3& targetModelSpace)
 {
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
@@ -396,7 +497,7 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     };
 }
 
-void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
+void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
     _savedCamera = camera;
 }
 

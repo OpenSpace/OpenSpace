@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,7 @@ public:
     void setCamera(Camera* camera);
     void resetCameraDirection();
 
-    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);    
+    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
 
     void updateCamera(double deltaTime);
 
@@ -69,9 +69,9 @@ public:
     Camera* camera() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
-    KeyframeNavigator& keyframeNavigator() const; 
+    KeyframeNavigator& keyframeNavigator() const;
 
-    // Callback functions 
+    // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);

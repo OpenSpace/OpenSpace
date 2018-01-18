@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,18 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/spicemanager.h>
+
+namespace {
+    const double KM_TO_M = 1000.0;
+}
 
 namespace openspace::globebrowsing {
 
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
     : _grid(grid)
-    ,_layerManager(layerManager)
+    , _layerManager(layerManager)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
             "GlobalChunkedLodPatch",
@@ -77,16 +82,16 @@ void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
 }
 
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
-    std::shared_ptr<LayerShaderManager> layeredShaderManager,
-    std::shared_ptr<GPULayerManager> gpuLayerManager,
-    const Chunk& chunk)
+                                 std::shared_ptr<LayerShaderManager> layeredShaderManager,
+                                 std::shared_ptr<GPULayerManager> gpuLayerManager,
+                                 const Chunk& chunk)
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
 
-    if (layeredShaderManager->updatedOnLastCall()) {
+    if (layeredShaderManager->updatedSinceLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);
     }
 
@@ -109,6 +114,131 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     }
 
     return programObject;
+}
+
+void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk,
+                                            ghoul::opengl::ProgramObject* programObject,
+                                            const RenderData& data)
+{
+    // Shadow calculations..
+    if (chunk.owner().ellipsoid().hasEclipseShadows()) {
+        std::vector<RenderableGlobe::ShadowRenderingStruct> shadowDataArray;
+        std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
+            chunk.owner().ellipsoid().shadowConfigurationArray();
+        shadowDataArray.reserve(shadowConfArray.size());
+        double lt;
+        for (const auto & shadowConf : shadowConfArray) {
+            // TO REMEMBER: all distances and lengths in world coordinates are in
+            // meters!!! We need to move this to view space...
+            // Getting source and caster:
+            glm::dvec3 sourcePos = SpiceManager::ref().targetPosition(
+                shadowConf.source.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                data.time.j2000Seconds(),
+                lt
+            );
+            sourcePos *= KM_TO_M; // converting to meters
+            glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
+                shadowConf.caster.first,
+                "SUN",
+                "GALACTIC",
+                {},
+                data.time.j2000Seconds(),
+                lt
+            );
+            casterPos *= KM_TO_M; // converting to meters
+            // psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+            //     casterPos.x,
+            //     casterPos.y,
+            //     casterPos.z
+            // );
+
+
+            // First we determine if the caster is shadowing the current planet (all
+            // calculations in World Coordinates):
+            glm::dvec3 planetCasterVec = casterPos - data.position.dvec3();
+            glm::dvec3 sourceCasterVec = casterPos - sourcePos;
+            double sc_length = glm::length(sourceCasterVec);
+            glm::dvec3 planetCaster_proj = (glm::dot(planetCasterVec, sourceCasterVec) /
+                                            (sc_length*sc_length)) * sourceCasterVec;
+            double d_test = glm::length(planetCasterVec - planetCaster_proj);
+            double xp_test = shadowConf.caster.second * sc_length /
+                             (shadowConf.source.second + shadowConf.caster.second);
+            double rp_test = shadowConf.caster.second *
+                             (glm::length(planetCaster_proj) + xp_test) / xp_test;
+
+            glm::dvec3 sunPos = SpiceManager::ref().targetPosition(
+                "SUN",
+                "SUN",
+                "GALACTIC",
+                {},
+                data.time.j2000Seconds(),
+                lt
+            );
+            double casterDistSun = glm::length(casterPos - sunPos);
+            double planetDistSun = glm::length(data.position.dvec3() - sunPos);
+
+            RenderableGlobe::ShadowRenderingStruct shadowData;
+            shadowData.isShadowing = false;
+
+            // Eclipse shadows considers planets and moons as spheres
+            if (((d_test - rp_test) < (chunk.owner().ellipsoid().radii().x * KM_TO_M)) &&
+                (casterDistSun < planetDistSun)) {
+                // The current caster is shadowing the current planet
+                shadowData.isShadowing = true;
+                shadowData.rs = shadowConf.source.second;
+                shadowData.rc = shadowConf.caster.second;
+                shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
+                shadowData.xp = xp_test;
+                shadowData.xu = shadowData.rc * sc_length /
+                                (shadowData.rs - shadowData.rc);
+                shadowData.casterPositionVec = casterPos;
+            }
+            shadowDataArray.push_back(shadowData);
+        }
+
+        const std::string uniformVarName("shadowDataArray[");
+        unsigned int counter = 0;
+        for (const auto & sd : shadowDataArray) {
+            std::stringstream ss;
+            ss << uniformVarName << counter << "].isShadowing";
+            programObject->setUniform(ss.str(), sd.isShadowing);
+            if (sd.isShadowing) {
+                ss.str(std::string());
+                ss << uniformVarName << counter << "].xp";
+                programObject->setUniform(ss.str(), sd.xp);
+                ss.str(std::string());
+                ss << uniformVarName << counter << "].xu";
+                programObject->setUniform(ss.str(), sd.xu);
+                /*ss.str(std::string());
+                ss << uniformVarName << counter << "].rs";
+                programObject->setUniform(ss.str(), sd.rs);*/
+                ss.str(std::string());
+                ss << uniformVarName << counter << "].rc";
+                programObject->setUniform(ss.str(), sd.rc);
+                ss.str(std::string());
+                ss << uniformVarName << counter << "].sourceCasterVec";
+                programObject->setUniform(ss.str(), sd.sourceCasterVec);
+                ss.str(std::string());
+                ss << uniformVarName << counter << "].casterPositionVec";
+                programObject->setUniform(ss.str(), sd.casterPositionVec);
+            }
+            counter++;
+        }
+
+        programObject->setUniform(
+            "inverseViewTransform",
+            glm::inverse(data.camera.combinedViewMatrix())
+        );
+        programObject->setUniform("modelTransform", chunk.owner().modelTransform());
+        programObject->setUniform(
+            "hardShadows",
+            chunk.owner().generalProperties().eclipseHardShadows
+        );
+        programObject->setUniform("calculateEclipseShadows", true);
+    }
 }
 
 void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
@@ -143,7 +273,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
     }
 
     if (chunk.owner().generalProperties().useAccurateNormals &&
-        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) 
+        !_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty())
     {
         glm::dvec3 corner00 = chunk.owner().ellipsoid().cartesianSurfacePosition(
             chunk.surfacePatch().getCorner(Quad::SOUTH_WEST));
@@ -177,6 +307,12 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         programObject.setUniform("deltaPhi0", glm::length(deltaPhi0));
         programObject.setUniform("deltaPhi1", glm::length(deltaPhi1));
         programObject.setUniform("tileDelta", tileDelta);
+
+        // This should not be needed once the light calculations for the atmosphere
+        // is performed in view space..
+        programObject.setUniform("invViewModelTransform",
+                               glm::inverse(glm::mat4(data.camera.combinedViewMatrix()) *
+                                            glm::mat4(chunk.owner().modelTransform())));
     }
 }
 
@@ -220,6 +356,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         "modelViewProjectionTransform", modelViewProjectionTransform);
     programObject->setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
     programObject->setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
+    // Ellipsoid Radius (Model Space)
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
@@ -241,6 +378,10 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     }
 
     setCommonUniforms(*programObject, chunk, data);
+
+    if (chunk.owner().ellipsoid().hasEclipseShadows()) {
+        calculateEclipseShadows(chunk, programObject, data);
+    }
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);
@@ -282,20 +423,24 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     }
 
     // Calculate other uniform variables needed for rendering
+    // Send the matrix inverse to the fragment for the global and local shader (JCC)
     dmat4 modelTransform = chunk.owner().modelTransform();
     dmat4 viewTransform = data.camera.combinedViewMatrix();
     dmat4 modelViewTransform = viewTransform * modelTransform;
 
     std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
     std::vector<glm::dvec3> cornersCameraSpace(4);
+    std::vector<glm::dvec3> cornersModelSpace(4);
     for (int i = 0; i < 4; ++i) {
         Quad q = static_cast<Quad>(i);
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
+        cornersModelSpace[i] = cornerModelSpace;
         glm::dvec3 cornerCameraSpace =
-            glm::dvec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
+            glm::dvec3(modelViewTransform * glm::dvec4(cornerModelSpace, 1));
         cornersCameraSpace[i] = cornerCameraSpace;
         programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
+
     }
 
     // TODO: Patch normal can be calculated for all corners and then linearly
@@ -306,8 +451,20 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
             cornersCameraSpace[Quad::NORTH_EAST] -
                 cornersCameraSpace[Quad::SOUTH_WEST]));
 
+    // In order to improve performance, lets use the normal in object space (model space)
+    // for deferred rendering.
+    vec3 patchNormalModelSpace = normalize(
+        cross(cornersModelSpace[Quad::SOUTH_EAST] -
+            cornersModelSpace[Quad::SOUTH_WEST],
+            cornersModelSpace[Quad::NORTH_EAST] -
+            cornersModelSpace[Quad::SOUTH_WEST]));
+
+    programObject->setUniform("patchNormalModelSpace", patchNormalModelSpace);
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
-    programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
+    programObject->setUniform(
+        "projectionTransform",
+        data.camera.sgctInternal.projectionMatrix()
+    );
 
     if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
         // Apply an extra scaling to the height if the object is scaled
@@ -316,6 +473,10 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     }
 
     setCommonUniforms(*programObject, chunk, data);
+
+    if (chunk.owner().ellipsoid().hasEclipseShadows()) {
+        calculateEclipseShadows(chunk, programObject, data);
+    }
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* _loggerCat = "TexturePlane";
+    constexpr const char* _loggerCat = "TexturePlane";
 } // namespace
 
 namespace openspace {
@@ -83,9 +83,23 @@ bool TexturePlane::createGeometry() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 
     return true;
 }

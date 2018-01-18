@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,9 +62,9 @@ public:
 
 protected:
     /**
-     * Should return the indices of vertices for a grid with size <code>xSegments</code> * 
-     * <code>ySegments</code>. Where the number of vertices in each direction is the number
-     * of segments + 1.
+     * Should return the indices of vertices for a grid with size <code>xSegments</code>
+     * <code>ySegments</code>. Where the number of vertices in each direction is the
+     * number of segments + 1.
      */
     virtual std::vector<GLuint> createElements(int xSegments, int ySegments) = 0;
 
@@ -85,8 +85,8 @@ protected:
 
     /**
      * Should return the normals of vertices for a grid with size <code>xSegments</code> *
-     * <code>ySegments</code>. Where the number of vertices in each direction is the number
-     * of segments + 1.
+     * <code>ySegments</code>. Where the number of vertices in each direction is the
+     * number of segments + 1.
      */
     virtual std::vector<glm::vec3> createNormals(int xSegments, int ySegments) = 0;
 

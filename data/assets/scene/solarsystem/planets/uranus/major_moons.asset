@@ -1,0 +1,90 @@
+local assetHelper = asset.require('util/asset_helper')
+local proceduralGlobes = asset.require('util/procedural_globe')
+local transforms = asset.require('./transforms')
+local kernels111 = asset.require('./ura111').Kernels
+
+
+
+local parentName = transforms.UranusBarycenter.Name
+local parentSpice = "URANUS BARYCENTER"
+local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
+local trailColor = { 0.60, 0.65, 0.84 }
+
+local majorMoons = {
+    {
+        Name = "Miranda",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "MIRANDA",
+        Radii = { 471600, 468000, 466000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 1.413479,
+        Kernels = kernels111
+    },
+    {
+        Name = "Ariel",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "ARIEL",
+        Radii = { 1162000, 1156000, 1155000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 2.520379,
+        Kernels = kernels111
+    },
+    {
+        Name = "Umbriel",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "UMBRIEL",
+        Radii = { 1169400, 1169400, 1169400 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 4.144177,
+        Kernels = kernels111
+    },
+    {
+        Name = "Titania",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "TITANIA",
+        Radii = { 1576800, 1576800, 1576800 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 8.705872,
+        Kernels = kernels111
+    },
+    {
+        Name = "Oberon",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "OBERON",
+        Radii = { 1522800, 1522800, 1522800 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 13.463239,
+        Kernels = kernels111
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(
+    asset,
+    proceduralGlobes.createGlobes(majorMoons)
+)

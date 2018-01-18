@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -198,10 +198,10 @@ int absolutePath(lua_State* L) {
 
     std::string path = luaL_checkstring(L, -1);
     path = absPath(path);
-    path = FileSys.convertPathSeparator(path, '/');
+    //path = FileSys.convertPathSeparator(path, '/');
     lua_pushstring(L, path.c_str());
     return 1;
-} 
+}
 
 /**
  * \ingroup LuaScripts
@@ -262,7 +262,7 @@ int directoryExists(lua_State* L) {
 /**
  * \ingroup LuaScripts
  * walkDirectory(string, bool, bool):
- * Walks a directory and returns the contents of the directory as absolute paths. The 
+ * Walks a directory and returns the contents of the directory as absolute paths. The
  * first argument is the path of the directory that should be walked, the second argument
  * determines if the walk is recursive and will continue in contained directories. The
  * default value for this parameter is "false". The third argument determines whether the
@@ -303,8 +303,8 @@ int walkDirectoryFolder(lua_State* L) {
 /**
  * \ingroup LuaScripts
  * directoryForPath(string):
- * This function extracts the directory part of the passed path. For example, if the 
- * parameter is 'C:\\OpenSpace\\foobar\\foo.txt', this function returns 
+ * This function extracts the directory part of the passed path. For example, if the
+ * parameter is 'C:\\OpenSpace\\foobar\\foo.txt', this function returns
  * 'C:\\OpenSpace\\foobar'."
  */
 int directoryForPath(lua_State* L) {

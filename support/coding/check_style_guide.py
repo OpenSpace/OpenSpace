@@ -1,7 +1,7 @@
 """
 OpenSpace
 
-Copyright (c) 2014-2017
+Copyright (c) 2014-2018
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
 software and associated documentation files (the "Software"), to deal in the Software
@@ -42,6 +42,8 @@ guards for correctness. At the moment this includes:
  * Checking that no file includes glm header directly
  * Checking whether any files starts with the UTF-8 Byte-order mark
  * Checking whether a file as empty-only lines
+ * Checking whether the default assert macros are used anywhere instead of the
+   ghoul_assert macro
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -54,7 +56,7 @@ import os
 import re
 import sys
 
-current_year = '2017'
+current_year = '2018'
 is_strict_mode = False
 
 def get_ifndef_symbol(lines):
@@ -288,10 +290,20 @@ def check_empty_only_line(lines):
         return ''
 
     index = [i + 1 for i, s in enumerate(lines) if s.translate({ord(c): None for c in '\n\r'}).isspace()]
-    if (len(index) > 0):
+    if len(index) > 0:
         return index
     else:
         return ''
+
+
+
+def check_assert_usage(lines):
+    # _assert checks for both ghoul_assert and static_assert, which are both reasonable
+    index = [i + 1 for i,s in enumerate(lines) if ('assert(' in s and not '_assert(' in s) and s.strip()[0:2] != '//']
+    if len(index) > 0:
+        return index
+    else:
+        return '';
 
 
 
@@ -308,9 +320,22 @@ def check_line_length(lines):
 
 
 
+def check_empty_character_at_end(lines):
+    # Disable this check in non-strict mode
+    if not is_strict_mode:
+        return ''
+
+    index = [i + 1 for i, s in enumerate(lines) if len(s) > 1 and s[-2] == ' ' and not s.strip() == '']
+    if len(index) > 0:
+        return index
+    else:
+        return ''
+
+
+
 previousSymbols  = {}
 def check_header_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         correctness = check_correctness(lines)
@@ -392,10 +417,18 @@ def check_header_file(file, component):
         if line_length:
             print(file, '\t', 'Line length exceeded: ', line_length)
 
+        empty_character_at_end = check_empty_character_at_end(lines)
+        if empty_character_at_end:
+            print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
 
 
 def check_inline_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         copyright = check_copyright(lines)
@@ -423,6 +456,10 @@ def check_inline_file(file, component):
         if empty_only_lines:
             print(file, '\t', 'Empty only line: ', empty_only_lines)
 
+        line_length = check_line_length(lines)
+        if line_length:
+            print(file, '\t', 'Line length exceeded: ', line_length)
+
         if (not '_doc.inl' in file):
             # The _doc.inl files are allowed to use using namespace as they are inclued
             # from the cpp files and thus don't leak it
@@ -434,10 +471,18 @@ def check_inline_file(file, component):
         if line_length:
             print(file, '\t', 'Line length exceeded: ', line_length)
 
+        empty_character_at_end = check_empty_character_at_end(lines)
+        if empty_character_at_end:
+            print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
+
 
 
 def check_source_file(file, component):
-    with open(file, 'r+') as f:
+    with open(file, 'r+', encoding="utf8") as f:
         lines = f.readlines()
 
         header = check_glm_header(lines, file)
@@ -468,6 +513,14 @@ def check_source_file(file, component):
         line_length = check_line_length(lines)
         if line_length:
             print(file, '\t', 'Line length exceeded: ', line_length)
+
+        empty_character_at_end = check_empty_character_at_end(lines)
+        if empty_character_at_end:
+            print(file, '\t', 'Empty character at end: ', empty_character_at_end)
+
+        assert_usage = check_assert_usage(lines)
+        if assert_usage:
+            print(file, '\t', 'Wrong assert usage: ', assert_usage)
 
 
 

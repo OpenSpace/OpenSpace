@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,8 +48,8 @@ class RenderableTrailOrbit : public RenderableTrail {
 public:
     explicit RenderableTrailOrbit(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     void update(const UpdateData& data) override;
 
@@ -66,9 +66,10 @@ private:
     /// about which parts of the vertex array to update
     struct UpdateReport {
         static const int All = 0; ///< The entire array was touched in the update
-
-        /// If \c true at least one point was touched
-        bool needsUpdate; 
+        /// If \c true the floating point needs to be updated
+        bool floatingPointNeedsUpdate;
+        /// If \c true at least one of their permanent point were touched
+        bool permanentPointsNeedUpdate;
         /// Returns the number of fixed points that were touched in the update method
         /// If this value is negative, the newest values were replaced, if positive the
         /// oldest

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <cassert>
 
 namespace {
-    const char* _loggerCat = "LocalTfBrickSelector";
+    constexpr const char* _loggerCat = "LocalTfBrickSelector";
 } // namespace
 
 namespace openspace {
@@ -358,8 +358,8 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
             for (int i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
-                assert(sample >= 0);
-                assert(gradients[i] >= 0);
+                ghoul_assert(sample >= 0, "@MISSING");
+                ghoul_assert(gradients[i] >= 0, "@MISSING");
                 error += sample * gradients[i];
             }
             _brickErrors[brickIndex].spatial = error;
@@ -375,8 +375,8 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
             for (int i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
-                assert(sample >= 0);
-                assert(gradients[i] >= 0);
+                ghoul_assert(sample >= 0, "@MISSING");
+                ghoul_assert(gradients[i] >= 0, "@MISSING");
                 error += sample * gradients[i];
             }
             _brickErrors[brickIndex].temporal = error;

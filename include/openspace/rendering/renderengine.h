@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 namespace ghoul {
@@ -46,6 +47,7 @@ namespace scripting { struct LuaLibrary; }
 
 class Camera;
 class RaycasterManager;
+class DeferredcasterManager;
 class Renderer;
 class Scene;
 class SceneManager;
@@ -62,19 +64,13 @@ public:
         Invalid
     };
 
-    enum class FrametimeType {
-        DtTimeAvg = 0,
-        FPS,
-        FPSAvg,
-        None
-    };
-
     RenderEngine();
     ~RenderEngine();
 
     void initialize();
     void initializeGL();
     void deinitialize();
+    void deinitializeGL();
 
     void setScene(Scene* scene);
     Scene* scene();
@@ -84,6 +80,7 @@ public:
     Renderer* renderer() const;
     RendererImplementation rendererImplementation() const;
     RaycasterManager& raycasterManager();
+    DeferredcasterManager& deferredcasterManager();
 
 
     void updateShaderPrograms();
@@ -97,18 +94,19 @@ public:
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
+    void renderDashboard();
     void postDraw();
 
     // Performance measurements
     bool doesPerformanceMeasurements() const;
-    performance::PerformanceManager* performanceManager();
+    std::shared_ptr<performance::PerformanceManager> performanceManager();
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
 
-    void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
-    void unregisterScreenSpaceRenderable(const std::string& name);
+    void addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void removeScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void removeScreenSpaceRenderable(const std::string& name);
     std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(const std::string& name);
     std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
@@ -125,9 +123,8 @@ public:
         std::string csPath,
         const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
-    std::string progressToStr(int size, double t);
-
-    void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+    void removeRenderProgram(
+        const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
@@ -177,14 +174,13 @@ private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method) const;
 
-    void renderInformation();
-
     Camera* _camera;
     Scene* _scene;
     std::unique_ptr<RaycasterManager> _raycasterManager;
+    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _doPerformanceMeasurements;
-    std::unique_ptr<performance::PerformanceManager> _performanceManager;
+    std::shared_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;
@@ -192,12 +188,6 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
-    properties::OptionProperty _frametimeType;
-
-    //FrametimeType _frametimeType;
-
-    properties::BoolProperty _showDate;
-    properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
@@ -214,6 +204,10 @@ private:
     float _currentFadeTime;
     int _fadeDirection;
     properties::IntProperty _nAaSamples;
+    properties::FloatProperty _hdrExposure;
+    properties::FloatProperty _hdrBackground;
+    properties::FloatProperty _gamma;
+
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,14 +48,14 @@ public:
 
     /**
      * Sets the value of <code>Layer</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
+     * GPU struct. OBS! Users must ensure bind has been
      * called before setting using this method.
      */
     virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
         const TileIndex& tileIndex, int pileSize);
 
-    /** 
-     * Binds this object with GLSL variables with identifiers starting 
+    /**
+     * Binds this object with GLSL variables with identifiers starting
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */

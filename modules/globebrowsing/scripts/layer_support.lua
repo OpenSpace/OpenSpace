@@ -153,6 +153,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         "<UnsafeSSL>true</UnsafeSSL>" ..
         "<ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>" ..
         "<ZeroBlockOnServerException>true</ZeroBlockOnServerException>" ..
+        "<Timeout>5</Timeout>" ..
     "</GDAL_WMS>"
 
     return gdalWmsTemplate
@@ -189,7 +190,7 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
     local files = openspace.walkDirectoryFiles(dir, true, true)
 
     for _, file in pairs(files) do
-        if file:find('.info') then
+        if file and file:find('.info') then
             c, h = openspace.globebrowsing.parseInfoFile(file)
 
             if c then

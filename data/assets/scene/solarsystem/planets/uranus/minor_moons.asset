@@ -1,0 +1,3 @@
+asset.request('./inner_moons')
+asset.request('./irregular_prograde_moons')
+asset.request('./irregular_retrograde_moons')

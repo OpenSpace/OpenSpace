@@ -1,0 +1,276 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local kernels = asset.require('./kernels')
+
+
+
+local assets = asset.syncedResource({
+    Name = "Pluto Assets",
+    Type = "HttpSynchronization",
+    Identifier = "newhorizons_plutoencounter_pluto_assets",
+    Version = 1
+})
+
+local encounterTextures = asset.syncedResource({
+    Name = "Pluto Encounter Textures",
+    Type = "HttpSynchronization",
+    Identifier = "newhorizons_plutoencounter_pluto_textures",
+    Version = 4
+})
+
+local textures = asset.syncedResource({
+    Name = "Pluto Textures",
+    Type = "HttpSynchronization",
+    Identifier = "pluto_textures",
+    Version = 5
+})
+
+local images = asset.syncedResource({
+    Name = "Pluto Images",
+    Type = "HttpSynchronization",
+    Identifier = "newhorizons_plutoencounter_pluto_images",
+    Version = 1
+})
+
+local plutoRadius = 1.173E6
+
+local Pluto = {
+    Name = "Pluto",
+    Parent = transforms.PlutoBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = NewHorizonsKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_PLUTO",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderablePlanetProjection",
+        Radius = plutoRadius,
+        Geometry = {
+            Type = "SimpleSphere",
+            Radius = plutoRadius,
+            Segments = 400
+        },
+        ColorTexturePaths = {
+            textures .. "/pluto.png",
+            textures .. "/NH_Pluto_mosaic_16384.png",
+            textures .. "/NH_Pluto_mosaic_8192.png",
+            textures .. "/pmap_cyl_k201.jpg",
+            textures .. "/pmap_cyl_k201_4096.jpg"
+        },
+        HeightTexturePaths = {
+            textures .. "/NH_Pluto_DTM_16384.png",
+            textures .. "/NH_Pluto_DTM_8192.png"
+        },
+        MeridianShift = true,
+        Projection = {
+            Sequence       = images,
+            EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+            SequenceType   = "image-sequence",
+            Observer       = "NEW HORIZONS",
+            Target         = "PLUTO",
+            Aberration     = "NONE",
+            AspectRatio = 2,
+
+            DataInputTranslation = {
+                Instrument = {
+                    LORRI = {
+                        DetectorType  = "Camera",
+                        Spice = { "NH_LORRI" }
+                    },
+                    RALPH_MVIC_PAN_FRAME = {
+                        DetectorType  = "Scanner",
+                        StopCommand = "RALPH_ABORT",
+                        Spice = { "NH_RALPH_MVIC_FT" }
+                    },
+                    RALPH_MVIC_COLOR = {
+                        DetectorType = "Scanner",
+                        StopCommand = "END_NOM",
+                        Spice = { "NH_RALPH_MVIC_NIR",
+                                  "NH_RALPH_MVIC_METHANE",
+                                  "NH_RALPH_MVIC_RED",
+                                  "NH_RALPH_MVIC_BLUE" }
+                    },
+                    RALPH_LEISA = {
+                        DetectorType = "Scanner",
+                        StopCommand = "END_NOM",
+                        Spice = { "NH_RALPH_LEISA" }
+                    },    
+                    RALPH_MVIC_PAN1 = {
+                        DetectorType = "Scanner",
+                        StopCommand = "END_NOM",
+                        Spice = { "NH_RALPH_MVIC_PAN1" }
+                    },
+                    RALPH_MVIC_PAN2 = {
+                        DetectorType = "Scanner",
+                        StopCommand = "END_NOM",
+                        Spice = { "NH_RALPH_MVIC_PAN2" }
+                    }, 
+                    ALICE_Use_AIRGLOW = {
+                        DetectorType = "Scanner",
+                        StopCommand = "ALICE_END_PIXELLIST",
+                        Spice = { "NH_ALICE_AIRGLOW" }
+                    },
+                    ALICE_Use_AIRGLOW = {
+                        DetectorType = "Scanner",
+                        StopCommand = "ALICE_END_HISTOGRAM",
+                        Spice = { "NH_ALICE_AIRGLOW" }
+                    },
+                    ALICE_Use_SOCC = {
+                        DetectorType = "Scanner",
+                        StopCommand = "ALICE_END_PIXELLIST",
+                        Spice = { "NH_ALICE_SOC" }
+                    },
+                    ALICE_Use_SOCC = {
+                        DetectorType = "Scanner",
+                        StopCommand = "ALICE_END_HISTOGRAM",
+                        Spice = { "NH_ALICE_SOC" }
+                    },
+                    REX_START = {
+                        DetectorType = "Scanner",
+                        StopCommand = "REX_MODE_OFF",
+                        Spice = { "NH_REX" }
+                    }
+                },
+                Target ={ 
+                    Read  = {
+                        "TARGET_NAME",
+                        "INSTRUMENT_HOST_NAME",
+                        "INSTRUMENT_ID",
+                        "START_TIME",
+                        "STOP_TIME",
+                        "DETECTOR_TYPE"
+                    },
+                    Convert = {
+                        PLUTO       = { "PLUTO" },
+                        NEWHORIZONS = { "NEW HORIZONS" },
+                        CCD         = { "CAMERA" },
+                        FRAMECCD    = { "SCANNER" }
+                    }
+                }
+            },
+
+            Instrument = {
+                Name       = "NH_LORRI",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",
+                Fovy       = 0.2907,
+                Aspect     = 1,
+                Near       = 0.2,
+                Far        = 10000
+            },
+            
+            PotentialTargets = {
+                 "PLUTO",
+                 "CHARON",
+                 "NIX",
+                 "HYDRA",
+                 "P5",
+                 "P4"
+            }
+        }
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local PlutoBarycenterLabel = {
+    Name = "PlutoBarycenterLabel",
+    Parent = transforms.PlutoBarycenter.Name,
+    Renderable = {
+        Type = "RenderablePlane",
+        Billboard = true,
+        Size = 5E4,
+        Texture = encounterTextures .. "/barycenter.png",
+        BlendMode = "Additive"
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local PlutoText = {
+    Name = "PlutoText",
+    Parent = Pluto.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0, -2000000.0, 0}
+        },
+    },
+    Renderable = {
+        Type = "RenderablePlane",
+        Size = 10^6.3,
+        Origin = "Center",
+        Billboard = true,
+        Texture = encounterTextures .. "/Pluto-Text.png",
+        BlendMode = "Additive"
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local PlutoShadow = {
+    Name = "PlutoShadow",
+    Parent = Pluto.Name,
+    Renderable = {
+        Type = "RenderableShadowCylinder",
+        TerminatorType = "PENUMBRAL", 
+        LightSource = "SUN",
+        Observer = "NEW HORIZONS",
+        Body = "PLUTO",
+        BodyFrame = "IAU_PLUTO",
+        Aberration = "NONE",
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local PlutoTrailBarycentric = {
+    Name = "PlutoBarycentricTrail",
+    Parent = transforms.PlutoBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO",
+            Observer = "PLUTO BARYCENTER"
+        },
+        Color = { 0.00, 0.62, 1.00 },
+        Period = 6.38723,
+        Resolution = 1000
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+local PlutoTrail = {
+    Name = "PlutoTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Enabled = false,
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PLUTO BARYCENTER",
+            Observer = "SUN"
+        },
+        Color = { 0.3, 0.7, 0.3 },
+        -- Not the actual Period, but the SPICE kernels we have only
+        -- go back to 1850, about 150 yeays ago
+        Period = 160 * 365.242,
+        Resolution = 1000
+    },
+    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Pluto,
+    PlutoBarycenterLabel,
+    PlutoText,
+    PlutoShadow,
+    PlutoTrailBarycentric,
+    PlutoTrail
+})

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,10 +33,13 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/asset.h>
+#include <openspace/scene/assetloader.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -68,7 +71,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelConnection()),
-                        &(OsEng.console())
+                        &(OsEng.console()),
+                        &(OsEng.dashboard())
                     };
                     return res;
                 }
@@ -84,9 +88,14 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._property.setSource(
                 []() {
-                    const std::vector<SceneGraphNode*>& nodes =
-                        OsEng.renderEngine().scene()->allSceneGraphNodes();
-                    return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+                    const Scene* scene = OsEng.renderEngine().scene();
+                    const std::vector<SceneGraphNode*>& nodes = scene ?
+                        scene->allSceneGraphNodes() :
+                        std::vector<SceneGraphNode*>();
+                    return std::vector<properties::PropertyOwner*>(
+                        nodes.begin(),
+                        nodes.end()
+                    );
                 }
             );
 
@@ -111,13 +120,20 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                             nodes.end(),
                             [](SceneGraphNode* n) {
                                 const std::vector<std::string>& tags = n->tags();
-                                auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
+                                auto it = std::find(
+                                    tags.begin(),
+                                    tags.end(),
+                                    "GUI.Interesting"
+                                );
                                 return it == tags.end();
                             }
                         ),
                         nodes.end()
                     );
-                    return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+                    return std::vector<properties::PropertyOwner*>(
+                        nodes.begin(),
+                        nodes.end()
+                    );
                 }
             );
         }
@@ -148,16 +164,12 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     );
 
     OsEng.registerModuleCallback(
-        // This is done in the PostDraw phase so that it will render it on top of
-        // everything else in the case of fisheyes. With this being in the Render callback
-        // the GUI would be rendered on top of each of the cube faces
-        OpenSpaceEngine::CallbackOption::PostDraw,
-        [&](){
+        OpenSpaceEngine::CallbackOption::Draw2D,
+        [&]() {
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (wrapper.isMaster() && showGui ) {
+            if (wrapper.isMaster() && showGui) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
-                //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
 
@@ -166,8 +178,8 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                     mouseButtons = touchInput.action;
                     mousePosition = touchInput.pos;
                 }
-                // We don't do any collection of immediate mode user interface, so it is
-                // fine to open and close a frame immediately
+                // We don't do any collection of immediate mode user interface, so it
+                // is fine to open and close a frame immediately
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
@@ -183,7 +195,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleKeyboardCallback(
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
-            if (gui.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.keyCallback(key, mod, action);
             }
             else {
@@ -194,7 +209,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleCharCallback(
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
-            if (gui.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.charCallback(codepoint, modifier);
             }
             else {
@@ -205,7 +223,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleMouseButtonCallback(
         [&](MouseButton button, MouseAction action) -> bool {
-            if (gui.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.mouseButtonCallback(button, action);
             }
             else {
@@ -216,7 +237,10 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
     OsEng.registerModuleMouseScrollWheelCallback(
         [&](double, double posY) -> bool {
-            if (gui.isEnabled()) {
+            // A list of all the windows that can show up by themselves
+            if (gui.isEnabled() || gui._performance.isEnabled() ||
+                gui._property.isEnabled())
+            {
                 return gui.mouseWheelCallback(posY);
             }
             else {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,7 +80,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 
-    _chunkEvaluatorByAvailableTiles = 
+    _chunkEvaluatorByAvailableTiles =
         std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
     std::make_unique<chunklevelevaluator::ProjectedArea>();
@@ -133,12 +133,13 @@ int ChunkedLodGlobe::getDesiredLevel(
         desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
     }
 
-    int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
+    int levelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
-        _owner.debugProperties().limitLevelByAvailableData) {
-        desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
+    if (levelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
+        _owner.debugProperties().limitLevelByAvailableData)
+    {
+        desiredLevel = glm::min(desiredLevel, levelByAvailableData);
     }
 
     desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
@@ -291,7 +292,8 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
 
     // Calculate the MVP matrix
     glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) * viewTransform;
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+                    viewTransform;
     glm::dmat4 mvp = vp * _owner.modelTransform();
 
     // Render function
@@ -315,16 +317,15 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     //_rightRoot->reverseBreadthFirst(renderJob);
 
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
-    auto millis2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
-    stats.i["chunk globe render time"] = millis2 - millis;
+    auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
+    stats.i["chunk globe render time"] = ms2 - millis;
 }
 
 void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
     if (_owner.debugProperties().showChunkBounds ||
         _owner.debugProperties().showChunkAABB)
     {
-        const std::vector<glm::dvec4> modelSpaceCorners =
-            chunk.getBoundingPolyhedronCorners();
+        std::vector<glm::dvec4> modelSpaceCorners = chunk.boundingPolyhedronCorners();
         std::vector<glm::vec4> clippingSpaceCorners(8);
         AABB3 screenSpaceBounds;
 

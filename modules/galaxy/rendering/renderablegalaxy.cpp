@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -148,12 +148,11 @@ namespace openspace {
     } else {
         LERROR("No points dictionary specified.");
     }
-
 }
 
 RenderableGalaxy::~RenderableGalaxy() {}
 
-void RenderableGalaxy::initialize() {
+void RenderableGalaxy::initializeGL() {
     // Aspect is currently hardcoded to cubic voxels.
     _aspect = static_cast<glm::vec3>(_volumeDimensions);
     _aspect = _aspect / std::max(std::max(_aspect.x, _aspect.y), _aspect.z);
@@ -176,6 +175,7 @@ void RenderableGalaxy::initialize() {
         _volume->data()),
         ghoul::opengl::Texture::TakeOwnership::No
     );
+
     _texture->setDimensions(_volume->dimensions());
     _texture->uploadTexture();
 
@@ -249,20 +249,23 @@ void RenderableGalaxy::initialize() {
     glBufferData(GL_ARRAY_BUFFER,
         pointPositions.size()*sizeof(glm::vec3),
         pointPositions.data(),
-        GL_STATIC_DRAW);
+        GL_STATIC_DRAW
+    );
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glBufferData(GL_ARRAY_BUFFER,
         pointColors.size()*sizeof(glm::vec3),
         pointColors.data(),
-        GL_STATIC_DRAW);
-
+        GL_STATIC_DRAW
+    );
 
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _pointsProgram = renderEngine.buildRenderProgram("Galaxy points",
-        "${MODULE_GALAXY}/shaders/points.vs",
-        "${MODULE_GALAXY}/shaders/points.fs",
-        ghoul::Dictionary());
+    _pointsProgram = renderEngine.buildRenderProgram(
+        "Galaxy points",
+        absPath("${MODULE_GALAXY}/shaders/points.vs"),
+        absPath("${MODULE_GALAXY}/shaders/points.fs"),
+        ghoul::Dictionary()
+    );
 
     _pointsProgram->setIgnoreUniformLocationError(
         ghoul::opengl::ProgramObject::IgnoreError::Yes
@@ -272,7 +275,7 @@ void RenderableGalaxy::initialize() {
     GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glEnableVertexAttribArray(positionAttrib);    
+    glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
@@ -283,7 +286,7 @@ void RenderableGalaxy::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderableGalaxy::deinitialize() {
+void RenderableGalaxy::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
@@ -296,7 +299,6 @@ bool RenderableGalaxy::isReady() const {
 
 void RenderableGalaxy::update(const UpdateData& data) {
     if (_raycaster) {
-
         //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
         glm::mat4 transform = glm::rotate(
@@ -320,7 +322,6 @@ void RenderableGalaxy::update(const UpdateData& data) {
         volumeTransform[3] += translation;
         _pointTransform[3] += translation;
 
-
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
         _raycaster->setModelTransform(volumeTransform);
@@ -338,22 +339,22 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
     float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
 
-    float lowerRampStart = maxDim * 0.02;
-    float lowerRampEnd = maxDim * 0.5;
+    float lowerRampStart = maxDim * 0.02f;
+    float lowerRampEnd = maxDim * 0.5f;
 
-    float upperRampStart = maxDim * 2.0;
-    float upperRampEnd = maxDim * 10;
+    float upperRampStart = maxDim * 2.f;
+    float upperRampEnd = maxDim * 10.f;
 
-    float opacityCoefficient = 1.0;
+    float opacityCoefficient = 1.f;
 
     if (length < lowerRampStart) {
-        opacityCoefficient = 0; // camera really close
+        opacityCoefficient = 0.f; // camera really close
     } else if (length < lowerRampEnd) {
         opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
     } else if (length < upperRampStart) {
-        opacityCoefficient = 1.0; // sweet spot (max)
+        opacityCoefficient = 1.f; // sweet spot (max)
     } else if (length < upperRampEnd) {
-        opacityCoefficient = 1.0 - (length - upperRampStart) /
+        opacityCoefficient = 1.f - (length - upperRampStart) /
                              (upperRampEnd - upperRampStart); //fade out
     } else {
         opacityCoefficient = 0;
@@ -361,7 +362,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
     _opacityCoefficient = opacityCoefficient;
     ghoul_assert(
-        _opacityCoefficient >= 0.0 && _opacityCoefficient <= 1.0,
+        _opacityCoefficient >= 0.f && _opacityCoefficient <= 1.f,
         "Opacity coefficient was not between 0 and 1"
     );
     if (opacityCoefficient > 0) {
@@ -410,4 +411,4 @@ float RenderableGalaxy::safeLength(const glm::vec3& vector) {
     OsEng.ref().renderEngine().postRaycast(*_pointsProgram);
 }*/
 
-}
+} // namespace openspace

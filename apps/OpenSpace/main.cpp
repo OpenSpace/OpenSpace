@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-//#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/boolean.h>
 
 #include <sgct.h>
 
@@ -67,11 +67,11 @@
 
 namespace {
 
-const char* _loggerCat = "main";
+constexpr const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
 
-const char* OpenVRTag = "OpenVR";
-const char* SpoutTag = "Spout";
+constexpr const char* OpenVRTag = "OpenVR";
+constexpr const char* SpoutTag = "Spout";
 
 #ifdef WIN32
 
@@ -268,7 +268,7 @@ void mainInitFunc() {
 
         const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
         const bool hasStereo =
-            (sm != sgct::SGCTWindow::No_Stereo) && 
+            (sm != sgct::SGCTWindow::No_Stereo) &&
             (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
 
         if (hasStereo) {
@@ -351,12 +351,35 @@ void mainRenderFunc() {
     }
 #endif
 
-    OsEng.render(
-        SgctEngine->getModelMatrix(),
-        viewMatrix,
-        projectionMatrix
-    );
+    try {
+        OsEng.render(
+            SgctEngine->getModelMatrix(),
+            viewMatrix,
+            projectionMatrix
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
     LTRACE("main::mainRenderFunc(end)");
+}
+
+void mainDraw2DFunc() {
+    LTRACE("main::mainDraw2DFunc(begin)");
+
+    try {
+        OsEng.drawOverlays();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+
+    // SGCT gets angry if we change this in our function
+    glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+
+    LTRACE("main::mainDraw2DFunc(end)");
 }
 
 void mainPostDrawFunc() {
@@ -525,6 +548,7 @@ int main_main(int argc, char** argv) {
     SgctEngine->setPreSyncFunction(mainPreSyncFunc);
     SgctEngine->setPostSyncPreDrawFunction(mainPostSyncPreDrawFunc);
     SgctEngine->setDrawFunction(mainRenderFunc);
+    SgctEngine->setDraw2DFunction(mainDraw2DFunc);
     SgctEngine->setPostDrawFunction(mainPostDrawFunc);
     SgctEngine->setKeyboardCallbackFunction(mainKeyboardCallback);
     SgctEngine->setMouseButtonCallbackFunction(mainMouseButtonCallback);
@@ -560,8 +584,11 @@ int main_main(int argc, char** argv) {
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
 
-    auto cleanup = [&](){
-        OsEng.deinitialize();
+    using IsInitialized = ghoul::Boolean;
+    auto cleanup = [&](IsInitialized isInitialized){
+        if (isInitialized) {
+            OsEng.deinitialize();
+        }
 
         // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
@@ -597,19 +624,19 @@ int main_main(int argc, char** argv) {
 
     if (!initSuccess) {
         LFATAL("Initializing failed");
-        cleanup();
+        cleanup(IsInitialized::No);
         return EXIT_FAILURE;
     }
 
     // Main loop
-    LDEBUG("Starting rendering loop");
+    LINFO("Starting rendering loop");
     SgctEngine->render();
-    LDEBUG("Ending rendering loop");
+    LINFO("Ending rendering loop");
 
-    cleanup();
+    cleanup(IsInitialized::Yes);
 
     // Exit program
-    exit(EXIT_SUCCESS); 
+    exit(EXIT_SUCCESS);
 }
 
 } // namespace

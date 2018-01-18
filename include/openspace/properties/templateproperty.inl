@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,8 @@ namespace openspace::properties {
     // The following macros can be used to quickly generate the necessary PropertyDelegate
     // specializations required by the TemplateProperty class. Use the
     // REGISTER_TEMPLATEPROPERTY_HEADER    macro in the header file and the
-    // REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new specialization of
-    // a TemplateProperty
+    // REGISTER_TEMPLATEPROPERTY_SOURCE macro in the source file of your new
+    // specialization of a TemplateProperty
 
 
     // CLASS_NAME = The string that the Property::className() should return as well as the
@@ -106,16 +106,17 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
-                                                                      bool& s)           \
+                                                                      bool& successful)  \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(l, s);                                         \
+        return FROM_LUA_LAMBDA_EXPRESSION(l, successful);                                \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l, TYPE v)\
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l,        \
+                                                                    TYPE value)          \
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(l, v);                                           \
+        return TO_LUA_LAMBDA_EXPRESSION(l, value);                                       \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -125,10 +126,10 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string v,             \
-                                                              bool& s)                   \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
+                                                              bool& successful)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(v, s);                                      \
+        return FROM_STRING_LAMBDA_EXPRESSION(value, successful);                         \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,11 +47,11 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "LabelParser";
-    const char* keySpecs   = "Read";
-    const char* keyConvert = "Convert";
+    constexpr const char* _loggerCat = "LabelParser";
+    constexpr const char* keySpecs   = "Read";
+    constexpr const char* keyConvert = "Convert";
 
-    const char* PlaybookIdentifierName = "LabelParser";
+    constexpr const char* PlaybookIdentifierName = "LabelParser";
 } // namespace
 
 namespace openspace {
@@ -170,7 +170,7 @@ bool LabelParser::create() {
             if (position != std::string::npos){
                 ghoul::filesystem::File currentFile(path);
                 std::string extension = currentFile.fileExtension();
-                if (extension == "lbl" || extension == "LBL"){ // discovered header file         
+                if (extension == "lbl" || extension == "LBL") { // discovered header file
                     std::ifstream file(currentFile.path());
 
                     if (!file.good()){
@@ -224,13 +224,8 @@ bool LabelParser::create() {
                         }
                         if (read == "DETECTOR_TYPE"){
                             _detectorType = decode(line);
-                            count++; 
+                            count++;
                         }
-                    //    if (_badDecoding){
-                    //        LERROR("Please examine file: '" << currentFile.path() << "'");
-                    //        return false;
-                    //    }
-
 
                         if (read == "START_TIME"){
                             std::string start = line.substr(line.find("=") + 1);
@@ -266,7 +261,9 @@ bool LabelParser::create() {
                                     ),
                                     stop.end()
                                 );
-                                stopTime = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                                stopTime = SpiceManager::ref().ephemerisTimeFromDate(
+                                    stop
+                                );
                                 count++;
                             }
                             else{

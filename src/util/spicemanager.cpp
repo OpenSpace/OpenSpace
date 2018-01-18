@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,7 @@
 #include "SpiceZpr.h"
 
 namespace {
-    const char* _loggerCat = "SpiceManager";
+    constexpr const char* _loggerCat = "SpiceManager";
 
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
@@ -175,7 +175,7 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString( const strin
     return Mapping.at(type);
 }
 
-SpiceManager::SpiceManager() 
+SpiceManager::SpiceManager()
     : _useExceptions(UseException::Yes)
 {
     // Set the SPICE library to not exit the program if an error occurs
@@ -447,7 +447,7 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
 }
 
 void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            std::vector<double>& v) const 
+                            std::vector<double>& v) const
 {
     ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
 
@@ -509,10 +509,11 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     if (!targetHasCoverage && !observerHasCoverage) {
         if (_useExceptions) {
             throw SpiceException(
-                format("Neither target '{}' nor observer '{}' has SPK coverage at time {}",
-                       target,
-                       observer,
-                       ephemerisTime
+                format(
+                    "Neither target '{}' nor observer '{}' has SPK coverage at time {}",
+                    target,
+                    observer,
+                    ephemerisTime
                 )
             );
         }
@@ -801,8 +802,8 @@ SpiceManager::fieldOfView(const std::string& instrument) const
 }
 
 SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const {
-    static const int MaxBoundsSize = 64;
-    static const int BufferSize = 128;
+    constexpr int MaxBoundsSize = 64;
+    constexpr int BufferSize = 128;
 
     FieldOfViewResult res;
 
@@ -864,10 +865,10 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     res.terminatorPoints.resize(numberOfTerminatorPoints);
 
     edterm_c(toString(terminatorType),
-             lightSource.c_str(), 
-             target.c_str(), 
-             ephemerisTime, 
-             frame.c_str(), 
+             lightSource.c_str(),
+             target.c_str(),
+             ephemerisTime,
+             frame.c_str(),
              aberrationCorrection,
              observer.c_str(),
              numberOfTerminatorPoints,
@@ -914,8 +915,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(FileSys.fileExists(path), format("File '{}' does not exist", path));
 
-    const unsigned int MaxObj = 64;
-    const unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 256;
+    constexpr unsigned int WinSiz = 10000;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -964,8 +965,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(FileSys.fileExists(path), format("File '{}' does not exist", path));
 
-    const unsigned int MaxObj = 64;
-    const unsigned int WinSiz = 10000;
+    constexpr unsigned int MaxObj = 256;
+    constexpr unsigned int WinSiz = 10000;
 
 #if defined __clang__
 #pragma clang diagnostic push
@@ -979,7 +980,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     SPICEDOUBLE_CELL(cover, WinSiz);
 
     spkobj_c(path.c_str(), &ids);
-    throwOnSpiceError("Error finding Spk Converage");
+    throwOnSpiceError("Error finding Spk ID for coverage");
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
@@ -992,7 +993,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
 
         scard_c(0, &cover);
         spkcov_c(path.c_str(), obj, &cover);
-        throwOnSpiceError("Error finding Spk Converage");
+        throwOnSpiceError("Error finding Spk coverage");
 
         //Get the number of intervals in the coverage window.
         SpiceInt numberOfIntervals = wncard_c(&cover);
@@ -1001,7 +1002,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
             //Get the endpoints of the jth interval.
             SpiceDouble b, e;
             wnfetd_c(&cover, j, &b, &e);
-            throwOnSpiceError("Error finding Spk Converage");
+            throwOnSpiceError("Error finding Spk coverage");
 
             //insert all into coverage time set, the windows could be merged @AA
             _spkCoverageTimes[obj].insert(e);
@@ -1128,7 +1129,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
         if (_useExceptions) {
             // no coverage
             throw SpiceException(format(
-                "No data available for the transform matrix from '{}' to '{}' at any time",
+                "No data available for transform matrix from '{}' to '{}' at any time",
                 fromFrame, toFrame
             ));
         }
@@ -1216,6 +1217,7 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "loadKernel",
                 &luascriptfunctions::loadKernel,
+                {},
                 "string",
                 "Loads the provided SPICE kernel by name. The name can contain path "
                 "tokens, which are automatically resolved"
@@ -1223,6 +1225,7 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "unloadKernel",
                 &luascriptfunctions::unloadKernel,
+                {},
                 "{string, number}",
                 "Unloads the provided SPICE kernel. The name can contain path tokens, "
                 "which are automatically resolved"

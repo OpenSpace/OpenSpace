@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -133,9 +133,11 @@ public:
     class SgctInternal {
         friend class Camera;
     public:
+        void setSceneMatrix(glm::mat4 sceneMatrix);
         void setViewMatrix(glm::mat4 viewMatrix);
         void setProjectionMatrix(glm::mat4 projectionMatrix);
 
+        const glm::mat4& sceneMatrix() const;
         const glm::mat4& viewMatrix() const;
         const glm::mat4& projectionMatrix() const;
         const glm::mat4& viewProjectionMatrix() const;
@@ -148,6 +150,7 @@ public:
         {}
 
         // State
+        glm::mat4 _sceneMatrix;
         glm::mat4 _viewMatrix;
         glm::mat4 _projectionMatrix;
 
@@ -157,22 +160,22 @@ public:
     } sgctInternal;
 
     // Deprecated
-    [[deprecated("Replaced by Camera::setPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::setPositionVec3()")]]
     void setPosition(psc pos);
-    [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
     void setFocusPosition(psc pos);
-    [[deprecated("Replaced by Camera::positionVec3()")]]
+    // [[deprecated("Replaced by Camera::positionVec3()")]]
     psc position() const;
-    [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
     psc unsynchedPosition() const;
-    [[deprecated("Replaced by Camera::focusPositionVec3()")]]
+    // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
     psc focusPosition() const;
     // @TODO use Camera::SgctInternal interface instead
-    [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
+    // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
-    [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
+    // [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
     const glm::mat4& projectionMatrix() const;
-    [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
+    // [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
     const glm::mat4& viewProjectionMatrix() const;
 
 

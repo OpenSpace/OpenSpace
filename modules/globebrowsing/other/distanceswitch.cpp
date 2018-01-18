@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,9 +37,23 @@ bool DistanceSwitch::initialize() {
     return true;
 }
 
+bool DistanceSwitch::initializeGL() {
+    for (unsigned int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->initializeGL();
+    }
+    return true;
+}
+
 bool DistanceSwitch::deinitialize() {
     for (unsigned int i = 0; i < _renderables.size(); ++i) {
         _renderables[i]->deinitialize();
+    }
+    return true;
+}
+
+bool DistanceSwitch::deinitializeGL() {
+    for (unsigned int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->deinitializeGL();
     }
     return true;
 }

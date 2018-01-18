@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,18 +31,18 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <functional>
 #include <unordered_map>
 
-namespace ghoul::filesystem { 
-    class File; 
-}
+namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -61,7 +61,8 @@ namespace openspace {
         ~RenderablePlanesCloud() = default;
 
         void initialize() override;
-        void deinitialize() override;
+        void initializeGL() override;
+        void deinitializeGL() override;
 
         bool isReady() const override;
 
@@ -92,9 +93,10 @@ namespace openspace {
         void deleteDataGPU();
         void createPlanes();
         void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-            const glm::dmat4& projectionMatrix);
-        void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
-            const glm::vec3& orthoRight, const glm::vec3& orthoUp);
+            const glm::dmat4& projectionMatrix, float fadeInVariable);
+        void renderLabels(const RenderData& data,
+            const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
+            const glm::dvec3& orthoUp, float fadeInVarible);
 
         bool loadData();
         bool loadTextures();
@@ -110,6 +112,7 @@ namespace openspace {
         bool _labelDataIsDirty;
 
         int _textMinSize;
+        int _textMaxSize;
         int _planeStartingIndexPos;
         int _textureVariableIndex;
 
@@ -119,12 +122,17 @@ namespace openspace {
         properties::FloatProperty _textSize;
         properties::BoolProperty _drawElements;
         properties::OptionProperty _blendMode;
+        properties::Vec2Property _fadeInDistance;
+        properties::BoolProperty _disableFadeInDistance;
+        properties::FloatProperty _planeMinSize;
 
         // DEBUG:
         properties::OptionProperty _renderOption;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;        
+        UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
+            galaxyTexture) _uniformCache;
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
         std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
         std::unordered_map<int, std::string> _textureFileMap;
@@ -146,7 +154,7 @@ namespace openspace {
 
         glm::dmat4 _transformationMatrix;
 
-        std::unordered_map<int, RenderingPlane> _renderingPlanesMap;       
+        std::vector<RenderingPlane> _renderingPlanesArray;
     };
 
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,23 +28,26 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <openspace/modulepath.h>
 
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "OpenSpaceModule";
-    const char* ModuleBaseToken = "MODULE_";
+    constexpr const char* _loggerCat = "OpenSpaceModule";
+    constexpr const char* ModuleBaseToken = "MODULE_";
 } // namespace
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) 
+OpenSpaceModule::OpenSpaceModule(std::string name)
     : properties::PropertyOwner({ std::move(name) })
 {}
 
-void OpenSpaceModule::initialize() {
+void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
+                                 const ghoul::Dictionary& configuration)
+{
     std::string upperName = name();
     std::transform(
         upperName.begin(),
@@ -55,7 +58,7 @@ void OpenSpaceModule::initialize() {
 
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
-        ModuleBaseToken +
+        std::string(ModuleBaseToken) +
         upperName +
         ghoul::filesystem::FileSystem::TokenClosingBraces;
 
@@ -63,7 +66,8 @@ void OpenSpaceModule::initialize() {
     LDEBUG("Registering module path: " << moduleToken << ": " << path);
     FileSys.registerPathToken(moduleToken, path);
 
-    internalInitialize();
+    _moduleEngine = moduleEngine;
+    internalInitialize(configuration);
 }
 
 void OpenSpaceModule::deinitialize() {
@@ -75,6 +79,10 @@ std::vector<documentation::Documentation> OpenSpaceModule::documentations() cons
 }
 
 scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
+    return {};
+}
+
+std::vector<scripting::LuaLibrary> OpenSpaceModule::luaLibraries() const {
     return {};
 }
 
@@ -92,13 +100,13 @@ std::string OpenSpaceModule::modulePath() const {
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
+    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleName))) {
         return absPath("${MODULES}/" + moduleName);
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
             const std::string path = std::string(dir) + '/' + moduleName;
-            if (FileSys.directoryExists(path)) {
+            if (FileSys.directoryExists(absPath(path))) {
                 return absPath(path);
             }
         }
@@ -111,7 +119,12 @@ std::string OpenSpaceModule::modulePath() const {
     );
 }
 
-void OpenSpaceModule::internalInitialize() {}
+const ModuleEngine* OpenSpaceModule::moduleEngine() const {
+    return _moduleEngine;
+}
+
+void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
+
 void OpenSpaceModule::internalDeinitialize() {}
 
 } // namespace openspace

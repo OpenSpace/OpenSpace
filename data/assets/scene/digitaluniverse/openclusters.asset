@@ -1,0 +1,41 @@
+local assetHelper = asset.require('util/asset_helper')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Open Clusters Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_openclusters_textures",
+    Version = 1
+})
+
+local speck = asset.syncedResource({
+    Name = "Open Clusters Speck Files",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_openclusters_speck",
+    Version = 1
+})
+
+local object = {
+    Name = "Open Star Clusters",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 0.1, 0.8, 0.4 },
+        Transparency = 0.5,
+        File = speck .. "/oc.speck",
+        Texture = textures .. "/point4.png",
+        PolygonSides = 12,
+        TextColor = { 0.05, 0.4, 0.2, 1.0 },
+        LabelFile = speck .. "/oc.label",
+        ScaleFactor = 418.33,
+        TextSize = 16.68,
+        TextMinSize = 4.5,
+        Unit = "pc"
+    },
+    GuiPath = "/Milky Way/Open Clusters"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })

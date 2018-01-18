@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ protected:
     /**
      * loads the transferfunctions specified in tfPath into
      * _transferFunctions list.
-     * 
+     *
      * @param tfPath Path to transfer function file
      */
     void readTransferFunctions(std::string tfPath);
@@ -99,7 +99,7 @@ protected:
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
 
-    std::shared_ptr<DataProcessor> _dataProcessor; 
+    std::shared_ptr<DataProcessor> _dataProcessor;
     std::string _dataBuffer;
     glm::size3_t _textureDimensions;
 
@@ -109,7 +109,8 @@ protected:
 
 private:
     bool readyToRender() const override;
-    bool downloadTextureResource(double timestamp = OsEng.timeManager().time().j2000Seconds()) override;
+    bool downloadTextureResource(
+        double timestamp = OsEng.timeManager().time().j2000Seconds()) override;
 };
 
 } //namespace openspace

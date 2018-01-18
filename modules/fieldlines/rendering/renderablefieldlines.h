@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,8 +45,8 @@ class RenderableFieldlines : public Renderable {
 public:
     RenderableFieldlines(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
@@ -57,7 +57,6 @@ private:
     typedef std::vector<LinePoint> Line;
 
     void initializeDefaultPropertyValues();
-    //std::vector<std::vector<LinePoint> > getFieldlinesData(std::string filename, ghoul::Dictionary hintsDictionary);
     std::vector<Line> getFieldlinesData();
     void loadSeedPoints();
     void loadSeedPointsFromFile();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,8 +82,6 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
         _texturePath = absPath(_texturePath);
         _textureFile = new ghoul::filesystem::File(_texturePath);
     }
-
-    loadTexture();
 }
 
 RenderablePlaneProjection::~RenderablePlaneProjection() {
@@ -94,7 +92,7 @@ bool RenderablePlaneProjection::isReady() const {
     return _shader && _texture;
 }
 
-void RenderablePlaneProjection::initialize() {
+void RenderablePlaneProjection::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
 
@@ -102,15 +100,15 @@ void RenderablePlaneProjection::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
         "Image Plane",
-        "${MODULE_BASE}/shaders/imageplane_vs.glsl",
-        "${MODULE_BASE}/shaders/imageplane_fs.glsl"
+        absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
     );
 
     setTarget(_defaultTarget);
     loadTexture();
 }
 
-void RenderablePlaneProjection::deinitialize() {
+void RenderablePlaneProjection::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -202,7 +200,7 @@ void RenderablePlaneProjection::loadTexture() {
             texture->uploadTexture();
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             _texture = std::move(texture);
 
             delete _textureFile;
@@ -221,8 +219,8 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     glm::dvec3 boresight;
 
     std::string target = _defaultTarget;
-    // Turned on if the plane should be attached to the closest target, 
-    // rather than the target specified in img 
+    // Turned on if the plane should be attached to the closest target,
+    // rather than the target specified in img
     //if (!_moving) {
     //    target = findClosestTarget(currentTime);
     //}
@@ -290,7 +288,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         );
         if (thisNode && newParent) {
             thisNode->setParent(*newParent);
-        }   
+        }
     }
 
     const GLfloat vertex_data[] = {

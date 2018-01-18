@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 //#include <boost/spirit/include/phoenix_stl.hpp>
 
 namespace {
-    const char* _loggerCat = "DataProcessorText";
+    constexpr const char* _loggerCat = "DataProcessorText";
 } // namespace
 
 namespace openspace{
@@ -44,13 +44,16 @@ DataProcessorText::DataProcessorText()
 
 DataProcessorText::~DataProcessorText(){}
 
-std::vector<std::string> DataProcessorText::readMetadata(std::string data, glm::size3_t& dimensions){
+std::vector<std::string> DataProcessorText::readMetadata(std::string data,
+                                                         glm::size3_t& dimensions)
+{
     //The intresting part of the file looks like this:
     //# Output data: field with 61x61=3721 elements
     //# x           y           z           N           V_x         B_x
 
     std::vector<std::string> options = std::vector<std::string>();
-    std::string info = "# Output data: field with "; //The string where the interesting data begins
+    // The string where the interesting data begins
+    std::string info = "# Output data: field with ";
     if(!data.empty()){
         std::string line;
         std::stringstream memorystream(data);
@@ -85,15 +88,18 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data, glm::
     return options;
 }
 
-void DataProcessorText::addDataValues(std::string data, properties::SelectionProperty& dataOptions){
-    int numOptions = dataOptions.options().size(); 
+void DataProcessorText::addDataValues(std::string data,
+                                      properties::SelectionProperty& dataOptions)
+{
+    int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
 
-    if(!data.empty()){
+    if (!data.empty()) {
         std::string line;
         std::stringstream memorystream(data);
 
-        std::vector<float> sum(numOptions, 0.0f); //for standard diviation in the add() function
+        // for standard diviation in the add() function
+        std::vector<float> sum(numOptions, 0.0f);
         std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
 
         std::vector<float> values;
@@ -140,15 +146,17 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
     }
 }
 
-std::vector<float*> DataProcessorText::processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions){
-    if(!data.empty()){
-
+std::vector<float*> DataProcessorText::processData(std::string data,
+                                               properties::SelectionProperty& options,
+                                               glm::size3_t& dimensions)
+{
+    if (!data.empty()) {
         std::string line;
         std::stringstream memorystream(data);
 
-        std::vector<int> selectedOptions = dataOptions.value();
+        std::vector<int> selectedOptions = options.value();
 //        int numSelected = selectedOptions.size();
-        int numOptions  = dataOptions.options().size();
+        int numOptions = static_cast<int>(options.options().size());
 
         std::vector<float> values;
         float value;
@@ -156,8 +164,8 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         int first, last, option, lineSize;
 
         std::vector<float*> dataOptions(numOptions, nullptr);
-        for (int option : selectedOptions) {
-            dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
+        for (int o : selectedOptions) {
+            dataOptions[o] = new float[dimensions.x * dimensions.y] { 0.f };
         }
 
         int numValues = 0;
@@ -178,32 +186,36 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             //     back_inserter(values)
             // );
 
+            // +3 because options x, y and z in the file
             // copy(
-            //     std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
+            //     std::next( std::istream_iterator<float> (ss), 3 ),
             //     std::istream_iterator<float> (),
             //     back_inserter(values)
             // );
 
             // for(int option : selectedOptions){
-            //     value = values[option]; 
+            //     value = values[option];
             //     //value = values[option+3]; //+3 because options x, y and z in the file
             //     dataOptions[option][numValues] = processDataPoint(value, option);
             // }
             // ----------- OLD METHODS ------------------------
 
-//            first = 0; 
+//            first = 0;
             last = 0;
             option = -3;
-            lineSize = line.size();
+            lineSize = static_cast<int>(line.size());
 
             while (last < lineSize) {
-
-                first = line.find_first_not_of(" \t", last);
-                last =  line.find_first_of(" \t", first);
+                first = static_cast<int>(line.find_first_not_of(" \t", last));
+                last = static_cast<int>(line.find_first_of(" \t", first));
                 last = (last > 0)? last : lineSize;
 
-                if (option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){
-                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::float_, value);                
+                auto it = std::find(
+                    selectedOptions.begin(),
+                    selectedOptions.end(),
+                    option
+                );
+                if (option >= 0 && it != selectedOptions.end()) {
                     value = std::stof(line.substr(first, last));
                     dataOptions[option][numValues] = processDataPoint(value, option);
                 }

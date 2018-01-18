@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,11 +31,10 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+    constexpr const char* _loggerCat = "BlockPlaneIntersectionGeometry";
 } // namespace
 
 namespace openspace {
-
 
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(
         glm::vec3 blockSize,
@@ -51,7 +50,6 @@ BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
     glDeleteBuffers(1, &_vBufferId);
     glDeleteVertexArrays(1, &_vaoId);
 }
-
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
     _size = size;

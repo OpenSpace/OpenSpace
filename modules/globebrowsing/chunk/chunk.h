@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ struct TileIndex;
 
 class Chunk {
 public:
-    const static float DEFAULT_HEIGHT;
+    constexpr static float DEFAULT_HEIGHT = 0.f;
 
     struct BoundingHeights {
         float min, max;
@@ -51,7 +51,7 @@ public:
     enum class Status {
         DoNothing,
         WantMerge,
-        WantSplit,
+        WantSplit
     };
 
     Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex,
@@ -66,7 +66,7 @@ public:
      * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
      * otherwise Status::DO_NOTHING.
      *
-     * \returns The Status of the chunk. 
+     * \returns The Status of the chunk.
      */
     Status update(const RenderData& data);
 
@@ -74,7 +74,7 @@ public:
      * Returns a convex polyhedron of eight vertices tightly bounding the volume of
      * the Chunk.
     */
-    std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
+    std::vector<glm::dvec4> boundingPolyhedronCorners() const;
 
     const GeodeticPatch& surfacePatch() const;
     const RenderableGlobe& owner() const;
@@ -90,7 +90,7 @@ public:
      * This means that high level Chunks can have BoundingHeights that are not
     * tightly fitting.
     */
-    BoundingHeights getBoundingHeights() const;
+    BoundingHeights boundingHeights() const;
 
 private:
     const RenderableGlobe& _owner;

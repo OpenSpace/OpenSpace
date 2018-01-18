@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,12 +38,6 @@
 
 #include <fstream>
 
-namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
-    const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
-} // namespace
-
 #include "keybindingmanager_lua.inl"
 
 namespace openspace::interaction {
@@ -53,14 +47,15 @@ KeyBindingManager::KeyBindingManager()
         "Documentation",
         "keybindings",
         {
-            { "keybindingTemplate",  KeybindingTemplateFilename },
-            { "mainTemplate", MainTemplateFilename }
+            { "keybindingTemplate", "${WEB}/keybindings/keybinding.hbs" },
+            { "mainTemplate", "${WEB}/keybindings/main.hbs" }
         },
-        JsFilename
+        "${WEB}/keybindings/script.js"
     )
 { }
 
-void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
+{
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
         std::pair<std::multimap<KeyWithModifier, KeyInformation>::iterator,
@@ -91,7 +86,7 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
         { key, modifier },
         {
             std::move(luaCommand),
-            Synchronized::No,
+            IsSynchronized::No,
             std::move(documentation)
         }
     });
@@ -104,10 +99,53 @@ void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
         { key, modifier },
         {
             std::move(luaCommand),
-            Synchronized::Yes,
+            IsSynchronized::Yes,
             std::move(documentation)
         }
     });
+}
+
+void KeyBindingManager::removeKeyBinding(const std::string& key) {
+    // Erase-remove idiom does not work for std::multimap so we have to do this on foot
+
+    KeyWithModifier k = stringToKey(key);
+
+    for (auto it = _keyLua.begin(); it != _keyLua.end(); ) {
+        // If the current iterator is the key that we are looking for, delete it
+        // (std::multimap::erase will return the iterator to the next element for us)
+        if (it->first == k) {
+            it = _keyLua.erase(it);
+        }
+        else {
+            // We if it is not, we continue iteration
+            ++it;
+        }
+    }
+
+    // _keyLua.erase(
+    //     std::remove_if(
+    //         _keyLua.begin(),
+    //         _keyLua.end(),
+    //         [key](const std::pair<KeyWithModifier, KeyInformation>& val) {
+    //             KeyWithModifier k = stringToKey(key);
+    //             return val.first == k;
+    //         }
+    //     ),
+    //     _keyLua.end()
+    // );
+}
+
+std::vector<std::pair<KeyWithModifier, KeyBindingManager::KeyInformation>>
+KeyBindingManager::keyBinding(const std::string& key) const
+{
+    std::vector<std::pair<KeyWithModifier, KeyInformation>> result;
+
+    KeyWithModifier k = stringToKey(key);
+    auto itRange = _keyLua.equal_range(k);
+    for (auto it = itRange.first; it != itRange.second; ++it) {
+        result.push_back({ it->first, it->second });
+    }
+    return result;
 }
 
 std::string KeyBindingManager::generateJson() const {
@@ -122,7 +160,8 @@ std::string KeyBindingManager::generateJson() const {
         json << "{";
         json << "\"key\": \"" << std::to_string(p.first) << "\",";
         json << "\"script\": \"" << p.second.command << "\",";
-        json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
+        json << "\"remoteScripting\": "
+             << (p.second.synchronization ? "true," : "false,");
         json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
         json << "}";
     }
@@ -147,12 +186,21 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "clearKeys",
                 &luascriptfunctions::clearKeys,
+                {},
                 "",
                 "Clear all key bindings"
             },
             {
+                "clearKey",
+                &luascriptfunctions::clearKey,
+                {},
+                "string",
+                "Unbinds all of the scripts that are bound to the provided key + modifier"
+            },
+            {
                 "bindKey",
                 &luascriptfunctions::bindKey,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute both locally "
                 "and to broadcast to clients if this is the host of a parallel session. "
@@ -163,12 +211,23 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
             {
                 "bindKeyLocal",
                 &luascriptfunctions::bindKeyLocal,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute only locally. "
                 "The first argument is the key, the second argument is the Lua command "
                 "that is to be executed, and the optional third argument is a human "
                 "readable description of the command for documentation purposes."
             },
+            {
+                "getKeyBinding",
+                &luascriptfunctions::getKeyBindings,
+                {},
+                "string",
+                "Returns a list of information about the keybindings for the provided "
+                "key. Each element in the list is a table describing the 'Command' that "
+                "was bound and whether it was a 'Remote' script or not."
+
+            }
         }
     };
 }

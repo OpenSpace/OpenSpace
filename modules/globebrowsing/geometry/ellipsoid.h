@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,19 +30,27 @@
 
 #include <ghoul/glm.h>
 
+#include <vector>
+
 namespace openspace::globebrowsing {
 
 /**
  * This class is based largely on the Ellipsoid class defined in the book
  * "3D Engine Design for Virtual Globes". Most planets or planetary objects are better
  * described using ellipsoids than spheres. All inputs and outputs to this class is
- * based on the WGS84 standard coordinate system where the x-axis points towards geographic
- * (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
+ * based on the WGS84 standard coordinate system where the x-axis points towards
+ * geographic (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
  * z-axis points towards the north pole. For other globes than earth of course the radii
  * can differ.
  */
 class Ellipsoid {
 public:
+    // Shadow configuration structure
+    struct ShadowConfiguration {
+        std::pair<std::string, double> source;
+        std::pair<std::string, double> caster;
+    };
+
     /**
      * \param radii defines three radii for the Ellipsoid
      */
@@ -64,7 +72,8 @@ public:
      */
     glm::dvec3 geodeticSurfaceProjection(const glm::dvec3& p) const;
 
-    glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const;
+    glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(
+        const glm::dvec3& p) const;
     glm::dvec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
 
     const glm::dvec3& radii() const;
@@ -83,6 +92,12 @@ public:
     glm::dvec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
     glm::dvec3 cartesianPosition(const Geodetic3& geodetic3) const;
 
+    void setShadowConfigurationArray(
+        const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray
+    );
+    std::vector<Ellipsoid::ShadowConfiguration> shadowConfigurationArray() const;
+    bool hasEclipseShadows() const;
+
 private:
     struct EllipsoidCache {
         glm::dvec3 _radiiSquared;
@@ -96,6 +111,9 @@ private:
     void updateInternalCache();
 
     glm::dvec3 _radii;
+
+    // Eclipse shadows conf
+    std::vector<Ellipsoid::ShadowConfiguration> _shadowConfArray;
 };
 
 } // namespace openspace::globebrowsing

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,12 +34,14 @@
 #include <algorithm>
 
 namespace {
-    const char* _loggerCat = "TaskRunner";
-}
+    constexpr const char* _loggerCat = "TaskRunner";
+} // namespace
 
 namespace openspace {
 
-std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(const ghoul::Dictionary& tasksDictionary) {
+std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
+                                                 const ghoul::Dictionary& tasksDictionary)
+{
     std::vector<std::unique_ptr<Task>> tasks;
     std::vector<std::string> keys = tasksDictionary.keys();
     for (const std::string& key : keys) {
@@ -63,8 +65,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(const ghoul::
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
     std::string absTasksFile = absPath(path);
-    using RawPath = ghoul::filesystem::FileSystem::RawPath;
-    if (!FileSys.fileExists(absTasksFile, RawPath::Yes)) {
+    if (!FileSys.fileExists(ghoul::filesystem::File(absTasksFile))) {
         LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
             "File not found");
         return std::vector<std::unique_ptr<Task>>();

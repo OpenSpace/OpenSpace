@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,8 @@
 #include <modules/imgui/include/guicomponent.h>
 
 #include <openspace/properties/property.h>
+#include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <ghoul/misc/boolean.h>
 
@@ -47,11 +49,9 @@ public:
     using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
     using UseTreeLayout = ghoul::Boolean;
-    using IsTopLevelWindow = ghoul::Boolean;
 
 
-    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No,
-        IsTopLevelWindow isTopLevel = IsTopLevelWindow::No);
+    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No);
 
     // This is the function that evaluates to the list of Propertyowners that this
     // component should render
@@ -73,9 +73,9 @@ protected:
     /// are regular, i.e., not containing wildcards, regex, or groups
     /// This variable only has an impact on which \c setPropertyValue function is called
     bool _hasOnlyRegularProperties = false;
-    UseTreeLayout _useTreeLayout;
-    bool _currentUseTreeLayout;
-    IsTopLevelWindow _isTopLevel;
+
+    properties::BoolProperty _useTreeLayout;
+    properties::StringListProperty _treeOrdering;
 };
 
 } // namespace openspace::gui

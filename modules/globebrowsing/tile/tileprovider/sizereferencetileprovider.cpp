@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,7 +106,8 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     return l;
 }
 
-TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
+TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const
+{
     int l = roundedLongitudalLength(tileIndex);
     TileIndex::TileHashKey key = static_cast<TileIndex::TileHashKey>(l);
     return key;

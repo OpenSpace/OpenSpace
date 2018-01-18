@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,13 +45,13 @@
 #include <vector>
 
 namespace {
-    const char* _loggerCat = "InstrumentTimesParser";
+    constexpr const char* _loggerCat = "InstrumentTimesParser";
 
-    const char* PlaybookIdentifierName = "InstrumentTimesParser";
-    const char* KeyTargetBody = "Target.Body";
-    const char* KeyInstruments = "Instruments";
-    const char* KeyInstrument = "Instrument";
-    const char* KeyInstrumentFiles = "Files";
+    constexpr const char* PlaybookIdentifierName = "InstrumentTimesParser";
+    constexpr const char* KeyTargetBody = "Target.Body";
+    constexpr const char* KeyInstruments = "Instruments";
+    constexpr const char* KeyInstrument = "Instrument";
+    constexpr const char* KeyInstrumentFiles = "Files";
 } // namespace
 
 namespace openspace {
@@ -114,7 +114,7 @@ bool InstrumentTimesParser::create() {
                 continue;
             }
 
-            // Read file into string 
+            // Read file into string
             std::ifstream inFile(filepath);
             std::string line;
             std::smatch matches;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
  */
 float normalizeFloat(float inpt) {
     if (inpt > 1.0) {
-        return inpt / pow(10, 27);
+        return inpt / pow(10, 30);
     } else {
         return inpt - 1.0;
     }
@@ -45,7 +45,7 @@ float denormalizeFloat(float inpt) {
     if (inpt < 0.0) {
         return inpt + 1.0;
     } else {
-        return inpt * pow(10, 27);
+        return inpt * pow(10, 30);
     }
 }
 

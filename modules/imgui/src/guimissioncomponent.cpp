@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    const ImVec2 size = ImVec2(350, 500);
+    static const ImVec2 Size = ImVec2(350, 500);
 
     void renderMission(const openspace::Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
@@ -47,7 +47,13 @@ namespace {
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
-        if (ImGui::TreeNodeEx(("%s" + missionHashname).c_str(), treeOption, "%s", mission.name().c_str())) {
+        if (ImGui::TreeNodeEx(
+                ("%s" + missionHashname).c_str(),
+                treeOption,
+                "%s",
+                mission.name().c_str())
+            )
+        {
             if (!mission.description().empty()) {
                 ImGui::Text("%s", mission.description().c_str());
             }
@@ -64,7 +70,13 @@ namespace {
             float s = static_cast<float>(startTime.j2000Seconds());
             float e = static_cast<float>(endTime.j2000Seconds());
 
-            ImGui::SliderFloat(missionHashname.c_str(), &v, s, e, OsEng.timeManager().time().UTC().c_str());
+            ImGui::SliderFloat(
+                missionHashname.c_str(),
+                &v,
+                s,
+                e,
+                OsEng.timeManager().time().UTC().c_str()
+            );
             ImGui::SameLine();
             ImGui::Text("%s", endTime.UTC().c_str());
 
@@ -86,9 +98,12 @@ namespace openspace::gui {
 GuiMissionComponent::GuiMissionComponent() : GuiComponent("Mission Information") {}
 
 void GuiMissionComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.75f);
+    ImGui::Begin(name().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
+
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
     ghoul_assert(
         MissionManager::ref().hasCurrentMission(),

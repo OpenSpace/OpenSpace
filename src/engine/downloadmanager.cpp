@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,11 +49,7 @@
 #endif
 
 namespace {
-    const char* _loggerCat = "DownloadManager";
-
-    const char* RequestIdentifier = "identifier";
-    const char* RequestFileVersion = "file_version";
-    const char* RequestApplicationVersion = "application_version";
+    constexpr const char* _loggerCat = "DownloadManager";
 
     struct ProgressInformation {
         std::shared_ptr<openspace::DownloadManager::FileFuture> future;
@@ -145,17 +141,10 @@ DownloadManager::FileFuture::FileFuture(std::string file)
     , abortDownload(false)
 {}
 
-DownloadManager::DownloadManager(std::string requestURL, int applicationVersion,
-                                 bool useMultithreadedDownload)
-    : _applicationVersion(std::move(applicationVersion))
-    , _useMultithreadedDownload(useMultithreadedDownload)
+DownloadManager::DownloadManager(bool useMultithreadedDownload)
+    : _useMultithreadedDownload(useMultithreadedDownload)
 {
     curl_global_init(CURL_GLOBAL_ALL);
-
-    _requestURL.push_back(std::move(requestURL));
-
-    // TODO: Check if URL is accessible ---abock
-    // TODO: Allow for multiple requestURLs
 }
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
@@ -313,106 +302,6 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     return std::async(std::launch::async, downloadFunction);
 }
 
-std::vector<std::shared_ptr<DownloadManager::FileFuture>>
-DownloadManager::downloadRequestFiles(
-    const std::string& identifier, const ghoul::filesystem::Directory& destination,
-    int version, bool overrideFiles, DownloadFinishedCallback, DownloadProgressCallback)
-{
-    std::vector<std::shared_ptr<FileFuture>> futures;
-    FileSys.createDirectory(destination, ghoul::filesystem::FileSystem::Recursive::Yes);
-    // TODO: Check s ---abock
-    // TODO: Escaping is necessary ---abock
-    const std::string fullRequest =_requestURL.back() + "?" +
-        RequestIdentifier + "=" + identifier + "&" +
-        RequestFileVersion + "=" + std::to_string(version) + "&" +
-        RequestApplicationVersion + "=" + std::to_string(_applicationVersion);
-    LDEBUG("Request: " << fullRequest);
-
-    std::string requestFile = absPath("${TEMPORARY}/" + identifier);
-    LDEBUG("Request File: " << requestFile);
-
-    bool isFinished = false;
-    auto callback = [&](const FileFuture&) {
-        LDEBUG("Finished: " << requestFile);
-        std::ifstream temporary(requestFile);
-        std::string line;
-        int nFiles = 0;
-        while (std::getline(temporary, line)) {
-            if (line.empty()) {
-                // This might occur if someone added multiple newlines
-                // or mixing carriage return and newlines
-                continue;
-            }
-
-            ++nFiles;
-#ifdef __APPLE__
-            // @TODO: Fix this so that the ifdef is not necessary anymore ---abock
-          std::string file = ghoul::filesystem::File(line, ghoul::filesystem::File::RawPath::Yes).filename();
-#else
-            std::string file = ghoul::filesystem::File(line).filename();
-#endif
-
-            LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
-
-            std::shared_ptr<FileFuture> future = downloadFile(
-                line,
-                destination.path() + "/" + file,
-                overrideFiles,
-                false,
-                0,
-                [](const FileFuture& f) { LDEBUG("Finished: " << f.filePath); }
-            );
-            if (future) {
-                futures.push_back(future);
-            }
-        }
-        isFinished = true;
-    };
-
-    std::shared_ptr<FileFuture> f = downloadFile(
-        fullRequest,
-        requestFile,
-        true,
-        false,
-        0,
-        callback
-    );
-
-    while (!isFinished) {}
-
-    return futures;
-}
-
-void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
-    const ghoul::filesystem::Directory& destination, int version, bool overrideFiles,
-    AsyncDownloadFinishedCallback callback)
-{
-    auto downloadFunction =
-        [this, identifier, destination, version, overrideFiles, callback]()
-    {
-        std::vector<std::shared_ptr<FileFuture>> f = downloadRequestFiles(
-            identifier,
-            destination,
-            version,
-            overrideFiles
-        );
-
-        callback(f);
-    };
-
-    if (_useMultithreadedDownload) {
-        using namespace ghoul::thread;
-        std::thread t = std::thread(downloadFunction);
-        ghoul::thread::setPriority(
-            t, ThreadPriorityClass::Idle, ThreadPriorityLevel::Lowest
-        );
-        t.detach();
-    }
-    else {
-        downloadFunction();
-    }
-}
-
 void DownloadManager::getFileExtension(const std::string& url,
     RequestFinishedCallback finishedCallback){
 
@@ -426,7 +315,7 @@ void DownloadManager::getFileExtension(const std::string& url,
             if (CURLE_OK == res) {
                 char* ct;
                 // ask for the content-type
-                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);    
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
                 if ((res == CURLE_OK) && ct && finishedCallback) {
                     finishedCallback(std::string(ct));
                 }

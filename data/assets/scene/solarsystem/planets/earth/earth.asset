@@ -1,0 +1,232 @@
+local transforms = asset.require('./transforms')
+local assetHelper = asset.require('util/asset_helper')
+local texturesPath = asset.require('./earth_textures').TexturesPath
+asset.request('./trail')
+
+
+
+-- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
+local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
+local mapServiceConfigsPath = asset.localResource("map_service_configs")
+
+local Earth = {
+    Name = "Earth",
+    Parent = transforms.EarthIAU.Name,
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = earthEllipsoid,
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Name = "ESRI VIIRS Combo",
+                    Type = "ByLevelTileLayer",
+                    LevelTileProviders = {
+                        {
+                            MaxLevel = 4,
+                            TileProvider = {
+                                Name = "Temporal VIIRS SNPP",
+                                Type = "TemporalTileLayer",
+                                FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                                    "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                                    "2015-11-24",
+                                    "Yesterday",
+                                    "1d",
+                                    "250m",
+                                    "jpg"
+                                ),
+                                PadTiles = false
+                            }
+                        },
+                        {
+                            MaxLevel = 22,
+                            TileProvider = {
+                                Name = "ESRI World Imagery",
+                                FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms",
+                                PadTiles = false
+                            }
+                        },
+                    },
+                    Enabled = true,
+                    PadTiles = false,
+                    Fallback = {
+                        Name = "Blue Marble",
+                        FilePath = texturesPath .. "/earth_bluemarble.jpg",
+                        Enabled = true
+                    }
+                },
+                {
+                    Name = "ESRI World Imagery",
+                    FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms"
+                },
+                {
+                    Name = "ESRI Imagery World 2D",
+                    FilePath = mapServiceConfigsPath .. "/ESRI/ESRI_Imagery_World_2D.wms"
+                },
+                {
+                    Name = "VIIRS SNPP (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                        "2015-11-24",
+                        "Yesterday",
+                        "1d",
+                        "250m",
+                        "jpg"
+                    )
+                },
+                {
+                    Name = "Aqua Modis (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "MODIS_Aqua_CorrectedReflectance_TrueColor",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "250m",
+                        "jpg"
+                    )
+                },
+                {
+                    Name = "Terra Modis (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "MODIS_Terra_CorrectedReflectance_TrueColor",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "250m",
+                        "jpg"
+                    )
+                },
+                {
+                    Name = "BMNG",
+                    FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms"
+                },
+                {
+                    Name = "AMSR2_GCOM_W1_Sea_Ice_Concentration (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "AMSR2_Sea_Ice_Concentration_12km",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "2km",
+                        "png"
+                    )
+                },
+                {
+                    Name = "MODIS_Terra_Chlorophyll_A (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "MODIS_Terra_Chlorophyll_A",
+                        "2013-07-02",
+                        "Yesterday",
+                        "1d",
+                        "1km",
+                        "png"
+                    )
+                },
+                {
+                    Name = "GHRSST_L4_G1SST_Sea_Surface_Temperature (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+                        "2010-06-21",
+                        "Yesterday",
+                        "1d",
+                        "1km",
+                        "png"
+                    )
+                }
+            },
+            NightLayers = {
+                {
+                    Name = "Earth at Night 2012",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
+                    Enabled = true,
+                    Settings = {
+                        Opacity = 1.0,
+                        Gamma = 1.5,
+                        Multiplier = 15.0
+                    },
+                    Fallback = {
+                        Name = "Earth Night",
+                        FilePath = texturesPath .. "/earth_night.jpg",
+                        Enabled = true,
+                        Settings = {
+                            Opacity = 1.0,
+                            Gamma = 1.5,
+                            Multiplier = 15.0
+                        },
+                    }
+                },
+                {
+                    Name = "Earth at Night (Temporal)",
+                    Type = "TemporalTileLayer",
+                    FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                        "VIIRS_SNPP_DayNightBand_ENCC",
+                        "2012-05-08",
+                        "Yesterday",
+                        "1d",
+                        "500m",
+                        "png"
+                    )
+                }
+            },
+            WaterMasks = {
+                {
+                    Name = "MODIS_Water_Mask",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
+                    Enabled = true
+                },
+                {
+                    Name = "GEBCO",
+                    FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms"
+                }
+            },
+            Overlays = {
+                {
+                    Name = "Coastlines",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.wms"
+                },
+                {
+                    Name = "Reference_Features",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Features.wms"
+                },
+                {
+                    Name = "Reference_Labels",
+                    FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
+                },
+                {
+                    Name = "Tile Indices",
+                    Type = "TileIndexTileLayer"
+                },
+                {
+                    Name = "Size Reference",
+                    Type = "SizeReferenceTileLayer",
+                    Radii = earthEllipsoid
+                }
+            },
+            HeightLayers = {
+                {
+                    Name = "Terrain tileset",
+                    FilePath = mapServiceConfigsPath .. "/ESRI/Terrain.wms",
+                    Enabled = true,
+                    TilePixelSize = 64,
+                    Fallback = {
+                        Name = "Earth Bluemarble Height",
+                        FilePath = texturesPath .. "/earth_bluemarble_height.jpg",
+                        Enabled = true
+                    }
+                }
+            }
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GuiPath = "/Solar System/Planets/Earth"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Earth })

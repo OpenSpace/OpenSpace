@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -223,9 +223,14 @@ void LuaConsole::initialize() {
 
     _program = ghoul::opengl::ProgramObject::Build(
         "Console",
-        "${SHADERS}/luaconsole.vert",
-        "${SHADERS}/luaconsole.frag"
+        absPath("${SHADERS}/luaconsole.vert"),
+        absPath("${SHADERS}/luaconsole.frag")
     );
+
+    _uniformCache.res = _program->uniformLocation("res");
+    _uniformCache.color = _program->uniformLocation("color");
+    _uniformCache.height = _program->uniformLocation("height");
+    _uniformCache.ortho = _program->uniformLocation("ortho");
 
     GLfloat data[] = {
         0.f, 0.f,
@@ -587,7 +592,6 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     default:
         return true;
     }
-
 }
 
 void LuaConsole::charCallback(unsigned int codepoint,
@@ -661,6 +665,11 @@ void LuaConsole::render() {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
+
+        _uniformCache.res = _program->uniformLocation("res");
+        _uniformCache.color = _program->uniformLocation("color");
+        _uniformCache.height = _program->uniformLocation("height");
+        _uniformCache.ortho = _program->uniformLocation("ortho");
     }
 
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
@@ -676,11 +685,11 @@ void LuaConsole::render() {
 
     _program->activate();
 
-    _program->setUniform("res", res);
-    _program->setUniform("color", _backgroundColor);
-    _program->setUniform("height", _currentHeight / res.y);
+    _program->setUniform(_uniformCache.res, res);
+    _program->setUniform(_uniformCache.color, _backgroundColor);
+    _program->setUniform(_uniformCache.height, _currentHeight / res.y);
     _program->setUniform(
-        "ortho",
+        _uniformCache.ortho,
         glm::ortho(
             0.f, static_cast<float>(res.x), 0.f, static_cast<float>(res.y)
         )
@@ -691,12 +700,15 @@ void LuaConsole::render() {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Draw the highlight lines above and below the background
-    _program->setUniform("color", _highlightColor);
+    _program->setUniform(_uniformCache.color, _highlightColor);
     glDrawArrays(GL_LINES, 1, 4);
 
     // Draw the separator between the current entry box and the history
-    _program->setUniform("color", _separatorColor);
-    _program->setUniform("height", _currentHeight / res.y - 2.5f * EntryFontSize / res.y);
+    _program->setUniform(_uniformCache.color, _separatorColor);
+    _program->setUniform(
+        _uniformCache.height,
+        _currentHeight / res.y - 2.5f * EntryFontSize / res.y
+    );
     glDrawArrays(GL_LINES, 1, 2);
 
     _program->deactivate();

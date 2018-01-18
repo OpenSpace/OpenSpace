@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,12 +36,12 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "TemporalTileProvider";
+    constexpr const char* _loggerCat = "TemporalTileProvider";
 
-    const char* KeyFilePath = "FilePath";
-    const char* KeyBasePath = "BasePath";
-    const char* KeyPreCacheStartTime = "PreCacheStartTime";
-    const char* KeyPreCacheEndTime = "PreCacheEndTime";
+    constexpr const char* KeyFilePath = "FilePath";
+    constexpr const char* KeyBasePath = "BasePath";
+    constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
+    constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
 
     static const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
@@ -61,45 +61,58 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION =
                                                                 "OpenSpaceTimeResolution";
 const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
 
-TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
     , _filePath(FilePathInfo)
     , _successfulInitialization(false)
 {
-    std::string filePath;
-    dictionary.getValue<std::string>(KeyFilePath, filePath);
-    try {
-        filePath = absPath(filePath);
-    }
-    catch (const std::runtime_error&) {
-        // File path was not a path to a file but a GDAL config or empty
-    }
+    _filePath = dictionary.value<std::string>(KeyFilePath);
+    // std::string filePath;
+    // dictionary.getValue<std::string>(KeyFilePath, filePath);
+    // try {
+    //     filePath = absPath(filePath);
+    // }
+    // catch (const std::runtime_error&) {
+    //     // File path was not a path to a file but a GDAL config or empty
+    // }
 
-    _filePath.setValue(filePath);
+    // _filePath.setValue(filePath);
     addProperty(_filePath);
 
     if (readFilePath()) {
-        const bool hasStart = dictionary.hasKeyAndValue<std::string>(KeyPreCacheStartTime);
+        const bool hasStart = dictionary.hasKeyAndValue<std::string>(
+            KeyPreCacheStartTime
+        );
         const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
         if (hasStart && hasEnd) {
             const std::string start = dictionary.value<std::string>(KeyPreCacheStartTime);
             const std::string end = dictionary.value<std::string>(KeyPreCacheEndTime);
-            std::vector<Time> preCacheTimes = _timeQuantizer.quantized(
+            _preCacheTimes = _timeQuantizer.quantized(
                 Time(Time::convertTime(start)),
                 Time(Time::convertTime(end))
             );
-
-            LINFO("Preloading: " << _filePath.value());
-            for (const Time& t : preCacheTimes) {
-                getTileProvider(t);
-            }
         }
         _successfulInitialization = true;
     }
     else {
         LERROR("Unable to read file " + _filePath.value());
         _successfulInitialization = false;
-    }  
+    }
+}
+
+
+bool TemporalTileProvider::initialize() {
+    bool success = TileProvider::initialize();
+
+    if (!_preCacheTimes.empty()) {
+        LINFO("Preloading: " << _filePath.value());
+        for (const Time& t : _preCacheTimes) {
+            getTileProvider(t);
+        }
+        _preCacheTimes.clear();
+    }
+
+    return success;
 }
 
 bool TemporalTileProvider::readFilePath() {
@@ -210,7 +223,7 @@ std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::strin
 TileDepthTransform TemporalTileProvider::depthTransform() {
     if (_successfulInitialization) {
         ensureUpdated();
-        return _currentTileProvider->depthTransform();    
+        return _currentTileProvider->depthTransform();
     }
     else {
         return { 1.0f, 0.0f};
@@ -266,7 +279,8 @@ void TemporalTileProvider::update() {
 
 void TemporalTileProvider::reset() {
     if (_successfulInitialization) {
-        for (std::pair<const TimeKey, std::shared_ptr<TileProvider>>& it : _tileProviderMap) {
+        using T = std::pair<const TimeKey, std::shared_ptr<TileProvider>>;
+        for (T& it : _tileProviderMap) {
             it.second->reset();
         }
     }
@@ -289,12 +303,13 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& 
 std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
     const TimeKey& timekey)
 {
-    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
+    auto it = _tileProviderMap.find(timekey);
     if (it != _tileProviderMap.end()) {
         return it->second;
     }
     else {
         std::shared_ptr<TileProvider> tileProvider = initTileProvider(timekey);
+        tileProvider->initialize();
 
         _tileProviderMap[timekey] = tileProvider;
         return tileProvider;
@@ -402,7 +417,7 @@ TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
         init();
     }
     ghoul_assert(
-        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
+        _timeIdProviderMap.find(format) != _timeIdProviderMap.end(),
         "Unsupported Time format: " + format
     );
     return _timeIdProviderMap[format].get();
@@ -456,7 +471,9 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) 
 bool TimeQuantizer::quantize(Time& t, bool clamp) const {
     double unquantized = t.j2000Seconds();
     if (_timerange.includes(unquantized)) {
-        double quantized = std::floor((unquantized - _timerange.start) / _resolution) * _resolution + _timerange.start;
+        double quantized = std::floor(
+            (unquantized - _timerange.start) / _resolution) *
+            _resolution + _timerange.start;
         t.setTime(quantized);
         return true;
     }
@@ -484,7 +501,7 @@ std::vector<Time> TimeQuantizer::quantized(const Time& start, const Time& end) c
     const double delta = endSeconds - startSeconds;
 
     ghoul_assert(int(delta) % int(_resolution) == 0, "Quantization error");
-    const int nSteps = delta / _resolution;
+    const int nSteps = static_cast<int>(delta / _resolution);
 
     std::vector<Time> result(nSteps + 1);
     for (int i = 0; i <= nSteps; ++i) {

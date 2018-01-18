@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@ layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
 out vec4 fs_position;
+out vec3 fs_normal;
 out vec3 ellipsoidNormalCameraSpace;
 out LevelWeights levelWeights;
 out vec3 positionCameraSpace;
@@ -44,6 +45,11 @@ out vec3 ellipsoidTangentThetaCameraSpace;
 out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
+#if USE_ECLIPSE_SHADOWS
+out vec3 positionWorldSpace;
+uniform dmat4 inverseViewTransform;
+#endif
+
 uniform mat4 projectionTransform;
 // Input points in camera space
 uniform vec3 p00;
@@ -51,11 +57,11 @@ uniform vec3 p10;
 uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
+uniform vec3 patchNormalModelSpace;
 uniform float chunkMinHeight;
 
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
-
 
 vec3 bilinearInterpolation(vec2 uv) {
     vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
@@ -101,5 +107,10 @@ void main() {
     fs_position = z_normalization(positionClippingSpace);
     gl_Position = fs_position;
     ellipsoidNormalCameraSpace = patchNormalCameraSpace;
+    fs_normal = patchNormalModelSpace;
     positionCameraSpace = p;
+
+#if USE_ECLIPSE_SHADOWS
+    positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+#endif
 }

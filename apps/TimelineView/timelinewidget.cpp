@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,7 +89,12 @@ void TimelineWidget::paintEvent(QPaintEvent* event) {
 
     QRectF fullRect = contentsRect();
     QRectF contentRect(0, 0, fullRect.width() - 1, fullRect.height() - LegendHeight);
-    QRectF legendRect(0, fullRect.bottom() - LegendHeight, fullRect.right(), fullRect.bottom());
+    QRectF legendRect(
+        0,
+        fullRect.bottom() - LegendHeight,
+        fullRect.right(),
+        fullRect.bottom()
+    );
 
     painter.save();
     drawContent(painter, contentRect);
@@ -101,10 +106,17 @@ void TimelineWidget::paintEvent(QPaintEvent* event) {
     painter.restore();
 }
 
-void TimelineWidget::setData(std::vector<Image> images, std::map<uint8_t, std::string> targetMap, std::map<uint16_t, std::string> instrumentMap) {
+void TimelineWidget::setData(std::vector<Image> images,
+                             std::map<uint8_t, std::string> targetMap,
+                             std::map<uint16_t, std::string> instrumentMap)
+{
     _images.insert(_images.end(), images.begin(), images.end());
 
-    std::sort(_images.begin(), _images.end(), [](const Image& a, const Image& b) { return a.beginning < b.beginning; });
+    std::sort(
+        _images.begin(),
+        _images.end(),
+        [](const Image& a, const Image& b) { return a.beginning < b.beginning; }
+    );
 
     _targetMap.insert(targetMap.begin(), targetMap.end());
     _instrumentMap.insert(instrumentMap.begin(), instrumentMap.end());
@@ -148,8 +160,15 @@ void TimelineWidget::drawContent(QPainter& painter, QRectF rect) {
     // Draw current time
     painter.setBrush(QBrush(Qt::black));
     painter.setPen(QPen(Qt::black, 2));
-    painter.drawLine(QPointF(0, timelineRect.height() / 2), QPointF(timelineRect.width(), timelineRect.height() / 2));
-    painter.drawText(timelineRect.width(), timelineRect.height() / 2 + TextOffset, QString::fromStdString(_currentTime.time));
+    painter.drawLine(
+        QPointF(0, timelineRect.height() / 2),
+        QPointF(timelineRect.width(), timelineRect.height() / 2)
+    );
+    painter.drawText(
+        timelineRect.width(),
+        timelineRect.height() / 2 + TextOffset,
+        QString::fromStdString(_currentTime.time)
+    );
 }
 
 void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
@@ -171,14 +190,21 @@ void TimelineWidget::drawLegend(QPainter& painter, QRectF rect) {
         ;
         painter.setBrush(QBrush(InstrumentColors[QString::fromStdString(instrument)]));
         painter.setPen(QPen(InstrumentColors[QString::fromStdString(instrument)]));
-        painter.drawRect(currentHorizontalPosition, currentVerticalPosition, BoxSize, BoxSize);
+        painter.drawRect(
+            currentHorizontalPosition,
+            currentVerticalPosition,
+            BoxSize,
+            BoxSize
+        );
         currentHorizontalPosition += BoxSize + Padding;
 
         painter.setPen(QPen(QColor(200, 200, 200)));
         //painter.setPen(QPen(Qt::black));
-        painter.drawText(currentHorizontalPosition, currentVerticalPosition + BoxSize / 2 + TextOffset, InstrumentConversion[QString::fromStdString(instrument)]);
-//        int textWidth = painter.boundingRect(QRect(), QString::fromStdString(instrument)).width();
-        //currentHorizontalPosition += std::max(textWidth, 25) + Padding;
+        painter.drawText(
+            currentHorizontalPosition,
+            currentVerticalPosition + BoxSize / 2 + TextOffset,
+            InstrumentConversion[QString::fromStdString(instrument)]
+        );
         currentHorizontalPosition += 125;
     }
 }
@@ -198,11 +224,12 @@ void TimelineWidget::drawImages(
 {
     std::set<std::string> instrumentSet;
     for (Image* i : images) {
-        for (std::string instrument : i->instruments)
+        for (std::string instrument : i->instruments) {
             instrumentSet.insert(instrument);
+        }
     }
     std::map<std::string, int> instruments;
-    for (std::set<std::string>::const_iterator it = instrumentSet.begin(); it != instrumentSet.end(); ++it)
+    for (auto it = instrumentSet.begin(); it != instrumentSet.end(); ++it)
         instruments[*it] = std::distance(instrumentSet.begin(), it);
 
     for (Image* i : images) {
@@ -215,8 +242,9 @@ void TimelineWidget::drawImages(
         int height = (timelineRect.top() + timelineRect.height() * tEnd) - loc;
         height = std::max(height, 5);
 
-        if (loc + height > timelineRect.height())
+        if (loc + height > timelineRect.height()) {
             height = timelineRect.height() - loc;
+        }
 
         std::string target = i->target;
         auto it = std::find(_targets.begin(), _targets.end(), target);
@@ -224,10 +252,13 @@ void TimelineWidget::drawImages(
 
         for (std::string instrument : i->instruments) {
             auto it = std::find(_instruments.begin(), _instruments.end(), instrument);
-            if (it == _instruments.end())
+            if (it == _instruments.end()) {
                 qDebug() << "Instrument not found";
+            }
 
-            painter.setBrush(QBrush(InstrumentColors[QString::fromStdString(instrument)]));
+            painter.setBrush(
+                QBrush(InstrumentColors[QString::fromStdString(instrument)])
+            );
 
             double width = timelineRect.width() / instruments.size();
             double pos = instruments[instrument] * width;
@@ -238,7 +269,8 @@ void TimelineWidget::drawImages(
         if (height >= 5) {
             painter.setBrush(QBrush(Qt::black));
             painter.setPen(QPen(Qt::black));
-            QString line = QString::fromStdString(i->beginningString) + QString(" (") + QString::fromStdString(i->target) + QString(")");
+            QString line = QString::fromStdString(i->beginningString) + QString(" (") +
+                           QString::fromStdString(i->target) + QString(")");
 
             painter.drawText(timelineRect.width(), loc + height / 2 + TextOffset, line);
         }
@@ -257,9 +289,16 @@ void TimelineWidget::socketDisconnected() {
 }
 
 std::string TimelineWidget::nextTarget() const {
-    auto it = std::lower_bound(_images.begin(), _images.end(), _currentTime.et, [](const Image& i, double et) { return i.beginning < et; });
-    if (it != _images.end())
+    auto it = std::lower_bound(
+        _images.begin(),
+        _images.end(),
+        _currentTime.et,
+        [](const Image& i, double et) { return i.beginning < et; }
+    );
+    if (it != _images.end()) {
         return it->target;
-    else
+    }
+    else {
         return "";
+    }
 }

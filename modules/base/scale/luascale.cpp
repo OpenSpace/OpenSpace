@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,6 +69,14 @@ LuaScale::LuaScale()
     , _state(false)
 {
     addProperty(_luaScriptFile);
+
+    _luaScriptFile.onChange([&]() {
+        requireUpdate();
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile);
+        _fileHandle->setCallback([&](const ghoul::filesystem::File&) {
+            requireUpdate();
+        });
+    });
 }
 
 LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
@@ -79,7 +87,7 @@ LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
     _luaScriptFile = absPath(dictionary.value<std::string>(ScriptInfo.identifier));
 }
 
-void LuaScale::update(const UpdateData& data) {
+double LuaScale::scaleValue(const Time& time) const {
     ghoul::lua::runScriptFile(_state, _luaScriptFile);
 
     // Get the scaling function
@@ -90,18 +98,20 @@ void LuaScale::update(const UpdateData& data) {
             "LuaScale",
             "Script '" << _luaScriptFile << "' does not have a function 'scale'"
         );
-        return;
+        return 0.0;
     }
 
     // First argument is the number of seconds past the J2000 epoch in ingame time
-    lua_pushnumber(_state, data.time.j2000Seconds());
+    lua_pushnumber(_state, time.j2000Seconds());
 
     // Second argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
     lua_pushnumber(
         _state,
-        duration_cast<milliseconds>(now.time_since_epoch()).count()
+        static_cast<lua_Number>(
+            duration_cast<milliseconds>(now.time_since_epoch()).count()
+        )
     );
 
     // Execute the scaling function
@@ -113,7 +123,7 @@ void LuaScale::update(const UpdateData& data) {
         );
     }
 
-    _scale = luaL_checknumber(_state, -1);
+    return luaL_checknumber(_state, -1);
 }
 
 } // namespace openspace

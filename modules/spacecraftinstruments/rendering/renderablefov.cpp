@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 #include <glm/gtx/projection.hpp>
@@ -297,13 +298,33 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     addProperty(_colors.square);
 }
 
-void RenderableFov::initialize() {
+void RenderableFov::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram(
         "FovProgram",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl",
-        "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl"
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
     );
+
+    _uniformCache.modelViewProjection = _programObject->uniformLocation(
+        "modelViewProjectionTransform"
+    );
+    _uniformCache.defaultColorStart = _programObject->uniformLocation(
+        "defaultColorStart"
+    );
+    _uniformCache.defaultColorEnd = _programObject->uniformLocation("defaultColorEnd");
+    _uniformCache.activeColor = _programObject->uniformLocation("activeColor");
+    _uniformCache.targetInFieldOfViewColor = _programObject->uniformLocation(
+        "targetInFieldOfViewColor"
+    );
+    _uniformCache.intersectionStartColor = _programObject->uniformLocation(
+        "intersectionStartColor"
+    );
+    _uniformCache.intersectionEndColor = _programObject->uniformLocation(
+        "intersectionEndColor"
+    );
+    _uniformCache.squareColor = _programObject->uniformLocation("squareColor");
+    _uniformCache.interpolation = _programObject->uniformLocation("interpolation");
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
@@ -411,7 +432,7 @@ void RenderableFov::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderableFov::deinitialize() {
+void RenderableFov::deinitializeGL() {
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
 
@@ -428,7 +449,7 @@ bool RenderableFov::isReady() const {
 
 // Orthogonal projection next to planets surface
 glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
-                                               const std::string& target) const 
+                                               const std::string& target) const
 {
     glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
         target,
@@ -714,13 +735,13 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                         const double t2 = 0.5 + bisect(half, jBound, intercepts);
 
                         //
-                        // The target is sticking out somewhere between i and j, so we 
+                        // The target is sticking out somewhere between i and j, so we
                         // have three regions here:
                         // The first (0,t1) and second (t2,1) are not intersecting
                         // The third between (t1,t2) is intersecting
                         //
-                        //   i       p1    p2       j 
-                        //            *****        
+                        //   i       p1    p2       j
+                        //            *****
                         //   x-------*     *-------x
                         //   0       t1    t2      1
 
@@ -806,7 +827,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //            SpiceManager::ref().surfaceIntercept(
             //                target,
             //                _instrument.spacecraft,
-            //                _instrument.name, 
+            //                _instrument.name,
             //                bodyfixed,
             //                _instrument.aberrationCorrection,
             //                data.time,
@@ -825,7 +846,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             //        bool intercepted = res.interceptFound;
 
             //        if (intercepted) {
-            //            // find the two outer most points of intersection 
+            //            // find the two outer most points of intersection
             //            glm::dvec3 root1 = bisection(half, current, data.time, target);
             //            glm::dvec3 root2 = bisection(half, next, data.time, target);
 
@@ -1022,7 +1043,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             if (interceptTag[i] == false) { // If point is non-interceptive, project it.
                 insertPoint(
                     _fovPlane,
-                    glm::vec4(orthogonalProjection(current, data.time, target), 0.0), 
+                    glm::vec4(orthogonalProjection(current, data.time, target), 0.0),
                     tmp
                 );
                 _rebuild = true;
@@ -1064,7 +1085,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     bool intercepted = res.interceptFound;
 
                     if (intercepted) {
-                        // find the two outer most points of intersection 
+                        // find the two outer most points of intersection
                         glm::dvec3 root1 = bisection(half, current, data.time, target);
                         glm::dvec3 root2 = bisection(half, next, data.time, target);
 
@@ -1122,7 +1143,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 for (int j = 1; j <= InterpolationSteps; ++j) {
                     float t = (static_cast<float>(j) / InterpolationSteps);
                     interpolated = interpolate(mid, next, t);
-                    glm::dvec3 ivec = 
+                    glm::dvec3 ivec =
                         (j > 1) ?
                         checkForIntercept(interpolated, data.time, target) :
                         orthogonalProjection(interpolated, data.time, target);
@@ -1200,21 +1221,27 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
             modelTransform);
 
         _programObject->setUniform(
-            "modelViewProjectionTransform",
+            _uniformCache.modelViewProjection,
             modelViewProjectionTransform
         );
 
-        _programObject->setUniform("defaultColorStart", _colors.defaultStart);
-        _programObject->setUniform("defaultColorEnd", _colors.defaultEnd);
-        _programObject->setUniform("activeColor", _colors.active);
+        _programObject->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
+        _programObject->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
+        _programObject->setUniform(_uniformCache.activeColor, _colors.active);
         _programObject->setUniform(
-            "targetInFieldOfViewColor",
+            _uniformCache.targetInFieldOfViewColor,
             _colors.targetInFieldOfView
         );
-        _programObject->setUniform("intersectionStartColor", _colors.intersectionStart);
-        _programObject->setUniform("intersectionEndColor", _colors.intersectionEnd);
-        _programObject->setUniform("squareColor", _colors.square);
-        _programObject->setUniform("interpolation", _interpolationTime);
+        _programObject->setUniform(
+            _uniformCache.intersectionStartColor,
+            _colors.intersectionStart
+        );
+        _programObject->setUniform(
+            _uniformCache.intersectionEndColor,
+            _colors.intersectionEnd
+        );
+        _programObject->setUniform(_uniformCache.squareColor, _colors.square);
+        _programObject->setUniform(_uniformCache.interpolation, _interpolationTime);
 
         GLenum mode = _drawSolid ? GL_TRIANGLE_STRIP : GL_LINES;
 
@@ -1257,6 +1284,33 @@ void RenderableFov::update(const UpdateData& data) {
         if (diff < 0.0) {
             _interpolationTime = 0.f;
         }
+    }
+
+    if (_programObject->isDirty()) {
+        _programObject->rebuildFromFile();
+
+
+        _uniformCache.modelViewProjection = _programObject->uniformLocation(
+            "modelViewProjectionTransform"
+        );
+        _uniformCache.defaultColorStart = _programObject->uniformLocation(
+            "defaultColorStart"
+        );
+        _uniformCache.defaultColorEnd = _programObject->uniformLocation(
+            "defaultColorEnd"
+        );
+        _uniformCache.activeColor = _programObject->uniformLocation("activeColor");
+        _uniformCache.targetInFieldOfViewColor = _programObject->uniformLocation(
+            "targetInFieldOfViewColor"
+        );
+        _uniformCache.intersectionStartColor = _programObject->uniformLocation(
+            "intersectionStartColor"
+        );
+        _uniformCache.intersectionEndColor = _programObject->uniformLocation(
+            "intersectionEndColor"
+        );
+        _uniformCache.squareColor = _programObject->uniformLocation("squareColor");
+        _uniformCache.interpolation = _programObject->uniformLocation("interpolation");
     }
 }
 
@@ -1353,7 +1407,7 @@ void RenderableFov::updateGPU() {
     //    );
     //}
     //else {
-    //    // new points - memory change 
+    //    // new points - memory change
     //    glBindVertexArray(_orthogonalPlane.vao);
     //    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
     //    glBufferData(

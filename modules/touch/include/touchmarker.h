@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <memory>
 #include <vector>
@@ -46,29 +47,30 @@ namespace ghoul::opengl { class ProgramObject; }
 namespace openspace {
 
 class TouchMarker : public properties::PropertyOwner {
-    public:
-        TouchMarker();
+public:
+    TouchMarker();
 
-        bool initialize();
-        bool deinitialize();
+    void initialize();
+    void deinitialize();
 
-        void render(const std::vector<TUIO::TuioCursor>& list);
+    void render(const std::vector<TUIO::TuioCursor>& list);
 
-    private:
-        void createVertexList(const std::vector<TUIO::TuioCursor>& list);
+private:
+    void createVertexList(const std::vector<TUIO::TuioCursor>& list);
 
-        properties::BoolProperty _visible;
-        properties::FloatProperty _radiusSize;
-        properties::FloatProperty _transparency;
-        properties::FloatProperty _thickness;
-        properties::Vec3Property _color;
+    properties::BoolProperty _visible;
+    properties::FloatProperty _radiusSize;
+    properties::FloatProperty _transparency;
+    properties::FloatProperty _thickness;
+    properties::Vec3Property _color;
 
-        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    UniformCache(radius, transparency, thickness, color) _uniformCache;
 
-        std::vector<GLfloat> _vertexData;
-
-        GLuint _quad;
-        GLuint _vertexPositionBuffer;
+    std::vector<GLfloat> _vertexData;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
+    int _numFingers = 0;
 };
 
 } // openspace namespace

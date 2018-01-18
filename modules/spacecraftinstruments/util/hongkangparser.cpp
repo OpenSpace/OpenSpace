@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,12 +41,12 @@ namespace {
 
 namespace openspace {
 
-HongKangParser::HongKangParser(std::string name, std::string fileName, 
+HongKangParser::HongKangParser(std::string name, std::string fileName,
                                std::string spacecraft,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
     : _defaultCaptureImage(
-        absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png")
+        absPath("${DATA}/placeholder.png")
     )
     , _name(std::move(name))
     , _fileName(std::move(fileName))
@@ -84,7 +84,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 }
 
 void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& target) {
-    //remembto add this lua later... 
+    //remembto add this lua later...
     std::transform(
         line.begin(),
         line.end(),
@@ -100,14 +100,14 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
             break;
         }
         else {
-            // not found - we set void until we have more info. 
+            // not found - we set void until we have more info.
             target = "VOID";
         }
     }
 }
 
 bool HongKangParser::create() {
-    //check input for errors. 
+    //check input for errors.
     bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
     if (!hasObserver) {
         throw ghoul::RuntimeError(
@@ -160,7 +160,7 @@ bool HongKangParser::create() {
                 while (!file.eof()) {
                     std::getline(file, line);
 
-                    std::string event = line.substr(0, line.find_first_of(" ")); 
+                    std::string event = line.substr(0, line.find_first_of(" "));
 
                     auto it = _fileTranslation.find(event);
                     bool foundEvent = (it != _fileTranslation.end());
@@ -169,7 +169,7 @@ bool HongKangParser::create() {
                     double time = getETfromMet(met);
 
                     if (foundEvent){
-                        //store the time, this is used for getNextCaptureTime() 
+                        //store the time, this is used for getNextCaptureTime()
                         _captureProgression.push_back(time);
 
                         if (it->second->getDecoderType() == "CAMERA") {
@@ -215,10 +215,10 @@ bool HongKangParser::create() {
                             // store actual image in map. All targets get _only_ their
                             // corresp. subset.
                             _subsetMap[image.target]._subset.push_back(image);
-                            // compute and store the range for each subset 
+                            // compute and store the range for each subset
                             _subsetMap[image.target]._range.include(time);
                         }
-                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START 
+                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START
                             scan_start = time;
 
                             InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(
@@ -292,16 +292,12 @@ bool HongKangParser::create() {
     return true;
 }
 
-bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft, 
-                                      std::vector<std::string>, 
+bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
+                                      std::vector<std::string>,
                                       std::vector<std::string> potentialTargets)
 {
     image.target = "VOID";
-    // we have (?) to cast to int, unfortunately
-    // Why? --abock
-    // because: old comment --m
-
-    int exposureTime = image.timeRange.duration();
+    int exposureTime = static_cast<int>(image.timeRange.duration());
     if (exposureTime == 0) {
         exposureTime = 1;
     }
@@ -337,8 +333,6 @@ double HongKangParser::getETfromMet(std::string line) {
 double HongKangParser::getETfromMet(double met) {
     const double referenceET =
         SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
-
-    //_metRef += 3; // MET reference time is off by 3 sec? 
 
     const double diff = std::abs(met - _metRef);
     if (met > _metRef) {

@@ -1,0 +1,133 @@
+local assetHelper = asset.require('util/asset_helper')
+local proceduralGlobes = asset.require('util/procedural_globe')
+local transforms = asset.require('./transforms')
+local kernels112 = asset.require('./ura112').Kernels
+
+
+
+local parentName = transforms.UranusBarycenter.Name
+local parentSpice = "URANUS BARYCENTER"
+local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_retrograde" }
+local trailColor = { 0.60, 0.65, 0.84 }
+
+local irregularMoons = {
+    {
+        Name = "Francisco",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "FRANCISCO",
+        Radii = { 22000, 22000, 22000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 266.56,
+        Kernels = kernels112
+    },
+    {
+        Name = "Caliban",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "CALIBAN",
+        Radii = { 72000, 72000, 72000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 579.50,
+        Kernels = kernels112
+    },
+    {
+        Name = "Stephano",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "STEPHANO",
+        Radii = { 32000, 32000, 32000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 676.50,
+        Kernels = kernels112
+    },
+    {
+        Name = "Trinculo",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "TRINCULO",
+        Radii = { 18000, 18000, 18000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 758.10,
+        Kernels = kernels112
+    },
+    {
+        Name = "Sycorax",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "SYCORAX",
+        Radii = { 165000, 165000, 165000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 1283.4,
+        Kernels = kernels112
+    },
+    {
+        Name = "Prospero",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "PROSPERO",
+        Radii = { 50000, 50000, 50000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 1992.8,
+        Kernels = kernels112
+    },
+    {
+        Name = "Setebos",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "SETEBOS",
+        Radii = { 48000, 48000, 48000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 2202.3,
+        Kernels = kernels112
+    },
+    {
+        Name = "Ferdinand",
+        Parent = {
+            Name = parentName,
+            Spice = parentSpice
+        },
+        Spice = "FERDINAND",
+        Radii = { 20000, 20000, 20000 },
+        Tags = tags,
+        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Retrograde Moons",
+        TrailColor = trailColor,
+        OrbitPeriod = 2823.4,
+        Kernels = kernels112
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(
+    asset,
+    proceduralGlobes.createGlobes(irregularMoons)
+)

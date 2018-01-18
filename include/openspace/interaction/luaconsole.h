@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,8 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
+
+#include <ghoul/opengl/uniformcache.h>
 
 #include <string>
 #include <vector>
@@ -90,6 +92,8 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     GLuint _vao;
     GLuint _vbo;
+
+    UniformCache(res, color, height, ortho) _uniformCache;
 };
 
 } // namespace openspace

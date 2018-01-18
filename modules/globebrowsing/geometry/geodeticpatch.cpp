@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,9 +48,14 @@ GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
 {}
 
 GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
-    double deltaLat = (2 * glm::pi<double>()) / (static_cast<double>(1 << tileIndex.level));
-    double deltaLon = (2 * glm::pi<double>()) / (static_cast<double>(1 << tileIndex.level));
-    Geodetic2 nwCorner(glm::pi<double>() / 2 - deltaLat * tileIndex.y, -glm::pi<double>() + deltaLon * tileIndex.x);
+    double deltaLat = (2 * glm::pi<double>()) /
+                      (static_cast<double>(1 << tileIndex.level));
+    double deltaLon = (2 * glm::pi<double>()) /
+                      (static_cast<double>(1 << tileIndex.level));
+    Geodetic2 nwCorner(
+        glm::pi<double>() / 2 - deltaLat * tileIndex.y,
+        -glm::pi<double>() + deltaLon * tileIndex.x
+    );
     _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
     _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
 }
@@ -139,7 +144,7 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
 
     // Normalize w.r.t. the center in order for the clamping to done correctly
     //
-    // Example: 
+    // Example:
     //    centerLat = 0 deg, halfSize.lat = 10 deg, pointLat = 330 deg
     //        --> Just clamping pointLat would be clamp(330, -10, 10) = 10 // WRONG!
     //    Instead, if we first normalize 330 deg around 0, we get -30 deg
@@ -163,11 +168,11 @@ Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
     Ang latDiff = Ang::fromRadians(centerToPoint.lat).normalizeAround(Ang::ZERO);
     Ang lonDiff = Ang::fromRadians(centerToPoint.lon).normalizeAround(Ang::ZERO);
 
-    // If latDiff > 0 
-    //    --> point p is north of the patch center 
+    // If latDiff > 0
+    //    --> point p is north of the patch center
     //    --> the closest corner to the point must be a northern one
     //    --> set the corner's latitude coordinate to center.lat + halfSize.lat
-    // else 
+    // else
     //    --> set corner's latidude coordinate to center.lat - halfSize.lat
     double cornerLat = _center.lat + _halfSize.lat * (latDiff > Ang::ZERO ? 1 : -1);
 
@@ -179,31 +184,31 @@ Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
 
 Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     // This method finds the closest point on the patch, to the provided
-    // point p. As we are deali ng with latitude-longitude patches, distance in this 
+    // point p. As we are deali ng with latitude-longitude patches, distance in this
     // context refers to great-circle distance.
     // (https://en.wikipedia.org/wiki/Great-circle_distance)
     //
-    // This uses a simple clamping approach to find the closest point on the 
-    // patch. A naive castesian clamp is not sufficient for this purpose, 
+    // This uses a simple clamping approach to find the closest point on the
+    // patch. A naive castesian clamp is not sufficient for this purpose,
     // as illustrated with an example below.
 
     // Example: (degrees are used for latidude, longitude)
     //    patchCenter = (0,0), patchHalfSize = (45,45), point = (5, 170)
     //    Note, the point and the patch are on opposite sides of the sphere
     //
-    //    cartesian clamp: 
+    //    cartesian clamp:
     //       --> clampedPointLat = clamp(5, -45, 45) = 5
     //       --> clampedPointLon = clamp(170, -45, 45) = 45
     //       --> result: (5, 45)
-    //       --> closest point is actually (45, 45) 
+    //       --> closest point is actually (45, 45)
     //       --> The error is significant
-    // 
-    // This method simply adds an extra clamp on the latitude in these cases. In the 
+    //
+    // This method simply adds an extra clamp on the latitude in these cases. In the
     // above example, that would be the following:
     //       --> clampedPointLat = clamp(180 - 5, -45, 45) = 45
-    // 
+    //
     // Just doing this actually makes points returned from this methods being the
-    // true closest point, great-circle distance-wise. 
+    // true closest point, great-circle distance-wise.
 
     using Ang = Angle<double>;
 
@@ -213,25 +218,30 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     Ang pointLat = Ang::fromRadians(p.lat);
     Ang pointLon = Ang::fromRadians(p.lon);
 
-    // Normalize point with respect to center. This is done because the point 
+    // Normalize point with respect to center. This is done because the point
     // will later be clamped. See LatLonPatch::clamp(const LatLon&) for explanation
     pointLat.normalizeAround(centerLat);
     pointLon.normalizeAround(centerLon);
 
-    // Calculate the longitud difference between center and point. We normalize around 
-    // zero because we want the "shortest distance" difference, i.e the difference 
+    // Calculate the longitud difference between center and point. We normalize around
+    // zero because we want the "shortest distance" difference, i.e the difference
     // should be in the interval [-180 deg, 180 deg]
     Ang centerToPointLon = (centerLon - pointLon).normalizeAround(Ang::ZERO);
 
-    // Calculate the longitudinal distance to the closest patch edge 
-    Ang longitudeDistanceToClosestPatchEdge = centerToPointLon.abs() - Ang::fromRadians(_halfSize.lon);
+    // Calculate the longitudinal distance to the closest patch edge
+    Ang longitudeDistanceToClosestPatchEdge =
+        centerToPointLon.abs() - Ang::fromRadians(_halfSize.lon);
 
     // If the longitude distance to the closest patch edge is larger than 90 deg
     // the latitude will have to be clamped to its closest corner, as explained in
     // the example above.
-    double clampedLat = longitudeDistanceToClosestPatchEdge > Ang::QUARTER  ?
-        clampedLat = glm::clamp((Ang::HALF - pointLat).normalizeAround(centerLat).asRadians(), minLat(), maxLat()) :
-        clampedLat = glm::clamp(pointLat.asRadians(), minLat(), maxLat());
+    double clampedLat =
+        longitudeDistanceToClosestPatchEdge > Ang::QUARTER ?
+        glm::clamp(
+            (Ang::HALF - pointLat).normalizeAround(centerLat).asRadians(),
+            minLat(),
+            maxLat()) :
+        glm::clamp(pointLat.asRadians(), minLat(), maxLat());
 
     // Longitude is just clamped normally
     double clampedLon = glm::clamp(pointLon.asRadians(), minLon(), maxLon());

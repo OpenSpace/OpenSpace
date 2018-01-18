@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2017                                                             *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,7 +97,9 @@ vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCamer
                    vec3 ellipsoidTangentThetaCameraSpace,
                    vec3 ellipsoidTangentPhiCameraSpace)
 {
-#if USE_ACCURATE_NORMALS && USE_HEIGHTMAP
+    vec3 normal = ellipsoidNormalCameraSpace;
+
+#if USE_ACCURATE_NORMALS
     float deltaPhi = mix(deltaPhi0, deltaPhi1, uv.x);
     float deltaTheta = mix(deltaTheta0, deltaTheta1, uv.y);
 
@@ -111,10 +113,9 @@ vec3 getTileNormal(vec2 uv, LevelWeights levelWeights, vec3 ellipsoidNormalCamer
     vec3 diffTheta = deltaThetaVec + ellipsoidNormalCameraSpace * (height10 - height00);
     vec3 diffPhi = deltaPhiVec + ellipsoidNormalCameraSpace * (height01 - height00);
 
-    return normalize(cross(diffTheta, diffPhi));
-#else // USE_ACCURATE_NORMALS && USE_HEIGHTMAP
-    return ellipsoidNormalCameraSpace;
-#endif
+    normal = normalize(cross(diffTheta, diffPhi));
+#endif // USE_ACCURATE_NORMALS
+    return normal;
 }
 
 #endif // TILE_HEIGHT_HGLSL

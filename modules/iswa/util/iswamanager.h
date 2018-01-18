@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,7 @@
 namespace openspace {
 
 class IswaBaseGroup;
-class IswaCygnet; 
+class IswaCygnet;
 
 struct CdfInfo {
     std::string name;
@@ -92,7 +92,9 @@ struct MetadataFuture {
 };
 
 
-class IswaManager : public ghoul::Singleton<IswaManager>, public properties::PropertyOwner {
+class IswaManager : public ghoul::Singleton<IswaManager>,
+                    public properties::PropertyOwner
+{
     friend class ghoul::Singleton<IswaManager>;
 
 public:
@@ -108,7 +110,9 @@ public:
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
-    std::string iswaUrl(int id, double timestamp = OsEng.timeManager().time().j2000Seconds(), std::string type = "image");
+    std::string iswaUrl(int id,
+        double timestamp = OsEng.timeManager().time().j2000Seconds(),
+        std::string type = "image");
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
 

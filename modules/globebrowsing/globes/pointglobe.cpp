@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,13 +31,14 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
     static const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
         "IntensityClamp",
         "Intensity clamp",
-        "" 
+        ""
     };
 
     static const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
@@ -67,8 +68,19 @@ PointGlobe::~PointGlobe() {
 void PointGlobe::initialize() {
     _programObject = OsEng.renderEngine().buildRenderProgram(
         "PointGlobe",
-        "${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl",
-        "${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl");
+        absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_vs.glsl"),
+        absPath("${MODULE_GLOBEBROWSING}/shaders/pointglobe_fs.glsl")
+    );
+
+    _uniformCache.lightIntensityClamped = _programObject->uniformLocation(
+        "lightIntensityClamped"
+    );
+    _uniformCache.modelView = _programObject->uniformLocation(
+        "modelViewTransform"
+    );
+    _uniformCache.projection = _programObject->uniformLocation(
+        "projectionTransform"
+    );
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vertexBufferID);
@@ -95,7 +107,7 @@ void PointGlobe::initialize() {
 
     // Position at location 0
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
 
     glBindVertexArray(0);
 }
@@ -138,18 +150,25 @@ void PointGlobe::render(const RenderData& data, RendererTasks&) {
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
-        glm::inverse(rotationTransform) * 
+        glm::inverse(rotationTransform) *
         scaleTransform; // Scale
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    //glm::vec3 directionToSun = glm::normalize(glm::vec3(0) - glm::vec3(bodyPosition));
-    //glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
 
-    _programObject->setUniform("lightIntensityClamped", lightIntensityClamped);
+    _programObject->setUniform(
+        _uniformCache.lightIntensityClamped,
+        lightIntensityClamped
+    );
     //_programObject->setUniform("lightOverflow", lightOverflow);
     //_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
-    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
+    _programObject->setUniform(
+        _uniformCache.modelView,
+        glm::mat4(modelViewTransform)
+    );
+    _programObject->setUniform(
+        _uniformCache.projection,
+        data.camera.sgctInternal.projectionMatrix()
+    );
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 

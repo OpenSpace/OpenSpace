@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,13 +53,13 @@ protected:
 };
 
 /**
- * A double buffered implementation of the Syncable interface. 
- * Users are encouraged to used this class as a default way to synchronize different 
+ * A double buffered implementation of the Syncable interface.
+ * Users are encouraged to used this class as a default way to synchronize different
  * C++ data types using the <code>SyncEngine</code>
  *
- * This class aims to handle the synchronization parts and yet act like a regular  
- * instance of T. Implicit casts are supported, however, when accessing member functions or
- * or variables, user may have to do explicit casts. 
+ * This class aims to handle the synchronization parts and yet act like a regular
+ * instance of T. Implicit casts are supported, however, when accessing member functions
+ * or variables, user may have to do explicit casts.
  *
  * ((T&) t).method();
  *
@@ -71,7 +71,7 @@ public:
     SyncData() {};
     SyncData(const T& val) : data(val) {};
     SyncData(const SyncData<T>& o) : data(o.data) {
-        // Should not have to be copied! 
+        // Should not have to be copied!
     };
 
     /**

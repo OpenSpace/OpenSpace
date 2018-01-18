@@ -1,0 +1,53 @@
+local transforms = asset.require('../transforms')
+local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+asset.request('./trail')
+local kernels = asset.require('../jup310').Kernels
+
+
+
+local textures = asset.syncedResource({
+    Name = "Ganymede Textures",
+    Type = "HttpSynchronization",
+    Identifier = "ganymede_textures",
+    Version = 1
+})
+
+local Ganymede = {
+    Name = "Ganymede",
+    Parent = transforms.JupiterBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_GANYMEDE",
+            DestinationFrame = "GALACTIC",
+            Kernels = kernels
+        },
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "GANYMEDE",
+            Observer = "JUPITER BARYCENTER",
+            Kernels = kernels
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = 2631000,
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Name = "Ganymede Texture",
+                    FilePath = textures .. "/ganymede.jpg",
+                    Enabled = true
+                }
+            }
+        }
+    },
+    Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
+    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+},
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Ganymede })

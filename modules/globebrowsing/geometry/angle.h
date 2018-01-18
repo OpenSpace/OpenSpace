@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,8 +96,8 @@ public:
     Angle<T>& normalizeAround(const Angle<T>& center);
 
     /**
-    * Clamps the angle to the interval [min, max]. 
-    * Default arguments are [0, 2pi]. 
+    * Clamps the angle to the interval [min, max].
+    * Default arguments are [0, 2pi].
     */
     Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 

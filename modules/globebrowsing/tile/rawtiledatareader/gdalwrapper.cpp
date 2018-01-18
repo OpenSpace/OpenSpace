@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@
 #endif // WIN32
 
 namespace {
-    const char* _loggerCat = "GdalWrapper";
+    constexpr const char* _loggerCat = "GdalWrapper";
 
     static const openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
@@ -110,7 +110,7 @@ bool GdalWrapper::logGdalErrors() const {
 
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
     : PropertyOwner({ "GdalWrapper" })
-    , _logGdalErrors(LogGdalErrorInfo, true)
+    , _logGdalErrors(LogGdalErrorInfo, false)
     , _gdalMaximumCacheSize (
         GdalMaximumCacheInfo,
         static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
@@ -128,7 +128,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     );
     CPLSetConfigOption(
         "CPL_TMPDIR",
-        absPath("${BASE_PATH}").c_str()
+        absPath("${BASE}").c_str()
     );
     CPLSetConfigOption(
         "GDAL_HTTP_UNSAFESSL",

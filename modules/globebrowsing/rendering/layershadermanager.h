@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,7 +84,7 @@ public:
      */
     ghoul::opengl::ProgramObject* programObject() const;
 
-    bool updatedOnLastCall();
+    bool updatedSinceLastCall();
 
     void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
@@ -96,7 +96,7 @@ private:
     const std::string _vsPath;
     const std::string _fsPath;
 
-    bool _updatedOnLastCall;
+    bool _updatedSinceLastCall;
 };
 
 } // namespace openspace::globebrowsing

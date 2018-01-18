@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const 
     glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
     glm::dvec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
 
-    Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+    Chunk::BoundingHeights heights = chunk.boundingHeights();
     double heightToChunk = heights.min;
 
     // Offset position according to height

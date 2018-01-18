@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,9 +30,9 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
+#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/sceneloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
@@ -46,6 +46,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -57,51 +58,56 @@
 #include <string>
 #include <stack>
 #include <unordered_map>
+#include <vector>
 
-#include "scene_doc.inl"
 #include "scene_lua.inl"
 
 namespace {
-    const char* _loggerCat = "Scene";
-    //const char* _moduleExtension = ".mod";
-    //const char* _commonModuleToken = "${COMMON_MODULE}";
-
-    //const char* KeyCamera = "Camera";
-    //const char* KeyFocusObject = "Focus";
-    //const char* KeyPositionObject = "Position";
-    //const char* KeyViewOffset = "Offset";
-
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
-    const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
-    const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
+    constexpr const char* _loggerCat = "Scene";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyParentName = "Parent";
 } // namespace
 
 namespace openspace {
 
-Scene::Scene()
+Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : DocumentationGenerator(
         "Documented",
         "propertyOwners",
         {
-            { "mainTemplate", MainTemplateFilename },
-            { "propertyOwnerTemplate", PropertyOwnerTemplateFilename },
-            { "propertyTemplate", PropertyTemplateFilename }
+            {
+                "mainTemplate",
+                "${WEB}/properties/main.hbs"
+            },
+            {
+                "propertyOwnerTemplate",
+                "${WEB}/properties/propertyowner.hbs"
+            },
+            {
+                "propertyTemplate",
+                "${WEB}/properties/property.hbs"
+            }
         },
-        JsFilename
+        "${WEB}/properties/script.js"
     )
-{}
-
-Scene::~Scene(){
+    , _dirtyNodeRegistry(false)
+    , _initializer(std::move(initializer))
+{
+    _rootDummy.setName(SceneGraphNode::RootNodeName);
+    _rootDummy.setScene(this);
 }
 
-void Scene::setRoot(std::unique_ptr<SceneGraphNode> root) {
-    if (_root) {
-        removeNode(_root.get());
-    }
-    _root = std::move(root);
-    _root->setScene(this);
-    addNode(_root.get());
+Scene::~Scene() {
+    clear();
+    _rootDummy.setScene(nullptr);
+}
+
+void Scene::attachNode(std::unique_ptr<SceneGraphNode> node) {
+    _rootDummy.attachChild(std::move(node));
+}
+
+std::unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+    return _rootDummy.detachChild(node);
 }
 
 void Scene::setCamera(std::unique_ptr<Camera> camera) {
@@ -112,39 +118,42 @@ Camera* Scene::camera() const {
     return _camera.get();
 }
 
-void Scene::addNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
-    // Add the node and all its children.
-    node->traversePreOrder([this](SceneGraphNode* n) {
-        _topologicallySortedNodes.push_back(n);
-        _nodesByName[n->name()] = n;
-    });
-
-    if (updateDeps) {
-        updateDependencies();
+void Scene::registerNode(SceneGraphNode* node) {
+    if (_nodesByName.count(node->name())){
+        throw Scene::InvalidSceneError(
+            "Node with name " + node->name() + " already exits."
+        );
     }
+
+    _topologicallySortedNodes.push_back(node);
+    _nodesByName[node->name()] = node;
+    _dirtyNodeRegistry = true;
 }
 
-void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
-    // Remove the node and all its children.
-    node->traversePostOrder([this](SceneGraphNode* n) {
-        _topologicallySortedNodes.erase(
-            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), n),
-            _topologicallySortedNodes.end()
-        );
-        _nodesByName.erase(n->name());
-    });
+void Scene::unregisterNode(SceneGraphNode* node) {
+    _topologicallySortedNodes.erase(
+        std::remove(
+            _topologicallySortedNodes.begin(),
+            _topologicallySortedNodes.end(),
+            node
+        ),
+        _topologicallySortedNodes.end()
+    );
+    _nodesByName.erase(node->name());
+    _dirtyNodeRegistry = true;
+}
 
-    if (updateDeps) {
-        updateDependencies();
-    }
+void Scene::markNodeRegistryDirty() {
+    _dirtyNodeRegistry = true;
+}
+
+void Scene::updateNodeRegistry() {
+    sortTopologically();
+    _dirtyNodeRegistry = false;
 }
 
 void Scene::addSceneLicense(SceneLicense license) {
     _licenses.push_back(std::move(license));
-}
-
-void Scene::updateDependencies() {
-    sortTopologically();
 }
 
 void Scene::sortTopologically() {
@@ -155,7 +164,10 @@ void Scene::sortTopologically() {
     );
     _circularNodes.clear();
 
-    ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
+    ghoul_assert(
+        _topologicallySortedNodes.size() == _nodesByName.size(),
+        "Number of scene graph nodes is inconsistent"
+    );
 
     if (_topologicallySortedNodes.empty()) {
         return;
@@ -204,7 +216,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR("The scene contains circular dependencies. " << inDegrees.size() << " nodes will be disabled.");
+        LERROR(
+            "The scene contains circular dependencies. " <<
+            inDegrees.size() << " nodes will be disabled."
+        );
     }
 
     for (auto it : inDegrees) {
@@ -214,10 +229,75 @@ void Scene::sortTopologically() {
     _topologicallySortedNodes = nodes;
 }
 
+void Scene::initializeNode(SceneGraphNode* node) {
+    _initializer->initializeNode(node);
+}
+
+bool Scene::isInitializing() const {
+    return _initializer->isInitializing();
+}
+
+/*
+
 void Scene::initialize() {
+    bool useMultipleThreads = true;
+    if (OsEng.configurationManager().hasKey(
+        ConfigurationManager::KeyUseMultithreadedInitialization
+    ))
+    {
+        useMultipleThreads = OsEng.configurationManager().value<bool>(
+            ConfigurationManager::KeyUseMultithreadedInitialization
+        );
+    }
+
+    auto initFunction = [](SceneGraphNode* node){
+        try {
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Initializing
+            );
+            node->initialize();
+            OsEng.loadingScreen().tickItem();
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Finished
+            );
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERROR(node->name() << " not initialized.");
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
+            OsEng.loadingScreen().updateItem(
+                node->name(),
+                LoadingScreen::ItemStatus::Failed
+            );
+        }
+
+    };
+
+    if (useMultipleThreads) {
+        unsigned int nThreads = std::thread::hardware_concurrency();
+
+        ghoul::ThreadPool pool(nThreads == 0 ? 2 : nThreads - 1);
+
+        OsEng.loadingScreen().postMessage("Initializing scene");
+
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            pool.queue(initFunction, node);
+        }
+
+        pool.stop();
+    }
+    else {
+        for (SceneGraphNode* node : _topologicallySortedNodes) {
+            initFunction(node);
+        }
+    }
+}
+
+void Scene::initializeGL() {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            node->initialize();
+            node->initializeGL();
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(node->name() << " not initialized.");
@@ -225,8 +305,22 @@ void Scene::initialize() {
         }
     }
 }
+*/
 
 void Scene::update(const UpdateData& data) {
+    std::vector<SceneGraphNode*> initializedNodes =
+        _initializer->getInitializedNodes();
+
+    for (SceneGraphNode* node : initializedNodes) {
+        try {
+            node->initializeGL();
+        } catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
+    }
+    if (_dirtyNodeRegistry) {
+        updateNodeRegistry();
+    }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::update(begin '" + node->name() + "')");
@@ -254,15 +348,19 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
 
 void Scene::clear() {
     LINFO("Clearing current scene graph");
-    _root = nullptr;
+    _rootDummy.clearChildren();
 }
 
-const std::map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
+const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
     return _nodesByName;
 }
 
-SceneGraphNode* Scene::root() const {
-    return _root.get();
+SceneGraphNode* Scene::root() {
+    return &_rootDummy;
+}
+
+const SceneGraphNode* Scene::root() const {
+    return &_rootDummy;
 }
 
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
@@ -275,6 +373,88 @@ SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
 
 const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
     return _topologicallySortedNodes;
+}
+
+SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
+    // First interpret the dictionary
+    std::vector<std::string> dependencyNames;
+
+    if (!dict.hasKey(KeyName)) {
+        // TODO: Throw exception
+        LERROR("Name missing for scene graph node");
+        return nullptr;
+    }
+
+    const std::string nodeName = dict.value<std::string>(KeyName);
+    const bool hasParent = dict.hasKey(KeyParentName);
+
+    if (_nodesByName.find(nodeName) != _nodesByName.end()) {
+        LERROR("Cannot add scene graph node " << nodeName <<
+               ". A node with that name already exisis.");
+        return nullptr;
+    }
+
+    SceneGraphNode* parent = nullptr;
+    if (hasParent) {
+        std::string parentName = dict.value<std::string>(KeyParentName);
+        parent = sceneGraphNode(parentName);
+        if (!parent) {
+            // TODO: Throw exception
+            LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
+            return nullptr;
+        }
+    }
+
+    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
+    if (!node) {
+        // TODO: Throw exception
+        LERROR("Could not create node from dictionary: " + nodeName);
+    }
+
+    if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
+        if (!dict.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
+            // TODO: Throw exception
+            LERROR("Dependencies did not have the corrent type");
+        }
+        ghoul::Dictionary nodeDependencies;
+        dict.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+
+        std::vector<std::string> keys = nodeDependencies.keys();
+        for (const std::string& key : keys) {
+            std::string value = nodeDependencies.value<std::string>(key);
+            dependencyNames.push_back(value);
+        }
+    }
+
+    // Make sure all dependencies are found
+    std::vector<SceneGraphNode*> dependencies;
+    bool foundAllDeps = true;
+    for (const auto& depName : dependencyNames) {
+        SceneGraphNode* dep = sceneGraphNode(depName);
+        if (!dep) {
+            // TODO: Throw exception
+            LERROR("Could not find dependency '" + depName + "' for '" + nodeName + "'");
+            foundAllDeps = false;
+            continue;
+        }
+        dependencies.push_back(dep);
+    }
+
+    if (!foundAllDeps) {
+        return nullptr;
+    }
+
+    // Now attach the node to the graph
+    SceneGraphNode* rawNodePointer = node.get();
+
+    if (parent) {
+        parent->attachChild(std::move(node));
+    } else {
+        attachNode(std::move(node));
+    }
+
+    rawNodePointer->setDependencies(dependencies);
+    return rawNodePointer;
 }
 
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
@@ -357,6 +537,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
+                {},
                 "string, *",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
@@ -369,6 +550,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
+                {},
                 "string, *",
                 "Sets all property(s) that pass the regular expression in the first "
                 "argument. The second argument can be any type, but it has to match "
@@ -382,6 +564,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
+                {},
                 "string, *",
                 "Sets all property(s) identified by the URI in the first argument to the "
                 "value passed in the second argument. The type of the second argument is "
@@ -394,6 +577,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
+                {},
                 "string",
                 "Returns the value the property, identified by "
                 "the provided URI."
@@ -401,6 +585,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "loadScene",
                 &luascriptfunctions::loadScene,
+                {},
                 "string",
                 "Loads the scene found at the file passed as an "
                 "argument. If a scene is already loaded, it is unloaded first"
@@ -408,6 +593,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
+                {},
                 "table",
                 "Loads the SceneGraphNode described in the table and adds it to the "
                 "SceneGraph"
@@ -415,12 +601,14 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
+                {},
                 "string",
                 "Removes the SceneGraphNode identified by name"
             },
             {
                 "hasSceneGraphNode",
                 &luascriptfunctions::hasSceneGraphNode,
+                {},
                 "string",
                 "Checks whether the specifies SceneGraphNode is present in the current "
                 "scene"
@@ -429,7 +617,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
     };
 }
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& error, const std::string& comp)
+Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
+                                            const std::string& comp)
     : ghoul::RuntimeError(error, comp)
 {}
 

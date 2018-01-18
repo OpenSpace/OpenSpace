@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ namespace openspace {
 
 SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
 
-void SpaceModule::internalInitialize() {
+void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
         "PlanetGeometry"
@@ -88,6 +88,8 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableStars::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
+        KeplerTranslation::Documentation(),
+        TLETranslation::Documentation(),
         planetgeometry::PlanetGeometry::Documentation(),
         planetgeometry::SimpleSphereGeometry::Documentation()
     };

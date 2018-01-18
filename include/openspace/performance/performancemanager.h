@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,7 +44,7 @@ public:
     static void createGlobalSharedMemory();
     static void destroyGlobalSharedMemory();
 
-    PerformanceManager(std::string loggingDirectory = "${BASE_PATH}",
+    PerformanceManager(std::string loggingDirectory = "${BASE}",
         std::string prefix = "PM-");
 
     ~PerformanceManager();
@@ -53,8 +53,10 @@ public:
 
     bool isMeasuringPerformance() const;
 
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
-    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
+    void storeIndividualPerformanceMeasurement(std::string identifier,
+        long long nanoseconds);
+    void storeScenePerformanceMeasurements(
+        const std::vector<SceneGraphNode*>& sceneNodes);
 
     void outputLogs();
 

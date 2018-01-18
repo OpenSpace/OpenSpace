@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -155,7 +155,8 @@ protected:
     std::shared_ptr<TileMetaData> getTileMetaData(
         std::shared_ptr<RawTile> result, const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
-    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult) const;
+    RawTile::ReadError postProcessErrorCheck(
+        std::shared_ptr<const RawTile> ioResult) const;
 
     struct Cached {
         int _maxLevel = -1;

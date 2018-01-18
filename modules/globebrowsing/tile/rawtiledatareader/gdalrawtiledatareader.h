@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,7 @@ class GdalRawTileDataReader : public RawTileDataReader {
 public:
 
     /**
-    * Opens a GDALDataset in readonly mode and calculates meta data required for 
+    * Opens a GDALDataset in readonly mode and calculates meta data required for
     * reading tile using a TileIndex.
     *
     * \param filePath, a path to a specific file GDAL can read
@@ -63,10 +63,9 @@ public:
     * \param baseDirectory, the base directory to use in future loading operations
     */
     GdalRawTileDataReader(const std::string& filePath,
-                          const TileTextureInitData& initData,
-                          const std::string& baseDirectory = "",
-                          RawTileDataReader::PerformPreprocessing preprocess =
-                            RawTileDataReader::PerformPreprocessing::No);
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No);
 
 
     virtual ~GdalRawTileDataReader() override;
@@ -103,12 +102,10 @@ private:
     /**
      * Use as a helper function when determining the maximum tile level. This function
      * returns the negated number of overviews requred to downscale the highest overview
-     * dataset so that it fits within minimumPixelSize pixels in the x-dimension. 
+     * dataset so that it fits within minimumPixelSize pixels in the x-dimension.
      */
     int calculateTileLevelDifference(int minimumPixelSize) const;
 
-    // Member variables
-    std::string _initDirectory;
     std::string _datasetFilePath;
 
     GDALDataset* _dataset;

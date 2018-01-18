@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,18 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
+#include <openspace/properties/scalar/floatproperty.h>
+
 namespace openspace::gui {
 
 class GuiSpaceTimeComponent : public GuiComponent {
 public:
     GuiSpaceTimeComponent();
-
     void render() override;
+
+private:
+    properties::FloatProperty _minMaxDeltaTime;
+    float _localMinMaxDeltatime; // We don't want the default display inside the component
 };
 
 } // namespace openspace::gui

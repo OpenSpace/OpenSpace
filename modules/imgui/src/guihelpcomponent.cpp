@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,9 +37,12 @@ GuiHelpComponent::GuiHelpComponent()
 {}
 
 void GuiHelpComponent::render() {
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
+
     bool v = _isEnabled;
     ImGui::Begin("Help", &v, size, 0.5f);
     _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
     ImGui::ShowUserGuide();
     ImGui::End();
 }

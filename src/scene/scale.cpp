@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,6 +58,10 @@ documentation::Documentation Scale::Documentation() {
     };
 }
 
+void Scale::requireUpdate() {
+    _needsUpdate = true;
+}
+
 
 std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
@@ -72,17 +76,26 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 
 Scale::Scale()
     : properties::PropertyOwner({ "Scale" })
-    , _scale(1.0)
+    , _cachedScale(1.0)
+    , _needsUpdate(true)
 {}
 
 bool Scale::initialize() {
     return true;
 }
 
-double Scale::scaleValue() const {
-    return _scale;
+double Scale::scaleValue() const
+{
+    return _cachedScale;
 }
 
-void Scale::update(const UpdateData&) {}
+void Scale::update(const Time& time) {
+    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+        return;
+    }
+    _cachedScale = scaleValue(time);
+    _cachedTime = time.j2000Seconds();
+    _needsUpdate = false;
+}
 
 } // namespace openspace

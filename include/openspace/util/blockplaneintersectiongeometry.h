@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,8 @@ namespace openspace {
 class BlockPlaneIntersectionGeometry {
 public:
     // initializers
-    BlockPlaneIntersectionGeometry(glm::vec3 blockSize, glm::vec3 planeNormal, float planeDistance);
+    BlockPlaneIntersectionGeometry(glm::vec3 blockSize, glm::vec3 planeNormal,
+        float planeDistance);
     ~BlockPlaneIntersectionGeometry();
 
     bool initialize();

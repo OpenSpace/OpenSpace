@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -177,22 +178,11 @@ bool RenderableSphericalGrid::isReady() const {
     return ready;
 }
 
-void RenderableSphericalGrid::deinitialize() {
-    glDeleteVertexArrays(1,&_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1,&_vBufferID);
-    _vBufferID = 0;
-
-    glDeleteBuffers(1,&_iBufferID);
-    _iBufferID = 0;
-}
-
-void RenderableSphericalGrid::initialize() {
+void RenderableSphericalGrid::initializeGL() {
     _gridProgram = OsEng.renderEngine().buildRenderProgram(
-            "GridProgram",
-            "${MODULE_BASE}/shaders/grid_vs.glsl",
-            "${MODULE_BASE}/shaders/grid_fs.glsl"
+        "GridProgram",
+        absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
     );
 
     glGenVertexArrays(1, &_vaoID);
@@ -204,6 +194,17 @@ void RenderableSphericalGrid::initialize() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+}
+
+void RenderableSphericalGrid::deinitializeGL() {
+    glDeleteVertexArrays(1, &_vaoID);
+    _vaoID = 0;
+
+    glDeleteBuffers(1, &_vBufferID);
+    _vBufferID = 0;
+
+    glDeleteBuffers(1, &_iBufferID);
+    _iBufferID = 0;
 }
 
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){

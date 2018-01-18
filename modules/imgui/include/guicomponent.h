@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,9 +69,18 @@ public:
     /// Renders the individual subcomponents to the screen
     virtual void render() = 0;
 
+    void setShowHelpTooltip(bool showHelpTooltip);
+    void setShowHelpTooltipDelay(double delay);
+
 protected:
     /// <code>true</code> if this component is enabled and visible on the screen
     properties::BoolProperty _isEnabled;
+    /// if <code>true</code> this window is currently collapsed. This setting mirrors the
+    /// ImGui internal state of the window
+    properties::BoolProperty _isCollapsed;
+
+    bool _showHelpTooltip;
+    double _tooltipDelay;
 };
 
 } // namespace openspace::gui

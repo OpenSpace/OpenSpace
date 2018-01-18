@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,12 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+namespace openspace {
+    class AtmosphereDeferredcaster;
+}
+#endif
+
 namespace openspace::globebrowsing {
 
 class ChunkedLodGlobe;
@@ -45,7 +51,7 @@ class LayerManager;
  * algorithm for rendering.
 
  * The renderable uses a <code>DistanceSwitch</code> to determine if the renderable
- * should be rendered. 
+ * should be rendered.
  */
 class RenderableGlobe : public Renderable {
 public:
@@ -73,16 +79,29 @@ public:
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty useAccurateNormals;
+        properties::BoolProperty eclipseShadowsEnabled;
+        properties::BoolProperty eclipseHardShadows;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
     };
 
+    // Shadow structure
+    struct ShadowRenderingStruct {
+        double xu;
+        double xp;
+        double rs;
+        double rc;
+        glm::dvec3 sourceCasterVec;
+        glm::dvec3 casterPositionVec;
+        bool isShadowing;
+    };
+
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
@@ -107,7 +126,7 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override; 
+                                             const glm::dvec3& targetModelSpace) override;
 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier

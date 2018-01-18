@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,15 +120,70 @@ int bindKeyLocal(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* getKeyBindings(string):
+* Returns the strings of the script that are bound to the passed key and whether they were
+* local or remote key binds
+*/
+int getKeyBindings(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string key = luaL_checkstring(L, -1);
+
+    using KeyInformation = interaction::KeyBindingManager::KeyInformation;
+
+    std::vector<std::pair<KeyWithModifier, KeyInformation>> info =
+        OsEng.keyBindingManager().keyBinding(key);
+
+    lua_createtable(L, static_cast<int>(info.size()), 0);
+    int i = 1;
+    for (const std::pair<KeyWithModifier, KeyInformation>& it : info) {
+        lua_pushnumber(L, i);
+
+        lua_createtable(L, 2, 0);
+        lua_pushstring(L, "Command");
+        lua_pushstring(L, it.second.command.c_str());
+        lua_settable(L, -3);
+        lua_pushstring(L, "Remote");
+        lua_pushboolean(L, it.second.synchronization);
+        lua_settable(L, -3);
+
+        lua_settable(L, -3);
+        ++i;
+    }
+    return 1;
+}
+
+/**
+* \ingroup LuaScripts
+* clearKey(string):
+* Clears the keybinding of the key named as argument
+*/
+int clearKey(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    std::string key = luaL_checkstring(L, -1);
+
+    OsEng.keyBindingManager().removeKeyBinding(key);
+
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
 * clearKeys():
 * Clears all key bindings
 */
 int clearKeys(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
     OsEng.keyBindingManager().resetKeyBindings();
 

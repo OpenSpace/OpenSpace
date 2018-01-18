@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,35 +36,40 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * @brief Creates a texture by rendering to a framebuffer, this is then used on a screen space plane.
- * @details This class lets you ass renderfunctions that should render to a framebuffer with an attached texture.
- * The texture is then used on a screen space plane that works both in fisheye and flat screens.
+ * @brief Creates a texture by rendering to a framebuffer, this is then used on a screen
+ *        space plane.
+ * @details This class lets you ass renderfunctions that should render to a framebuffer
+ *          with an attached texture.
+ * The texture is then used on a screen space plane that works both in fisheye and flat
+ * screens.
  */
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
     ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
     ~ScreenSpaceFramebuffer();
 
-    bool initialize() override;
-    bool deinitialize() override;
+    bool initializeGL() override;
+    bool deinitializeGL() override;
     void render() override;
-    void update() override;
     bool isReady() const override;
 
     void setSize(glm::vec4);
     void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
+    void addRenderFunction(std::function<void()> renderFunction);
     void removeAllRenderFunctions();
 
     static documentation::Documentation Documentation();
 
-private:
-    void createFragmentbuffer();
-    static int id();
-
+protected:
+    void createFramebuffer();
     properties::Vec4Property _size;
 
+private:
+    static int id();
+
     std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctions;
+    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctionsShared;
+    std::vector<std::function<void()>> _renderFunctions;
 
     int _id;
 };

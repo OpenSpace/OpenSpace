@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -178,20 +178,21 @@ bool RenderablePlane::isReady() const {
     return _shader && _texture;
 }
 
-void RenderablePlane::initialize() {
+void RenderablePlane::initializeGL() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    _shader = OsEng.renderEngine().buildRenderProgram("PlaneProgram",
-        "${MODULE_BASE}/shaders/plane_vs.glsl",
-        "${MODULE_BASE}/shaders/plane_fs.glsl"
+    _shader = OsEng.renderEngine().buildRenderProgram(
+        "PlaneProgram",
+        absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
+        absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
     );
 
     loadTexture();
 }
 
-void RenderablePlane::deinitialize() {
+void RenderablePlane::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -210,7 +211,7 @@ void RenderablePlane::deinitialize() {
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     //if (_projectionListener){
-    //    //get parent node-texture and set with correct dimensions  
+    //    //get parent node-texture and set with correct dimensions
     //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(
     //        _nodeName
     //    )->parent();
@@ -241,6 +242,9 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+
+    _shader->setUniform("modelViewTransform",
+        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -303,7 +307,7 @@ void RenderablePlane::loadTexture() {
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than
             // linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
             _texture = std::move(texture);
 
@@ -342,7 +346,7 @@ void RenderablePlane::createPlane() {
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
-        1, 
+        1,
         2,
         GL_FLOAT,
         GL_FALSE,

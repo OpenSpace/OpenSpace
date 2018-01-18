@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,9 +52,9 @@ private:
     std::string decode(std::string line);
     std::string encode(std::string line);
 
-    bool augmentWithSpice(Image& image, 
-                            std::string spacecraft, 
-                            std::vector<std::string> payload, 
+    bool augmentWithSpice(Image& image,
+                            std::string spacecraft,
+                            std::vector<std::string> payload,
                             std::vector<std::string> potentialTargets);
 
     std::string _name;

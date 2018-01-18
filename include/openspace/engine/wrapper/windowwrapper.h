@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -125,7 +125,7 @@ public:
      * is <code>1</code> if mouse button <code>i</code> is pressed down;
      * <code>false</code> otherwise. On default, this method returns that none of the
      * buttons is pressed.
-     * \param maxNumber The maximum number of mouse buttons that should be queried 
+     * \param maxNumber The maximum number of mouse buttons that should be queried
      * \return A bitmask showing the status of all mouse buttons (up to \p maxNumber)
      */
     virtual uint32_t mouseButtons(int maxNumber = 8) const;
@@ -201,8 +201,9 @@ public:
     virtual bool isUsingSwapGroups() const;
 
     /**
-    * Returns <code>true</code> if the current rendering window is master of the swap its group. 
-    */
+     * Returns <code>true</code> if the current rendering window is master of the swap its
+     * group.
+     */
     virtual bool isSwapGroupMaster() const;
 
     /**
@@ -269,6 +270,21 @@ public:
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
     virtual void takeScreenshot(bool applyWarping = false) const;
+
+    /**
+     * Encourages the windowing system to swap the back- and front buffers
+     */
+    virtual void swapBuffer() const;
+
+    /**
+     * Returns the number of windows that are currently instantiated
+     */
+    virtual int nWindows() const;
+
+    /**
+     * Returns the id of the current window (in the range [0, nWindows -1])
+     */
+    virtual int currentWindowId() const;
 
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);

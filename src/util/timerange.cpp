@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,7 +74,9 @@ TimeRange::TimeRange(const ghoul::Dictionary& dict) {
     }
 }
 
-bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange) {
+bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict,
+                                         TimeRange& timeRange)
+{
     std::string startTimeStr;
     std::string endTimeStr;
 
@@ -82,7 +84,7 @@ bool TimeRange::initializeFromDictionary(const ghoul::Dictionary& dict, TimeRang
     success &= dict.getValue(KeyStart, startTimeStr);
     success &= dict.getValue(KeyEnd, endTimeStr);
     if (success) {
-        // Parse to date. 
+        // Parse to date.
         // @TODO converting string to time stamp should not rely on Spice
         timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
         timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
@@ -118,7 +120,7 @@ double TimeRange::duration() const {
 }
 
 bool TimeRange::isDefined() const {
-    return start <= end; 
+    return start <= end;
 }
 
 bool TimeRange::isEmpty() const {

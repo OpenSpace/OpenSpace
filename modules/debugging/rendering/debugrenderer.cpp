@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,11 +31,12 @@
 #include <memory>
 #include <ostream>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <iostream>
 
 namespace {
-    const char* _loggerCat = "DebugRenderer";
+    constexpr const char* _loggerCat = "DebugRenderer";
 } // namespace
 
 namespace openspace {
@@ -44,15 +45,15 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 
 DebugRenderer::DebugRenderer()  {
     _programObject = OsEng.renderEngine().buildRenderProgram(
-        "BasicDebugShader", 
-        "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
-        "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
-        );
+        "BasicDebugShader",
+        absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
+        absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")
+    );
 }
 
 DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)
-    : _programObject(std::move(programObject)) 
-{ 
+    : _programObject(std::move(programObject))
+{
     // nothing to do
 }
 
@@ -107,7 +108,14 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(clippingSpacePoints[0]),
+        nullptr
+    );
 
     // Draw the vertices
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));

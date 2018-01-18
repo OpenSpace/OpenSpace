@@ -1,0 +1,453 @@
+local assetHelper = asset.require('util/asset_helper')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+local transforms = asset.require('./67p')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Rosetta Textures",
+    Type = "HttpSynchronization",
+    Identifier = "rosetta_textures",
+    Version = 2
+})
+
+local models = asset.syncedResource({
+    Name = "Rosetta Models",
+    Type = "HttpSynchronization",
+    Identifier = "rosetta_model",
+    Version = 3
+})
+
+local kernels = asset.syncedResource({
+    Name = "Rosetta Kernels",
+    Type = "TorrentSynchronization",
+    Identifier = "rosetta_kernels",
+    Magnet = "magnet:?xt=urn:btih:5DE346AE06D62FC53BEBBBBF591D1CA7715F6F64&dn=Rosetta&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.opentrackr.org%3a1337%2fannounce"
+})
+
+local RosettaKernels = {
+    kernels .. "/Rosetta/SCLK/ROS_160718_STEP.TSC",
+    kernels .. "/Rosetta/SCLK/ros_triv.tsc",
+
+    kernels .. "/Rosetta/SPK/CORB_DV_243_01___T19_00325.BSP",
+    kernels .. "/Rosetta/SPK/CORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/Rosetta/SPK/CORB_DV_145_01___T19_00216.BSP",
+
+    kernels .. "/Rosetta/SPK/LORB_DV_236_01___T19_00318.BSP",
+    kernels .. "/Rosetta/SPK/LORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/Rosetta/SPK/LORB_DV_145_01___T19_00216.BSP",
+    
+    kernels .. "/Rosetta/SPK/RORB_DV_243_01___T19_00325.BSP",
+    kernels .. "/Rosetta/SPK/RORB_DV_223_01___T19_00302.BSP",
+    kernels .. "/Rosetta/SPK/RORB_DV_145_01___T19_00216.BSP",
+
+    kernels .. "/Rosetta/CK/ATNR_P040302093352_00127.BC",
+
+    kernels .. "/Rosetta/SPK/ROS_STRUCT_V5.BSP",
+
+    kernels .. "/Rosetta/IK/ROS_NAVCAM_V01.TI",
+    
+    kernels .. "/Rosetta/FK/ROS_CHURYUMOV_V01.TF",
+    kernels .. "/Rosetta/FK/ROS_V26.TF",
+
+    -- CK
+    -- Rosetta attitude
+    kernels .. "/Rosetta/CK/RATT_DV_243_01_01____00325.BC",
+    kernels .. "/Rosetta/CK/RATT_DV_223_01_01____00302.BC",
+    kernels .. "/Rosetta/CK/RATT_DV_145_01_01____00216.BC",
+
+    -- Comet attitude
+    kernels .. "/Rosetta/CK/CATT_DV_243_01_______00325.BC",
+    kernels .. "/Rosetta/CK/CATT_DV_223_01_______00302.BC",
+    kernels .. "/Rosetta/CK/CATT_DV_145_01_______00216.BC",
+
+    -- High gain antenna
+    kernels .. "/Rosetta/CK/ROS_HGA_2016_V0035.BC",
+    kernels .. "/Rosetta/CK/ROS_HGA_2015_V0053.BC",
+    kernels .. "/Rosetta/CK/ROS_HGA_2014_V0044.BC",
+
+    -- Solar arrays
+    kernels .. "/Rosetta/CK/ROS_SA_2016_V0034.BC",
+    kernels .. "/Rosetta/CK/ROS_SA_2015_V0042.BC",
+    kernels .. "/Rosetta/CK/ROS_SA_2014_V0047.BC",
+
+
+    kernels .. "/Rosetta/PCK/ROS_CGS_RSOC_V03.TPC"
+}
+
+local RotationMatrix = {
+    0, 1, 0,
+    0, 0, 1,
+    1, 0, 0
+}
+
+local Rosetta = {
+    Name = "Rosetta",
+    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "ROSETTA",
+            Observer = "SUN",
+            Kernels = RosettaKernels
+        },  
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "ROS_SPACECRAFT",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaModel = {
+    Name = "RosettaModel",
+    Parent = Rosetta.Name,
+    Transform = {
+        Scale = {
+            Type = "StaticScale",
+            -- The scale of the model is in cm; OpenSpace is in m
+            Scale = 0.01
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaBlackFoil = {
+    Name = "Rosetta_black_foil",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/black_foil.obj"
+        },
+        ColorTexture = textures .. "/foil_silver_ramp.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaBlackParts = {
+    Name = "Rosetta_black_parts",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/black_parts.obj"
+        },
+        ColorTexture = textures .. "/foil_silver_ramp.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaDish = {
+    Name = "Rosetta_dish",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/dish.obj"
+        },
+        ColorTexture = textures .. "/dish_AO.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaParts = {
+    Name = "Rosetta_parts",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/parts.obj"
+        },
+        ColorTexture = textures .. "/parts2_AO.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaSilverFoil = {
+    Name = "Rosetta_silver_foil",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/silver_foil.obj"
+        },
+        ColorTexture = textures .. "/foil_silver_ramp.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaVents = {
+    Name = "Rosetta_vents",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/vents.obj"
+        },
+        ColorTexture = textures .. "/tex_01.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaWingA = {
+    Name = "Rosetta_wing_a",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .."/wingA.obj"
+        },
+        ColorTexture = textures .. "/tex_01.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaWingB = {
+    Name = "Rosetta_wing_b",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/wingB.obj"
+        },
+        ColorTexture = textures .. "/tex_01.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaYellowFoil = {
+    Name = "Rosetta_yellow_foil",
+    Parent = RosettaModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/yellow_foil.obj"
+        },
+        ColorTexture = textures .. "/foil_gold_ramp.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local Philae = {
+    Name = "Philae",
+    Parent = transforms.Barycenter.Name,
+    -- This should need a transform, but currently the model is intrinsically
+    -- translated
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PHILAE",
+            Observer = "CHURYUMOV-GERASIMENKO",
+            Kernels = RosettaKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "ROS_SPACECRAFT",
+            DestinationFrame = "GALACTIC",
+        },
+        Scale = {
+            Type = "StaticScale",
+            -- The scale of the model is in cm; OpenSpace is in m
+            Scale = 0.01
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local PhilaeFoil = {
+    Name = "Philae_foil",
+    Parent = Philae.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/lander_foil.obj"
+        },
+        ColorTexture = textures .. "/foil_silver_ramp.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local PhilaeLids = {
+    Name = "Philae_lids",
+    Parent = Philae.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/lander_lids.obj"
+        },
+        ColorTexture = textures .. "/parts2_AO.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local PhilaeParts = {
+    Name = "Philae_parts",
+    Parent = Philae.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/lander_parts.obj"
+        },
+        ColorTexture = textures .. "/foil_silver_ramp.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local PhilaeSolarPanels = {
+    Name = "Philae_solarp",
+    Parent = Philae.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "ROSETTA",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/lander_solarp.obj"
+        },
+        ColorTexture = textures .. "/tex_01.png",
+        ModelTransform = RotationMatrix
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local NavCam = {
+    Name = "NAVCAM",
+    Parent = Rosetta.Name,
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local NavCamFov = {
+    Name = "NAVCAM FOV",
+    Parent = NavCam.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "ROSETTA",
+        Frame = "ROS_NAVCAM-A",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "ROS_NAVCAM-A",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "CHURYUMOV-GERASIMENKO" },
+        FrameConversions = {
+            ["CHURYUMOV-GERASIMENKO"] = "67P/C-G_CK"
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local ImagePlane = {
+    Name = "ImagePlaneRosetta",
+    Parent = transforms.Comet67P.Name,
+    Renderable = {
+        Type = "RenderablePlaneProjection",
+        Frame = "67P/C-G_CK",
+        DefaultTarget = "CHURYUMOV-GERASIMENKO",
+        Spacecraft = "ROSETTA",
+        Instrument = "ROS_NAVCAM-A",
+        Moving = false,
+        Texture = textures .. "/defaultProj.png"
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local RosettaCometTrail = {
+    Name = "RosettaCometTrail",
+    Parent = transforms.Barycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "ROSETTA",
+            Observer = "CHURYUMOV-GERASIMENKO"
+        },
+        Color = { 0.288, 0.375, 0.934 },
+        StartTime = "2014 AUG 01 12:00:00",
+        EndTime = "2016 SEP 30 12:00:00",
+        SampleInterval = 3600
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local PhilaeTrail = {
+    Name = "PhilaeTrail",
+    Parent = transforms.Barycenter.Name,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "PHILAE",
+            Observer = "CHURYUMOV-GERASIMENKO"
+        },
+        Color = { 0.8, 0.5, 1.0 },
+        StartTime = "2014 NOV 12 08:35:00",
+        EndTime = "2014 NOV 12 17:00:00",
+        SampleInterval = 2
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+    Rosetta,
+    RosettaModel,
+    RosettaBlackFoil,
+    RosettaBlackParts,
+    RosettaDish,
+    RosettaParts,
+    RosettaSilverFoil,
+    RosettaVents,
+    RosettaWingA,
+    RosettaWingB,
+    RosettaYellowFoil,
+
+    NavCam,
+    NavCamFov,
+    ImagePlane,
+
+    Philae,
+    PhilaeFoil,
+    PhilaeLids,
+    PhilaeParts,
+    PhilaeSolarPanels,
+
+    RosettaCometTrail,
+    PhilaeTrail
+})

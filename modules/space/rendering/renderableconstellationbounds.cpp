@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -195,11 +195,11 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     }
 }
 
-void RenderableConstellationBounds::initialize() {
+void RenderableConstellationBounds::initializeGL() {
     _program = OsEng.renderEngine().buildRenderProgram(
         "ConstellationBounds",
-        "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
-        "${MODULE_SPACE}/shaders/constellationbounds_fs.glsl"
+        absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
 
 
@@ -222,7 +222,7 @@ void RenderableConstellationBounds::initialize() {
     glBindVertexArray(0);
 }
 
-void RenderableConstellationBounds::deinitialize() {
+void RenderableConstellationBounds::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);

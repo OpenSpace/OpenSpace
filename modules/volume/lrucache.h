@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,7 +82,9 @@ private:
         auto iter = _tracker.insert(_tracker.end(), key);
         _cache[key] = std::make_pair(value, iter);
     };
-    ContainerType<KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>> _cache;
+    ContainerType<
+        KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>
+    > _cache;
     std::list<KeyType> _tracker;
     size_t _capacity;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,40 +24,6 @@
 
 namespace openspace::luascriptfunctions {
 
-/**
- * \ingroup LuaScripts
- * setOrigin():
- * Set the origin of the camera
- */
-int setOrigin(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
-
-    const int type = lua_type(L, -1);
-    if (type != LUA_TSTRING) {
-        return luaL_error(L, "Expected string, got %i", type);
-    }
-
-    std::string s = luaL_checkstring(L, -1);
-
-    SceneGraphNode* node = sceneGraphNode(s);
-    if (!node) {
-        LWARNINGC(
-            "lua.setOrigin",
-            "Could not find a node in scenegraph called '" << s << "'"
-        );
-        return 0;
-    }
-
-    OsEng.navigationHandler().setFocusNode(node);
-
-    return 0;
-}
-
 int restoreCameraStateFromFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
@@ -73,6 +39,22 @@ int restoreCameraStateFromFile(lua_State* L) {
     }
 
     OsEng.navigationHandler().restoreCameraStateFromFile(cameraStateFilePath);
+    return 0;
+}
+
+int setCameraState(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    try {
+        ghoul::Dictionary dictionary;
+        ghoul::lua::luaDictionaryFromState(L, dictionary);
+        OsEng.navigationHandler().setCameraStateFromDictionary(dictionary);
+    } catch (const ghoul::RuntimeError& e) {
+        return luaL_error(L, "Could not set camera state: %s", e.what());
+    }
     return 0;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -195,6 +195,7 @@ KeplerTranslation::KeplerTranslation()
 {
     auto update = [this]() {
         _orbitPlaneDirty = true;
+        requireUpdate();
     };
 
     // Only the eccentricity, semimajor axis, inclination, and location of ascending node
@@ -220,7 +221,7 @@ KeplerTranslation::KeplerTranslation()
     addProperty(_period);
 }
 
-KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary) 
+KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     : KeplerTranslation()
 {
     documentation::testSpecificationAndThrow(
@@ -239,10 +240,6 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
         dictionary.value<double>(PeriodInfo.identifier),
         dictionary.value<std::string>(EpochInfo.identifier)
     );
-}
-
-glm::dvec3 KeplerTranslation::position() const {
-    return _position;
 }
 
 double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
@@ -292,13 +289,13 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
 }
 
-void KeplerTranslation::update(const UpdateData& data) {
+glm::dvec3 KeplerTranslation::position(const Time& time) const {
     if (_orbitPlaneDirty) {
         computeOrbitPlane();
         _orbitPlaneDirty = false;
     }
 
-    double t = data.time.j2000Seconds() - _epoch;
+    double t = time.j2000Seconds() - _epoch;
     double meanMotion = 2.0 * glm::pi<double>() / _period;
     double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
     double e = eccentricAnomaly(meanAnomaly);
@@ -310,10 +307,10 @@ void KeplerTranslation::update(const UpdateData& data) {
         a * sqrt(1.0 - _eccentricity * _eccentricity) * sin(e),
         0.0
     };
-    _position = _orbitPlaneRotation * p;
+    return _orbitPlaneRotation * p;
 }
 
-void KeplerTranslation::computeOrbitPlane() {
+void KeplerTranslation::computeOrbitPlane() const {
     // We assume the following coordinate system:
     // z = axis of rotation
     // x = pointing towards the first point of Aries

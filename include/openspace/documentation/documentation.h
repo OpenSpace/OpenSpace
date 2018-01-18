@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ using Optional = ghoul::Boolean;
 struct TestResult {
     /**
      * An Offense is a violation against a specific verifier. The Offense::offender is the
-     * key that caused the offense (in the case of nested tables, it will be fully 
+     * key that caused the offense (in the case of nested tables, it will be fully
      * qualified identifier) and the Offense::Reason is the reason that caused the
      * offense.
      */
@@ -60,7 +60,7 @@ struct TestResult {
             ExtraKey,         ///< The exhaustive documentation contained an extra key
             WrongType,        ///< The key's value was not of the expected type
             Verification,     ///< The value did not pass a necessary non-type verifier
-            UnknownIdentifier ///< If the identifier for a ReferencingVerifier did not exist
+            UnknownIdentifier ///< The identifier for a ReferencingVerifier did not exist
         };
         /// The offending key that caused the Offense. In the case of a nested table,
         /// this value will be the fully qualified name of the key
@@ -142,8 +142,8 @@ struct DocumentationEntry {
 
     /**
      * The constructor for a DocumentationEntry describing a \p key in a Documentation.
-     * The value for the key (or each value in the case of the 
-     * DocumentationEntry::Wildcard) is tested using the \p verifier, that specifies the 
+     * The value for the key (or each value in the case of the
+     * DocumentationEntry::Wildcard) is tested using the \p verifier, that specifies the
      * conditions that the \p key%'s value has to fulfill. The textual documentation
      * \p doc shall describe the usage of the key-value pair and will be printed for human
      * consumption for example in the DocumentationEngine. Each DocumentationEntry can
@@ -211,7 +211,7 @@ Documentation doc = {
     { // A list of DocumentationEntry%s; also specified using initializer lists
         { "key1", new IntVerifier, "Documentation key1", Optional::Yes },
         { "key2", new FloatVerifier, "Documentation key2" },
-        { "key3", new StringVerifier } 
+        { "key3", new StringVerifier }
     }
 };
 \endverbatim
@@ -294,7 +294,11 @@ void testSpecificationAndThrow(const Documentation& documentation,
 
 namespace std {
 
+std::string to_string(openspace::documentation::TestResult testResult);
+
+std::string to_string(openspace::documentation::TestResult::Offense offense);
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+std::string to_string(openspace::documentation::TestResult::Warning warning);
 std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
 
 } // namespace std

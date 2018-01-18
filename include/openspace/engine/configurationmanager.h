@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,6 +51,9 @@ public:
     /// The key that stores the location of the SGCT configuration file that is used on
     /// application launch
     static const std::string KeyConfigSgct;
+    /// The key that defines a list of scripts for global customization that get executed
+    /// regardless of which scene is loaded
+    static const std::string KeyGlobalCustomizationScripts;
     /// The part of the key that defines the type
     static const std::string PartType;
     /// The part of the key that defines the file
@@ -67,12 +70,10 @@ public:
     static const std::string KeyDocumentation;
     /// The key that stores the factory documentation values
     static const std::string KeyFactoryDocumentation;
+    /// The key that stores the location of the asset file that is initially loaded
+    static const std::string KeyConfigAsset;
     /// The key that stores the scene license documentation values
     static const std::string KeySceneLicenseDocumentation;
-    /// The key that stores the location of the scene file that is initially loaded
-    static const std::string KeyConfigScene;
-    /// The key that stores the location of the tasks files
-    static const std::string KeyConfigTasksRoot;
     /// The key that stores the subdirectory containing a list of all startup scripts to
     /// be executed on application start before the scene file is loaded
     static const std::string KeyStartupScript;
@@ -115,9 +116,6 @@ public:
     static const std::string KeyDisableMasterRendering;
     /// The key that stores whether the master node should apply the scene transformation
     static const std::string KeyDisableSceneOnMaster;
-    /// The key that sets the request URL that is used to request additional data to be
-    /// downloaded
-    static const std::string KeyDownloadRequestURL;
     /// The key that stores the switch for enabling/disabling the rendering on a master
     /// computer
     static const std::string KeyRenderingMethod;
@@ -131,9 +129,9 @@ public:
     static const std::string PartHttpProxyPort;
     /// The key that stores the authentication method of the http proxy
     static const std::string PartHttpProxyAuthentication;
-    /// The key that stores the username to use for authentication to access the http proxy
+    /// Key that stores the username to use for authentication to access the http proxy
     static const std::string PartHttpProxyUser;
-    /// The key that stores the password to use for authentication to access the http proxy
+    /// Key that stores the password to use for authentication to access the http proxy
     static const std::string PartHttpProxyPassword;
     /// The key that stores the dictionary containing information about debug contexts
     static const std::string KeyOpenGLDebugContext;
@@ -155,6 +153,22 @@ public:
     static const std::string KeyCheckOpenGLState;
     /// The part of the key storing whether each OpenGL call should be logged
     static const std::string KeyLogEachOpenGLCall;
+
+    /// This key determines whether the scene graph nodes should initialized multithreaded
+    static const std::string KeyUseMultithreadedInitialization;
+
+    /// The key under which all of the loading settings are grouped
+    static const std::string KeyLoadingScreen;
+    /// The part of the key storing whether the loading screen should display the message
+    /// about current status
+    static const std::string PartShowMessage;
+    /// The part of the key storing whether the loading screen should display node names
+    static const std::string PartShowNodeNames;
+    /// The part of the key storing whether the loading screen should contain a progress
+    /// bar
+    static const std::string PartShowProgressbar;
+    /// The key used to specify module specific configurations
+    static const std::string KeyModuleConfigurations;
 
 
     /**

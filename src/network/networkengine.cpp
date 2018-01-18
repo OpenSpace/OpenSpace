@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,19 +37,19 @@
 #include <thread>
 
 namespace {
-    const char* _loggerCat = "NetworkEngine";
+    constexpr const char* _loggerCat = "NetworkEngine";
 
-    const char* StatusMessageIdentifierName = "StatusMessage";
-    const char* MappingIdentifierIdentifierName = "IdentifierMapping";
-    const char* InitialMessageFinishedIdentifierName = "InitialMessageFinished";
+    constexpr const char* StatusMessageIdentifierName = "StatusMessage";
+    constexpr const char* MappingIdentifierIdentifierName = "IdentifierMapping";
+    constexpr const char* InitialMessageFinishedIdentifierName = "InitialMessageFinished";
 
-    const char MessageTypeLuaScript = '0';
-    const char MessageTypeExternalControlConnected = '1';
+    constexpr const char MessageTypeLuaScript = '0';
+    constexpr const char MessageTypeExternalControlConnected = '1';
 } // namespace
 
 namespace openspace {
 
-NetworkEngine::NetworkEngine() 
+NetworkEngine::NetworkEngine()
     // -1 is okay as we assign one identifier in this ctor
     : _lastAssignedIdentifier(MessageIdentifier(-1))
     , _shouldPublishStatusMessage(true)
@@ -217,7 +217,7 @@ void NetworkEngine::sendInitialInformation() {
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
         OsEng.windowWrapper().sendMessageToExternalControl(payload);
-        LINFO("Sent initial message: (s=" << m.body.size() << ")" << 
+        LINFO("Sent initial message: (s=" << m.body.size() << ")" <<
               "[i=" << identifier.value << "]"
         );
 

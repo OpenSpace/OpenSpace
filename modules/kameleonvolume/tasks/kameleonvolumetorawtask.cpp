@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,19 +38,19 @@
 #include <fstream>
 
 namespace {
-    const char* KeyInput = "Input";
-    const char* KeyRawVolumeOutput = "RawVolumeOutput";
-    const char* KeyDictionaryOutput = "DictionaryOutput";
-    const char* KeyDimensions = "Dimensions";
-    const char* KeyVariable = "Variable";
-    const char* KeyTime = "Time";
-    const char* KeyLowerDomainBound = "LowerDomainBound";
-    const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyInput = "Input";
+    constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";
+    constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyVariable = "Variable";
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
 
-    const char* KeyMinValue = "MinValue";
-    const char* KeyMaxValue = "MaxValue";
+    constexpr const char* KeyMinValue = "MinValue";
+    constexpr const char* KeyMaxValue = "MaxValue";
 
-    const char* _loggerCat = "KameleonVolumeToRawTask";
+    constexpr const char* _loggerCat = "KameleonVolumeToRawTask";
 } // namespace
 
 namespace openspace {
@@ -130,8 +130,14 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
     outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
     outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
-    outputMetadata.setValue<float>(KeyMinValue, reader.minValue(_variable));
-    outputMetadata.setValue<float>(KeyMaxValue, reader.maxValue(_variable));
+    outputMetadata.setValue<float>(
+        KeyMinValue,
+        static_cast<float>(reader.minValue(_variable))
+    );
+    outputMetadata.setValue<float>(
+        KeyMaxValue,
+        static_cast<float>(reader.maxValue(_variable))
+    );
 
     ghoul::DictionaryLuaFormatter formatter;
     std::string metadataString = formatter.format(outputMetadata);

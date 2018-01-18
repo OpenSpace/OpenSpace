@@ -1,0 +1,154 @@
+local transforms = asset.require('./transforms')
+local assetHelper = asset.require('util/asset_helper')
+asset.require("spice/base")
+asset.request('./trail')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Mars Textures",
+    Type = "HttpSynchronization",
+    Identifier = "mars_textures",
+    Version = 1
+})
+
+-- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
+local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
+
+local mapServiceConfigs = asset.localResource("map_service_configs")
+
+local color_layers = {
+    {
+        Name = "MOC WA AMNH Color",
+        FilePath = mapServiceConfigs .. "/Utah/Mars_Color.wms",
+        Enabled = true,
+        Fallback =  {
+            Name = "Mars Texture",
+            FilePath = textures .. "/mars.jpg",
+            Enabled = true
+        }
+    },
+    {
+        Name = "Viking MDIM",
+        FilePath = mapServiceConfigs .. "/MARS_Viking_MDIM21.wms"
+    },
+    {
+        Name = "MOLA Pseudo Color",
+        FilePath = mapServiceConfigs .. "/Utah/Mola_PseudoColor.wms"
+    },
+    {
+        Name = "MOLA HRSC",
+        FilePath = mapServiceConfigs .. "/Utah/Mola_HRSC.wms"
+    },
+    {
+        Name = "Viking MDIM [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/Mdim.wms"
+    },
+    {
+        Name = "Viking MDIM [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/Mdim.wms"
+    },
+    {
+        Name = "MOLA Pseudo Color [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/Mola_PseudoColor.wms"
+    },
+    {
+        Name = "CTX Mosaic [LiU]",
+        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
+        Name = "CTX Mosaic [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
+        Name = "CTX Mosaic [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
+        Name = "Themis IR Day [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Day.wms",
+        BlendMode = "Color"
+    },
+    {
+        Name = "Themis IR Night [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Night.wms",
+        BlendMode = "Color"
+    },
+    {
+        Name = "Themis IR Day [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Day.wms",
+        BlendMode = "Color"
+    },
+    {
+        Name = "Themis IR Night [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Night.wms",
+        BlendMode = "Color"
+    }
+}
+
+local overlay_layers = {
+    {
+        Type = "TileIndexTileLayer",
+        Name = "Indices"
+    },
+    {
+        Type = "SizeReferenceTileLayer",
+        Name = "Size Reference",
+        Radii = marsRadii
+    }
+}
+
+local height_layers = {
+    {
+        Name = "Mola Elevation",
+        FilePath = mapServiceConfigs .. "/Mars_MGS_MOLA_DEM.wms",
+        TilePixelSize = 90
+    },
+    {
+        Name = "Mola Elevation [Europe]",
+        FilePath = mapServiceConfigs .. "/LiU/Mola_Elevation.wms",
+        Enabled = true,
+        TilePixelSize = 90
+    },
+    {
+        Name = "Mola Elevation [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/Mola_Elevation.wms",
+        TilePixelSize = 90
+    },
+    {
+        Name = "Mola Elevation [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/Mola_Elevation.wms",
+        TilePixelSize = 90
+    }
+}
+
+local Mars = {
+    Name = "Mars",
+    Parent = transforms.MarsBarycenter.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MARS",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = marsRadii,
+        SegmentsPerPatch = 90,
+        Layers = {
+            ColorLayers = color_layers,
+            Overlays = overlay_layers,
+            HeightLayers = height_layers
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GuiPath = "/Solar System/Planets/Mars"
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mars })

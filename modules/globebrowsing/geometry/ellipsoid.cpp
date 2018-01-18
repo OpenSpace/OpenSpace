@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,7 +81,9 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     return p / d;
 }
 
-glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const {
+glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
+                                                                const glm::dvec3& p) const
+{
     glm::dvec3 normal = p * _cached._oneOverRadiiSquared;
     return glm::normalize(normal);
 }
@@ -91,7 +93,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const {
     //geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
     return glm::dvec3(
         cosLat * cos(geodetic2.lon),
-        cosLat * sin(geodetic2.lon), 
+        cosLat * sin(geodetic2.lon),
         sin(geodetic2.lat));
 }
 
@@ -162,6 +164,20 @@ glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {
     double gamma = sqrt(dot(k, normal));
     glm::dvec3 rSurface = k / gamma;
     return rSurface + geodetic3.height * normal;
+}
+
+void Ellipsoid::setShadowConfigurationArray(
+                       const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray)
+{
+    _shadowConfArray = shadowConfArray;
+}
+
+std::vector<Ellipsoid::ShadowConfiguration> Ellipsoid::shadowConfigurationArray() const {
+    return _shadowConfArray;
+}
+
+bool Ellipsoid::hasEclipseShadows() const {
+    return !_shadowConfArray.empty();
 }
 
 } // namespace openspace::globebrowsing

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#include <openspace/documentation/documentation.h>
 
 #include <regex>
 
@@ -147,7 +149,6 @@ int setPropertyCall_single(properties::Property* prop, std::string uri, lua_Stat
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
-        //OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
 
     return 0;
@@ -180,7 +181,7 @@ int property_setValueSingle(lua_State* L) {
         for (properties::Property* prop : allProperties()) {
             std::string propFullId = prop->fullyQualifiedIdentifier();
             //Look for a match in the uri with the group name (first term) removed
-            int propMatchLength = 
+            int propMatchLength =
                 static_cast<int>(propFullId.length()) -
                 static_cast<int>(pathRemainderToMatch.length());
 
@@ -337,8 +338,8 @@ int loadScene(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("loadScene", L, 1, nArguments);
 
     std::string sceneFile = luaL_checkstring(L, -1);
+    OsEng.scheduleLoadSingleAsset(sceneFile);
 
-    OsEng.scheduleLoadScene(sceneFile);
     return 0;
 }
 
@@ -354,14 +355,29 @@ int addSceneGraphNode(lua_State* L) {
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addSceneGraphNode", e.what());
-        return 0;
+        return luaL_error(L, "Error loading dictionary from lua state");
     }
 
-    SceneLoader loader;
-    SceneGraphNode* importedNode = loader.importNodeDictionary(*OsEng.renderEngine().scene(), d);
-    importedNode->initialize();
+    try {
+        SceneGraphNode* node = OsEng.renderEngine().scene()->loadNode(d);
+        if (!node) {
+            LERRORC("Scene", "Could not load scene graph node");
+            return luaL_error(L, "Error loading scene graph node");
+        }
 
-    return 1;
+        OsEng.renderEngine().scene()->initializeNode(node);
+    }
+    catch (const documentation::SpecificationError& e) {
+        return luaL_error(
+            L,
+            "Error loading scene graph node: %s: %s",
+            e.what(),
+            std::to_string(e.result).c_str()
+        );
+    } catch (const ghoul::RuntimeError& e) {
+        return luaL_error(L, "Error loading scene graph node: %s", e.what());
+    }
+    return 0;
 }
 
 int removeSceneGraphNode(lua_State* L) {
@@ -387,6 +403,7 @@ int removeSceneGraphNode(lua_State* L) {
             );
         return 0;
     }
+    node->deinitializeGL();
     parent->detachChild(*node);
     return 1;
 }
@@ -394,7 +411,7 @@ int removeSceneGraphNode(lua_State* L) {
 
 int hasSceneGraphNode(lua_State* L) {
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("removeSceneGraphNode", L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("hasSceneGraphNode", L, 1, nArguments);
 
     std::string nodeName = luaL_checkstring(L, -1);
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* _loggerCat = "PixelBuffer";
+    constexpr const char* _loggerCat = "PixelBuffer";
 } // namespace
 
 namespace openspace::globebrowsing {
@@ -38,7 +38,7 @@ PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
 {
     glGenBuffers(1, &_id);
     bind();
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, nullptr, static_cast<GLenum>(_usage));
     unbind();
 }
 
@@ -52,7 +52,9 @@ void* PixelBuffer::mapBuffer(Access access) {
     return dataPtr;
 }
 
-void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, BufferAccessMask access) {
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length,
+                                  BufferAccessMask access)
+{
     void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
     _isMapped = dataPtr ? true : false;
     return dataPtr;

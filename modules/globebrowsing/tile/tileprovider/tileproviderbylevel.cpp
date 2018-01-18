@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,10 +61,11 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 "Must define key '" + std::string(KeyMaxLevel) + "'"
             );
         }
-        maxLevel = std::round(floatMaxLevel);
+        maxLevel = static_cast<int>(std::round(floatMaxLevel));
 
         ghoul::Dictionary providerDict;
-        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
+        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict))
+        {
             throw std::runtime_error(
                 "Must define key '" + std::string(KeyTileProvider) + "'"
             );
@@ -86,7 +87,10 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         }
 
         _levelTileProviders.push_back(
-            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(typeID, providerDict))
+            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(
+                typeID,
+                providerDict
+            ))
         );
 
         std::string providerName;
@@ -109,6 +113,24 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             _providerIndices[i] = _providerIndices[i+1];
         }
     }
+}
+
+bool TileProviderByLevel::initialize() {
+    bool success = TileProvider::initialize();
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->initialize();
+    }
+
+    return success;
+}
+
+bool TileProviderByLevel::deinitialize() {
+    bool success = true;
+    for (const std::shared_ptr<TileProvider>& tp : _levelTileProviders) {
+        success &= tp->deinitialize();
+    }
+
+    return TileProvider::deinitialize() && success;
 }
 
 Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {

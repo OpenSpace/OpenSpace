@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,11 +42,11 @@
 #include <stdint.h>
 
 namespace {
-    const char* _loggerCat = "RenderableStars";
+    constexpr const char* _loggerCat = "RenderableStars";
 
-    const char* KeyFile = "File";
+    constexpr const char* KeyFile = "File";
 
-    const int8_t CurrentCacheVersion = 1;
+    constexpr int8_t CurrentCacheVersion = 1;
 
     struct ColorVBOLayout {
         std::array<float, 4> position; // (x,y,z,e)
@@ -286,12 +286,24 @@ bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
 }
 
-void RenderableStars::initialize() {
+void RenderableStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
-        "${MODULE_SPACE}/shaders/star_vs.glsl",
-        "${MODULE_SPACE}/shaders/star_fs.glsl",
-        "${MODULE_SPACE}/shaders/star_ge.glsl");
+        absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
+        absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
+    );
+
+    _uniformCache.view = _program->uniformLocation("view");
+    _uniformCache.projection = _program->uniformLocation("projection");
+    _uniformCache.colorOption = _program->uniformLocation("colorOption");
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+    _uniformCache.screenSize = _program->uniformLocation("screenSize");
+    _uniformCache.scaling = _program->uniformLocation("scaling");
+    _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+    _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
 
     bool success = loadData();
     if (!success) {
@@ -299,7 +311,7 @@ void RenderableStars::initialize() {
     }
 }
 
-void RenderableStars::deinitialize() {
+void RenderableStars::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
@@ -321,49 +333,38 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     // @Check overwriting the scaling from the camera; error as parsec->meter conversion
     // is done twice? ---abock
-    glm::vec2 scaling = glm::vec2(1, -19);  
+    glm::vec2 scaling = glm::vec2(1, -19);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0);
-    glm::mat4 viewMatrix       = data.camera.viewMatrix();
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
+    _program->setUniform(_uniformCache.view, data.camera.viewMatrix());
+    _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
-    //_program->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    //_program->setUniform("ModelTransform", glm::mat4(1.f));
-    _program->setUniform("model", modelMatrix);
-    _program->setUniform("view", viewMatrix);
-    _program->setUniform("projection", projectionMatrix);
-
-    _program->setUniform("colorOption", _colorOption);
-    _program->setUniform("alphaValue", _alphaValue);
-    _program->setUniform("scaleFactor", _scaleFactor);
-    _program->setUniform("minBillboardSize", _minBillboardSize);
+    _program->setUniform(_uniformCache.colorOption, _colorOption);
+    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
+    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
+    _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
     _program->setUniform(
-        "screenSize",
+        _uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
 
     setPscUniforms(*_program.get(), data.camera, data.position);
-    _program->setUniform("scaling", scaling);
+    _program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
     _pointSpreadFunctionTexture->bind();
-    _program->setUniform("psfTexture", psfUnit);
+    _program->setUniform(_uniformCache.psfTexture, psfUnit);
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
     _colorTexture->bind();
-    _program->setUniform("colorTexture", colorUnit);
+    _program->setUniform(_uniformCache.colorTexture, colorUnit);
 
     glBindVertexArray(_vao);
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
     glDrawArrays(GL_POINTS, 0, nStars);
 
     glBindVertexArray(0);
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreUniformLocationError(IgnoreError::No);
     _program->deactivate();
 
     glDepthMask(true);
@@ -547,6 +548,21 @@ void RenderableStars::update(const UpdateData&) {
         }
         _colorTextureIsDirty = false;
     }
+
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+
+        _uniformCache.view = _program->uniformLocation("view");
+        _uniformCache.projection = _program->uniformLocation("projection");
+        _uniformCache.colorOption = _program->uniformLocation("colorOption");
+        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+        _uniformCache.screenSize = _program->uniformLocation("screenSize");
+        _uniformCache.scaling = _program->uniformLocation("scaling");
+        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+        _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+    }
 }
 
 bool RenderableStars::loadData() {
@@ -644,8 +660,16 @@ bool RenderableStars::readSpeckFile() {
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
-
-        _fullData.insert(_fullData.end(), values.begin(), values.end());
+        bool nullArray = true;
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (values[i] != 0.0) {
+                nullArray = false;
+                break;
+            }
+        }
+        if (!nullArray) {
+            _fullData.insert(_fullData.end(), values.begin(), values.end());
+        }
     } while (!file.eof());
 
     return true;
