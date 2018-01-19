@@ -46,8 +46,8 @@ class TfEditor extends Component {
               </div>
           </Window>
           { showColorPicker && (
-            <Window  size={{ width: 230, height: 350 }} closeCallback={this.toggleColorPicker} title="Color Picker" className={styles.ColorPickerWindow}>
-              <ColorPicker onColorChange={(color) => this.setState({currentColor : color})} />
+            <Window  size={{ width: 230 }} closeCallback={this.toggleColorPicker} title="Color Picker" className={styles.ColorPickerWindow}>
+              <ColorPicker className={styles.ColorPicker} onColorChange={(color) => this.setState({currentColor : color})} />
             </Window>
           )}
           </div>

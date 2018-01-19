@@ -2,15 +2,15 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styles from '../style/Envelope.scss'
 import GraphBody from '../../../common/Graph/GraphBody'
+import PointPosition from './PointPosition'
 import Point from './Point'
 
-const pointsForEnvelopeGraph = (data) => {
-  console.log(data)
+const pointsForEnvelopeGraph = (data, height) => {
     let convertedData = [];
     data.forEach(function(point) {
       let tmpObject = Object.assign({},
-        {x: point.position.x + 10,
-         y: 600 - point.position.y - 10,
+        {x: point.position.x,
+         y: height - point.position.y,
          color: point.color}
         )
       convertedData.push(tmpObject);
@@ -23,35 +23,56 @@ const EnvelopeCanvas = ({
   handleDrag,
   height,
   width,
-  active,
-  points,
+  envelopes,
+  pointPositions,
+  minValue,
+  maxValue,
 }) => (
-    <div className={styles.Envelope}>
-      <svg className={styles.Line} height={height} width={width + 10}>
-        <GraphBody
-         UseLinearGradient={true}
-         points={pointsForEnvelopeGraph(points)}
-         x={0}
-         y={600}
-         width={width}
-         fillOpacity={"0"}
-         strokeWidth={2}
+      <div className={styles.Envelope}>
+      {(envelopes.length !== 0) && (
+        <div>
+        <PointPosition className={styles.Envelope}
+          points={pointPositions}
+          width={width}
+          height={height}
+          envelopes={envelopes}
+          minValue={minValue}
+          maxValue={maxValue}
         />
-      </svg>
-     {points.map((point, index) =>
-      <Point className={styles.Envelope}
-        key={point.id}
-        handleClick={() => handleClick(point.id)}
-        handleDrag={(e, ui) => handleDrag(e, ui, index)}
-        height={height}
-        width={width}
-        {...point}
-        active={(point.active || active) ? true : false}
-      />
+        {envelopes.map(envelope =>
+          <div key={envelope.id}>
+          <svg className={styles.Line} height={height} width={width + 10}>
+            <GraphBody
+             UseLinearGradient={true}
+             points={pointsForEnvelopeGraph(envelope.points, height)}
+             x={0}
+             y={600}
+             width={width}
+             fillOpacity={"0"}
+             strokeWidth={2}
+            />
+          </svg>
+         {envelope.points.map((point, index) =>
+          <Point className={styles.Envelope}
+            key={point.id}
+            handleClick={() => handleClick(envelope, point.id)}
+            handleDrag={(e, ui) => handleDrag(e, ui, index, envelope)}
+            height={height}
+            width={width}
+            {...point}
+            bounds={(index === 0) ? {x1 : 0, x2: envelope.points[1].position.x} : 
+                      (index === envelope.points.length - 1) ? {x1 : envelope.points[envelope.points.length - 2].position.x, x2: width}:
+                       {x1 : envelope.points[0].position.x, x2: envelope.points[envelope.points.length -1].position.x}}
+            active={(point.active || envelope.active) ? true : false}
+          />
+          )}
+         </div>
+        )}
+        </div>
       )}
     </div>
 )
-EnvelopeCanvas.propTypes = {
+/*EnvelopeCanvas.propTypes = {
   HandleDrag: PropTypes.func.isRequired,
   handleClick: PropTypes.func.isRequired,
   points: PropTypes.arrayOf(
@@ -68,5 +89,5 @@ EnvelopeCanvas.propTypes = {
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
   active: PropTypes.bool.isRequired,
-}
+}*/
 export default EnvelopeCanvas

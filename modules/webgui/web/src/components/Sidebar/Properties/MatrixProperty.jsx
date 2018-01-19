@@ -34,7 +34,7 @@ class MatrixProperty extends Property {
   }
 
   render() {
-    const { Description } = this.props;
+    const { Description, Value } = this.props;
     const { SteppingValue, MaximumValue, MinimumValue } = Description.AdditionalData;
     const firstLabel = (<span>
       { Description.Name } { this.descriptionPopup }
@@ -42,7 +42,7 @@ class MatrixProperty extends Property {
 
     // Convert the flat array into a 2D N*N array representing the matrix. Add '[' and ']' to
     // compensate for formatting from the server.
-    const values = JSON.parse(`[${this.props.Value}]`)
+    const values = JSON.parse(`[${Value}]`)
       .map((value, index) => ({
         key: `${Description.Name}-${index}`,
         value: parseFloat(value),

@@ -15,7 +15,8 @@ const Point = ({
   position
 }) => (
   <div>
-  <DraggableCore defaultPosition={{x: position.x - 10, y: position.y - 10}} onDrag={handleDrag} axis={anchor ? "x" : "both"} bounds={{top: -10, left: anchor ? -10 : bounds.x1 -10 , right: anchor ? width - 10 : bounds.x2 -10, bottom: (height)}}>
+  <DraggableCore defaultPosition={{x: position.x - 10, y: position.y - 10}} onDrag={handleDrag} axis={anchor ? "x" : "both"} 
+                    bounds={{top: - 10, left: bounds.x1 - 10, right: bounds.x2 - 10, bottom: height - 10}}>
     <svg className={active ? styles.Active : styles.Point} width={20} height={20} onDrag={handleDrag} onClick={handleClick}>
       <circle cx={10} cy={10} r={active ? 8 : 10} fill={color} />
     </svg>

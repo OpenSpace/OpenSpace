@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { SketchPicker } from 'react-color';
+import { ChromePicker } from 'react-color';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { changeColor } from '../../../api/Actions/transferFunctionActions.js';
@@ -20,7 +20,8 @@ class ColorPicker extends Component {
 
   render() {
     return (
-      <SketchPicker
+      <ChromePicker
+        disableAlpha={true}
         {...this.props }
         color={ this.state.color }
         onChangeComplete={(color) => this.handleChangeComplete(color) }

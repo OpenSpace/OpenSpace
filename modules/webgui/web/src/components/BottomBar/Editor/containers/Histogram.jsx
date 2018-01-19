@@ -24,17 +24,14 @@ const normalizeHistogramDataToCanvas = (Value, width, height) => {
 }
 
 const mapStateToProps = (state, ownProps) => {
-    var histogram, minValue, maxValue, unit;
-    var envelopes;
-    state.sceneGraph.map(element => {
-          if(element.name === "Enlil Sequence") {
-            envelopes = element.subowners[1].subowners[1].properties[1].Value;
-            histogram = normalizeHistogramDataToCanvas(element.subowners[1].subowners[1].properties[2].Value, ownProps.width, ownProps.height);
-            minValue = element.subowners[1].subowners[1].properties[3].Value;
-            maxValue = element.subowners[1].subowners[1].properties[4].Value;
-            unit = element.subowners[1].subowners[1].properties[5].Value;
-          }
-        })
+  var histogram, minValue, maxValue, unit;
+
+  histogram = normalizeHistogramDataToCanvas(ownProps.activeVolume.properties.find(function (obj) 
+    { return obj.id === "Histogram"; }).Value, ownProps.width, ownProps.height);
+
+  unit = Number(ownProps.activeVolume.properties.find(function (obj) { return obj.id === "DataUnit"; }).Value);
+  minValue = Number(ownProps.activeVolume.properties.find(function (obj) { return obj.id === "MinValue"; }).Value);
+  maxValue = Number(ownProps.activeVolume.properties.find(function (obj) { return obj.id === "MaxValue"; }).Value);
     return {
       histogram, 
       minValue,

@@ -51,9 +51,12 @@
 }
 
 .ColorPickerWindow {
-  max-width: none !important;
   bottom: unquote("calc(100% + #{$popover-arrow-size})");
   left: 50%;
   position: absolute;
   z-index: 11;
+}
+
+.ColorPicker {
+  margin: 0 auto;
 }

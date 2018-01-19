@@ -8,7 +8,8 @@ import Envelope from '../containers/Envelope'
 const EditorContainer = ({
   height,
   width,
-  activeVolume
+  activeVolume,
+  URI
 }) => (
   <div >
     <div className={styles.EnvelopeContainer}>
@@ -16,6 +17,7 @@ const EditorContainer = ({
             height={height}
             width={width}
             activeVolume={activeVolume}
+            URI={URI}
           />
     </div>
     <div className={styles.HistogramContainer}>
@@ -25,5 +27,3 @@ const EditorContainer = ({
 )
 
 export default EditorContainer
-
-

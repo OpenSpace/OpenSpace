@@ -22,11 +22,11 @@ class SettingsPane extends Component {
 
     return (
       <Pane title="Settings" closeCallback={this.props.closeCallback}>
-        { (this.props.properties.length != 0 )&& (
+        { (properties.length == 0 ) && (
           <LoadingBlocks className={Pane.styles.loading} />
         )}
 
-        { properties.length > 0 && (
+        {( properties.length > 0 ) && (
           <FilterList
             data={properties}
             className={styles.list}

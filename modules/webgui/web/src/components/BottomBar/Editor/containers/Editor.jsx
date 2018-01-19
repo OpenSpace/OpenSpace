@@ -9,7 +9,7 @@ class Editor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      URI: this.props.volumes[0],
+      currentVolume: this.props.volumes[0].name,
       height: 600,
       width: 800,
     }
@@ -18,35 +18,48 @@ class Editor extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.props.color !== prevProps.color) {
-      this.props.ChangeColor(this.props.color, this.props.URI);
+      const { currentVolume } = this.state;
+      this.props.ChangeColor(this.props.color, this.props.volumes.find(function (obj) 
+        { return obj.id === currentVolume.name; }).TransferFunctionData.properties.find(function (obj) 
+        { return obj.id === "TransferFunction"; }).Description.Identifier);
     }
   }
 
   handleVolumeChange(event) {
-    this.setState({URI: event.target.value});
+    this.setState({currentVolume: event.target.value});
   }
 
   render() {
-    const {height, width } = this.state;
-    const { color, URI, volumes } = this.props;
-    let defaultEnvelopePoints = [{color: color, position : { x: 0, y: height}}, {color: color, position : { x: 30, y: 0}},
-                    {color: color, position : { x: 70, y: 0}}, {color: color, position : { x: 100, y: height}}];
+    const { height, width, currentVolume } = this.state;
+    const { color, volumes } = this.props;
+
+    const URI = volumes.find(function (obj) { 
+      return obj.id === currentVolume.name; }).TransferFunctionData.properties.find(function (obj) { 
+        return obj.id === "TransferFunction"; }).Description.Identifier;
+    
+    const defaultEnvelopePoints = [{color: color, position : { x: 0, y: 0}}, {color: color, position : { x: 0.3, y: 1}},
+                    {color: color, position : { x: 0.7, y: 1}}, {color: color, position : { x: 1, y: 0}}];
     return (
       <div>
         <button onClick={() => this.props.AddEnvelope(defaultEnvelopePoints, URI)}>Add Envelope</button>
         <button onClick={() => this.props.DeleteEnvelope(URI)}>Delete Envelope</button>
         <button onClick={() => this.props.AddPoint(color, URI)}>Add Point</button>
+        
         <select onChange={this.handleVolumeChange}>{
           this.props.volumes.map((volume, index) =>
-            <option key={index} value={volume}>{volume}</option>
+            <option key={index} value={volume.name}>{volume.name}</option>
             )
         }
         </select>
+
+        {(currentVolume !== undefined) && (
         <EditorContainer
           height={height}
           width={width}
-          URI={this.state.URI}
+          activeVolume={volumes.find(function (obj) { return obj.id === currentVolume.name; }).TransferFunctionData}
+          URI={URI}
         />
+        )}
       </div>
     );
   }
@@ -58,15 +71,38 @@ Editor.propTypes = {
   ClearEnvelopes: PropTypes.func.isRequired,
 }
 
+const traverseTree = (node) => {
+  let TransferFunctionData;
+  node.subowners.forEach(function(element) {
+        TransferFunctionData = traverseTree(element);
+        if( element.tag.includes("TF")) {
+          TransferFunctionData = element;
+        }
+    })
+
+  return TransferFunctionData;
+}
+
+const findAllVolumes = (state) => {
+  let volumes = [];
+  state.forEach(function(element) {
+      const TransferFunctionData = traverseTree(element);
+      if(TransferFunctionData !== undefined) {
+        const returnValue = {
+          TransferFunctionData: TransferFunctionData,
+          name: element.name
+        }
+        volumes.push(returnValue);
+      }
+  })
+  return volumes;
+}
+
 const mapStateToProps = (state) => {
-  let volumes = state.sceneGraph.map(node => {
-      if(node.name === "Enlil Sequence")
-        return node.id;
-      })
-    return {
-      volumes,
-      URI: "Enlil Sequence.renderable.TransferFunctionHandler.TransferFunction"
-    }
+  let volumes = findAllVolumes(state.sceneGraph);
+  return {
+    volumes,
+  }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
