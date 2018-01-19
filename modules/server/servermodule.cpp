@@ -113,7 +113,9 @@ void ServerModule::triggerRefresh() {
 void ServerModule::disconnectAll() {
     for (auto& connection : _connections) {
         if (connection->socket && connection->socket->isConnected()) {
-            connection->socket->disconnect(ghoul::io::WebSocket::ClosingReason::ClosingAll);
+            connection->socket->disconnect(
+                static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
+            );
         }
     }
 }
