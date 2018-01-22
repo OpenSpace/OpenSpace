@@ -27,7 +27,6 @@
 #include <modules/imgui/include/gui.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -67,7 +66,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
                         &(OsEng.windowWrapper()),
-                        &(OsEng.settingsEngine()),
+                        //&(OsEng.moduleEngine()),
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelConnection()),

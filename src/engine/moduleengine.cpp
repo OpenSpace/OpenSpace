@@ -41,6 +41,10 @@ namespace {
 
 namespace openspace {
 
+ModuleEngine::ModuleEngine()
+    : properties::PropertyOwner({"Modules"})
+{}
+
 void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
     for (OpenSpaceModule* m : AllModules()) {
         const std::string name = m->name();
@@ -83,6 +87,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
 
     LDEBUG("Registering module '" << m->name() << "'");
     m->initialize(this, configuration);
+    addPropertySubOwner(m.get());
     LDEBUG("Registered module '" << m->name() << "'");
     _modules.push_back(std::move(m));
 }

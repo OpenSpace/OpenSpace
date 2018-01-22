@@ -113,7 +113,7 @@ void GuiSpaceTimeComponent::render() {
             ImGui::SameLine();
             if (pressed) {
                 OsEng.scriptEngine().queueScript(
-                    "openspace.setPropertyValue('NavigationHandler.Origin', '" +
+                    "openspace.setPropertyValue('Globals.NavigationHandler.Origin', '" +
                     n->name() + "');",
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
@@ -142,7 +142,7 @@ void GuiSpaceTimeComponent::render() {
     bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('NavigationHandler.Origin', '" +
+            "openspace.setPropertyValue('Globals.NavigationHandler.Origin', '" +
             nodes[currentPosition]->name() + "');",
             scripting::ScriptEngine::RemoteScripting::Yes
         );

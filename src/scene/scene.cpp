@@ -71,7 +71,8 @@ namespace {
 namespace openspace {
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
-    : DocumentationGenerator(
+    : properties::PropertyOwner({"Scene", "Scene"})
+    , DocumentationGenerator(
         "Documented",
         "propertyOwners",
         {
@@ -127,6 +128,7 @@ void Scene::registerNode(SceneGraphNode* node) {
 
     _topologicallySortedNodes.push_back(node);
     _nodesByName[node->name()] = node;
+    addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
 
@@ -140,6 +142,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
         _topologicallySortedNodes.end()
     );
     _nodesByName.erase(node->name());
+    removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
 
