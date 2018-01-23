@@ -168,7 +168,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
     , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
-    , _globalPropertyOwner(new properties::PropertyOwner({ "Globals" }))
     , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
@@ -179,25 +178,24 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
-    _rootPropertyOwner->addPropertySubOwner(_globalPropertyOwner.get());
     _rootPropertyOwner->addPropertySubOwner(_moduleEngine.get());
 
-    _navigationHandler->setPropertyOwner(_globalPropertyOwner.get());
+    _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
-    _globalPropertyOwner->addPropertySubOwner(_navigationHandler.get());
+    _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
 
-    _globalPropertyOwner->addPropertySubOwner(_renderEngine.get());
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
     if (_windowWrapper) {
-        _globalPropertyOwner->addPropertySubOwner(_windowWrapper.get());
+        _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
-    _globalPropertyOwner->addPropertySubOwner(_parallelConnection.get());
-    _globalPropertyOwner->addPropertySubOwner(_console.get());
-    _globalPropertyOwner->addPropertySubOwner(_dashboard.get());
+    _rootPropertyOwner->addPropertySubOwner(_parallelConnection.get());
+    _rootPropertyOwner->addPropertySubOwner(_console.get());
+    _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
     _versionInformation.versionString.setReadOnly(true);
-    _globalPropertyOwner->addProperty(_versionInformation.versionString);
+    _rootPropertyOwner->addProperty(_versionInformation.versionString);
     _versionInformation.sourceControlInformation.setReadOnly(true);
-    _globalPropertyOwner->addProperty(_versionInformation.sourceControlInformation);
+    _rootPropertyOwner->addProperty(_versionInformation.sourceControlInformation);
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -1733,14 +1731,6 @@ interaction::NavigationHandler& OpenSpaceEngine::navigationHandler() {
 interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
     ghoul_assert(_keyBindingManager, "KeyBindingManager must not be nullptr");
     return *_keyBindingManager;
-}
-
-properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
-    ghoul_assert(
-        _globalPropertyOwner,
-        "Global Property Namespace must not be nullptr"
-    );
-    return *_globalPropertyOwner;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {
