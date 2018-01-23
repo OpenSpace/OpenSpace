@@ -1,11 +1,12 @@
 import { applyMiddleware } from 'redux'
-import updateBackend from './sceneGraph'
+import { updateBackend } from './propertyTree'
+import { connection } from './connection'
 import logger from './logger'
-//Add more reducers here
 
 const middleware = applyMiddleware(
-  //logger, //middleWare for logging state change
+  logger, //middleWare for logging state change
   updateBackend,
+  connection,
 );
 
 export default middleware;

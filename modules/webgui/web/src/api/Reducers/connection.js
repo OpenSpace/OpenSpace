@@ -1,5 +1,6 @@
 import Connection from '../Connection';
 import DataManager from '../DataManager';
+import { actionTypes } from '../Actions/actionTypes'
 
 export const connection = (state={}, action) => {  // state refers to connection
   switch(action.type) {

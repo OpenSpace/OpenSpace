@@ -1,6 +1,8 @@
+import { actionTypes } from './actionTypes'
+
 export const updatePropertyValue = ( description, value) => {
 	return {
-		type: 'SCENEGRAPH_UPDATE_PROPERTY',
+		type: actionTypes.updatePropertyTreeNode,
 		payload: {
 			URI: description.Identifier, 
 			description,
@@ -10,9 +12,8 @@ export const updatePropertyValue = ( description, value) => {
 };
 
 export const changePropertyValue = ( description, value) => {
-	console.log(description)
 	return {
-		type: 'SCENEGRAPH_CHANGE_PROPERTY',
+		type: actionTypes.changePropertyTreeNode,
 		payload: {
 			URI: description.Identifier, 
 			description,
@@ -21,10 +22,9 @@ export const changePropertyValue = ( description, value) => {
 	};
 };
 
-export const insertInSceneGraph = (data) => {
-	console.log(data)
+export const initializePropertyTree = (data) => {
 	return {
-		type: 'SCENEGRAPH_INSERT',
+		type: actionTypes.initializePropertyTree,
 		payload: {
 			data: data,
 		}
@@ -34,7 +34,7 @@ export const insertInSceneGraph = (data) => {
 
 export const startListening = (URI) => {
 	return {
-		type: 'SCENEGRAPH_START_LISTENING',
+		type: actionTypes.startListeningToNode,
 		payload: {
 			URI,
 		}
@@ -43,9 +43,45 @@ export const startListening = (URI) => {
 
 export const stopListening = (URI) => {
 	return {
-		type: 'SCENEGRAPH_STOP_LISTENING',
+		type: actionTypes.stopListeningToNode,
 		payload: {
 			URI,	
+		}
+	}
+}
+
+export const startConnection = () => {
+	return {
+ 		type: actionTypes.startConnection,
+		payload: {
+				
+		}
+	}
+}
+
+export const onOpenConnection = () => {
+	return {
+ 		type: actionTypes.onOpenConnection,
+		payload: {
+				
+		}
+	}
+}
+
+export const onCloseConnection = () => {
+	return {
+ 		type: actionTypes.onCloseConnection,
+		payload: {
+
+		}
+	}
+}
+
+export const changeConnectionWait = (value) => {
+	return {
+ 		type: actionTypes.changeConnectionWait,
+		payload: {
+			value,
 		}
 	}
 }

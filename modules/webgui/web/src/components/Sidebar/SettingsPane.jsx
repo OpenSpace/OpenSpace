@@ -48,7 +48,7 @@ SettingsPane.defaultProps = {
 
 const mapStateToProps = (state) => {
     return {
-        properties: state.sceneGraph
+        properties: state.propertyTree
     }
 };
 

@@ -70,12 +70,10 @@ const convertEnvelopes = (envelopes) => {
         {points: envelope.points.map(point =>
             Object.assign({},
             { color : point.color,
-              position : convertPointsBeforeSending(point.position),
+              position : point.position,
             })
           )
         },
-        {height:600},
-        {width: 800},
       )
     )
     return JSON.stringify(convertedEnvelopes);

@@ -59,7 +59,7 @@ ViewPane.defaultProps = {
 
 const mapStateToProps = (state) => {
     return {
-        nodes: state.sceneGraph
+        nodes: state.propertyTree
     }
 };
 

@@ -67,13 +67,11 @@ namespace openspace {
             for (json::iterator it = j.begin(); it != j.end(); ++it) {
                 Envelope env;
                 std::vector < EnvelopePoint> tmpVec;
-                int height = (*it)["height"].get<int>();
-                int width = (*it)["width"].get<int>();
                 for (size_t i = 0; i < 4; i++) {
                     std::string color = (*it)["points"][i]["color"].get<std::string>();
-                    int x_value = (*it)["points"][i]["position"]["x"].get<int>();
-                    int y_value = (*it)["points"][i]["position"]["y"].get<int>();
-                    tmpVec.emplace_back(color, static_cast<float>(x_value) / width, static_cast<float>(y_value) / height);
+                    float x_value = (*it)["points"][i]["position"]["x"].get<float>();
+                    float y_value = (*it)["points"][i]["position"]["y"].get<float>();
+                    tmpVec.emplace_back(color, x_value, y_value);
                 }
                 env.setPoints(tmpVec);
                 _envelopes.emplace_back(env);

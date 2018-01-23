@@ -1,50 +1,51 @@
 import Connection from '../Connection';
 import DataManager from '../DataManager';
+import { onOpenConnection, changeConnectionWait, onCloseConnection } from '../Actions'
+import { actionTypes } from '../Actions/actionTypes'
 
 /**
  * start reconnection attempts, at intervals ever increasing
  */
 const tryToReconnect = (store) => {
-  let { connectionWait } = this.store.connection;
+  let { connection } = store.getState();
 
-  console.log('Attempting to connect in', connectionWait, 'ms.'); // eslint-disable-line
+  console.log('Attempting to connect in', connection.connectionWait, 'ms.'); // eslint-disable-line
   setTimeout(() => {
-    DataManager.connection.reconnect();
-    connectionWait *= 2;
-    store.dispatch(changeConnectionWait(connectionWait));
-  }, connectionWait);
+    connection.connection.reconnect();
+    connection.connectionWait *= 2;
+    store.dispatch(changeConnectionWait(connection.connectionWait));
+  }, connection.connectionWait);
 }
 
 const connectionStatusCallback = (store, event, origin) => {
-    store.getState();
-    switch (origin) {
-      case 'onOpen':
-        // everything is all right!
-        store.dispatch(onOpen());
-        break;
-      case 'onClose':
-        store.dispatch(onClose());
-        this.tryToReconnect(store);
-        break;
-      case 'onError':
-        break;
-      default:
-        // unknown
-    }
+  store.getState();
+  switch (origin) {
+    case 'onOpen':
+      // everything is all right!
+      store.dispatch(onOpenConnection());
+      break;
+    case 'onClose':
+      store.dispatch(onCloseConnection());
+      tryToReconnect(store);
+      break;
+    case 'onError':
+      break;
+    default:
+      // unknown
   }
+}
 
 const initializeConnection = (store) => {
-    connection.addStatusCallback(({event, origin}) => {
+  store.getState().connection.connection.addStatusCallback((connection, event, origin) => {
     connectionStatusCallback(store, event, origin)
   });
 }
 
-const connection = store => next => action => {
+export const connection = store => next => action => {
   let result = next(action)
   var state = store.getState();
-  console.log(state)
   switch(action.type) {
-  	case 'CONNECTION_START':
+  	case actionTypes.startConnection:
       initializeConnection(store)
   		break;
     default:

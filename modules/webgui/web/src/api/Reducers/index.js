@@ -1,8 +1,10 @@
-import { combineReducers } from 'redux'
-import { sceneGraph, settings } from './scenegraph'
+import { combineReducers } from 'redux';
+import { propertyTree } from './propertyTree';
+import { connection } from './connection';
 //Add more reducers here
 const openspaceApp = combineReducers({
-  sceneGraph,
+  propertyTree,
+  connection,	
 });
 
 export default openspaceApp;

@@ -17,12 +17,10 @@ class OnScreenGui extends Component {
   }
 
   componentDidMount() {
-    console.log("please")
     this.props.StartConnection();
   }
 
   render() {
-     console.log("please")
     return (
       <div className={styles.app}>
         <Router basename="/onscreen/">
@@ -68,7 +66,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     StartConnection: () => {
-      console.log("pleaase")
       dispatch(startConnection());
     },
   }

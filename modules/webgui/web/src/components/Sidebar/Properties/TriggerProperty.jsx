@@ -11,16 +11,14 @@ class TriggerProperty extends Property {
   }
 
   onChange() {
-    console.log(this.props.Description.Identifier)
-    this.props.ChangeValue();
+    this.props.ChangeValue("", this.props.Description.Identifier);
   }
 
   render() {
     const { Name } = this.props.Description;
-    console.log(this)
     return (
       <div>
-        <Button onClick={this.props.onChange}>
+        <Button onClick={this.onChange}>
           { Name }
         </Button> { this.descriptionPopup }
       </div>

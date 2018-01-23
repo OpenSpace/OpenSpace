@@ -1,6 +1,8 @@
+import { actionTypes } from '../Actions/actionTypes'
+
 const point = (state={}, action, value, id) => {
   switch(action.payload.type) {
-    case 'TRANSFERFUNCTION_ADD_ENVELOPE':
+    case actionTypes.addEnvelope:
       let anchor = false;
       if (id === 0 || id === 3)
         anchor = true;
@@ -12,7 +14,7 @@ const point = (state={}, action, value, id) => {
         anchor: anchor,
         color: value.color,
       }
-    case 'TRANSFERFUNCTION_ADD_POINT':
+    case actionTypes.addPoint:
       return {
         id: id,
         position: value.position,
@@ -25,12 +27,15 @@ const point = (state={}, action, value, id) => {
       return state;
   }
 }
+/*
+  Envelopes are just an arbitrary amount of points that can be moved in the TF-editor
 
+*/
 const envelope = (state={}, action) => {  // state refers to individual envelope
   switch(action.payload.type) {
-    case 'TRANSFERFUNCTION_ADD_TRANSFER_FUNCTION':
+    case actionTypes.addTransferFunction:
       return [...state];
-    case 'TRANSFERFUNCTION_ADD_ENVELOPE':
+    case actionTypes.addEnvelope:
       let counter = 0;
       let points = action.payload.points.map((value) =>
           point(undefined, action, value, counter++),
@@ -40,7 +45,7 @@ const envelope = (state={}, action) => {  // state refers to individual envelope
         points: points,
         active: false,
       }
-    case 'TRANSFERFUNCTION_ADD_POINT':
+    case actionTypes.addPoint:
       var pointPos = Math.ceil(state.points.length / 2);
       var pointId = state.points.length;
       let pointValue = Object.assign({},
@@ -55,12 +60,65 @@ const envelope = (state={}, action) => {  // state refers to individual envelope
       return {...state, points: state.points.map((point, index) => ({
               ...point,
              }))};
-    case 'TRANSFERFUNCTION_SWAP_POINTS':
-      const results = state.points.slice();
-      const firstItem = state.points[action.payload.id];
-      results[action.payload.id] = state.points[action.payload.swapId];
-      results[action.payload.swapId] = firstItem;
-      return {...state, points: results};
+    case actionTypes.movePoint:
+      points = state.points.map(point => ({
+        ...point,
+        position: (point.id === action.payload.id) ?
+          {
+            x: point.position.x + action.payload.deltaPosition.x,
+            y: point.position.y + action.payload.deltaPosition.y,
+          }
+        : point.position }))
+      let swapPoints = points.slice(1, points.length - 1).sort(function(a, b) 
+        { return a.position.x - b.position.x})
+      
+      swapPoints.splice(0, 0, points[0])
+      swapPoints.splice(points.length - 1, 0, points[points.length - 1])
+        return {
+          ...state,
+          points: swapPoints
+        }
+    case actionTypes.changeColor:
+      return {
+        ...state,
+        points: state.points.map(point => ({
+          ...point,
+          color: (point.active || state.active) ?
+            action.payload.color
+          : point.color })),
+          }
+    case actionTypes.toggleActiveEnvelope:
+      return {
+        ...state,
+        active: (state.id === action.payload.envelopeId) ?
+          !state.active
+          : false,
+        points: state.points.map(point => ({
+          ...point,
+          active: false
+          })),
+        }
+    case actionTypes.toggleActivePoint:
+      return {
+        ...state,
+        active: false,
+        points: state.points.map(point => ({
+          ...point,
+          active: (point.id === action.payload.pointId) ?
+            !point.active
+            : false,
+          })),
+        }
+     case actionTypes.setClickablePoint:
+      return {
+        ...state,
+        points: state.points.map(point => ({
+          ...point,
+          clickable: (point.id === action.payload.pointId) ?
+            action.payload.isClickable
+            : true,
+          })),
+        }
     default:
       return state;
   }
@@ -68,75 +126,37 @@ const envelope = (state={}, action) => {  // state refers to individual envelope
 
 const envelopes = (state=[], action) => {  // state refers to array of envelopes
   switch(action.payload.type) {
-    case 'TRANSFERFUNCTION_ADD_ENVELOPE':
+    case actionTypes.addEnvelope:
       return [...state, envelope(undefined, action)];
-    case 'TRANSFERFUNCTION_CLEAR_ENVELOPES':
+    case actionTypes.clearEnvelopes:
       return [];
-    case 'TRANSFERFUNCTION_DELETE_ENVELOPE':
+    case actionTypes.deleteEnvelope:
       return state.filter(envelope => envelope.active !== true);
-    case 'TRANSFERFUNCTION_ADD_POINT':
-      return state.map(value => {
-            if(value.active === true) {
-              return envelope(value, action);
-            }
-            else {
-             return value;
-            }
-           });
-    case 'TRANSFERFUNCTION_SWAP_POINTS':
-      return  state.map(value => {
-                if(value.id === action.payload.envelopeId) {
-                  return envelope(value, action);
-                }
-                else {
-                 return value;
-                }
-              });
-    case 'TRANSFERFUNCTION_MOVE_POINT':
-      return  state.map(envelope => ({
-              ...envelope,
-              points: envelope.points.map(point => ({
-                ...point,
-                position: (point.id === action.payload.id && envelope.id === action.payload.envelopeId) ?
-                  action.payload.position
-                : point.position })),
-                })
-              );
-    case 'TRANSFERFUNCTION_CHANGE_COLOR':
-      return state.map(envelope => ({
-              ...envelope,
-              points: envelope.points.map(point => ({
-                ...point,
-                color: (point.active || envelope.active) ?
-                  action.payload.color
-                : point.color })),
-                })
-              );
-    case 'TRANSFERFUNCTION_TOGGLE_ACTIVE_ENVELOPE':
-      return state.map(envelope => ({
-              ...envelope,
-              active: (envelope.id === action.payload.id) ?
-                !envelope.active
-                : false,
-              points: envelope.points.map(point => ({
-                ...point,
-                active: false
-                })),
-              })
-            );
-    case 'TRANSFERFUNCTION_TOGGLE_ACTIVE_POINT':
-      return state.map(envelope => ({
-              ...envelope,
-              active: false,
-              points: envelope.points.map(point => ({
-                ...point,
-                active: (point.id === action.payload.pointId &&
-                  envelope.id === action.payload.envelopeId) ?
-                  !point.active
-                  : false,
-                })),
-              })
-            );
+    case actionTypes.addPoint:
+      return state.map(element => {
+        if(element.active === true) {
+          return envelope(element, action);
+        }
+        else {
+         return element;
+        }
+       });
+    case actionTypes.movePoint:
+    case actionTypes.toggleActivePoint:
+    case actionTypes.setClickablePoint:
+      return state.map(element => {
+        if(action.payload.envelopeId === element.id) {
+          return envelope(element, action);
+        }
+        else {
+         return element;
+        }
+       });
+    case actionTypes.toggleActiveEnvelope:
+    case actionTypes.changeColor:
+    return state.map(element => {
+          return envelope(element, action);
+        });
     default:
       return state;
   }

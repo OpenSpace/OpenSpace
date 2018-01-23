@@ -7,11 +7,6 @@ import Icon from '../common/Icon/Icon';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
 import ViewPane from './ViewPane';
 import SettingsPane from './SettingsPane';
-import { AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../../api/keys';
-import { insertInSceneGraph } from '../../api/Actions'
-import { connect } from 'react-redux';
-import DataManager from '../../api/DataManager';
-const NODES_KEY = '__allNodes';
 
 import styles from './Sidebar.scss';
 
@@ -27,12 +22,6 @@ class Sidebar extends React.Component {
 
     this.selectView = this.selectView.bind(this);
     this.isActive = this.isActive.bind(this);
-  }
-
-  componentDidMount() {
-    DataManager.getValue(AllPropertiesKey, this.props.InsertSettings);
-    DataManager.getValue(AllScreenSpaceRenderablesKey, this.props.InsertSettings);
-    DataManager.getValue(NODES_KEY, this.props.InsertSceneGraph);
   }
 
   selectView(selectedView) {
@@ -76,19 +65,4 @@ class Sidebar extends React.Component {
   }
 }
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    InsertSceneGraph: (data) => {
-      dispatch(insertInSceneGraph(data));
-    },
-    InsertSettings: (data) => {
-      dispatch(insertInSceneGraph(data.value));
-    },
-  }
-}
-
-Sidebar = connect(
-  null,
-  mapDispatchToProps,
-  )(Sidebar)
 export default Sidebar;
