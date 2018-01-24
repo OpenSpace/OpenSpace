@@ -195,6 +195,12 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // Update the trails; the report contains whether any of the other values has been
     // touched and if so, how many
     UpdateReport report = updateTrails(data);
+    _previousTime = data.time.j2000Seconds();
+
+    // Do not do anything if no point needs to be updated
+    if (!report.permanentPointsNeedUpdate && !report.floatingPointNeedsUpdate) {
+        return;
+    }
 
     // 2
     // Write the current location into the floating position
@@ -205,14 +211,16 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
 
     // 3
-    if (!report.needsUpdate) {
-        // If no other values have been touched, we only need to upload the floating value
-        glBufferSubData(
-            GL_ARRAY_BUFFER,
-            _primaryRenderInformation.first * sizeof(TrailVBOLayout),
-            sizeof(TrailVBOLayout),
-            _vertexArray.data() + _primaryRenderInformation.first
-        );
+    if (!report.permanentPointsNeedUpdate) {
+        if (report.floatingPointNeedsUpdate) {
+            // If no other values have been touched, we only need to upload the floating value
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                _primaryRenderInformation.first * sizeof(TrailVBOLayout),
+                sizeof(TrailVBOLayout),
+                _vertexArray.data() + _primaryRenderInformation.first
+            );
+        }
     }
     else {
         // Otherwise we need to check how many values have been changed
@@ -315,7 +323,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
-    _previousTime = data.time.j2000Seconds();
+
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
@@ -323,14 +331,14 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
 {
     if (_needsFullSweep) {
         fullSweep(data.time.j2000Seconds());
-        return { true, UpdateReport::All } ;
+        return { false, true, UpdateReport::All } ;
     }
 
 
     const double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
-        return { false, 0 };
+        return { false, false, 0 };
     }
 
     double secondsPerPoint = _period / (_resolution - 1);
@@ -345,14 +353,14 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     // intervals
 
     if (std::abs(delta) < Epsilon) {
-        return { false, 0 };
+        return { false, false, 0 };
     }
 
     if (delta > 0.0) {
         // Check whether we need to drop a new permanent point. This is only the case if
         // enough (> secondsPerPoint) time has passed since the last permanent point
         if (std::abs(delta) < secondsPerPoint) {
-            return { false, 0 };
+            return { true, false, 0 };
         }
 
         // See how many points we need to drop
@@ -362,7 +370,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // array, it is faster to regenerate the entire array
         if (nNewPoints >= _resolution) {
             fullSweep(data.time.j2000Seconds());
-            return { true, UpdateReport::All };
+            return { false, true, UpdateReport::All };
         }
 
         for (int i = 0; i < nNewPoints; ++i) {
@@ -386,7 +394,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
 
-        return { true, nNewPoints };
+        return { false, true, nNewPoints };
     }
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
@@ -397,7 +405,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // array, it is faster to regenerate the entire array
         if (nNewPoints >= _resolution) {
             fullSweep(data.time.j2000Seconds());
-            return { true, UpdateReport::All };
+            return { false, true, UpdateReport::All };
         }
 
         for (int i = 0; i < nNewPoints; ++i) {
@@ -423,7 +431,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously youngest point has become nNewPoints steps older
         _lastPointTime -= nNewPoints * secondsPerPoint;
 
-        return { true, -nNewPoints };
+        return { false, true, -nNewPoints };
     }
 }
 

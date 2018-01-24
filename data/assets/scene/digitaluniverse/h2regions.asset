@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "HII Regions Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_h2regions_speck",
-    Version = 1
+    Version = 2
 })
 
 local object = {

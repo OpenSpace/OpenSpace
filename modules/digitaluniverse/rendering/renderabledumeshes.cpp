@@ -458,7 +458,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     GLfloat lineWidth = 1.0f;
     glGetFloatv(GL_LINE_WIDTH, &lineWidth);
 
-    GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
     GLenum blendEquationRGB;
     GLenum blendEquationAlpha;
     GLenum blendDestAlpha;
@@ -473,7 +473,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
-    glEnable(GL_BLEND);
+    glEnablei(GL_BLEND, 0);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
@@ -516,7 +516,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glDepthMask(true);
 
     if (!blendEnabled) {
-        glDisable(GL_BLEND);
+        glDisablei(GL_BLEND, 0);
     }
 }
 

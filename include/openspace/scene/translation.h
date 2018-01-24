@@ -36,7 +36,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-struct UpdateData;
+class Time;
 
 namespace documentation {  struct Documentation; }
 
@@ -49,10 +49,10 @@ public:
     virtual ~Translation() = default;
     virtual bool initialize();
 
-    virtual glm::dvec3 position() const;
-    virtual void update(const UpdateData& data);
+    glm::dvec3 position() const;
+    void update(const Time& time);
 
-    glm::dvec3 position(double time);
+    virtual glm::dvec3 position(const Time& time) const = 0;
 
     // Registers a callback that gets called when a significant change has been made that
     // invalidates potentially stored points, for example in trails
@@ -61,11 +61,14 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void notifyObservers();
+    void notifyObservers() const;
+    void requireUpdate();
 
+private:
+    bool _needsUpdate;
+    double _cachedTime;
+    glm::dvec3 _cachedPosition;
     std::function<void()> _onParameterChangeCallback;
-
-    glm::dvec3 _positionValue;
 };
 
 } // namespace openspace

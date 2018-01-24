@@ -35,8 +35,7 @@ class SpiceTranslation : public Translation {
 public:
     SpiceTranslation(const ghoul::Dictionary& dictionary);
 
-    glm::dvec3 position() const override;
-    void update(const UpdateData& data) override;
+    glm::dvec3 position(const Time& time) const override;
 
     static documentation::Documentation Documentation();
 

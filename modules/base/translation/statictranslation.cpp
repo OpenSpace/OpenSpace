@@ -70,7 +70,14 @@ StaticTranslation::StaticTranslation()
 {
     addProperty(_position);
 
-    _position.onChange([&](){ _positionValue = _position; });
+    _position.onChange([this]() {
+        requireUpdate();
+        notifyObservers();
+    });
+}
+
+glm::dvec3 StaticTranslation::position(const Time&) const {
+    return _position;
 }
 
 StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)

@@ -99,7 +99,7 @@ public:
 
     // Performance measurements
     bool doesPerformanceMeasurements() const;
-    performance::PerformanceManager* performanceManager();
+    std::shared_ptr<performance::PerformanceManager> performanceManager();
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
@@ -180,7 +180,7 @@ private:
     std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _doPerformanceMeasurements;
-    std::unique_ptr<performance::PerformanceManager> _performanceManager;
+    std::shared_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;

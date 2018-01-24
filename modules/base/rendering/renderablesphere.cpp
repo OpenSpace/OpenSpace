@@ -394,7 +394,7 @@ void RenderableSphere::loadTexture() {
             // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
             _texture = std::move(texture);
         }

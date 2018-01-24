@@ -30,7 +30,6 @@
 
 struct Fragment {
     vec4 color;
-    vec4 gOtherData;
     vec4 gPosition;
     vec4 gNormal;
     float depth;

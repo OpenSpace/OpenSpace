@@ -54,7 +54,6 @@ class ParallelConnection;
 class RenderEngine;
 class Scene;
 class SyncEngine;
-class SettingsEngine;
 class TimeManager;
 class VirtualPropertyManager;
 class WindowWrapper;
@@ -117,12 +116,12 @@ public:
     NetworkEngine& networkEngine();
     ParallelConnection& parallelConnection();
     RenderEngine& renderEngine();
-    SettingsEngine& settingsEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
     interaction::KeyBindingManager& keyBindingManager();
+    properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
@@ -201,7 +200,6 @@ private:
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelConnection> _parallelConnection;
     std::unique_ptr<RenderEngine> _renderEngine;
-    std::unique_ptr<SettingsEngine> _settingsEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<WindowWrapper> _windowWrapper;
@@ -215,7 +213,8 @@ private:
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 
     // Others
-    std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+    std::unique_ptr<properties::PropertyOwner> _rootPropertyOwner;
+    std::unique_ptr<properties::PropertyOwner> _globalPropertyOwner;
 
     std::unique_ptr<LoadingScreen> _loadingScreen;
 

@@ -40,6 +40,8 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 
+#include <openspace/properties/propertyowner.h>
+
 #include <ghoul/opengl/programobject.h>
 
 namespace ghoul { class Dictionary; }
@@ -50,9 +52,11 @@ namespace documentation { struct Documentation; }
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene : public DocumentationGenerator {
+class Scene
+    : public properties::PropertyOwner
+    , public DocumentationGenerator
+{
 public:
-
     using UpdateDependencies = ghoul::Boolean;
 
     struct InvalidSceneError : ghoul::RuntimeError {

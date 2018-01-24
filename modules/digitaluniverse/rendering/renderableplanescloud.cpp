@@ -578,7 +578,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
                                          const float fadeInVariable)
 {
     // Saving current OpenGL state
-    GLboolean blendEnabled = glIsEnabled(GL_BLEND);
+    GLboolean blendEnabled = glIsEnabledi(GL_BLEND, 0);
     GLenum blendEquationRGB;
     GLenum blendEquationAlpha;
     GLenum blendDestAlpha;
@@ -593,7 +593,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
-    glEnable(GL_BLEND);
+    glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
@@ -671,7 +671,7 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
     glDepthMask(true);
 
     if (!blendEnabled) {
-        glDisable(GL_BLEND);
+        glDisablei(GL_BLEND, 0);
     }
 }
 
@@ -943,7 +943,7 @@ bool RenderablePlanesCloud::loadTextures() {
                 );
                 auto it = p.first;
                 it->second->uploadTexture();
-                it->second->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                it->second->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             }
         }
     }

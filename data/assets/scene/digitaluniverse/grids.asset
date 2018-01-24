@@ -1,5 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-
+local transforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local speck = asset.syncedResource({
@@ -10,7 +10,25 @@ local speck = asset.syncedResource({
 })
 
 local ecliptic = {
+    Name = "Ecliptic Sphere",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        GridColor = { 0.7, 0.0, 0.0, 0.5},
+        LineWidth = 2.0,
+        Radius = 9.46377307652E17;
+        GridMatrix = { -0.05487554,  0.4941095, -0.8676661   , 0.0,
+                       -0.9938214 , -0.1109906, -0.0003515167, 0.0,
+                       -0.09647644,  0.8622859,  0.4971472   , 0.0,
+                        0.0       ,  0.0      ,  0.0         , 1.0 }
+    },
+    GuiPath = "/Other/Grids"
+}
+
+local eclipticLabels = {
     Name = "Ecliptic Sphere Labels",
+    Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -32,7 +50,25 @@ local ecliptic = {
 }
 
 local equatorial = {
+    Name = "Equatorial Sphere",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        GridColor = { 0.0, 0.0, 1.0, 0.8},
+        LineWidth = 2.0,
+        Radius = 6.2440846E17,
+        GridMatrix = { -0.05487554,  0.4941095, -0.8676661, 0.0,
+                       -0.8734371 , -0.4448296, -0.1980764, 0.0,
+                       -0.483835  ,  0.7469823,  0.4559838, 0.0,
+                        0.0       ,  0.0      ,  0.0      , 1.0 },
+    },
+    GuiPath = "/Other/Grids"
+}
+
+local equatorialLabels = {
     Name = "Equatorial Sphere Labels",
+    Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -54,7 +90,21 @@ local equatorial = {
 }
 
 local galactic = {
+    Name = "Galactic Sphere",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        LineWidth = 2.0,
+        Radius = 9.46377307652E18;
+        GridColor = { 0.0, 0.6, 0.6, 0.6}
+    },
+    GuiPath = "/Other/Grids"
+}
+
+local galacticLabels = {
     Name = "Galactic Sphere Labels",
+    Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -165,6 +215,6 @@ local plane20Gly = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
-    ecliptic, equatorial, galactic, plane100kly, plane1Mly,
-    plane10Mly, plane100Mly, plane20Gly
+    ecliptic, eclipticLabels, equatorial, equatorialLabels, galactic, galacticLabels,
+    plane100kly, plane1Mly, plane10Mly, plane100Mly, plane20Gly
 })

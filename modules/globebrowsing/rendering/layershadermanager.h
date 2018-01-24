@@ -84,7 +84,7 @@ public:
      */
     ghoul::opengl::ProgramObject* programObject() const;
 
-    bool updatedOnLastCall();
+    bool updatedSinceLastCall();
 
     void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
@@ -96,7 +96,7 @@ private:
     const std::string _vsPath;
     const std::string _fsPath;
 
-    bool _updatedOnLastCall;
+    bool _updatedSinceLastCall;
 };
 
 } // namespace openspace::globebrowsing

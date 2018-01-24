@@ -18,4 +18,5 @@
     <BandsCount>3</BandsCount>
     <MaxConnections>5</MaxConnections>
     <OfflineMode>false</OfflineMode>
+    <Timeout>5</Timeout>
 </GDAL_WMS>

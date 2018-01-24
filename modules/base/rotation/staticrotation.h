@@ -38,6 +38,8 @@ public:
     StaticRotation();
     StaticRotation(const ghoul::Dictionary& dictionary);
 
+    glm::dmat3 matrix(const Time& time) const override;
+
     static documentation::Documentation Documentation();
 
 private:

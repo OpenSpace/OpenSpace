@@ -236,6 +236,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
+    addProperty(_performShading);
 
     addPropertySubOwner(_geometry.get());
 
@@ -255,11 +256,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         );
     }
     addProperty(_heightExaggeration);
-
-    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
-        _performShading = dictionary.value<bool>(HeightExaggerationInfo.identifier);
-    }
-    addProperty(_performShading);
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
@@ -637,7 +633,7 @@ void RenderablePlanet::loadTexture() {
             // linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         }
     }
 
@@ -650,7 +646,7 @@ void RenderablePlanet::loadTexture() {
             if (_nightTexture) {
                 LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
                 _nightTexture->uploadTexture();
-                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
                 //_nightTexture->setFilter(
                 //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
                 //);

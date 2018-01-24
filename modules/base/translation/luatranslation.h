@@ -43,15 +43,14 @@ public:
     LuaTranslation();
     LuaTranslation(const ghoul::Dictionary& dictionary);
 
-    virtual void update(const UpdateData& data) override;
+    glm::dvec3 position(const Time& time) const override;
 
     static documentation::Documentation Documentation();
 
 private:
     properties::StringProperty _luaScriptFile;
-    ghoul::lua::LuaState _state;
-
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;
+    ghoul::lua::LuaState _state;
 };
 
 } // namespace openspace

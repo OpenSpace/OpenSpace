@@ -66,9 +66,10 @@ private:
     /// about which parts of the vertex array to update
     struct UpdateReport {
         static const int All = 0; ///< The entire array was touched in the update
-
-        /// If \c true at least one point was touched
-        bool needsUpdate;
+        /// If \c true the floating point needs to be updated
+        bool floatingPointNeedsUpdate;
+        /// If \c true at least one of their permanent point were touched
+        bool permanentPointsNeedUpdate;
         /// Returns the number of fixed points that were touched in the update method
         /// If this value is negative, the newest values were replaced, if positive the
         /// oldest
