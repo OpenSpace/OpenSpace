@@ -12,6 +12,11 @@ const TOPIC_TYPES = {
   trigger: 'trigger',
 };
 
+const SUBSCRIPTION_EVENTS = {
+  start: 'start_subscription',
+  stop: 'stop_subscription',
+}
+
 const ResubscribeOnReconnect = true;
 Object.freeze(ResubscribeOnReconnect);
 
@@ -44,10 +49,10 @@ class DataManager {
   subscribe(key: string, callback: Function, type: string = TOPIC_TYPES.subscribe) {
     let subscription = this.subscriptions[key];
     if (!subscription) {
-      subscription = this.createSubscription(key, type);
+      subscription = this.createSubscription(key, type, SUBSCRIPTION_EVENTS.start);
       this.subscriptions[key] = subscription;
     }
-    subscription.addCallback(callback);
+    return subscription.addCallback(callback); 
   }
 
   /**
@@ -55,16 +60,17 @@ class DataManager {
    * @param key - the key to unsubscribe from
    * @param callback - the callback stored in the subscription
    */
-  unsubscribe(key: string, callback: Function) {
+  unsubscribe(key: string, callbackId: number) {
     const subscription = this.subscriptions[key];
     if (subscription) {
-      subscription.removeCallback(callback);
-
+      subscription.removeCallback(callbackId);
       // TODO: should subscriptions be killed or should we let them be for future snappiness?
-      // if (!subscription.hasAnyCallbacks()) {
-      //   this.connection.clearTopic(subscription.topic);
-      //   delete this.subscriptions[subscription.key];
-      // }
+       if (!subscription.hasAnyCallbacks()) {
+          this.deleteSubscription(key, subscription.topic);
+          this.connection.clearTopic(subscription.topic);
+          delete this.subscriptions[subscription.key];
+       }
+       return true;
     }
   }
 
@@ -136,11 +142,24 @@ class DataManager {
       type,
       payload: {
         property: key,
+        event: SUBSCRIPTION_EVENTS.start,
       },
     });
     const subscription = new Subscription(key, message.topic);
     this.send(message, subscription.onMessage, ResubscribeOnReconnect);
     return subscription;
+  }
+
+  deleteSubscription(key: string, topic: number, type: string = TOPIC_TYPES.subscribe) {
+    const message = this.wrapMessage({
+      type,
+      payload: {
+        property: key,
+        event: SUBSCRIPTION_EVENTS.stop,
+      },
+      topic,
+    });
+    this.send(message);
   }
 
   /**

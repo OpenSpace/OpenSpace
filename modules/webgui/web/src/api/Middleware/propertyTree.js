@@ -4,19 +4,22 @@ import * as helperFunctions from '../../utils/propertyTreeHelpers.js'
 import { actionTypes } from '../Actions/actionTypes'
 import { SceneGraphKey, AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../keys';
 
-const startSubscription = (URI, store) => {
-	DataManager.subscribe(URI, ({Description, Value}) => {
-    handleUpdatedValues(Description, Value, store)
-	});	
-}
+let subscriptionIds = []
 
-const handleUpdatedValues = (Description, Value, store) => {
+const handleUpdatedValues = store => ({Description, Value}) => {
   store.dispatch(updatePropertyValue(Description, Value))
   const state = store.getState();
   var property = helperFunctions.findPropertyTreeNode(state.propertyTree, Description.Identifier);
   if (property.listeners < 1) {
-    DataManager.unsubscribe(Description.Identifier, handleUpdatedValues);
+    if (DataManager.unsubscribe(Description.Identifier, subscriptionIds[Description.Identifier])) {
+      delete subscriptionIds[Description.Identifier];
+    }
   }
+}
+
+
+const startSubscription = (URI, store) => {
+	subscriptionIds[URI] = DataManager.subscribe(URI, handleUpdatedValues(store));
 }
 
 const getPropertyTree = (dispatch) => {
@@ -59,7 +62,7 @@ const sendDataToBackEnd = (node) => {
 }
 
 export const updateBackend = store => next => action => {
-  let result = next(action)
+  let result = next(action);
   var state = store.getState();
   switch(action.type) {
     case actionTypes.onOpenConnection:

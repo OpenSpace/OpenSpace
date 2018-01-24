@@ -30,6 +30,11 @@
 namespace {
 const char* _loggerCat = "SubscriptionTopic";
 const char* PropertyKey = "property";
+const char* EventKey = "event";
+
+const char* StartSubscription = "start_subscription";
+const char* StopSubscription = "stop_subscription";
+
 const int UNSET_ONCHANGE_HANDLE = -1;
 }
 
@@ -49,27 +54,35 @@ SubscriptionTopic::~SubscriptionTopic() {
 }
 
 bool SubscriptionTopic::isDone() {
-    return !_requestedResourceIsSubscribable || !_connection->active;
+    return !_requestedResourceIsSubscribable || !_connection->active || !_isSubscribedTo;
 }
 
 void SubscriptionTopic::handleJson(json j) {
     std::string key = j.at(PropertyKey).get<std::string>();
-    LDEBUG("Subscribing to property '" + key + "'...");
+    std::string event = j.at(EventKey).get<std::string>();
 
-    _prop = property(key);
-    if (_prop != nullptr) {
-        _requestedResourceIsSubscribable = true;
-        auto onChange = [this, key]() {
-            LDEBUG("Updating subscription '" + key + "'.");
-            _connection->sendJson(wrappedPayload(_prop));
-        };
-        _onChangeHandle = _prop->onChange(onChange);
+    if (event == StartSubscription) {
+        LDEBUG("Subscribing to property '" + key + "'...");
 
-        // immediately send the value
-        onChange();
+        _prop = property(key);
+        if (_prop != nullptr) {
+            _requestedResourceIsSubscribable = true;
+            _isSubscribedTo = true;
+            auto onChange = [this, key]() {
+                LDEBUG("Updating subscription '" + key + "'.");
+                _connection->sendJson(wrappedPayload(_prop));
+            };
+            _onChangeHandle = _prop->onChange(onChange);
+
+            // immediately send the value
+            onChange();
+        }
+        else {
+            LWARNING("Could not subscribe. Property '" + key + "' not found.");
+        }
     }
-    else {
-        LWARNING("Could not subscribe. Property '" + key + "' not found.");
+    if (event == StopSubscription) {
+        _isSubscribedTo = false;
     }
 }
 

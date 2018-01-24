@@ -41,6 +41,7 @@ public:
 
 private:
     bool _requestedResourceIsSubscribable;
+    bool _isSubscribedTo;
     int _onChangeHandle;
     properties::Property* _prop;
 
