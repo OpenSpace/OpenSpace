@@ -69,9 +69,8 @@ void ServerModule::preSync() {
     for (auto& server : _servers) {
         std::shared_ptr<ghoul::io::Socket> socket;
         while ((socket = server->nextPendingSocket())) {
-            std::unique_ptr<Connection> connection = std::make_unique<Connection>(socket, server->address());
-            Connection* c = connection.get();
-            connection->thread = std::thread([this, c] () { handleConnection(c); });
+            std::shared_ptr<Connection> connection = std::make_shared<Connection>(socket, server->address());
+            connection->thread = std::thread([this, connection] () { handleConnection(connection); });
             _connections.push_back(std::move(connection));
         }
     }
@@ -120,7 +119,7 @@ void ServerModule::disconnectAll() {
     }
 }
     
-void ServerModule::handleConnection(Connection* connection) {
+void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     std::string messageString;
     while (connection->socket->getMessage(messageString)) {
         std::lock_guard<std::mutex> lock(_messageQueueMutex);
@@ -136,7 +135,9 @@ void ServerModule::consumeMessages() {
     while (_messageQueue.size() > 0) {
         Message m = _messageQueue.front();
         _messageQueue.pop_front();
-        m.conneciton->handleMessage(m.messageString);
+        if (std::shared_ptr<Connection> c = m.connection.lock()) {
+            c->handleMessage(m.messageString);
+        }
     }
 }
 

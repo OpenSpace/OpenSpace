@@ -45,7 +45,7 @@
 namespace openspace {
 
 struct Message {
-    Connection* conneciton;
+    std::weak_ptr<Connection> connection;
     std::string messageString;
 };
 
@@ -57,7 +57,7 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 private:
-    void handleConnection(Connection* socket);
+    void handleConnection(std::shared_ptr<Connection> connection);
     void cleanUpFinishedThreads();
     void consumeMessages();
     void triggerRefresh();
@@ -67,7 +67,7 @@ private:
     std::mutex _messageQueueMutex;
     std::deque<Message> _messageQueue;
 
-    std::vector<std::unique_ptr<Connection>> _connections;
+    std::vector<std::shared_ptr<Connection>> _connections;
     std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
 };
 
