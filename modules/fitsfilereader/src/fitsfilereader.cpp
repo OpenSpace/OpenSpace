@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -112,6 +112,45 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
     }
     return nullptr;
 }
+
+// Read specified table columns from fits file. 
+// If readAll variable is set to true the entire table will be read before the selected columns,
+// which makes the function take a lot longer if it's a big file. 
+// If no HDU index is given the currentExtension will be read from. 
+template<typename T>
+std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::string& path,
+    const std::vector<string> columnNames, int startRow, int endRow, int hduIdx, bool readAll) {
+    try {
+
+        _infile = std::make_unique<FITS>(path, Read, readAll);
+
+        // Make sure FITS file is not a Primary HDU Object (aka an image).
+        if (!isPrimaryHDU()) {
+
+            ExtHDU& table = pInfile->extension(hduIdx);
+            int numCols = columnNames.size();
+            std::map<string, std::vector<T>> contents;
+
+            for (int i = 0; i < numCols; ++i) {
+                std::vector<T> columnData;
+                table.column(columnNames[i]).read(columnData, startRow, endRow);
+                contents[columnNames[i]] = columnData;
+            }
+
+            // Create TableData object of table contents.
+            std::shared_ptr<TableData<T>> loadedTable = {
+                std::move(contents), table.getRowSize(), table.name()};
+
+            return std::make_shared<TableData<T>>(loadedTable);
+        }
+    }
+    catch (FitsException& e) {
+        LERROR("Could not read FITS table from file. Make sure it's not an image file.");
+    }
+
+    return nullptr;
+}
+
 
 // This is pretty annoying, the read method is not derived from the HDU class
 // in CCfits - need to explicitly cast to the sub classes to access read

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
-#define __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
+#ifndef __OPENSPACE_MODULE_FITSFILEREADER___FITSFILEREADER___H__
+#define __OPENSPACE_MODULE_FITSFILEREADER___FITSFILEREADER___H__
 
 #include <string>
 #include <memory>
@@ -43,6 +43,13 @@ struct ImageData {
     long int height;
 };
 
+template<typename T>
+struct TableData {
+    std::map<string, std::vector<T>> contents;
+    long int optimalRowsize;
+    string name;
+};
+
 class FitsFileReader {
 public:
     FitsFileReader(bool verboseMode);
@@ -54,6 +61,11 @@ public:
     std::shared_ptr<std::unordered_map<std::string, T>> readHeader(std::vector<std::string>& keywords);
     template<typename T>
     std::shared_ptr<T> readHeaderValue(const std::string key);
+
+    template<typename T>
+    std::shared_ptr<TableData<T>> readTable(const std::string& path, 
+        const std::vector<string> columnNames, int startRow = 1, int endRow = 10,
+        int hduIdx = 1, bool readAll = false);
 
 private:
     std::unique_ptr<CCfits::FITS> _infile;
@@ -68,4 +80,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
+#endif // __OPENSPACE_MODULE_FITSFILEREADER___FITSFILEREADER___H__
