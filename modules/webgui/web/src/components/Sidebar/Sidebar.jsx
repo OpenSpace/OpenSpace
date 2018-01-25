@@ -5,14 +5,14 @@ import SystemMenu from '../SystemMenu/SystemMenu';
 import TabMenuItem from './TabMenu/TabMenuItem';
 import Icon from '../common/Icon/Icon';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
-import ViewPane from './ViewPane';
+import ScenePane from './ScenePane';
 import SettingsPane from './SettingsPane';
 
 import styles from './Sidebar.scss';
 
 const views = {
   settings: SettingsPane,
-  view: ViewPane,
+  scene: ScenePane,
 };
 
 class Sidebar extends React.Component {
@@ -46,14 +46,9 @@ class Sidebar extends React.Component {
 
         <TabMenu>
           <SystemMenu />
-
-          <TabMenuItem active={this.isActive('play')} onClick={this.selectView('play')}>
-            <Icon className={styles.icon} icon="playlist_play" />
-            <SmallLabel>Playlist</SmallLabel>
-          </TabMenuItem>
-          <TabMenuItem active={this.isActive('view')} onClick={this.selectView('view')}>
+          <TabMenuItem active={this.isActive('scene')} onClick={this.selectView('scene')}>
             <Icon className={styles.icon} icon="layers" />
-            <SmallLabel>View</SmallLabel>
+            <SmallLabel>Scene</SmallLabel>
           </TabMenuItem>
           <TabMenuItem active={this.isActive('settings')} onClick={this.selectView('settings')}>
             <Icon className={styles.icon} icon="settings" />

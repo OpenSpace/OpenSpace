@@ -6,7 +6,7 @@ import FilterList from '../common/FilterList/FilterList';
 import SceneGraphNode from './SceneGraphNode';
 import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 
-class ViewPane extends Component {
+class ScenePane extends Component {
   constructor(props) {
     super(props);
   }
@@ -27,11 +27,11 @@ class ViewPane extends Component {
   }
 }
 
-ViewPane.propTypes = {
+ScenePane.propTypes = {
   closeCallback: PropTypes.func,
 };
 
-ViewPane.defaultProps = {
+ScenePane.defaultProps = {
   closeCallback: null,
 };
 
@@ -48,8 +48,8 @@ const mapStateToProps = (state) => {
   };
 };
 
-ViewPane = connect(
+ScenePane = connect(
   mapStateToProps,
-)(ViewPane);
+)(ScenePane);
 
-export default ViewPane;
+export default ScenePane;
