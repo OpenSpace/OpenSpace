@@ -1,87 +1,69 @@
-import { actionTypes } from './actionTypes'
+import { actionTypes } from './actionTypes';
 
-export const updatePropertyValue = ( description, value) => {
-	return {
-		type: actionTypes.updatePropertyTreeNode,
-		payload: {
-			URI: description.Identifier, 
-			description,
-			value,
-		}
-	};
-};
+export const updatePropertyValue = (description, value) => ({
+  type: actionTypes.updatePropertyTreeNode,
+  payload: {
+    URI: description.Identifier,
+    description,
+    value,
+  },
+});
 
-export const changePropertyValue = ( description, value) => {
-	return {
-		type: actionTypes.changePropertyTreeNode,
-		payload: {
-			URI: description.Identifier, 
-			description,
-			value,
-		}
-	};
-};
+export const changePropertyValue = (description, value) => ({
+  type: actionTypes.changePropertyTreeNode,
+  payload: {
+    URI: description.Identifier,
+    description,
+    value,
+  },
+});
 
-export const initializePropertyTree = (data) => {
-	return {
-		type: actionTypes.initializePropertyTree,
-		payload: {
-			data: data,
-		}
-	}
-}
+export const initializePropertyTree = data => ({
+  type: actionTypes.initializePropertyTree,
+  payload: {
+    data,
+  },
+});
 
 
-export const startListening = (URI) => {
-	return {
-		type: actionTypes.startListeningToNode,
-		payload: {
-			URI,
-		}
-	}
-}
+export const startListening = URI => ({
+  type: actionTypes.startListeningToNode,
+  payload: {
+    URI,
+  },
+});
 
-export const stopListening = (URI) => {
-	return {
-		type: actionTypes.stopListeningToNode,
-		payload: {
-			URI,	
-		}
-	}
-}
+export const stopListening = URI => ({
+  type: actionTypes.stopListeningToNode,
+  payload: {
+    URI,
+  },
+});
 
-export const startConnection = () => {
-	return {
- 		type: actionTypes.startConnection,
-		payload: {
-				
-		}
-	}
-}
+export const startConnection = () => ({
+  type: actionTypes.startConnection,
+  payload: {
 
-export const onOpenConnection = () => {
-	return {
- 		type: actionTypes.onOpenConnection,
-		payload: {
-				
-		}
-	}
-}
+  },
+});
 
-export const onCloseConnection = () => {
-	return {
- 		type: actionTypes.onCloseConnection,
-		payload: {
+export const onOpenConnection = () => ({
+  type: actionTypes.onOpenConnection,
+  payload: {
 
-		}
-	}
-}
+  },
+});
 
-export const changeConnectionWait = (value) => {
-	return {
- 		type: actionTypes.changeConnectionWait,
-		payload: {
-			value,
-		}
-	}
-}
+export const onCloseConnection = () => ({
+  type: actionTypes.onCloseConnection,
+  payload: {
+
+  },
+});
+
+export const changeConnectionWait = value => ({
+  type: actionTypes.changeConnectionWait,
+  payload: {
+    value,
+  },
+});

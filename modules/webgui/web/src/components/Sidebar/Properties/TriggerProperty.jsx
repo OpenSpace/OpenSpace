@@ -1,7 +1,6 @@
 import React from 'react';
 import Property from './Property';
 import Button from '../../common/Input/Button/Button';
-import DataManager from '../../../api/DataManager';
 import { connectProperty } from './connectProperty';
 
 class TriggerProperty extends Property {
@@ -11,7 +10,7 @@ class TriggerProperty extends Property {
   }
 
   onChange() {
-    this.props.ChangeValue("", this.props.Description.Identifier);
+    this.props.ChangeValue('', this.props.Description.Identifier);
   }
 
   render() {
@@ -26,6 +25,6 @@ class TriggerProperty extends Property {
   }
 }
 
-TriggerProperty = connectProperty(TriggerProperty)
+TriggerProperty = connectProperty(TriggerProperty);
 
 export default TriggerProperty;

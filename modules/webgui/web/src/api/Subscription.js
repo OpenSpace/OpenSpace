@@ -10,7 +10,7 @@ class Subscription {
 
   onMessage(...args) {
     this.lastData = args;
-    for(let cb of this.callbacks.values()) {
+    for (const cb of this.callbacks.values()) {
       cb(...args);
     }
   }
@@ -29,9 +29,10 @@ class Subscription {
   }
 
   hasCallback(callback) {
-    for (let cb of this.callbacks.values()) {
-      if (cb === callback)
+    for (const cb of this.callbacks.values()) {
+      if (cb === callback) {
         return true;
+      }
     }
     return false;
   }

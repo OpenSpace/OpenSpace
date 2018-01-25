@@ -3,11 +3,11 @@
 // key for setting/getting the Origin (focus) node
 export const OriginKey = 'NavigationHandler.Origin';
 // key to get all scene graph nodes
-//export const SceneGraphKey = '__allNodes';
+// export const SceneGraphKey = '__allNodes';
 // key to get all properties in openspace engine
-//export const AllPropertiesKey = '__allProperties';
+// export const AllPropertiesKey = '__allProperties';
 export const rootOwnerKey = '__rootOwner';
-//export const AllScreenSpaceRenderablesKey = '__screenSpaceRenderables';
+// export const AllScreenSpaceRenderablesKey = '__screenSpaceRenderables';
 export const VersionInfoKey = 'VersionInfo';
 export const SCMInfoKey = 'SCMInfo';
 // script to toggle pause

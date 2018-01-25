@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import SmallLabel from '../../common/SmallLabel/SmallLabel';
 import Icon from '../../common/Icon/Icon';
@@ -9,7 +10,6 @@ import FilterList from '../../common/FilterList/FilterList';
 import DataManager from '../../../api/DataManager';
 import { OriginKey } from '../../../api/keys';
 import FocusEntry from './FocusEntry';
-import { connect } from 'react-redux';
 
 import Earth from './images/earth.png';
 import styles from './OriginPicker.scss';
@@ -100,21 +100,21 @@ class OriginPicker extends Component {
 }
 
 const mapStateToProps = (state) => {
-    const sceneType = 'Scene';
-    const rootNodes = state.propertyTree.filter(element => element.name == sceneType)
-    let nodes = [];
-    rootNodes.forEach(function(node) {
-      nodes = [...nodes, ...node.subowners]; 
-    })
-    nodes = nodes.filter(node => node.tag.some(tag => REQUIRED_TAGS.includes(tag)))
-      .map(node => Object.assign(node, { key: node.name }))
-    return {
-        nodes,
-    }
+  const sceneType = 'Scene';
+  const rootNodes = state.propertyTree.filter(element => element.name === sceneType);
+  let nodes = [];
+  rootNodes.forEach((node) => {
+    nodes = [...nodes, ...node.subowners];
+  });
+  nodes = nodes.filter(node => node.tag.some(tag => REQUIRED_TAGS.includes(tag)))
+    .map(node => Object.assign(node, { key: node.name }));
+  return {
+    nodes,
+  };
 };
 
 OriginPicker = connect(
   mapStateToProps,
-  )(OriginPicker)
+)(OriginPicker);
 
 export default OriginPicker;
