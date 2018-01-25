@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import DataManager from '../../../api/DataManager';
 import styles from './FocusEntry.scss';
-
+import { jsonToLuaString } from '../../../utils/propertyTreeHelpers';
 const ORIGIN_KEY = 'NavigationHandler.Origin';
 
 class FocusEntry extends Component {
@@ -16,7 +16,7 @@ class FocusEntry extends Component {
     if (this.props.onClick) {
       this.props.onClick(name);
     } else {
-      DataManager.setValue(ORIGIN_KEY, name);
+      DataManager.setValue(ORIGIN_KEY, jsonToLuaString(name));
     }
   }
 

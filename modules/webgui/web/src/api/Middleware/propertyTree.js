@@ -2,7 +2,7 @@ import DataManager from '../DataManager';
 import { updatePropertyValue, initializePropertyTree } from '../Actions'
 import * as helperFunctions from '../../utils/propertyTreeHelpers.js'
 import { actionTypes } from '../Actions/actionTypes'
-import { SceneGraphKey, AllPropertiesKey, AllScreenSpaceRenderablesKey } from '../keys';
+import { rootOwnerKey } from '../keys';
 
 let subscriptionIds = []
 
@@ -23,19 +23,13 @@ const startSubscription = (URI, store) => {
 }
 
 const getPropertyTree = (dispatch) => {
-  DataManager.getValue(SceneGraphKey, (Value) => {
+  DataManager.getValue(rootOwnerKey, (Value) => {
     populatePropertyTree(Value, dispatch)
-  }); 
-  DataManager.getValue(AllPropertiesKey, (Value) => {
-    populatePropertyTree(Value.value, dispatch)
-  }); 
-  DataManager.getValue(AllScreenSpaceRenderablesKey, (Value) => {
-    populatePropertyTree(Value.value, dispatch)
   }); 
 }
 
 const populatePropertyTree = (Value, dispatch) => {
-  dispatch(initializePropertyTree(Value));
+  dispatch(initializePropertyTree(Value.subowners));
 }
 
 const sendDataToBackEnd = (node) => {
@@ -45,7 +39,7 @@ const sendDataToBackEnd = (node) => {
     case 'Vec4Property':
     case 'MatrixProperty':
     case 'DMat4Property':
-			const convertedValue = helperFunctions.jsonToLua(node.Value);
+			const convertedValue = helperFunctions.jsonToLuaTable(node.Value);
       DataManager.setValue(node.Description.Identifier, convertedValue);
 			break;
 		case 'TransferFunctionProperty':
@@ -54,6 +48,10 @@ const sendDataToBackEnd = (node) => {
 			break;
     case 'TriggerProperty':
       DataManager.trigger(node.Description.Identifier);
+      break;
+    case 'StringProperty':
+      const convertedString = helperFunctions.jsonToLuaString(node.Value);
+      DataManager.setValue(node.Description.Identifier, convertedString);
       break;
 		default:
       DataManager.setValue(node.Description.Identifier, node.Value);

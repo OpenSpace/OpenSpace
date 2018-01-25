@@ -13,30 +13,13 @@ const NODES_KEY = '__allNodes';
 class ViewPane extends Component {
   constructor(props) {
     super(props);
-    this.state = { nodes: [], hasData: false };
-
-    this.receiveData = this.receiveData.bind(this);
-  }
-
-  componentDidMount() {
-    // subscribe to data
-    
-  }
-
-  receiveData(data) {
-    this.setState({ nodes: data, hasData: true });
-  }
-
-  get nodes() {
-    return this.props.nodes
-      .map(node => Object.assign({ key: node.name }, node));
   }
 
   render() {
     const { nodes } = this.props;
     return (
       <Pane title="View" closeCallback={this.props.closeCallback}>
-        { (this.nodes.length == 0) && (
+        { (nodes.length == 0) && (
           <LoadingBlocks className={Pane.styles.loading} />
         )}
 
@@ -58,8 +41,14 @@ ViewPane.defaultProps = {
 
 
 const mapStateToProps = (state) => {
+    const sceneType = 'Scene';
+    const rootNodes = state.propertyTree.filter(element => element.name == sceneType)
+    let nodes = [];
+    rootNodes.forEach(function(node) {
+      nodes = [...nodes, ...node.subowners]; 
+    })
     return {
-        nodes: state.propertyTree
+        nodes,
     }
 };
 

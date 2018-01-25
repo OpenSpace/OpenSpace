@@ -37,6 +37,7 @@ class TimePicker extends Component {
       time: new Date(),
       hasTime: false,
       showPopover: false,
+      subscriptionId: -1,
     };
 
     this.subscriptionCallback = this.subscriptionCallback.bind(this);
@@ -47,11 +48,11 @@ class TimePicker extends Component {
 
   componentDidMount() {
     // subscribe to data
-    DataManager.subscribe(CurrenTimeKey, this.subscriptionCallback, TopicTypes.time);
+    this.state.subscriptionId = DataManager.subscribe(CurrenTimeKey, this.subscriptionCallback, TopicTypes.time);
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(CurrenTimeKey, this.subscriptionCallback);
+    DataManager.unsubscribe(CurrenTimeKey, subscriptionId);
   }
 
   get time() {
