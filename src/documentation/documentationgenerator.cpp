@@ -36,6 +36,7 @@
 
 namespace {
     const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    const char* BaseLibraryFilename = "${WEB}/common/base.js";
     const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
     const char* CssFilename = "${WEB}/common/style.css";
 } // namespace
@@ -67,6 +68,14 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
     handlebarsInput.open(absPath(HandlebarsFilename));
     const std::string handlebarsContent = std::string(
         std::istreambuf_iterator<char>(handlebarsInput),
+        std::istreambuf_iterator<char>()
+    );
+
+    std::ifstream baseLibarayInput;
+    baseLibarayInput.exceptions(~std::ofstream::goodbit);
+    baseLibarayInput.open(absPath(BaseLibraryFilename));
+    const std::string baseLibraryContent = std::string(
+        std::istreambuf_iterator<char>(baseLibarayInput),
         std::istreambuf_iterator<char>()
     );
 
@@ -120,6 +129,8 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
                    << "</script>"                                                 << '\n';
     }
 
+    const std::string DataId = "data";
+
     const std::string Version =
         "[" +
         std::to_string(OPENSPACE_VERSION_MAJOR) + "," +
@@ -128,10 +139,18 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
         "]";
 
     file
+        << "\t" << "<script id=\"" << DataId
+        << "\" type=\"text/application/json\">" << '\n'
+        << json << '\n'
+        << "\t" << "</script>" << '\n';
+
+
+    file
          << "\t"   << "<script>"                                                  << '\n'
-         << "\t\t" << "var " << _jsonName << " = JSON.parse('" << json << "');"   << '\n'
+         << "\t\t" << "var " << _jsonName << " = parseJson('" << DataId << "');"  << '\n'
          << "\t\t" << "var version = " << Version << ";"                          << '\n'
          << "\t\t" << handlebarsContent                                           << '\n'
+         << "\t\t" << baseLibraryContent                                          << '\n'
          << "\t\t" << jsContent                                                   << '\n'
          << "\t"   << "</script>"                                                 << '\n'
          << "\t"   << "<style type=\"text/css\">"                                 << '\n'
@@ -150,21 +169,19 @@ std::string escapedJson(const std::string& text) {
     for (const char& c : text) {
         switch (c) {
         case '\t':
-            jsonString += "\\t";
+            jsonString += "\\t"; // Replace tab with \t
             break;
         case '"':
-            // The " character has to be double escaped as JSON.parse will remove a single
-            // escape character, thus leaving only " behind that breaks the string
-            jsonString += "\\\\\"";
+            jsonString += "\\\""; // Replace " with \"
             break;
         case '\\':
-            jsonString += "\\\\";
+            jsonString += "\\\\"; // Replace \ with \\
             break;
         case '\n':
-            jsonString += "\\\\n";
+            jsonString += "\\\\n"; // Replace newline with \n
             break;
         case '\r':
-            jsonString += "\\r";
+            jsonString += "\\r"; // Replace carriage return with \r
             break;
         default:
             jsonString += c;
