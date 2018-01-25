@@ -1,0 +1,35 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+-- assetHelper.requestAll(asset, 'scene/solarsystem/planets')
+-- asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+
+local GaiaMissionAsset = asset.require('scene/digitaluniverse/gaiamission')
+
+
+asset.onInitialize(function ()
+    openspace.time.setTime("2018 JAN 25 00:00:00")
+
+    openspace.setDefaultDashboard()
+    openspace.setDefaultGuiSorting()
+
+    -- TODO: Mark Gaia Model (and a few stars?) as interesting nodes
+    -- openspace.markInterestingNodes()
+
+    openspace.navigation.setCameraState({
+        Focus = GaiaMissionAsset.GaiaMission.Name,
+        Position = { 1837386367.601345, -389860693812.834839, 714830404470.398926 },
+        Rotation = { -0.336540, 0.711402, -0.099212, 0.608937 },
+    })
+end)
+
+-- Remove interesting nodes and added virtual properties
+-- asset.onDeinitialize()
