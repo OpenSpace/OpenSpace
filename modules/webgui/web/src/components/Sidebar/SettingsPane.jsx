@@ -12,13 +12,11 @@ import styles from './SettingsPane.scss';
 class SettingsPane extends Component {
   constructor(props) {
     super(props);
-    this.state = { properties: [], screenSpaceRenderables: [], hasData: false };
 
   }
 
   render() {
-    const properties = this.props.properties.concat(this.state.screenSpaceRenderables)
-      .map(prop => Object.assign(prop, { key: prop.name }));
+    const { properties } = this.props;
 
     return (
       <Pane title="Settings" closeCallback={this.props.closeCallback}>
@@ -47,8 +45,10 @@ SettingsPane.defaultProps = {
 };
 
 const mapStateToProps = (state) => {
+    const sceneType = 'Scene';
+    const properties = state.propertyTree.filter(element => element.name !== sceneType)
     return {
-        properties: state.propertyTree
+        properties,
     }
 };
 

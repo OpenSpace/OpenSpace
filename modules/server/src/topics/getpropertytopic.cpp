@@ -26,7 +26,6 @@
 #include <openspace/properties/property.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/virtualpropertymanager.h>
@@ -43,6 +42,7 @@ const char* AllPropertiesValue = "__allProperties";
 const char* AllNodesValue = "__allNodes";
 const char* AllScreenSpaceRenderablesValue = "__screenSpaceRenderables";
 const char* PropertyKey = "property";
+const char* RootPropertyOwner = "__rootOwner";
 }
 
 namespace openspace {
@@ -67,6 +67,9 @@ void GetPropertyTopic::handleJson(json j) {
     else if (requestedKey == AllScreenSpaceRenderablesValue) {
         response = wrappedPayload({ { "value", OsEng.renderEngine().screenSpaceRenderables() } });
     }
+    else if (requestedKey == RootPropertyOwner) {
+        response = wrappedPayload(OsEng.rootPropertyOwner());
+    }
     else {
         response = getPropertyFromKey(requestedKey);
     }
@@ -79,10 +82,8 @@ json GetPropertyTopic::getAllProperties() {
             OsEng.renderEngine(),
             OsEng.console(),
             OsEng.parallelConnection(),
-            OsEng.settingsEngine(),
             OsEng.windowWrapper(),
             OsEng.navigationHandler(),
-            OsEng.globalPropertyOwner(),
             OsEng.virtualPropertyManager(),
         }}
     };

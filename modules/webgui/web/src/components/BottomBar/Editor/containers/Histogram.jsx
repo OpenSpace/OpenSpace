@@ -29,7 +29,7 @@ const mapStateToProps = (state, ownProps) => {
   histogram = normalizeHistogramDataToCanvas(ownProps.activeVolume.properties.find(function (obj) 
     { return obj.id === "Histogram"; }).Value, ownProps.width, ownProps.height);
 
-  unit = Number(ownProps.activeVolume.properties.find(function (obj) { return obj.id === "DataUnit"; }).Value);
+  unit = ownProps.activeVolume.properties.find(function (obj) { return obj.id === "DataUnit"; }).Value;
   minValue = Number(ownProps.activeVolume.properties.find(function (obj) { return obj.id === "MinValue"; }).Value);
   maxValue = Number(ownProps.activeVolume.properties.find(function (obj) { return obj.id === "MaxValue"; }).Value);
     return {

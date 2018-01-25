@@ -55,7 +55,6 @@ export const findPropertyTreeNode = (state, URI) => {
   let property;
   const splittedURI = splitURI(URI);
   let returnNode;
-  console.log(state)
   state.forEach(function(element) {
     if( element.name === splittedURI.name) {
       returnNode = traverseTree(element, splittedURI.URI);
@@ -65,9 +64,12 @@ export const findPropertyTreeNode = (state, URI) => {
 }
 
 //Conversion from json type array to lua
-export const jsonToLua = (json) => {
-    console.log(json)
+export const jsonToLuaTable = (json) => {
     return json.replace('[', '').replace(']', '');
+}
+
+export const jsonToLuaString = (json) => {
+    return '"' + json + '"';
 }
 
 //Convert envelopes in transfer function property to back end compatible format

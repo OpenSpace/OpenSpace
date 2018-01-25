@@ -7,8 +7,9 @@ import Picker from '../Picker';
 import Popover from '../../common/Popover/Popover';
 import FilterList from '../../common/FilterList/FilterList';
 import DataManager from '../../../api/DataManager';
-import { OriginKey, SceneGraphKey } from '../../../api/keys';
+import { OriginKey } from '../../../api/keys';
 import FocusEntry from './FocusEntry';
+import { connect } from 'react-redux';
 
 import Earth from './images/earth.png';
 import styles from './OriginPicker.scss';
@@ -37,9 +38,6 @@ class OriginPicker extends Component {
 
   componentDidMount() {
     DataManager.subscribe(OriginKey, this.updateOrigin);
-    DataManager.getValue(SceneGraphKey, (sceneGraphNodes) => {
-      this.setState({ sceneGraphNodes });
-    });
   }
 
   componentWillUnmount() {
@@ -69,18 +67,9 @@ class OriginPicker extends Component {
     return this.state.origin;
   }
 
-  /**
-   * Get all the scene graph nodes that has one of REQUIRED_TAGS in them
-   * @returns {Array}
-   */
-  get sceneGraphNodes() {
-    return this.state.sceneGraphNodes
-      .filter(node => node.tags.some(tag => REQUIRED_TAGS.includes(tag)))
-      .map(node => Object.assign(node, { key: node.name }));
-  }
-
   render() {
     const { hasOrigin, showPopover } = this.state;
+    const { nodes } = this.props;
     return (
       <div className={Picker.Wrapper}>
         <Picker onClick={this.togglePopover} className={(showPopover ? Picker.Active : '')}>
@@ -97,7 +86,7 @@ class OriginPicker extends Component {
         { showPopover && (
           <Popover closeCallback={this.togglePopover} title="Select focus" className={Picker.Popover}>
             <FilterList
-              data={this.sceneGraphNodes}
+              data={nodes}
               className={styles.list}
               searchText="Search the universe..."
               viewComponent={FocusEntry}
@@ -109,5 +98,23 @@ class OriginPicker extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+    const sceneType = 'Scene';
+    const rootNodes = state.propertyTree.filter(element => element.name == sceneType)
+    let nodes = [];
+    rootNodes.forEach(function(node) {
+      nodes = [...nodes, ...node.subowners]; 
+    })
+    nodes = nodes.filter(node => node.tag.some(tag => REQUIRED_TAGS.includes(tag)))
+      .map(node => Object.assign(node, { key: node.name }))
+    return {
+        nodes,
+    }
+};
+
+OriginPicker = connect(
+  mapStateToProps,
+  )(OriginPicker)
 
 export default OriginPicker;

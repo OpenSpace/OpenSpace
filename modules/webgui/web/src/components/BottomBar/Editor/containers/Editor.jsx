@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { addEnvelope, deleteEnvelope, clearEnvelopes, addPoint, changeColor } from '../../../../api/Actions/transferFunctionActions.js';
 import EditorContainer from '../presentational/EditorContainer'
+import { startListening, stopListening } from '../../../../api/Actions';
 
 class Editor extends Component {
   constructor(props) {
@@ -14,6 +15,22 @@ class Editor extends Component {
       width: 800,
     }
     this.handleVolumeChange = this.handleVolumeChange.bind(this);
+  }
+
+  componentDidMount() {
+    this.props.volumes.forEach(volume => {
+      volume.TransferFunctionData.properties.forEach(property => {
+        this.props.StartListening(property.Description.Identifier);
+      })
+    })
+  }
+
+  componentWillUnmount() {
+    this.props.volumes.forEach(volume => {
+      volume.TransferFunctionData.properties.forEach(property => {
+        this.props.StopListening(property.Description.Identifier);
+      })
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -99,7 +116,13 @@ const findAllVolumes = (state) => {
 }
 
 const mapStateToProps = (state) => {
-  let volumes = findAllVolumes(state.sceneGraph);
+  const sceneType = 'Scene';
+    const rootNodes = state.propertyTree.filter(element => element.name == sceneType)
+    let nodes = [];
+    rootNodes.forEach(function(node) {
+      nodes = [...nodes, ...node.subowners]; 
+    })
+  let volumes = findAllVolumes(nodes);
   return {
     volumes,
   }
@@ -121,6 +144,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     ChangeColor: (color, URI) => {
       dispatch(changeColor(color, URI));
+    },
+    StartListening: (URI) => {
+      dispatch(startListening(URI))
+    },
+    StopListening: (URI) => {
+      dispatch(stopListening(URI))
     },
   }
 }
