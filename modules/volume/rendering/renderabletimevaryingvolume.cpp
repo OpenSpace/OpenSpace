@@ -250,16 +250,16 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         float min = t.minValue;
         float diff = t.maxValue - t.minValue;
-        std::vector<float> test;
         float *data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
-            test.push_back(glm::clamp((data[i] - min) / diff, 0.0f, 1.0f));
             data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
         }
 
-        _transferFunctionHandler->buildHistogram(data, t.rawVolume->nCells());
-        _transferFunctionHandler->setUnit(t.unit);
-        _transferFunctionHandler->setMinAndMaxValue(t.minValue, t.maxValue);
+        t.histogram = std::make_shared<Histogram>(0.0, 1.0, 100);
+        for (int i = 0; i < t.rawVolume->nCells(); ++i) {
+            t.histogram->add(data[i]);
+        }
+
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
@@ -361,7 +361,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
     t.minValue = dictionary.value<float>(KeyMinValue);
     t.maxValue = dictionary.value<float>(KeyMaxValue);
-//    t.unit = dictionary.value<std::string>(KeyUnit);
+    t.unit = dictionary.value<std::string>(KeyUnit);
 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);
@@ -462,6 +462,9 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
+            _transferFunctionHandler->setUnit(t->unit);
+            _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
+            _transferFunctionHandler->setHistogramProperty(t->histogram);
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }

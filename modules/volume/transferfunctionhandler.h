@@ -28,6 +28,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/glm.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/binaryproperty.h>
 #include <openspace/properties/scalarproperty.h>
@@ -49,7 +50,7 @@ namespace openspace {
             
             void initialize();
             
-            void buildHistogram(float *data, int num);
+            void setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram);
 
             void setTexture();
             void loadStoredEnvelopes();
@@ -70,10 +71,10 @@ namespace openspace {
             properties::StringProperty _dataUnit;
             properties::StringProperty _minValue;
             properties::StringProperty _maxValue;
+            properties::TriggerProperty _saveTransferFunction;
             std::string _filePath;
             properties::TransferFunctionProperty _transferFunctionProperty;
             properties::BinaryProperty _histogramProperty;
-            std::shared_ptr<Histogram> _histogram;
             std::shared_ptr<openspace::TransferFunction> _transferFunction;
             std::shared_ptr<ghoul::opengl::Texture> _texture = nullptr;
         };

@@ -34,7 +34,7 @@
 static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
     "TransferFunction",
     "TransferFunction",
-    "All the envelopes"
+    "All the envelopes used in the transfer function"
 };
 
 static const openspace::properties::Property::PropertyInfo HistogramInfo = {
@@ -61,6 +61,12 @@ static const openspace::properties::Property::PropertyInfo MaxValueInfo = {
     "Maximum value in the data"
 };
 
+static const openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
+    "SaveTransferFunction",
+    "Save Transfer Function",
+    "Save your transfer function"
+};
+
 namespace openspace {
     namespace volume {
 
@@ -75,7 +81,8 @@ namespace openspace {
             _dataUnit(DataUnitInfo),
             _minValue(MinValueInfo),
             _maxValue(MaxValueInfo),
-            _histogramProperty(HistogramInfo)
+            _histogramProperty(HistogramInfo),
+            _saveTransferFunction(SaveTransferFunctionInfo)
         {
             _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
         }
@@ -87,6 +94,7 @@ namespace openspace {
             addProperty(_dataUnit);
             addProperty(_minValue);
             addProperty(_maxValue);
+            addProperty(_saveTransferFunction);
 
             this->addTag("TF");
             _texture = std::make_shared<ghoul::opengl::Texture>(
@@ -99,16 +107,15 @@ namespace openspace {
 
             _transferFunctionProperty.onChange([this]() {
                 setTexture();
+            });
+
+            _saveTransferFunction.onChange([this]() {
                 saveEnvelopes();
             });
         }
 
-        void TransferFunctionHandler::buildHistogram(float *data, int num) {
-            _histogram = std::make_shared<Histogram>(0.0, 1.0, 100);
-            for (int i = 0; i < num; ++i) {
-                _histogram->add(data[i]);
-            }
-            _histogramProperty.setValue(openspace::properties::VectorProperty{ _histogram->getDataAsVector() });
+        void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
+            _histogramProperty.setValue(openspace::properties::VectorProperty{ histogram->getDataAsVector() });
         }
 
         void TransferFunctionHandler::setTexture() {
@@ -144,7 +151,7 @@ namespace openspace {
         }
 
         void TransferFunctionHandler::saveEnvelopes() {
-           // _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
+            _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
         }
 
         void TransferFunctionHandler::setFilepath(const std::string& path) {

@@ -37,6 +37,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/boxgeometry.h>
+#include <openspace/util/histogram.h>
 
 namespace openspace {
 
@@ -72,6 +73,7 @@ private:
         bool onGpu;
         std::unique_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
+        std::shared_ptr<openspace::Histogram> histogram;
     };
 
     Timestep* currentTimestep();
