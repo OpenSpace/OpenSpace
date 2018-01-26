@@ -169,19 +169,19 @@ std::string escapedJson(const std::string& text) {
     for (const char& c : text) {
         switch (c) {
         case '\t':
-            jsonString += "\\t"; // Replace tab with \t
+            jsonString += "\\t"; // Replace tab with \t.
             break;
         case '"':
-            jsonString += "\\\""; // Replace " with \"
+            jsonString += "\\\""; // Replace " with \".
             break;
         case '\\':
-            jsonString += "\\\\"; // Replace \ with \\
+            jsonString += "\\\\"; // Replace \ with \\.
             break;
         case '\n':
-            jsonString += "\\\\n"; // Replace newline with \n
+            jsonString += "\\\\n"; // Replace newline with \n.
             break;
         case '\r':
-            jsonString += "\\r"; // Replace carriage return with \r
+            jsonString += "\\r"; // Replace carriage return with \r.
             break;
         default:
             jsonString += c;
