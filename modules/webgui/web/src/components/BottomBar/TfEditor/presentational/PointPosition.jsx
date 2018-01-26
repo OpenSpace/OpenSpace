@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from '../style/Histogram.scss'
+import styles from '../style/Envelope.scss'
 
 const normalizeBetweenValues = (value, min, max, width) => {
     return (min + (max - min) * (value / width));

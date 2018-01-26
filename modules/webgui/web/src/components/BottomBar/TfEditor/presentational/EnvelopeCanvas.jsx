@@ -28,10 +28,10 @@ const EnvelopeCanvas = ({
   minValue,
   maxValue,
 }) => (
-      <div className={styles.Envelope}>
+      <div>
       {(envelopes.length !== 0) && (
         <div>
-        <PointPosition className={styles.Envelope}
+        <PointPosition className={styles.Line}
           points={pointPositions}
           width={width}
           height={height}
@@ -41,7 +41,7 @@ const EnvelopeCanvas = ({
         />
         {envelopes.map(envelope =>
           <div key={envelope.id}>
-          <svg className={styles.Line} height={height} width={width + 10}>
+          <svg className={styles.Line} height={height} width={width}>
             <GraphBody
              UseLinearGradient={true}
              points={pointsForEnvelopeGraph(envelope.points, height)}

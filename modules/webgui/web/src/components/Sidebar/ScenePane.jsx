@@ -8,8 +8,6 @@ import SceneGraphNode from './SceneGraphNode';
 import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 import { insertInSceneGraph } from '../../api/Actions'
 
-const NODES_KEY = '__allNodes';
-
 class ScenePane extends Component {
   constructor(props) {
     super(props);

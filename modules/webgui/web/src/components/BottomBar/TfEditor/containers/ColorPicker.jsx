@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ChromePicker } from 'react-color';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { changeColor } from '../../../api/Actions/transferFunctionActions.js';
+import { changeColor } from '../../../../api/Actions/transferFunctionActions.js';
 
 class ColorPicker extends Component {
   constructor(props) {

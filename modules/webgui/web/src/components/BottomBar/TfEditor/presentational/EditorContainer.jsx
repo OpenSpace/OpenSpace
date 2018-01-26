@@ -11,7 +11,7 @@ const EditorContainer = ({
   activeVolume,
   URI
 }) => (
-  <div >
+  <div className={styles.EditorContainer}>
     <div className={styles.EnvelopeContainer}>
           <Envelope
             height={height}

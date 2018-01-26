@@ -26,7 +26,7 @@ export const keepCloning = (objectpassed) => {
   return temporaryStorage;
 }
 
-const traverseTree = (node, URI) => {
+const traverseTreeWithURI = (node, URI) => {
   const splittedURI = splitURI(URI);
   let tmpValue;
   if (splittedURI.lastNode) {
@@ -43,7 +43,7 @@ const traverseTree = (node, URI) => {
         if(splittedURI.lastNode)
           tmpValue = element;
         else
-          tmpValue = traverseTree(element, splittedURI.URI);
+          tmpValue = traverseTreeWithURI(element, splittedURI.URI);
         return tmpValue;
       }
     })
@@ -57,7 +57,7 @@ export const findPropertyTreeNode = (state, URI) => {
   let returnNode;
   state.forEach(function(element) {
     if( element.name === splittedURI.name) {
-      returnNode = traverseTree(element, splittedURI.URI);
+      returnNode = traverseTreeWithURI(element, splittedURI.URI);
     }
   })
   return returnNode;
@@ -88,3 +88,29 @@ export const convertEnvelopes = (envelopes) => {
     )
     return JSON.stringify(convertedEnvelopes);
   }
+
+const traverseTreeForTag = (node, tag) => {
+  let data;
+  node.subowners.map(element => {
+        data = traverseTreeForTag(element, tag);
+        if( element.tag.includes(tag)) {
+          data = element;
+        }
+    })
+  return data;
+}
+
+export const findAllNodesWithTag = (state, tag) => {
+  let nodes = [];
+  state.map(element => {
+      const data = traverseTreeForTag(element, tag);
+      if(data !== undefined) {
+        const returnValue = {
+          data,
+          name: element.name
+        }
+        nodes.push(returnValue);
+      }
+  })
+  return nodes;
+}
