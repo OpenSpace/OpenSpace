@@ -53,7 +53,6 @@
 #include <chrono>
 #include <iostream>
 #include <iterator>
-#include <numeric>
 #include <fstream>
 #include <string>
 #include <stack>
@@ -72,25 +71,6 @@ namespace openspace {
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
-    , DocumentationGenerator(
-        "Documented",
-        "propertyOwners",
-        {
-            {
-                "mainTemplate",
-                "${WEB}/properties/main.hbs"
-            },
-            {
-                "propertyOwnerTemplate",
-                "${WEB}/properties/propertyowner.hbs"
-            },
-            {
-                "propertyTemplate",
-                "${WEB}/properties/property.hbs"
-            }
-        },
-        "${WEB}/properties/script.js"
-    )
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
 {
@@ -463,74 +443,6 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
-}
-
-std::string Scene::generateJson() const {
-    std::function<std::string(properties::PropertyOwner*)> createJson =
-        [&createJson](properties::PropertyOwner* owner) -> std::string
-    {
-        std::stringstream json;
-        json << "{";
-        json << "\"name\": \"" << owner->name() << "\",";
-
-        json << "\"properties\": [";
-        auto properties = owner->properties();
-        for (properties::Property* p : properties) {
-            json << "{";
-            json << "\"id\": \"" << p->identifier() << "\",";
-            json << "\"type\": \"" << p->className() << "\",";
-            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\",";
-            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
-            json << "}";
-            if (p != properties.back()) {
-                json << ",";
-            }
-        }
-        json << "],";
-
-        json << "\"propertyOwners\": [";
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            json << createJson(o);
-            if (o != propertyOwners.back()) {
-                json << ",";
-            }
-        }
-        json << "]";
-        json << "}";
-
-        return json.str();
-    };
-
-
-    std::stringstream json;
-    json << "[";
-    std::vector<SceneGraphNode*> nodes = allSceneGraphNodes();
-    if (!nodes.empty()) {
-        json << std::accumulate(
-            std::next(nodes.begin()),
-            nodes.end(),
-            createJson(*nodes.begin()),
-            [createJson](std::string a, SceneGraphNode* n) {
-            return a + "," + createJson(n);
-        }
-        );
-    }
-
-    json << "]";
-
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {

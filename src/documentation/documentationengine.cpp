@@ -282,18 +282,7 @@ std::string DocumentationEngine::generateJson() const {
 
     json << "]";
 
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        switch (c) {
-            case '\'':
-                jsonString += "\\'";
-                break;
-            default:
-                jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {

@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___SCENE___H__
 #define __OPENSPACE_CORE___SCENE___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <vector>
 #include <unordered_map>
 #include <set>
@@ -54,7 +52,6 @@ namespace documentation { struct Documentation; }
 // SceneGraphFinishedLoading
 class Scene
     : public properties::PropertyOwner
-    , public DocumentationGenerator
 {
 public:
     using UpdateDependencies = ghoul::Boolean;
@@ -186,8 +183,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    std::string generateJson() const override;
-
     /**
      * Update dependencies.
      */

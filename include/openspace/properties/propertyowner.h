@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
 #define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -47,7 +49,7 @@ class Property;
  * URI contains separators (<code>.</code>), the first name before the separator will be
  * used as a subOwner's name and the search will proceed recursively.
  */
-class PropertyOwner {
+class PropertyOwner : public DocumentationGenerator {
 public:
     /// The separator that is used while accessing the properties and/or sub-owners
     static const char URISeparator = '.';
@@ -238,6 +240,8 @@ public:
     void removeTag(const std::string& tag);
 
 private:
+    std::string generateJson() const override;
+
     /// The name of this PropertyOwner
     std::string _name;
     /// The description for this PropertyOwner

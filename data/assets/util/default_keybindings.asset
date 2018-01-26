@@ -1,4 +1,5 @@
-local helper = asset.require('./scene_helper')
+local sceneHelper = asset.require('./scene_helper')
+local propertyHelper = asset.require('./property_helper')
 
 local Keybindings = {
     {
@@ -33,7 +34,7 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
     },
     {
         Key = "F4",
-        Command = helper.property.invert("RenderEngine.PerformanceMeasurements"),
+        Command = propertyHelper.invert("RenderEngine.PerformanceMeasurements"),
         Documentation = "Toogles performance measurements that shows rendering time informations.",
         Local = true
     },
@@ -57,19 +58,19 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
     },
     {
         Key = "f",
-        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
         Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
         Local = false
     },
     {
         Key = "Shift+f",
-        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
         Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
         Local = false
     },
     {
         Key = "Ctrl+f",
-        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
         Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
         Local = false
     },
@@ -84,9 +85,9 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
 local DeltaTimeKeys
 
 asset.onInitialize(function()
-    Keys = helper.bindKeys(Keybindings)
+    Keys = sceneHelper.bindKeys(Keybindings)
 
-    DeltaTimeKeys = helper.setDeltaTimeKeys({
+    DeltaTimeKeys = sceneHelper.setDeltaTimeKeys({
     --  1           2           3           4           5           6           7           8           9           0
     --------------------------------------------------------------------------------------------------------------------------
     --  1s          2s          5s          10s         30s         1m          2m          5m          10m         30m
@@ -102,8 +103,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function ()
-    helper.unbindKeys(Keybindings)
-    helper.unbindKeys(DeltaTimeKeys)
+    sceneHelper.unbindKeys(Keybindings)
+    sceneHelper.unbindKeys(DeltaTimeKeys)
 end)
 
 asset.export("DefaultKeybindings", Keybindings)

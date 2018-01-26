@@ -988,8 +988,16 @@ void OpenSpaceEngine::writeSceneDocumentation() {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+    if (configurationManager().hasKey(ConfigurationManager::KeyScenePropertyDocumentation)) {
         _scene->writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyScenePropertyDocumentation
+                ))
+        );
+    }
+
+    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+        _rootPropertyOwner->writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyPropertyDocumentation
                 ))
