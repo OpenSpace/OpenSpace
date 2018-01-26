@@ -2,7 +2,7 @@ import React from 'react';
 import Property from './Property';
 import NumericInput from '../../common/Input/NumericInput/NumericInput';
 import InfoBox from '../../common/InfoBox/InfoBox';
-import { connectProperty } from './connectProperty.js'
+import { connectProperty } from './connectProperty';
 
 class NumericProperty extends Property {
   constructor(props) {

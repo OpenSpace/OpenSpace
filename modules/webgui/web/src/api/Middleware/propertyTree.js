@@ -1,82 +1,93 @@
 import DataManager from '../DataManager';
-import { updatePropertyValue, initializePropertyTree } from '../Actions'
-import * as helperFunctions from '../../utils/propertyTreeHelpers.js'
-import { actionTypes } from '../Actions/actionTypes'
+import { updatePropertyValue, initializePropertyTree } from '../Actions';
+import * as helperFunctions from '../../utils/propertyTreeHelpers';
+import { actionTypes } from '../Actions/actionTypes';
 import { rootOwnerKey } from '../keys';
 
-let subscriptionIds = []
+const subscriptionIds = [];
 
-const handleUpdatedValues = store => ({Description, Value}) => {
-  store.dispatch(updatePropertyValue(Description, Value))
+const handleUpdatedValues = store => ({ Description, Value }) => {
+  store.dispatch(updatePropertyValue(Description, Value));
   const state = store.getState();
-  var property = helperFunctions.findPropertyTreeNode(state.propertyTree, Description.Identifier);
+  const property = helperFunctions.findPropertyTreeNode(state.propertyTree, Description.Identifier);
   if (property.listeners < 1) {
     if (DataManager.unsubscribe(Description.Identifier, subscriptionIds[Description.Identifier])) {
       delete subscriptionIds[Description.Identifier];
     }
   }
-}
-
+};
 
 const startSubscription = (URI, store) => {
-	subscriptionIds[URI] = DataManager.subscribe(URI, handleUpdatedValues(store));
-}
-
-const getPropertyTree = (dispatch) => {
-  DataManager.getValue(rootOwnerKey, (Value) => {
-    populatePropertyTree(Value, dispatch)
-  }); 
-}
+  subscriptionIds[URI] = DataManager.subscribe(URI, handleUpdatedValues(store));
+};
 
 const populatePropertyTree = (Value, dispatch) => {
   dispatch(initializePropertyTree(Value.subowners));
-}
+};
+
+const getPropertyTree = (dispatch) => {
+  DataManager.getValue(rootOwnerKey, (Value) => {
+    populatePropertyTree(Value, dispatch);
+  });
+};
 
 const sendDataToBackEnd = (node) => {
-	switch(node.Description.Type) {
-		case 'Vec2Property':
+  switch (node.Description.Type) {
+    case 'Vec2Property':
     case 'Vec3Property':
     case 'Vec4Property':
     case 'MatrixProperty':
-    case 'DMat4Property':
-			const convertedValue = helperFunctions.jsonToLuaTable(node.Value);
+    case 'DMat4Property': {
+      const convertedValue = helperFunctions.jsonToLuaTable(node.Value);
       DataManager.setValue(node.Description.Identifier, convertedValue);
-			break;
-		case 'TransferFunctionProperty':
-			const convertedEnvelopes = helperFunctions.convertEnvelopes(node.Value);
+      break;
+    }
+    case 'TransferFunctionProperty': {
+      const convertedEnvelopes = helperFunctions.convertEnvelopes(node.Value);
       DataManager.setValue(node.Description.Identifier, convertedEnvelopes);
-			break;
-    case 'TriggerProperty':
+      break;
+    }
+    case 'TriggerProperty': {
       DataManager.trigger(node.Description.Identifier);
       break;
-    case 'StringProperty':
+    }
+    case 'StringProperty': {
       const convertedString = helperFunctions.jsonToLuaString(node.Value);
       DataManager.setValue(node.Description.Identifier, convertedString);
       break;
-		default:
+    }
+    default: {
       DataManager.setValue(node.Description.Identifier, node.Value);
-			break;
-	}
-}
+      break;
+    }
+  }
+};
 
-export const updateBackend = store => next => action => {
-  let result = next(action);
-  var state = store.getState();
-  switch(action.type) {
+export const updateBackend = store => next => (action) => {
+  const result = next(action);
+  const state = store.getState();
+  switch (action.type) {
     case actionTypes.onOpenConnection:
       getPropertyTree(store.dispatch);
       break;
-    case actionTypes.changePropertyTreeNode:
-      var node = helperFunctions.findPropertyTreeNode(state.propertyTree, action.payload.URI);
-      sendDataToBackEnd(node)
+    case actionTypes.changePropertyTreeNode: {
+      const nodeToUpdate = helperFunctions
+        .findPropertyTreeNode(state.propertyTree, action.payload.URI);
+      sendDataToBackEnd(nodeToUpdate);
       break;
-    case actionTypes.startListeningToNode:
-      var node = helperFunctions.findPropertyTreeNode(state.propertyTree, action.payload.URI);
-      if(node.listeners === 1)
+    }
+    case actionTypes.startListeningToNode: {
+      const nodeToListen = helperFunctions
+        .findPropertyTreeNode(state.propertyTree, action.payload.URI);
+      if (nodeToListen.listeners === 1) {
         startSubscription(action.payload.URI, store);
+      }
+      break;
+    }
     default:
       break;
   }
-  return result
-}
+  return result;
+};
+
 export default updateBackend;

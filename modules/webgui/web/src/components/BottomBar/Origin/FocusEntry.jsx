@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import DataManager from '../../../api/DataManager';
 import styles from './FocusEntry.scss';
 import { jsonToLuaString } from '../../../utils/propertyTreeHelpers';
+
 const ORIGIN_KEY = 'NavigationHandler.Origin';
 
 class FocusEntry extends Component {

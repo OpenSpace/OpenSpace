@@ -1,14 +1,14 @@
 import React from 'react';
 import Property from './Property';
 import Select from '../../common/Input/Select/Select';
-import { connectProperty } from './connectProperty.js'
+import { connectProperty } from './connectProperty';
 
 class OptionProperty extends Property {
   constructor(props) {
     super(props);
     this.onChange = this.onChange.bind(this);
   }
-  
+
   onChange({ value }) {
     this.props.ChangeValue(value);
   }
@@ -41,5 +41,6 @@ class OptionProperty extends Property {
     );
   }
 }
-OptionProperty = connectProperty(OptionProperty)
+OptionProperty = connectProperty(OptionProperty);
+
 export default OptionProperty;

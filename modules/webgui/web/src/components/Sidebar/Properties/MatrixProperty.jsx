@@ -3,7 +3,7 @@ import Property from './Property';
 import NumericInput from '../../common/Input/NumericInput/NumericInput';
 import Row from '../../common/Row/Row';
 import styles from './Property.scss';
-import { connectProperty } from './connectProperty.js'
+import { connectProperty } from './connectProperty';
 
 class MatrixProperty extends Property {
   constructor(props) {
@@ -16,11 +16,11 @@ class MatrixProperty extends Property {
   }
 
   componentDidMount() {
-    this.props.StartListening(this.props.Description.Identifier)
+    this.props.StartListening(this.props.Description.Identifier);
   }
 
   componentWillUnmount() {
-    this.props.StopListening(this.props.Description.Identifier)
+    this.props.StopListening(this.props.Description.Identifier);
   }
 
   onChange(index) {
@@ -29,7 +29,7 @@ class MatrixProperty extends Property {
       const { value } = event.currentTarget;
       stateValue[index] = parseFloat(value);
 
-      this.props.ChangeValue( JSON.stringify(stateValue));
+      this.props.ChangeValue(JSON.stringify(stateValue));
     };
   }
 
@@ -58,7 +58,7 @@ class MatrixProperty extends Property {
       <div className={styles.matrixProperty}>
         { groups.map((group, index) => (
           <Row key={`row-${index}`}>
-            { group.map((comp) => (
+            { group.map(comp => (
               <NumericInput
                 key={comp.key}
                 value={comp.value}
@@ -79,5 +79,5 @@ class MatrixProperty extends Property {
   }
 }
 
-MatrixProperty = connectProperty(MatrixProperty)
+MatrixProperty = connectProperty(MatrixProperty);
 export default MatrixProperty;

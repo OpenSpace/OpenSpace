@@ -3,7 +3,7 @@ import Property from './Property';
 import NumericInput from '../../common/Input/NumericInput/NumericInput';
 import Row from '../../common/Row/Row';
 import styles from './Property.scss';
-import { connectProperty } from './connectProperty.js'
+import { connectProperty } from './connectProperty';
 
 class VectorProperty extends Property {
   static jsonToLua(json) {
@@ -58,6 +58,6 @@ class VectorProperty extends Property {
     );
   }
 }
-VectorProperty = connectProperty(VectorProperty)
+VectorProperty = connectProperty(VectorProperty);
 
 export default VectorProperty;

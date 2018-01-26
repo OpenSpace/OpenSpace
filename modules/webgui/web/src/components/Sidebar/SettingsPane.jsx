@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Pane from './Pane';
 import LoadingBlocks from '../common/LoadingBlock/LoadingBlocks';
 import FilterList from '../common/FilterList/FilterList';
-import DataManager from '../../api/DataManager';
 import PropertyOwner from './Properties/PropertyOwner';
-import { connect } from 'react-redux';
 
 import styles from './SettingsPane.scss';
 
 class SettingsPane extends Component {
   constructor(props) {
     super(props);
-
   }
 
   render() {
@@ -20,11 +18,11 @@ class SettingsPane extends Component {
 
     return (
       <Pane title="Settings" closeCallback={this.props.closeCallback}>
-        { (properties.length == 0 ) && (
+        { (properties.length === 0) && (
           <LoadingBlocks className={Pane.styles.loading} />
         )}
 
-        {( properties.length > 0 ) && (
+        {(properties.length > 0) && (
           <FilterList
             data={properties}
             className={styles.list}
@@ -45,15 +43,15 @@ SettingsPane.defaultProps = {
 };
 
 const mapStateToProps = (state) => {
-    const sceneType = 'Scene';
-    const properties = state.propertyTree.filter(element => element.name !== sceneType)
-    return {
-        properties,
-    }
+  const sceneType = 'Scene';
+  const properties = state.propertyTree.filter(element => element.name !== sceneType);
+  return {
+    properties,
+  };
 };
 
 SettingsPane = connect(
   mapStateToProps,
-  )(SettingsPane)
+)(SettingsPane);
 
 export default SettingsPane;
