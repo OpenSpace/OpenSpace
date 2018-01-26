@@ -9,7 +9,7 @@ const subscriptionIds = [];
 const handleUpdatedValues = store => ({ Description, Value }) => {
   store.dispatch(updatePropertyValue(Description, Value));
   const state = store.getState();
-  const property = helperFunctions.findPropertyTreeNode(state.propertyTree, Description.Identifier);
+  const property = helperFunctions.traverseTreeWithURI(state.propertyTree, Description.Identifier);
   if (property.listeners < 1) {
     if (DataManager.unsubscribe(Description.Identifier, subscriptionIds[Description.Identifier])) {
       delete subscriptionIds[Description.Identifier];
@@ -22,7 +22,7 @@ const startSubscription = (URI, store) => {
 };
 
 const populatePropertyTree = (Value, dispatch) => {
-  dispatch(initializePropertyTree(Value.subowners));
+  dispatch(initializePropertyTree(Value));
 };
 
 const getPropertyTree = (dispatch) => {
@@ -72,13 +72,13 @@ export const updateBackend = store => next => (action) => {
       break;
     case actionTypes.changePropertyTreeNode: {
       const nodeToUpdate = helperFunctions
-        .findPropertyTreeNode(state.propertyTree, action.payload.URI);
+        .traverseTreeWithURI(state.propertyTree, action.payload.URI);
       sendDataToBackEnd(nodeToUpdate);
       break;
     }
     case actionTypes.startListeningToNode: {
       const nodeToListen = helperFunctions
-        .findPropertyTreeNode(state.propertyTree, action.payload.URI);
+        .traverseTreeWithURI(state.propertyTree, action.payload.URI);
       if (nodeToListen.listeners === 1) {
         startSubscription(action.payload.URI, store);
       }

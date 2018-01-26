@@ -18,10 +18,10 @@ export const changePropertyValue = (description, value) => ({
   },
 });
 
-export const initializePropertyTree = data => ({
-  type: actionTypes.initializePropertyTree,
+export const initializePropertyTree = node => ({
+  type: actionTypes.insertNode,
   payload: {
-    data,
+    node,
   },
 });
 

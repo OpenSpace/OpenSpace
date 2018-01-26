@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { addEnvelope, deleteEnvelope, clearEnvelopes, addPoint, changeColor } from '../../../../api/Actions/transferFunctionActions.js';
 import EditorContainer from '../presentational/EditorContainer'
 import { startListening, stopListening } from '../../../../api/Actions';
-import { findAllNodesWithTag } from '../../../../utils/propertyTreeHelpers';
+import { findAllNodesWithTag, findAllNodesWithURI } from '../../../../utils/propertyTreeHelpers';
 import Window from '../../../common/Window/Window';
 import Picker from '../../Picker';
 import styles from '../style/TfEditor.scss'
@@ -140,15 +140,15 @@ TfEditor.propTypes = {
 const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   const TfTag = "TF";
- 
-  const rootNodes = state.propertyTree.filter(element => element.name == sceneType)
-  let nodes = [];
-  rootNodes.forEach(function(node) {
-    nodes = [...nodes, ...node.subowners]; 
-  })
-
-  let volumes = findAllNodesWithTag(nodes, TfTag);
-  console.log(volumes)
+  let volumes = [];
+  if (Object.keys(state.propertyTree).length !== 0) {
+    let nodes = [];
+    const rootNodes = state.propertyTree.subowners.filter(element => element.name == sceneType)
+    rootNodes.forEach(function(node) {
+      nodes = [...nodes, ...node.subowners]; 
+    })
+    volumes = findAllNodesWithTag(nodes, TfTag);
+  }
   return {
     volumes,
   }

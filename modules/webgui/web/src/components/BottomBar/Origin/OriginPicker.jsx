@@ -19,7 +19,7 @@ const icons = {
 };
 
 // tag that each focusable node must have
-const REQUIRED_TAGS = ['planet_solarSystem'];
+const REQUIRED_TAG = 'planet_solarSystem';
 
 class OriginPicker extends Component {
   constructor(props) {
@@ -100,14 +100,18 @@ class OriginPicker extends Component {
 }
 
 const mapStateToProps = (state) => {
-  const sceneType = 'Scene';
-  const rootNodes = state.propertyTree.filter(element => element.name === sceneType);
+  const sceneType = 'Scene';  
   let nodes = [];
-  rootNodes.forEach((node) => {
-    nodes = [...nodes, ...node.subowners];
-  });
-  nodes = nodes.filter(node => node.tag.some(tag => REQUIRED_TAGS.includes(tag)))
+  if (Object.keys(state.propertyTree).length !== 0) {
+    const rootNodes = state.propertyTree.subowners.filter(element => element.name == sceneType);
+    rootNodes.forEach((node) => {
+      nodes = [...nodes, ...node.subowners]; 
+    });
+    console.log(nodes)
+    nodes = nodes.filter(node => node.tag.some(tag => tag.includes(REQUIRED_TAG)))
     .map(node => Object.assign(node, { key: node.name }));
+  }
+  console.log(nodes)
   return {
     nodes,
   };

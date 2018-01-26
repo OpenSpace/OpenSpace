@@ -4,7 +4,7 @@ export const splitURI = (URI) => {
     indexForName : URI.length);
   const newURI = URI.substring(indexForName + 1, URI.length);
 
-  return { name, URI: newURI, lastOwner: newURI.indexOf('.') === -1, lastNode: URI.indexOf('.') === -1 };
+  return { name, URI: newURI, isLastOwner: newURI.indexOf('.') === -1, isLastNode: URI.indexOf('.') === -1 };
 };
 
 export const getIdOfProperty = (URI) => {
@@ -26,10 +26,10 @@ export const keepCloning = (objectpassed) => {
   return temporaryStorage;
 };
 
-const traverseTreeWithURI = (node, URI) => {
+export const traverseTreeWithURI = (node, URI) => {
   const splittedURI = splitURI(URI);
   let tmpValue;
-  if (splittedURI.lastNode) {
+  if (splittedURI.isLastNode) {
     node.properties.forEach((element) => {
       if (element.id === splittedURI.URI) {
         tmpValue = element;
@@ -39,7 +39,7 @@ const traverseTreeWithURI = (node, URI) => {
   }
   node.subowners.forEach((element) => {
     if (element.name === splittedURI.name) {
-      if (splittedURI.lastNode) { tmpValue = element; } else {
+      if (splittedURI.isLastNode) { tmpValue = element; } else {
         tmpValue = traverseTreeWithURI(element, splittedURI.URI);
       }
       return tmpValue;
@@ -48,24 +48,13 @@ const traverseTreeWithURI = (node, URI) => {
   return tmpValue;
 };
 
-export const findPropertyTreeNode = (state, URI) => {
-  const splittedURI = splitURI(URI);
-  let returnNode;
-  state.forEach((element) => {
-    if (element.name === splittedURI.name) {
-      returnNode = traverseTreeWithURI(element, splittedURI.URI);
-    }
-  });
-  return returnNode;
-};
-
 // Conversion from json type array to lua
 export const jsonToLuaTable = json => json.replace('[', '').replace(']', '');
 
 export const jsonToLuaString = json => `"${json}"`;
 
 
-const traverseTreeForTag = (node, tag) => {
+export const traverseTreeForTag = (node, tag) => {
   let data;
   node.subowners.map(element => {
     data = traverseTreeForTag(element, tag);

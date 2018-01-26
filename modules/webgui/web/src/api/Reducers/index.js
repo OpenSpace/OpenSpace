@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { propertyTree } from './propertyTree';
+import { propertyOwner as propertyTree } from './propertyTree';
 import { connection } from './connection';
 
 // Add more reducers here
