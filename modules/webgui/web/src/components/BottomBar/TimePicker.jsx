@@ -48,7 +48,8 @@ class TimePicker extends Component {
 
   componentDidMount() {
     // subscribe to data
-    this.state.subscriptionId = DataManager.subscribe(CurrenTimeKey, this.subscriptionCallback, TopicTypes.time);
+    this.state.subscriptionId = DataManager
+      .subscribe(CurrenTimeKey, this.subscriptionCallback, TopicTypes.time);
   }
 
   componentWillUnmount() {
