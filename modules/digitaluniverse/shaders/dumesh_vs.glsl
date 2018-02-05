@@ -30,7 +30,6 @@ in vec3 in_position;
 
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
-uniform float scaleFactor;
 
 out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;

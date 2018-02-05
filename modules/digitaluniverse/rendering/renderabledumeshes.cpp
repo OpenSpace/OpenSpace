@@ -69,12 +69,12 @@ namespace {
         "all point."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    /*static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each point."
-    };
+    };*/
 
     static const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -179,12 +179,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 Optional::Yes,
                 TransparencyInfo.description
             },
-            {
+            /*{
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
                 ScaleFactorInfo.description
-            },
+            },*/
             {
                 DrawLabelInfo.identifier,
                 new BoolVerifier,
@@ -246,7 +246,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
+    //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -328,12 +328,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     }
     addProperty(_alphaValue);
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
+    /*if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
         );
     }
-    addProperty(_scaleFactor);
+    addProperty(_scaleFactor);*/
 
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);

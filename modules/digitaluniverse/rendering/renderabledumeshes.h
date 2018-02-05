@@ -126,7 +126,7 @@ private:
     bool _labelDataIsDirty;
 
     properties::FloatProperty _alphaValue;
-    properties::FloatProperty _scaleFactor;
+    //properties::FloatProperty _scaleFactor;
     //properties::Vec3Property _pointColor;
     properties::Vec4Property _textColor;
     properties::FloatProperty _textSize;
@@ -141,7 +141,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,
-        scaleFactor, color) _uniformCache;
+        /*scaleFactor,*/ color) _uniformCache;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
