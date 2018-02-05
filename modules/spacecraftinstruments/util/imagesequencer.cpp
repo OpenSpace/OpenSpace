@@ -269,11 +269,9 @@ float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) cons
     return -1.f;
 }
 
-bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
-                                    std::string projectee,
-                                    std::string instrumentRequest,
-                                    double sinceTime) {
-
+bool ImageSequencer::getImagePaths(std::vector<Image>& captures, std::string projectee,
+                                   std::string instrumentRequest, double sinceTime)
+{
     // check if this instance is either in range or
     // a valid candidate to recieve data
     if (!instrumentActive(instrumentRequest) && !OsEng.timeManager().time().timeJumped())
@@ -283,9 +281,9 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
 
     //if (!Time::ref().timeJumped() && projectee == getCurrentTarget().second)
     if (_subsetMap[projectee]._range.includes(_currentTime) ||
-        _subsetMap[projectee]._range.includes(sinceTime)){
-        auto compareTime = [](const Image &a,
-                              const Image &b)->bool{
+        _subsetMap[projectee]._range.includes(sinceTime))
+    {
+        auto compareTime = [](const Image& a, const Image& b) -> bool {
             return a.timeRange.start < b.timeRange.start;
         };
         // for readability we store the iterators
