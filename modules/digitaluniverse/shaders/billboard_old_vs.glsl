@@ -26,12 +26,24 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-in vec4 in_position;
-in vec4 in_colormap;
+in dvec4 in_position;
+//in dvec4 in_colormap;
 
-out vec4 colorMap;
+uniform dmat4 modelViewTransform;
+uniform mat4 projection;
+
+out float vs_screenSpaceDepth;
+out vec4 orig_position;
+//out vec4 colorMap;
 
 void main() {
-    colorMap = in_colormap;
-    gl_Position = vec4(in_position);
+    orig_position = vec4(in_position);
+    //colorMap = vec4(in_colormap);
+
+    vec4 positionViewSpace = vec4(modelViewTransform * in_position);
+    vec4 positionScreenSpace = vec4(z_normalization(projection * positionViewSpace));
+    //vec4 positionScreenSpace = vec4(projection * positionViewSpace);
+    vs_screenSpaceDepth = positionScreenSpace.w;
+
+    gl_Position = positionViewSpace;
 }

@@ -24,14 +24,74 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "PowerScaling/powerScalingMath.hglsl"
 
-in vec4 in_position;
-in vec4 in_colormap;
+layout(points) in;
+layout(triangle_strip, max_vertices = 4) out;
+//layout(points, max_vertices = 1) out;
 
-out vec4 colorMap;
+in vec4 orig_position[];
+//in vec4 colorMap[];
+in float vs_screenSpaceDepth[];
+
+out vec2 texCoord;
+out float billboardSize;
+out float gs_screenSpaceDepth;
+//out vec4 gs_colorMap;
+
+uniform mat4 projection;
+uniform float scaleFactor;
+uniform float minBillboardSize;
+uniform vec2 screenSize;
+
+const vec2 corners[4] = vec2[4]( 
+    vec2(0.0, 1.0), 
+    vec2(0.0, 0.0), 
+    vec2(1.0, 1.0), 
+    vec2(1.0, 0.0) 
+);
+
 
 void main() {
-    colorMap = in_colormap;
-    gl_Position = vec4(in_position);
+    gs_screenSpaceDepth = vs_screenSpaceDepth[0];
+    //gs_colorMap = colorMap[0];
+
+    // if ((orig_position[0].x == 0.0) &&
+    //     (orig_position[0].y == 0.0) &&
+    //     (orig_position[0].z == 0.0))
+    // {
+    //     return;
+    // }
+
+    //float modifiedSpriteSize = exp((-30.623 - 0.5) * 1.0) * scaleFactor * 2000;
+
+    float modifiedSpriteSize =
+        exp((-30.623 - (-5.0)) * 0.462) * 1.0 * 2000;
+
+    vec4 projPos[4];
+    for (int i = 0; i < 4; ++i) {
+        vec4 p1 = gl_in[0].gl_Position;
+        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
+        projPos[i] = projection * p1;
+    }
+
+    // Calculate the positions of the lower left and upper right corners of the
+    // billboard in screen-space
+    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
+    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
+
+    // The billboard is smaller than one pixel, we can discard it
+    float sizeInPixels = length(ll - ur);
+    //if (sizeInPixels < minBillboardSize) {
+    //    return;
+    //}
+
+    for (int i = 0; i < 4; i++) {
+        gl_Position = projPos[i];
+        texCoord = corners[i];
+        billboardSize = sizeInPixels;
+        EmitVertex();
+    }
+    
+    EndPrimitive();
 }
