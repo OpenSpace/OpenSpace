@@ -4,7 +4,7 @@ export const splitURI = (URI) => {
     indexForName : URI.length);
   URI = URI.substring(indexForName + 1, URI.length);
 
-  return { name, URI, lastOwner: URI.indexOf('.') === -1, lastNode: URI.length === 0 };
+  return { name, URI, isLastOwner: URI.indexOf('.') === -1, isLastNode: URI.length === 0 };
 };
 
 export const getIdOfProperty = (URI) => {
@@ -83,7 +83,7 @@ const jsonToLua = json => json.replace('[', '').replace(']', '');
 const traverseTree = (node, URI) => {
   const splittedURI = splitURI(URI);
   let tmpValue;
-  if (splittedURI.lastNode) {
+  if (splittedURI.isLastNode) {
     node.properties.forEach((element) => {
       if (element.id === splittedURI.URI) {
         tmpValue = element;
