@@ -627,13 +627,11 @@ void RenderableBillboardsCloud::initializeGL() {
 
     _program = renderEngine.buildRenderProgram(
         "RenderableBillboardsCloud",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl")
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
+        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
     );
 
-    //_uniformCache.projection = _program->uniformLocation("projection");
-    //_uniformCache.modelView = _program->uniformLocation("modelViewTransform");
     _uniformCache.modelViewProjection = _program->uniformLocation(
         "modelViewProjectionTransform"
     );
@@ -646,7 +644,6 @@ void RenderableBillboardsCloud::initializeGL() {
     _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
     _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
     _uniformCache.color = _program->uniformLocation("color");
-    //_uniformCache.sides = _program->uniformLocation("sides");
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
     _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.up = _program->uniformLocation("up");
@@ -736,8 +733,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         "screenSize",
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-    //_program->setUniform(_uniformCache.projection, projMatrix);
-    //_program->setUniform(_uniformCache.modelView, modelViewMatrix);
+    
     _program->setUniform(_uniformCache.modelViewProjection, projMatrix * modelViewMatrix);
     _program->setUniform(
         _uniformCache.cameraPos,
@@ -750,10 +746,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         )
     );
 
-    //_program->setUniform("cameraPosition", data.camera.positionVec3());
-    //_program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
-
-
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
     glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) *
                                    glm::dvec4(0.0, 0.0, 0.0, 1.0);
@@ -763,7 +755,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
     _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
     _program->setUniform(_uniformCache.color, _pointColor);
-    //_program->setUniform(_uniformCache.sides, 4);
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
@@ -934,7 +925,6 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    // glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *

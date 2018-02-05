@@ -530,7 +530,6 @@ void RenderablePlanesCloud::initializeGL() {
         "modelViewProjectionTransform"
     );
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
     _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
 
@@ -606,7 +605,6 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         modelViewProjectionMatrix
     );
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
@@ -847,7 +845,6 @@ void RenderablePlanesCloud::update(const UpdateData&) {
             "modelViewProjectionTransform"
         );
         _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
         _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
         _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
     }
