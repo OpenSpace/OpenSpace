@@ -133,6 +133,9 @@ void GdalRawTileDataReader::initialize() {
         throw ghoul::RuntimeError("File path must not be empty");
     }
     _dataset = openGdalDataset(_datasetFilePath);
+    if (!_dataset) {
+        throw ghoul::RuntimeError("Failed to load dataset: " + _datasetFilePath);
+    }
 
     // Assume all raster bands have the same data type
     _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
@@ -223,21 +226,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 }
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
-    GDALDataset* dataset = static_cast<GDALDataset*>(
-        GDALOpen(filePath.c_str(), GA_ReadOnly)
-    );
-    if (!dataset) {
-        using namespace ghoul::filesystem;
-        // std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
-        //     _initDirectory, filePath
-        // );
-
-        dataset = static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
-        if (!dataset) {
-            throw ghoul::RuntimeError("Failed to load dataset:\n" + filePath);
-        }
-    }
-    return dataset;
+    return static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
 }
 
 int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) const {
