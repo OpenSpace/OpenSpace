@@ -646,6 +646,10 @@ int main_main(int argc, char** argv) {
 
     bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
 
+    // Do not print message if slaves are waiting for the master
+    // Only timeout after 15 minutes
+    SgctEngine->setSyncParameters(false, 15.f * 60.f);
+
     if (!initSuccess) {
         LFATAL("Initializing failed");
         cleanup(IsInitialized::No);
