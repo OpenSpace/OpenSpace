@@ -84,8 +84,7 @@ bool Scale::initialize() {
     return true;
 }
 
-double Scale::scaleValue() const
-{
+double Scale::scaleValue() const {
     return _cachedScale;
 }
 
