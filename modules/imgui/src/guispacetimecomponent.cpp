@@ -148,6 +148,22 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
+    ImGui::SameLine();
+    bool pressed = ImGui::Button("Refocus");
+    if (pressed) {
+        // To refocus, we are first clearing the origin property before setting it back
+        // to its old value. The property mechanism's onChange does not fire if the same
+        // value is set again, hence the need for the clearing
+        OsEng.scriptEngine().queueScript(
+            R"(
+                local o = openspace.getPropertyValue('NavigationHandler.Origin');
+                openspace.setPropertyValue('NavigationHandler.Origin', '');
+                openspace.setPropertyValue('NavigationHandler.Origin', o);
+            )",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
     ImGui::Separator();
