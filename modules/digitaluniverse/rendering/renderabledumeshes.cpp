@@ -60,7 +60,7 @@ namespace {
     constexpr const char* GigalightyearUnit = "Gly";
 
     constexpr const int8_t CurrentCacheVersion = 1;
-    const float PARSEC = 0.308567756E17;
+    const float PARSEC = 0.308567756E17f;
 
     static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
@@ -361,16 +361,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<int>(
-                dictionary.value<float>(LabelMinSizeInfo.identifier)
-            );
+            _textMinSize = dictionary.value<float>(LabelMinSizeInfo.identifier);
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<int>(
-                dictionary.value<float>(LabelMaxSizeInfo.identifier)
-            );
+            _textMaxSize = dictionary.value<float>(LabelMaxSizeInfo.identifier);
         }
         addProperty(_textMaxSize);
     }
@@ -406,6 +402,7 @@ void RenderableDUMeshes::initializeGL() {
         absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
     );
 
+    _uniformCache.modelViewProjectionTransform = _program->uniformLocation("modelViewProjectionTransform");
     _uniformCache.modelViewTransform = _program->uniformLocation("modelViewTransform");
     _uniformCache.projectionTransform = _program->uniformLocation("projectionTransform");
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
@@ -480,6 +477,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     _program->activate();
 
+    _program->setUniform(_uniformCache.modelViewProjectionTransform, glm::mat4(projectionMatrix * modelViewMatrix));
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
@@ -529,28 +527,28 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 
     _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
 
-    float scale = 0.0;
+    float scale = 0.0f;
     switch (_unit) {
     case Meter:
-        scale = 1.0;
+        scale = 1.0f;
         break;
     case Kilometer:
-        scale = 1e3;
+        scale = 1e3f;
         break;
     case Parsec:
         scale = PARSEC;
         break;
     case Kiloparsec:
-        scale = 1e3 * PARSEC;
+        scale = 1e3f * PARSEC;
         break;
     case Megaparsec:
-        scale = 1e6 * PARSEC;
+        scale = 1e6f * PARSEC;
         break;
     case Gigaparsec:
-        scale = 1e9 * PARSEC;
+        scale = 1e9f * PARSEC;
         break;
     case GigalightYears:
-        scale = 306391534.73091 * PARSEC;
+        scale = 306391534.73091f * PARSEC;
         break;
     }
 
@@ -562,9 +560,9 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
             *_font,
             scaledPos,
             _textColor,
-            pow(10.0, _textSize.value()),
-            _textMinSize,
-            _textMaxSize,
+            powf(10.0, _textSize.value()),
+            static_cast<const int>(_textMinSize),
+            static_cast<const int>(_textMaxSize),
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,
@@ -582,9 +580,9 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-    glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewMatrix;
+    glm::dmat4 modelViewMatrix(data.camera.combinedViewMatrix() * modelMatrix);
+    glm::dmat4 projectionMatrix(data.camera.projectionMatrix());
+    glm::dmat4 modelViewProjectionMatrix(projectionMatrix * modelViewMatrix);
 
     glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
     glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
@@ -612,6 +610,9 @@ void RenderableDUMeshes::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
 
+        _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
+            "modelViewProjectionTransform"
+        );
         _uniformCache.modelViewTransform = _program->uniformLocation(
             "modelViewTransform"
         );
@@ -987,28 +988,28 @@ void RenderableDUMeshes::createMeshes() {
             _renderingMeshesMap.end();
 
         for (; it != itEnd; ++it) {
-            float scale = 0.0;
+            float scale = 0.0f;
             switch (_unit) {
                 case Meter:
-                    scale = 1.0;
+                    scale = 1.0f;
                     break;
                 case Kilometer:
-                    scale = 1e3;
+                    scale = 1e3f;
                     break;
                 case Parsec:
                     scale = PARSEC;
                     break;
                 case Kiloparsec:
-                    scale = 1e3 * PARSEC;
+                    scale = 1e3f * PARSEC;
                     break;
                 case Megaparsec:
-                    scale = 1e6 * PARSEC;
+                    scale = 1e6f * PARSEC;
                     break;
                 case Gigaparsec:
-                    scale = 1e9 * PARSEC;
+                    scale = 1e9f * PARSEC;
                     break;
                 case GigalightYears:
-                    scale = 306391534.73091 * PARSEC;
+                    scale = 306391534.73091f * PARSEC;
                     break;
             }
 

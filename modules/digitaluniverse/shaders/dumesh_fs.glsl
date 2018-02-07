@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in float vs_screenSpaceDepth;
-in vec4 vs_positionViewSpace;
+//in vec4 vs_positionViewSpace;
 
 uniform vec3 color;
 uniform float alphaValue;
@@ -41,7 +41,8 @@ Fragment getFragment() {
     frag.depth = vs_screenSpaceDepth;
 
     // JCC: Need to change the position to camera space
-    frag.gPosition  = vs_positionViewSpace;
+    //frag.gPosition  = vs_positionViewSpace;
+    frag.gPosition  = vec4(vec3(1E30), 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     
     return frag;
