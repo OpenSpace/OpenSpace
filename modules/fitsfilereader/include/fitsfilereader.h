@@ -45,7 +45,7 @@ struct ImageData {
 
 template<typename T>
 struct TableData {
-    std::map<string, std::vector<T>> contents;
+    std::unordered_map<string, std::vector<T>> contents;
     long int optimalRowsize;
     string name;
 };
@@ -54,7 +54,7 @@ class FitsFileReader {
 public:
     FitsFileReader(bool verboseMode);
     ~FitsFileReader();
-
+    
     template<typename T>
     std::shared_ptr<ImageData<T>> readImage(const std::string& path);
     template<typename T>
@@ -63,9 +63,8 @@ public:
     std::shared_ptr<T> readHeaderValue(const std::string key);
 
     template<typename T>
-    std::shared_ptr<TableData<T>> readTable(const std::string& path, 
-        const std::vector<string> columnNames, int startRow = 1, int endRow = 10,
-        int hduIdx = 1, bool readAll = false);
+    std::shared_ptr<TableData<T>> readTable(std::string& path, std::vector<std::string>& columnNames,
+        int startRow = 1, int endRow = 10, int hduIdx = 1, bool readAll = false);
 
 private:
     std::unique_ptr<CCfits::FITS> _infile;

@@ -60,18 +60,15 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum ColorOption {
-        Color = 0,
-        Velocity = 1,
-        Speed = 2
-    };
-
-    void createDataSlice(ColorOption option);
-
+    void createDataSlice();
     bool loadData();
-    bool readSpeckFile();
+    bool readFitsFile();
     bool loadCachedFile(const std::string& file);
     bool saveCachedFile(const std::string& file) const;
+
+    properties::StringProperty _fitsFilePath;
+    std::unique_ptr<ghoul::filesystem::File> _fitsFile;
+    bool _dataIsDirty;
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
@@ -83,22 +80,17 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
     bool _colorTextureIsDirty;
 
-    properties::OptionProperty _colorOption;
-    bool _dataIsDirty;
-
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::FloatProperty _minBillboardSize;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
-
-    std::string _speckFile;
+    UniformCache(view, projection, alphaValue, scaleFactor,
+        minBillboardSize, screenSize, psfTexture, time, colorTexture, scaling) _uniformCache;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
-    int _nValuesPerStar;
+    size_t _nValuesPerStar;
 
     GLuint _vao;
     GLuint _vbo;

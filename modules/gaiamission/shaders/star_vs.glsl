@@ -27,26 +27,23 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec4 in_position;
-in vec3 in_brightness;
 in vec3 in_velocity;
-in float in_speed;
+in vec3 in_brightness;
 
 out vec4 psc_position;
-out vec3 vs_brightness;
 out vec3 vs_velocity;
-out float vs_speed;
+out vec3 vs_brightness;
 out vec4 vs_gPosition;
 
 uniform mat4 view;
 uniform mat4 projection;
-
+uniform float time; 
 
 void main() {
     vec4 p = in_position;
     psc_position  = p;
     vs_brightness = in_brightness;
-    vs_velocity = in_velocity;
-    vs_speed = in_speed;
+    vs_velocity = in_velocity * time;
 
     vec4 tmp = p;
     vec4 position = pscTransform(tmp, mat4(1.0));

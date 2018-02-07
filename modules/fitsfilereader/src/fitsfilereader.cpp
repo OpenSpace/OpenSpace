@@ -118,8 +118,8 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
 // which makes the function take a lot longer if it's a big file. 
 // If no HDU index is given the currentExtension will be read from. 
 template<typename T>
-std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::string& path,
-    const std::vector<string> columnNames, int startRow, int endRow, int hduIdx, bool readAll) {
+std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
+    std::vector<std::string>& columnNames, int startRow, int endRow, int hduIdx, bool readAll) {
     try {
 
         _infile = std::make_unique<FITS>(path, Read, readAll);
@@ -127,19 +127,21 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::string& path,
         // Make sure FITS file is not a Primary HDU Object (aka an image).
         if (!isPrimaryHDU()) {
 
-            ExtHDU& table = pInfile->extension(hduIdx);
+            ExtHDU& table = _infile->extension(hduIdx);
             int numCols = columnNames.size();
-            std::map<string, std::vector<T>> contents;
+            std::unordered_map<string, std::vector<T>> contents;
 
             for (int i = 0; i < numCols; ++i) {
                 std::vector<T> columnData;
+                LINFO("Read column: " + columnNames[i]);
                 table.column(columnNames[i]).read(columnData, startRow, endRow);
                 contents[columnNames[i]] = columnData;
             }
 
             // Create TableData object of table contents.
-            std::shared_ptr<TableData<T>> loadedTable = {
-                std::move(contents), table.getRowSize(), table.name()};
+            TableData<T> loadedTable = {
+                std::move(contents), table.getRowsize(), table.name()
+            };
 
             return std::make_shared<TableData<T>>(loadedTable);
         }
@@ -195,4 +197,8 @@ template std::shared_ptr<std::unordered_map<std::string, std::string>> FitsFileR
 template std::shared_ptr<float> FitsFileReader::readHeaderValue(const std::string key);
 template std::shared_ptr<int> FitsFileReader::readHeaderValue(const std::string key);
 template std::shared_ptr<std::string> FitsFileReader::readHeaderValue(const std::string key);
+
+template std::shared_ptr<TableData<float>> FitsFileReader::readTable(std::string& path, 
+    std::vector<std::string>& columnNames,
+    int startRow, int endRow, int hduIdx, bool readAll);
 } // namespace openspace

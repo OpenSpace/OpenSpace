@@ -24,23 +24,69 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+layout(points) in;
+in vec3 vs_velocity[];
+in vec2 vs_brightness[];
+in vec4 vs_gPosition[];
 
-layout(location = 0) in vec4 vertPosition;
+layout(triangle_strip, max_vertices = 4) out;
+out vec4 vs_position;
+out vec4 ge_gPosition;               
+out vec3 ge_velocity;
+out vec2 ge_brightness;
+out vec2 texCoord;
+out float billboardSize;
 
-out vec3 vPosition;
-out vec4 worldPosition;
+uniform mat4 projection;
+uniform float scaleFactor;
+uniform float minBillboardSize;
+uniform vec2 screenSize;
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
-
+const vec2 corners[4] = vec2[4]( 
+    vec2(0.0, 1.0), 
+    vec2(0.0, 0.0), 
+    vec2(1.0, 1.0), 
+    vec2(1.0, 0.0) 
+);
 
 void main() {
-    vPosition = vertPosition.xyz;
 
-    worldPosition = modelTransform * vec4(vertPosition.xyz, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = pscTransform(worldPosition, mat4(1.0));
+    ge_brightness = vs_brightness[0];
+    ge_velocity = vs_velocity[0];
+    
+    float magnitude = vs_brightness[0].x;
+    float modifiedSpriteSize =
+        exp(magnitude * 0.462) * scaleFactor * 2000;
 
-    gl_Position =  z_normalization(viewProjection * position);
+    vec4 projPos[4];
+    for (int i = 0; i < 4; ++i) {
+        vec4 p1 = gl_in[0].gl_Position;
+        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
+        projPos[i] = projection * p1;
+    }
+
+    // Calculate the positions of the lower left and upper right corners of the
+    // billboard in screen-space
+    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
+    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
+
+    // The billboard is smaller than one pixel, we can discard it
+    float sizeInPixels = length(ll - ur);
+    if (sizeInPixels < minBillboardSize) {
+        return;
+    }
+
+    for (int i = 0; i < 4; i++) {
+        vs_position = gl_in[0].gl_Position;
+        gl_Position = projPos[i];
+        texCoord = corners[i];
+
+        // G-Buffer
+        ge_gPosition  = vs_gPosition[0];
+        billboardSize = sizeInPixels;
+        EmitVertex();
+    }
+
+    EndPrimitive();
+    
 }

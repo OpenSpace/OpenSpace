@@ -41,11 +41,9 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/galaxyraycast.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points.fs
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points.vs
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds.fs
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/raycasterbounds.vs
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_ge.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_ge.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_vs.glsl

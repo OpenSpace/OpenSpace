@@ -27,8 +27,11 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
@@ -44,58 +47,28 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableGaiaStars";
 
-    constexpr const char* KeyFile = "File";
-
     constexpr int8_t CurrentCacheVersion = 1;
 
-    struct ColorVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
-
-        float bvColor; // B-V color value
+    struct VBOLayout {
+        std::array<float, 4> position; // (x,y,z) - TODO
+        std::array<float, 3> velocity; // (x,y,z)
+        float magnitude;
+        float bvColor;
         float luminance;
-        float absoluteMagnitude;
+        
     };
 
-    struct VelocityVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
 
-        float bvColor; // B-V color value
-        float luminance;
-        float absoluteMagnitude;
-
-        float vx; // v_x
-        float vy; // v_y
-        float vz; // v_z
-    };
-
-    struct SpeedVBOLayout {
-        std::array<float, 4> position; // (x,y,z,e)
-
-        float bvColor; // B-V color value
-        float luminance;
-        float absoluteMagnitude;
-
-        float speed;
-    };
-
+    static const openspace::properties::Property::PropertyInfo FitsFileInfo = {
+        "File",
+        "File Path",
+        "The path to the fits file with data for the stars to be rendered."
+    }; 
+    
     static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
         "Point Spread Function Texture",
         "The path to the texture that should be used as a point spread function for the "
-        "stars."
-    };
-
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
-        "ColorMap",
-        "ColorBV Texture",
-        "The path to the texture that is used to convert from the B-V value of the star "
-        "to its color. The texture is used as a one dimensional lookup function."
-    };
-
-    static const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
-        "ColorOption",
-        "Color Option",
-        "This value determines which quantity is used for determining the color of the "
         "stars."
     };
 
@@ -119,6 +92,13 @@ namespace {
         "This value is used as a lower limit on the size of stars that are rendered. Any "
         "stars that have a smaller apparent size will be discarded entirely."
     };
+
+    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+        "ColorMap",
+        "ColorBV Texture",
+        "The path to the texture that is used to convert from the B-V value of the star "
+        "to its color. The texture is used as a one dimensional lookup function."
+    };
 }  // namespace
 
 namespace openspace {
@@ -135,31 +115,16 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 Optional::No
             },
             {
-                KeyFile,
+                FitsFileInfo.identifier,
                 new StringVerifier,
                 Optional::No,
-                "The path to the SPECK file that contains information about the stars "
-                "being rendered."
+                FitsFileInfo.description
             },
             {
                 PsfTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
                 PsfTextureInfo.description
-            },
-            {
-                ColorTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ColorTextureInfo.description
-            },
-            {
-                ColorOptionInfo.identifier,
-                new StringInListVerifier({
-                    "Color", "Velocity", "Speed"
-                }),
-                Optional::Yes,
-                ColorOptionInfo.description
             },
             {
                 TransparencyInfo.identifier,
@@ -178,6 +143,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 MinBillboardSizeInfo.description
+            },
+            {
+                ColorTextureInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                ColorTextureInfo.description
             }
         }
     };
@@ -185,19 +156,19 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _fitsFilePath(FitsFileInfo)
+    , _fitsFile(nullptr)
+    , _dataIsDirty(true)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _pointSpreadFunctionTexture(nullptr)
     , _pointSpreadFunctionTextureIsDirty(true)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _dataIsDirty(true)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
     , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
     , _program(nullptr)
-    , _speckFile("")
     , _nValuesPerStar(0)
     , _vao(0)
     , _vbo(0)
@@ -210,39 +181,22 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         "RenderableGaiaStars"
     );
 
+    _fitsFilePath = absPath(dictionary.value<std::string>(FitsFileInfo.identifier));
+    _fitsFile = std::make_unique<File>(_fitsFilePath);
+
+    _fitsFilePath.onChange(
+        [&] { _dataIsDirty = true; }
+    );
+    _fitsFile->setCallback(
+        [&](const File&) { _dataIsDirty = true; }
+    );
+    addProperty(_fitsFilePath);
+
+
     _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
         PsfTextureInfo.identifier
     ));
     _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
-
-    _colorTexturePath = absPath(dictionary.value<std::string>(
-        ColorTextureInfo.identifier
-    ));
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
-
-    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
-
-    _colorOption.addOptions({
-        { ColorOption::Color, "Color" },
-        { ColorOption::Velocity, "Velocity" },
-        { ColorOption::Speed, "Speed" }
-    });
-    if (dictionary.hasKey(ColorOptionInfo.identifier)) {
-        const std::string colorOption = dictionary.value<std::string>(
-            ColorOptionInfo.identifier
-        );
-        if (colorOption == "Color") {
-            _colorOption = ColorOption::Color;
-        }
-        else if (colorOption == "Velocity") {
-            _colorOption = ColorOption::Velocity;
-        }
-        else {
-            _colorOption = ColorOption::Speed;
-        }
-    }
-    _colorOption.onChange([&] { _dataIsDirty = true; });
-    addProperty(_colorOption);
 
     _pointSpreadFunctionTexturePath.onChange(
         [&]{ _pointSpreadFunctionTextureIsDirty = true; }
@@ -252,7 +206,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     );
     addProperty(_pointSpreadFunctionTexturePath);
 
-    _colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
+    _colorTexturePath = absPath(dictionary.value<std::string>(
+        ColorTextureInfo.identifier
+        ));
+    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
+    _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
     _colorTextureFile->setCallback(
         [&](const File&) { _colorTextureIsDirty = true; }
     );
@@ -288,26 +246,31 @@ bool RenderableGaiaStars::isReady() const {
 
 void RenderableGaiaStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram("Star",
+    _program = renderEngine.buildRenderProgram("GaiaStar",
+        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
+        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
+        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
         absPath("${MODULE_GAIAMISSION}/shaders/star_vs.glsl"),
         absPath("${MODULE_GAIAMISSION}/shaders/star_fs.glsl"),
         absPath("${MODULE_GAIAMISSION}/shaders/star_ge.glsl")
+        
     );
 
     _uniformCache.view = _program->uniformLocation("view");
     _uniformCache.projection = _program->uniformLocation("projection");
-    _uniformCache.colorOption = _program->uniformLocation("colorOption");
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
     _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.scaling = _program->uniformLocation("scaling");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+    _uniformCache.time = _program->uniformLocation("time");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+
+    _uniformCache.scaling = _program->uniformLocation("scaling");
 
     bool success = loadData();
     if (!success) {
-        throw ghoul::RuntimeError("Error loading data");
+        throw ghoul::RuntimeError("Error loading FITS data");
     }
 }
 
@@ -317,6 +280,7 @@ void RenderableGaiaStars::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
+    _fitsFile = nullptr;
     _pointSpreadFunctionTexture = nullptr;
     _colorTexture = nullptr;
 
@@ -338,14 +302,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.view, data.camera.viewMatrix());
     _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
 
-    _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
-    _program->setUniform(
-        _uniformCache.screenSize,
+    _program->setUniform(_uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
+    _program->setUniform(_uniformCache.time, static_cast<float>(data.time.j2000Seconds()));
 
     setPscUniforms(*_program.get(), data.camera, data.position);
     _program->setUniform(_uniformCache.scaling, scaling);
@@ -364,6 +327,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
     glDrawArrays(GL_POINTS, 0, nStars);
 
+    //LINFO("Fulldata: " + std::to_string(_fullData.size()));
+    //LINFO("_nValuesPerStar: " + std::to_string(_nValuesPerStar));
+    //LINFO("Number of stars: " + std::to_string(nStars));
+
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -372,10 +339,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
 void RenderableGaiaStars::update(const UpdateData&) {
     if (_dataIsDirty) {
-        const int value = _colorOption;
         LDEBUG("Regenerating data");
 
-        createDataSlice(ColorOption(value));
+        createDataSlice();
 
         int size = static_cast<int>(_slicedData.size());
 
@@ -397,99 +363,44 @@ void RenderableGaiaStars::update(const UpdateData&) {
         );
 
         GLint positionAttrib = _program->attributeLocation("in_position");
+        GLint velocityAttrib = _program->attributeLocation("in_velocity");
         GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
 
         const size_t nStars = _fullData.size() / _nValuesPerStar;
         const size_t nValues = _slicedData.size() / nStars;
 
+        LINFO("nStars: " + std::to_string(nStars) + " - nValues: " + std::to_string(nValues));
+
         GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
         glEnableVertexAttribArray(positionAttrib);
+        glEnableVertexAttribArray(velocityAttrib);
         glEnableVertexAttribArray(brightnessDataAttrib);
-        const int colorOption = _colorOption;
-        switch (colorOption) {
-        case ColorOption::Color:
-            glVertexAttribPointer(
-                positionAttrib,
-                4,
-                GL_FLOAT,
-                GL_FALSE,
-                stride,
-                nullptr // = offsetof(ColorVBOLayout, position)
-            );
-            glVertexAttribPointer(
-                brightnessDataAttrib,
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
-            );
 
-            break;
-        case ColorOption::Velocity:
-            {
-                glVertexAttribPointer(
-                    positionAttrib,
-                    4,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(VelocityVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    brightnessDataAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor))
-                );
-
-                GLint velocityAttrib = _program->attributeLocation("in_velocity");
-                glEnableVertexAttribArray(velocityAttrib);
-                glVertexAttribPointer(
-                    velocityAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_TRUE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
-                );
-
-                break;
-            }
-        case ColorOption::Speed:
-            {
-                glVertexAttribPointer(
-                    positionAttrib,
-                    4,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(SpeedVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    brightnessDataAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor))
-                );
-
-                GLint speedAttrib = _program->attributeLocation("in_speed");
-                glEnableVertexAttribArray(speedAttrib);
-                glVertexAttribPointer(
-                    speedAttrib,
-                    1,
-                    GL_FLOAT,
-                    GL_TRUE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed))
-                );
-            }
-        }
+        glVertexAttribPointer(
+            positionAttrib,
+            4, // TODO
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr // = offsetof(VelocityVBOLayout, position)
+        );
+        glVertexAttribPointer(
+            velocityAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            reinterpret_cast<void*>(offsetof(VBOLayout, velocity))
+        );
+        glVertexAttribPointer(
+            brightnessDataAttrib,
+            3, // TODO
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            reinterpret_cast<void*>(offsetof(VBOLayout, magnitude))
+        );
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -541,7 +452,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _colorTexturePath
-            );
+                );
             _colorTextureFile->setCallback(
                 [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
             );
@@ -554,123 +465,106 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         _uniformCache.view = _program->uniformLocation("view");
         _uniformCache.projection = _program->uniformLocation("projection");
-        _uniformCache.colorOption = _program->uniformLocation("colorOption");
         _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
         _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
         _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.scaling = _program->uniformLocation("scaling");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+        _uniformCache.time = _program->uniformLocation("time");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+        _uniformCache.scaling = _program->uniformLocation("scaling");
     }
 }
 
 bool RenderableGaiaStars::loadData() {
-    std::string _file = _speckFile;
+    std::string _file = _fitsFilePath;
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         _file,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+    //bool hasCachedFile = FileSys.fileExists(cachedFile);
+    //if (hasCachedFile) {
+    //    LINFO("Cached file '" << cachedFile << "' used for Fits file '" << _file << "'");
+    //
+    //    bool success = loadCachedFile(cachedFile);
+    //    if (success) {
+    //        return true;
+    //    }
+    //    else {
+    //        FileSys.cacheManager()->removeCacheFile(_file);
+    //    }
+    //}
+    //else {
+    //    LINFO("Cache for Fits file '" << _file << "' not found");
+    //}
+    //LINFO("Loading Fits file '" << _file << "'");
 
-        bool success = loadCachedFile(cachedFile);
-        if (success) {
-            return true;
-        }
-        else {
-            FileSys.cacheManager()->removeCacheFile(_file);
-            // Intentional fall-through to the 'else' computation to generate the cache
-            // file for the next run
-        }
-    }
-    else {
-        LINFO("Cache for Speck file '" << _file << "' not found");
-    }
-    LINFO("Loading Speck file '" << _file << "'");
-
-    bool success = readSpeckFile();
+    bool success = readFitsFile();
     if (!success) {
         return false;
     }
 
-    LINFO("Saving cache");
-    success = saveCachedFile(cachedFile);
+    //LINFO("Saving cache");
+    //success = saveCachedFile(cachedFile);
 
     return success;
 }
 
-bool RenderableGaiaStars::readSpeckFile() {
-    std::string _file = _speckFile;
-    std::ifstream file(_file);
-    if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+bool RenderableGaiaStars::readFitsFile() {
+    std::string _file = _fitsFilePath;
+
+    std::string columns[] = { "Position_X", "Position_Y", "Position_Z",
+        "Velocity_X", "Velocity_Y", "Velocity_Z", "Gaia_G_Mag", "HIP_B_V" };
+    std::vector<string> columnNames(columns, columns + sizeof(columns) / sizeof(std::string));
+
+    int firstRow = 1;
+    int allRows = 2539913;
+    int lastRow = 100000;
+    int nStars = lastRow - firstRow + 1;
+
+    FitsFileReader fitsInFile(false);
+    std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_file, columnNames,
+        firstRow, lastRow);
+
+    if (!table) {
+        LERROR("Failed to open Fits file '" << _file << "'");
         return false;
     }
 
-    _nValuesPerStar = 0;
+    _nValuesPerStar = columnNames.size();
+    int nNullArr = 0;
 
-    // The beginning of the speck file has a header that either contains comments
-    // (signaled by a preceding '#') or information about the structure of the file
-    // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
-    while (true) {
-        std::streampos position = file.tellg();
-        std::getline(file, line);
-
-        if (line[0] == '#' || line.empty()) {
-            continue;
-        }
-
-        if (line.substr(0, 7) != "datavar" &&
-            line.substr(0, 10) != "texturevar" &&
-            line.substr(0, 7) != "texture")
-        {
-            // we read a line that doesn't belong to the header, so we have to jump back
-            // before the beginning of the current line
-            file.seekg(position);
-            break;
-        }
-
-        if (line.substr(0, 7) == "datavar") {
-            // datavar lines are structured as follows:
-            // datavar # description
-            // where # is the index of the data variable; so if we repeatedly overwrite
-            // the 'nValues' variable with the latest index, we will end up with the total
-            // number of values (+3 since X Y Z are not counted in the Speck file index)
-            std::stringstream str(line);
-
-            std::string dummy;
-            str >> dummy;
-            str >> _nValuesPerStar;
-            _nValuesPerStar += 1; // We want the number, but the index is 0 based
-        }
-    }
-
-    _nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
-
-    do {
+    std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
+    for (int i = 0; i < nStars; ++i) {
         std::vector<float> values(_nValuesPerStar);
-
-        std::getline(file, line);
-        std::stringstream str(line);
-
-        for (int i = 0; i < _nValuesPerStar; ++i) {
-            str >> values[i];
+        size_t idx = 0;
+        for (std::string name : columnNames) {
+            std::vector<float> vecData = tableContent[name];
+            values[idx] = vecData[i];
+            idx++;
         }
+
         bool nullArray = true;
-        for (size_t i = 0; i < values.size(); ++i) {
-            if (values[i] != 0.0) {
+        for (size_t j = 0; j < values.size(); ++j) {
+            if (values[j] != -999) {
                 nullArray = false;
                 break;
             }
         }
+        if (i % 10000 == 0) {
+            LINFO(std::to_string(i / 1000) + "k out of " + std::to_string(nStars) +
+                " stars sorted!");
+        }
+        
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
+        } else {
+            nNullArr++;
         }
-    } while (!file.eof());
+    }
+    LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
+        " read stars were nullArrays");
 
     return true;
 }
@@ -732,119 +626,45 @@ bool RenderableGaiaStars::saveCachedFile(const std::string& file) const {
     }
 }
 
-void RenderableGaiaStars::createDataSlice(ColorOption option) {
+void RenderableGaiaStars::createDataSlice() {
     _slicedData.clear();
 
-    // This is only temporary until the scalegraph is in place ---abock
-    float minDistance = std::numeric_limits<float>::max();
-    float maxDistance = -std::numeric_limits<float>::max();
-
-    for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
-        float distLy = _fullData[i + 6];
-        //if (distLy < 20.f) {
-            minDistance = std::min(minDistance, distLy);
-            maxDistance = std::max(maxDistance, distLy);
-        //}
-    }
-
-    for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
-        glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-
-        // This is only temporary until the scalegraph is in place. It places all stars
-        // on a sphere with a small variation in the distance to account for blending
-        // issues ---abock
-        //if (p != glm::vec3(0.f))
-        //    p = glm::normalize(p);
-
-        //float distLy = _fullData[i + 6];
-        //float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
-        //float distance = 18.f - normalizedDist / 1.f ;
-
-
-        //psc position = psc(glm::vec4(p, distance));
+    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
+        glm::vec3 pos = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+        //glm::vec3 position = glm::vec3(4662120063743.592773, 1263245003503.724854, -955413856565.788086);
 
         // Convert parsecs -> meter
-        psc position = psc(glm::vec4(p * 0.308567756f, 17));
+        psc position = psc(glm::vec4(pos * 0.308567756f, 15));
+        //glm::vec3 position = pos * static_cast<float>(distanceconstants::Parsec);
+        /*LINFO("Pos for row: " + std::to_string(i/_nValuesPerStar) + " : ("
+            + std::to_string(position.x) + ", "
+            + std::to_string(position.y) + ", "
+            + std::to_string(position.z) + ")");
+        LINFO("Vel for row: " + std::to_string(i / _nValuesPerStar) + " : ("
+            + std::to_string(_fullData[i + 3]) + ", "
+            + std::to_string(_fullData[i + 4]) + ", "
+            + std::to_string(_fullData[i + 5]) + ")");
+        LINFO("Brighness for row: " + std::to_string(i / _nValuesPerStar) + " : ("
+            + std::to_string(_fullData[i + 6]) + ", "
+            + std::to_string(_fullData[i + 7]) + ")");*/
 
-        //position[1] *= parsecsToMetersFactor[0];
-        //position[2] *= parsecsToMetersFactor[0];
-        //position[3] += parsecsToMetersFactor[1];
+        union {
+            VBOLayout value;
+            std::array<float, sizeof(VBOLayout)> data;
+        } layout;
 
-        switch (option) {
-        case ColorOption::Color:
-            {
-                union {
-                    ColorVBOLayout value;
-                    std::array<float, sizeof(ColorVBOLayout)> data;
-                } layout;
+        layout.value.position = { {
+                position[0], position[1], position[2], position[3] // TODO
+            } };
+        layout.value.velocity = { {
+                _fullData[i + 3], _fullData[i + 4], _fullData[i + 5]
+            } };
 
-                layout.value.position = { {
-                    position[0], position[1], position[2], position[3]
-                } };
+        layout.value.magnitude = _fullData[i + 6];
+        layout.value.bvColor = _fullData[i + 7];
+        layout.value.luminance = 1.5;
 
-#ifdef USING_STELLAR_TEST_GRID
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 3];
-                layout.value.absoluteMagnitude = _fullData[i + 3];
-#else
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
-#endif
-
-                _slicedData.insert(_slicedData.end(),
-                                   layout.data.begin(),
-                                   layout.data.end());
-
-                break;
-            }
-        case ColorOption::Velocity:
-            {
-                union {
-                    VelocityVBOLayout value;
-                    std::array<float, sizeof(VelocityVBOLayout)> data;
-                } layout;
-
-                layout.value.position = { {
-                        position[0], position[1], position[2], position[3]
-                    } };
-
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
-
-                layout.value.vx = _fullData[i + 12];
-                layout.value.vy = _fullData[i + 13];
-                layout.value.vz = _fullData[i + 14];
-
-                _slicedData.insert(_slicedData.end(),
-                                   layout.data.begin(),
-                                   layout.data.end());
-                break;
-            }
-        case ColorOption::Speed:
-            {
-                union {
-                    SpeedVBOLayout value;
-                    std::array<float, sizeof(SpeedVBOLayout)> data;
-                } layout;
-
-                layout.value.position = { {
-                        position[0], position[1], position[2], position[3]
-                    } };
-
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
-
-                layout.value.speed = _fullData[i + 15];
-
-                _slicedData.insert(_slicedData.end(),
-                                   layout.data.begin(),
-                                   layout.data.end());
-                break;
-            }
-        }
+        _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
     }
 }
 

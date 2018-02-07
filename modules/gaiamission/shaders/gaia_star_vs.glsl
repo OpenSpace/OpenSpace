@@ -21,23 +21,30 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#version __CONTEXT__
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_velocity;
+layout(location = 2) in vec2 in_brightness;
 
-in vec3 vsPosition;
-in vec3 vsColor;
+out vec3 vs_velocity;
+out vec2 vs_brightness;
+out vec4 vs_gPosition;
 
-uniform float emittanceFactor;
+uniform mat4 view;
+uniform mat4 projection;
+uniform float time; 
 
 
-Fragment getFragment() {
-    Fragment frag;
+void main() {
+    vs_brightness = in_brightness;
+    vs_velocity = in_velocity;
 
-    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
-    frag.color = vec4(vsColor.rgb * coefficient, 1.0);
-
-    frag.depth = pscDepth(vec4(vsPosition, 0.0));
-
-    return frag;
+    //vec3 position = in_position + (time * in_velocity);
+    vec3 position = in_position;
+    
+    // G-Buffer
+    vs_gPosition = vec4(position, 1.0);
+    
+    gl_Position = view * vec4(position, 1.0);
 }

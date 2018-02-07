@@ -3,37 +3,31 @@ local assetHelper = asset.require("util/asset_helper")
 local textures = asset.syncedResource({
     Name = "Stars Textures",
     Type = "HttpSynchronization",
-    Identifier = "stars-denver_textures",
-    Version = 1
-})
-
-local speck = asset.syncedResource({
-    Name = "Stars Speck Files",
-    Type = "HttpSynchronization",
-    Identifier = "stars-denver_speck",
+    Identifier = "stars_textures",
     Version = 1
 })
 
 local colorLUT = asset.syncedResource({
     Name = "Stars Color Table",
     Type = "HttpSynchronization",
-    Identifier = "stars-denver_colormap",
+    Identifier = "stars_colormap",
     Version = 1
 })
+
+local fits = "C:/Users/adaal265/Documents/data"
 
 
 local GaiaMission = {
     Name = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = speck .. "/denver_stars.speck",
+        File = fits .. "/TIGS_v9.0.fits",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/denver_colorbv.cmap",
-        ColorOption = "Color",
+        ColorMap = colorLUT .. "/colorbv.cmap",
         Transparency = 1.0,
-        ScaleFactor = 5,
-        MinBillboardSize = 1,
+        ScaleFactor = 1.0,
+        MinBillboardSize = 1.0,
     },
-    GuiPath = "/GaiaMission/Denver_Stars"
+    GuiPath = "/GaiaMission/Gaia_Stars"
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaMission })

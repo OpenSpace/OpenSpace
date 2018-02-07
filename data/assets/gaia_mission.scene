@@ -2,34 +2,75 @@ local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 
 -- Specifying which other assets should be loaded in this scene
-asset.require('spice/base')
+-- asset.require('spice/base')
 
-assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+-- assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 -- assetHelper.requestAll(asset, 'scene/solarsystem/planets')
 -- asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
+-- asset.request('scene/digitaluniverse/milkyway')
+
+asset.request('scene/milkyway/gaia/gaiamission')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 
-local GaiaMissionAsset = asset.require('scene/digitaluniverse/gaiamission')
+-- Custom Keybindings
+local Keybindings = {
+    {
+        Key = "a",
+        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'NewHorizons')",
+        Documentation = "Sets the focus of the camera on 'Gaia'.",
+        Local = false
+    }
+}
 
+local GaiaModelAsset = asset.require('scene/milkyway/gaia/gaiamodel')
 
 asset.onInitialize(function ()
-    openspace.time.setTime("2018 JAN 25 00:00:00")
+    openspace.time.setTime("2015-07-14T08:00:00.00")
+    sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultDashboard()
+
+    --openspace.dashboard.addDashboardItem({
+    --    Type = "DashboardItemDistance",
+    --    SourceType = "Node",
+    --    SourceNodeName = "NewHorizons",
+    --    DestinationType = "Node Surface",
+    --    DestinationNodeName = "Earth"
+    --})
+
     openspace.setDefaultGuiSorting()
 
     -- TODO: Mark Gaia Model (and a few stars?) as interesting nodes
-    -- openspace.markInterestingNodes()
+    -- openspace.markInterestingNodes({
+    --    "GaiaModelAsset", "Earth"
+    -- })
+
+    -- openspace.addVirtualProperty(
+    --     "BoolProperty",
+    --     "Show Trails",
+    --     "*Trail.renderable.Enabled",
+    --     "Disable or enable all trails of the scene at the same time",
+    --     true,
+    --     nil,
+    --     nil
+    -- )
 
     openspace.navigation.setCameraState({
-        Focus = GaiaMissionAsset.GaiaMission.Name,
-        Position = { 1837386367.601345, -389860693812.834839, 714830404470.398926 },
-        Rotation = { -0.336540, 0.711402, -0.099212, 0.608937 },
+        Focus = GaiaModelAsset.NewHorizons.Name,
+        --Position = { 4662120063743.592773, 1263245003503.724854, -955413856565.788086 },
+        Position = { 100.0, 100.0, 100.0 },
+        Rotation = { 0.683224, -0.165934, 0.701234, 0.118073 },
     })
 end)
 
 -- Remove interesting nodes and added virtual properties
--- asset.onDeinitialize()
+asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
+    --openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    --openspace.removeInterestingNodes({
+    --    "GaiaMission", "Earth"
+    --})
+end)

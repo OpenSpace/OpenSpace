@@ -21,33 +21,48 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
-#version __CONTEXT__
+//in vec4 vs_position;
+//in vec4 ge_gPosition;
+//in vec3 ge_velocity;
+//in vec2 ge_brightness;
+//in vec2 texCoord;
+//in float billboardSize;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec3 vs_velocity;
+in vec2 vs_brightness;
+in vec4 vs_gPosition;
 
-in vec3 inPosition;
-in vec3 inColor;
+uniform sampler2D psfTexture;
+uniform float minBillboardSize;
+uniform float alphaValue;
 
-out vec3 vsPosition;
-out vec3 vsColor;
+Fragment getFragment() {
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+    // Use measurement for color instead --adaal        
+    //vec4 color = vec4(abs(ge_velocity), 0.5); 
+    vec4 color = vec4(1.0f); 
 
+    //vec4 textureColor = texture(psfTexture, texCoord);
+    //vec4 fullColor = vec4(color.rgb, textureColor.a);
+    //fullColor.a *= alphaValue;
 
-void main() {
-    vec4 p = vec4(inPosition, 1.0);
+    //vec4 position = vs_position;
 
-    vec4 worldPosition = model * vec4(inPosition, 1.0);
-    worldPosition.w = 0.0;
-    vec4 position = worldPosition; //pscTransform(worldPosition, model);
+    Fragment frag;
+    frag.color = color;
+    //frag.depth = vs_gPosition.w; //safeLength(position);
 
+    // G-Buffer
+    //frag.gPosition  = vs_gPosition;
+    // There is no normal here
+    //frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+    
+    //if (fullColor.a == 0) {
+    //    discard;
+    //}
 
-    position = pscTransform(position, mat4(1.0));
-    vsPosition = position.xyz;    
-    position = projection * view * position;
-    gl_Position =  z_normalization(position);
-    vsColor = inColor;
+    return frag;
 }
