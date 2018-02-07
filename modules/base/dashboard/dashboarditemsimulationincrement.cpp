@@ -49,6 +49,14 @@ namespace {
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
+
+    static const openspace::properties::Property::PropertyInfo SimplificationInfo = {
+        "Simplification",
+        "Time Simplification",
+        "If this value is enabled, the time is displayed in nuanced units, such as "
+        "minutes, hours, days, years, etc. If this value is disabled, it is always "
+        "displayed in seconds."
+    };
 } // namespace
 
 namespace openspace {
@@ -75,6 +83,12 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
                 new IntVerifier,
                 Optional::Yes,
                 FontSizeInfo.description
+            },
+            {
+                SimplificationInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                SimplificationInfo.description
             }
         }
     };
@@ -85,6 +99,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     : DashboardItem("Simulation Increment")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
+    , _doSimplification(SimplificationInfo, true)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -110,13 +125,21 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     });
     addProperty(_fontSize);
 
+    if (dictionary.hasKey(SimplificationInfo.identifier)) {
+        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
+    }
+    addProperty(_doSimplification);
+
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    std::pair<double, std::string> deltaTime = simplifyTime(
-        OsEng.timeManager().time().deltaTime()
-    );
+    double t = OsEng.timeManager().time().deltaTime();
+    std::pair<double, std::string> deltaTime =
+        _doSimplification.value() ?
+        simplifyTime(t) :
+        std::make_pair(t, t == 1.0 ? std::string("second") : std::string("seconds"));
+
     penPosition.y -= _font->height();
     RenderFont(
         *_font,
@@ -128,9 +151,12 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    std::pair<double, std::string> deltaTime = simplifyTime(
-        OsEng.timeManager().time().deltaTime()
-    );
+    double t = OsEng.timeManager().time().deltaTime();
+    std::pair<double, std::string> deltaTime =
+        _doSimplification.value() ?
+        simplifyTime(t) :
+        std::make_pair(t, t == 1.0 ? std::string("seconds") : std::string("second"));
+
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
         "Simulation increment: %.1f %s / second",
