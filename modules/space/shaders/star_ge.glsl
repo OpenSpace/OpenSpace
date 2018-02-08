@@ -27,6 +27,7 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
+
 in vec4 psc_position[];
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
@@ -93,16 +94,17 @@ void main() {
         return;
     }
 
+    // G-Buffer
+    ge_gPosition = vs_gPosition[0];
+
+    billboardSize = sizeInPixels;
+    
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projPos[i];
         texCoord    = corners[i];
-
-        // G-Buffer
-        ge_gPosition  = vs_gPosition[0];
-        billboardSize = sizeInPixels;
         EmitVertex();
     }
-
+    
     EndPrimitive();
 }

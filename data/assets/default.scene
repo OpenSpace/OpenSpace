@@ -7,7 +7,8 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
-assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- assetHelper.requestAll(asset, 'scene/digitaluniverse')
+asset.require('scene/digitaluniverse/stars')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')

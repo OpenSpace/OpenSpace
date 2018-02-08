@@ -49,12 +49,14 @@ void main() {
     vs_speed = in_speed;
 
     vec4 tmp = p;
-    vec4 position = pscTransform(tmp, mat4(1.0));
-    
+    vec4 position = view * pscTransform(tmp, mat4(1.0));
+
     // G-Buffer
     vs_gPosition = position;
     
-    position = view * position;
-    
+    // JCC: Temporary
+    if (position.z < 0.0)
+        vs_gPosition.z = 1E30;
+
     gl_Position = position;
 }
