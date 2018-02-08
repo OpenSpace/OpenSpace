@@ -25,12 +25,37 @@
 #ifndef __OPENSPACE_CORE___TIMECONVERSION___H__
 #define __OPENSPACE_CORE___TIMECONVERSION___H__
 
+#include <array>
 #include <string>
 #include <utility>
 
 namespace openspace {
 
-std::pair<double, std::string> simplifyTime(double seconds);
+enum class TimeUnit {
+    Nanosecond = 0,
+    Microsecond,
+    Millisecond,
+    Second,
+    Minute,
+    Hour,
+    Day,
+    Month,
+    Year
+};
+constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1>
+TimeUnits = {
+    TimeUnit::Nanosecond, TimeUnit::Microsecond, TimeUnit::Millisecond,
+    TimeUnit::Second, TimeUnit::Minute, TimeUnit::Hour, TimeUnit::Day,
+    TimeUnit::Month, TimeUnit::Year
+};
+
+std::pair<double, std::string> simplifyTime(double seconds,
+    bool forceSingularForm = false);
+
+double convertTime(double seconds, TimeUnit requestedUnit);
+
+std::string nameForTimeUnit(TimeUnit unit, bool pluralForm = false);
+TimeUnit timeUnitFromString(const std::string& unit);
 
 } // namespace openspace
 

@@ -28,12 +28,13 @@
 #include <modules/imgui/include/imgui_include.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/time.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeconversion.h>
+#include <openspace/util/timemanager.h>
 
 #include <imgui_internal.h>
 
@@ -277,36 +278,72 @@ void GuiSpaceTimeComponent::render() {
     showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
+//
+//    {
+//        float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
+//        //std::pair<double, std::string> dt = simplifyTime(deltaTime, true);
+//
+//
+//        //float val = dt.first;
+//        ImGui::InputFloat("", &val);
+//
+//        //bool ImGui::Combo(const char* label, int* current_item, const char* const* items, int items_count, int height_in_items)
+//
+//        const char* TimeSteps = "nanoseconds / second\0microseconds / second\0\
+//milliseconds / second\0seconds / second\0minutes / second\0hours / second\0days / second\
+//months / second\0years / second\0";
+//
+//        std::string nodeNames = "";
+//        for (SceneGraphNode* n : nodes) {
+//            nodeNames += n->name() + '\0';
+//        }
+//
+//        auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
+//        if (!nodes.empty()) {
+//            // Only check if we found the current focus node if we have any nodes at all
+//            // only then it would be a real error
+//            ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
+//        }
+//        int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
+//
+//
+//        bool hasChanged = ImGui::Combo("", );
+//
+//        bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
+//
+//    }
+//
 
-    bool minMaxChanged = ImGui::InputFloat(
-        "Time slider range",
-        &_localMinMaxDeltatime
-    );
-    if (minMaxChanged) {
-        _minMaxDeltaTime = _localMinMaxDeltatime;
-    }
 
-    float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    bool deltaChanged = ImGui::SliderFloat(
-        "Delta Time",
-        &deltaTime,
-        -_minMaxDeltaTime,
-        _minMaxDeltaTime,
-        "%.6f",
-        5.f
-    );
-    if (deltaChanged) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    showTooltip(
-        "This determines the simulation time increment, that is the passage of time in "
-        "OpenSpace relative to a wall clock. Times are expressed as simulation time / "
-        "real world time.",
-        _tooltipDelay
-    );
+    //bool minMaxChanged = ImGui::InputFloat(
+    //    "Time slider range",
+    //    &_localMinMaxDeltatime
+    //);
+    //if (minMaxChanged) {
+    //    _minMaxDeltaTime = _localMinMaxDeltatime;
+    //}
+
+    //float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
+    //bool deltaChanged = ImGui::SliderFloat(
+    //    "Delta Time",
+    //    &deltaTime,
+    //    -_minMaxDeltaTime,
+    //    _minMaxDeltaTime,
+    //    "%.6f",
+    //    5.f
+    //);
+    //if (deltaChanged) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //showTooltip(
+    //    "This determines the simulation time increment, that is the passage of time in "
+    //    "OpenSpace relative to a wall clock. Times are expressed as simulation time / "
+    //    "real world time.",
+    //    _tooltipDelay
+    //);
 
     bool isPaused = OsEng.timeManager().time().paused();
 
@@ -321,87 +358,87 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
-    bool minusDs = ImGui::Button("-1d/s");
-    if (minusDs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool minusDs = ImGui::Button("-1d/s");
+    //if (minusDs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool minusHs = ImGui::Button("-1h/s");
-    if (minusHs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(-60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool minusHs = ImGui::Button("-1h/s");
+    //if (minusHs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(-60 * 60) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool minusMs = ImGui::Button("-1min/s");
-    if (minusMs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(-60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool minusMs = ImGui::Button("-1min/s");
+    //if (minusMs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(-60) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool minusSs = ImGui::Button("-1s/s");
-    if (minusSs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(-1) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool minusSs = ImGui::Button("-1s/s");
+    //if (minusSs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(-1) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool zero = ImGui::Button("0");
-    if (zero) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(0) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool zero = ImGui::Button("0");
+    //if (zero) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(0) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
 
-    bool plusSs = ImGui::Button("+1s/s");
-    if (plusSs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(1) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool plusSs = ImGui::Button("+1s/s");
+    //if (plusSs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(1) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool plusMs = ImGui::Button("1min/s");
-    if (plusMs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool plusMs = ImGui::Button("1min/s");
+    //if (plusMs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(60) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool plusHs = ImGui::Button("1h/s");
-    if (plusHs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool plusHs = ImGui::Button("1h/s");
+    //if (plusHs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(60 * 60) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
-    bool plusDs = ImGui::Button("1d/s");
-    if (plusDs) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    ImGui::SameLine();
+    //bool plusDs = ImGui::Button("1d/s");
+    //if (plusDs) {
+    //    OsEng.scriptEngine().queueScript(
+    //        "openspace.time.setDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
+    //        scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+    //ImGui::SameLine();
 
     ImGui::End();
 

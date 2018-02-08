@@ -25,12 +25,44 @@
 #ifndef __OPENSPACE_CORE___DISTANCECONVERSION___H__
 #define __OPENSPACE_CORE___DISTANCECONVERSION___H__
 
+#include <array>
 #include <string>
 #include <utility>
 
 namespace openspace {
 
-std::pair<double, std::string> simplifyDistance(double meters);
+enum class DistanceUnit {
+    Nanometer = 0,
+    Micrometer,
+    Millimeter,
+    Meter,
+    Kilometer,
+    AU,
+    Lighthour,
+    Lightday,
+    Lightmonth,
+    Lightyear,
+    Parsec,
+    Kiloparsec,
+    Megaparsec,
+    Gigaparsec
+};
+constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
+DistanceUnits = {
+    DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
+    DistanceUnit::Meter, DistanceUnit::Kilometer, DistanceUnit::AU,
+    DistanceUnit::Lighthour, DistanceUnit::Lightday, DistanceUnit::Lightmonth,
+    DistanceUnit::Lightyear, DistanceUnit::Parsec, DistanceUnit::Kiloparsec,
+    DistanceUnit::Megaparsec, DistanceUnit::Gigaparsec
+};
+
+std::pair<double, std::string> simplifyDistance(double meters,
+    bool forceSingularForm = false);
+
+double convertDistance(double meters, DistanceUnit requestedUnit);
+
+std::string nameForDistanceUnit(DistanceUnit unit, bool pluralForm = false);
+DistanceUnit distanceUnitFromString(const std::string& unit);
 
 } // namespace openspace
 
