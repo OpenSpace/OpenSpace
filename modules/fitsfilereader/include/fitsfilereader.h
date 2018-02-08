@@ -63,7 +63,7 @@ public:
     std::shared_ptr<T> readHeaderValue(const std::string key);
 
     template<typename T>
-    std::shared_ptr<TableData<T>> readTable(std::string& path, std::vector<std::string>& columnNames,
+    std::shared_ptr<TableData<T>> readTable(std::string& path, const std::vector<std::string>& columnNames,
         int startRow = 1, int endRow = 10, int hduIdx = 1, bool readAll = false);
 
 private:

@@ -28,8 +28,9 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -83,6 +84,11 @@ private:
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
     properties::FloatProperty _minBillboardSize;
+
+    properties::IntProperty _firstRow;
+    properties::IntProperty _lastRow;
+    properties::StringListProperty _columnNamesList;
+    std::vector<std::string> _columnNames;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(view, projection, alphaValue, scaleFactor,

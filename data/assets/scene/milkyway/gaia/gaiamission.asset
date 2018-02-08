@@ -31,6 +31,18 @@ local GaiaMission = {
         Transparency = 1.0,
         ScaleFactor = 1.0,
         MinBillboardSize = 1.0,
+        FirstRow = 1,
+        LastRow = 50000, -- MAX: 2539913
+        ColumnNames = {
+            "Position_X",
+            "Position_Y",
+            "Position_Z",
+            "Velocity_X",
+            "Velocity_Y",
+            "Velocity_Z",
+            "Gaia_G_Mag", 
+            "HIP_B_V"
+        }
     },
     GuiPath = "/GaiaMission"
 }

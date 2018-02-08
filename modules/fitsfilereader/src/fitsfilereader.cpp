@@ -114,12 +114,13 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
 }
 
 // Read specified table columns from fits file. 
-// If readAll variable is set to true the entire table will be read before the selected columns,
-// which makes the function take a lot longer if it's a big file. 
+// If readAll variable is set to true the entire table will be read before the 
+// selected columns, which makes the function take a lot longer if it's a big file. 
 // If no HDU index is given the currentExtension will be read from. 
 template<typename T>
 std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
-    std::vector<std::string>& columnNames, int startRow, int endRow, int hduIdx, bool readAll) {
+    const std::vector<std::string>& columnNames, int startRow, int endRow, 
+    int hduIdx, bool readAll) {
     try {
 
         _infile = std::make_unique<FITS>(path, Read, readAll);
@@ -199,6 +200,6 @@ template std::shared_ptr<int> FitsFileReader::readHeaderValue(const std::string 
 template std::shared_ptr<std::string> FitsFileReader::readHeaderValue(const std::string key);
 
 template std::shared_ptr<TableData<float>> FitsFileReader::readTable(std::string& path, 
-    std::vector<std::string>& columnNames,
-    int startRow, int endRow, int hduIdx, bool readAll);
+    const std::vector<std::string>& columnNames, int startRow, int endRow, 
+    int hduIdx, bool readAll);
 } // namespace openspace

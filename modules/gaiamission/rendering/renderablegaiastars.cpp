@@ -99,6 +99,26 @@ namespace {
         "The path to the texture that is used to convert from the B-V value of the star "
         "to its color. The texture is used as a one dimensional lookup function."
     };
+
+    static const openspace::properties::Property::PropertyInfo FirstRowInfo = {
+        "FirstRow",
+        "First Row to Read",
+        "Defines the first row that will be read from the specified FITS file."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LastRowInfo = {
+        "LastRow",
+        "Last Row to Read",
+        "Defines the last row that will be read from the specified FITS file."
+        "Has to be equal to or greater than FirstRow."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColumnNamesInfo = {
+        "ColumnNames",
+        "Column Names",
+        "A list of strings with the names of all the columns that are to be "
+        "read from the specified FITS file."
+    };
 }  // namespace
 
 namespace openspace {
@@ -149,6 +169,24 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new StringVerifier,
                 Optional::No,
                 ColorTextureInfo.description
+            },
+            {
+                FirstRowInfo.identifier,
+                new IntVerifier,
+                Optional::No,
+                FirstRowInfo.description
+            },
+            {
+                LastRowInfo.identifier,
+                new IntVerifier,
+                Optional::No,
+                LastRowInfo.description
+            },
+            {
+                ColumnNamesInfo.identifier,
+                new StringListVerifier,
+                Optional::No,
+                ColumnNamesInfo.description
             }
         }
     };
@@ -168,6 +206,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
     , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
+    , _firstRow(FirstRowInfo, 1, 1, 2539913)
+    , _lastRow(LastRowInfo, 10000, 1, 2539913)
+    , _columnNamesList(ColumnNamesInfo)
     , _program(nullptr)
     , _nValuesPerStar(0)
     , _vao(0)
@@ -236,6 +277,42 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         );
     }
     addProperty(_minBillboardSize);
+
+    if (dictionary.hasKey(FirstRowInfo.identifier)) {
+        _firstRow = static_cast<int>(
+            dictionary.value<double>(FirstRowInfo.identifier)
+        );
+    }
+    _firstRow.onChange([&] { _dataIsDirty = true; });
+    addProperty(_firstRow);
+
+    if (dictionary.hasKey(LastRowInfo.identifier)) {
+        _lastRow = static_cast<int>(
+            dictionary.value<double>(LastRowInfo.identifier)
+        );
+    }
+    _lastRow.onChange([&] { _dataIsDirty = true; });
+    addProperty(_lastRow);
+
+    if (dictionary.hasKey(ColumnNamesInfo.identifier)) {        
+        auto tmpDict = dictionary.value<ghoul::Dictionary>
+            (ColumnNamesInfo.identifier);
+
+        auto tmpKeys = tmpDict.keys();
+        for (auto key : tmpKeys) {
+            _columnNames.push_back(tmpDict.value<std::string>(key));
+        }
+
+        // Copy values to the StringListproperty to be shown in the Property list.
+        _columnNamesList = _columnNames;
+    }
+    _columnNamesList.onChange([&] { _dataIsDirty = true; });
+    addProperty(_columnNamesList);
+
+    if (_firstRow > _lastRow) {
+        throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow.");
+    }
+
 }
 
 RenderableGaiaStars::~RenderableGaiaStars() {}
@@ -340,6 +417,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 void RenderableGaiaStars::update(const UpdateData&) {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
+
+        // TODO (adaal): Reload fits file!
 
         createDataSlice();
 
@@ -514,32 +593,25 @@ bool RenderableGaiaStars::loadData() {
 bool RenderableGaiaStars::readFitsFile() {
     std::string _file = _fitsFilePath;
 
-    std::string columns[] = { "Position_X", "Position_Y", "Position_Z",
-        "Velocity_X", "Velocity_Y", "Velocity_Z", "Gaia_G_Mag", "HIP_B_V" };
-    std::vector<string> columnNames(columns, columns + sizeof(columns) / sizeof(std::string));
-
-    int firstRow = 1;
-    int allRows = 2539913;
-    int lastRow = 100000;
-    int nStars = lastRow - firstRow + 1;
+    int nStars = _lastRow - _firstRow + 1;
 
     FitsFileReader fitsInFile(false);
-    std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_file, columnNames,
-        firstRow, lastRow);
+    std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_file, _columnNames,
+        _firstRow, _lastRow);
 
     if (!table) {
         LERROR("Failed to open Fits file '" << _file << "'");
         return false;
     }
 
-    _nValuesPerStar = columnNames.size();
+    _nValuesPerStar = _columnNames.size();
     int nNullArr = 0;
 
     std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
     for (int i = 0; i < nStars; ++i) {
         std::vector<float> values(_nValuesPerStar);
         size_t idx = 0;
-        for (std::string name : columnNames) {
+        for (std::string name : _columnNames) {
             std::vector<float> vecData = tableContent[name];
             values[idx] = vecData[i];
             idx++;
