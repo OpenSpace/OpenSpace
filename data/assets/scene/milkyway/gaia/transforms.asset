@@ -1,0 +1,24 @@
+local assetHelper = asset.require('util/asset_helper')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+
+local GaiaPosition = {
+    Name = "GaiaPosition",
+    Parent = earthTransforms.EarthBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MOON",
+            Observer = "EARTH BARYCENTER",
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MOON",
+            DestinationFrame = "GALACTIC"
+        },
+
+    },
+    GuiPath = "/GaiaMission/Gaia_Model"
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaPosition })

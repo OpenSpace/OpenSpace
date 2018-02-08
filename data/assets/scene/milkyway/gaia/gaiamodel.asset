@@ -1,39 +1,35 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('scene/solarsystem/missions/newhorizons/transforms')
-
+local transforms = asset.require('./transforms')
 
 
 local textures = asset.syncedResource({
-    Name = "New Horizons Textures",
+    Name = "Gaia Textures",
     Type = "HttpSynchronization",
-    Identifier = "newhorizons_textures",
-    Version = 2
-})
-
-local models = asset.syncedResource({
-    Name = "New Horizons Model",
-    Type = "HttpSynchronization",
-    Identifier = "newhorizons_model",
+    Identifier = "gaia_textures",
     Version = 1
 })
 
-local NewHorizons = {
-    Name = "NewHorizons",
-    Parent = transforms.NewHorizonsPosition.Name,
+local models = asset.syncedResource({
+    Name = "Gaia Model",
+    Type = "HttpSynchronization",
+    Identifier = "gaia_model",
+    Version = 1
+})
+
+
+local GaiaModel = {
+    Name = "GaiaModel",
+    Parent = transforms.GaiaPosition.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "NEW HORIZONS",
+        Body = "GAIA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+            GeometryFile = models .. "/gaia.obj"
         }, 
-        ColorTexture = textures .. "/NHTexture.jpg"
+        ColorTexture = textures .. "/gaia-baked.png"
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GuiPath = "/GaiaMission/Gaia_Model"
 }
 
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { NewHorizons })
-asset.export("NewHorizonsTextures", textures)
-asset.export("NewHorizonsModels", models)
+assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaModel })

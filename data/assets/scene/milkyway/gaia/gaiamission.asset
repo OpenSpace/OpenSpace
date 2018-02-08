@@ -14,8 +14,12 @@ local colorLUT = asset.syncedResource({
     Version = 1
 })
 
-local fits = "C:/Users/adaal265/Documents/data"
-
+local fits = asset.syncedResource({
+    Name = "Gaia Stars Fits File",
+    Type = "HttpSynchronization",
+    Identifier = "gaia_stars",
+    Version = 1
+})
 
 local GaiaMission = {
     Name = "GaiaMission",
@@ -28,6 +32,6 @@ local GaiaMission = {
         ScaleFactor = 1.0,
         MinBillboardSize = 1.0,
     },
-    GuiPath = "/GaiaMission/Gaia_Stars"
+    GuiPath = "/GaiaMission"
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaMission })
