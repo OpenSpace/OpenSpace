@@ -36,16 +36,18 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
+#include <numeric>
+
 #include <imgui_internal.h>
 
 namespace {
     static const ImVec2 Size = ImVec2(350, 500);
 
-    static const openspace::properties::Property::PropertyInfo MinMaxInfo = {
-        "MinMax",
-        "Minimum/Maximum value for delta time",
-        "This value determines the minimum and maximum value for the delta time slider."
-    };
+    //static const openspace::properties::Property::PropertyInfo MinMaxInfo = {
+    //    "MinMax",
+    //    "Minimum/Maximum value for delta time",
+    //    "This value determines the minimum and maximum value for the delta time slider."
+    //};
 
     void showTooltip(const std::string& message, double delay) {
         // Hackish way to enfore a window size for TextWrapped (SetNextWindowSize did not
@@ -74,13 +76,19 @@ namespace openspace::gui {
 
 GuiSpaceTimeComponent::GuiSpaceTimeComponent()
     : GuiComponent("Space/Time")
-    , _minMaxDeltaTime(MinMaxInfo, 100000.f, 0.f, 1e8f, 1.f, 5.f)
-    , _localMinMaxDeltatime(100000.f)
+    , _deltaTime(0.f)
+    , _deltaTimeUnit(static_cast<int>(TimeUnit::Second))
+    , _accelerationDelta(0.f)
+    , _slidingDelta(0.f)
+    , _firstFrame(true)
+    //, _minMaxDeltaTime(MinMaxInfo, 100000.f, 0.f, 1e8f, 1.f, 5.f)
+    //, _localMinMaxDeltatime(100000.f)
 {
-    _minMaxDeltaTime.onChange([this]() {
-        _localMinMaxDeltatime = _minMaxDeltaTime;
-    });
-    addProperty(_minMaxDeltaTime);
+
+    //_minMaxDeltaTime.onChange([this]() {
+    //    _localMinMaxDeltatime = _minMaxDeltaTime;
+    //});
+    //addProperty(_minMaxDeltaTime);
 }
 
 void GuiSpaceTimeComponent::render() {
@@ -279,71 +287,140 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
-//    {
-//        float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-//        //std::pair<double, std::string> dt = simplifyTime(deltaTime, true);
-//
-//
-//        //float val = dt.first;
-//        ImGui::InputFloat("", &val);
-//
-//        //bool ImGui::Combo(const char* label, int* current_item, const char* const* items, int items_count, int height_in_items)
-//
-//        const char* TimeSteps = "nanoseconds / second\0microseconds / second\0\
-//milliseconds / second\0seconds / second\0minutes / second\0hours / second\0days / second\
-//months / second\0years / second\0";
-//
-//        std::string nodeNames = "";
-//        for (SceneGraphNode* n : nodes) {
-//            nodeNames += n->name() + '\0';
-//        }
-//
-//        auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
-//        if (!nodes.empty()) {
-//            // Only check if we found the current focus node if we have any nodes at all
-//            // only then it would be a real error
-//            ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
-//        }
-//        int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
-//
-//
-//        bool hasChanged = ImGui::Combo("", );
-//
-//        bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
-//
-//    }
-//
+    {
+        float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
 
+        if (_firstFrame) {
+            std::pair<double, std::string> dt = simplifyTime(deltaTime);
+            _deltaTime = dt.first;
+            _deltaTimeUnit = static_cast<int>(timeUnitFromString(dt.second.c_str()));
 
-    //bool minMaxChanged = ImGui::InputFloat(
-    //    "Time slider range",
-    //    &_localMinMaxDeltatime
-    //);
-    //if (minMaxChanged) {
-    //    _minMaxDeltaTime = _localMinMaxDeltatime;
-    //}
+            _timeUnits = std::accumulate(
+                openspace::TimeUnits.begin(),
+                openspace::TimeUnits.end(),
+                std::string(""),
+                [](const std::string& a, const openspace::TimeUnit& unit) {
+                    return a + nameForTimeUnit(unit, true) + " / second" + '\0';
+                }
+            );
 
-    //float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    //bool deltaChanged = ImGui::SliderFloat(
-    //    "Delta Time",
-    //    &deltaTime,
-    //    -_minMaxDeltaTime,
-    //    _minMaxDeltaTime,
-    //    "%.6f",
-    //    5.f
-    //);
-    //if (deltaChanged) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //showTooltip(
-    //    "This determines the simulation time increment, that is the passage of time in "
-    //    "OpenSpace relative to a wall clock. Times are expressed as simulation time / "
-    //    "real world time.",
-    //    _tooltipDelay
-    //);
+            _firstFrame = false;
+        }
+
+        _deltaTime = convertTime(
+            deltaTime,
+            TimeUnit::Second,
+            static_cast<TimeUnit>(_deltaTimeUnit)
+        );
+
+        bool valueChanged = ImGui::InputFloat(
+            "##inputValueDeltaTime",
+            &_deltaTime,
+            1.f,
+            100.f,
+            -1,
+            ImGuiInputTextFlags_EnterReturnsTrue
+        );
+        ImGui::SameLine();
+
+        bool unitChanged = ImGui::Combo(
+            "##inputUnit",
+            &_deltaTimeUnit,
+            _timeUnits.c_str()
+        );
+
+        if (valueChanged) {
+            LINFOC("valueChanged", valueChanged);
+            // If the value changed, we want to change the delta time to the new value
+
+            double newDeltaTime = convertTime(
+                _deltaTime,
+                static_cast<TimeUnit>(_deltaTimeUnit),
+                TimeUnit::Second
+            );
+
+            OsEng.scriptEngine().queueScript(
+                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+        }
+        if (unitChanged) {
+            LINFOC("unitChanged", unitChanged);
+            // If only the unit changes, we keep the delta time, but need to convert the
+            // value to the new unit
+
+            _deltaTime = convertTime(
+                deltaTime,
+                TimeUnit::Second,
+                static_cast<TimeUnit>(_deltaTimeUnit)
+            );
+        }
+    }
+
+    ImGui::Text("%s", "Time Slider");
+    bool accelerationDeltaChanged = ImGui::SliderFloat(
+        "Delta Time Acceleration",
+        &_accelerationDelta,
+        -100.f,
+        100.f,
+        "%.6f"
+    );
+
+    if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
+        double newDeltaTime = convertTime(
+            _deltaTime + _accelerationDelta,
+            static_cast<TimeUnit>(_deltaTimeUnit),
+            TimeUnit::Second
+        );
+
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    else {
+        _accelerationDelta = 0.f;
+    }
+
+    _deltaTime -= _slidingDelta;
+
+    bool firstSlidingValue = _slidingDelta == 0.f;
+    bool slidingDeltaChanged = ImGui::SliderFloat(
+        "Delta Time Slider",
+        &_slidingDelta,
+        -100.f,
+        100.f,
+        "%.6f"
+    );
+    firstSlidingValue &= _slidingDelta != 0.f;
+
+    if (slidingDeltaChanged) {
+        if (firstSlidingValue) {
+            _oldDeltaTime = _deltaTime;
+        }
+
+        double newDeltaTime = convertTime(
+            _deltaTime + _slidingDelta,
+            static_cast<TimeUnit>(_deltaTimeUnit),
+            TimeUnit::Second
+        );
+
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
+        if (_slidingDelta != 0.f) {
+            OsEng.scriptEngine().queueScript(
+                "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+
+        }
+        _slidingDelta = 0.f;
+    }
+
 
     bool isPaused = OsEng.timeManager().time().paused();
 
@@ -358,87 +435,87 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
-    //bool minusDs = ImGui::Button("-1d/s");
-    //if (minusDs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool minusDs = ImGui::Button("-1d/s");
+    if (minusDs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool minusHs = ImGui::Button("-1h/s");
-    //if (minusHs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(-60 * 60) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool minusHs = ImGui::Button("-1h/s");
+    if (minusHs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(-60 * 60) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool minusMs = ImGui::Button("-1min/s");
-    //if (minusMs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(-60) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool minusMs = ImGui::Button("-1min/s");
+    if (minusMs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(-60) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool minusSs = ImGui::Button("-1s/s");
-    //if (minusSs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(-1) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool minusSs = ImGui::Button("-1s/s");
+    if (minusSs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(-1) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool zero = ImGui::Button("0");
-    //if (zero) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(0) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool zero = ImGui::Button("0");
+    if (zero) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(0) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
 
-    //bool plusSs = ImGui::Button("+1s/s");
-    //if (plusSs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(1) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool plusSs = ImGui::Button("+1s/s");
+    if (plusSs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(1) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool plusMs = ImGui::Button("1min/s");
-    //if (plusMs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(60) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool plusMs = ImGui::Button("1min/s");
+    if (plusMs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(60) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool plusHs = ImGui::Button("1h/s");
-    //if (plusHs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(60 * 60) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool plusHs = ImGui::Button("1h/s");
+    if (plusHs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(60 * 60) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
-    //bool plusDs = ImGui::Button("1d/s");
-    //if (plusDs) {
-    //    OsEng.scriptEngine().queueScript(
-    //        "openspace.time.setDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
-    //        scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-    //ImGui::SameLine();
+    bool plusDs = ImGui::Button("1d/s");
+    if (plusDs) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.time.setDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    ImGui::SameLine();
 
     ImGui::End();
 

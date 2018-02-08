@@ -171,7 +171,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _requestedUnit = static_cast<int>(TimeUnit::Second);
     if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
         std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
-        TimeUnit unit = timeUnitFromString(value);
+        TimeUnit unit = timeUnitFromString(value.c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -188,7 +188,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     }
     else {
         TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, unit);
+        double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
     
@@ -210,7 +210,7 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
     }
     else {
         TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, unit);
+        double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
 

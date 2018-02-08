@@ -349,7 +349,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
         std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
-        DistanceUnit unit = distanceUnitFromString(value);
+        DistanceUnit unit = distanceUnitFromString(value.c_str());
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
