@@ -57,6 +57,7 @@ public:
     using TorrentId = int32_t;
 
     virtual void initialize() = 0;
+    virtual void deinitialize() = 0;
     virtual TorrentId addTorrentFile(std::string torrentFile,
         std::string destination,
         TorrentProgressCallback cb) = 0;
@@ -78,6 +79,7 @@ public:
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <unordered_map>
 
 #include "libtorrent/torrent_handle.hpp"
@@ -92,6 +94,7 @@ public:
     virtual ~TorrentClient();
 
     void initialize() override;
+    void deinitialize() override;
     TorrentId addTorrentFile(std::string torrentFile,
         std::string destination,
         TorrentProgressCallback cb) override;
@@ -116,7 +119,9 @@ private:
     std::unique_ptr<libtorrent::session> _session;
     std::thread _torrentThread;
     std::mutex _mutex;
-    std::atomic_bool _keepRunning;
+    std::atomic_bool _active;
+    std::mutex _abortMutex;
+    std::condition_variable _abortNotifier;
 };
 
 } // namespace openspace
@@ -131,6 +136,7 @@ public:
     virtual ~TorrentClient();
 
     void initialize() override;
+    void deinitialize() override;
     TorrentId addTorrentFile(std::string torrentFile,
         std::string destination,
         TorrentProgressCallback cb) override;

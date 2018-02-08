@@ -106,6 +106,7 @@ AssetLoader::AssetLoader(ghoul::lua::LuaState& luaState,
 AssetLoader::~AssetLoader() {
     _currentAsset = nullptr;
     _rootAsset = nullptr;
+    luaL_unref(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
 }
 
 void AssetLoader::trackAsset(std::shared_ptr<Asset> asset) {
@@ -279,14 +280,17 @@ void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
-    _onDependencyInitializationFunctionRefs[asset.get()].clear();
+    _onDependencyInitializationFunctionRefs.erase(asset.get());
 
     for (const auto& it : _onDependencyDeinitializationFunctionRefs[asset.get()]) {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
-    _onDependencyDeinitializationFunctionRefs[asset.get()].clear();
+    _onDependencyDeinitializationFunctionRefs.erase(asset.get());
+
+    asset->clearSynchronizations();
+    untrackAsset(asset.get());
 }
 
 std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
@@ -484,6 +488,8 @@ void AssetLoader::callOnInitialize(Asset* asset) {
                 luaL_checkstring(*_luaState, -1)
             );
         }
+        // Clean up lua stack, in case the pcall left anything there.
+        lua_settop(*_luaState, 0);
     }
 }
 
@@ -497,6 +503,8 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
                 luaL_checkstring(*_luaState, -1)
             );
         }
+        // Clean up lua stack, in case the pcall left anything there.
+        lua_settop(*_luaState, 0);
     }
 }
 
@@ -509,6 +517,8 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
                 asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
             );
         }
+        // Clean up lua stack, in case the pcall left anything there.
+        lua_settop(*_luaState, 0);
     }
     // Potential Todo:
     // Call dependency->onInitialize with the asset table
@@ -525,6 +535,8 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
                 asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
             );
         }
+        // Clean up lua stack, in case the pcall left anything there.
+        lua_settop(*_luaState, 0);
     }
 }
 

@@ -80,12 +80,7 @@ Asset::Asset(AssetLoader* loader,
     , _assetPath(assetPath)
 {}
 
-Asset::~Asset() {
-    for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
-        _synchronizationWatcher->unwatchSynchronization(h);
-    }
-    _loader->untrackAsset(this);
-}
+Asset::~Asset() {}
 
 std::string Asset::resolveLocalResource(std::string resourceName) {
     std::string currentAssetDirectory = assetDirectory();
@@ -184,6 +179,12 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
             }
         );
     _syncWatches.push_back(watch);
+}
+
+void Asset::clearSynchronizations() {
+    for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
+        _synchronizationWatcher->unwatchSynchronization(h);
+    }
 }
 
 void Asset::syncStateChanged(ResourceSynchronization::State state)
