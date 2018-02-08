@@ -28,6 +28,7 @@
 #include <modules/imgui/include/imgui_include.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -292,7 +293,7 @@ void GuiSpaceTimeComponent::render() {
 
         if (_firstFrame) {
             std::pair<double, std::string> dt = simplifyTime(deltaTime);
-            _deltaTime = dt.first;
+            _deltaTime = static_cast<float>(dt.first);
             _deltaTimeUnit = static_cast<int>(timeUnitFromString(dt.second.c_str()));
 
             _timeUnits = std::accumulate(
@@ -307,10 +308,12 @@ void GuiSpaceTimeComponent::render() {
             _firstFrame = false;
         }
 
-        _deltaTime = convertTime(
-            deltaTime,
-            TimeUnit::Second,
-            static_cast<TimeUnit>(_deltaTimeUnit)
+        _deltaTime = static_cast<float>(
+            convertTime(
+                deltaTime,
+                TimeUnit::Second,
+                static_cast<TimeUnit>(_deltaTimeUnit)
+            )
         );
 
         bool valueChanged = ImGui::InputFloat(
@@ -330,7 +333,6 @@ void GuiSpaceTimeComponent::render() {
         );
 
         if (valueChanged) {
-            LINFOC("valueChanged", valueChanged);
             // If the value changed, we want to change the delta time to the new value
 
             double newDeltaTime = convertTime(
@@ -345,14 +347,15 @@ void GuiSpaceTimeComponent::render() {
             );
         }
         if (unitChanged) {
-            LINFOC("unitChanged", unitChanged);
             // If only the unit changes, we keep the delta time, but need to convert the
             // value to the new unit
 
-            _deltaTime = convertTime(
-                deltaTime,
-                TimeUnit::Second,
-                static_cast<TimeUnit>(_deltaTimeUnit)
+            _deltaTime = static_cast<float>(
+                convertTime(
+                    deltaTime,
+                    TimeUnit::Second,
+                    static_cast<TimeUnit>(_deltaTimeUnit)
+                )
             );
         }
     }
@@ -367,8 +370,9 @@ void GuiSpaceTimeComponent::render() {
     );
 
     if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
+        // We want the value to change by _accelerationDelta every 100 ms real world time
         double newDeltaTime = convertTime(
-            _deltaTime + _accelerationDelta,
+            _deltaTime + _accelerationDelta * OsEng.windowWrapper().deltaTime() * 10,
             static_cast<TimeUnit>(_deltaTimeUnit),
             TimeUnit::Second
         );
