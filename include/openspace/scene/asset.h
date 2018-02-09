@@ -90,7 +90,7 @@ public:
      * i.e. if this and all required assets loaded without errors.
      */
     bool load();
-    bool hasLoadedParent() const;
+    bool hasLoadedParent();
     bool isLoaded() const;
     void unload();
     void unloadIfUnwanted();

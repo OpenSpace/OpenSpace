@@ -39,6 +39,7 @@ int loadFile(lua_State* L) {
         ghoul::lua::loadDictionaryFromFile(missionFileName, L)
     );
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -84,6 +85,7 @@ int loadScheduledScript(lua_State* L) {
         return luaL_error(L, "Expected %i-%i arguments, got %i", 2, 4, nArguments);
     }
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -95,6 +97,7 @@ int clear(lua_State* L) {
 
     OsEng.scriptScheduler().clearSchedule();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

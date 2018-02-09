@@ -81,14 +81,17 @@ int addLayer(lua_State* L) {
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addLayerFromDictionary", e.what());
+        lua_settop(L, 0);
         return 0;
     }
+    lua_settop(L, 0);
 
     std::shared_ptr<Layer> layer = globe->layerManager()->addLayer(groupID, d);
     if (layer) {
         layer->initialize();
     }
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -113,6 +116,8 @@ int deleteLayer(lua_State* L) {
     const std::string LayerGroupName = luaL_checkstring(L, LayerGroupLocation);
     const std::string LayerName = luaL_checkstring(L, NameLocation);
 
+    lua_settop(L, 0);
+
     // Get the node and make sure it exists
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(GlobeName);
     if (!node) {
@@ -133,6 +138,7 @@ int deleteLayer(lua_State* L) {
 
     globe->layerManager()->deleteLayer(groupID, LayerName);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -148,10 +154,12 @@ int goToChunk(lua_State* L) {
     int x = static_cast<int>(lua_tonumber(L, 1));
     int y = static_cast<int>(lua_tonumber(L, 2));
     int level = static_cast<int>(lua_tonumber(L, 3));
+    lua_settop(L, 0);
 
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->goToChunk(x, y, level);
 
-return 0;
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 int goToGeo(lua_State* L) {
@@ -174,6 +182,8 @@ int goToGeo(lua_State* L) {
             altitude);
     }
 
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -202,10 +212,13 @@ int getGeoPosition(lua_State* L) {
     double altitude = glm::length(cameraPositionModelSpace -
                                   posHandle.centerToReferenceSurface);
 
+    lua_settop(L, 0);
+
     lua_pushnumber(L, Angle<double>::fromRadians(geo2.lat).asDegrees());
     lua_pushnumber(L, Angle<double>::fromRadians(geo2.lon).asDegrees());
     lua_pushnumber(L, altitude);
 
+    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
 }
 
@@ -220,6 +233,7 @@ int loadWMSCapabilities(lua_State* L) {
     std::string name = lua_tostring(L, -3);
     std::string globe = lua_tostring(L, -2);
     std::string url = lua_tostring(L, -1);
+    lua_settop(L, 0);
 
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
@@ -227,6 +241,7 @@ int loadWMSCapabilities(lua_State* L) {
         std::move(url)
     );
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -238,7 +253,11 @@ int removeWMSServer(lua_State* L) {
     }
 
     std::string name = lua_tostring(L, -1);
+
+    lua_settop(L, 0);
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->removeWMSServer(name);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -253,6 +272,7 @@ int capabilities(lua_State* L) {
     GlobeBrowsingModule::Capabilities cap =
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
 
+    lua_settop(L, 0);
     lua_newtable(L);
     for (unsigned long i = 0; i < cap.size(); ++i) {
         const GlobeBrowsingModule::Layer& l = cap[i];
@@ -270,6 +290,7 @@ int capabilities(lua_State* L) {
         lua_rawseti(L, -2, i + 1);
     }
 
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 #endif // GLOBEBROWSING_USE_GDAL
