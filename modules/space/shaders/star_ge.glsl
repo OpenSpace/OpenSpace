@@ -30,9 +30,7 @@ layout(points) in;
 
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
-in vec4 vs_gPosition[];
 in float vs_speed[];
-in float vs_clipSpaceDepth[];
 
 layout(triangle_strip, max_vertices = 4) out;
 
@@ -72,8 +70,7 @@ void main() {
     for (int i = 0; i < 4; ++i) {
         vec4 p1 = gl_in[0].gl_Position;
         p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
-        projPos[i] = projectionMatrix * p1;
-        //projPos[i].z = 0.0;
+        projPos[i] = z_normalization(projectionMatrix * p1);
     }
 
     // Calculate the positions of the lower left and upper right corners of the
@@ -88,12 +85,13 @@ void main() {
     }
 
     // G-Buffer
-    gs_gPosition = vs_gPosition[0];
+    // See renderablestars.cpp to understand the scale factor
+    gs_gPosition = vec4(1E19, 1E19, 1E19, 1.0) * gl_in[0].gl_Position;
 
     billboardSize = sizeInPixels;
-
-    gs_clipSpaceDepth = vs_clipSpaceDepth[0];
     
+    gs_clipSpaceDepth = projPos[0].w;
+
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projPos[i];

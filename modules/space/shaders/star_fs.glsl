@@ -60,6 +60,12 @@ Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
         
+    if (vs_position[0] == 0.0 &&
+        vs_position[1] == 0.0 &&
+        vs_position[2] == 0.0) {
+            discard;
+        }
+    
     vec4 color = vec4(0.0);
     switch (colorOption) {
         case COLOROPTION_COLOR: 
@@ -82,6 +88,10 @@ Fragment getFragment() {
     // This has to be fixed when the scale graph is in place ---emiax
     position.w = 15;
 
+    if (fullColor.a == 0) {
+        discard;
+    }
+
     Fragment frag;
     frag.color = fullColor;
     frag.depth = gs_clipSpaceDepth;
@@ -90,10 +100,6 @@ Fragment getFragment() {
     frag.gPosition  = gs_gPosition;
     // There is no normal here
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
-    
-    if (fullColor.a == 0) {
-        discard;
-    }
 
     return frag;
 }

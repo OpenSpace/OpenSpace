@@ -34,25 +34,15 @@ in float in_speed;
 out vec3 vs_brightness;
 out vec3 vs_velocity;
 out float vs_speed;
-out vec4 vs_gPosition;
-out float vs_clipSpaceDepth;
 
 uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
+//uniform mat4 projectionMatrix;
 
 
 void main() {
     vs_brightness = in_brightness;
-    vs_velocity = in_velocity;
-    vs_speed = in_speed;
+    vs_velocity   = in_velocity;
+    vs_speed      = in_speed;
 
-    vec4 positionViewSpace = modelViewMatrix * vec4(1E19, 1E19, 1E19, 1.0) * in_position;
-    vec4 positionClipSpace = projectionMatrix * positionViewSpace;
-    
-    // G-Buffer
-    vs_gPosition = positionViewSpace;
-    
-    vs_clipSpaceDepth =  positionClipSpace.w;
-    
-    gl_Position = positionViewSpace;
+    gl_Position = modelViewMatrix * in_position;
 }

@@ -338,17 +338,19 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     // @Check overwriting the scaling from the camera; error as parsec->meter conversion
-    // is done twice? ---abock
-    modelMatrix = glm::scale(glm::dmat4(1.0), glm::dvec3(1E-19, 1E-19, 1E-19)) * glm::dmat4(1.0);//modelMatrix;
-
-    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    // is done twice? ---abock 
+    glm::dmat4 modelViewMatrix =
+        glm::dmat4(data.camera.viewMatrix()) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(1E-19, 1E-19, 1E-19)) *
+        data.camera.viewRotationMatrix() *
+        glm::inverse(glm::translate(glm::dmat4(1.0), data.modelTransform.translation)) *
+        modelMatrix;
    
     glDepthMask(false);
     _program->activate();
 
     _program->setUniform(_uniformCache.modelViewMatrix, glm::mat4(modelViewMatrix));
-    _program->setUniform(_uniformCache.projectionMatrix, glm::mat4(projectionMatrix));
+    _program->setUniform(_uniformCache.projectionMatrix, data.camera.projectionMatrix());
 
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
