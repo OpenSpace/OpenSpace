@@ -91,8 +91,8 @@ private:
     properties::FloatProperty _minBillboardSize;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
+    UniformCache(modelViewMatrix, projectionMatrix, colorOption, alphaValue, scaleFactor,
+        minBillboardSize, screenSize, psfTexture, colorTexture) _uniformCache;
 
     std::string _speckFile;
 

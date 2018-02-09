@@ -37,19 +37,18 @@ uniform float minBillboardSize;
 uniform float alphaValue;
 uniform int colorOption;
 
+uniform vec2 magnitudeClamp;
+
 in vec4 vs_position;
-in vec4 ge_gPosition;
+in vec4 gs_gPosition;
 in vec3 ge_brightness;
 in vec3 ge_velocity;
 in float ge_speed;
 in vec2 texCoord;
 in float billboardSize;
+in float gs_clipSpaceDepth
 
 #include "fragment.glsl"
-//#include "PowerScaling/powerScaling_fs.hglsl"
-
-uniform vec2 magnitudeClamp;
-
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -85,10 +84,10 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = fullColor;
-    frag.depth = pscDepth(position);
+    frag.depth = gs_clipSpaceDepth;
 
     // G-Buffer
-    frag.gPosition  = ge_gPosition;
+    frag.gPosition  = gs_gPosition;
     // There is no normal here
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     

@@ -37,6 +37,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ghoul/glm.h>
+
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -47,6 +49,8 @@ namespace {
     constexpr const char* KeyFile = "File";
 
     constexpr int8_t CurrentCacheVersion = 1;
+
+    const float PARSEC = 0.308567756E17f;
 
     struct ColorVBOLayout {
         std::array<float, 4> position; // (x,y,z,e)
@@ -294,14 +298,13 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
-    _uniformCache.view = _program->uniformLocation("view");
-    _uniformCache.projection = _program->uniformLocation("projection");
+    _uniformCache.modelViewMatrix = _program->uniformLocation("modelViewMatrix");
+    _uniformCache.projectionMatrix = _program->uniformLocation("projectionMatrix");
     _uniformCache.colorOption = _program->uniformLocation("colorOption");
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
     _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.scaling = _program->uniformLocation("scaling");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
 
@@ -328,15 +331,24 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
-    glDepthMask(false);
-    _program->activate();
+
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     // @Check overwriting the scaling from the camera; error as parsec->meter conversion
     // is done twice? ---abock
-    glm::vec2 scaling = glm::vec2(1, -19);
+    modelMatrix = glm::scale(glm::dmat4(1.0), glm::dvec3(1E-19, 1E-19, 1E-19)) * glm::dmat4(1.0);//modelMatrix;
 
-    _program->setUniform(_uniformCache.view, data.camera.viewMatrix());
-    _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
+    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+   
+    glDepthMask(false);
+    _program->activate();
+
+    _program->setUniform(_uniformCache.modelViewMatrix, glm::mat4(modelViewMatrix));
+    _program->setUniform(_uniformCache.projectionMatrix, glm::mat4(projectionMatrix));
 
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
@@ -346,9 +358,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-
-    setPscUniforms(*_program.get(), data.camera, data.position);
-    _program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
@@ -552,14 +561,13 @@ void RenderableStars::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
 
-        _uniformCache.view = _program->uniformLocation("view");
-        _uniformCache.projection = _program->uniformLocation("projection");
+        _uniformCache.modelViewMatrix = _program->uniformLocation("modelViewMatrix");
+        _uniformCache.projectionMatrix = _program->uniformLocation("projectionMatrix");
         _uniformCache.colorOption = _program->uniformLocation("colorOption");
         _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
         _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
         _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.scaling = _program->uniformLocation("scaling");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
     }
@@ -764,11 +772,7 @@ void RenderableStars::createDataSlice(ColorOption option) {
         //psc position = psc(glm::vec4(p, distance));
 
         // Convert parsecs -> meter
-        psc position = psc(glm::vec4(p * 0.308567756f, 17));
-
-        //position[1] *= parsecsToMetersFactor[0];
-        //position[2] *= parsecsToMetersFactor[0];
-        //position[3] += parsecsToMetersFactor[1];
+        glm::vec4 position = glm::vec4(p * PARSEC, 1.0);
 
         switch (option) {
         case ColorOption::Color:
