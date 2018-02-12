@@ -80,6 +80,7 @@ public:
     State state() const;
 
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
+    void clearSynchronizations();
     std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
 
     void syncStateChanged(ResourceSynchronization::State s);
@@ -89,7 +90,7 @@ public:
      * i.e. if this and all required assets loaded without errors.
      */
     bool load();
-    bool hasLoadedParent() const;
+    bool hasLoadedParent();
     bool isLoaded() const;
     void unload();
     void unloadIfUnwanted();
