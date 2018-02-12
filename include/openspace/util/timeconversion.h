@@ -142,10 +142,12 @@ constexpr const char* nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
 }
 
 constexpr TimeUnit timeUnitFromString(const char* unitName) {
+    int found = -1;
     int i = 0;
     for (const char* val : TimeUnitNamesSingular) {
         if (ghoul::equal(unitName, val)) {
-            return static_cast<TimeUnit>(i);
+            found = i;
+            break;
         }
         ++i;
     }
@@ -153,12 +155,18 @@ constexpr TimeUnit timeUnitFromString(const char* unitName) {
     i = 0;
     for (const char* val : TimeUnitNamesPlural) {
         if (ghoul::equal(unitName, val)) {
-            return static_cast<TimeUnit>(i);
+            found = i;
+            break;
         }
         ++i;
     }
 
-    throw ghoul::MissingCaseException();
+    if (found != -1) {
+        return static_cast<TimeUnit>(found);
+    }
+    else {
+        throw ghoul::MissingCaseException();
+    }
 }
 
 std::pair<double, std::string> simplifyTime(double seconds,
