@@ -158,11 +158,8 @@ constexpr TimeUnit timeUnitFromString(const char* unitName) {
         ++i;
     }
 
-    ghoul_assert(false, "Unit name is not a valid name");
     throw ghoul::MissingCaseException();
 }
-
-
 
 std::pair<double, std::string> simplifyTime(double seconds,
     bool forceSingularForm = false);
