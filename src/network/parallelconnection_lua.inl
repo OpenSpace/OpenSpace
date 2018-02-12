@@ -31,6 +31,8 @@ int connect(lua_State* L) {
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().clientConnect();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -41,6 +43,8 @@ int disconnect(lua_State* L) {
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().signalDisconnect();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -51,6 +55,8 @@ int requestHostship(lua_State* L) {
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().requestHostship();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -61,6 +67,8 @@ int resignHostship(lua_State* L) {
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().resignHostship();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

@@ -46,6 +46,7 @@ int time_setDeltaTime(lua_State* L) {
     if (isNumber) {
         double value = lua_tonumber(L, -1);
         OsEng.timeManager().time().setDeltaTime(value);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
     else {
@@ -67,6 +68,7 @@ int time_setDeltaTime(lua_State* L) {
  */
 int time_deltaTime(lua_State* L) {
     lua_pushnumber(L, OsEng.timeManager().time().deltaTime());
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -82,6 +84,7 @@ int time_togglePause(lua_State* L) {
     }
 
     OsEng.timeManager().time().togglePause();
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -98,6 +101,8 @@ int time_setPause(lua_State* L) {
 
     bool pause = lua_toboolean(L, -1) == 1;
     OsEng.timeManager().time().setPause(pause);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -137,6 +142,7 @@ int time_setTime(lua_State* L) {
         OsEng.timeManager().time().setTime(time);
         return 0;
     }
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -148,6 +154,7 @@ int time_setTime(lua_State* L) {
  */
 int time_currentTime(lua_State* L) {
     lua_pushnumber(L, OsEng.timeManager().time().j2000Seconds());
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -159,6 +166,7 @@ int time_currentTime(lua_State* L) {
  */
 int time_currentTimeUTC(lua_State* L) {
     lua_pushstring(L, OsEng.timeManager().time().UTC().c_str());
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -182,6 +190,7 @@ int time_currentWallTime(lua_State* L) {
         utcTime->tm_sec
     );
     lua_pushstring(L, time.c_str());
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

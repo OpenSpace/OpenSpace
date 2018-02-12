@@ -57,6 +57,7 @@ int isLoaded(lua_State* L) {
     else
         lua_pushboolean(L, 0);
 
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

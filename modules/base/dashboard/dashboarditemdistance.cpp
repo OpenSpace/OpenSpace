@@ -90,6 +90,26 @@ namespace {
         "km, AU, light years, parsecs, etc. If this value is disabled, it is always "
         "displayed in meters."
     };
+
+    static const openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+        "RequestedUnit",
+        "Requested Unit",
+        "If the simplification is disabled, this distance unit is used as a destination "
+        "to convert the meters into."
+    };
+
+    std::vector<std::string> unitList() {
+        std::vector<std::string> res(openspace::DistanceUnits.size());
+        std::transform(
+            openspace::DistanceUnits.begin(),
+            openspace::DistanceUnits.end(),
+            res.begin(),
+            [](openspace::DistanceUnit unit) -> std::string {
+                return nameForDistanceUnit(unit);
+            }
+        );
+        return res;
+    }
 } // namespace
 
 namespace openspace {
@@ -150,6 +170,12 @@ documentation::Documentation DashboardItemDistance::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 SimplificationInfo.description
+            },
+            {
+                RequestedUnitInfo.identifier,
+                new StringInListVerifier(unitList()),
+                Optional::Yes,
+                RequestedUnitInfo.description
             }
         }
     };
@@ -160,6 +186,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)
+    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -306,7 +333,27 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     if (dictionary.hasKey(SimplificationInfo.identifier)) {
         _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
     }
+    _doSimplification.onChange([this]() {
+        if (_doSimplification) {
+            _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
+        }
+        else {
+            _requestedUnit.setVisibility(properties::Property::Visibility::User);
+        }
+    });
     addProperty(_doSimplification);
+
+    for (DistanceUnit u : DistanceUnits) {
+        _requestedUnit.addOption(static_cast<int>(u), nameForDistanceUnit(u));
+    }
+    _requestedUnit = static_cast<int>(DistanceUnit::Meter);
+    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
+        std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
+        DistanceUnit unit = distanceUnitFromString(value.c_str());
+        _requestedUnit = static_cast<int>(unit);
+    }
+    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
+    addProperty(_requestedUnit);
 
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
@@ -375,10 +422,15 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     );
 
     double d = glm::length(sourceInfo.first - destinationInfo.first);
-    std::pair<double, std::string> dist =
-        _doSimplification.value() ?
-        simplifyDistance(d) :
-        std::make_pair(d, d == 1.0 ? std::string("meter") : std::string("meters"));
+    std::pair<double, std::string> dist;
+    if (_doSimplification) {
+        dist = simplifyDistance(d);
+    }
+    else {
+        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        double convertedD = convertDistance(d, unit);
+        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+    }
 
     penPosition.y -= _font->height();
     RenderFont(
@@ -394,10 +446,15 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
 glm::vec2 DashboardItemDistance::size() const {
     double d = glm::length(1e20);
-    std::pair<double, std::string> dist =
-        _doSimplification.value() ?
-        simplifyDistance(d) :
-        std::make_pair(d, d == 1.0 ? std::string("meter") : std::string("meters"));
+    std::pair<double, std::string> dist;
+    if (_doSimplification) {
+        dist = simplifyDistance(d);
+    }
+    else {
+        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        double convertedD = convertDistance(d, unit);
+        dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
+    }
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,

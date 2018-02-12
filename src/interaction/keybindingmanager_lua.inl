@@ -69,6 +69,8 @@ int bindKey(lua_State* L) {
         std::move(documentation)
     );
 
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -115,6 +117,8 @@ int bindKeyLocal(lua_State* L) {
         std::move(documentation)
         );
 
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -131,6 +135,7 @@ int getKeyBindings(lua_State* L) {
     }
 
     std::string key = luaL_checkstring(L, -1);
+    lua_settop(L, 0);
 
     using KeyInformation = interaction::KeyBindingManager::KeyInformation;
 
@@ -153,6 +158,8 @@ int getKeyBindings(lua_State* L) {
         lua_settable(L, -3);
         ++i;
     }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -168,9 +175,11 @@ int clearKey(lua_State* L) {
     }
 
     std::string key = luaL_checkstring(L, -1);
+    lua_settop(L, 0);
 
     OsEng.keyBindingManager().removeKeyBinding(key);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -187,6 +196,7 @@ int clearKeys(lua_State* L) {
 
     OsEng.keyBindingManager().resetKeyBindings();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

@@ -73,6 +73,7 @@ private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
+    properties::OptionProperty _requestedUnit;
 
 
 

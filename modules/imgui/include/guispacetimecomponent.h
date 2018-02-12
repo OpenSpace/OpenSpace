@@ -28,6 +28,7 @@
 #include <modules/imgui/include/guicomponent.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/timeconversion.h>
 
 namespace openspace::gui {
 
@@ -37,8 +38,21 @@ public:
     void render() override;
 
 private:
-    properties::FloatProperty _minMaxDeltaTime;
-    float _localMinMaxDeltatime; // We don't want the default display inside the component
+    float _deltaTime;
+    int _deltaTimeUnit; // aka static_cast<int>(TimeUnit)
+
+    float _accelerationDelta;
+
+    double _oldDeltaTime;
+    float _slidingDelta;
+
+    bool _firstFrame;
+
+    std::string _timeUnits;
+
+
+    //properties::FloatProperty _minMaxDeltaTime;
+    //float _localMinMaxDeltatime; // We don't want the default display inside the component
 };
 
 } // namespace openspace::gui
