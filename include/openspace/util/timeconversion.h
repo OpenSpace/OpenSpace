@@ -94,7 +94,7 @@ TimeUnitNamesSingular = {
     TimeUnitMinute, TimeUnitHour, TimeUnitDay, TimeUnitMonth, TimeUnitYear
 };
 
-constexpr std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
+constexpr const std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
 TimeUnitNamesPlural = {
     TimeUnitNanoseconds, TimeUnitMicroseconds, TimeUnitMilliseconds, TimeUnitSeconds,
     TimeUnitMinutes, TimeUnitHours, TimeUnitDays, TimeUnitMonths, TimeUnitYears
