@@ -121,23 +121,23 @@ constexpr bool isValidTimeUnitName(const char* name) {
 
 constexpr const char* nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
     switch (unit) {
-    case TimeUnit::Nanosecond:
-    case TimeUnit::Microsecond:
-    case TimeUnit::Millisecond:
-    case TimeUnit::Second:
-    case TimeUnit::Minute:
-    case TimeUnit::Hour:
-    case TimeUnit::Day:
-    case TimeUnit::Month:
-    case TimeUnit::Year:
-        if (pluralForm) {
-            return TimeUnitNamesPlural[static_cast<int>(unit)];
-        }
-        else {
-            return TimeUnitNamesSingular[static_cast<int>(unit)];
-        }
-    default:
-        throw ghoul::MissingCaseException();
+        case TimeUnit::Nanosecond:
+        case TimeUnit::Microsecond:
+        case TimeUnit::Millisecond:
+        case TimeUnit::Second:
+        case TimeUnit::Minute:
+        case TimeUnit::Hour:
+        case TimeUnit::Day:
+        case TimeUnit::Month:
+        case TimeUnit::Year:
+            if (pluralForm) {
+                return TimeUnitNamesPlural[static_cast<int>(unit)];
+            }
+            else {
+                return TimeUnitNamesSingular[static_cast<int>(unit)];
+            }
+        default:
+            throw ghoul::MissingCaseException();
     }
 }
 
