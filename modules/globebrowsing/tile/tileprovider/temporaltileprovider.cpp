@@ -160,7 +160,7 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
     std::string timeEnd = getXMLValue(
         node,
         TemporalXMLTags::TIME_END,
-        "Now"
+        "Today"
     );
     std::string timeIdFormat = getXMLValue(
         node,
@@ -168,12 +168,13 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
         "YYYY-MM-DDThh:mm:ssZ"
     );
 
-    Time start; start.setTime(timeStart);
+    Time start;
+    start.setTime(timeStart);
     Time end(Time::now());
     if (timeEnd == "Yesterday") {
         end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
     }
-    else if (timeEnd != "Now") {
+    else if (timeEnd != "Today") {
         end.setTime(timeEnd);
     }
 

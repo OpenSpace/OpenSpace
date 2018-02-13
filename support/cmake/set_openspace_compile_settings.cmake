@@ -24,7 +24,7 @@
 
 function (set_openspace_compile_settings project)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD 17)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED ON)
 
     if (MSVC)
         target_compile_options(

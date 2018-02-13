@@ -117,23 +117,18 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         0,                                          // Minimum: No caching
         static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL)), // Maximum
         1                                           // Step: One MB
-    ) {
+    )
+{
     addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 
     GDALAllRegister();
-    CPLSetConfigOption(
-        "GDAL_DATA",
-        absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str()
-    );
-    CPLSetConfigOption(
-        "CPL_TMPDIR",
-        absPath("${BASE}").c_str()
-    );
-    CPLSetConfigOption(
-        "GDAL_HTTP_UNSAFESSL",
-        "YES"
-    );
+    CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
+    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").c_str());
+    CPLSetConfigOption("GDAL_HTTP_UNSAFESSL", "YES");
+
+    CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
+
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
 

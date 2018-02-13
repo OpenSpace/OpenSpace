@@ -164,6 +164,8 @@ asset.onInitialize(function ()
         "Pluto", "NewHorizons", "Charon"
     })
 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowFocusNodeRotationDistance', 20.000000);
+
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",

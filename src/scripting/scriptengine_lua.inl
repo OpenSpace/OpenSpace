@@ -71,6 +71,8 @@ int walkCommon(lua_State* L, Func func) {
         );
     }
 
+    lua_settop(L, 0);
+
     // Copy values into the lua_State
     lua_newtable(L);
 
@@ -79,6 +81,7 @@ int walkCommon(lua_State* L, Func func) {
         lua_rawseti(L, -2, i + 1);
     }
 
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 } // namespace
@@ -115,6 +118,7 @@ int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
             LOGC(level, "print", lua_tostring(L, -1));
             break;
     }
+    lua_settop(L, 0);
     return 0;
 }
 
@@ -197,6 +201,8 @@ int absolutePath(lua_State* L) {
     }
 
     std::string path = luaL_checkstring(L, -1);
+    lua_settop(L, 0);
+
     path = absPath(path);
     //path = FileSys.convertPathSeparator(path, '/');
     lua_pushstring(L, path.c_str());
@@ -217,6 +223,7 @@ int setPathToken(lua_State* L) {
 
     const std::string path = luaL_checkstring(L, -1);
     const std::string pathToken = luaL_checkstring(L, -2);
+    lua_settop(L, 0);
     FileSys.registerPathToken(
         pathToken,
         path,
@@ -238,6 +245,8 @@ int fileExists(lua_State* L) {
 
     const std::string file = luaL_checkstring(L, -1);
     const bool e = FileSys.fileExists(absPath(file));
+
+    lua_settop(L, 0);
     lua_pushboolean(L, (e ? 1 : 0));
     return 1;
 }
@@ -255,6 +264,8 @@ int directoryExists(lua_State* L) {
 
     const std::string file = luaL_checkstring(L, -1);
     const bool e = FileSys.directoryExists(absPath(file));
+
+    lua_settop(L, 0);
     lua_pushboolean(L, (e ? 1 : 0));
     return 1;
 }
@@ -315,6 +326,8 @@ int directoryForPath(lua_State* L) {
 
     const std::string file = luaL_checkstring(L, -1);
     const std::string path = ghoul::filesystem::File(file).directoryName();
+
+    lua_settop(L, 0);
     lua_pushstring(L, path.c_str());
     return 1;
 }

@@ -506,12 +506,36 @@ int main_main(int argc, char** argv) {
     // @CLEANUP:  Replace the return valua with throwing an exception --abock
     std::vector<std::string> sgctArguments;
     bool requestQuit = false;
-    openspace::OpenSpaceEngine::create(
-        argc, argv,
-        std::make_unique<openspace::SGCTWindowWrapper>(),
-        sgctArguments,
-        requestQuit
-    );
+    try {
+        openspace::OpenSpaceEngine::create(
+            argc, argv,
+            std::make_unique<openspace::SGCTWindowWrapper>(),
+            sgctArguments,
+            requestQuit
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        // Write out all of the information about the exception and flush the logs
+        LFATALC(e.component, e.message);
+        LogMgr.flushLogs();
+        return EXIT_FAILURE;
+    }
+    catch (const ghoul::AssertionException& e) {
+        // We don't want to catch the assertion exception as we won't be able to add a
+        // breakpoint for debugging
+        LFATALC("Assertion failed", e.what());
+        throw;
+    }
+    catch (const std::exception& e) {
+        LFATALC("Exception", e.what());
+        LogMgr.flushLogs();
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        LFATALC("Exception", "Unknown exception");
+        LogMgr.flushLogs();
+        return EXIT_FAILURE;
+    }
 
     if (requestQuit) {
         return EXIT_SUCCESS;
@@ -621,6 +645,10 @@ int main_main(int argc, char** argv) {
     };
 
     bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
+
+    // Do not print message if slaves are waiting for the master
+    // Only timeout after 15 minutes
+    SgctEngine->setSyncParameters(false, 15.f * 60.f);
 
     if (!initSuccess) {
         LFATAL("Initializing failed");

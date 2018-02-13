@@ -49,7 +49,10 @@ int loadKernel(lua_State* L) {
     }
     unsigned int result = SpiceManager::ref().loadKernel(argument);
 
+    lua_settop(L, 0);
     lua_pushnumber(L, result);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -71,6 +74,8 @@ int unloadKernel(lua_State* L) {
             ghoul::lua::errorLocation(L) <<
             "Expected argument of type 'string' or 'number'"
         );
+        lua_settop(L, 0);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
 
@@ -84,6 +89,9 @@ int unloadKernel(lua_State* L) {
         SpiceManager::ref().unloadKernel(argument);
     }
 
+    lua_settop(L, 0);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

@@ -106,6 +106,11 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     fTask->registerClass<SyncAssetTask>("SyncAssetTask");
 
     _torrentClient.initialize();
+
+    // Deinitialize
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&] {
+        _torrentClient.deinitialize();
+    });
 }
 
 std::vector<documentation::Documentation> SyncModule::documentations() const {

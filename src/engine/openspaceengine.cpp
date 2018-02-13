@@ -310,7 +310,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     if (!FileSys.fileExists(configurationFilePath)) {
         throw ghoul::FileNotFoundError(
-            "Configuration file '" + configurationFilePath + "' not found"
+            "Configuration file '" + configurationFilePath + "'"
         );
     }
     LINFO("Configuration Path: '" << configurationFilePath << "'");
@@ -817,26 +817,26 @@ void OpenSpaceEngine::writeStaticDocumentation() {
 void OpenSpaceEngine::gatherCommandlineArguments() {
     commandlineArgumentPlaceholders.configurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+        commandlineArgumentPlaceholders.configurationName, "--config", "-c",
         "Provides the path to the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sgctConfigurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+        commandlineArgumentPlaceholders.sgctConfigurationName, "--sgct", "-s",
         "Provides the path to the SGCT configuration file, overriding the value set in "
         "the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sceneName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
+        commandlineArgumentPlaceholders.sceneName, "--scene", "", "Provides the path to "
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.cacheFolder = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
+        commandlineArgumentPlaceholders.cacheFolder, "--cacheDir", "", "Provides the "
         "path to a cache file, overriding the value set in the OpenSpace configuration "
         "file"
     ));
@@ -1235,6 +1235,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
     if (_hasScheduledAssetLoading) {
+        LINFO("Loading asset: " << _scheduledAssetPathToLoad);
         loadSingleAsset(_scheduledAssetPathToLoad);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad = "";

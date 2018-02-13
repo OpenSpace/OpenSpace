@@ -30,7 +30,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "TorrentClient";
-    std::chrono::milliseconds PollInterval(200);
+    std::chrono::milliseconds PollInterval(1000);
 } // namespace
 
 namespace openspace {
@@ -53,14 +53,11 @@ TorrentError::TorrentError(std::string component)
 namespace openspace {
 
 TorrentClient::TorrentClient()
-    : _keepRunning(true)
+    : _active(false)
 {}
 
 TorrentClient::~TorrentClient() {
-    std::lock_guard<std::mutex> guard(_mutex);
-    _keepRunning = false;
-    _torrentThread.join();
-    _session = nullptr;
+    deinitialize();
 }
 
 void TorrentClient::initialize() {
@@ -92,39 +89,64 @@ void TorrentClient::initialize() {
     _session->listen_on(std::make_pair(20280, 20290), ec);
     _session->start_upnp();
 
+    _active = true;
+
     _torrentThread = std::thread([this]() {
-        while (_keepRunning) {
+        while (_active) {
             pollAlerts();
-            std::this_thread::sleep_for(PollInterval);
+            std::unique_lock<std::mutex> lock(_abortMutex);
+            _abortNotifier.wait_for(lock, PollInterval);
         }
     });
 }
 
+void TorrentClient::deinitialize() {
+    if (!_active) {
+        return;
+    }
+
+    _active = false;
+    _abortNotifier.notify_all();
+    if (_torrentThread.joinable()) {
+        _torrentThread.join();
+    }
+
+    std::vector<lt::torrent_handle> handles = _session->get_torrents();
+    for (lt::torrent_handle h : handles) {
+        _session->remove_torrent(h);
+    }
+    _torrents.clear();
+
+    _session->abort();
+    _session = nullptr;
+}
+
 void TorrentClient::pollAlerts() {
+    // Libtorrent does not seem to reliably generate alerts for all added torrents.
+    // To make sure that the program does not keep waiting for already finished 
+    // downsloads, we go through the whole list of torrents when polling.
+    // However, in theory, the commented code below should be more efficient:
+    /*
     std::vector<libtorrent::alert*> alerts;
     {
         std::lock_guard<std::mutex> guard(_mutex);
         _session->pop_alerts(&alerts);
     }
-
-    for (lt::alert const* a : alerts) {
-        //LINFO(a->message());
-        // if we receive the finished alert or an error, we're done
-        if (const lt::torrent_finished_alert* alert =
-           lt::alert_cast<lt::torrent_finished_alert>(a))
+    for (lt::alert* a : alerts) {
+        if (const lt::torrent_alert* alert =
+           dynamic_cast<lt::torrent_alert*>(a))
         {
             notify(alert->handle.id());
         }
-        if (const lt::piece_finished_alert* alert =
-            lt::alert_cast<lt::piece_finished_alert>(a))
-        {
-            notify(alert->handle.id());
-        }
-        if (const lt::torrent_error_alert* alert =
-            lt::alert_cast<lt::torrent_error_alert>(a))
-        {
-            notify(alert->handle.id());
-        }
+    }
+    */
+    std::vector<lt::torrent_handle> handles;
+    {
+        std::lock_guard<std::mutex> guard(_mutex);
+        handles = _session->get_torrents();
+    }
+    for (lt::torrent_handle h : handles) {
+        notify(h.id());
     }
 }
 
@@ -167,6 +189,11 @@ TorrentClient::TorrentId TorrentClient::addMagnetLink(std::string magnetLink,
     }
     libtorrent::error_code ec;
     libtorrent::add_torrent_params p = libtorrent::parse_magnet_uri(magnetLink, ec);
+
+    if (ec) {
+        LERROR(magnetLink << ": " << ec.message());
+    }
+
     p.save_path = destination;
     p.storage_mode = libtorrent::storage_mode_allocate;
 
@@ -195,24 +222,29 @@ void TorrentClient::removeTorrent(TorrentId id) {
 }
 
 void TorrentClient::notify(TorrentId id) {
-    std::lock_guard<std::mutex> guard(_mutex);
-
-    auto torrent = _torrents.find(id);
-    if (torrent == _torrents.end()) {
-        return;
-    }
-
-    libtorrent::torrent_handle h = torrent->second.handle;
-    libtorrent::torrent_status status = h.status();
-
+    TorrentProgressCallback callback;
     TorrentProgress progress;
 
-    progress.finished = status.is_finished;
-    progress.nTotalBytesKnown = status.total_wanted > 0;
-    progress.nTotalBytes = status.total_wanted;
-    progress.nDownloadedBytes = status.total_wanted_done;
+    {
+        std::lock_guard<std::mutex> guard(_mutex);
 
-    torrent->second.callback(progress);
+        auto torrent = _torrents.find(id);
+        if (torrent == _torrents.end()) {
+            return;
+        }
+
+        libtorrent::torrent_handle h = torrent->second.handle;
+        libtorrent::torrent_status status = h.status();
+
+        progress.finished = status.is_finished;
+        progress.nTotalBytesKnown = status.total_wanted > 0;
+        progress.nTotalBytes = status.total_wanted;
+        progress.nDownloadedBytes = status.total_wanted_done;
+
+        callback = torrent->second.callback;
+    }
+
+    callback(progress);
 }
 
 } // namespace openspace
@@ -226,6 +258,8 @@ TorrentClient::TorrentClient() {}
 TorrentClient::~TorrentClient() {}
 
 void TorrentClient::initialize() {}
+
+void TorrentClient::deinitialize() {}
 
 void TorrentClient::pollAlerts() {}
 
