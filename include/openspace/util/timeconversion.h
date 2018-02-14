@@ -82,13 +82,13 @@ constexpr const char* TimeUnitDays = "days";
 constexpr const char* TimeUnitMonths = "months";
 constexpr const char* TimeUnitYears = "years";
 
-constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits = {
+constexpr const std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits = {
     TimeUnit::Nanosecond, TimeUnit::Microsecond, TimeUnit::Millisecond,
     TimeUnit::Second, TimeUnit::Minute, TimeUnit::Hour, TimeUnit::Day,
     TimeUnit::Month, TimeUnit::Year
 };
 
-constexpr std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
+constexpr const std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
 TimeUnitNamesSingular = {
     TimeUnitNanosecond, TimeUnitMicrosecond, TimeUnitMillisecond, TimeUnitSecond,
     TimeUnitMinute, TimeUnitHour, TimeUnitDay, TimeUnitMonth, TimeUnitYear
@@ -158,11 +158,8 @@ constexpr TimeUnit timeUnitFromString(const char* unitName) {
         ++i;
     }
 
-    ghoul_assert(false, "Unit name is not a valid name");
     throw ghoul::MissingCaseException();
 }
-
-
 
 std::pair<double, std::string> simplifyTime(double seconds,
     bool forceSingularForm = false);

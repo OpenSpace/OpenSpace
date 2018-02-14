@@ -36,6 +36,8 @@ int loadMission(lua_State* L) {
     }
     std::string name = MissionManager::ref().loadMission(absPath(missionFileName));
     lua_pushstring(L, name.c_str());
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -55,6 +57,8 @@ int unloadMission(lua_State* L) {
     }
 
     MissionManager::ref().unloadMission(missionName);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -72,6 +76,8 @@ int hasMission(lua_State* L) {
     bool hasMission = MissionManager::ref().hasMission(missionName);
 
     lua_pushboolean(L, hasMission);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -86,6 +92,8 @@ int setCurrentMission(lua_State* L) {
         return luaL_error(L, "Mission name is empty");
     }
     MissionManager::ref().setCurrentMission(missionName);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

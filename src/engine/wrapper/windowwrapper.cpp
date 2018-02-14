@@ -41,6 +41,8 @@ int setSynchronization(lua_State* L) {
 
     bool b = lua_toboolean(L, -1) != 0;
     OsEng.windowWrapper().setSynchronization(b);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
