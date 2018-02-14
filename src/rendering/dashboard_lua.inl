@@ -46,10 +46,14 @@ int addDashboardItem(lua_State* L) {
         }
         catch (const ghoul::lua::LuaFormatException& e) {
             LERRORC("addDashboardItem", e.what());
+            lua_settop(L, 0);
             return 0;
         }
+        lua_settop(L, 0);
 
         OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
     else {
@@ -68,6 +72,8 @@ int removeDashboardItems(lua_State* L) {
     }
 
     OsEng.dashboard().removeDashboardItems();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

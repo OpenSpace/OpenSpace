@@ -320,10 +320,13 @@ int property_getValue(lua_State* L) {
             "property_getValue",
             errorLocation(L) << "Property with URL '" << uri << "' was not found"
         );
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
-    }
-    else
+    } else {
         prop->getLuaValue(L);
+    }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -340,6 +343,7 @@ int loadScene(lua_State* L) {
     std::string sceneFile = luaL_checkstring(L, -1);
     OsEng.scheduleLoadSingleAsset(sceneFile);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -377,6 +381,9 @@ int addSceneGraphNode(lua_State* L) {
     } catch (const ghoul::RuntimeError& e) {
         return luaL_error(L, "Error loading scene graph node: %s", e.what());
     }
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -405,7 +412,10 @@ int removeSceneGraphNode(lua_State* L) {
     }
     node->deinitializeGL();
     parent->detachChild(*node);
-    return 1;
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 
@@ -416,7 +426,10 @@ int hasSceneGraphNode(lua_State* L) {
     std::string nodeName = luaL_checkstring(L, -1);
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
 
+    lua_settop(L, 0);
     lua_pushboolean(L, node != nullptr);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

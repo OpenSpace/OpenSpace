@@ -226,92 +226,94 @@ globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     std::string listLayerGroups = layerGroupNamesList();
-    return {
-        "globebrowsing",
+
+    scripting::LuaLibrary res;
+    res.name = "globebrowsing";
+    res.functions = {
         {
-            {
-                "addLayer",
-                &globebrowsing::luascriptfunctions::addLayer,
-                {},
-                "string, string, table",
-                "Adds a layer to the specified globe. The first argument specifies the "
-                "name of the scene graph node of which to add the layer. The renderable "
-                "of the specified scene graph node needs to be a renderable globe. "
-                "The second argument is the layer group which can be any of "
-                + listLayerGroups + ". The third argument is the dictionary defining the "
-                "layer."
-            },
-            {
-                "deleteLayer",
-                &globebrowsing::luascriptfunctions::deleteLayer,
-                {},
-                "string, string",
-                "Removes a layer from the specified globe. The first argument specifies "
-                "the name of the scene graph node of which to remove the layer. "
-                "The renderable of the specified scene graph node needs to be a "
-                "renderable globe. The second argument is the layer group which can be "
-                "any of " + listLayerGroups + ". The third argument is the dictionary"
-                "defining the layer."
-            },
-            {
-                "goToChunk",
-                &globebrowsing::luascriptfunctions::goToChunk,
-                {},
-                "void",
-                "Go to chunk with given index x, y, level"
-            },
-            {
-                "goToGeo",
-                &globebrowsing::luascriptfunctions::goToGeo,
-                {},
-                "number, number, number",
-                "Go to geographic coordinates latitude and longitude"
-            },
-            {
-                "getGeoPosition",
-                &globebrowsing::luascriptfunctions::getGeoPosition,
-                {},
-                "void",
-                "Get geographic coordinates of the camera poosition in latitude, "
-                "longitude, and altitude"
-            },
-#ifdef GLOBEBROWSING_USE_GDAL
-            {
-                "loadWMSCapabilities",
-                &globebrowsing::luascriptfunctions::loadWMSCapabilities,
-                {},
-                "string, string, string",
-                "Loads and parses the WMS capabilities xml file from a remote server. "
-                "The first argument is the name of the capabilities that can be used to "
-                "later refer to the set of capabilities. The second argument is the "
-                "globe for which this server is applicable. The third argument is the "
-                "URL at which the capabilities file can be found."
-            },
-            {
-                "removeWMSServer",
-                &globebrowsing::luascriptfunctions::removeWMSServer,
-                {},
-                "string",
-                "Removes the WMS server identified by the first argument from the list "
-                "of available servers. The parameter corrsponds to the first argument in "
-                "the loadWMSCapabilities call that was used to load the WMS server."
-            },
-            {
-                "capabilitiesWMS",
-                &globebrowsing::luascriptfunctions::capabilities,
-                {},
-                "string",
-                "Returns an array of tables that describe the available layers that are "
-                "supported by the WMS server identified by the provided name. The 'URL'"
-                "component of the returned table can be used in the 'FilePath' argument "
-                "for a call to the 'addLayer' function to add the value to a globe."
-            }
-#endif  // GLOBEBROWSING_USE_GDAL
+            "addLayer",
+            &globebrowsing::luascriptfunctions::addLayer,
+            {},
+            "string, string, table",
+            "Adds a layer to the specified globe. The first argument specifies the "
+            "name of the scene graph node of which to add the layer. The renderable "
+            "of the specified scene graph node needs to be a renderable globe. "
+            "The second argument is the layer group which can be any of "
+            + listLayerGroups + ". The third argument is the dictionary defining the "
+            "layer."
         },
         {
-            absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
+            "deleteLayer",
+            &globebrowsing::luascriptfunctions::deleteLayer,
+            {},
+            "string, string",
+            "Removes a layer from the specified globe. The first argument specifies "
+            "the name of the scene graph node of which to remove the layer. "
+            "The renderable of the specified scene graph node needs to be a "
+            "renderable globe. The second argument is the layer group which can be "
+            "any of " + listLayerGroups + ". The third argument is the dictionary"
+            "defining the layer."
+        },
+        {
+            "goToChunk",
+            &globebrowsing::luascriptfunctions::goToChunk,
+            {},
+            "void",
+            "Go to chunk with given index x, y, level"
+        },
+        {
+            "goToGeo",
+            &globebrowsing::luascriptfunctions::goToGeo,
+            {},
+            "number, number, number",
+            "Go to geographic coordinates latitude and longitude"
+        },
+        {
+            "getGeoPosition",
+            &globebrowsing::luascriptfunctions::getGeoPosition,
+            {},
+            "void",
+            "Get geographic coordinates of the camera poosition in latitude, "
+            "longitude, and altitude"
+        },
+#ifdef GLOBEBROWSING_USE_GDAL
+        {
+            "loadWMSCapabilities",
+            &globebrowsing::luascriptfunctions::loadWMSCapabilities,
+            {},
+            "string, string, string",
+            "Loads and parses the WMS capabilities xml file from a remote server. "
+            "The first argument is the name of the capabilities that can be used to "
+            "later refer to the set of capabilities. The second argument is the "
+            "globe for which this server is applicable. The third argument is the "
+            "URL at which the capabilities file can be found."
+        },
+        {
+            "removeWMSServer",
+            &globebrowsing::luascriptfunctions::removeWMSServer,
+            {},
+            "string",
+            "Removes the WMS server identified by the first argument from the list "
+            "of available servers. The parameter corrsponds to the first argument in "
+            "the loadWMSCapabilities call that was used to load the WMS server."
+        },
+        {
+            "capabilitiesWMS",
+            &globebrowsing::luascriptfunctions::capabilities,
+            {},
+            "string",
+            "Returns an array of tables that describe the available layers that are "
+            "supported by the WMS server identified by the provided name. The 'URL'"
+            "component of the returned table can be used in the 'FilePath' argument "
+            "for a call to the 'addLayer' function to add the value to a globe."
         }
+#endif  // GLOBEBROWSING_USE_GDAL
     };
+    res.scripts = {
+        absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua")
+    };
+
+    return res;
 }
 
 void GlobeBrowsingModule::goToChunk(int x, int y, int level) {

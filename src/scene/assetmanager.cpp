@@ -53,6 +53,7 @@ void AssetManager::initialize() {
 
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
+    _assetLoader->rootAsset()->unload();
     _assetLoader->removeAssetListener(this);
     _assetLoader = nullptr;
 }

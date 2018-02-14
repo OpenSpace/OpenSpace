@@ -29,6 +29,7 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
 
 #include <functional>
 #include <memory>
