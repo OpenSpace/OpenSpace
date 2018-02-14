@@ -313,6 +313,7 @@ int property_getValue(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("property_getValue", L, 1, nArguments);
 
     std::string uri = luaL_checkstring(L, -1);
+    lua_settop(L, 0);
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {
