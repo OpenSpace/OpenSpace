@@ -374,7 +374,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
-            "heightScale", static_cast<float>(data.modelTransform.scale));
+            "heightScale", static_cast<float>(data.modelTransform.scale * data.camera.scaling()));
     }
 
     setCommonUniforms(*programObject, chunk, data);
