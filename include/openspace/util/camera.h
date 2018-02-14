@@ -171,6 +171,7 @@ public:
     psc unsynchedPosition() const;
     // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
     psc focusPosition() const;
+    const glm::mat4& sceneMatrix() const;
     // @TODO use Camera::SgctInternal interface instead
     // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
