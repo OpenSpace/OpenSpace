@@ -31,7 +31,7 @@
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/onscopeexit.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fmt/format.h>
@@ -250,9 +250,9 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     std::shared_ptr<Asset> parentAsset = _currentAsset;
 
     setCurrentAsset(asset);
-    ghoul::OnScopeExit e([this, parentAsset] {
+    defer {
         setCurrentAsset(parentAsset);
-    });
+    };
 
     if (!FileSys.fileExists(asset->assetFilePath())) {
         LERROR("Could not load asset '" << asset->assetFilePath() <<

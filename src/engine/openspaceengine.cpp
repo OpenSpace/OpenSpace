@@ -72,7 +72,6 @@
 
 #include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -80,6 +79,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
@@ -636,12 +636,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     windowWrapper().setBarrier(false);
     windowWrapper().setSynchronization(false);
-    OnExit(
-        [this]() {
-            windowWrapper().setSynchronization(true);
-            windowWrapper().setBarrier(true);
-        }
-    );
+    defer {
+        windowWrapper().setSynchronization(true);
+        windowWrapper().setBarrier(true);
+    };
 
     if (assetPath == "") {
         return;
@@ -1352,10 +1350,6 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
             );
     }
 
-    OnExit([] {
-        LTRACE("OpenSpaceEngine::render(end)");
-    });
-
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     if (isGuiWindow) {
@@ -1368,14 +1362,11 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-
+    LTRACE("OpenSpaceEngine::render(end)");
 }
 
 void OpenSpaceEngine::drawOverlays() {
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
-    OnExit([] {
-        LTRACE("OpenSpaceEngine::drawOverlays(end)");
-    });
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (OsEng.renderEngine().performanceManager()) {
@@ -1408,6 +1399,8 @@ void OpenSpaceEngine::drawOverlays() {
     for (const auto& func : _moduleCallbacks.draw2D) {
         func();
     }
+
+    LTRACE("OpenSpaceEngine::drawOverlays(end)");
 }
 
 void OpenSpaceEngine::postDraw() {
