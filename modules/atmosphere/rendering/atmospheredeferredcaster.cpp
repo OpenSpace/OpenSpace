@@ -256,6 +256,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             // World to Eye Space in OS
             program.setUniform(
+                "dInverseCamScaleTransform",
+                glm::inverse(renderData.camera.viewScaleMatrix())
+            ); 
+
+            program.setUniform(
                 "dInverseCamRotTransform",
                 glm::mat4_cast(
                     static_cast<glm::dquat>(renderData.camera.rotationQuaternion())

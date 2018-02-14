@@ -306,6 +306,10 @@ namespace openspace {
         return psc(_focusPosition);
     }
 
+    const glm::mat4& Camera::sceneMatrix() const {
+        return sgctInternal.sceneMatrix();
+    }
+
     const glm::mat4& Camera::viewMatrix() const {
         return sgctInternal.viewMatrix();
     }

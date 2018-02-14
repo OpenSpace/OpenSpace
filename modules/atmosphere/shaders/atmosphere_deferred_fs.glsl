@@ -88,6 +88,7 @@ uniform sampler2DMS mainColorTexture;
 uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
 uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
 uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
+uniform dmat4 dInverseCamScaleTransform;
 uniform dmat4 dInverseCamRotTransform; 
 uniform dmat4 dInverseModelTransformMatrix; 
 uniform dmat4 dModelTransformMatrix;
@@ -260,13 +261,14 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
 
     // Clip to SGCT Eye
     dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
-    sgctEyeCoords.w     = 1.0;
+    sgctEyeCoords.w     = clipCoords.z;//1.0;
     
     // SGCT Eye to OS Eye
     dvec4 tOSEyeCoordsInv = dSgctEyeToOSEyeTranform * sgctEyeCoords;
     
     // OS Eye to World coords
-    dvec4 tmpRInv     = dInverseCamRotTransform * tOSEyeCoordsInv;
+    dvec4 tmpSInv     = dInverseCamScaleTransform * tOSEyeCoordsInv;
+    dvec4 tmpRInv     = dInverseCamRotTransform * tmpSInv;//tOSEyeCoordsInv;
     dvec4 worldCoords = dvec4(dvec3(tmpRInv) + dCampos, 1.0);
     
     // World to Object
@@ -634,8 +636,9 @@ void main() {
                 // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
                 // when using their positions later, one must convert them to the planet's coords
                 
-                // OS Eye to World coords                
-                dvec4 tmpRInvPos            = dInverseCamRotTransform * dSgctEyeToOSEyeTranform * position;        
+                // OS Eye to World coords  
+                dvec4 tmpSInvPos            = dInverseCamScaleTransform * dSgctEyeToOSEyeTranform * position;               
+                dvec4 tmpRInvPos            = dInverseCamRotTransform * tmpSInvPos;//dSgctEyeToOSEyeTranform * position;        
                 dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
@@ -652,7 +655,7 @@ void main() {
                 float dC = float(length(cameraPositionInObject.xyz));
                 float x1 = 1e8;
                 if (dC > x1) {
-                    pixelDepth += 1000.0;
+                    pixelDepth     += 1000.0;
                     float alpha     = 1000.0;
                     float beta      = 1000000.0;
                     float x2        = 1e9; 
