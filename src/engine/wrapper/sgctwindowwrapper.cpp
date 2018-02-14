@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 10.f)
+    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 0.2f)
     , _showStatsGraph(ShowStatsGraphInfo, false)
 {
     _showStatsGraph.onChange([this](){

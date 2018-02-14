@@ -84,6 +84,10 @@ private:
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;
 
+    properties::BoolProperty _useAdaptiveStereoscopicDepth;
+    properties::FloatProperty _stereoscopicDepthOfFocusSurface;
+    properties::FloatProperty _staticViewScaleExponent;
+
     MouseStates _mouseStates;
 
     SceneGraphNode* _focusNode = nullptr;
@@ -192,6 +196,14 @@ private:
                                              const glm::dvec3& objectPosition,
                                              const glm::dvec3& cameraPosition,
                                              const SurfacePositionHandle& positionHandle);
+
+    /**
+     * Get the vector from the camera to the surface of the focus object in world space.
+     */
+    glm::dvec3 cameraToSurfaceVector(
+        const glm::dvec3& cameraPos,
+        const glm::dvec3& centerPos,
+        const SurfacePositionHandle& posHandle);
 
     /**
      * Calculates a SurfacePositionHandle given a camera position in world space.

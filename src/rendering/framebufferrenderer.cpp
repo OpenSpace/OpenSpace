@@ -925,19 +925,13 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         return;
     }
 
-    glEnable(GL_DEPTH_TEST);
-
-
-    Time time = OsEng.timeManager().time();
-
-    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0, {} };
-    RendererTasks tasks;
-
     // Capture standard fbo
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    glEnable(GL_DEPTH_TEST);
+
     // deferred g-buffer
     GLenum textureBuffers[3] = {
         GL_COLOR_ATTACHMENT0,
@@ -952,6 +946,11 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glDisablei(GL_BLEND, 2);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
+    Time time = OsEng.timeManager().time();
+    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0,{} };
+    RendererTasks tasks;
+
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
     _scene->render(data, tasks);
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
@@ -961,7 +960,49 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     _scene->render(data, tasks);
 
-    for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
+
+    performRaycasterTasks(tasks.raycasterTasks);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, dBuffer);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    performDeferredTasks(tasks.deferredcasterTasks);
+
+    if (!tasks.deferredcasterTasks.empty()) {
+        // JCC: Temporarily disabled. Need to test it on mac and linux before final
+        // merging.
+        /*glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
+        GLenum dBuffer[] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, dBuffer);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
+        0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
+        GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        */
+        //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    } else {
+        _resolveProgram->activate();
+
+        ghoul::opengl::TextureUnit mainColorTextureUnit;
+        mainColorTextureUnit.activate();
+
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+        _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
+        _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
+        _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
+        glBindVertexArray(_screenQuad);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        _resolveProgram->deactivate();
+    }
+}
+
+void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks) {
+    for (const RaycasterTask& raycasterTask : tasks) {
         VolumeRaycaster* raycaster = raycasterTask.raycaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
@@ -1041,18 +1082,15 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             LWARNING("Raycaster is not attached when trying to perform raycaster task");
         }
     }
+}
 
+void FramebufferRenderer::performDeferredTasks(const std::vector<DeferredcasterTask>& tasks) {
     // g-buffer
-    if (!tasks.deferredcasterTasks.empty()) {
+    if (!tasks.empty()) {
         //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _deferredFramebuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-        GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, dBuffer);
-        glClear(GL_COLOR_BUFFER_BIT);
-
         bool firstPaint = true;
 
-        for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
+        for (const DeferredcasterTask& deferredcasterTask : tasks) {
 
             Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
@@ -1125,44 +1163,12 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                 if (firstPaint) {
                     firstPaint = false;
                 }
-            }
-            else {
+            } else {
                 LWARNING(
                     "Deferredcaster is not attached when trying to perform deferred task"
                 );
             }
         }
-    }
-
-    if (!tasks.deferredcasterTasks.empty()) {
-        // JCC: Temporarily disabled. Need to test it on mac and linux before final
-        // merging.
-        /*glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
-        GLenum dBuffer[] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, dBuffer);
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        */
-        //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-        _resolveProgram->activate();
-
-        ghoul::opengl::TextureUnit mainColorTextureUnit;
-        mainColorTextureUnit.activate();
-
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
-        _resolveProgram->setUniform(_uniformCache.mainColorTexture, mainColorTextureUnit);
-        _resolveProgram->setUniform(_uniformCache.blackoutFactor, blackoutFactor);
-        _resolveProgram->setUniform(_uniformCache.nAaSamples, _nAaSamples);
-        glBindVertexArray(_screenQuad);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        _resolveProgram->deactivate();
     }
 }
 

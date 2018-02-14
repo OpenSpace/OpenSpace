@@ -49,8 +49,6 @@ namespace openspace {
         : _focusPosition()
         , _maxFov(0.f)
     {
-
-        _scaling = glm::vec2(1.f, 0.f);
         _position = Vec3(1.0, 1.0, 1.0);
         Vec3 eulerAngles(1.0, 1.0, 1.0);
         _rotation = Quat(eulerAngles);
@@ -60,7 +58,6 @@ namespace openspace {
         : sgctInternal(o.sgctInternal)
         , _position(o._position)
         , _rotation(o._rotation)
-        , _scaling(o._scaling)
         , _focusPosition(o._focusPosition)
         , _maxFov(o._maxFov)
         , _cachedViewDirection(o._cachedViewDirection)
@@ -91,9 +88,11 @@ namespace openspace {
         _cachedCombinedViewMatrix.isDirty = true;
     }
 
-    void Camera::setScaling(glm::vec2 scaling) {
+    void Camera::setScaling(float scaling) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _scaling = std::move(scaling);
+        _scaling = scaling;
+        _cachedViewScaleMatrix.isDirty = true;
+        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     void Camera::setMaxFov(float fov) {
@@ -154,10 +153,6 @@ namespace openspace {
         return _cachedLookupVector.datum;
     }
 
-    const glm::vec2& Camera::scaling() const {
-        return _scaling;
-    }
-
     float Camera::maxFov() const {
         return _maxFov;
     }
@@ -174,6 +169,10 @@ namespace openspace {
         return _parent;
     }
 
+    float Camera::scaling() const {
+        return _scaling;
+    }
+
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
             _cachedViewRotationMatrix.datum = glm::mat4_cast(
@@ -181,6 +180,14 @@ namespace openspace {
             );
         }
         return _cachedViewRotationMatrix.datum;
+    }
+
+    const Camera::Mat4& Camera::viewScaleMatrix() const
+    {
+        if (_cachedViewScaleMatrix.isDirty) {
+            _cachedViewScaleMatrix.datum = glm::scale(glm::vec3(_scaling));
+        }
+        return _cachedViewScaleMatrix.datum;
     }
 
     const Camera::Quat& Camera::rotationQuaternion() const {
@@ -193,6 +200,7 @@ namespace openspace {
                 glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));
             _cachedCombinedViewMatrix.datum =
                 Mat4(sgctInternal.viewMatrix()) *
+                Mat4(viewScaleMatrix()) *
                 Mat4(viewRotationMatrix()) *
                 cameraTranslation;
             _cachedCombinedViewMatrix.isDirty = true;

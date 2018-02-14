@@ -84,6 +84,33 @@ namespace {
         "Minimum allowed distance",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo
+        UseAdaptiveStereoscopicDepthInfo = {
+            "UseAdaptiveStereoscopicDepth",
+            "Adaptive Steroscopic Depth",
+            "Dynamically adjust the view scaling based on the distance to the surface of "
+            "the focus node. If enabled, view scale will be set to "
+            "StereoscopicDepthOfFocusSurface / distance. "
+            "If disabled, view scale will be set to 10^StaticViewScaleExponent."
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+        StaticViewScaleExponentInfo = {
+            "StaticViewScaleExponent",
+            "Static View Scale Exponent",
+            "Statically scale the world by 10^StaticViewScaleExponent. "
+            "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
+        };
+
+    static const openspace::properties::Property::PropertyInfo
+        StereoscopicDepthOfFocusSurfaceInfo = {
+            "StereoscopicDepthOfFocusSurface",
+            "Stereoscopic depth of the surface in focus",
+            "Set the stereoscopically perceived distance (in meters) to the surface of "
+            "the focus node. "
+            "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
+        };
 } // namespace
 
 namespace openspace::interaction {
@@ -107,6 +134,9 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
+    , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
+    , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
+    , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
 {
     auto smoothStep =
         [](double t) {
@@ -158,6 +188,10 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
+
+    addProperty(_useAdaptiveStereoscopicDepth);
+    addProperty(_staticViewScaleExponent);
+    addProperty(_stereoscopicDepthOfFocusSurface);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -263,7 +297,35 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
         // Update the camera state
         camera.setPositionVec3(camPos);
         camera.setRotation(camRot.globalRotation * camRot.localRotation);
+
+        if (_useAdaptiveStereoscopicDepth) {
+            glm::vec3 surfaceToCamera = static_cast<glm::vec3>(
+                cameraToSurfaceVector(camPos, centerPos, posHandle)
+            );
+            camera.setScaling(
+                _stereoscopicDepthOfFocusSurface / glm::length(surfaceToCamera)
+            );
+        } else {
+            camera.setScaling(glm::pow(10.f, _staticViewScaleExponent));
+        }
     }
+}
+
+glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(
+    const glm::dvec3& camPos,
+    const glm::dvec3& centerPos,
+    const SurfacePositionHandle& posHandle)
+{
+    glm::dmat4 modelTransform = _focusNode->modelTransform();
+    glm::dvec3 posDiff = camPos - centerPos;
+    glm::dvec3 centerToActualSurfaceModelSpace =
+        posHandle.centerToReferenceSurface +
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+
+    glm::dvec3 centerToActualSurface =
+        glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
+
+    return centerToActualSurface - posDiff;
 }
 
 void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
