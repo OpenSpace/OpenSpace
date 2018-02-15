@@ -31,10 +31,7 @@ namespace {
 // Defining a common walk function that works off a pointer-to-member function
 template <typename Func>
 int walkCommon(lua_State* L, Func func) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments < 1 || nArguments > 3) {
-        return luaL_error(L, "Expected %i-%i arguments, got %i", 1, 3, nArguments);
-    }
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
 
     std::vector<std::string> result;
     if (nArguments == 1) {
@@ -87,13 +84,9 @@ int walkCommon(lua_State* L, Func func) {
 } // namespace
 
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "print";
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::printInternal");
 
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    using ghoul::lua::luaTypeToString;
 
     const int type = lua_type(L, -1);
     switch (type) {
@@ -195,13 +188,9 @@ int printFatal(lua_State* L) {
  * tokens and returns the absolute path.
  */
 int absolutePath(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %d arguments, got %d", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::absolutePath");
 
-    std::string path = luaL_checkstring(L, -1);
-    lua_settop(L, 0);
+    std::string path = ghoul::lua::checkStringAndPop(L);
 
     path = absPath(path);
     //path = FileSys.convertPathSeparator(path, '/');
@@ -216,19 +205,17 @@ int absolutePath(lua_State* L) {
  * argument. If the path token already exists, it will be silently overridden.
  */
 int setPathToken(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 2) {
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setPathToken");
 
-    const std::string path = luaL_checkstring(L, -1);
-    const std::string pathToken = luaL_checkstring(L, -2);
-    lua_settop(L, 0);
+    const std::string path = ghoul::lua::checkStringAndPop(L);
+    const std::string pathToken = ghoul::lua::checkStringAndPop(L);
+
     FileSys.registerPathToken(
         pathToken,
         path,
         ghoul::filesystem::FileSystem::Override::Yes
     );
+
     return 0;
 }
 
@@ -238,16 +225,13 @@ int setPathToken(lua_State* L) {
  * Checks whether the provided file exists
  */
 int fileExists(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileExists");
 
-    const std::string file = luaL_checkstring(L, -1);
+    const std::string file = ghoul::lua::checkStringAndPop(L);
     const bool e = FileSys.fileExists(absPath(file));
 
-    lua_settop(L, 0);
     lua_pushboolean(L, (e ? 1 : 0));
+
     return 1;
 }
 
@@ -257,15 +241,12 @@ int fileExists(lua_State* L) {
 * Checks whether the provided file exists
 */
 int directoryExists(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
 
-    const std::string file = luaL_checkstring(L, -1);
+
+    const std::string file = ghoul::lua::checkStringAndPop(L);
     const bool e = FileSys.directoryExists(absPath(file));
 
-    lua_settop(L, 0);
     lua_pushboolean(L, (e ? 1 : 0));
     return 1;
 }
@@ -319,16 +300,13 @@ int walkDirectoryFolder(lua_State* L) {
  * 'C:\\OpenSpace\\foobar'."
  */
 int directoryForPath(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
 
-    const std::string file = luaL_checkstring(L, -1);
+    const std::string file = ghoul::lua::checkStringAndPop(L);
     const std::string path = ghoul::filesystem::File(file).directoryName();
 
-    lua_settop(L, 0);
     lua_pushstring(L, path.c_str());
+    
     return 1;
 }
 

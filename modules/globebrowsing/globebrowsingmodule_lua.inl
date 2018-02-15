@@ -41,16 +41,13 @@ namespace openspace::globebrowsing::luascriptfunctions {
  *Adds a layer to the specified globe.
  */
 int addLayer(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::addLayer");
+
     using ghoul::lua::errorLocation;
 
     // Argument locations
     const int GlobeLocation = -3;
     const int LayerGroupLocation = -2;
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 3) {
-        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
-    }
 
     // String arguments
     const std::string GlobeName = luaL_checkstring(L, GlobeLocation);
@@ -99,17 +96,14 @@ int addLayer(lua_State* L) {
  Deletes a layer from the specified globe.
  */
 int deleteLayer(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::deleteLayer");
+
     using ghoul::lua::errorLocation;
 
     // Argument locations
     const int GlobeLocation = -3;
     const int LayerGroupLocation = -2;
     const int NameLocation = -1;
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 3) {
-        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
-    }
 
     // String arguments
     const std::string GlobeName = luaL_checkstring(L, GlobeLocation);
@@ -143,13 +137,9 @@ int deleteLayer(lua_State* L) {
 }
 
 int goToChunk(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::goToChunk");
 
-    // Check arguments
-    int nArguments = lua_gettop(L);
-    if (nArguments != 3) {
-        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
-    }
+    using ghoul::lua::luaTypeToString;
 
     int x = static_cast<int>(lua_tonumber(L, 1));
     int y = static_cast<int>(lua_tonumber(L, 2));
@@ -163,12 +153,9 @@ int goToChunk(lua_State* L) {
 }
 
 int goToGeo(lua_State* L) {
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::goToGeo");
+    
     using ghoul::lua::luaTypeToString;
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2 && nArguments != 3) {
-        return luaL_error(L, "Expected 2 or 3 arguments.");
-    }
 
     double latitude = lua_tonumber(L, 1);
     double longitude = lua_tonumber(L, 2);
@@ -188,10 +175,8 @@ int goToGeo(lua_State* L) {
 }
 
 int getGeoPosition(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPosition");
+
     GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
@@ -224,16 +209,11 @@ int getGeoPosition(lua_State* L) {
 
 #ifdef GLOBEBROWSING_USE_GDAL
 int loadWMSCapabilities(lua_State* L) {
-    int nArguments = lua_gettop(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::loadWMSCapabilities");
 
-    if (nArguments != 3) {
-        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
-    }
-
-    std::string name = lua_tostring(L, -3);
-    std::string globe = lua_tostring(L, -2);
-    std::string url = lua_tostring(L, -1);
-    lua_settop(L, 0);
+    std::string url = ghoul::lua::checkStringAndPop(L);
+    std::string globe = ghoul::lua::checkStringAndPop(L);
+    std::string name = ghoul::lua::checkStringAndPop(L);
 
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->loadWMSCapabilities(
         std::move(name),
@@ -246,15 +226,10 @@ int loadWMSCapabilities(lua_State* L) {
 }
 
 int removeWMSServer(lua_State* L) {
-    int nArguments = lua_gettop(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
 
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    std::string name = ghoul::lua::checkStringAndPop(L);
 
-    std::string name = lua_tostring(L, -1);
-
-    lua_settop(L, 0);
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->removeWMSServer(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -262,13 +237,9 @@ int removeWMSServer(lua_State* L) {
 }
 
 int capabilities(lua_State* L) {
-    int nArguments = lua_gettop(L);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::capabilities");
 
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
-
-    std::string name = lua_tostring(L, -1);
+    std::string name = ghoul::lua::checkStringAndPop(L);
     GlobeBrowsingModule::Capabilities cap =
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
 

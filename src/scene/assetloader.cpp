@@ -25,7 +25,6 @@
 #include <openspace/scene/assetloader.h>
 
 #include <openspace/scene/asset.h>
-#include <openspace/scripting/script_helper.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
@@ -389,39 +388,43 @@ std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
 }
 
 int AssetLoader::onInitializeLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("onInitialize", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onInitialize");
+
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onInitializationFunctionRefs[asset].push_back(referenceIndex);
+
     lua_settop(*_luaState, 0);
     return 0;
 }
 
 int AssetLoader::onDeinitializeLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("onDeinitialize", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onDeinitialize");
+
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onDeinitializationFunctionRefs[asset].push_back(referenceIndex);
+
     lua_settop(*_luaState, 0);
     return 0;
 }
 
 int AssetLoader::onInitializeDependencyLua(Asset* dependant, Asset* dependency) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("onInitialize", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onInitializeDependency");
+
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onDependencyInitializationFunctionRefs[dependant][dependency]
         .push_back(referenceIndex);
+
     lua_settop(*_luaState, 0);
     return 0;
 }
 
 int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("onDeinitialize", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onDeinitializeDependency");
+    
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onDependencyDeinitializationFunctionRefs[dependant][dependency]
         .push_back(referenceIndex);
+    
     lua_settop(*_luaState, 0);
     return 0;
 }
@@ -496,7 +499,7 @@ void AssetLoader::callOnInitialize(Asset* asset) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When initializing " + asset->assetFilePath() + ": " +
-                luaL_checkstring(*_luaState, -1)
+                ghoul::lua::checkStringAndPop(*_luaState)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -511,7 +514,7 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When deinitializing " + asset->assetFilePath() + ": " +
-                luaL_checkstring(*_luaState, -1)
+                ghoul::lua::checkStringAndPop(*_luaState)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -525,7 +528,7 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When initializing dependency " + dependant->assetFilePath() + " -> " +
-                asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
+                asset->assetFilePath() + ": " + ghoul::lua::checkStringAndPop(*_luaState)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -543,7 +546,7 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When deinitializing dependency " + dependant->assetFilePath() + " -> " +
-                asset->assetFilePath() + ": " + luaL_checkstring(*_luaState, -1)
+                asset->assetFilePath() + ": " + ghoul::lua::checkStringAndPop(*_luaState)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -552,13 +555,11 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
 }
 
 int AssetLoader::localResourceLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("localResource", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::localResourceLua");
 
-    std::string resourceName = luaL_checkstring(*_luaState, -1);
+    std::string resourceName = ghoul::lua::checkStringAndPop(*_luaState);
     std::string resolved = asset->resolveLocalResource(resourceName);
 
-    lua_settop(*_luaState, 0);
     lua_pushstring(*_luaState, resolved.c_str());
 
     ghoul_assert(lua_gettop(*_luaState) == 1, "Incorrect number of items left on stack");
@@ -566,8 +567,7 @@ int AssetLoader::localResourceLua(Asset* asset) {
 }
 
 int AssetLoader::syncedResourceLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("syncedResource", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::syncedResourceLua");
 
     ghoul::Dictionary d;
     ghoul::lua::luaDictionaryFromState(*_luaState, d);
@@ -608,8 +608,7 @@ void AssetLoader::setCurrentAsset(std::shared_ptr<Asset> asset) {
 }
 
 int AssetLoader::requireLua(Asset* dependant) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("require", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::require");
 
     std::string assetName = luaL_checkstring(*_luaState, 1);
     lua_settop(*_luaState, 0);
@@ -647,8 +646,7 @@ int AssetLoader::requireLua(Asset* dependant) {
 }
 
 int AssetLoader::requestLua(Asset* parent) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("request", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::request");
 
     std::string assetName = luaL_checkstring(*_luaState, 1);
     lua_settop(*_luaState, 0);
@@ -674,8 +672,7 @@ int AssetLoader::requestLua(Asset* parent) {
 }
 
 int AssetLoader::existsLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("exists", *_luaState, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::exists");
 
     std::string assetName = luaL_checkstring(*_luaState, 1);
 
@@ -689,8 +686,7 @@ int AssetLoader::existsLua(Asset* asset) {
 }
 
 int AssetLoader::exportAssetLua(Asset* asset) {
-    int nArguments = lua_gettop(*_luaState);
-    SCRIPT_CHECK_ARGUMENTS("exportAsset", *_luaState, 2, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(*_luaState, 2, "lua::exportAsset");
 
     std::string exportName = luaL_checkstring(*_luaState, 1);
 
