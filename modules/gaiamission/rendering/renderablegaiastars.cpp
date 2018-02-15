@@ -50,14 +50,10 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 1;
 
     struct VBOLayout {
-        std::array<float, 4> position; // (x,y,z) - TODO
+        std::array<float, 3> position; // (x,y,z)
         std::array<float, 3> velocity; // (x,y,z)
         float magnitude;
-        float bvColor;
-        float luminance;
-        
     };
-
 
     static const openspace::properties::Property::PropertyInfo FitsFileInfo = {
         "File",
@@ -206,8 +202,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
     , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
     , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
-    , _firstRow(FirstRowInfo, 1, 1, 2539913)
-    , _lastRow(LastRowInfo, 10000, 1, 2539913)
+    , _firstRow(FirstRowInfo, 1, 1, 2539913) // DR1-max: 2539913
+    , _lastRow(LastRowInfo, 50000, 1, 2539913)
     , _columnNamesList(ColumnNamesInfo)
     , _program(nullptr)
     , _nValuesPerStar(0)
@@ -306,8 +302,12 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         // Copy values to the StringListproperty to be shown in the Property list.
         _columnNamesList = _columnNames;
     }
-    _columnNamesList.onChange([&] { _dataIsDirty = true; });
-    addProperty(_columnNamesList);
+   // There's not any point in exposing this property atm --adaal
+   // _columnNamesList.onChange([&] { 
+   //     _dataIsDirty = true; 
+   //     _columnNames = _columnNamesList;
+   // });
+   // addProperty(_columnNamesList);
 
     if (_firstRow > _lastRow) {
         throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow.");
@@ -324,12 +324,9 @@ bool RenderableGaiaStars::isReady() const {
 void RenderableGaiaStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("GaiaStar",
-        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
-        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
-        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
-        absPath("${MODULE_GAIAMISSION}/shaders/star_vs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/star_fs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/star_ge.glsl")
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
         
     );
 
@@ -404,10 +401,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
     glDrawArrays(GL_POINTS, 0, nStars);
 
-    //LINFO("Fulldata: " + std::to_string(_fullData.size()));
-    //LINFO("_nValuesPerStar: " + std::to_string(_nValuesPerStar));
-    //LINFO("Number of stars: " + std::to_string(nStars));
-
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -418,7 +411,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
 
-        // TODO (adaal): Reload fits file!
+        // Reload fits file (as long as it's not the first initialization)!
+        if (_vao != 0) {
+            // Bypass cached files and go directly to read function.
+            bool success = readFitsFile();
+            if (!success) {
+                throw ghoul::RuntimeError("Error loading FITS data");
+            }
+        }
 
         createDataSlice();
 
@@ -448,8 +448,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
         const size_t nStars = _fullData.size() / _nValuesPerStar;
         const size_t nValues = _slicedData.size() / nStars;
 
-        LINFO("nStars: " + std::to_string(nStars) + " - nValues: " + std::to_string(nValues));
-
         GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
         glEnableVertexAttribArray(positionAttrib);
@@ -458,7 +456,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         glVertexAttribPointer(
             positionAttrib,
-            4, // TODO
+            3,
             GL_FLOAT,
             GL_FALSE,
             stride,
@@ -474,7 +472,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         );
         glVertexAttribPointer(
             brightnessDataAttrib,
-            3, // TODO
+            1,
             GL_FLOAT,
             GL_FALSE,
             stride,
@@ -592,6 +590,7 @@ bool RenderableGaiaStars::loadData() {
 
 bool RenderableGaiaStars::readFitsFile() {
     std::string _file = _fitsFilePath;
+    _fullData.clear();
 
     int nStars = _lastRow - _firstRow + 1;
 
@@ -608,17 +607,35 @@ bool RenderableGaiaStars::readFitsFile() {
     int nNullArr = 0;
 
     std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
+    std::vector<float> posXcol = tableContent[_columnNames[0]];
+    std::vector<float> posYcol = tableContent[_columnNames[1]];
+    std::vector<float> posZcol = tableContent[_columnNames[2]];
+    std::vector<float> velXcol = tableContent[_columnNames[3]];
+    std::vector<float> velYcol = tableContent[_columnNames[4]];
+    std::vector<float> velZcol = tableContent[_columnNames[5]];
+    std::vector<float> magCol = tableContent[_columnNames[6]];
+
     for (int i = 0; i < nStars; ++i) {
         std::vector<float> values(_nValuesPerStar);
         size_t idx = 0;
-        for (std::string name : _columnNames) {
-            std::vector<float> vecData = tableContent[name];
-            values[idx] = vecData[i];
-            idx++;
+
+        // Read default values.
+        values[idx++] = posXcol[i];
+        values[idx++] = posYcol[i];
+        values[idx++] = posZcol[i];
+        values[idx++] = velXcol[i];
+        values[idx++] = velYcol[i];
+        values[idx++] = velZcol[i];
+        values[idx++] = magCol[i];
+
+        // Read extra columns, if any. This will slow down the sorting tremendously!
+        for (size_t col = 7; col < _nValuesPerStar; ++col) {
+            std::vector<float> vecData = tableContent[_columnNames[col]];
+            values[idx++] = vecData[i];
         }
 
         bool nullArray = true;
-        for (size_t j = 0; j < values.size(); ++j) {
+        for (size_t j = 0; j < _nValuesPerStar; ++j) {
             if (values[j] != -999) {
                 nullArray = false;
                 break;
@@ -703,22 +720,11 @@ void RenderableGaiaStars::createDataSlice() {
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
         glm::vec3 pos = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-        //glm::vec3 position = glm::vec3(4662120063743.592773, 1263245003503.724854, -955413856565.788086);
+        glm::vec3 vel = glm::vec3(_fullData[i + 3], _fullData[i + 4], _fullData[i + 5]);
 
         // Convert parsecs -> meter
-        psc position = psc(glm::vec4(pos * 0.308567756f, 15));
-        //glm::vec3 position = pos * static_cast<float>(distanceconstants::Parsec);
-        /*LINFO("Pos for row: " + std::to_string(i/_nValuesPerStar) + " : ("
-            + std::to_string(position.x) + ", "
-            + std::to_string(position.y) + ", "
-            + std::to_string(position.z) + ")");
-        LINFO("Vel for row: " + std::to_string(i / _nValuesPerStar) + " : ("
-            + std::to_string(_fullData[i + 3]) + ", "
-            + std::to_string(_fullData[i + 4]) + ", "
-            + std::to_string(_fullData[i + 5]) + ")");
-        LINFO("Brighness for row: " + std::to_string(i / _nValuesPerStar) + " : ("
-            + std::to_string(_fullData[i + 6]) + ", "
-            + std::to_string(_fullData[i + 7]) + ")");*/
+        glm::vec3 position = pos * static_cast<float>(distanceconstants::Parsec);
+        glm::vec3 velocity = vel * static_cast<float>(distanceconstants::Parsec);
 
         union {
             VBOLayout value;
@@ -726,15 +732,13 @@ void RenderableGaiaStars::createDataSlice() {
         } layout;
 
         layout.value.position = { {
-                position[0], position[1], position[2], position[3] // TODO
+                position[0], position[1], position[2]
             } };
         layout.value.velocity = { {
                 _fullData[i + 3], _fullData[i + 4], _fullData[i + 5]
             } };
 
         layout.value.magnitude = _fullData[i + 6];
-        layout.value.bvColor = _fullData[i + 7];
-        layout.value.luminance = 1.5;
 
         _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
     }

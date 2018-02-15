@@ -26,14 +26,14 @@
 
 layout(points) in;
 in vec3 vs_velocity[];
-in vec2 vs_brightness[];
+in float vs_brightness[];
 in vec4 vs_gPosition[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out vec4 vs_position;
-out vec4 ge_gPosition;               
 out vec3 ge_velocity;
-out vec2 ge_brightness;
+out float ge_brightness;
+out vec4 ge_gPosition;               
 out vec2 texCoord;
 out float billboardSize;
 
@@ -53,10 +53,10 @@ void main() {
 
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
-    
-    float magnitude = vs_brightness[0].x;
+
+    float absoluteMagnitude = vs_brightness[0];
     float modifiedSpriteSize =
-        exp(magnitude * 0.462) * scaleFactor * 2000;
+        exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
 
     vec4 projPos[4];
     for (int i = 0; i < 4; ++i) {
@@ -88,5 +88,4 @@ void main() {
     }
 
     EndPrimitive();
-    
 }

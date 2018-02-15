@@ -21,30 +21,36 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #version __CONTEXT__
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_velocity;
-layout(location = 2) in vec2 in_brightness;
+#include "PowerScaling/powerScaling_vs.hglsl"
+//#include "PowerScaling/powerScalingMath.hglsl"
+
+in vec3 in_position;
+in vec3 in_velocity;
+in float in_brightness;
 
 out vec3 vs_velocity;
-out vec2 vs_brightness;
+out float vs_brightness;
 out vec4 vs_gPosition;
 
 uniform mat4 view;
 uniform mat4 projection;
 uniform float time; 
 
-
 void main() {
-    vs_brightness = in_brightness;
     vs_velocity = in_velocity;
+    vs_brightness = in_brightness;
+    
+    vec4 pos = vec4(in_position + time * in_velocity, 1.0);
+    vec4 position = pscTransform(pos, mat4(1.0));
+    
+    vec4 positionClipSpace = projection * view * pos;
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-    //vec3 position = in_position + (time * in_velocity);
-    vec3 position = in_position;
-    
     // G-Buffer
-    vs_gPosition = vec4(position, 1.0);
+    vs_gPosition = pos;
     
-    gl_Position = view * vec4(position, 1.0);
+    gl_Position = view * pos;
 }
