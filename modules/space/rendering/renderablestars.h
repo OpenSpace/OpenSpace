@@ -86,13 +86,13 @@ private:
     properties::OptionProperty _colorOption;
     bool _dataIsDirty;
 
-    properties::FloatProperty _alphaValue;
-    properties::FloatProperty _scaleFactor;
-    properties::FloatProperty _minBillboardSize;
+    properties::FloatProperty _magnitudeExponent;
+    properties::FloatProperty _sharpness;
+    properties::FloatProperty _billboardSize;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(view, projection, colorOption, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
+    UniformCache(model, view, viewScaling, projection, colorOption, magnitudeExponent, sharpness,
+        billboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
 
     std::string _speckFile;
 
