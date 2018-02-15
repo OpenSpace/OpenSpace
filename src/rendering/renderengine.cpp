@@ -116,6 +116,13 @@ namespace {
         "example)."
     };
 
+    static const openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
+        "ShowOverlayOnSlaves",
+        "Show Overlay Information on Slaves",
+        "If this value is enabled, the overlay information text is also automatically "
+        "rendered on the slave nodes. This values is disabled by default."
+    };
+
     static const openspace::properties::Property::PropertyInfo ShowLogInfo = {
         "ShowLog",
         "Show the on-screen log",
@@ -226,6 +233,7 @@ RenderEngine::RenderEngine()
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
+    , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
@@ -276,6 +284,7 @@ RenderEngine::RenderEngine()
     });
     addProperty(_doPerformanceMeasurements);
 
+    addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
@@ -600,6 +609,25 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         }
     }
     LTRACE("RenderEngine::render(end)");
+}
+
+void RenderEngine::renderOverlays(const ShutdownInformation& info) {
+    const bool isMaster = OsEng.windowWrapper().isMaster();
+    if (isMaster || _showOverlayOnSlaves) {
+        renderScreenLog();
+        renderVersionInformation();
+        renderDashboard();
+
+        if (!info.inShutdown) {
+            // We render the camera information in the same location as the shutdown info
+            // and we won't need this if we are shutting down
+            renderCameraInformation();
+        }
+        else {
+            // If we are in shutdown mode, we can display the remaining time
+            renderShutdownInformation(info.timer, info.waitTime);
+        }
+    }
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {

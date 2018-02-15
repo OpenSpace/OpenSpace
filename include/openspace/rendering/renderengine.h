@@ -53,6 +53,7 @@ class Scene;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
+struct ShutdownInformation;
 class Syncable;
 class SyncBuffer;
 
@@ -90,11 +91,7 @@ public:
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
 
-    void renderScreenLog();
-    void renderVersionInformation();
-    void renderCameraInformation();
-    void renderShutdownInformation(float timer, float fullTime);
-    void renderDashboard();
+    void renderOverlays(const ShutdownInformation& shutdownInfo);
     void postDraw();
 
     // Performance measurements
@@ -174,6 +171,13 @@ private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method) const;
 
+    void renderScreenLog();
+    void renderVersionInformation();
+    void renderCameraInformation();
+    void renderShutdownInformation(float timer, float fullTime);
+    void renderDashboard();
+
+
     Camera* _camera;
     Scene* _scene;
     std::unique_ptr<RaycasterManager> _raycasterManager;
@@ -188,6 +192,7 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
+    properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;

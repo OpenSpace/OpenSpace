@@ -1347,7 +1347,7 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::render",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     const bool isGuiWindow =
@@ -1373,26 +1373,14 @@ void OpenSpaceEngine::drawOverlays() {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::drawOverlays",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
 
     if (isGuiWindow) {
-        _renderEngine->renderScreenLog();
-        _renderEngine->renderVersionInformation();
-        _renderEngine->renderDashboard();
-
-        if (!_shutdown.inShutdown) {
-            // We render the camera information in the same location as the shutdown info
-            // and we won't need this if we are shutting down
-            _renderEngine->renderCameraInformation();
-        }
-        else {
-            // If we are in shutdown mode, we can display the remaining time
-            _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
-        }
+        _renderEngine->renderOverlays(_shutdown);
         _console->render();
     }
 
@@ -1411,7 +1399,7 @@ void OpenSpaceEngine::postDraw() {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::postDraw",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     _renderEngine->postDraw();
