@@ -88,13 +88,18 @@ private:
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
 
+    properties::FloatProperty _rotateToFocusInterpolationTime;
+    properties::FloatProperty _stereoInterpolationTime;
+
     MouseStates _mouseStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
+    double _currentCameraToSurfaceDistance;
 
     Interpolator<double> _rotateToFocusNodeInterpolator;
+    Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
     /**
@@ -128,6 +133,11 @@ private:
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
                                         const glm::dquat& localCameraRotation);
+
+
+    double interpolateCameraToSurfaceDistance(double deltaTime,
+                                              double currentDistance,
+                                              double targetDistance);
 
     /**
      * Translates the horizontal direction. If far from the focus object, this will
