@@ -329,7 +329,9 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
+
     _program->activate();
 
     glm::mat4 model =
@@ -373,6 +375,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->deactivate();
 
     glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void RenderableStars::update(const UpdateData&) {
