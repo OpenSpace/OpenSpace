@@ -94,7 +94,7 @@ TimeUnitNamesSingular = {
     TimeUnitMinute, TimeUnitHour, TimeUnitDay, TimeUnitMonth, TimeUnitYear
 };
 
-constexpr std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
+constexpr const std::array<const char*, static_cast<int>(TimeUnit::Year) + 1>
 TimeUnitNamesPlural = {
     TimeUnitNanoseconds, TimeUnitMicroseconds, TimeUnitMilliseconds, TimeUnitSeconds,
     TimeUnitMinutes, TimeUnitHours, TimeUnitDays, TimeUnitMonths, TimeUnitYears
@@ -121,31 +121,33 @@ constexpr bool isValidTimeUnitName(const char* name) {
 
 constexpr const char* nameForTimeUnit(TimeUnit unit, bool pluralForm = false) {
     switch (unit) {
-    case TimeUnit::Nanosecond:
-    case TimeUnit::Microsecond:
-    case TimeUnit::Millisecond:
-    case TimeUnit::Second:
-    case TimeUnit::Minute:
-    case TimeUnit::Hour:
-    case TimeUnit::Day:
-    case TimeUnit::Month:
-    case TimeUnit::Year:
-        if (pluralForm) {
-            return TimeUnitNamesPlural[static_cast<int>(unit)];
-        }
-        else {
-            return TimeUnitNamesSingular[static_cast<int>(unit)];
-        }
-    default:
-        throw ghoul::MissingCaseException();
+        case TimeUnit::Nanosecond:
+        case TimeUnit::Microsecond:
+        case TimeUnit::Millisecond:
+        case TimeUnit::Second:
+        case TimeUnit::Minute:
+        case TimeUnit::Hour:
+        case TimeUnit::Day:
+        case TimeUnit::Month:
+        case TimeUnit::Year:
+            if (pluralForm) {
+                return TimeUnitNamesPlural[static_cast<int>(unit)];
+            }
+            else {
+                return TimeUnitNamesSingular[static_cast<int>(unit)];
+            }
+        default:
+            throw ghoul::MissingCaseException();
     }
 }
 
 constexpr TimeUnit timeUnitFromString(const char* unitName) {
+    int found = -1;
     int i = 0;
     for (const char* val : TimeUnitNamesSingular) {
         if (ghoul::equal(unitName, val)) {
-            return static_cast<TimeUnit>(i);
+            found = i;
+            break;
         }
         ++i;
     }
@@ -153,12 +155,18 @@ constexpr TimeUnit timeUnitFromString(const char* unitName) {
     i = 0;
     for (const char* val : TimeUnitNamesPlural) {
         if (ghoul::equal(unitName, val)) {
-            return static_cast<TimeUnit>(i);
+            found = i;
+            break;
         }
         ++i;
     }
 
-    throw ghoul::MissingCaseException();
+    if (found != -1) {
+        return static_cast<TimeUnit>(found);
+    }
+    else {
+        throw ghoul::MissingCaseException();
+    }
 }
 
 std::pair<double, std::string> simplifyTime(double seconds,

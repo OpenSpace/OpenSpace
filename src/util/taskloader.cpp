@@ -27,7 +27,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/onscopeexit.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
