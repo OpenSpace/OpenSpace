@@ -27,7 +27,8 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 6) out;
+//layout(triangle_strip, max_vertices = 6) out;
+layout(triangle_strip, max_vertices = 4) out;
 
 //uniform dmat4 transformMatrix;
 uniform dmat4 modelViewProjectionTransform;
@@ -41,6 +42,9 @@ uniform int renderOption;
 uniform vec2 screenSize;
 uniform float maxBillboardSize;
 uniform float minBillboardSize;
+
+uniform dmat4 modelViewMatrix;
+uniform dmat4 projectionMatrix;
 
 in vec4 colorMap[];
 
@@ -102,26 +106,53 @@ void main() {
         unit = 306391534.73091 * PARSEC;
     }
     
-    //dvec4 dpos = transformMatrix * dvec4(dvec3(pos.xyz) * unit, 1.0); 
     dvec4 dpos = dvec4(dvec3(pos.xyz) * unit, 1.0); 
 
-    // texCoord = corners[0];
-    vec4 initialPosition = z_normalization(vec4(modelViewProjectionTransform * 
+    vec4 initialPosition, secondPosition, thirdPosition, crossCorner;
+     // Testing new alingment
+    if (renderOption == 2) {
+        dvec4 dposCameraSpace = modelViewMatrix * dpos;
+
+        if (dposCameraSpace.z > 0.0) {
+            return;
+        }
+        dvec3 xAxis = dvec3(0.5, 0.0, 0.0);
+        dvec3 yAxis = dvec3(0.0, 0.5, 0.0);
+
+        xAxis *= scaleMultiply;
+        yAxis *= scaleMultiply;
+
+        //xAxis *= unit * 0.80;
+        //yAxis *= unit * 0.80;
+
+        initialPosition = z_normalization(
+            vec4(projectionMatrix * dvec4(dposCameraSpace.xyz - xAxis - yAxis, dposCameraSpace.w)
+            ));
+        vs_screenSpaceDepth = initialPosition.w;
+        
+        secondPosition = z_normalization(
+            vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + xAxis - yAxis, dposCameraSpace.w)));
+        
+        crossCorner = z_normalization(
+            vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + yAxis + xAxis, dposCameraSpace.w)));
+        
+        thirdPosition = z_normalization(
+            vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + yAxis - xAxis, dposCameraSpace.w)));
+    } else {
+        initialPosition = z_normalization(vec4(modelViewProjectionTransform * 
                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    vs_screenSpaceDepth  = initialPosition.w;
-    
-    // texCoord    = corners[1];
-    vec4 secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
-                    dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-    
-    //texCoord = corners[2];
-    vec4 crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
-                        dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    
-    // texCoord = corners[3];
-    vec4 thirdPosition = z_normalization(vec4(modelViewProjectionTransform * 
-                    dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    
+        vs_screenSpaceDepth  = initialPosition.w;
+        
+        secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
+                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+        
+        crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
+                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+        
+        thirdPosition = z_normalization(vec4(modelViewProjectionTransform * 
+                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    }
+
     // Testing size:
     vec4 topRight = secondPosition/secondPosition.w;
     topRight =  ((topRight + vec4(1.0)) / vec4(2.0)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
@@ -138,25 +169,20 @@ void main() {
         // Set maximum size as Carter's instructions
         float correctionScale = height > maxBillboardSize ? maxBillboardSize / (topRight.y - bottomLeft.y) :
                                                             maxBillboardSize / (topRight.x - bottomLeft.x);
-        
-        scaledRight = correctionScale * scaleMultiply * right/2.0f;
-        scaledUp    = correctionScale * scaleMultiply * up/2.0f;
-        initialPosition = z_normalization(vec4(modelViewProjectionTransform *
-                                dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-        vs_screenSpaceDepth  = initialPosition.w;
-        secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
-                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
-                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-        thirdPosition = z_normalization(vec4(modelViewProjectionTransform *
-                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-
-        // Fade-out
-        // float maxVar = 2.0f * maxBillboardSize;
-        // float minVar = maxBillboardSize;
-        // ta = 1.0f - ( (var - minVar)/(maxVar - minVar) );
-        // if (ta == 0.0f)
-        //    return;
+        if (renderOption == 2) {
+        } else {
+            scaledRight = correctionScale * scaleMultiply * right/2.0f;
+            scaledUp    = correctionScale * scaleMultiply * up/2.0f;
+            initialPosition = z_normalization(vec4(modelViewProjectionTransform *
+                                    dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+            vs_screenSpaceDepth  = initialPosition.w;
+            secondPosition = z_normalization(vec4(modelViewProjectionTransform * 
+                            dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+            crossCorner = z_normalization(vec4(modelViewProjectionTransform * 
+                                dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+            thirdPosition = z_normalization(vec4(modelViewProjectionTransform *
+                            dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+        }
     } 
     else if (width < 2.0f * minBillboardSize) {
         //return;
@@ -166,26 +192,20 @@ void main() {
         if (ta == 0.0f)
             return;
     } 
-    
+
     // Build primitive
+    texCoord    = corners[3];
+    gl_Position = thirdPosition;
+    EmitVertex();
     texCoord    = corners[0];
     gl_Position = initialPosition;
+    EmitVertex();
+    texCoord    = corners[2];
+    gl_Position = crossCorner;
     EmitVertex();
     texCoord    = corners[1];
     gl_Position = secondPosition;
     EmitVertex();
-    texCoord    = corners[2];
-    gl_Position = crossCorner;
-    EmitVertex();
-    EndPrimitive(); // First Triangle
-    texCoord    = corners[0];
-    gl_Position = initialPosition;
-    EmitVertex();
-    texCoord    = corners[2];
-    gl_Position = crossCorner;
-    EmitVertex();
-    texCoord    = corners[3];
-    gl_Position = thirdPosition;
-    EmitVertex();
-    EndPrimitive(); // Second Triangle    
+    EndPrimitive();     
+
 }

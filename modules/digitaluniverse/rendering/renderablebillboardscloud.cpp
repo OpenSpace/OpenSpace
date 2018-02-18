@@ -750,6 +750,14 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) *
                                    glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+
+    _program->setUniform("modelViewMatrix", data.camera.combinedViewMatrix() * modelMatrix);
+    _program->setUniform("projectionMatrix", glm::dmat4(data.camera.projectionMatrix()));
+
     _program->setUniform(_uniformCache.centerSceenInWorldPos, centerScreenWorld);
 
     _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
@@ -894,19 +902,6 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.0f;
     if (!_disableFadeInDistance) {
         float distCamera = glm::length(data.camera.positionVec3());
-
-        /*
-        // Linear Fading
-        float funcValue = static_cast<float>(
-            (1.0 / double(_fadeInDistance*scale))*(distCamera)
-        );
-        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
-
-        if (funcValue < 0.01) {
-        return;
-        }
-        */
-
         glm::vec2 fadeRange = _fadeInDistance;
         float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
         float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
@@ -961,10 +956,25 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
 
     // Almost Working
-    glm::dmat4 invMVPParts = worldToModelTransform * glm::inverse(data.camera.combinedViewMatrix()) *
+    /*glm::dmat4 invMVPParts = worldToModelTransform * glm::inverse(data.camera.combinedViewMatrix()) *
         glm::inverse(glm::dmat4(projectionMatrix));
     glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
-    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
+    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))));*/
+
+    /*glm::dmat4 combinedViewMatrix(data.camera.combinedViewMatrix());
+    glm::dvec3 orthoRight = glm::dvec3(worldToModelTransform * 
+        glm::dvec4(combinedViewMatrix[0][0], combinedViewMatrix[1][0], combinedViewMatrix[2][0], 0.0));
+    glm::dvec3 orthoUp = glm::dvec3(worldToModelTransform * 
+        glm::dvec4(combinedViewMatrix[0][1], combinedViewMatrix[1][1], combinedViewMatrix[2][1], 0.0));
+*/
+    glm::dvec3 cameraViewDirectionWorldSpace = -glm::normalize(data.camera.viewDirectionWorldSpace());
+    glm::dvec3 otherVector = cameraViewDirectionWorldSpace;
+    otherVector.y = 0.0;
+    glm::dvec3 orthoRight = glm::dvec3(
+        worldToModelTransform * glm::dvec4(glm::normalize(glm::cross(otherVector, cameraViewDirectionWorldSpace)), 0.0));
+    glm::dvec3 orthoUp = glm::dvec3(
+        worldToModelTransform * glm::dvec4(glm::cross(cameraViewDirectionWorldSpace, orthoRight), 0.0));
+    
 
     if (_hasSpeckFile) {
         renderBillboards(
