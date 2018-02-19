@@ -89,9 +89,8 @@ private:
         GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
     void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
-    void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp, float fadeInVariable);
+    void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
@@ -142,9 +141,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(modelViewProjection, cameraPos, cameraLookup,
-        renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
-        color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
+    UniformCache(modelViewMatrix, projectionMatrix, cameraViewProjectionMatrix,
+        modelMatrix, cameraPos, cameraLookup, renderOption, 
+        minBillboardSize, maxBillboardSize, color, sides, alphaValue, 
+        scaleFactor, up, right, fadeInValue, screenSize,
         spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
