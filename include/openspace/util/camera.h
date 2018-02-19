@@ -101,6 +101,7 @@ public:
     // Accessors
     // Remove Vec3 from the name when psc is gone
     const Vec3& positionVec3() const;
+    const Vec3 eyePositionVec3() const;
     const Vec3& unsynchedPositionVec3() const;
     const Vec3& focusPositionVec3() const;
     const Vec3& viewDirectionWorldSpace() const;

@@ -331,7 +331,12 @@ void FramebufferRenderer::update() {
 
     for (auto &program : _deferredcastPrograms) {
         if (program.second && program.second->isDirty()) {
-            program.second->rebuildFromFile();
+            try {
+                program.second->rebuildFromFile();
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
         }
     }
 }

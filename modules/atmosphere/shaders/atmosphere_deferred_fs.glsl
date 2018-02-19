@@ -88,6 +88,7 @@ uniform sampler2DMS mainColorTexture;
 uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
 uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
 uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
+uniform dmat4 dCamScaleTransform;
 uniform dmat4 dInverseCamScaleTransform;
 uniform dmat4 dInverseCamRotTransform; 
 uniform dmat4 dInverseModelTransformMatrix; 
@@ -639,7 +640,7 @@ void main() {
                 // OS Eye to World coords  
                 dvec4 tmpSInvPos            = dInverseCamScaleTransform * dSgctEyeToOSEyeTranform * position;               
                 dvec4 tmpRInvPos            = dInverseCamRotTransform * tmpSInvPos;//dSgctEyeToOSEyeTranform * position;        
-                dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
+                dvec4 fragWorldCoords       = dCamScaleTransform * dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
                 dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;

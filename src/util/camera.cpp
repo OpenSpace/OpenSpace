@@ -121,6 +121,26 @@ namespace openspace {
         return _position;
     }
 
+    const Camera::Vec3 Camera::eyePositionVec3() const {
+        glm::dvec4 eyeInEyeSpace(0.0, 0.0, 0.0, 1.0);
+
+        glm::dmat4 invViewMatrix = glm::inverse(sgctInternal.viewMatrix());
+        glm::dmat4 invRotationMatrix = glm::inverse(viewRotationMatrix());
+        glm::dmat4 invTranslationMatrix =
+            glm::translate(Mat4(1.0), static_cast<Vec3>(_position));
+
+        glm::dmat4 invViewScale = glm::inverse(viewScaleMatrix());
+
+        glm::dvec4 eyeInWorldSpace =
+            invTranslationMatrix *
+            invRotationMatrix *
+            invViewScale *
+            invViewMatrix *
+            eyeInEyeSpace;
+
+        return glm::dvec3(eyeInWorldSpace.x, eyeInWorldSpace.y, eyeInWorldSpace.z);
+    }
+
     const Camera::Vec3& Camera::unsynchedPositionVec3() const {
         return _position;
     }

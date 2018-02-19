@@ -192,7 +192,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
         _modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    double distance = glm::distance(tPlanetPosWorld, renderData.camera.positionVec3());
+    double distance = glm::distance(tPlanetPosWorld, renderData.camera.eyePositionVec3());
     if (distance > DISTANCE_CULLING) {
         program.setUniform("cullAtmosphere", 1);
     }
@@ -254,11 +254,16 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 glm::inverse(dfScaleCamTransf)
             );
 
+            program.setUniform(
+                "dCamScaleTransform",
+                renderData.camera.viewScaleMatrix()
+            ); 
+
             // World to Eye Space in OS
             program.setUniform(
                 "dInverseCamScaleTransform",
                 glm::inverse(renderData.camera.viewScaleMatrix())
-            ); 
+            );
 
             program.setUniform(
                 "dInverseCamRotTransform",
@@ -284,7 +289,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
 
             program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
-            program.setUniform("dCampos", renderData.camera.positionVec3());
+
+            glm::dvec3 campos = renderData.camera.eyePositionVec3();
+            program.setUniform("dCampos", campos);
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
@@ -300,7 +307,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             // Sun following camera position
             if (_sunFollowingCameraEnabled) {
                 sunPosObj = inverseModelMatrix * glm::dvec4(
-                    renderData.camera.positionVec3(),
+                    renderData.camera.eyePositionVec3(),
                     1.0
                 );
             }
