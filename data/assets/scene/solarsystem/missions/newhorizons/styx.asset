@@ -20,12 +20,7 @@ local Styx = {
             Target = "STYX",
             Observer = "PLUTO BARYCENTER",
             Kernels = kernels.Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_STYX",
-            DestinationFrame = "GALACTIC"
-        },
+        }
     },
     Renderable = {
         Type = "RenderablePlanet",

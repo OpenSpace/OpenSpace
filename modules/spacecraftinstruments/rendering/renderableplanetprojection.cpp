@@ -61,6 +61,8 @@ namespace {
 //    const char* keyShading = "PerformShading";
     constexpr const char* _mainFrame = "GALACTIC";
 
+    constexpr const char* NoImageText = "No Image";
+
     static const openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
         "Color Texture",
@@ -175,7 +177,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 100.f)
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f, 3.f)
     , _meridianShift(MeridianShiftInfo, false)
     , _capture(false)
 {
@@ -199,7 +201,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     _projectionComponent.initialize(dict.value<ghoul::Dictionary>(KeyProjection));
 
-    _colorTexturePaths.addOption(0, "");
+    _colorTexturePaths.addOption(0, NoImageText);
     _colorTexturePaths.onChange([this](){
         _colorTextureDirty = true;
     });
@@ -244,7 +246,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 
 
-    _heightMapTexturePaths.addOption(0, "");
+    _heightMapTexturePaths.addOption(0, NoImageText);
     _heightMapTexturePaths.onChange([this]() {
         _heightMapTextureDirty = true;
     });
@@ -713,13 +715,16 @@ void RenderablePlanetProjection::loadColorTexture() {
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _baseTexture = nullptr;
-    if (!selectedPath.empty()) {
+    if (selectedPath != NoImageText) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath)
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
             _baseTexture->uploadTexture();
+            _baseTexture->setWrapping(
+                { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat}
+            );
             _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
         }
     }
@@ -732,7 +737,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _heightMapTexture = nullptr;
-    if (!selectedPath.empty()) {
+    if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath)
         );

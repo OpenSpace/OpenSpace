@@ -10,13 +10,13 @@ local NewHorizonsKernels = {
     Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp",
     Kernels .. "/new_horizons/spk/NavPE_de433_od122.bsp",
 
+    Kernels .. "/new_horizons/sclk/new-horizons_1121.tsc",
+
     Kernels .. "/new_horizons/ck/nh_scispi_2015_pred.bc",
     Kernels .. "/new_horizons/ck/nh_scispi_2015_recon.bc",
     Kernels .. "/new_horizons/ck/nh_lorri_wcs.bc",
     
     Kernels .. "/new_horizons/smithed_pc_and_sp/PLU_LORRI_ALL_161216.bc",
-
-    Kernels .. "/new_horizons/sclk/new-horizons_1121.tsc",
 
     Kernels .. "/new_horizons/pck/nh_targets_v001.tpc",
     Kernels .. "/new_horizons/pck/nh_pcnh_005.tpc",

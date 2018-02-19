@@ -99,7 +99,7 @@ local Keybindings = {
     },
     {
         Key = "l",
-        Command = sceneHelper.property.invert('Labels.renderable.performFading'),
+        Command = sceneHelper.property.invert('Labels.renderable.Enabled'),
         Documentation = "Toggles the visibility of the labels for the New Horizons instruments.",
         Local = false
     },
