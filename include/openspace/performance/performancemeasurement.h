@@ -48,12 +48,12 @@ private:
     std::chrono::high_resolution_clock::time_point _startTime;
 };
 
-#define __MERGE(a,b)  a##b
-#define __LABEL(a) __MERGE(unique_name_, a)
+#define __MERGE_PerfMeasure(a,b)  a##b
+#define __LABEL_PerfMeasure(a) __MERGE_PerfMeasure(unique_name_, a)
 
 /// Declare a new variable for measuring the performance of the current block
 #define PerfMeasure(name) \
-    auto __LABEL(__LINE__) = \
+    auto __LABEL_PerfMeasure(__LINE__) = \
         openspace::performance::PerformanceMeasurement(\
             (name), \
             OsEng.renderEngine().performanceManager() \
