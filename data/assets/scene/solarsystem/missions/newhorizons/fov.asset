@@ -267,7 +267,8 @@ local AliceAirglow = {
             "Pluto",
             "Charon",
             -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
+        },
+        SimplifyBounds = true
     },
     Transform = {
         Translation = {
