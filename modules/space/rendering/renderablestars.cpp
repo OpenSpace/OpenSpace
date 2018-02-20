@@ -298,15 +298,16 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
-    _uniformCache.modelViewMatrix = _program->uniformLocation("modelViewMatrix");
-    _uniformCache.projectionMatrix = _program->uniformLocation("projectionMatrix");
-    _uniformCache.colorOption = _program->uniformLocation("colorOption");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-    _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
-    _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+    _uniformCache.viewMatrix        = _program->uniformLocation("viewMatrix");
+    _uniformCache.modelCameraMatrix = _program->uniformLocation("modelCameraMatrix");
+    _uniformCache.projectionMatrix  = _program->uniformLocation("projectionMatrix");
+    _uniformCache.colorOption       = _program->uniformLocation("colorOption");
+    _uniformCache.alphaValue        = _program->uniformLocation("alphaValue");
+    _uniformCache.scaleFactor       = _program->uniformLocation("scaleFactor");
+    _uniformCache.minBillboardSize  = _program->uniformLocation("minBillboardSize");
+    _uniformCache.screenSize        = _program->uniformLocation("screenSize");
+    _uniformCache.psfTexture        = _program->uniformLocation("psfTexture");
+    _uniformCache.colorTexture      = _program->uniformLocation("colorTexture");
 
     bool success = loadData();
     if (!success) {
@@ -339,17 +340,18 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     // @Check overwriting the scaling from the camera; error as parsec->meter conversion
     // is done twice? ---abock 
-    glm::dmat4 modelViewMatrix =
-        glm::dmat4(data.camera.viewMatrix()) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(1E-19, 1E-19, 1E-19)) *
+    glm::dmat4 modelCameraMatrix =        
+        //glm::scale(glm::dmat4(1.0), glm::dvec3(1E-19, 1E-19, 1E-19)) *
         data.camera.viewRotationMatrix() *
         glm::inverse(glm::translate(glm::dmat4(1.0), data.modelTransform.translation)) *
         modelMatrix;
-   
+  
+
     glDepthMask(false);
     _program->activate();
 
-    _program->setUniform(_uniformCache.modelViewMatrix, glm::mat4(modelViewMatrix));
+    _program->setUniform(_uniformCache.viewMatrix, data.camera.viewMatrix());
+    _program->setUniform(_uniformCache.modelCameraMatrix, glm::mat4(modelCameraMatrix));
     _program->setUniform(_uniformCache.projectionMatrix, data.camera.projectionMatrix());
 
     _program->setUniform(_uniformCache.colorOption, _colorOption);
@@ -563,15 +565,16 @@ void RenderableStars::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
 
-        _uniformCache.modelViewMatrix = _program->uniformLocation("modelViewMatrix");
-        _uniformCache.projectionMatrix = _program->uniformLocation("projectionMatrix");
-        _uniformCache.colorOption = _program->uniformLocation("colorOption");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
-        _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+        _uniformCache.viewMatrix        = _program->uniformLocation("viewMatrix");
+        _uniformCache.modelCameraMatrix = _program->uniformLocation("modelCameraMatrix");
+        _uniformCache.projectionMatrix  = _program->uniformLocation("projectionMatrix");
+        _uniformCache.colorOption       = _program->uniformLocation("colorOption");
+        _uniformCache.alphaValue        = _program->uniformLocation("alphaValue");
+        _uniformCache.scaleFactor       = _program->uniformLocation("scaleFactor");
+        _uniformCache.minBillboardSize  = _program->uniformLocation("minBillboardSize");
+        _uniformCache.screenSize        = _program->uniformLocation("screenSize");
+        _uniformCache.psfTexture        = _program->uniformLocation("psfTexture");
+        _uniformCache.colorTexture      = _program->uniformLocation("colorTexture");
     }
 }
 

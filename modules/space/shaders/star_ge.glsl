@@ -31,6 +31,7 @@ layout(points) in;
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
 in float vs_speed[];
+in vec4 vs_correctedPositionViewSpace[];
 
 layout(triangle_strip, max_vertices = 4) out;
 
@@ -44,6 +45,7 @@ out float billboardSize;
 out float gs_clipSpaceDepth;
 
 uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 uniform float scaleFactor;
 uniform float minBillboardSize;
@@ -68,10 +70,26 @@ void main() {
 
     vec4 projPos[4];
     for (int i = 0; i < 4; ++i) {
-        vec4 p1 = gl_in[0].gl_Position;
-        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
-        projPos[i] = z_normalization(projectionMatrix * p1);
+        // vec4 p1 = gl_in[0].gl_Position;
+        // p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
+        // projPos[i] = z_normalization(projectionMatrix * p1);
     }
+
+    vec4 p1 = gl_in[0].gl_Position;
+    p1.xy += vec2(1E10 * (corners[0] - vec2(0.5)));
+    projPos[0] = z_normalization(projectionMatrix * viewMatrix * p1);
+
+    p1 = gl_in[0].gl_Position;
+    p1.xy += vec2(1E10 * (corners[1] - vec2(0.5)));
+    projPos[1] = z_normalization(projectionMatrix * viewMatrix * p1);
+
+    p1 = gl_in[0].gl_Position;
+    p1.xy += vec2(1E10 * (corners[2] - vec2(0.5)));
+    projPos[2] = z_normalization(projectionMatrix * viewMatrix * p1);
+
+    p1 = gl_in[0].gl_Position;
+    p1.xy += vec2(1E10 * (corners[3] - vec2(0.5)));
+    projPos[3] = z_normalization(projectionMatrix * viewMatrix * p1);
 
     // Calculate the positions of the lower left and upper right corners of the
     // billboard in screen-space
@@ -86,7 +104,7 @@ void main() {
 
     // G-Buffer
     // See renderablestars.cpp to understand the scale factor
-    gs_gPosition = vec4(1E19, 1E19, 1E19, 1.0) * gl_in[0].gl_Position;
+    gs_gPosition = vs_correctedPositionViewSpace[0];
 
     billboardSize = sizeInPixels;
     
