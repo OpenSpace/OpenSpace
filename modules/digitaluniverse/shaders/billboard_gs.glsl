@@ -116,11 +116,11 @@ void main() {
             ));
         vs_screenSpaceDepth = initialPosition.w;
         
-        secondPosition = z_normalization(
-            vec4(projectionMatrix *  dvec4(dposCameraSpace.xyz + xAxis - yAxis, dposCameraSpace.w)));
-
+        crossCorner = z_normalization(
+            vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + yAxis + xAxis, dposCameraSpace.w)));
+                    
         // Testing size:
-        vec4 topRight = secondPosition/secondPosition.w;
+        vec4 topRight = crossCorner/crossCorner.w;
         topRight =  ((topRight + vec4(1.0)) * vec4(0.5)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
         vec4 bottomLeft = initialPosition/initialPosition.w;
         bottomLeft = ((bottomLeft + vec4(1.0)) * vec4(0.5)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
@@ -158,11 +158,11 @@ void main() {
                 if (ta == 0.0f)
                     return;
             }
-            crossCorner = z_normalization(
-                    vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + yAxis + xAxis, dposCameraSpace.w)));
-                
+            secondPosition = z_normalization(
+                vec4(projectionMatrix *  dvec4(dposCameraSpace.xyz + xAxis - yAxis, dposCameraSpace.w)));
+    
             thirdPosition = z_normalization(
-                    vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + yAxis - xAxis, dposCameraSpace.w)));  
+                vec4(projectionMatrix * dvec4(dposCameraSpace.xyz + yAxis - xAxis, dposCameraSpace.w)));  
         } 
     }
 
@@ -173,11 +173,11 @@ void main() {
                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
         vs_screenSpaceDepth  = initialPosition.w;
         
-        secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+        crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
+                                dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
 
         // Testing size:
-        vec4 topRight = secondPosition/secondPosition.w;
+        vec4 topRight = crossCorner/crossCorner.w;//secondPosition/secondPosition.w;
         topRight =  ((topRight + vec4(1.0)) * vec4(0.5)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
         vec4 bottomLeft = initialPosition/initialPosition.w;
         bottomLeft = ((bottomLeft + vec4(1.0)) * vec4(0.5)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
@@ -211,8 +211,11 @@ void main() {
                 if (ta == 0.0f)
                     return;
             }
-            crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
-                                dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+            // crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
+            //                     dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+            
+            secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
+                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
             
             thirdPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
                             dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
