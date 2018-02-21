@@ -85,7 +85,6 @@ uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
 
 // Model Transform Matrix Used for Globe Rendering
-uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
 uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
 uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
 uniform dmat4 dCamScaleTransform;
@@ -96,6 +95,7 @@ uniform dmat4 dModelTransformMatrix;
 //uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
 
 uniform dvec4 dObjpos;
+uniform dvec3 dCamRigPos;
 uniform dvec3 dCampos;
 uniform dvec3 sunDirectionObj;
 uniform dvec3 ellipsoidRadii;
@@ -253,23 +253,20 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // ======================================
     // ======= Avoiding Some Matrices =======
 
-    // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
-    // Using the interpolated coords:
-    // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
+    // Compute positions and directions in world space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                             msaaSamplePatter[mssaSample+1]);
-    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, interpolatedNDCPos.z, 1.0) / gl_FragCoord.w; 
+    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 1.0, 1.0);
 
     // Clip to SGCT Eye
     dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
-    sgctEyeCoords.w     = clipCoords.z;//1.0;
     
     // SGCT Eye to OS Eye
     dvec4 tOSEyeCoords = dSgctEyeToOSEyeTranform * sgctEyeCoords;
-    
+
     // OS Eye to World coords
-    dvec4 cameraOffsetWorldCoords = dInverseCamRotTransform * dInverseCamScaleTransform * tOSEyeCoords;
-    dvec4 worldCoords = dvec4(dvec3(cameraOffsetWorldCoords) + dCampos, 1.0);
+    dvec4 offsetWorldCoords = dInverseCamRotTransform * dInverseCamScaleTransform * tOSEyeCoords;
+    dvec4 worldCoords = dvec4(dvec3(offsetWorldCoords) + dCampos, 1.0);
     
     // World to Object
     dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
@@ -313,6 +310,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        out vec3 attenuation, const vec3 fragPosObj,
                        const double maxLength, const double pixelDepth,
                        const vec4 spaceColor, const float sunIntensity) {
+
+    const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
+
     vec3 radiance;
     
     r  = length(x);
@@ -344,7 +344,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     float mu0    = dot(x0, v) * invr0;
 
     bool groundHit = false;
-    if ((pixelDepth > 0.0) && (pixelDepth < maxLength)) {    
+    if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
         t = float(pixelDepth);  
         groundHit = true;
         
@@ -377,7 +377,6 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
 
     // In order to avoid imprecision problems near horizon,
     // we interpolate between two points: above and below horizon
-    const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
     if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
@@ -637,8 +636,8 @@ void main() {
                 // when using their positions later, one must convert them to the planet's coords
                 
                 // OS Eye to World coords  
-                dvec4 fragWorldCoordsOffset = dInverseCamRotTransform * dInverseCamScaleTransform * position;
-                dvec4 fragWorldCoords       = dvec4(dvec3(fragWorldCoordsOffset) + dCampos, 1.0);
+                dvec4 fragWorldCoordsOffset = dInverseCamRotTransform * dInverseCamScaleTransform * dSgctEyeToOSEyeTranform * position;
+                dvec4 fragWorldCoords       = dvec4(dvec3(fragWorldCoordsOffset) + dCamRigPos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
                 dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;

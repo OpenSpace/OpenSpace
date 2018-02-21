@@ -272,11 +272,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 )
             );
 
-            program.setUniform(
-                "dInverseSgctEyeToWorldTranform",
-                glm::inverse(renderData.camera.combinedViewMatrix())
-            );
-
             // Eye Space in OS to Eye Space in SGCT
             glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
             glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);
@@ -292,6 +287,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             glm::dvec3 campos = renderData.camera.eyePositionVec3();
             program.setUniform("dCampos", campos);
+
+            glm::dvec3 camRigPos = renderData.camera.positionVec3();
+            program.setUniform("dCamRigPos", camRigPos);
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
