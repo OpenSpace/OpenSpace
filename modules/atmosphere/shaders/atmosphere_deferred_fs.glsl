@@ -265,12 +265,11 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     sgctEyeCoords.w     = clipCoords.z;//1.0;
     
     // SGCT Eye to OS Eye
-    dvec4 tOSEyeCoordsInv = dSgctEyeToOSEyeTranform * sgctEyeCoords;
+    dvec4 tOSEyeCoords = dSgctEyeToOSEyeTranform * sgctEyeCoords;
     
     // OS Eye to World coords
-    dvec4 tmpSInv     = dInverseCamScaleTransform * tOSEyeCoordsInv;
-    dvec4 tmpRInv     = dInverseCamRotTransform * tmpSInv;//tOSEyeCoordsInv;
-    dvec4 worldCoords = dvec4(dvec3(tmpRInv) + dCampos, 1.0);
+    dvec4 cameraOffsetWorldCoords = dInverseCamRotTransform * dInverseCamScaleTransform * tOSEyeCoords;
+    dvec4 worldCoords = dvec4(dvec3(cameraOffsetWorldCoords) + dCampos, 1.0);
     
     // World to Object
     dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
@@ -638,9 +637,8 @@ void main() {
                 // when using their positions later, one must convert them to the planet's coords
                 
                 // OS Eye to World coords  
-                dvec4 tmpSInvPos            = dInverseCamScaleTransform * dSgctEyeToOSEyeTranform * position;               
-                dvec4 tmpRInvPos            = dInverseCamRotTransform * tmpSInvPos;//dSgctEyeToOSEyeTranform * position;        
-                dvec4 fragWorldCoords       = dCamScaleTransform * dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
+                dvec4 fragWorldCoordsOffset = dInverseCamRotTransform * dInverseCamScaleTransform * position;
+                dvec4 fragWorldCoords       = dvec4(dvec3(fragWorldCoordsOffset) + dCampos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
                 dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;
