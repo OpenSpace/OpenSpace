@@ -36,18 +36,18 @@ openspace.documentation = {
     }
 }
 
-openspace.markInterestingNodes = function(nodes)
+openspace.markInterestingNodes = function(tag, nodes)
     for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
-            openspace.addTag(n, "GUI.Interesting")
+            openspace.addTag(n, tag)
         end
     end
 end
 
-openspace.removeInterestingNodes = function(nodes)
+openspace.removeInterestingNodes = function(tag, nodes)
     for _, n in pairs(nodes) do
         if openspace.hasSceneGraphNode(n) then
-            openspace.removeTag(n, "GUI.Interesting")
+            openspace.removeTag(n, tag)
         end
     end
 end

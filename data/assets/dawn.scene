@@ -22,9 +22,10 @@ asset.onInitialize(function ()
     openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
-    openspace.markInterestingNodes({
-        "Dawn", "Ceres", "Vesta"
-    })
+    openspace.markInterestingNodes(
+        "GUI.Interesting",
+        { "Dawn", "Ceres", "Vesta"}
+    )
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -45,7 +46,8 @@ end)
 
 asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
-    openspace.removeInterestingNodes({
-        "Dawn", "Ceres", "Vesta"
-    })
+    openspace.removeInterestingNodes(
+        "GUI.Interesting",
+        { "Dawn", "Ceres", "Vesta" }
+    )
 end)

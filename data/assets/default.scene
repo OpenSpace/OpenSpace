@@ -68,9 +68,10 @@ asset.onInitialize(function ()
         openspace.absPath("${DATA}/globebrowsing_servers.lua")
     )
 
-    openspace.markInterestingNodes({
-        "Earth", "Mars", "Moon"
-    })
+    openspace.markInterestingNodes(
+        "GUI.Interesting",
+        { "Earth", "Mars", "Moon" }
+    )
 
 
     openspace.addVirtualProperty(
@@ -97,7 +98,8 @@ asset.onDeinitialize(function ()
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
-    openspace.removeInterestingNodes({
-        "Earth", "Mars", "Moon"
-    })
+    openspace.removeInterestingNodes(
+        "GUI.Interesting",
+        { "Earth", "Mars", "Moon" }
+    )
 end)
