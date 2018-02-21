@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemparallelconnection.h>
+#include <modules/marsrover/dashboard/dashboarditemparallelconnection.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -60,7 +60,7 @@ documentation::Documentation DashboardItemParallelConnection::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Parallel Connection",
-        "base_dashboarditem_parallelconnection",
+        "marsrover_dashboarditem_parallelconnection",
         {
             {
                 "Type",

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMSIMULATIONINCREMENT___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___DASHBOARDITEMSIMULATIONINCREMENT___H__
+#define __OPENSPACE_MODULE_MARSROVER___DASHBOARDITEMSIMULATIONINCREMENT___H__
 
 #include <openspace/rendering/dashboarditem.h>
 

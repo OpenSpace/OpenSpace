@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemangle.h>
+#include <modules/marsrover/dashboard/dashboarditemangle.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>

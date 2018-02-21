@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rotation/staticrotation.h>
+#include <modules/marsrover/rotation/staticrotation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -42,7 +42,7 @@ documentation::Documentation StaticRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Rotation",
-        "base_transform_rotation_static",
+        "marsrover_transform_rotation_static",
         {
             {
                 "Type",

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___MODELGEOMETRY___H__
+#define __OPENSPACE_MODULE_MARSROVER___MODELGEOMETRY___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -86,4 +86,4 @@ protected:
 
 }  // namespace openspace::modelgeometry
 
-#endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_MARSROVER___MODELGEOMETRY___H__

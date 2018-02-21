@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___STATICTRANSLATION___H__
+#define __OPENSPACE_MODULE_MARSROVER___STATICTRANSLATION___H__
 
 #include <openspace/scene/translation.h>
 

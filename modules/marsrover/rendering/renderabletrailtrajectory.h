@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETRAILTRAJECTORY___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLETRAILTRAJECTORY___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___RENDERABLETRAILTRAJECTORY___H__
+#define __OPENSPACE_MODULE_MARSROVER___RENDERABLETRAILTRAJECTORY___H__
 
-#include <modules/base/rendering/renderabletrail.h>
+#include <modules/marsrover/rendering/renderabletrail.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -89,4 +89,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLETRAILTRAJECTORY___H__
+#endif // __OPENSPACE_MODULE_MARSROVER___RENDERABLETRAILTRAJECTORY___H__

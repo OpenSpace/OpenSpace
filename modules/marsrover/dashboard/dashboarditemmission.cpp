@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemmission.h>
+#include <modules/marsrover/dashboard/dashboarditemmission.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -76,7 +76,7 @@ documentation::Documentation DashboardItemMission::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Mission",
-        "base_dashboarditem_mission",
+        "marsrover_dashboarditem_mission",
         {
             {
                 "Type",

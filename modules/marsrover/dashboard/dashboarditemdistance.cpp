@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/marsrover/dashboard/dashboarditemdistance.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -118,7 +118,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Distance",
-        "base_dashboarditem_distance",
+        "marsrover_dashboarditem_distance",
         {
             {
                 "Type",

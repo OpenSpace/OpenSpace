@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/scale/luascale.h>
+#include <modules/marsrover/scale/luascale.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -52,7 +52,7 @@ documentation::Documentation LuaScale::Documentation() {
     using namespace openspace::documentation;
     return {
         "Lua Scaling",
-        "base_scale_lua",
+        "marsrover_scale_lua",
         {
             {
                 ScriptInfo.identifier,

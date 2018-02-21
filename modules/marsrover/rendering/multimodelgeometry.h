@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___MULTIMODELGEOMETRY___H__
+#define __OPENSPACE_MODULE_MARSROVER___MULTIMODELGEOMETRY___H__
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <modules/marsrover/rendering/modelgeometry.h>
 
 namespace openspace {
     class RenderableModel;
@@ -44,4 +44,4 @@ private:
 
 }  // namespace openspace::modelgeometry
 
-#endif // __OPENSPACE_MODULE_BASE___MULTIMODELGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_MARSROVER___MULTIMODELGEOMETRY___H__

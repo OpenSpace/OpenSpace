@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemframerate.h>
+#include <modules/marsrover/dashboard/dashboarditemframerate.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -62,7 +62,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Framerate",
-        "base_dashboarditem_framerate",
+        "marsrover_dashboarditem_framerate",
         {
             {
                 "Type",

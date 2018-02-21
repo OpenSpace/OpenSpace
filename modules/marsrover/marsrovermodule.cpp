@@ -156,7 +156,7 @@ std::vector<documentation::Documentation> MarsroverModule::documentations() cons
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
 
-        ScreenSpaceDashboard::Documentation(),
+        //ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
@@ -174,6 +174,7 @@ std::vector<documentation::Documentation> MarsroverModule::documentations() cons
         modelgeometry::ModelGeometry::Documentation(),
     };
 }
+
 
 std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
     return {

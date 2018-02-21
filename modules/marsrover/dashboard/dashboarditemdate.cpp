@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemdate.h>
+#include <modules/marsrover/dashboard/dashboarditemdate.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -56,7 +56,7 @@ documentation::Documentation DashboardItemDate::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Date",
-        "base_dashboarditem_date",
+        "marsrover_dashboarditem_date",
         {
             {
                 "Type",

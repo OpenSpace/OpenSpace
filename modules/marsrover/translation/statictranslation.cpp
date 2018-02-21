@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/translation/statictranslation.h>
+#include <modules/marsrover/translation/statictranslation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -42,7 +42,7 @@ documentation::Documentation StaticTranslation::Documentation() {
     using namespace documentation;
     return {
         "Static Translation",
-        "base_transform_translation_static",
+        "marsrover_transform_translation_static",
         {
             {
                 "Type",

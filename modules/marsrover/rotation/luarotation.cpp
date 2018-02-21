@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rotation/luarotation.h>
+#include <modules/marsrover/rotation/luarotation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -52,7 +52,7 @@ documentation::Documentation LuaRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Lua Rotation",
-        "base_transform_rotation_lua",
+        "marsrover_transform_rotation_lua",
         {
             {
                 "Type",

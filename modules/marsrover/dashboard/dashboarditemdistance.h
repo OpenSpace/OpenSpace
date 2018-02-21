@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DASHBOARDITEMDISTANCE___H__
-#define __OPENSPACE_MODULE_BASE___DASHBOARDITEMDISTANCE___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___DASHBOARDITEMDISTANCE___H__
+#define __OPENSPACE_MODULE_MARSROVER___DASHBOARDITEMDISTANCE___H__
 
 #include <openspace/rendering/dashboarditem.h>
 

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rotation/fixedrotation.h>
+#include <modules/marsrover/rotation/fixedrotation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -99,7 +99,7 @@ documentation::Documentation FixedRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Fixed Rotation",
-        "base_transform_rotation_fixed",
+        "marsrover_transform_rotation_fixed",
         {
             {
                 "Type",

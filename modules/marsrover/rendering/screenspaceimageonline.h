@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___SCREENSPACEIMAGEONLINE___H__
+#define __OPENSPACE_MODULE_MARSROVER___SCREENSPACEIMAGEONLINE___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -56,4 +56,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_MARSROVER___SCREENSPACEIMAGEONLINE___H__

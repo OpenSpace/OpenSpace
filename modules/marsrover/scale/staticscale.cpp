@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/scale/staticscale.h>
+#include <modules/marsrover/scale/staticscale.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -42,7 +42,7 @@ documentation::Documentation StaticScale::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Scaling",
-        "base_scale_static",
+        "marsrover_scale_static",
         {
             {
                 ScaleInfo.identifier,

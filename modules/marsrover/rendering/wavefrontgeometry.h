@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___WAVEFRONTGEOMETRY___H__
+#define __OPENSPACE_MODULE_MARSROVER___WAVEFRONTGEOMETRY___H__
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <modules/marsrover/rendering/modelgeometry.h>
 
 namespace openspace {
 
@@ -48,4 +48,4 @@ namespace modelgeometry {
 } // namespace modelgeometry
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_MARSROVER___WAVEFRONTGEOMETRY___H__

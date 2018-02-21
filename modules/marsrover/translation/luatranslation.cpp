@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/translation/luatranslation.h>
+#include <modules/marsrover/translation/luatranslation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -52,7 +52,7 @@ documentation::Documentation LuaTranslation::Documentation() {
     using namespace documentation;
     return {
         "Lua Translation",
-        "base_transform_translation_lua",
+        "marsrover_transform_translation_lua",
         {
             {
                 "Type",

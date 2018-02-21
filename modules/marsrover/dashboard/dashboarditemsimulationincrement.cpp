@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemsimulationincrement.h>
+#include <modules/marsrover/dashboard/dashboarditemsimulationincrement.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -85,7 +85,7 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Simulation Increment",
-        "base_dashboarditem_simulationincrement",
+        "marsrover_dashboarditem_simulationincrement",
         {
             {
                 "Type",

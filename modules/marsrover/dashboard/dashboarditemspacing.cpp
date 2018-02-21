@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemspacing.h>
+#include <modules/marsrover/dashboard/dashboarditemspacing.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -42,7 +42,7 @@ documentation::Documentation DashboardItemSpacing::Documentation() {
     using namespace documentation;
     return {
         "DashboardItem Spacing",
-        "base_dashboarditem_spacing",
+        "marsrover_dashboarditem_spacing",
         {
             {
                 "Type",
