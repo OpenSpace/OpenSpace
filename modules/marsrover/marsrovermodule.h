@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MARSROVER___MARSROVERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/documentation/documentation.h>
 
 namespace openspace {
 

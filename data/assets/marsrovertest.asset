@@ -1,18 +1,16 @@
-local texturePath = asset.localResource("../test3.jpg")
+local texturePath = asset.localResource("../test2.jpg")
 local assetHelper = asset.require("util/asset_helper")
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-
-  {
+local marsroverObject = {
     Name = "Mars Rover Test",
     Parent = "Root",
     Renderable = {
-      Type = "RenderableMarsrover",
+      Type = "RenderableSphere",
       Size = 1,
       Segments = 20,
       Texture = texturePath
     }
-  }
+}
 
-})
+assetHelper.registerSceneGraphNodesAndExport(asset, { marsroverObject })
 

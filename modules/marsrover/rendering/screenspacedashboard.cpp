@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspacedashboard.h>
+#include <modules/marsrover/rendering/screenspacedashboard.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -94,7 +94,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-        
+
         lua_settop(L, 0);
         return 0;
     }

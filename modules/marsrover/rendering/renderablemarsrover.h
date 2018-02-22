@@ -46,6 +46,7 @@ struct UpdateData;
 namespace documentation { struct Documentation; }
 
 class RenderableMarsrover : public Renderable {
+
 public:
     RenderableMarsrover(const ghoul::Dictionary& dictionary);
 
@@ -78,7 +79,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<PowerScaledSphere> _marsrover;
 
     bool _sphereIsDirty;
 };

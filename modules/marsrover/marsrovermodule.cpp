@@ -69,7 +69,7 @@
 
 namespace openspace {
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}
+MarsroverModule::MarsroverModule() : OpenSpaceModule(Name) {}
 
 void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <modules/marsrover/rendering/screenspaceframebuffer.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>

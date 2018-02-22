@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablesphere.h>
+#include <modules/marsrover/rendering/renderablesphere.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -105,7 +105,7 @@ documentation::Documentation RenderableSphere::Documentation() {
     using namespace documentation;
     return {
         "RenderableSphere",
-        "base_renderable_sphere",
+        "marsrover_renderable_sphere",
         {
             {
                 SizeInfo.identifier,

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderabletrail.h>
+#include <modules/marsrover/rendering/renderabletrail.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>

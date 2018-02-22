@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/multimodelgeometry.h>
+#include <modules/marsrover/rendering/multimodelgeometry.h>
 
 #include "ghoul/io/model/modelreadermultiformat.h"
 

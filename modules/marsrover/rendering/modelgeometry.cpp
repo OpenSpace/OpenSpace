@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <modules/marsrover/rendering/modelgeometry.h>
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/rendering/renderable.h>

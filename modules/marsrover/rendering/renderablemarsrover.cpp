@@ -172,7 +172,7 @@ RenderableMarsrover::RenderableMarsrover(const ghoul::Dictionary& dictionary)
     , _fadeInThreshold(0.0)
     , _shader(nullptr)
     , _texture(nullptr)
-    , _sphere(nullptr)
+    , _marsrover(nullptr)
     , _sphereIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
@@ -260,14 +260,14 @@ bool RenderableMarsrover::isReady() const {
 }
 
 void RenderableMarsrover::initializeGL() {
-    _sphere = std::make_unique<PowerScaledSphere>(
+    _marsrover = std::make_unique<PowerScaledSphere>(
         PowerScaledScalar::CreatePSS(_size), _segments
     );
-    _sphere->initialize();
+    _marsrover->initialize();
 
     // pscstandard
     _shader = OsEng.renderEngine().buildRenderProgram(
-        "Sphere",
+        "Marsrover",
         absPath("${MODULE_MARSROVER}/shaders/sphere_vs.glsl"),
         absPath("${MODULE_MARSROVER}/shaders/sphere_fs.glsl")
     );
@@ -353,7 +353,7 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    _sphere->render();
+    _marsrover->render();
 
     if (usingFramebufferRenderer) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -369,10 +369,10 @@ void RenderableMarsrover::update(const UpdateData&) {
     }
 
     if (_sphereIsDirty) {
-        _sphere = std::make_unique<PowerScaledSphere>(
+        _marsrover = std::make_unique<PowerScaledSphere>(
             PowerScaledScalar::CreatePSS(_size), _segments
         );
-        _sphere->initialize();
+        _marsrover->initialize();
         _sphereIsDirty = false;
     }
 }

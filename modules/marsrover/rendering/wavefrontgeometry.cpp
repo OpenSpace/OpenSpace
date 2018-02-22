@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/wavefrontgeometry.h>
+#include <modules/marsrover/rendering/wavefrontgeometry.h>
 
 #include "ghoul/logging/logmanager.h"
 #include <tiny_obj_loader.h>
