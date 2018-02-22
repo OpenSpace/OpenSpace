@@ -101,6 +101,7 @@ int addScreenSpaceRenderable(lua_State* L) {
     ghoul::Dictionary d;
     try {
         ghoul::lua::luaDictionaryFromState(L, d);
+        lua_settop(L, 0);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addScreenSpaceRenderable", e.what());

@@ -182,6 +182,8 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
         _originalViewportSize.y,
         1
     ));
+    _objectSize = glm::ivec2(_originalViewportSize);
+
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
@@ -191,6 +193,10 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 int ScreenSpaceFramebuffer::id() {
     static int id = 0;
     return id++;
+}
+
+void ScreenSpaceFramebuffer::bindTexture() {
+    _texture->bind();
 }
 
 } //namespace openspace

@@ -22,42 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#include <modules/spout/spoutmodule.h>
+
+#include <openspace/util/factorymanager.h>
+
+#include <ghoul/misc/assert.h>
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/stringproperty.h>
-
-#include <ghoul/opengl/texture.h>
+#include <modules/spout/screenspacespout.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
 
-class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
-public:
-    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
+    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
-    void update() override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    bool _downloadImage;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
-
-private:
-    void bindTexture() override;
-
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-};
+#ifdef WIN32
+    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
+#endif // WIN32
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__

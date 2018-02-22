@@ -22,42 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__
+#define __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
-
-#include <openspace/engine/downloadmanager.h>
-#include <openspace/properties/stringproperty.h>
-
-#include <ghoul/opengl/texture.h>
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
+class SpoutModule : public OpenSpaceModule {
 public:
-    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    constexpr static const char* Name = "Spout";
 
-    void update() override;
+    SpoutModule();
 
-    static documentation::Documentation Documentation();
-
-protected:
-    bool _downloadImage;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
-
-private:
-    void bindTexture() override;
-
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__

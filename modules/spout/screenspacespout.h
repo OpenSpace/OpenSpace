@@ -22,42 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___SCREENSPACESPOUT___H__
+#define __OPENSPACE_MODULE_SPOUT___SCREENSPACESPOUT___H__
+
+#ifdef WIN32
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
-#include <ghoul/opengl/texture.h>
+#define __gl_h_
+#include <SpoutLibrary.h>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
+class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
+
+    bool initializeGL() override;
+    bool deinitializeGL() override;
+
+    bool isReady() const override;
 
     void update() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    bool _downloadImage;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
-
 private:
     void bindTexture() override;
+    void unbindTexture() override;
 
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
+    properties::StringProperty _spoutName;
+    properties::OptionProperty _spoutSelection;
+    properties::TriggerProperty _updateSelection;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    SPOUTHANDLE _receiver;
+
+    bool _isSpoutDirty = false;
+    char _currentSenderName[256];
+    bool _isFirstUpdate = true;
+    bool _isErrorMessageDisplayed = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
+#endif // __OPENSPACE_MODULE_SPOUT___SCREENSPACESPOUT___H__
+
+#endif // WIN32

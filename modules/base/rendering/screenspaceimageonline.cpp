@@ -149,6 +149,7 @@ void ScreenSpaceImageOnline::update() {
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
                 _texture = std::move(texture);
+                _objectSize = _texture->dimensions();
                 _textureIsDirty = false;
             }
         }
@@ -173,6 +174,10 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
             );
         }
     );
+}
+
+void ScreenSpaceImageOnline::bindTexture() {
+    _texture->bind();
 }
 
 } // namespace openspace
