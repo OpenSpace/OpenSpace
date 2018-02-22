@@ -73,6 +73,10 @@ asset.onInitialize(function ()
         { "Earth", "Mars", "Moon" }
     )
 
+    openspace.markInterestingNodes(
+        "Touch.Interesting",
+        { "Earth", "Mars", "Moon" }
+    )
 
     openspace.addVirtualProperty(
         "BoolProperty",
@@ -100,6 +104,11 @@ asset.onDeinitialize(function ()
 
     openspace.removeInterestingNodes(
         "GUI.Interesting",
+        { "Earth", "Mars", "Moon" }
+    )
+
+    openspace.removeInterestingNodes(
+        "Touch.Interesting",
         { "Earth", "Mars", "Moon" }
     )
 end)

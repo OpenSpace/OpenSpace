@@ -1,0 +1,13 @@
+@import "../../../styles/all";
+
+.button {
+  padding: $button-padding;
+
+  &:hover {
+    opacity: 0.5;
+  }
+
+  &.active {
+    border: 4px solid $blue;
+  }
+}
