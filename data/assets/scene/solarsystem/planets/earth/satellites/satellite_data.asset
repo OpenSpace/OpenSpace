@@ -1,0 +1,7 @@
+local SatDataPath = asset.syncedResource({
+    Name = "Satellite Data",
+    Type = "HttpSynchronization",
+    Identifier = "satellite_data",
+    Version = 2
+})
+asset.export("SatDataPath", SatDataPath)

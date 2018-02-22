@@ -1,10 +1,15 @@
-local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+--local satDataPath = asset.require('./satellite_data').SatDataPath
+local satDataPath = asset.request('./satellite_data').SatDataPath
+satDataPath = "C:\\Users\\openspace\\Desktop\\OpenSpace_20180207\\sync\\http\\satellite_data\\2"
+
 
 -- Waiting for URL based download
-
---[[
 DOWNLOAD = false
+
+
 
 function dirListing(dirname)
   f = io.popen('ls ' .. dirname)
@@ -58,23 +63,23 @@ function checkTleFileFormat(lineArr)
 end
 
 
-function  getSat(title, file, lineNum)
+function  getSat(title, file, lineNum, textureFile)
   return {
       Name = title,
-      Parent = "EarthInertial",
+      Parent = transforms.EarthInertial.Name,
       Renderable = {
           Type = "RenderablePlane",
           Size = 3e4,
           Origin = "Center",
           Body = "TLE",
           Billboard = true,
-          Texture = "satB.png"
+          Texture = textureFile
       },
       Transform = {
           Translation = {
               Type = "TLETranslation",
               Body = title,
-              Observer = "EarthInertial",
+              Observer = transforms.EarthInertial.Name,
               File = file,
               LineNum = lineNum
           },
@@ -89,16 +94,15 @@ end
 
 function getSatTrail(title, file, lineNum, per, color)
   trailName = title .. "_trail"
-
   return {
       Name = trailName,
-      Parent = "EarthInertial",
+      Parent = transforms.EarthInertial.Name,
       Renderable = {
           Type = "RenderableTrailOrbit",
           Translation = {
               Type = "TLETranslation",
               Body = title,
-              Observer = "EarthInertial",
+              Observer = transforms.EarthInertial.Name,
               File = file,
               LineNum = lineNum
           },
@@ -108,6 +112,54 @@ function getSatTrail(title, file, lineNum, per, color)
       },
       GuiPath = "/Solar System/Planets/Earth/Satellites"
   }
+end
+
+function printSatElements_debug(satElem)
+  print(">SATELLITE")
+  print("  " .. satElem.Name)
+  print("  " .. satElem.Parent)
+  print("  (Renderable)")
+  print("   " .. satElem.Renderable.Type)
+  print("   " .. satElem.Renderable.Size)
+  print("   " .. satElem.Renderable.Origin)
+  print("   " .. satElem.Renderable.Body)
+  if satElem.Renderable.Billboard then
+    print("   Billboard = true")
+  end
+  print("   " .. satElem.Renderable.Texture)
+  print("  (Transform.Translation)")
+  print("   " .. satElem.Transform.Translation.Type)
+  print("   " .. satElem.Transform.Translation.Body)
+  print("   " .. satElem.Transform.Translation.Observer)
+  print("   " .. satElem.Transform.Translation.File)
+  print("   " .. satElem.Transform.Translation.LineNum)
+  print("  (Transform.Scale)")
+  print("   " .. satElem.Transform.Scale.Type)
+  print("   " .. satElem.Transform.Scale.Scale)
+  print("  (GuiPath)")
+  print("   " .. satElem.GuiPath)
+end
+
+function printSatTrailElements_debug(satElem)
+  print(">SAT_TRAIL")
+  print("  " .. satElem.Name)
+  print("  " .. satElem.Parent)
+  print("  (Renderable)")
+  print("   " .. satElem.Renderable.Type)
+  print("   " .. satElem.Renderable.Translation.Type)
+  print("   " .. satElem.Renderable.Translation.Body)
+  print("   " .. satElem.Renderable.Translation.Observer)
+  print("   " .. satElem.Renderable.Translation.File)
+  print("   " .. satElem.Renderable.Translation.LineNum)
+  print("  ((Misc))")
+  print("    (color)")
+  print("   " .. satElem.Renderable.Color[1] .. ","
+        .. satElem.Renderable.Color[2] .. ","
+		.. satElem.Renderable.Color[3])
+  print("   " .. satElem.Renderable.Period)
+  print("   " .. satElem.Renderable.Resolution)
+  print("  (GuiPath)")
+  print("   " .. satElem.GuiPath)
 end
 
 -------------------------------------------------------------
@@ -127,22 +179,23 @@ satelliteGroups = {
     },
 }
 
-modElements = {}  
-fileErr = ""
 for sOrbit in values(satelliteGroups) do
+  fileErr = ""
   filename = sOrbit.url:match("([^/]+)$")
   filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
-  sOrbit.path = "satellites/tle/" .. filename
- 
+
+  sOrbit.path = satDataPath .. "/tle/" .. filename
+  sOrbit.texturePath = satDataPath .. "/" .. "satB.png"
+
   if DOWNLOAD then
     openspace.downloadFile(sOrbit.url, sOrbit.path)
   end
-  sOrbit.path = "../" .. sOrbit.path
-  pathFromScenegraphParent = "./" .. sOrbit.path
-  
+  local sat_var
+  local satTrail_var
+
   line = {} 
-  myfile = io.open(sOrbit.path, "r")
-  lines = getNumLinesInFile(sOrbit.path)
+  myfile = io.open(satDataPath  .. "/tle/" .. filename, "r")
+  lines = getNumLinesInFile(satDataPath .. "/tle/" .. filename)
   --now loop through the tle file and get each set of 3 lines
   if myfile then
     for n=1,lines,3 do
@@ -153,9 +206,12 @@ for sOrbit in values(satelliteGroups) do
         title = trimString(line[1])
         per = getPeriodFromFile(line[3])
         per = 1.0 / per * 2 --trail for 2x a single revolution
-        table.insert(modElements, getSat(filenameSansExt .. "_" .. title, pathFromScenegraphParent, n))
-        table.insert(modElements, getSatTrail(filenameSansExt .. "_" .. title,
-                     pathFromScenegraphParent, n, per, sOrbit.trailColor))
+        satName = filenameSansExt .. "_" .. title
+        --register satellite object and trail
+        sat_var = getSat(satName, sOrbit.path, n, sOrbit.texturePath)
+        assetHelper.registerSceneGraphNodesAndExport(asset, {sat_var})
+        satTrail_var = getSatTrail(satName, sOrbit.path, n, per, sOrbit.trailColor)
+        assetHelper.registerSceneGraphNodesAndExport(asset, {satTrail_var})
       else
         fileErr = " TLE file syntax error on line " .. n .. ": " .. sOrbit.path
         break
@@ -165,15 +221,5 @@ for sOrbit in values(satelliteGroups) do
     fileErr = " File not found: " .. sOrbit.path
     break
   end
+  assert(fileErr == "", fileErr)
 end
-assert(fileErr == "", fileErr)
-
-
-if (fileErr == "") then
-  return modElements
-else
-  return "Invalid file: " .. fileErr
-end
-
-
-]]
