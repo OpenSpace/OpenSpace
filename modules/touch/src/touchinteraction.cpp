@@ -148,6 +148,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    static const openspace::properties::Property::PropertyInfo ZoomSensitivityDistanceThresholdInfo = {
+        "ZoomSensitivityDistanceThreshold",
+        "Threshold of distance to target node for whether or not to use exponential zooming",
+        "" // @TODO Missing documentation
+    };
+
     static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
@@ -210,6 +216,7 @@ TouchInteraction::TouchInteraction()
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
     , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
     , _zoomSensitivity(ZoomSensitivityInfo, 1.04f, 1.0f, 1.1f)
+    , _zoomSensitivityDistanceThreshold(ZoomSensitivityDistanceThresholdInfo, 0.05, 0.01, 0.25)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -268,6 +275,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_orbitSpeedThreshold);
     addProperty(_spinSensitivity);
     addProperty(_zoomSensitivity);
+    addProperty(_zoomSensitivityDistanceThreshold);
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
     addProperty(_interpretPan);
@@ -954,9 +962,13 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 }
             ) / lastProcessed.size();
 
-            double zoomFactor = (distance - lastDistance) *
-                pow((glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) -
-                _focusNode->boundingSphere()), (float)_zoomSensitivity);
+            double currDistanceToFocusNode = glm::distance(_camera->positionVec3(),
+                                                           _camera->focusPositionVec3());
+            double distanceFromFocusSurface = currDistanceToFocusNode - _focusNode->boundingSphere();
+            double zoomFactor = 1.0;
+            if ((currDistanceToFocusNode / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
+                zoomFactor = (distance - lastDistance) * pow(distanceFromFocusSurface, (float)_zoomSensitivity);
+            }
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
             break;
@@ -1265,7 +1277,7 @@ void TouchInteraction::resetToDefault() {
     _rollAngleThreshold.set(0.025f);
     _orbitSpeedThreshold.set(0.005f);
     _spinSensitivity.set(1.0f);
-    _zoomSensitivity.set(10.f);
+    _zoomSensitivity.set(1.04f);
     _inputStillThreshold.set(0.0005f);
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);

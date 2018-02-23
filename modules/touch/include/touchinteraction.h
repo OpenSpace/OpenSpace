@@ -173,6 +173,7 @@ private:
     properties::FloatProperty _orbitSpeedThreshold;
     properties::FloatProperty _spinSensitivity;
     properties::FloatProperty _zoomSensitivity;
+    properties::FloatProperty _zoomSensitivityDistanceThreshold;
     properties::FloatProperty _inputStillThreshold;
     properties::FloatProperty _centroidStillThreshold;
     properties::FloatProperty _interpretPan;
