@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import DataManager from '../../../api/DataManager';
-import { OriginKey } from '../../../api/keys';
-import { jsonToLuaString } from '../../../utils/propertyTreeHelpers';
 import styles from './FocusMenu.scss';
 
 class FocusButton extends Component {
@@ -17,7 +14,7 @@ class FocusButton extends Component {
   }
 
   select() {
-    DataManager.setValue(OriginKey, jsonToLuaString(this.props.name));
+    this.props.onChangeOrigin(this.props.name);
   }
 
   render() {
@@ -32,6 +29,7 @@ class FocusButton extends Component {
 FocusButton.propTypes = {
   active: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  onChangeOrigin: PropTypes.func.isRequired,
 };
 
 export default FocusButton;
