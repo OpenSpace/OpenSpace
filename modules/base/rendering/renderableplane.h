@@ -33,13 +33,11 @@
 #include <openspace/properties/scalar/floatproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace ghoul::filesystem { class File; }
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -64,24 +62,23 @@ public:
 
     static documentation::Documentation Documentation();
 
+protected:
+    virtual void bindTexture();
+    virtual void unbindTexture();
+
 private:
-    void loadTexture();
     void createPlane();
 
-    properties::StringProperty _texturePath;
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
     properties::OptionProperty _blendMode;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 
     bool _planeIsDirty;
-    bool _textureIsDirty;
 };
 
 } // namespace openspace

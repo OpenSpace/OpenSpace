@@ -24,12 +24,15 @@
 
 #ifdef WIN32
 
-#include <modules/spout/screenspacespout.h>
+#include <modules/spout/renderableplanespout.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
+#include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/defer.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     const char* KeyName = "Name";
@@ -59,7 +62,7 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceSpout::Documentation() {
+documentation::Documentation RenderablePlaneSpout::Documentation() {
     using namespace openspace::documentation;
     return {
         "ScreenSpace Spout",
@@ -81,8 +84,8 @@ documentation::Documentation ScreenSpaceSpout::Documentation() {
     };
 }
 
-ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable(dictionary)
+RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
     , _spoutName(NameInfo)
     , _spoutSelection(SelectionInfo)
     , _updateSelection(UpdateInfo)
@@ -91,7 +94,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "ScreenSpaceSpout"
+        "RenderablePlaneSpout"
     );
 
     if (dictionary.hasKey(KeyName)) {
@@ -156,18 +159,16 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     addProperty(_updateSelection);
 }
 
-bool ScreenSpaceSpout::deinitializeGL() {
+void RenderablePlaneSpout::deinitializeGL() {
     _receiver->ReleaseReceiver();
     _receiver->Release();
 
-    return ScreenSpaceRenderable::deinitializeGL();
+    RenderablePlane::deinitializeGL();
 }
 
-bool ScreenSpaceSpout::isReady() const {
-    return ScreenSpaceRenderable::isReady() && !_spoutName.value().empty();
-}
+void RenderablePlaneSpout::update(const UpdateData& data) {
+    RenderablePlane::update(data);
 
-void ScreenSpaceSpout::update() {
     if (_isFirstUpdate) {
         defer { _isFirstUpdate = false; };
 
@@ -201,8 +202,6 @@ void ScreenSpaceSpout::update() {
             height
         );
 
-        _objectSize = { width, height };
-
         if (!createSuccess) {
             LWARNINGC(
                 "ScreenSpaceSpout",
@@ -230,11 +229,11 @@ void ScreenSpaceSpout::update() {
     }
 }
 
-void ScreenSpaceSpout::bindTexture() {
+void RenderablePlaneSpout::bindTexture() {
     _receiver->BindSharedTexture();
 }
 
-void ScreenSpaceSpout::unbindTexture() {
+void RenderablePlaneSpout::unbindTexture() {
     _receiver->UnBindSharedTexture();
 }
 

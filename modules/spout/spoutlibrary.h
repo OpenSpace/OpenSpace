@@ -22,30 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/spout/spoutmodule.h>
+#ifndef __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__
+#define __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__
 
-#include <modules/spout/renderableplanespout.h>
-#include <modules/spout/screenspacespout.h>
+// We need to have this extra file as the Spout people have not put an include guard into
+// their file which leads to a violation of the ODR in our usage.
 
-#include <openspace/util/factorymanager.h>
+#define __gl_h_
+#include <modules/spout/ext/spout/SpoutLibrary.h>
 
-#include <ghoul/misc/assert.h>
-
-namespace openspace {
-
-SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
-
-void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
-
-#ifdef WIN32
-    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
-    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
-
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
-    fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
-#endif // WIN32
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__

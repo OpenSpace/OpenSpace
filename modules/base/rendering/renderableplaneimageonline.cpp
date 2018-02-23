@@ -22,80 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspaceimageonline.h>
+#include <modules/base/rendering/renderableplaneimageonline.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/renderengine.h>
 
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+
 
 namespace {
-    constexpr const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. The size of the image will also automatically set the default "
-        "size of this plane."
+        "and displayed."
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageOnline::Documentation() {
-    using namespace openspace::documentation;
+documentation::Documentation RenderablePlaneImageOnline::Documentation() {
+    using namespace documentation;
     return {
-        "ScreenSpace Online Image",
-        "base_screenspace_image_online",
+        "Renderable Plane Image Online",
+        "base_renderable_plane_image_online",
         {
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
             {
                 TextureInfo.identifier,
                 new StringVerifier,
-                Optional::Yes,
-                TextureInfo.description
+                Optional::No,
+                TextureInfo.description,
             }
         }
     };
 }
 
-ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable(dictionary)
-    , _textureIsDirty(false)
+RenderablePlaneImageOnline::RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
+    , _texture(nullptr)
+    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "ScreenSpaceImage"
+        "RenderablePlaneImageOnline"
     );
-
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
-        static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceImageOnline");
-        }
-        else {
-            setName("ScreenSpaceImageOnline " + std::to_string(id));
-        }
-        ++id;
-    }
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
@@ -105,9 +82,25 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
         _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
     }
 
+    addProperty(_texturePath);
 }
 
-void ScreenSpaceImageOnline::update() {
+void RenderablePlaneImageOnline::deinitializeGL() {
+    _texture = nullptr;
+
+    RenderablePlane::deinitializeGL();
+}
+
+void RenderablePlaneImageOnline::bindTexture() {
+    if (_texture) {
+        _texture->bind();
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+}
+
+void RenderablePlaneImageOnline::update(const UpdateData&) {
     if (_textureIsDirty) {
         if (!_imageFuture.valid()) {
             std::future<DownloadManager::MemoryFile> future = downloadImageToMemory(
@@ -148,15 +141,14 @@ void ScreenSpaceImageOnline::update() {
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
                 _texture = std::move(texture);
-                _objectSize = _texture->dimensions();
                 _textureIsDirty = false;
             }
         }
     }
 }
 
-std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
-    std::string url)
+std::future<DownloadManager::MemoryFile>
+RenderablePlaneImageOnline::downloadImageToMemory(std::string url)
 {
     return OsEng.downloadManager().fetchFile(
         url,
@@ -173,10 +165,6 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
             );
         }
     );
-}
-
-void ScreenSpaceImageOnline::bindTexture() {
-    _texture->bind();
 }
 
 } // namespace openspace

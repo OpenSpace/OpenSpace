@@ -46,7 +46,7 @@ local StyxText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,

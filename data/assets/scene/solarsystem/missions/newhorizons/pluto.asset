@@ -185,7 +185,7 @@ local PlutoBarycenterLabel = {
     Name = "PlutoBarycenterLabel",
     Parent = transforms.PlutoBarycenter.Name,
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Billboard = true,
         Size = 5E4,
         Texture = encounterTextures .. "/barycenter.png",
@@ -204,7 +204,7 @@ local PlutoText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,

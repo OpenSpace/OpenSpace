@@ -22,30 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/spout/spoutmodule.h>
+#ifndef __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
+#define __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
 
-#include <modules/spout/renderableplanespout.h>
-#include <modules/spout/screenspacespout.h>
+#ifdef WIN32
 
-#include <openspace/util/factorymanager.h>
+#include <modules/base/rendering/renderableplane.h>
 
-#include <ghoul/misc/assert.h>
+#include <modules/spout/spoutlibrary.h>
+
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/triggerproperty.h>
+
+
 
 namespace openspace {
 
-SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
+namespace documentation { struct Documentation; }
 
-void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
+class RenderablePlaneSpout : public RenderablePlane {
+public:
+    RenderablePlaneSpout(const ghoul::Dictionary& dictionary);
 
-#ifdef WIN32
-    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
-    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
+    void deinitializeGL() override;
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
-    fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
-#endif // WIN32
-}
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    void bindTexture() override;
+    void unbindTexture() override;
+
+    properties::StringProperty _spoutName;
+    properties::OptionProperty _spoutSelection;
+    properties::TriggerProperty _updateSelection;
+
+    SPOUTHANDLE _receiver;
+
+    bool _isSpoutDirty = false;
+    char _currentSenderName[256];
+    bool _isFirstUpdate = true;
+    bool _isErrorMessageDisplayed = false;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
+
+#endif // WIN32

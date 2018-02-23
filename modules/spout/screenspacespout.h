@@ -29,12 +29,11 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <modules/spout/spoutlibrary.h>
+
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/triggerproperty.h>
-
-#define __gl_h_
-#include <SpoutLibrary.h>
 
 namespace openspace {
 
@@ -44,7 +43,6 @@ class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
     ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
 
-    bool initializeGL() override;
     bool deinitializeGL() override;
 
     bool isReady() const override;

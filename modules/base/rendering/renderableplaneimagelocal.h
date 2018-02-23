@@ -22,30 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/spout/spoutmodule.h>
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
 
-#include <modules/spout/renderableplanespout.h>
-#include <modules/spout/screenspacespout.h>
+#include <modules/base/rendering/renderableplane.h>
 
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
+struct RenderData;
+struct UpdateData;
 
-void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
+namespace documentation { struct Documentation; }
 
-#ifdef WIN32
-    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
-    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
+class RenderablePlaneImageLocal : public RenderablePlane {
+public:
+    RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
-    fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
-#endif // WIN32
-}
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+protected:
+    virtual void bindTexture();
+
+private:
+    void loadTexture();
+
+    properties::StringProperty _texturePath;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
+    bool _textureIsDirty;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
