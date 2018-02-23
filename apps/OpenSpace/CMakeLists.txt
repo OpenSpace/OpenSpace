@@ -68,25 +68,6 @@ if (OPENSPACE_OPENVR_SUPPORT)
     endif()
 endif()
 
-#####
-# Spout 
-#####
-if (WIN32)
-    option(OPENSPACE_SPOUT_SUPPORT "Build OpenSpace application with Spout support" OFF)
-endif ()
-
-if (OPENSPACE_SPOUT_SUPPORT)
-    set(SPOUT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
-    set(SPOUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
-    set(SPOUT_DEFINITIONS "OPENSPACE_HAS_SPOUT")
-
-    set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
-endif ()
-
-if (OPENSPACE_SPOUT_SUPPORT)
-    add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
-endif ()
-
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
 create_new_application(OpenSpace

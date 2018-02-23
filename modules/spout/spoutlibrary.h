@@ -22,65 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__
+#define __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__
 
-#include <openspace/rendering/renderable.h>
+// We need to have this extra file as the Spout people have not put an include guard into
+// their file which leads to a violation of the ODR in our usage.
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#define __gl_h_
+#include <modules/spout/ext/spout/SpoutLibrary.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl { class Texture; }
-
-namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
-struct LinePoint;
-
-class RenderablePlane : public Renderable {
-public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture();
-    virtual void unbindTexture();
-
-private:
-    void createPlane();
-
-    properties::BoolProperty _billboard;
-    properties::FloatProperty _size;
-    properties::OptionProperty _blendMode;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
-
-    bool _planeIsDirty;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#endif // __OPENSPACE_MODULE_SPOUT___SPOUTLIBRARY___H__

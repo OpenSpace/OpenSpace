@@ -22,65 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#include <modules/spout/spoutmodule.h>
 
-#include <openspace/rendering/renderable.h>
+#include <modules/spout/renderableplanespout.h>
+#include <modules/spout/screenspacespout.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/factorymanager.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
-
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl { class Texture; }
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
+SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
 
-namespace documentation { struct Documentation; }
+void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 
-struct LinePoint;
+#ifdef WIN32
+    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
 
-class RenderablePlane : public Renderable {
-public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture();
-    virtual void unbindTexture();
-
-private:
-    void createPlane();
-
-    properties::BoolProperty _billboard;
-    properties::FloatProperty _size;
-    properties::OptionProperty _blendMode;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
-
-    bool _planeIsDirty;
-};
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+    fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
+#endif // WIN32
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__

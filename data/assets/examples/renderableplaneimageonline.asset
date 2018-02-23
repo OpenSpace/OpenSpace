@@ -1,0 +1,24 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SPOUT enabled
+
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local RenderablePlaneImageOnline = {
+    Name = "RenderablePlaneImageOnline",
+    Parent = transforms.SolarSystemBarycenter.Name,
+    Renderable = {
+        Type = "RenderablePlaneImageOnline",
+        Size = 3.0E11,
+        Origin = "Center",
+        Billboard = true,
+        URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
+    },
+    GuiPath = "/Examples"
+}
+
+
+
+local objects = { RenderablePlaneImageOnline }
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)

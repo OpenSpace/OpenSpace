@@ -22,100 +22,104 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspaceimagelocal.h>
+#include <modules/base/rendering/renderableplaneimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/renderengine.h>
-
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/opengl/textureconversion.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
-    const char* KeyName = "Name";
-
-    static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
-        "TexturePath",
-        "Texture path",
-        "Sets the path of the texture that is displayed on this screen space plane. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. The size of the image will also automatically set the default "
-        "size of this plane."
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "Texture",
+        "Texture",
+        "This value specifies an image that is loaded from disk and is used as a texture "
+        "that is applied to this plane. This image has to be square."
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageLocal::Documentation() {
-    using namespace openspace::documentation;
+documentation::Documentation RenderablePlaneImageLocal::Documentation() {
+    using namespace documentation;
     return {
-        "ScreenSpace Local Image",
-        "base_screenspace_image_local",
+        "Renderable Plane Image Local",
+        "base_renderable_plane_image_local",
         {
             {
-                KeyName,
+                TextureInfo.identifier,
                 new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the ScreenspaceImage"
-            },
-            {
-                TexturePathInfo.identifier,
-                new StringVerifier,
-                Optional::Yes,
-                TexturePathInfo.description
+                Optional::No,
+                TextureInfo.description,
             }
         }
     };
 }
 
-ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable(dictionary)
-    , _texturePath(TexturePathInfo)
+RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
+    : RenderablePlane(dictionary)
+    , _texturePath(TextureInfo)
+    , _texture(nullptr)
     , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "ScreenSpaceImageLocal"
+        "RenderablePlaneImageLocal"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
-        static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceImageLocal");
-        }
-        else {
-            setName("ScreenSpaceImageLocal " + std::to_string(id));
-        }
-        ++id;
-    }
+    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
-    _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
+    _texturePath.onChange([this]() {loadTexture(); });
+    _textureFile->setCallback(
+        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+    );
+}
 
-    if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
+bool RenderablePlaneImageLocal::isReady() const {
+    return RenderablePlane::isReady() && _texture != nullptr;
+}
+
+void RenderablePlaneImageLocal::initializeGL() {
+    RenderablePlane::initializeGL();
+
+    loadTexture();
+}
+
+void RenderablePlaneImageLocal::deinitializeGL() {
+    _textureFile = nullptr;
+    _texture = nullptr;
+    RenderablePlane::deinitializeGL();
+}
+
+
+void RenderablePlaneImageLocal::bindTexture() {
+    _texture->bind();
+}
+
+void RenderablePlaneImageLocal::update(const UpdateData& data) {
+    RenderablePlane::update(data);
+
+    if (_textureIsDirty) {
+        loadTexture();
+        _textureIsDirty = false;
     }
 }
 
-void ScreenSpaceImageLocal::update() {
-    if (_textureIsDirty && !_texturePath.value().empty()) {
+void RenderablePlaneImageLocal::loadTexture() {
+    if (!_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 
         if (texture) {
-            // Images don't need to start on 4-byte boundaries, for example if the
-            // image is only RGB
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
+            LDEBUGC(
+                "RenderablePlane",
+                "Loaded texture from '" << absPath(_texturePath) << "'"
+            );
             texture->uploadTexture();
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than
@@ -123,15 +127,13 @@ void ScreenSpaceImageLocal::update() {
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
             _texture = std::move(texture);
-            _objectSize = _texture->dimensions();
-            _textureIsDirty = false;
+
+            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
+            _textureFile->setCallback(
+                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+            );
         }
-
     }
-}
-
-void ScreenSpaceImageLocal::bindTexture() {
-    _texture->bind();
 }
 
 } // namespace openspace

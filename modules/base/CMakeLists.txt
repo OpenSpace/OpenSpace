@@ -37,6 +37,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
@@ -69,6 +71,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimageonline.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp

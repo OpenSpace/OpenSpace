@@ -22,21 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
 
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
+#include <modules/base/rendering/renderableplane.h>
 
 namespace ghoul::filesystem { class File; }
-
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
@@ -46,41 +37,32 @@ struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
-struct LinePoint;
-
-class RenderablePlane : public Renderable {
+class RenderablePlaneImageLocal : public RenderablePlane {
 public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+    RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
     virtual void bindTexture();
-    virtual void unbindTexture();
 
 private:
-    void createPlane();
+    void loadTexture();
 
-    properties::BoolProperty _billboard;
-    properties::FloatProperty _size;
-    properties::OptionProperty _blendMode;
+    properties::StringProperty _texturePath;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
-
-    bool _planeIsDirty;
+    bool _textureIsDirty;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__

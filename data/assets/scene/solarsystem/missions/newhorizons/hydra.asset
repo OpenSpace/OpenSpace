@@ -47,7 +47,7 @@ local HydraText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10.0^6.3,
         Origin = "Center",
         Billboard = true,

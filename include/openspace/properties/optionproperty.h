@@ -111,6 +111,11 @@ public:
     const std::vector<Option>& options() const;
 
     /**
+     * This function removes all previous options from the OptionProperty
+     */
+    void clearOptions();
+
+    /**
      * The overritten TemplateProperty::setValue method that checks if the provided value
      * represents a valid Option
      * \param value The value of the Option that should be set
