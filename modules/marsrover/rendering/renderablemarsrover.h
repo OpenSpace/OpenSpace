@@ -29,6 +29,7 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
+
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
@@ -76,8 +77,8 @@ private:
     float _fadeOutThreshold;
     float _fadeInThreshold;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader1;
+    std::unique_ptr<ghoul::opengl::Texture> _texture1;
 
     std::unique_ptr<PowerScaledSphere> _marsrover;
 

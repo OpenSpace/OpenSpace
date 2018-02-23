@@ -42,6 +42,7 @@
 
 #include <modules/marsrover/rendering/renderablemodel.h>
 #include <modules/marsrover/rendering/renderablesphere.h>
+#include <modules/marsrover/rendering/renderablemarsrover.h>
 #include <modules/marsrover/rendering/renderablesphericalgrid.h>
 #include <modules/marsrover/rendering/renderabletrailorbit.h>
 #include <modules/marsrover/rendering/renderabletrailtrajectory.h>
@@ -53,6 +54,7 @@
 #include <modules/marsrover/rendering/screenspaceimageonline.h>
 #include <modules/marsrover/rendering/screenspaceframebuffer.h>
 
+
 #include <modules/marsrover/translation/luatranslation.h>
 #include <modules/marsrover/translation/statictranslation.h>
 
@@ -62,14 +64,11 @@
 
 #include <modules/marsrover/scale/luascale.h>
 #include <modules/marsrover/scale/staticscale.h>
-
-#include <modules/marsrover/rendering/renderablemarsrover.h>
-
 #include <ghoul/filesystem/filesystem>
 
 namespace openspace {
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule(Name) {}
+MarsroverModule::MarsroverModule() : OpenSpaceModule("Marsrover") {}    //changed by kristin: original was MarsRoverModule::Name instead of "Marsrover"
 
 void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     FactoryManager::ref().addFactory(
@@ -84,14 +83,14 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
-    fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
-    fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
-    fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
-    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
+    //fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
+    //fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
+    //fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
+    //fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
     auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(fDashboard, "Dashboard factory was not created");
-
+/*
     fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
     fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
     fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
@@ -104,21 +103,22 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
         "DashboardItemSimulationIncrement"
     );
     fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
-
+*/
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-
+/*
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePlane>("RenderablePlane");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
+  */
     fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
-
+/*
     fTranslation->registerClass<LuaTranslation>("LuaTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
 
@@ -138,10 +138,14 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fGeometry, "Model geometry factory was not created");
     fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
+    */
 }
 
 std::vector<documentation::Documentation> MarsroverModule::documentations() const {
     return {
+
+        RenderableMarsrover::Documentation(),
+       /*
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),
@@ -172,6 +176,7 @@ std::vector<documentation::Documentation> MarsroverModule::documentations() cons
         StaticTranslation::Documentation(),
 
         modelgeometry::ModelGeometry::Documentation(),
+        */
     };
 }
 

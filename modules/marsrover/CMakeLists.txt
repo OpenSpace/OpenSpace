@@ -38,6 +38,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
@@ -53,7 +54,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.h
+
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -71,6 +72,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
@@ -86,7 +88,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

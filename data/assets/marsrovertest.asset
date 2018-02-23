@@ -1,11 +1,11 @@
-local texturePath = asset.localResource("../test2.jpg")
 local assetHelper = asset.require("util/asset_helper")
+local texturePath = asset.localResource("../test2.jpg")
 
 local marsroverObject = {
     Name = "Mars Rover Test",
     Parent = "Root",
     Renderable = {
-      Type = "RenderableSphere",
+      Type = "RenderableMarsrover",
       Size = 1,
       Segments = 20,
       Texture = texturePath

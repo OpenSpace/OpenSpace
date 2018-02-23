@@ -97,6 +97,7 @@ namespace {
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."
     };
+
 } // namespace
 
 namespace openspace {
@@ -106,6 +107,7 @@ documentation::Documentation RenderableMarsrover::Documentation() {
     return {
         "RenderableMarsrover",
         "marsrover_renderable_marsrover",
+
         {
             {
                 SizeInfo.identifier,
@@ -156,6 +158,7 @@ documentation::Documentation RenderableMarsrover::Documentation() {
                 DisableFadeInOuInfo.description
             },
         }
+
     };
 }
 
@@ -170,8 +173,8 @@ RenderableMarsrover::RenderableMarsrover(const ghoul::Dictionary& dictionary)
     , _disableFadeInDistance(DisableFadeInOuInfo, true)
     , _fadeOutThreshold(-1.0)
     , _fadeInThreshold(0.0)
-    , _shader(nullptr)
-    , _texture(nullptr)
+    , _shader1(nullptr)
+    , _texture1(nullptr)
     , _marsrover(nullptr)
     , _sphereIsDirty(false)
 {
@@ -256,7 +259,7 @@ RenderableMarsrover::RenderableMarsrover(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableMarsrover::isReady() const {
-    return _shader && _texture;
+    return _shader1 && _texture1;
 }
 
 void RenderableMarsrover::initializeGL() {
@@ -266,7 +269,7 @@ void RenderableMarsrover::initializeGL() {
     _marsrover->initialize();
 
     // pscstandard
-    _shader = OsEng.renderEngine().buildRenderProgram(
+    _shader1 = OsEng.renderEngine().buildRenderProgram(
         "Marsrover",
         absPath("${MODULE_MARSROVER}/shaders/sphere_vs.glsl"),
         absPath("${MODULE_MARSROVER}/shaders/sphere_fs.glsl")
@@ -276,11 +279,11 @@ void RenderableMarsrover::initializeGL() {
 }
 
 void RenderableMarsrover::deinitializeGL() {
-    _texture = nullptr;
+    _texture1 = nullptr;
 
-    if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader);
-        _shader = nullptr;
+    if (_shader1) {
+        OsEng.renderEngine().removeRenderProgram(_shader1);
+        _shader1 = nullptr;
     }
 }
 
@@ -291,13 +294,13 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
 
     // Activate shader
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _shader->activate();
-    _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
+    _shader1->activate();
+    _shader1->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
+    _shader1->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _shader1->setUniform("ModelTransform", transform);
 
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    setPscUniforms(*_shader1.get(), data.camera, data.position);
 
     float adjustedTransparency = _transparency;
 
@@ -327,12 +330,12 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    _shader->setUniform("alpha", adjustedTransparency);
+    _shader1->setUniform("alpha", adjustedTransparency);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
-    _shader->setUniform("texture1", unit);
+    _texture1->bind();
+    _shader1->setUniform("texture1", unit);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -346,7 +349,7 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
         RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
-        _shader->setUniform("additiveBlending", true);
+        _shader1->setUniform("additiveBlending", true);
     }
 
     if (usingFramebufferRenderer) {
@@ -359,13 +362,13 @@ void RenderableMarsrover::render(const RenderData& data, RendererTasks&) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    _shader->setIgnoreUniformLocationError(IgnoreError::No);
-    _shader->deactivate();
+    _shader1->setIgnoreUniformLocationError(IgnoreError::No);
+    _shader1->deactivate();
 }
 
 void RenderableMarsrover::update(const UpdateData&) {
-    if (_shader->isDirty()) {
-        _shader->rebuildFromFile();
+    if (_shader1->isDirty()) {
+        _shader1->rebuildFromFile();
     }
 
     if (_sphereIsDirty) {
@@ -396,7 +399,7 @@ void RenderableMarsrover::loadTexture() {
             //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
-            _texture = std::move(texture);
+            _texture1 = std::move(texture);
         }
     }
 }
