@@ -176,7 +176,12 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 }
 
 void ScreenSpaceImageOnline::bindTexture() {
-    _texture->bind();
+    if (_texture) {
+        _texture->bind();
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }
 
 } // namespace openspace
