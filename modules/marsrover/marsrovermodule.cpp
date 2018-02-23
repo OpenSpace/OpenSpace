@@ -31,32 +31,8 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/marsrover/dashboard/dashboarditemangle.h>
-#include <modules/marsrover/dashboard/dashboarditemdate.h>
-#include <modules/marsrover/dashboard/dashboarditemdistance.h>
-#include <modules/marsrover/dashboard/dashboarditemframerate.h>
-#include <modules/marsrover/dashboard/dashboarditemmission.h>
-#include <modules/marsrover/dashboard/dashboarditemparallelconnection.h>
-#include <modules/marsrover/dashboard/dashboarditemsimulationincrement.h>
-#include <modules/marsrover/dashboard/dashboarditemspacing.h>
-
-#include <modules/marsrover/rendering/renderablemodel.h>
-#include <modules/marsrover/rendering/renderablesphere.h>
-#include <modules/marsrover/rendering/renderablemarsrover.h>
-#include <modules/marsrover/rendering/renderablesphericalgrid.h>
-#include <modules/marsrover/rendering/renderabletrailorbit.h>
-#include <modules/marsrover/rendering/renderabletrailtrajectory.h>
-#include <modules/marsrover/rendering/renderableplane.h>
-#include <modules/marsrover/rendering/modelgeometry.h>
-#include <modules/marsrover/rendering/multimodelgeometry.h>
 #include <modules/marsrover/rendering/screenspacedashboard.h>
-#include <modules/marsrover/rendering/screenspaceimagelocal.h>
-#include <modules/marsrover/rendering/screenspaceimageonline.h>
-#include <modules/marsrover/rendering/screenspaceframebuffer.h>
-
-
-#include <modules/marsrover/translation/luatranslation.h>
-#include <modules/marsrover/translation/statictranslation.h>
+#include <modules/marsrover/rendering/renderablemarsrover.h>
 
 #include <modules/marsrover/rotation/fixedrotation.h>
 #include <modules/marsrover/rotation/luarotation.h>
@@ -71,112 +47,17 @@ namespace openspace {
 MarsroverModule::MarsroverModule() : OpenSpaceModule("Marsrover") {}    //changed by kristin: original was MarsRoverModule::Name instead of "Marsrover"
 
 void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>(),
-        "ModelGeometry"
-    );
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
-        "ScreenSpaceRenderable"
-    );
 
-    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
-
-    //fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
-    //fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
-    //fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
-    //fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
-
-    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
-    ghoul_assert(fDashboard, "Dashboard factory was not created");
-/*
-    fDashboard->registerClass<DashboardItemAngle>("DashboardItemAngle");
-    fDashboard->registerClass<DashboardItemDate>("DashboardItemDate");
-    fDashboard->registerClass<DashboardItemDistance>("DashboardItemDistance");
-    fDashboard->registerClass<DashboardItemFramerate>("DashboardItemFramerate");
-    fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
-    fDashboard->registerClass<DashboardItemParallelConnection>(
-        "DashboardItemParallelConnection"
-    );
-    fDashboard->registerClass<DashboardItemSimulationIncrement>(
-        "DashboardItemSimulationIncrement"
-    );
-    fDashboard->registerClass<DashboardItemSpacing>("DashboardItemSpacing");
-*/
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-/*
-    fRenderable->registerClass<RenderableModel>("RenderableModel");
-    fRenderable->registerClass<RenderablePlane>("RenderablePlane");
-    fRenderable->registerClass<RenderableSphere>("RenderableSphere");
-    fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
-    fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
-    fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
-  */
+
     fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
 
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
-    ghoul_assert(fTranslation, "Ephemeris factory was not created");
-/*
-    fTranslation->registerClass<LuaTranslation>("LuaTranslation");
-    fTranslation->registerClass<StaticTranslation>("StaticTranslation");
-
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
-
-    fRotation->registerClass<FixedRotation>("FixedRotation");
-    fRotation->registerClass<LuaRotation>("LuaRotation");
-    fRotation->registerClass<StaticRotation>("StaticRotation");
-
-    auto fScale = FactoryManager::ref().factory<Scale>();
-    ghoul_assert(fScale, "Scale factory was not created");
-
-    fScale->registerClass<LuaScale>("LuaScale");
-    fScale->registerClass<StaticScale>("StaticScale");
-
-    auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
-    ghoul_assert(fGeometry, "Model geometry factory was not created");
-    fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
-    */
 }
 
 std::vector<documentation::Documentation> MarsroverModule::documentations() const {
     return {
-
         RenderableMarsrover::Documentation(),
-       /*
-        DashboardItemDate::Documentation(),
-        DashboardItemDistance::Documentation(),
-        DashboardItemFramerate::Documentation(),
-        DashboardItemMission::Documentation(),
-        DashboardItemParallelConnection::Documentation(),
-        DashboardItemSimulationIncrement::Documentation(),
-        DashboardItemSpacing::Documentation(),
-
-        RenderableModel::Documentation(),
-        RenderablePlane::Documentation(),
-        RenderableSphere::Documentation(),
-        RenderableTrailOrbit::Documentation(),
-        RenderableTrailTrajectory::Documentation(),
-
-        //ScreenSpaceDashboard::Documentation(),
-        ScreenSpaceFramebuffer::Documentation(),
-        ScreenSpaceImageLocal::Documentation(),
-        ScreenSpaceImageOnline::Documentation(),
-
-        FixedRotation::Documentation(),
-        LuaRotation::Documentation(),
-        StaticRotation::Documentation(),
-
-        LuaScale::Documentation(),
-        StaticScale::Documentation(),
-
-        LuaTranslation::Documentation(),
-        StaticTranslation::Documentation(),
-
-        modelgeometry::ModelGeometry::Documentation(),
-        */
     };
 }
 
