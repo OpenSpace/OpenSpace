@@ -101,7 +101,7 @@ private:
     libtorrent::session _session;
     bool _isInitialized = false;
 
-    std::atomic_bool _isActive{ false };
+    std::atomic_bool _isActive = false;
     std::thread _torrentThread;
     std::condition_variable _abortNotifier;
     std::mutex _abortMutex;
