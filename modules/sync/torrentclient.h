@@ -79,7 +79,6 @@ public:
     void initialize();
     void deinitialize();
 
-
     TorrentId addTorrentFile(const std::string& torrentFile,
         const std::string& destination, TorrentProgressCallback cb);
 

@@ -59,7 +59,8 @@ private:
     bool hasSyncFile();
     void createSyncFile();
 
-    std::atomic_bool _enabled;
+    std::atomic_bool _enabled = false;
+
     TorrentClient::TorrentId _torrentId;
     TorrentClient::TorrentProgress _progress;
     std::mutex _progressMutex;

@@ -48,8 +48,6 @@ TorrentError::TorrentError(std::string message)
     : RuntimeError(std::move(message), "TorrentClient")
 {}
 
-//TorrentClient::TorrentClient() : _isActive(false) {}
-
 TorrentClient::~TorrentClient() {
     deinitialize();
 }
