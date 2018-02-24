@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_SYNC___HTTPSYNCHRONIZATION___H__
 
 #include <openspace/util/resourcesynchronization.h>
-#include <openspace/documentation/documentation.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {

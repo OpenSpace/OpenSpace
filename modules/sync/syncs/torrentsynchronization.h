@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 #define __OPENSPACE_MODULE_SYNC___TORRENTSYNCHRONIZATION___H__
 
-#include <modules/sync/torrentclient.h>
-
 #include <openspace/util/resourcesynchronization.h>
-#include <openspace/documentation/documentation.h>
 
+#include <modules/sync/torrentclient.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
@@ -39,12 +38,9 @@ class TorrentSynchronizationJob;
 class TorrentSynchronization : public ResourceSynchronization {
 public:
     TorrentSynchronization(const ghoul::Dictionary& dict,
-                           const std::string& synchronizationRoot,
-                           TorrentClient& client);
-
+        const std::string& synchronizationRoot, TorrentClient& client);
 
     virtual ~TorrentSynchronization();
-    static documentation::Documentation Documentation();
 
     std::string directory() override;
     void start() override;
@@ -54,6 +50,8 @@ public:
     size_t nSynchronizedBytes() override;
     size_t nTotalBytes() override;
     bool nTotalBytesIsKnown() override;
+
+    static documentation::Documentation Documentation();
 
 private:
     void updateTorrentProgress(TorrentClient::TorrentProgress p);

@@ -26,20 +26,17 @@
 #define __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__
 
 #include <ghoul/misc/exception.h>
-
-#include <functional>
 #include <atomic>
-#include <string>
-#include <memory>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <string>
+#include <thread>
 #include <unordered_map>
 
 #ifdef SYNC_USE_LIBTORRENT
-#include "libtorrent/torrent_handle.hpp"
-
-namespace libtorrent { class session; }
+#include <libtorrent/torrent_handle.hpp>
+#include <libtorrent/session.hpp>
 
 #else // SYNC_USE_LIBTORRENT
 // Dummy definition to make TorrentClient compile, these is not actually used if
@@ -47,10 +44,9 @@ namespace libtorrent { class session; }
 namespace libtorrent {
     using torrent_handle = void*;
     using session = void*;
-}
+} // namespace libtorrent
 
 #endif // SYNC_USE_LIBTORRENT
-
 
 namespace openspace {
 
@@ -77,20 +73,21 @@ public:
     using TorrentProgressCallback = std::function<void(TorrentProgress)>;
     using TorrentId = int32_t;
 
-    TorrentClient();
-    virtual ~TorrentClient();
+    //TorrentClient();
+    ~TorrentClient();
 
     void initialize();
     void deinitialize();
-    TorrentId addTorrentFile(std::string torrentFile, std::string destination,
-        TorrentProgressCallback cb);
 
-    TorrentId addMagnetLink(std::string magnetLink, std::string destination,
+
+    TorrentId addTorrentFile(const std::string& torrentFile,
+        const std::string& destination, TorrentProgressCallback cb);
+
+    TorrentId addMagnetLink(const std::string& magnetLink, const std::string& destination,
         TorrentProgressCallback cb);
 
     void removeTorrent(TorrentId id);
-    void pollAlerts();
-
+    
 private:
     struct Torrent {
         TorrentId id;
@@ -99,14 +96,18 @@ private:
     };
 
     void notify(TorrentId id);
+    void pollAlerts();
+
+    libtorrent::session _session;
+    bool _isInitialized = false;
+
+    std::atomic_bool _isActive{ false };
+    std::thread _torrentThread;
+    std::condition_variable _abortNotifier;
+    std::mutex _abortMutex;
+    std::mutex _mutex;
 
     std::unordered_map<TorrentId, Torrent> _torrents;
-    std::unique_ptr<libtorrent::session> _session;
-    std::thread _torrentThread;
-    std::mutex _mutex;
-    std::atomic_bool _active;
-    std::mutex _abortMutex;
-    std::condition_variable _abortNotifier;
 };
 
 } // namespace openspace

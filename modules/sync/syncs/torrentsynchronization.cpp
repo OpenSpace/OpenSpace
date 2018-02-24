@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "torrentsynchronization.h"
+#include <modules/sync/syncs/torrentsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
 
@@ -41,7 +41,7 @@ namespace {
     constexpr const char* _loggerCat = "TorrentSynchronization";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyMagnet = "Magnet";
-}
+} // namespace
 
 namespace openspace {
 
