@@ -26,6 +26,7 @@
 
 #include <modules/sync/syncs/httpsynchronization.h>
 #include <modules/sync/syncs/torrentsynchronization.h>
+#include <modules/sync/syncs/urlsynchronization.h>
 #include <modules/sync/tasks/syncassettask.h>
 
 #include <openspace/documentation/documentation.h>
@@ -99,6 +100,16 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
                 &_torrentClient
             );
         }
+    );
+
+    fSynchronization->registerClass(
+        "UrlSynchronization",
+        [this](bool, const ghoul::Dictionary& dictionary) {
+        return new UrlSynchronization(
+            dictionary,
+            _synchronizationRoot
+        );
+    }
     );
 
     auto fTask = FactoryManager::ref().factory<Task>();

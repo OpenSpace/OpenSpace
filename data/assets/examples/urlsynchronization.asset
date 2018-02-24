@@ -1,0 +1,27 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_SYNC enabled
+
+local assetHelper = asset.require("util/asset_helper")
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Example Single",
+    Identifier = "example_single",
+    Url = "http://celestrak.com/NORAD/elements/geo.txt"
+})
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Example Multiple",
+    Identifier = "example_multiple",
+    Url = {
+        "http://celestrak.com/NORAD/elements/stations.txt",
+        "http://celestrak.com/NORAD/elements/gps-ops.txt",
+    }
+})
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Example Large",
+    Identifier = "example_large",
+    Url = "http://ipv4.download.thinkbroadband.com/100MB.zip"
+})
