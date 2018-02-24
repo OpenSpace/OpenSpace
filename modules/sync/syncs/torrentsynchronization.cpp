@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "torrentsynchronization.h"
+#include <modules/sync/syncs/torrentsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
 
@@ -41,28 +41,43 @@ namespace {
     constexpr const char* _loggerCat = "TorrentSynchronization";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyMagnet = "Magnet";
-}
+} // namespace
 
 namespace openspace {
+
+documentation::Documentation TorrentSynchronization::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "TorrentSynchronization",
+        "torrent_synchronization",
+    {
+        {
+            KeyIdentifier,
+            new StringVerifier,
+            Optional::No,
+            "A unique identifier for this torrent"
+        },
+        {
+            KeyMagnet,
+            new StringVerifier,
+            Optional::No,
+            "A magnet link identifying the torrent"
+        }
+    }
+    };
+}
 
 TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
                                                const std::string& synchronizationRoot,
                                                TorrentClient& torrentClient)
     : ResourceSynchronization(dict)
-    , _enabled(false)
     , _synchronizationRoot(synchronizationRoot)
     , _torrentClient(torrentClient)
 {
     documentation::testSpecificationAndThrow(
-        ResourceSynchronization::Documentation(),
-        dict,
-        "ResourceSynchronization::TorrentSynchronization"
-    );
-
-    documentation::testSpecificationAndThrow(
         Documentation(),
         dict,
-        "TorrentSynchronization::TorrentSynchronization"
+        "TorrentSynchronization"
     );
 
     _identifier = dict.value<std::string>(KeyIdentifier);
@@ -73,36 +88,18 @@ TorrentSynchronization::~TorrentSynchronization() {
     cancel();
 }
 
-documentation::Documentation TorrentSynchronization::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "TorrentSynchronization",
-        "torrent_synchronization",
-        {
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::No,
-                "A unique identifier for this torrent"
-            },
-            {
-                KeyMagnet,
-                new StringVerifier,
-                Optional::No,
-                "A magnet link identifying the torrent"
-            }
-        }
-    };
-}
-
 std::string TorrentSynchronization::uniformResourceName() const {
     size_t begin = _magnetLink.find("=urn") + 1;
     size_t end = _magnetLink.find('&', begin);
-    std::string xs = _magnetLink.substr(begin, end == std::string::npos ?
-        end : (end - begin));
+    std::string xs = _magnetLink.substr(
+        begin,
+        end == std::string::npos ? end : (end - begin)
+    );
 
     std::transform(xs.begin(), xs.end(), xs.begin(), [](char x) {
-        if (x == ':') return '.';
+        if (x == ':') {
+            return '.';
+        }
         return x;
     });
     return xs;
@@ -168,9 +165,11 @@ bool TorrentSynchronization::hasSyncFile() {
 }
 
 void TorrentSynchronization::createSyncFile() {
-    std::string dir = directory();
-    std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
+    std::string directoryName = directory();
+    std::string filepath = directoryName + ".ossync";
+    
+    FileSys.createDirectory(directoryName, ghoul::filesystem::Directory::Recursive::Yes);
+    
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();
@@ -196,7 +195,7 @@ void TorrentSynchronization::updateTorrentProgress(
 {
     std::lock_guard<std::mutex> g(_progressMutex);
     _progress = progress;
-    if (progress.finished && state() == State::Syncing) {
+    if (progress.finished && (state() == State::Syncing)) {
         createSyncFile();
         resolve();
     }
