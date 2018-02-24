@@ -230,6 +230,8 @@ if (OPENSPACE_HAVE_TESTS)
     )
     target_link_libraries(OpenSpaceTest gtest libOpenSpace)
 
+    set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
+
     if (MSVC)
         set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS
             "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"

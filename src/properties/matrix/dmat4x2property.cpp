@@ -34,20 +34,29 @@ namespace {
 
 glm::dmat4x2 fromLuaConversion(lua_State* state, bool& success) {
     glm::dmat4x2 result;
+    lua_pushnil(state);
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x2>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x2>::value; ++j) {
-            lua_getfield(state, -1, std::to_string(number).c_str());
+            int hasNext = lua_next(state, -2);
+            if (hasNext != 1) {
+                success = false;
+                return glm::dmat4x2(0);
+            }
             if (lua_isnumber(state, -1) != 1) {
                 success = false;
                 return glm::dmat4x2(0);
-            } else {
-                result[i][j] = lua_tonumber(state, -1);
+            }
+            else {
+                result[i][j]
+                    = static_cast<glm::dmat4x2::value_type>(lua_tonumber(state, -1));
                 lua_pop(state, 1);
                 ++number;
             }
         }
     }
+    // The last accessor argument and the table are still on the stack
+    lua_pop(state, 2);
     success = true;
     return result;
 }
@@ -58,7 +67,7 @@ bool toLuaConversion(lua_State* state, glm::dmat4x2 value) {
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::dmat4x2>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::dmat4x2>::value; ++j) {
             lua_pushnumber(state, value[i][j]);
-            lua_setfield(state, -2, std::to_string(number).c_str());
+            lua_rawseti(state, -2, number);
             ++number;
         }
     }
