@@ -336,6 +336,8 @@ local Rex = {
     GuiPath = "/Solar System/Missions/New Horizons"
 }
 
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Lorri,
     RalphLeisa,

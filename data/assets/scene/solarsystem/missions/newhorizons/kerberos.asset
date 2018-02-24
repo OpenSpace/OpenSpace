@@ -77,6 +77,8 @@ local KerberosTrail = {
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Kerberos,
     KerberosText,

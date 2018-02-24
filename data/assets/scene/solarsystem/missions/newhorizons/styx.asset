@@ -73,6 +73,8 @@ local StyxTrail = {
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Styx,
     StyxText,

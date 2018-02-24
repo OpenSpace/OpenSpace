@@ -267,6 +267,8 @@ local VoyagerTrailCruiseNeptuneInf = {
     GuiPath = "/Solar System/Missions/Voyager 2"
 }
 
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Voyager2,
     Voyager2Main,
