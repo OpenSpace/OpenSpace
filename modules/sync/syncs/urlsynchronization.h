@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_SYNC___URLSYNCHRONIZATION___H__
 
 #include <openspace/util/resourcesynchronization.h>
-#include <openspace/documentation/documentation.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
@@ -39,8 +39,6 @@ public:
 
     virtual ~UrlSynchronization();
 
-
-    std::string directory() override;
     void start() override;
     void cancel() override;
     void clear() override;
@@ -58,17 +56,14 @@ private:
 
     void createSyncFile();
     bool hasSyncFile();
+    std::string directory() override;
 
 
 
-
-    //bool trySyncFromUrl(std::string url);
-
-    std::atomic_bool _nTotalBytesKnown;
-    std::atomic_size_t _nTotalBytes;
-    std::atomic_size_t _nSynchronizedBytes;
-
-    std::atomic_bool _shouldCancel;
+    std::atomic_bool _nTotalBytesKnown = false;
+    std::atomic_size_t _nTotalBytes = 0;
+    std::atomic_size_t _nSynchronizedBytes = 0;
+    std::atomic_bool _shouldCancel = false;
 
     std::thread _syncThread;
 };

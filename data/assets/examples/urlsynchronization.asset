@@ -25,3 +25,9 @@ asset.syncedResource({
     Identifier = "example_large",
     Url = "http://ipv4.download.thinkbroadband.com/100MB.zip"
 })
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Example No ident",
+    Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
+})
