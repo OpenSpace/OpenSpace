@@ -50,15 +50,13 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::vector<std::string> _urls;
-    std::string _synchronizationRoot;
-    std::string _identifier;
-
     void createSyncFile();
     bool hasSyncFile();
     std::string directory() override;
 
-
+    std::vector<std::string> _urls;
+    std::string _synchronizationRoot;
+    std::string _identifier;
 
     std::atomic_bool _nTotalBytesKnown = false;
     std::atomic_size_t _nTotalBytes = 0;
