@@ -58,21 +58,19 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             KeyHttpSynchronizationRepositories);
 
         for (const std::string& key : dictionary.keys()) {
-            _httpSynchronizationRepositories.push_back(
-                dictionary.value<std::string>(key)
-            );
+            _synchronizationRepositories.push_back(dictionary.value<std::string>(key));
         }
     }
 
     if (configuration.hasKey(KeySynchronizationRoot)) {
         _synchronizationRoot = configuration.value<std::string>(KeySynchronizationRoot);
     } else {
-        LWARNING(
-            "No synchronization root specified."
-            "Resource synchronization will be disabled."
+        LWARNINGC(
+            "SyncModule",
+            "No synchronization root specified. Disabling resource synchronization"
         );
         //_synchronizationEnabled = false;
-        // TODO: Make it possible to disable synchronization manyally.
+        // TODO: Make it possible to disable synchronization manually.
         // Group root and enabled into a sync config object that can be passed to syncs.
     }
 
@@ -85,7 +83,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             return new HttpSynchronization(
                 dictionary,
                 _synchronizationRoot,
-                _httpSynchronizationRepositories
+                _synchronizationRepositories
             );
         }
     );
@@ -96,7 +94,7 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
             return new TorrentSynchronization(
                 dictionary,
                 _synchronizationRoot,
-                &_torrentClient
+                _torrentClient
             );
         }
     );
@@ -104,6 +102,8 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<SyncAssetTask>("SyncAssetTask");
+
+
 
     _torrentClient.initialize();
 
@@ -113,27 +113,23 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     });
 }
 
+std::string SyncModule::synchronizationRoot() const {
+    return _synchronizationRoot;
+}
+
+void SyncModule::addHttpSynchronizationRepository(std::string repository) {
+    _synchronizationRepositories.push_back(std::move(repository));
+}
+
+std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
+    return _synchronizationRepositories;
+}
+
 std::vector<documentation::Documentation> SyncModule::documentations() const {
     return {
         HttpSynchronization::Documentation(),
         TorrentSynchronization::Documentation()
     };
-}
-
-std::string SyncModule::synchronizationRoot() const {
-    return _synchronizationRoot;
-}
-
-void SyncModule::addHttpSynchronizationRepository(const std::string& repository) {
-    _httpSynchronizationRepositories.push_back(repository);
-}
-
-std::vector<std::string> SyncModule::httpSynchronizationRepositories() const {
-    return _httpSynchronizationRepositories;
-}
-
-TorrentClient* SyncModule::torrentClient() {
-    return &_torrentClient;
 }
 
 } // namespace openspace

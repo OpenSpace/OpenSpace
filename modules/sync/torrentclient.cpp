@@ -28,6 +28,15 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#ifdef SYNC_USE_LIBTORRENT
+#include <libtorrent/entry.hpp>
+#include <libtorrent/bencode.hpp>
+#include <libtorrent/session.hpp>
+#include <libtorrent/alert_types.hpp>
+#include <libtorrent/torrent_info.hpp>
+#include <libtorrent/magnet_uri.hpp>
+#endif // SYNC_USE_LIBTORRENT
+
 namespace {
     constexpr const char* _loggerCat = "TorrentClient";
     std::chrono::milliseconds PollInterval(1000);
@@ -35,32 +44,18 @@ namespace {
 
 namespace openspace {
 
-TorrentError::TorrentError(std::string component)
-    : RuntimeError("TorrentClient", component)
+TorrentError::TorrentError(std::string message)
+    : RuntimeError(std::move(message), "TorrentClient")
 {}
 
-} // namespace openspace
-
-#ifdef SYNC_USE_LIBTORRENT
-
-#include <libtorrent/entry.hpp>
-#include <libtorrent/bencode.hpp>
-#include <libtorrent/session.hpp>
-#include <libtorrent/alert_types.hpp>
-#include <libtorrent/torrent_info.hpp>
-#include <libtorrent/magnet_uri.hpp>
-
-namespace openspace {
-
-TorrentClient::TorrentClient()
-    : _active(false)
-{}
+TorrentClient::TorrentClient() : _active(false) {}
 
 TorrentClient::~TorrentClient() {
     deinitialize();
 }
 
 void TorrentClient::initialize() {
+#ifdef SYNC_USE_LIBTORRENT
     libtorrent::settings_pack settings;
 
     _session = std::make_unique<libtorrent::session>();
@@ -77,7 +72,7 @@ void TorrentClient::initialize() {
     settings.set_int(libtorrent::settings_pack::active_downloads, -1);
     settings.set_int(libtorrent::settings_pack::active_seeds, -1);
     settings.set_int(libtorrent::settings_pack::active_limit, 30);
-    settings.set_int(libtorrent::settings_pack::dht_announce_interval, 60);
+    settings.set_int(libtorrent::settings_pack::dht_announce_interval, 15);
     _session->apply_settings(settings);
 
     _session->add_dht_router({ "router.utorrent.com", 6881 });
@@ -98,9 +93,11 @@ void TorrentClient::initialize() {
             _abortNotifier.wait_for(lock, PollInterval);
         }
     });
+#endif // SYNC_USE_LIBTORRENT
 }
 
 void TorrentClient::deinitialize() {
+#ifdef SYNC_USE_LIBTORRENT
     if (!_active) {
         return;
     }
@@ -119,9 +116,11 @@ void TorrentClient::deinitialize() {
 
     _session->abort();
     _session = nullptr;
+#endif // SYNC_USE_LIBTORRENT
 }
 
 void TorrentClient::pollAlerts() {
+#ifdef SYNC_USE_LIBTORRENT
     // Libtorrent does not seem to reliably generate alerts for all added torrents.
     // To make sure that the program does not keep waiting for already finished 
     // downsloads, we go through the whole list of torrents when polling.
@@ -148,12 +147,14 @@ void TorrentClient::pollAlerts() {
     for (lt::torrent_handle h : handles) {
         notify(h.id());
     }
+#endif // SYNC_USE_LIBTORRENT
 }
 
 TorrentClient::TorrentId TorrentClient::addTorrentFile(std::string torrentFile,
                                                        std::string destination,
                                                        TorrentProgressCallback cb)
 {
+#ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
 
     if (!_session) {
@@ -174,12 +175,16 @@ TorrentClient::TorrentId TorrentClient::addTorrentFile(std::string torrentFile,
     TorrentId id = h.id();
     _torrents.emplace(id, Torrent{id, h, cb});
     return id;
+#else // SYNC_USE_LIBTORRENT
+    throw TorrentError("SyncModule is compiled without libtorrent");
+#endif // SYNC_USE_LIBTORRENT
 }
 
 TorrentClient::TorrentId TorrentClient::addMagnetLink(std::string magnetLink,
                                                       std::string destination,
                                                       TorrentProgressCallback cb)
 {
+#ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
 
     // TODO: register callback!
@@ -205,9 +210,13 @@ TorrentClient::TorrentId TorrentClient::addMagnetLink(std::string magnetLink,
     TorrentId id = h.id();
     _torrents.emplace(id, Torrent{id, h, cb});
     return id;
+#else // SYNC_USE_LIBTORRENT
+    throw TorrentError("SyncModule is compiled without libtorrent");
+#endif // SYNC_USE_LIBTORRENT
 }
 
 void TorrentClient::removeTorrent(TorrentId id) {
+#ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
 
     auto it = _torrents.find(id);
@@ -219,9 +228,11 @@ void TorrentClient::removeTorrent(TorrentId id) {
     _session->remove_torrent(h);
 
     _torrents.erase(it);
+#endif // SYNC_USE_LIBTORRENT
 }
 
 void TorrentClient::notify(TorrentId id) {
+#ifdef SYNC_USE_LIBTORRENT
     TorrentProgressCallback callback;
     TorrentProgress progress;
 
@@ -245,38 +256,8 @@ void TorrentClient::notify(TorrentId id) {
     }
 
     callback(progress);
-}
-
-} // namespace openspace
-
-#else // SYNC_USE_LIBTORRENT
-
-namespace openspace {
-
-TorrentClient::TorrentClient() {}
-
-TorrentClient::~TorrentClient() {}
-
-void TorrentClient::initialize() {}
-
-void TorrentClient::deinitialize() {}
-
-void TorrentClient::pollAlerts() {}
-
-TorrentClient::TorrentId TorrentClient::addTorrentFile(std::string, std::string,
-                                                       TorrentProgressCallback)
-{
-    throw TorrentError("SyncModule is not compiled with libtorrent");
-}
-
-TorrentClient::TorrentId TorrentClient::addMagnetLink(std::string, std::string,
-                                                      TorrentProgressCallback)
-{
-    throw TorrentError("SyncModule is not compiled with libtorrent");
-}
-
-void TorrentClient::removeTorrent(TorrentId id) {}
-
-} // namespace openspace
-
 #endif // SYNC_USE_LIBTORRENT
+}
+
+} // namespace openspace
+

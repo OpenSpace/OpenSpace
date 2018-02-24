@@ -47,7 +47,7 @@ namespace openspace {
 
 TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
                                                const std::string& synchronizationRoot,
-                                               TorrentClient* torrentClient)
+                                               TorrentClient& torrentClient)
     : ResourceSynchronization(dict)
     , _enabled(false)
     , _synchronizationRoot(synchronizationRoot)
@@ -134,16 +134,15 @@ void TorrentSynchronization::start() {
 
     _enabled = true;
     try {
-        _torrentId = _torrentClient->addMagnetLink(
+        _torrentId = _torrentClient.addMagnetLink(
             _magnetLink,
             directory(),
             [this](TorrentClient::TorrentProgress p) {
                 updateTorrentProgress(p);
             }
         );
-    } catch (const TorrentError&) {
-        LERROR("Failed to synchronize '" << name() <<
-            "'.\nOpenSpace needs to be linked with libtorrent.");
+    } catch (const TorrentError& e) {
+        LERRORC(name(), e.message);
         if (!isResolved()) {
             reject();
         }
@@ -152,7 +151,7 @@ void TorrentSynchronization::start() {
 
 void TorrentSynchronization::cancel() {
     if (_enabled) {
-        _torrentClient->removeTorrent(_torrentId);
+        _torrentClient.removeTorrent(_torrentId);
         _enabled = false;
         reset();
     }

@@ -28,6 +28,29 @@
 #include <ghoul/misc/exception.h>
 
 #include <functional>
+#include <atomic>
+#include <string>
+#include <memory>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <unordered_map>
+
+#ifdef SYNC_USE_LIBTORRENT
+#include "libtorrent/torrent_handle.hpp"
+
+namespace libtorrent { class session; }
+
+#else // SYNC_USE_LIBTORRENT
+// Dummy definition to make TorrentClient compile, these is not actually used if
+// SYNC_USE_LIBTORRENT is FALSE
+namespace libtorrent {
+    using torrent_handle = void*;
+    using session = void*;
+}
+
+#endif // SYNC_USE_LIBTORRENT
+
 
 namespace openspace {
 
@@ -38,10 +61,11 @@ struct TorrentError : public ghoul::RuntimeError {
     * \param component The component that initiated the specification test
     * \pre \p result%'s TestResult::success must be \c false
     */
-    TorrentError(std::string component);
+    TorrentError(std::string message);
 };
 
-class TorrentClientBase {
+
+class TorrentClient {
 public:
     struct TorrentProgress {
         bool finished = false;
@@ -50,61 +74,22 @@ public:
         size_t nDownloadedBytes = 0;
     };
 
-    virtual ~TorrentClientBase() = default;
-
     using TorrentProgressCallback = std::function<void(TorrentProgress)>;
-
     using TorrentId = int32_t;
 
-    virtual void initialize() = 0;
-    virtual void deinitialize() = 0;
-    virtual TorrentId addTorrentFile(std::string torrentFile,
-        std::string destination,
-        TorrentProgressCallback cb) = 0;
-
-    virtual TorrentId addMagnetLink(std::string magnetLink,
-        std::string destination,
-        TorrentProgressCallback cb) = 0;
-
-    virtual void removeTorrent(TorrentId id) = 0;
-    virtual void pollAlerts() = 0;
-};
-
-} // namespace openspace
-
-#ifdef SYNC_USE_LIBTORRENT
-
-#include <atomic>
-#include <string>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <unordered_map>
-
-#include "libtorrent/torrent_handle.hpp"
-
-namespace libtorrent { class session; }
-
-namespace openspace {
-
-class TorrentClient : public TorrentClientBase {
-public:
     TorrentClient();
     virtual ~TorrentClient();
 
-    void initialize() override;
-    void deinitialize() override;
-    TorrentId addTorrentFile(std::string torrentFile,
-        std::string destination,
-        TorrentProgressCallback cb) override;
+    void initialize();
+    void deinitialize();
+    TorrentId addTorrentFile(std::string torrentFile, std::string destination,
+        TorrentProgressCallback cb);
 
-    TorrentId addMagnetLink(std::string magnetLink,
-        std::string destination,
-        TorrentProgressCallback cb) override;
+    TorrentId addMagnetLink(std::string magnetLink, std::string destination,
+        TorrentProgressCallback cb);
 
-    void removeTorrent(TorrentId id) override;
-    void pollAlerts() override;
+    void removeTorrent(TorrentId id);
+    void pollAlerts();
 
 private:
     struct Torrent {
@@ -125,32 +110,5 @@ private:
 };
 
 } // namespace openspace
-
-#else // SYNC_USE_LIBTORRENT
-
-namespace openspace {
-
-class TorrentClient : public TorrentClientBase {
-public:
-    TorrentClient();
-    virtual ~TorrentClient();
-
-    void initialize() override;
-    void deinitialize() override;
-    TorrentId addTorrentFile(std::string torrentFile,
-        std::string destination,
-        TorrentProgressCallback cb) override;
-
-    TorrentId addMagnetLink(std::string magnetLink,
-        std::string destination,
-        TorrentProgressCallback cb) override;
-
-    void removeTorrent(TorrentId id) override;
-    void pollAlerts() override;
-};
-
-} // namespace openspace
-
-#endif // SYNC_USE_LIBTORRENT
 
 #endif // __OPENSPACE_MODULE_SYNC___TORRENTCLIENT___H__

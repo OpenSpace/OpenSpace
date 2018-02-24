@@ -40,7 +40,7 @@ class TorrentSynchronization : public ResourceSynchronization {
 public:
     TorrentSynchronization(const ghoul::Dictionary& dict,
                            const std::string& synchronizationRoot,
-                           TorrentClient* client);
+                           TorrentClient& client);
 
 
     virtual ~TorrentSynchronization();
@@ -68,7 +68,7 @@ private:
     std::string _identifier;
     std::string _magnetLink;
     std::string _synchronizationRoot;
-    TorrentClient* _torrentClient;
+    TorrentClient& _torrentClient;
 };
 
 } // namespace openspace
