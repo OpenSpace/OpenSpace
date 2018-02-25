@@ -95,6 +95,11 @@ void OptionProperty::setValue(int value) {
     LERROR("Could not find an option for value '" << value << "' in OptionProperty");
 }
 
+bool OptionProperty::hasOption() const {
+    return value() >= 0 && value() < _options.size();
+}
+
+
 const OptionProperty::Option& OptionProperty::option() const {
     return _options[value()];
 }
