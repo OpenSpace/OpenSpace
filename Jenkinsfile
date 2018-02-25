@@ -36,7 +36,7 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make -j2
+                make -j4
                 '''
             }
         }
@@ -54,7 +54,7 @@ stage('Build') {
                         cd build
                         cmake -G "Visual Studio 15 2017 Win64" .. ''' +
                         flags + ''' ..
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:2 /p:Configuration=Debug
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:4 /p:Configuration=Debug
                     '''
                 }
             }
@@ -79,7 +79,7 @@ stage('Build') {
                     cd ${srcDir}/build
                     /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
-                    xcodebuild -quiet
+                    xcodebuild -quiet -parallelizeTargets -jobs 4
                     '''
             }
         }

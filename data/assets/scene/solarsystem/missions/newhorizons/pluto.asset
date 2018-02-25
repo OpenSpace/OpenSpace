@@ -266,6 +266,8 @@ local PlutoTrail = {
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Pluto,
     PlutoBarycenterLabel,
