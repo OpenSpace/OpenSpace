@@ -22,66 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/properties/scalar/ulonglongproperty.h>
+#include <openspace/properties/optionproperty.h>
 
-#include <ghoul/lua/ghoul_lua.h>
+using namespace openspace::properties;
 
-#include <limits>
-#include <sstream>
+class Issue527 : public testing::Test {};
 
-namespace {
+TEST_F(Issue527, Regression) {
+    // Error in OptionProperty if values not starting at 0 are used
 
-unsigned long long fromLuaConversion(lua_State* state, bool& success) {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned long long val = static_cast<unsigned long long>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
-        return val;
-    }
-    else {
-        return 0ull;
-    }
+    OptionProperty p({ "id", "gui", "desc"});
+
+    p.addOptions({
+        {-1, "a" },
+        {-2, "b" }
+    });
+
+
+    p = -1;
+    ASSERT_EQ("a", p.option().description);
 }
-
-bool toLuaConversion(lua_State* state, unsigned long long value) {
-    lua_pushnumber(state, static_cast<lua_Number>(value));
-    return true;
-}
-
-unsigned long long fromStringConversion(std::string val, bool& success) {
-    std::stringstream s(val);
-    unsigned long long v;
-    s >> v;
-    success = !s.fail();
-    if (success) {
-        return v;
-    }
-    else {
-        throw ghoul::RuntimeError("Conversion error for string: " + val);
-    }
-}
-
-bool toStringConversion(std::string& outValue, unsigned long long inValue) {
-    outValue = std::to_string(inValue);
-    return true;
-}
-
-} // namespace
-
-namespace openspace::properties {
-
-REGISTER_NUMERICALPROPERTY_SOURCE(
-    ULongLongProperty,
-    unsigned long long,
-    1ull,
-    std::numeric_limits<unsigned long long>::lowest(),
-    std::numeric_limits<unsigned long long>::max(),
-    1ull,
-    fromLuaConversion,
-    toLuaConversion,
-    fromStringConversion,
-    toStringConversion,
-    LUA_TNUMBER
-)
-
-} // namespace openspace::properties

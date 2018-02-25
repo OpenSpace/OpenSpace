@@ -123,6 +123,13 @@ public:
     void setValue(int value) override;
 
     /**
+     * This method returns \c true if currently a valid option is selected. This might
+     * change as options are added or removed.
+     * \return <code>true</code> if a call to #option would return a valid Option
+     */
+    bool hasOption() const;
+
+    /**
      * Returns the currently selected option.
      * \return The currently selected option
      */
