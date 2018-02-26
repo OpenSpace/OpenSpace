@@ -31,6 +31,7 @@
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -62,10 +63,7 @@ public:
 
 private:
     void createDataSlice();
-    bool loadData();
     bool readFitsFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
 
     properties::StringProperty _fitsFilePath;
     std::unique_ptr<ghoul::filesystem::File> _fitsFile;
@@ -89,6 +87,7 @@ private:
     properties::IntProperty _lastRow;
     properties::StringListProperty _columnNamesList;
     std::vector<std::string> _columnNames;
+    properties::BoolProperty _filePreprocessed;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(view, projection, alphaValue, scaleFactor,

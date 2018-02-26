@@ -145,8 +145,6 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
 
     std::ofstream fileStream(_outFilePath, std::ofstream::binary);
     if (fileStream.good()) {
-        fileStream.write(reinterpret_cast<const char*>(&CurrentFileVersion),
-            sizeof(int8_t));
 
         int32_t nValues = static_cast<int32_t>(fullData.size());
         if (nValues == 0) {
