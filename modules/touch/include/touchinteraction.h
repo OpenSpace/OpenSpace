@@ -174,8 +174,10 @@ private:
     properties::FloatProperty _spinSensitivity;
     properties::FloatProperty _zoomSensitivity;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
+    properties::FloatProperty _zoomBoundarySphereMultiplier;
     properties::FloatProperty _inputStillThreshold;
     properties::FloatProperty _centroidStillThreshold;
+    properties::BoolProperty  _panEnabled;
     properties::FloatProperty _interpretPan;
     properties::FloatProperty _slerpTime;
     properties::IVec2Property _guiButton;

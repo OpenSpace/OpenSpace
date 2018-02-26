@@ -60,9 +60,6 @@
 #pragma warning (pop)
 #endif // WIN32
 
-#define DISABLE_PANNING
-#define INCREASE_SURFACE_THRESHOLD_TO_LIMIT_ZOOM
-
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 
@@ -154,6 +151,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    static const openspace::properties::Property::PropertyInfo ZoomBoundarySphereMultiplierInfo = {
+        "ZoomBoundarySphereMultiplier",
+        "Multiplies a node's boundary sphere by this in order to limit zoom & prevent surface collision",
+        "" // @TODO Missing documentation
+    };
+
     static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
@@ -163,6 +166,12 @@ namespace {
     static const openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo PanModeInfo = {
+        "PanMode",
+        "Allow panning gesture",
         "" // @TODO Missing documentation
     };
 
@@ -217,9 +226,11 @@ TouchInteraction::TouchInteraction()
     , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
     , _zoomSensitivity(ZoomSensitivityInfo, 1.04f, 1.0f, 1.1f)
     , _zoomSensitivityDistanceThreshold(ZoomSensitivityDistanceThresholdInfo, 0.05, 0.01, 0.25)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
+    , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
     , _slerpTime(SlerpTimeInfo, 3.f, 0.f, 5.f)
     , _guiButton(
@@ -276,8 +287,10 @@ TouchInteraction::TouchInteraction()
     addProperty(_spinSensitivity);
     addProperty(_zoomSensitivity);
     addProperty(_zoomSensitivityDistanceThreshold);
+    addProperty(_zoomBoundarySphereMultiplier);
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
+    addProperty(_panEnabled);
     addProperty(_interpretPan);
     addProperty(_slerpTime);
     addProperty(_guiButton);
@@ -605,12 +618,10 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         if (nDOF > 2) {
             _vel.zoom = par.at(2);
             _vel.roll = par.at(3);
-#ifndef DISABLE_PANNING
-            if (nDOF > 4) {
+            if (_panEnabled && nDOF > 4) {
                 _vel.roll = 0.0;
                 _vel.pan = glm::dvec2(par.at(4), par.at(5));
             }
-#endif //#ifndef DISABLE_PANNING
         }
         step(1.0);
 
@@ -888,11 +899,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
             std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
         );
         // if average distance between 3 fingers are constant we have panning
-#ifdef DISABLE_PANNING
-        if (false) {
-#else
-        if (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < _interpretPan && list.size() == 3) {
-#endif //#ifdef DISABLE_PANNING
+        if (_panEnabled && (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < _interpretPan && list.size() == 3)) {
             return PAN;
         }
 
@@ -1129,9 +1136,7 @@ void TouchInteraction::step(double dt) {
             centerToBoundingSphere = -directionToCenter * boundingSphere;
             dvec3 centerToCamera = camPos - centerPos;
             double planetBoundaryRadius = length(centerToBoundingSphere);
-#ifdef INCREASE_SURFACE_THRESHOLD_TO_LIMIT_ZOOM
-            planetBoundaryRadius *= 1.001;
-#endif //#ifdef INCREASE_SURFACE_THRESHOLD_TO_LIMIT_ZOOM
+            planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
             if (length(_vel.zoom*dt) < distToSurface &&
 	        length(centerToCamera + directionToCenter*_vel.zoom*dt) >
