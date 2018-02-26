@@ -26,22 +26,12 @@
 #define __OPENSPACE_MODULE_GAIAMISSION___READFITSTASK___H__
 
 #include <openspace/util/task.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-
-// TODO: Create a module for FitsReader!
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-/**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
- */
 class ReadFitsTask : public Task {
 public:
     ReadFitsTask(const ghoul::Dictionary& dictionary);
@@ -52,12 +42,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::string _inFilenamePrefix;
-    std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
-    std::string _outFilename;
-    glm::ivec3 _outDimensions;
+    std::string _inFilePath;
+    std::string _outFilePath;
+    int _firstRow;
+    int _lastRow;
+    std::vector<std::string> _columnNames;
 };
 
 } // namespace openspace

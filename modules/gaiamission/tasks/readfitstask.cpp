@@ -24,100 +24,195 @@
 
 #include <modules/gaiamission/tasks/readfitstask.h>
 
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
-#include <modules/volume/volumesampler.h>
-
 #include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <fstream>
 
 namespace {
-    const char* KeyInFilenamePrefix = "InFilenamePrefix";
-    const char* KeyInFilenameSuffix = "InFilenameSuffix";
-    const char* KeyInFirstIndex = "InFirstIndex";
-    const char* KeyInNSlices = "InNSlices";
-    const char* KeyOutFilename = "OutFilename";
-    const char* KeyOutDimensions = "OutDimensions";
+    const char* KeyInFilePath = "InFilePath";
+    const char* KeyOutFilePath = "OutFilePath";
+    const char* KeyFirstRow = "FirstRow";
+    const char* KeyLastRow = "LastRow";
+    const char* KeyColumnNames = "ColumnNames";
+
+    constexpr const char* _loggerCat = "ReadFitsTask";
+    constexpr int8_t CurrentFileVersion = 1;
 } // namespace
 
 namespace openspace {
 
 ReadFitsTask::ReadFitsTask(const ghoul::Dictionary& dictionary) {
-    std::string inFilenamePrefix;
-    if (dictionary.getValue(KeyInFilenamePrefix, inFilenamePrefix)) {
-        _inFilenamePrefix = inFilenamePrefix;
-    }
+    
+    openspace::documentation::testSpecificationAndThrow(
+        documentation(),
+        dictionary,
+        "ReadFitsTask"
+    );
 
-    std::string inFilenameSuffix;
-    if (dictionary.getValue(KeyInFilenameSuffix, inFilenameSuffix)) {
-        _inFilenameSuffix = inFilenameSuffix;
-    }
+    _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
+    _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
+    _firstRow = static_cast<int>(dictionary.value<double>(KeyFirstRow));
+    _lastRow = static_cast<int>(dictionary.value<double>(KeyLastRow));
 
-    size_t inFirstIndex;
-    if (dictionary.getValue(KeyInFirstIndex, inFirstIndex)) {
-        _inFirstIndex = inFirstIndex;
-    }
+    if (dictionary.hasKey(KeyColumnNames)) {
+        auto tmpDict = dictionary.value<ghoul::Dictionary>(KeyColumnNames);
+        auto tmpKeys = tmpDict.keys();
 
-    size_t inNSlices;
-    if (dictionary.getValue(KeyInNSlices, inNSlices)) {
-        _inNSlices = inNSlices;
-    }
-
-    std::string outFilename;
-    if (dictionary.getValue(KeyOutFilename, outFilename)) {
-        _outFilename = outFilename;
-    }
-
-    glm::ivec3 outDimensions;
-    if (dictionary.getValue(KeyOutDimensions, outDimensions)) {
-        _outDimensions = outDimensions;
+        for (auto key : tmpKeys) {
+            _columnNames.push_back(tmpDict.value<std::string>(key));
+        }
     }
 }
 
 ReadFitsTask::~ReadFitsTask() {}
 
 std::string ReadFitsTask::description() {
-    return std::string();
+    return "Read fits file: " + _inFilePath + "\n and write raw star data into: "
+        + _outFilePath + "\n. Which columns and rows to read is defined by user.";
 }
 
 void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
-    using namespace openspace::volume;
+    std::vector<float> fullData;
+    int nStars = _lastRow - _firstRow + 1;
+    progressCallback(0.0f);
 
-    std::vector<std::string> filenames;
-    for (int i = 0; i < _inNSlices; i++) {
-        filenames.push_back(
-            _inFilenamePrefix + std::to_string(i + _inFirstIndex) + _inFilenameSuffix
-        );
+    FitsFileReader fitsInFile(false);
+    std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_inFilePath, 
+        _columnNames, _firstRow, _lastRow);
+
+    if (!table) {
+        LERROR("Failed to open Fits file '" << _inFilePath << "'");
+    }
+    progressCallback(0.5f);
+
+    int32_t nValuesPerStar = _columnNames.size();
+    int nNullArr = 0;
+
+    std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
+    std::vector<float> posXcol = tableContent[_columnNames[0]];
+    std::vector<float> posYcol = tableContent[_columnNames[1]];
+    std::vector<float> posZcol = tableContent[_columnNames[2]];
+    std::vector<float> velXcol = tableContent[_columnNames[3]];
+    std::vector<float> velYcol = tableContent[_columnNames[4]];
+    std::vector<float> velZcol = tableContent[_columnNames[5]];
+    std::vector<float> magCol = tableContent[_columnNames[6]];
+
+    for (int i = 0; i < nStars; ++i) {
+        std::vector<float> values(nValuesPerStar);
+        size_t idx = 0;
+
+        // Read default values.
+        values[idx++] = posXcol[i];
+        values[idx++] = posYcol[i];
+        values[idx++] = posZcol[i];
+        values[idx++] = velXcol[i];
+        values[idx++] = velYcol[i];
+        values[idx++] = velZcol[i];
+        values[idx++] = magCol[i];
+
+        // Read extra columns, if any. This will slow down the sorting tremendously!
+        for (size_t col = 7; col < nValuesPerStar; ++col) {
+            std::vector<float> vecData = tableContent[_columnNames[col]];
+            values[idx++] = vecData[i];
+        }
+
+        bool nullArray = true;
+        for (size_t j = 0; j < nValuesPerStar; ++j) {
+            if (values[j] != -999) {
+                nullArray = false;
+            }
+            else {
+                values[j] = 0;
+            }
+        }
+        if (!nullArray) {
+            fullData.insert(fullData.end(), values.begin(), values.end());
+        }
+        else {
+            nNullArr++;
+        }
     }
 
-    TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader(filenames, _inNSlices, 10);
-    sliceReader.initialize();
+    LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
+        " read stars were nullArrays");
+    
+    progressCallback(0.9f);
 
-    RawVolumeWriter<glm::tvec4<GLfloat>> rawWriter(_outFilename);
-    rawWriter.setDimensions(_outDimensions);
+    std::ofstream fileStream(_outFilePath, std::ofstream::binary);
+    if (fileStream.good()) {
+        fileStream.write(reinterpret_cast<const char*>(&CurrentFileVersion),
+            sizeof(int8_t));
 
-    glm::vec3 resolutionRatio =
-        static_cast<glm::vec3>(sliceReader.dimensions()) /
-        static_cast<glm::vec3>(rawWriter.dimensions());
+        int32_t nValues = static_cast<int32_t>(fullData.size());
+        if (nValues == 0) {
+            LERROR("Error writing file - No values were read from file.");
+        }
+        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+        fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
 
-    VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
-        sliceReader,
-        resolutionRatio
-    );
-    std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
-        [&](glm::ivec3 outCoord) {
-            glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5)) *
-                                 resolutionRatio) - glm::vec3(0.5);
-            glm::tvec4<GLfloat> value = sampler.sample(inCoord);
-            return value;
-        };
+        size_t nBytes = nValues * sizeof(fullData[0]);
+        fileStream.write(reinterpret_cast<const char*>(&fullData[0]), nBytes);
 
-    rawWriter.write(sampleFunction, progressCallback);
+        fileStream.close();
+    }
+    else {
+        LERROR("Error opening file: " << _outFilePath << " as output data file.");
+    }
+
+    progressCallback(1.0f);
 }
 
 documentation::Documentation ReadFitsTask::Documentation() {
-    return documentation::Documentation();
+    using namespace documentation;
+    return {
+        "ReadFitsFile",
+        "gaiamission_fitsfiletorawdata",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("ReadFitsTask"),
+                Optional::No
+            },
+            {
+                KeyInFilePath,
+                new StringVerifier,
+                Optional::No,
+                "The path to the FITS file that are to be read.",
+            },
+            {
+                KeyOutFilePath,
+                new StringVerifier,
+                Optional::No,
+                "The path to the file to export raw VBO data to.",
+            },
+            {
+                KeyFirstRow,
+                new IntVerifier,
+                Optional::No,
+                "Defines the first row that will be read from the specified FITS file.",
+            },
+            {
+                KeyLastRow,
+                new IntVerifier,
+                Optional::No,
+                "Defines the last row that will be read from the specified FITS file."
+                "Has to be equal to or greater than FirstRow.",
+            },
+            {
+                KeyColumnNames,
+                new StringListVerifier,
+                Optional::No,
+                "A list of strings with the names of all the columns that are to be "
+                "read from the specified FITS file.",
+            },
+
+        }
+    };
 }
 
 } // namespace openspace

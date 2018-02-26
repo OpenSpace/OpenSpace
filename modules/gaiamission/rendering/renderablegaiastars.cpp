@@ -728,7 +728,7 @@ void RenderableGaiaStars::createDataSlice() {
 
         union {
             VBOLayout value;
-            std::array<float, sizeof(VBOLayout)> data;
+            std::array<float, sizeof(VBOLayout) / sizeof(float)> data;
         } layout;
 
         layout.value.position = { {

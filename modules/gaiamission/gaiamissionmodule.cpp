@@ -51,8 +51,8 @@ void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
 std::vector<documentation::Documentation> GaiaMissionModule::documentations() const {
     return {
     	//RenderableSkyCloud::Documentation(),
-        //RenderableGaiaStars::Documentation(),
-        //ReadFitsTask::Documentation(),
+        RenderableGaiaStars::Documentation(),
+        ReadFitsTask::Documentation(),
     };
 }
 
