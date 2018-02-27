@@ -157,7 +157,7 @@ void KameleonPlane::initialize() {
 
     // Set Property callback specific to KameleonPlane
     _resolution.onChange([this](){
-        for(int i=0; i<_textures.size(); i++){
+        for (size_t i = 0; i < _textures.size(); i++) {
             _textures[i] = std::move(nullptr);
         }
 

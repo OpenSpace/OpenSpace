@@ -368,7 +368,6 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    using TimeStep = RenderableTimeVaryingVolume::Timestep;
     if (_volumeTimesteps.size() == 0) {
         return nullptr;
     }
