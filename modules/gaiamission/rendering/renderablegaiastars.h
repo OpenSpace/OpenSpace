@@ -79,9 +79,9 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
     bool _colorTextureIsDirty;
 
-    properties::FloatProperty _alphaValue;
-    properties::FloatProperty _scaleFactor;
-    properties::FloatProperty _minBillboardSize;
+    properties::FloatProperty _magnitudeExponent;
+    properties::FloatProperty _sharpness;
+    properties::FloatProperty _billboardSize;
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
@@ -90,8 +90,8 @@ private:
     properties::BoolProperty _filePreprocessed;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(view, projection, alphaValue, scaleFactor,
-        minBillboardSize, screenSize, psfTexture, time, colorTexture, scaling) _uniformCache;
+    UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness,
+        billboardSize, screenSize, psfTexture, time, colorTexture) _uniformCache;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;

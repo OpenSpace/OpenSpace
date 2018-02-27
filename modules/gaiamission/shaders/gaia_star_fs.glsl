@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-//#include "PowerScaling/powerScaling_fs.hglsl"
 #include "floatoperations.glsl"
 
 in vec4 vs_position;
@@ -31,12 +30,12 @@ in vec3 ge_velocity;
 in float ge_brightness;
 in vec4 ge_gPosition;
 in vec2 texCoord;
-in float billboardSize;
+in float ge_observationDistance;
 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
-uniform float minBillboardSize;
-uniform float alphaValue;
+uniform float magnitudeExponent;
+uniform float sharpness;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -52,18 +51,15 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a *= alphaValue;
+    fullColor.a = pow(fullColor.a, sharpness);
 
-    vec3 position = vs_position.xyz;
+    float d = magnitudeExponent - log(ge_observationDistance) / log(10.0);
+    fullColor.a *= clamp(d, 0.0, 1.0);
 
     Fragment frag;
     frag.color = fullColor;
-    frag.depth = safeLength(position);
-    //frag.depth = vs_position.w;
-
-    // G-Buffer
+    frag.depth = safeLength(vs_position);
     frag.gPosition = ge_gPosition;
-    // There is no normal here
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     
     if (fullColor.a == 0) {

@@ -72,25 +72,24 @@ namespace {
         "stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all stars."
+    static const openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
+        "MagnitudeExponent",
+        "MagnitudeExponent",
+        "Adjust star magnitude by 10^MagnitudeExponent. "
+        "Stars closer than this distance are given full opacity. "
+        "Farther away, stars dim proportionally to the logarithm of their distance."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each star."
+    static const openspace::properties::Property::PropertyInfo SharpnessInfo = {
+        "Sharpness",
+        "Sharpness",
+        "Adjust star sharpness"
     };
 
-    static const openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
-        "MinBillboardSize",
-        "Min Billboard Size",
-        "This value is used as a lower limit on the size of stars that are rendered. Any "
-        "stars that have a smaller apparent size will be discarded entirely."
+    static const openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
+        "BillboardSize",
+        "Billboard Size",
+        "Set the billboard size of all stars"
     };
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
@@ -156,22 +155,22 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 PsfTextureInfo.description
             },
             {
-                TransparencyInfo.identifier,
+                MagnitudeExponentInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                TransparencyInfo.description
+                MagnitudeExponentInfo.description
             },
             {
-                ScaleFactorInfo.identifier,
+                SharpnessInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                ScaleFactorInfo.description
+                SharpnessInfo.description
             },
             {
-                MinBillboardSizeInfo.identifier,
+                BillboardSizeInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                MinBillboardSizeInfo.description
+                BillboardSizeInfo.description
             },
             {
                 ColorTextureInfo.identifier,
@@ -213,9 +212,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
-    , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
+    , _magnitudeExponent(MagnitudeExponentInfo, 19.f, 0.f, 30.f)
+    , _sharpness(SharpnessInfo, 1.f, 0.f, 5.f)
+    , _billboardSize(BillboardSizeInfo, 15.f, 1.f, 100.f)
     , _firstRow(FirstRowInfo, 1, 1, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 50000, 1, 2539913)
     , _columnNamesList(ColumnNamesInfo)
@@ -267,28 +266,27 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         [&](const File&) { _colorTextureIsDirty = true; }
     );
     addProperty(_colorTexturePath);
-
-
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
+    
+    if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
+        _magnitudeExponent = static_cast<float>(
+            dictionary.value<double>(MagnitudeExponentInfo.identifier)
+            );
     }
-    addProperty(_alphaValue);
+    addProperty(_magnitudeExponent);
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
+    if (dictionary.hasKey(SharpnessInfo.identifier)) {
+        _sharpness = static_cast<float>(
+            dictionary.value<double>(SharpnessInfo.identifier)
+            );
     }
-    addProperty(_scaleFactor);
+    addProperty(_sharpness);
 
-    if (dictionary.hasKey(MinBillboardSizeInfo.identifier)) {
-        _minBillboardSize = static_cast<float>(
-            dictionary.value<double>(MinBillboardSizeInfo.identifier)
-        );
+    if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
+        _billboardSize = static_cast<float>(
+            dictionary.value<double>(BillboardSizeInfo.identifier)
+            );
     }
-    addProperty(_minBillboardSize);
+    addProperty(_billboardSize);
 
     if (dictionary.hasKey(FilePreprocessedInfo.identifier)) {
         _filePreprocessed = dictionary.value<bool>(FilePreprocessedInfo.identifier);
@@ -352,17 +350,17 @@ void RenderableGaiaStars::initializeGL() {
         
     );
 
+    _uniformCache.model = _program->uniformLocation("model");
     _uniformCache.view = _program->uniformLocation("view");
+    _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.projection = _program->uniformLocation("projection");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+    _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
+    _uniformCache.sharpness = _program->uniformLocation("sharpness");
+    _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.time = _program->uniformLocation("time");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
-
-    _uniformCache.scaling = _program->uniformLocation("scaling");
 
     bool success = readFitsFile();
     if (!success) {
@@ -388,26 +386,32 @@ void RenderableGaiaStars::deinitializeGL() {
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
     _program->activate();
 
-    // @Check overwriting the scaling from the camera; error as parsec->meter conversion
-    // is done twice? ---abock
-    glm::vec2 scaling = glm::vec2(1, -19);
+    glm::mat4 model =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
-    _program->setUniform(_uniformCache.view, data.camera.viewMatrix());
-    _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    float viewScaling = 1.0f; //data.camera.scaling();
+    glm::mat4 view = data.camera.combinedViewMatrix();
+    glm::mat4 projection = data.camera.projectionMatrix();
 
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
-    _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
+    _program->setUniform(_uniformCache.model, model);
+    _program->setUniform(_uniformCache.view, view);
+    _program->setUniform(_uniformCache.viewScaling, viewScaling);
+    _program->setUniform(_uniformCache.projection, projection);
+
+    _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
+    _program->setUniform(_uniformCache.sharpness, _sharpness);
+    _program->setUniform(_uniformCache.billboardSize, _billboardSize);
     _program->setUniform(_uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
     _program->setUniform(_uniformCache.time, static_cast<float>(data.time.j2000Seconds()));
 
-    setPscUniforms(*_program.get(), data.camera, data.position);
-    _program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
@@ -427,6 +431,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->deactivate();
 
     glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void RenderableGaiaStars::update(const UpdateData&) {
@@ -562,22 +567,25 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
 
+        _uniformCache.model = _program->uniformLocation("model");
         _uniformCache.view = _program->uniformLocation("view");
+        _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
         _uniformCache.projection = _program->uniformLocation("projection");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+        _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
+        _uniformCache.sharpness = _program->uniformLocation("sharpness");
+        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.time = _program->uniformLocation("time");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
-        _uniformCache.scaling = _program->uniformLocation("scaling");
     }
 }
 
 bool RenderableGaiaStars::readFitsFile() {
     std::string _file = _fitsFilePath;
     _fullData.clear();
+
+    LINFO("Loading FITS file: " + _file);
 
     // Read from binary if file has been preprocessed, else read from FITS file.
     if (_filePreprocessed) {
@@ -673,12 +681,12 @@ void RenderableGaiaStars::createDataSlice() {
     _slicedData.clear();
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        glm::vec3 pos = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-        glm::vec3 vel = glm::vec3(_fullData[i + 3], _fullData[i + 4], _fullData[i + 5]);
+        glm::vec3 position = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
+        glm::vec3 velocity = glm::vec3(_fullData[i + 3], _fullData[i + 4], _fullData[i + 5]);
 
         // Convert parsecs -> meter
-        glm::vec3 position = pos * static_cast<float>(distanceconstants::Parsec);
-        glm::vec3 velocity = vel * static_cast<float>(distanceconstants::Parsec);
+        position *= static_cast<float>(distanceconstants::Parsec);
+        velocity *= static_cast<float>(distanceconstants::Parsec);
 
         union {
             VBOLayout value;
@@ -689,7 +697,7 @@ void RenderableGaiaStars::createDataSlice() {
                 position[0], position[1], position[2]
             } };
         layout.value.velocity = { {
-                _fullData[i + 3], _fullData[i + 4], _fullData[i + 5]
+                velocity[0], velocity[1], velocity[2]
             } };
 
         layout.value.magnitude = _fullData[i + 6];

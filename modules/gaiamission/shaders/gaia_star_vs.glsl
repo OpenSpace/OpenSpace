@@ -24,9 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-//#include "PowerScaling/powerScalingMath.hglsl"
-
 in vec3 in_position;
 in vec3 in_velocity;
 in float in_brightness;
@@ -35,6 +32,7 @@ out vec3 vs_velocity;
 out float vs_brightness;
 out vec4 vs_gPosition;
 
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform float time; 
@@ -43,14 +41,9 @@ void main() {
     vs_velocity = in_velocity;
     vs_brightness = in_brightness;
     
-    vec4 pos = vec4(in_position + time * in_velocity, 1.0);
-    vec4 position = pscTransform(pos, mat4(1.0));
-    
-    vec4 positionClipSpace = projection * view * pos;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    vec4 modelPosition = vec4(in_position + time * in_velocity, 1.0);
+    vec4 viewPosition = view * model * modelPosition;
 
-    // G-Buffer
-    vs_gPosition = pos;
-    
-    gl_Position = view * pos;
+    vs_gPosition = viewPosition;    
+    gl_Position = projection * viewPosition;
 }

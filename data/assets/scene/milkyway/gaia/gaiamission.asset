@@ -29,11 +29,11 @@ local GaiaMission = {
         FilePreprocessed = true,
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        Transparency = 1.0,
-        ScaleFactor = 1.0,
-        MinBillboardSize = 1.0,
+        MagnitudeExponent = 18,
+        BillboardSize = 12,
+        Sharpness = 1.3,
         FirstRow = 1,
-        LastRow = 200000, -- MAX: 2539913
+        LastRow = 2539913, -- MAX: 2539913
         ColumnNames = {
             "Position_X",
             "Position_Y",
