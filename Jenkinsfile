@@ -36,7 +36,7 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make -j4
+                make -j4 OpenSpace
                 '''
             }
         }

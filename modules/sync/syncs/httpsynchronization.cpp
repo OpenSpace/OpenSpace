@@ -127,9 +127,9 @@ void HttpSynchronization::start() {
         "&" + QueryKeyFileVersion + "=" + std::to_string(_version) +
         "&" + QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
 
-    _syncThread = std::thread([this](const std::string& query) {
+    _syncThread = std::thread([this](const std::string& q) {
         for (const std::string& url : _synchronizationRepositories) {
-            if (trySyncFromUrl(url + query)) {
+            if (trySyncFromUrl(url + q)) {
                 createSyncFile();
                 resolve();
                 return;

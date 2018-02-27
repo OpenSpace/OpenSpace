@@ -35,8 +35,8 @@ namespace openspace {
 
 DataProcessorKameleon::DataProcessorKameleon()
     : DataProcessor()
-    , _kwPath("")
     , _kw(nullptr)
+    , _kwPath("")
     , _slice(0.5)
 {}
 

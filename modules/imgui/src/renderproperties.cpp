@@ -503,8 +503,8 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec2Property::ValueType value = *p;
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    float min = glm::compMin(p->minValue());
+    float max = glm::compMax(p->maxValue());
 
     bool changed = ImGui::SliderFloat2(
         name.c_str(),
@@ -539,8 +539,8 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec3Property::ValueType value = *p;
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    float min = glm::compMin(p->minValue());
+    float max = glm::compMax(p->maxValue());
 
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
@@ -584,8 +584,8 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec4Property::ValueType value = *p;
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    float min = glm::compMin(p->minValue());
+    float max = glm::compMax(p->maxValue());
 
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {

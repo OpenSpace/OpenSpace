@@ -83,14 +83,15 @@ namespace openspace {
 
 DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     : IswaCygnet(dictionary)
-    , _dataProcessor(nullptr)
     , _dataOptions(DataOptionsInfo)
+    , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
+    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _normValues(NormalizeValuesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
     , _useLog(UseLogInfo, false)
     , _useHistogram(UseHistogramInfo, false)
     , _autoFilter(AutoFilterInfo, true)
-    , _normValues(NormalizeValuesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
-    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
+
+    , _dataProcessor(nullptr)
     //FOR TESTING
     , _numOfBenchmarks(0)
     , _avgBenchmarkTime(0.0f)

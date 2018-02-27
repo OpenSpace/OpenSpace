@@ -32,6 +32,7 @@
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4265)
+#pragma warning (disable : 4996)
 #endif // _MSC_VER
 
 #include <libtorrent/entry.hpp>
@@ -40,6 +41,7 @@
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/torrent_info.hpp>
 #include <libtorrent/magnet_uri.hpp>
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif // _MSC_VER
@@ -53,8 +55,8 @@ namespace {
 
 namespace openspace {
 
-TorrentError::TorrentError(std::string message)
-    : RuntimeError(std::move(message), "TorrentClient")
+TorrentError::TorrentError(std::string msg)
+    : RuntimeError(std::move(msg), "TorrentClient")
 {}
 
 TorrentClient::~TorrentClient() {
@@ -70,23 +72,35 @@ void TorrentClient::initialize() {
         std::to_string(openspace::OPENSPACE_VERSION_PATCH)
     );
 
+    settings.set_str(
+        libtorrent::settings_pack::listen_interfaces,
+        "0.0.0.0:6881,0.0.0.0:20280,0.0.0.0:20285,0.0.0.0:20290,0.0.0.0:0"
+    );
     settings.set_bool(libtorrent::settings_pack::allow_multiple_connections_per_ip, true);
+    settings.set_bool(libtorrent::settings_pack::enable_upnp, true);
     //settings.set_bool(libtorrent::settings_pack::ignore_limits_on_local_network, true);
     settings.set_int(libtorrent::settings_pack::connection_speed, 20);
     settings.set_int(libtorrent::settings_pack::active_downloads, -1);
     settings.set_int(libtorrent::settings_pack::active_seeds, -1);
     settings.set_int(libtorrent::settings_pack::active_limit, 30);
+    
+    settings.set_str(
+        libtorrent::settings_pack::dht_bootstrap_nodes,
+        "router.utorrent.com,dht.transmissionbt.com,router.bittorrent.com,\
+router.bitcomet.com"
+    );
     settings.set_int(libtorrent::settings_pack::dht_announce_interval, 15);
+
     _session.apply_settings(settings);
 
-    _session.add_dht_router({ "router.utorrent.com", 6881 });
-    _session.add_dht_router({ "dht.transmissionbt.com", 6881 });
-    _session.add_dht_router({ "router.bittorrent.com", 6881 });
-    _session.add_dht_router({ "router.bitcomet.com", 6881 });
+    //_session.add_dht_router({ "router.utorrent.com", 6881 });
+    //_session.add_dht_router({ "dht.transmissionbt.com", 6881 });
+    //_session.add_dht_router({ "router.bittorrent.com", 6881 });
+    //_session.add_dht_router({ "router.bitcomet.com", 6881 });
 
     libtorrent::error_code ec;
-    _session.listen_on(std::make_pair(20280, 20290), ec);
-    _session.start_upnp();
+    //_session.listen_on(std::make_pair(20280, 20290), ec);
+    //_session.start_upnp();
 
     _isInitialized = true;
 
@@ -173,7 +187,7 @@ TorrentClient::TorrentId TorrentClient::addTorrentFile(const std::string& torren
     libtorrent::error_code ec;
     libtorrent::add_torrent_params p;
     p.save_path = destination;
-    p.ti = std::make_shared<libtorrent::torrent_info>(torrentFile, ec, 0);
+    p.ti = std::make_shared<libtorrent::torrent_info>(torrentFile, ec);
     if (ec) {
         LERROR(torrentFile << ": " << ec.message());
     }
