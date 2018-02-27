@@ -84,7 +84,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     }
     else {
         ghoul::Dictionary urls = dict.value<ghoul::Dictionary>(KeyUrl);
-        for (int i = 1; i <= urls.size(); ++i) {
+        for (size_t i = 1; i <= urls.size(); ++i) {
             std::string url = urls.value<std::string>(std::to_string(i));
             _urls.push_back(std::move(url));
         }

@@ -29,12 +29,21 @@
 #include <ghoul/logging/logmanager.h>
 
 #ifdef SYNC_USE_LIBTORRENT
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4265)
+#endif // _MSC_VER
+
 #include <libtorrent/entry.hpp>
 #include <libtorrent/bencode.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/torrent_info.hpp>
 #include <libtorrent/magnet_uri.hpp>
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 #endif // SYNC_USE_LIBTORRENT
 
 namespace {

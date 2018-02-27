@@ -95,15 +95,20 @@ double getTime(ccmc::Kameleon* kameleon) {
                 switch (N_CHARS) {
                     case 10 : // YYYY-MM-DD             =>       YYYY-MM-DDTHH
                         seqStartStr += "T00";
+                        [[fallthrough]]
                     case 13 : // YYYY-MM-DDTHH          =>       YYYY-MM-DDTHH:
                         seqStartStr += ":";
+                        [[fallthrough]]
                     case 14 : // YYYY-MM-DDTHH:         =>       YYYY-MM-DDTHH:MM
                         seqStartStr += "00";
+                        [[fallthrough]]
                     case 16 : // YYYY-MM-DDTHH:MM       =>       YYYY-MM-DDTHH:MM:
                         seqStartStr += ":";
+                        [[fallthrough]]
                     case 17 : // YYYY-MM-DDTHH:MM:      =>       YYYY-MM-DDTHH:MM:SS
                         seqStartStr += "00";
-                    // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
+                        [[fallthrough]]
+                        // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
                     //     seqStartStr += ".000";
                     // case 23 : // YYYY-MM-DDTHH:MM:SS.   =>    YYYY-MM-DDTHH:MM:SS.000Z
                     //     seqStartStr += "Z";

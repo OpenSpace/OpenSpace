@@ -78,9 +78,9 @@ private:
     void changeKwPath(std::string path);
     static int id();
 
+    properties::SelectionProperty _fieldlines;
     properties::FloatProperty _resolution;
     properties::FloatProperty _slice;
-    properties::SelectionProperty _fieldlines;
 
     std::string _kwPath;
 
@@ -98,7 +98,7 @@ private:
      * This is the name, path to seedpoints file and a boolean to determine if it is
      * active or inactive.
      */
-    std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
+    std::map<int, std::tuple<std::string, std::string, bool>> _fieldlineState;
     std::string _fieldlineIndexFile;
     int _cut;
 

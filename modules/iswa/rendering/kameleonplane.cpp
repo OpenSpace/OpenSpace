@@ -26,7 +26,17 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <ghoul/filesystem/filesystem>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif // __GNUC__
+
 #include <modules/iswa/ext/json.h>
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif // __GNUC__
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 
@@ -210,7 +220,7 @@ bool KameleonPlane::createGeometry() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
@@ -247,7 +257,7 @@ std::vector<float*> KameleonPlane::textureData() {
         _dimensions,
         _slice
     );
-};
+}
 
 bool KameleonPlane::updateTextureResource() {
     _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
@@ -377,7 +387,7 @@ void KameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
     // with lower resolution the offset increases.
     _data->offset = _origOffset - 0.5f*  (100.f / _resolution.value());
-    _dimensions = glm::size3_t(_data->scale * ((float)_resolution.value() /  100.f));
+    _dimensions = glm::size3_t(_data->scale * (_resolution.value() / 100.f));
     _dimensions[_cut] = 1;
 
     if (_cut == 0) {

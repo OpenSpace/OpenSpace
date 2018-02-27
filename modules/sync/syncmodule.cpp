@@ -45,9 +45,7 @@ namespace {
     constexpr const char* KeyHttpSynchronizationRepositories =
         "HttpSynchronizationRepositories";
     constexpr const char* KeySynchronizationRoot = "SynchronizationRoot";
-
-    const char* _loggerCat = "SyncModule";
-}
+} // namespace
 
 namespace openspace {
 

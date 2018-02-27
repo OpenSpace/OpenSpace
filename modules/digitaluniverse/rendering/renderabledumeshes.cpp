@@ -521,8 +521,6 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
     float scale = 0.0;
     switch (_unit) {
     case Meter:

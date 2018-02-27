@@ -38,38 +38,38 @@
 #include <fstream>
 
 namespace {
-    std::string _loggerCat = "RenderableFieldlines";
+    constexpr const char* _loggerCat = "RenderableFieldlines";
 
-    const float defaultFieldlineStepSize = 0.5f;;
+    constexpr const float defaultFieldlineStepSize = 0.5f;;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
-    const char* keyVectorField = "VectorField";
-    const char* keyVectorFieldType = "Type";
-    const char* keyVectorFieldFile = "File";
-    const char* keyVectorFieldVolumeModel = "Model";
-    const char* keyVectorFieldVolumeVariable = "Variables";
+    constexpr const char* keyVectorField = "VectorField";
+    constexpr const char* keyVectorFieldType = "Type";
+    constexpr const char* keyVectorFieldFile = "File";
+    constexpr const char* keyVectorFieldVolumeModel = "Model";
+    constexpr const char* keyVectorFieldVolumeVariable = "Variables";
 
-    const char* keyFieldlines = "Fieldlines";
-    const char* keyFieldlinesStepSize = "Stepsize";
-    const char* keyFieldlinesClassification = "Classification";
-    const char* keyFieldlinesColor = "Color";
+    constexpr const char* keyFieldlines = "Fieldlines";
+    constexpr const char* keyFieldlinesStepSize = "Stepsize";
+    constexpr const char* keyFieldlinesClassification = "Classification";
+    constexpr const char* keyFieldlinesColor = "Color";
 
-    const char* keySeedPoints = "SeedPoints";
-    const char* keySeedPointsType = "Type";
-    const char* keySeedPointsFile = "File";
-    const char* keySeedPointsTable = "SeedPoints";
+    constexpr const char* keySeedPoints = "SeedPoints";
+    constexpr const char* keySeedPointsType = "Type";
+    constexpr const char* keySeedPointsFile = "File";
+    constexpr const char* keySeedPointsTable = "SeedPoints";
 
-    const char* seedPointsSourceFile = "File";
-    const char* seedPointsSourceTable = "Table";
+    constexpr const char* seedPointsSourceFile = "File";
+    constexpr const char* seedPointsSourceTable = "Table";
 
-    const char* vectorFieldTypeVolumeKameleon = "VolumeKameleon";
+    constexpr const char* vectorFieldTypeVolumeKameleon = "VolumeKameleon";
 
-    const char* vectorFieldKameleonModelBATSRUS = "BATSRUS";
+    constexpr const char* vectorFieldKameleonModelBATSRUS = "BATSRUS";
 
-    const char* vectorFieldKameleonVariableLorentz = "Lorentz";
+    constexpr const char* vectorFieldKameleonVariableLorentz = "Lorentz";
 
-    const int SeedPointSourceFile = 0;
-    const int SeedPointSourceTable = 1;
+    constexpr const int SeedPointSourceFile = 0;
+    constexpr const int SeedPointSourceTable = 1;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",

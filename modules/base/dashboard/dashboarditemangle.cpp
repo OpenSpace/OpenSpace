@@ -323,11 +323,11 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
         );
     });
     if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(DestinationTypeInfo.identifier);
-        if (value == "Node") {
+        std::string type = dictionary.value<std::string>(DestinationTypeInfo.identifier);
+        if (type == "Node") {
             _destination.type = Type::Node;
         }
-        else if (value == "Focus") {
+        else if (type == "Focus") {
             _destination.type = Type::Focus;
         }
         else {
