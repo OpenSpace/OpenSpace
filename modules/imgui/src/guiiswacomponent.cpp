@@ -145,7 +145,7 @@ void GuiIswaComponent::render() {
                     ImGui::RadioButton(
                         cdfs[i].name.c_str(),
                         &_cdfOptionsMap[groupName],
-                        i
+                        static_cast<int>(i)
                     );
                 }
 

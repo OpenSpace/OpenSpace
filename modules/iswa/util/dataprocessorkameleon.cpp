@@ -37,7 +37,6 @@ DataProcessorKameleon::DataProcessorKameleon()
     : DataProcessor()
     , _kwPath("")
     , _kw(nullptr)
-    , _initialized(false)
     , _slice(0.5)
 {}
 
