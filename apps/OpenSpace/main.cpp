@@ -27,6 +27,7 @@
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
