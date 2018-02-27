@@ -1,16 +1,39 @@
-local assetHelper = asset.require("util/asset_helper")
 local texturePath = asset.localResource("../test2.jpg")
+local texturePath2 = asset.localResource("../test3.jpg")
 
-local marsroverObject = {
-    Name = "Mars Rover Test",
+local assetHelper = asset.require('util/asset_helper')
+
+local textures = asset.syncedResource({
+    Name = "Mars Curiosity Textures",
+    Type = "HttpSynchronization",
+    Identifier = "marscuriosity_textures",
+    Version = 2
+})
+
+local models = asset.syncedResource({
+    Name = "Mars Curiosity Model",
+    Type = "HttpSynchronization",
+    Identifier = "marscuriosity_model",
+    Version = 2
+})
+
+local MarsCuriosityModel = {
+    Name = "curiosityModel",
     Parent = "Root",
     Renderable = {
-      Type = "RenderableMarsrover",
-      Size = 1,
-      Segments = 20,
-      Texture = texturePath
+        Type = "RenderableModel",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+        }
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { marsroverObject })
+assetHelper.registerSceneGraphNodesAndExport(asset, { MarsCuriosityModel })
+asset.export("CuriosityTextures", textures)
+asset.export("CuriosityModels", models)
+
+
+
+
 

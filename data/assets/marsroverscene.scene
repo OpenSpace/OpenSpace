@@ -1,3 +1,13 @@
 asset.require('spice/base')
-asset.require('util/default_keybindings')
-asset.require('marsrovertest')
+asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
+
+
+asset.require('./marsrovertest')
+
+local assetHelper = asset.require('util/asset_helper')
+
+asset.onInitialize(function ()
+    openspace.time.setTime("2015-07-14T08:00:00.00")
+   
+end)
