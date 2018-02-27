@@ -1,16 +1,24 @@
 local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local texturePath = asset.localResource("../test2.jpg")
 
-local marsroverObject = {
-    Name = "Mars Rover Test",
-    Parent = "Root",
+
+local catSphere = {
+    Name = "Cat Sphere",
+    Parent = transforms.MarsBarycenter.Name,
+    Transform = {
+      Rotation = {
+        Type = "SpiceRotation",
+        SourceFrame = "IAU_MARS",
+      }
+    },
     Renderable = {
       Type = "RenderableMarsrover",
-      Size = 1,
+      Size = 10,
       Segments = 20,
       Texture = texturePath
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { marsroverObject })
+assetHelper.registerSceneGraphNodesAndExport(asset, { catSphere })
 
