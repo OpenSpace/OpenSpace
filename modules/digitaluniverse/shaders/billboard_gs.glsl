@@ -177,14 +177,13 @@ void main() {
                                 dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
 
         // Testing size:
-        vec4 topRight = crossCorner/crossCorner.w;//secondPosition/secondPosition.w;
+        vec4 topRight = crossCorner/crossCorner.w;
         topRight =  ((topRight + vec4(1.0)) * vec4(0.5)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
         vec4 bottomLeft = initialPosition/initialPosition.w;
         bottomLeft = ((bottomLeft + vec4(1.0)) * vec4(0.5)) * vec4(screenSize.x, screenSize.y, 1.0, 1.0);
 
         float height = abs(topRight.y - bottomLeft.y);
         float width  = abs(topRight.x - bottomLeft.x);    
-        float var    = (height + width);    
         
         if ((height > maxBillboardSize) ||
             (width > maxBillboardSize)) {        
@@ -207,13 +206,12 @@ void main() {
             if (width < 2.0f * minBillboardSize) {
                 float maxVar = 2.0f * minBillboardSize;
                 float minVar = minBillboardSize;
+                float var    = (height + width);    
                 ta = ( (var - minVar)/(maxVar - minVar) );
                 if (ta == 0.0f)
                     return;
             }
-            // crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
-            //                     dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-            
+
             secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
             
