@@ -321,7 +321,10 @@ void mainInitFunc() {
         strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
         screenshotPath += "/" + std::string(mbstr);
 
-        FileSys.createDirectory(absPath(screenshotPath));
+        std::string p = absPath(screenshotPath);
+        if (!FileSys.directoryExists(p)) {
+            FileSys.createDirectory(p);
+        }
     }
 
     for (size_t i = 0; i < nWindows; ++i) {
