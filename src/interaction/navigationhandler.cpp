@@ -77,7 +77,7 @@ NavigationHandler::NavigationHandler()
         if (_origin.value().empty()) {
             return;
         }
-
+        
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
             LWARNING(
@@ -130,8 +130,8 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::resetCameraDirection() {
-    LINFO("Setting camera direction to point at focus node.");
-    _orbitalNavigator->startInterpolateCameraDirection(*_camera);
+    LINFO("Setting camera direction to point at focus node: " << focusNode()->name());
+    _orbitalNavigator->startInterpolateCameraDirection(*_camera);    
 }
 
 const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
@@ -207,7 +207,7 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 {
     bool readSuccessful = true;
 
-    std::string focus;
+    std::string focus = "Moon";
     glm::dvec3 cameraPosition;
     glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
 
