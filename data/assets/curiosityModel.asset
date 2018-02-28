@@ -5,7 +5,7 @@ local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
     Type = "HttpSynchronization",
     Identifier = "marscuriosity_textures",
-    Version = 2
+    Version = 1
 })
 
 local models = asset.syncedResource({
@@ -24,9 +24,9 @@ local MarsCuriosityModel = {
         Body = "CURIOSITY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+          GeometryFile = models .. "/MSL_clean_test.obj"
         },
-        ColorTexture = textures .. "/MSL_clean_test.jpg"
+        ColorTexture = textures .. "/MSLTextureTest.png"
     }
 }
 

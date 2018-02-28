@@ -252,7 +252,7 @@ local Rexis = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = { 0, 0.3371, 0.2712 }
+            Position = { 0, 0.337100, 0.271200 }
         },
         Rotation = {
             Type = "SpiceRotation",

@@ -1,0 +1,22 @@
+local assetHelper = asset.require("util/asset_helper")
+
+
+local textures = asset.syncedResource({
+    Name = "Mars Curiosity Textures",
+    Type = "HttpSynchronization",
+    Identifier = "marscuriosity_textures",
+    Version = 2
+})
+
+local models = asset.syncedResource({
+    Name = "Mars Curiosity Model",
+    Type = "HttpSynchronization",
+    Identifier = "marscuriosity_model",
+    Version = 2
+})
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { MarsCuriosityModel })
+
+
+

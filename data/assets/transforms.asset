@@ -21,3 +21,4 @@ local CuriosityPosition = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { CuriosityPosition })
+
