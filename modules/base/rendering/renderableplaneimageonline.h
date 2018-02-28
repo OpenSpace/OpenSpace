@@ -50,7 +50,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture();
+    virtual void bindTexture() override;
 
 private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
@@ -61,10 +61,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _textureIsDirty;
-    bool _downloadImage;
-
-
-
 };
 
 } // namespace openspace

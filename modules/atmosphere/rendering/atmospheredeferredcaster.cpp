@@ -249,7 +249,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             // The following scale comes from PSC transformations.
             float fScaleFactor = renderData.camera.scaling().x *
-                                 pow(10.0, renderData.camera.scaling().y);
+                                 pow(10.f, renderData.camera.scaling().y);
             glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(fScaleFactor));
             program.setUniform(
                 "dInverseScaleTransformMatrix",

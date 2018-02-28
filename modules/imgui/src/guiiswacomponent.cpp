@@ -141,11 +141,11 @@ void GuiIswaComponent::render() {
                 int cdfOptionValue = _cdfOptionsMap[groupName];
                 const auto& cdfs = group.second;
 
-                for (int i = 0; i < cdfs.size(); ++i) {
+                for (size_t i = 0; i < cdfs.size(); ++i) {
                     ImGui::RadioButton(
                         cdfs[i].name.c_str(),
                         &_cdfOptionsMap[groupName],
-                        i
+                        static_cast<int>(i)
                     );
                 }
 
@@ -192,7 +192,7 @@ void GuiIswaComponent::render() {
             ImGui::SameLine();
 
             if (ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())) {
-                ImGui::TextWrapped(info->description.c_str());
+                ImGui::TextWrapped("%s", info->description.c_str());
                 ImGui::Spacing();
             }
 

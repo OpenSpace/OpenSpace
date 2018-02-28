@@ -24,18 +24,16 @@
 
 #include <openspace/properties/optionproperty.h>
 
-using namespace openspace::properties;
-
 class OptionPropertyTest : public testing::Test {};
 
 TEST_F(OptionPropertyTest, NoOption) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     ASSERT_EQ(false, p.hasOption());
 }
 
 TEST_F(OptionPropertyTest, SingleOptionSingleZero) {
-    OptionProperty p({ "id", "gui", "desc"});
+    openspace::properties::OptionProperty p({ "id", "gui", "desc"});
 
     p.addOption(0, "a");
 
@@ -46,7 +44,7 @@ TEST_F(OptionPropertyTest, SingleOptionSingleZero) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionSingleNegative) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p = -1;
@@ -56,7 +54,7 @@ TEST_F(OptionPropertyTest, SingleOptionSingleNegative) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionSinglePositive) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({
         { 1, "a" }
@@ -68,7 +66,7 @@ TEST_F(OptionPropertyTest, SingleOptionSinglePositive) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionMultipleZero) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({
         { 0, "a" }
@@ -80,7 +78,7 @@ TEST_F(OptionPropertyTest, SingleOptionMultipleZero) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionMultipleNegative) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({
         { -1, "a" }
@@ -92,7 +90,7 @@ TEST_F(OptionPropertyTest, SingleOptionMultipleNegative) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionMultiplePositive) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({
         { 1, "a" }
@@ -104,7 +102,7 @@ TEST_F(OptionPropertyTest, SingleOptionMultiplePositive) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionsZeroBasedConsecutive) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
     p.addOption(1, "b");
@@ -124,7 +122,7 @@ TEST_F(OptionPropertyTest, SingleOptionsZeroBasedConsecutive) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionsZeroBasedNonConsecutive) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
     p.addOption(2, "b");
@@ -144,7 +142,7 @@ TEST_F(OptionPropertyTest, SingleOptionsZeroBasedNonConsecutive) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionsNegativeBasedConsecutive) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p.addOption(-2, "b");
@@ -164,7 +162,7 @@ TEST_F(OptionPropertyTest, SingleOptionsNegativeBasedConsecutive) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedNonConsecutive) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p.addOption(-3, "b");
@@ -184,7 +182,7 @@ TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedNonConsecutive) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionsZeroBasedAlternating) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
     p.addOption(2, "b");
@@ -204,7 +202,7 @@ TEST_F(OptionPropertyTest, SingleOptionsZeroBasedAlternating) {
 }
 
 TEST_F(OptionPropertyTest, SingleOptionsNonZeroBasedAlternating) {
-    OptionProperty p({ "id", "gui", "desc" });
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-20, "a");
     p.addOption(2, "b");

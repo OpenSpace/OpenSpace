@@ -38,7 +38,6 @@
 
 
 namespace {
-    constexpr const char* _loggerCat = "TorrentSynchronization";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyMagnet = "Magnet";
 } // namespace

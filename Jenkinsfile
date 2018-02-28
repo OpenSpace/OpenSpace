@@ -4,12 +4,12 @@ def modules = [
     "fieldlines",
     "galaxy",
     "globebrowsing",
+    "imgui",
     "iswa",
     "kameleon",
     "kameleonvolume",
     "multiresvolume",
-    "newhorizons",
-    "onscreengui",
+    "spacecraftinstruments",
     "space",
     "toyvolume",
     "volume"
@@ -36,7 +36,7 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make -j4
+                make -j4 OpenSpace
                 '''
             }
         }

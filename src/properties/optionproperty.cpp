@@ -82,11 +82,11 @@ void OptionProperty::clearOptions() {
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (int i = 0; i < _options.size(); ++i) {
+    for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
-            NumericalProperty::setValue(i);
+            NumericalProperty::setValue(static_cast<int>(i));
             return;
         }
     }
@@ -96,7 +96,7 @@ void OptionProperty::setValue(int value) {
 }
 
 bool OptionProperty::hasOption() const {
-    return value() >= 0 && value() < _options.size();
+    return value() >= 0 && value() < static_cast<int>(_options.size());
 }
 
 
