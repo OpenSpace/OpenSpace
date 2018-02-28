@@ -24,6 +24,12 @@
 
 #version __CONTEXT__
 
+// Keep in sync with renderablegaiastars.h:ColumnOption enum
+const int COLUMNOPTION_STATIC = 0;
+const int COLUMNOPTION_MOTION = 1; 
+const int COLUMNOPTION_COLOR = 2;
+const float EPS = 1e-5;
+
 in vec3 in_position;
 in vec3 in_velocity;
 in float in_brightness;
@@ -36,14 +42,27 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform float time; 
+uniform int columnOption;
 
 void main() {
     vs_velocity = in_velocity;
     vs_brightness = in_brightness;
     
-    vec4 modelPosition = vec4(in_position + time * in_velocity, 1.0);
+    vec4 modelPosition = vec4(in_position, 1.0);
+
+    if ( columnOption != COLUMNOPTION_STATIC ) {
+        modelPosition.xyz += time * in_velocity;
+    } 
+
     vec4 viewPosition = view * model * modelPosition;
 
-    vs_gPosition = viewPosition;    
-    gl_Position = projection * viewPosition;
+    // Remove stars without position, but still wasn't nullArrays.
+    // Has to be done in Geometry shader because Vertices cannot be discarded here.
+    if ( length(in_position) > EPS ){
+        vs_gPosition = viewPosition;    
+        gl_Position = projection * viewPosition;
+    } else {
+        vs_gPosition = vec4(0.0);    
+        gl_Position = vec4(0.0);
+    }
 }

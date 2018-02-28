@@ -25,6 +25,11 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
+// Keep in sync with renderablegaiastars.h:ColumnOption enum
+const int COLUMNOPTION_STATIC = 0;
+const int COLUMNOPTION_MOTION = 1; 
+const int COLUMNOPTION_COLOR = 2;
+
 in vec4 vs_position;
 in vec3 ge_velocity;
 in float ge_brightness;
@@ -36,18 +41,21 @@ uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 uniform float magnitudeExponent;
 uniform float sharpness;
+uniform int columnOption;
 
-vec4 bv2rgb(float bv) {
-    // BV is [-0.4,2.0]
-    float t = (bv + 0.4) / (2.0 + 0.4);
-    return texture(colorTexture, t);
+vec4 mag2rgb(float magnitude) {
+    // DR1 mag is [4, 20]
+    float st = (magnitude - 4) / (20 - 4);
+    return texture(colorTexture, st);
 }
 
 Fragment getFragment() {
-        
-    //vec4 color = bv2rgb(ge_brightness.y);
-    //vec4 color = vec4(abs(ge_velocity), 0.5); 
+
     vec4 color = vec4(1.0);
+
+    if ( columnOption == COLUMNOPTION_COLOR ) {
+        color = mag2rgb(ge_brightness);
+    }
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
@@ -56,15 +64,15 @@ Fragment getFragment() {
     float d = magnitudeExponent - log(ge_observationDistance) / log(10.0);
     fullColor.a *= clamp(d, 0.0, 1.0);
 
+    if (fullColor.a == 0) {
+        discard;
+    }
+
     Fragment frag;
     frag.color = fullColor;
     frag.depth = safeLength(vs_position);
     frag.gPosition = ge_gPosition;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    
-    if (fullColor.a == 0) {
-        discard;
-    }
 
     return frag;
 }

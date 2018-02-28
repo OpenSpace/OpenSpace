@@ -2,7 +2,7 @@ return {
     {
         Type = "ReadFitsTask",
         InFilePath = "C:/Users/openspace/Documents/adaal265/data/TIGS_v9.0.fits",
-        OutFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/Sorted_DR1.fits",
+        OutFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/Sorted_DR1.bin",
         FirstRow = 1,
         LastRow = 2539913, -- Max: 2539913
         ColumnNames = {

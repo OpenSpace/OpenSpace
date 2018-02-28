@@ -123,6 +123,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
 
         bool nullArray = true;
         for (size_t j = 0; j < nValuesPerStar; ++j) {
+            // The astronomers in Vienna use -999 as default value.
             if (values[j] != -999) {
                 nullArray = false;
             }

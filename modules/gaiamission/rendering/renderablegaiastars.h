@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -62,7 +63,13 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void createDataSlice();
+    enum ColumnOption {
+        Static = 0,
+        Motion = 1,
+        Color = 2
+    };
+    
+    void createDataSlice(ColumnOption option);
     bool readFitsFile();
 
     properties::StringProperty _fitsFilePath;
@@ -88,10 +95,12 @@ private:
     properties::StringListProperty _columnNamesList;
     std::vector<std::string> _columnNames;
     properties::BoolProperty _filePreprocessed;
+    properties::OptionProperty _columnOption;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness,
-        billboardSize, screenSize, psfTexture, time, colorTexture) _uniformCache;
+    UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness, 
+        billboardSize, screenSize, psfTexture, time, colorTexture, columnOption) 
+        _uniformCache;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;

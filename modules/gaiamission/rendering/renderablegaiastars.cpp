@@ -47,7 +47,16 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableGaiaStars";
 
-    struct VBOLayout {
+    struct StaticVBOLayout {
+        std::array<float, 3> position; // (x,y,z)
+    };
+
+    struct MotionVBOLayout {
+        std::array<float, 3> position; // (x,y,z)
+        std::array<float, 3> velocity; // (x,y,z)
+    };
+
+    struct ColorVBOLayout {
         std::array<float, 3> position; // (x,y,z)
         std::array<float, 3> velocity; // (x,y,z)
         float magnitude;
@@ -56,13 +65,22 @@ namespace {
     static const openspace::properties::Property::PropertyInfo FitsFileInfo = {
         "File",
         "File Path",
-        "The path to the FITS file with data for the stars to be rendered."
+        "The path to the FITS or BIN file with data for the stars to be rendered."
     }; 
 
     static const openspace::properties::Property::PropertyInfo FilePreprocessedInfo = {
         "FilePreprocessed",
         "File Preprocessed",
-        "If true then the FITS file has already been read and sorted."
+        "If true then use a preprocessed BIN file. "
+        "If false then a FITS file will be read."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ColumnOptionInfo = {
+        "ColumnOption",
+        "Column Option",
+        "This value determines which predefined columns to use. If 'Static' only the "
+        "position of the stars is used. 'Motion' uses position + velocity and 'Color' "
+        "uses pos, vel as well as magnitude for the color."
     };
     
     static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
@@ -94,8 +112,8 @@ namespace {
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
-        "ColorBV Texture",
-        "The path to the texture that is used to convert from the B-V value of the star "
+        "Color Texture",
+        "The path to the texture that is used to convert from the magnitude of the star "
         "to its color. The texture is used as a one dimensional lookup function."
     };
 
@@ -147,6 +165,14 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new BoolVerifier,
                 Optional::No,
                 FilePreprocessedInfo.description
+            },
+            {
+                ColumnOptionInfo.identifier,
+                new StringInListVerifier({
+                    "Static", "Motion", "Color"
+                }),
+                Optional::Yes,
+                ColumnOptionInfo.description
             },
             {
                 PsfTextureInfo.identifier,
@@ -206,6 +232,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _fitsFile(nullptr)
     , _dataIsDirty(true)
     , _filePreprocessed(FilePreprocessedInfo, false)
+    , _columnOption(ColumnOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _pointSpreadFunctionTexture(nullptr)
     , _pointSpreadFunctionTextureIsDirty(true)
@@ -242,6 +269,27 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     );
     addProperty(_fitsFilePath);
 
+    _columnOption.addOptions({
+        { ColumnOption::Static, "Static" },
+        { ColumnOption::Motion, "Motion" },
+        { ColumnOption::Color, "Color" }
+    });
+    if (dictionary.hasKey(ColumnOptionInfo.identifier)) {
+        const std::string columnOption = dictionary.value<std::string>(
+            ColumnOptionInfo.identifier
+            );
+        if (columnOption == "Static") {
+            _columnOption = ColumnOption::Static;
+        }
+        else if (columnOption == "Motion") {
+            _columnOption = ColumnOption::Motion;
+        }
+        else {
+            _columnOption = ColumnOption::Color;
+        }
+    }
+    _columnOption.onChange([&] { _dataIsDirty = true; });
+    addProperty(_columnOption);
 
     _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
         PsfTextureInfo.identifier
@@ -349,11 +397,14 @@ void RenderableGaiaStars::initializeGL() {
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
         
     );
+    //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    //_program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     _uniformCache.model = _program->uniformLocation("model");
     _uniformCache.view = _program->uniformLocation("view");
     _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.projection = _program->uniformLocation("projection");
+    _uniformCache.columnOption = _program->uniformLocation("columnOption");
     _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
     _uniformCache.sharpness = _program->uniformLocation("sharpness");
     _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
@@ -403,7 +454,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.view, view);
     _program->setUniform(_uniformCache.viewScaling, viewScaling);
     _program->setUniform(_uniformCache.projection, projection);
-
+    _program->setUniform(_uniformCache.columnOption, _columnOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
     _program->setUniform(_uniformCache.sharpness, _sharpness);
     _program->setUniform(_uniformCache.billboardSize, _billboardSize);
@@ -437,6 +488,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 void RenderableGaiaStars::update(const UpdateData&) {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
+        const int option = _columnOption;
 
         // Reload fits file (as long as it's not the first initialization)!
         if (_vao != 0) {
@@ -447,7 +499,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
         }
 
-        createDataSlice();
+        createDataSlice(ColumnOption(option));
 
         int size = static_cast<int>(_slicedData.size());
 
@@ -468,43 +520,90 @@ void RenderableGaiaStars::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
 
-        GLint positionAttrib = _program->attributeLocation("in_position");
-        GLint velocityAttrib = _program->attributeLocation("in_velocity");
-        GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
-
         const size_t nStars = _fullData.size() / _nValuesPerStar;
         const size_t nValues = _slicedData.size() / nStars;
 
         GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
-        glEnableVertexAttribArray(positionAttrib);
-        glEnableVertexAttribArray(velocityAttrib);
-        glEnableVertexAttribArray(brightnessDataAttrib);
+        switch (option) {
+        case ColumnOption::Static: {
+            GLint positionAttrib = _program->attributeLocation("in_position");
 
-        glVertexAttribPointer(
-            positionAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            stride,
-            nullptr // = offsetof(VelocityVBOLayout, position)
-        );
-        glVertexAttribPointer(
-            velocityAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            stride,
-            reinterpret_cast<void*>(offsetof(VBOLayout, velocity))
-        );
-        glVertexAttribPointer(
-            brightnessDataAttrib,
-            1,
-            GL_FLOAT,
-            GL_FALSE,
-            stride,
-            reinterpret_cast<void*>(offsetof(VBOLayout, magnitude))
-        );
+            glEnableVertexAttribArray(positionAttrib);
+
+            glVertexAttribPointer(
+                positionAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                nullptr // = offsetof(StaticVBOLayout, position)
+            );
+
+            break;
+        } 
+        case ColumnOption::Motion: {
+            GLint positionAttrib = _program->attributeLocation("in_position");
+            GLint velocityAttrib = _program->attributeLocation("in_velocity");
+
+            glEnableVertexAttribArray(positionAttrib);
+            glEnableVertexAttribArray(velocityAttrib);
+
+            glVertexAttribPointer(
+                positionAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                nullptr // = offsetof(MotionVBOLayout, position)
+            );
+            glVertexAttribPointer(
+                velocityAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(offsetof(MotionVBOLayout, velocity))
+            );
+
+            break;
+        }
+        case ColumnOption::Color: {
+            GLint positionAttrib = _program->attributeLocation("in_position");
+            GLint velocityAttrib = _program->attributeLocation("in_velocity");
+            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+
+            glEnableVertexAttribArray(positionAttrib);
+            glEnableVertexAttribArray(velocityAttrib);
+            glEnableVertexAttribArray(brightnessDataAttrib);
+
+            glVertexAttribPointer(
+                positionAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                nullptr // = offsetof(ColorVBOLayout, position)
+            );
+            glVertexAttribPointer(
+                velocityAttrib,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(offsetof(ColorVBOLayout, velocity))
+            );
+            glVertexAttribPointer(
+                brightnessDataAttrib,
+                1,
+                GL_FLOAT,
+                GL_FALSE,
+                stride,
+                reinterpret_cast<void*>(offsetof(ColorVBOLayout, magnitude))
+            );
+            break;
+        }
+        }
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -571,6 +670,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.view = _program->uniformLocation("view");
         _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
         _uniformCache.projection = _program->uniformLocation("projection");
+        _uniformCache.columnOption = _program->uniformLocation("columnOption");
         _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
@@ -677,7 +777,7 @@ bool RenderableGaiaStars::readFitsFile() {
     return true;
 }
 
-void RenderableGaiaStars::createDataSlice() {
+void RenderableGaiaStars::createDataSlice(ColumnOption option) {
     _slicedData.clear();
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
@@ -685,24 +785,62 @@ void RenderableGaiaStars::createDataSlice() {
         glm::vec3 velocity = glm::vec3(_fullData[i + 3], _fullData[i + 4], _fullData[i + 5]);
 
         // Convert parsecs -> meter
-        position *= static_cast<float>(distanceconstants::Parsec);
-        velocity *= static_cast<float>(distanceconstants::Parsec);
+        position *= 1000 * static_cast<float>(distanceconstants::Parsec);
+        //velocity *= static_cast<float>(distanceconstants::Parsec); // TODO (adaal): what unit!?
 
-        union {
-            VBOLayout value;
-            std::array<float, sizeof(VBOLayout) / sizeof(float)> data;
-        } layout;
+        switch (option) {
+        case ColumnOption::Static: {
+            union {
+                StaticVBOLayout value;
+                std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
+            } layout;
 
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
-        layout.value.velocity = { {
-                velocity[0], velocity[1], velocity[2]
-            } };
+            layout.value.position = { {
+                    position[0], position[1], position[2]
+                } };
 
-        layout.value.magnitude = _fullData[i + 6];
+            _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
 
-        _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
+            break;
+        }
+            
+        case ColumnOption::Motion: {
+            union {
+                MotionVBOLayout value;
+                std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;
+            } layout;
+
+            layout.value.position = { {
+                    position[0], position[1], position[2]
+                } };
+            layout.value.velocity = { {
+                    velocity[0], velocity[1], velocity[2]
+                } };
+
+            _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
+            break;
+        }
+            
+        case ColumnOption::Color: {
+            union {
+                ColorVBOLayout value;
+                std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
+            } layout;
+
+            layout.value.position = { {
+                    position[0], position[1], position[2]
+                } };
+            layout.value.velocity = { {
+                    velocity[0], velocity[1], velocity[2]
+                } };
+
+            layout.value.magnitude = _fullData[i + 6];
+
+            _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
+            break;
+        }
+        }
+            
     }
 }
 
