@@ -1,0 +1,23 @@
+local assetHelper = asset.require('util/asset_helper')
+local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+
+
+local CuriosityPosition = {
+    Name = "CuriosityPosition",
+    Parent = marsTransforms.MarsBarycenter.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MOON",
+            Observer = "MARS BARYCENTER",
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MOON",
+            DestinationFrame = "GALACTIC"
+        }
+
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { CuriosityPosition })
