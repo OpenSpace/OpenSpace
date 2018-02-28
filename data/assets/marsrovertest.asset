@@ -1,6 +1,5 @@
 
 local assetHelper = asset.require("util/asset_helper")
-local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 
 local texturePath = asset.localResource("../test2.jpg")
 local texturePath2 = asset.localResource("../test3.jpg")
@@ -21,19 +20,52 @@ local models = asset.syncedResource({
     Version = 2
 })
 
-local MarsCuriosityModel = {
-    Name = "curiosityModel",
+local catSphere = { 
+  Name = "Mars Rover Cat",
     Parent = "Root",
     Renderable = {
-        Type = "RenderableModel",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/NewHorizonsCleanModel.obj"
-        }
+      Type = "RenderableSphere",
+      Size = 0.05,
+      Segments = 20,
+      Texture = texturePath
+    },
+    Transform = {
+      Translation = {
+          Type = "StaticTranslation",
+          Position = { 0, 0, 0}
+      }
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsCuriosityModel })
+local catSphere2 = { 
+  Name = "Mars Rover Cat2",
+  Parent = "Root",
+  Renderable = {
+    Type = "RenderableSphere",
+    Size = 30,
+    Segments = 20,
+    Texture = texturePath
+  }
+}
+
+local MarsCuriosityModel = { 
+  Name = "curiosityModel",
+  Parent = catSphere.Name,
+  Renderable = {
+      Type = "RenderableModel",
+      Geometry = {
+        Type = "MultiModelGeometry",
+        GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+      }
+    },
+    ColorTexture = textures .. "/NHTexture.jpg" 
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+  catSphere,
+  catSphere2,
+  MarsCuriosityModel
+})
 asset.export("CuriosityTextures", textures)
 asset.export("CuriosityModels", models)
 
