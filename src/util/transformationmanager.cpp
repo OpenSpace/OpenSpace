@@ -26,6 +26,10 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
 
+namespace {
+    constexpr const char* _loggerCat = "TransformationManager";
+} // namespace
+
 namespace openspace {
 
 TransformationManager::TransformationManager(){

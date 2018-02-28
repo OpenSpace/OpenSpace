@@ -82,7 +82,7 @@ namespace {
             return PathType::Absolute;
         }
         return PathType::RelativeToAssetRoot;
-    };
+    }
 }
 
 namespace openspace {

@@ -608,7 +608,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
         renderTooltip(prop, tooltipDelay);
     }
 
-    if (value != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             std::to_string(value),

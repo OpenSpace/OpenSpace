@@ -674,8 +674,6 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
                                          const glm::dvec3& orthoRight,
                                          const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
     float scale = 0.0;
     switch (_unit) {
         case Meter:

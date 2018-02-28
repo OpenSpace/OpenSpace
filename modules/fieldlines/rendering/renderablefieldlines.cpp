@@ -41,7 +41,7 @@ namespace {
 
     std::string _loggerCat = "RenderableFieldlines";
 
-    constexpr const float defaultFieldlineStepSize = 0.5f;;
+    constexpr const float defaultFieldlineStepSize = 0.5f;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
     constexpr const char* keyVectorField = "VectorField";
@@ -310,7 +310,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
         // Arrange data for glMultiDrawArrays
-        for (int j = 0; j < fieldlines.size(); ++j) {
+        for (size_t j = 0; j < fieldlines.size(); ++j) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());
