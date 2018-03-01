@@ -247,6 +247,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
             program.setUniform("dModelTransformMatrix", _modelTransform);
 
+            /*
             // The following scale comes from PSC transformations.
             float fScaleFactor = renderData.camera.scaling().x *
                                  pow(10.f, renderData.camera.scaling().y);
@@ -255,30 +256,25 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 "dInverseScaleTransformMatrix",
                 glm::inverse(dfScaleCamTransf)
             );
-
-            // World to Eye Space in OS
-            program.setUniform(
-                "dInverseCamRotTransform",
-                glm::mat4_cast(
-                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-                )
-            );
-
-            program.setUniform(
-                "dInverseSgctEyeToWorldTranform",
-                glm::inverse(renderData.camera.combinedViewMatrix())
-            );
-
+            */
+            
             // Eye Space in OS to Eye Space in SGCT
-            glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
-            glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);
-            program.setUniform("dSgctEyeToOSEyeTranform", dSgctEye2OSEye);
-
+            glm::dmat4 dSgctEye2OSEye = glm::inverse(
+                glm::dmat4(renderData.camera.viewMatrix()));
+            
             // Eye Space in SGCT to Projection (Clip) Space in SGCT
-            glm::dmat4 dSgctEye2Clip = glm::dmat4(renderData.camera.projectionMatrix());
-            glm::dmat4 dInverseProjection = glm::inverse(dSgctEye2Clip);
+            glm::dmat4 dInverseProjection = glm::inverse(
+                glm::dmat4(renderData.camera.projectionMatrix()));
 
-            program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
+            glm::dmat4 dInverseCameraRotationToSgctEyeTransform = glm::mat4_cast(
+                static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
+            ) * dSgctEye2OSEye;
+
+            program.setUniform("dInverseSgctProjectionToTmpRotTransformMatrix", 
+                dInverseCameraRotationToSgctEyeTransform * dInverseProjection);
+
+            program.setUniform("dInverseSGCTEyeToTmpRotTransformMatrix", 
+                dInverseCameraRotationToSgctEyeTransform);
 
             program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
             program.setUniform("dCampos", renderData.camera.positionVec3());
@@ -444,6 +440,47 @@ std::string AtmosphereDeferredcaster::deferredcastVSPath() const {
 
 std::string AtmosphereDeferredcaster::helperPath() const {
     return ""; // no helper file
+}
+
+void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramObject& program) {
+    _uniformCache.cullAtmosphere = program.uniformLocation("cullAtmosphere");
+    _uniformCache.Rg = program.uniformLocation("Rg"); 
+    _uniformCache.Rt = program.uniformLocation("Rt");
+    _uniformCache.AverageGroundReflectance = program.uniformLocation("AverageGroundReflectance");
+    _uniformCache.groundRadianceEmittion = program.uniformLocation("groundRadianceEmittion");
+    _uniformCache.HR = program.uniformLocation("HR"); 
+    _uniformCache.betaRayleigh = program.uniformLocation("betaRayleigh"); 
+    _uniformCache.HM = program.uniformLocation("HM");  
+    _uniformCache.betaMieScattering = program.uniformLocation("betaMieScattering");
+    _uniformCache.betaMieExtinction = program.uniformLocation("betaMieExtinction"); 
+    _uniformCache.mieG = program.uniformLocation("mieG"); 
+    _uniformCache.sunRadiance = program.uniformLocation("sunRadiance"); 
+    _uniformCache.ozoneLayerEnabled = program.uniformLocation("ozoneLayerEnabled");
+    _uniformCache.HO = program.uniformLocation("HO"); 
+    _uniformCache.betaOzoneExtinction = program.uniformLocation("betaOzoneExtinction"); 
+    _uniformCache.TRANSMITTANCE_W = program.uniformLocation("TRANSMITTANCE_W"); 
+    _uniformCache.TRANSMITTANCE_H = program.uniformLocation("TRANSMITTANCE_H");
+    _uniformCache.SKY_W = program.uniformLocation("SKY_W"); 
+    _uniformCache.SKY_H = program.uniformLocation("SKY_H"); 
+    _uniformCache.OTHER_TEXTURES_W = program.uniformLocation("OTHER_TEXTURES_W"); 
+    _uniformCache.OTHER_TEXTURES_H = program.uniformLocation("OTHER_TEXTURES_H"); 
+    _uniformCache.SAMPLES_R = program.uniformLocation("SAMPLES_R");
+    _uniformCache.SAMPLES_MU = program.uniformLocation("SAMPLES_MU"); 
+    _uniformCache.SAMPLES_MU_S = program.uniformLocation("SAMPLES_MU_S"); 
+    _uniformCache.SAMPLES_NU = program.uniformLocation("SAMPLES_NU");
+    _uniformCache2.ModelTransformMatrix = program.uniformLocation("ModelTransformMatrix");
+    _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation("dInverseModelTransformMatrix");
+    _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
+    _uniformCache2.dInverseSgctProjectionToTmpRotTransformMatrix = program.uniformLocation("dInverseSgctProjectionToTmpRotTransformMatrix");
+    _uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix = program.uniformLocation("dInverseSGCTEyeToTmpRotTransformMatrix");
+    _uniformCache2.dObjpos = program.uniformLocation("dObjpos");
+    _uniformCache2.dCampos = program.uniformLocation("dCampos");
+    _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
+    _uniformCache2.ellipsoidRadii = program.uniformLocation("ellipsoidRadii");
+    _uniformCache2.hardShadows = program.uniformLocation("hardShadows");
+    _uniformCache2.transmittanceTexture = program.uniformLocation("transmittanceTexture");
+    _uniformCache2.irradianceTexture = program.uniformLocation("irradianceTexture");
+    _uniformCache2.inscatterTexture = program.uniformLocation("inscatterTexture");
 }
 
 void AtmosphereDeferredcaster::setModelTransform(const glm::dmat4& transform) {

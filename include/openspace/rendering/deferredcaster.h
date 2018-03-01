@@ -58,6 +58,8 @@ public:
 
     virtual std::string deferredcastFSPath() const = 0;
 
+    virtual void initializeCachedVariables(ghoul::opengl::ProgramObject&) = 0;
+
     /**
      * Return a path to a glsl file with helper functions required for the
      * transformation and raycast steps.
