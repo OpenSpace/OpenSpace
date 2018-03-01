@@ -84,15 +84,8 @@ uniform sampler2DMS mainPositionTexture;
 uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
 
-// Model Transform Matrix Used for Globe Rendering
-uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
-uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
-uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
-uniform dmat4 dInverseCamRotTransform; 
 uniform dmat4 dInverseModelTransformMatrix; 
 uniform dmat4 dModelTransformMatrix;
-//uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
-uniform dmat4 dInverseSgctProjectionToOSEyeTransformMatrix;
 uniform dmat4 dInverseSgctProjectionToTmpRotTransformMatrix;
 uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
 
