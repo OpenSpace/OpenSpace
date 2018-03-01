@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
 namespace openspace {
@@ -84,6 +85,7 @@ public:
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
+        properties::IVec2Property screenSpacePosition;
     };
 
     // Shadow structure

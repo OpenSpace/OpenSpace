@@ -39,6 +39,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -374,6 +375,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
         else
             _renderable->render(newData, tasks);
+            getScreenSpacePositon(newData);
     }
 
     // evaluate all the children, tail-recursive function(?)
@@ -503,6 +505,44 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
 
     if (_scene) {
         _scene->markNodeRegistryDirty();
+    }
+}
+
+void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
+   
+    std::vector<std::string> tags = this->tags();
+    const std::string tag = "Touch.Interesting";
+
+    if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
+        // Get the previous screenSpacePos
+        properties::Property* ScreenSpacePosition = this->propertySubOwner("RenderableGlobe")->property("ScreenSpacePosition");
+        properties::IVec2Property* p = static_cast<properties::IVec2Property*>(ScreenSpacePosition);
+        properties::IVec2Property::ValueType value = *p;
+        glm::ivec2 prevScreenSpacePos = glm::ivec2(value[0], value[1]);
+
+        // Calculate ndc
+        Camera cam = newData.camera;
+        glm::dvec3 worldPos = this->_worldPositionCached;
+        glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(worldPos, 1.0);
+        glm::dvec2 ndc = clipSpace / clipSpace.w;
+
+         // If the object is not in the screen, we dont want to consider it at all
+        if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0) {
+            WindowWrapper& wrapper = OsEng.windowWrapper();
+            glm::ivec2 res = wrapper.currentWindowSize();
+            glm::ivec2 screenPos = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
+
+            int threshold = 2;
+            if (abs(screenPos.x - prevScreenSpacePos.x) > threshold || abs(screenPos.y - prevScreenSpacePos.y) > threshold) {
+                ScreenSpacePosition->set(screenPos);
+            }
+        }
+        // If not on the screen, we want to reset it or don't update it
+        else {
+            if (prevScreenSpacePos.x != -1 && prevScreenSpacePos.y != -1) {
+                ScreenSpacePosition->set(glm::ivec2(-1,-1));
+            }
+        }
     }
 }
 

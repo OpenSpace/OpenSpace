@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/vector/ivec2property.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
@@ -103,6 +104,8 @@ public:
     void removeDependency(SceneGraphNode& dependency);
     void clearDependencies();
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
+
+    void getScreenSpacePositon(RenderData& newData);
 
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace);
