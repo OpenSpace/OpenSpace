@@ -20,6 +20,7 @@ const types = {
   Vec2Property: VecProperty,
   Vec3Property: VecProperty,
   Vec4Property: VecProperty,
+  IVec2Property: VecProperty,
   MatrixProperty,
   DMat4Property: MatrixProperty,
   defaultProperty: Property,
