@@ -27,7 +27,9 @@ local CuriosityModel = {
           GeometryFile = models .. "/MSL_clean_test.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
-    }
+    },
+    Tag = {"planet_solarsystem", "planet_terrestrial"},
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { CuriosityModel })

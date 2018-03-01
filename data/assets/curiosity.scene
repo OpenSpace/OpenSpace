@@ -1,21 +1,56 @@
 local sceneHelper = asset.require('util/scene_helper')
 local assetHelper = asset.require('util/asset_helper')
+asset.require('util/default_keybindings')
 
 asset.require('spice/base')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 
-local CuriosityModelAsset = asset.require('scene/solarsystem/planets/mars/rovers/model')
--- local MarsAsset = asset.request('scene/solarsystem/planets/mars/mars')
+--local CuriosityModelAsset =
+asset.require('scene/solarsystem/planets/mars/rovers/model')
+local MarsAsset = asset.require('scene/solarsystem/planets/mars/mars')
+
+
+
 
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
-    openspace.navigation.setCameraState({
-        Focus = CuriosityModelAsset.CuriosityModel.Name,
-        -- Focus = MarsAsset.Mars.Name,
-        Position = { 10.0, 10.0, 10.0 },
-        Rotation = { 0.683224, -0.165934, 0.701234, 0.118073 },
+    openspace.setDefaultDashboard()
+    openspace.setDefaultGuiSorting()
+
+    
+    -- Mark the Gaia Instrument Model (and a few stars?) as interesting nodes
+    openspace.markInterestingNodes({
+       "CuriosityModel", "Mars"
     })
+
+
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+ 
+    openspace.navigation.setCameraState({
+        --Focus = CuriosityModelAsset.CuriosityModel.Name,
+        Focus = MarsAsset.Mars.Name,
+        Position = { 10.0, 10.0, 10.0 },
+        Rotation = { 0.0, -0.0, 0.0, 0.0 },
+    })
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 end)
 
+asset.onDeinitialize(function ()
+
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+    openspace.removeInterestingNodes({
+    	"CuriosityModel", "Mars"
+    })
+end)
