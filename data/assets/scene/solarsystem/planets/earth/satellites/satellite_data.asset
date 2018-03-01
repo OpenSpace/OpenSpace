@@ -1,7 +1,10 @@
 local SatDataPath = asset.syncedResource({
-    Name = "Satellite Data",
-    Type = "HttpSynchronization",
-    Identifier = "satellite_data",
-    Version = 2
+    Name = "Satellite TLE Data",
+    Type = "UrlSynchronization",
+    Identifier = "satellite_tle_data",
+    Url = {
+	    "http://celestrak.com/NORAD/elements/stations.txt",
+		"http://celestrak.com/NORAD/elements/gps-ops.txt"
+	}
 })
 asset.export("SatDataPath", SatDataPath)

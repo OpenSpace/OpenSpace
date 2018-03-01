@@ -1,9 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
+local satImageFolder = asset.require('./satellite_image').SatImageFolder
 --local satDataPath = asset.require('./satellite_data').SatDataPath
-local satDataPath = asset.request('./satellite_data').SatDataPath
-satDataPath = "C:\\Users\\openspace\\Desktop\\OpenSpace_20180207\\sync\\http\\satellite_data\\2"
+local satDataPath = asset.require('./satellite_data').SatDataPath
+--satDataPath = "C:\\Users\\openspace\\Desktop\\OpenSpace_20180207\\sync\\http\\satellite_data\\2"
 
 
 -- Waiting for URL based download
@@ -184,8 +185,9 @@ for sOrbit in values(satelliteGroups) do
   filename = sOrbit.url:match("([^/]+)$")
   filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
 
-  sOrbit.path = satDataPath .. "/tle/" .. filename
-  sOrbit.texturePath = satDataPath .. "/" .. "satB.png"
+--  sOrbit.path = satDataPath .. "/tle/" .. filename
+  sOrbit.path = satDataPath .. filename
+  sOrbit.texturePath = satImageFolder .. "/" .. "satB.png"
 
   if DOWNLOAD then
     openspace.downloadFile(sOrbit.url, sOrbit.path)
