@@ -39,6 +39,7 @@ namespace openspace {
 
 struct RenderData;
 struct DeferredcastData;
+struct UpdateData;
 
 class Deferredcaster {
 public:
@@ -59,6 +60,8 @@ public:
     virtual std::string deferredcastFSPath() const = 0;
 
     virtual void initializeCachedVariables(ghoul::opengl::ProgramObject&) = 0;
+
+    virtual void update(const UpdateData&) = 0;
 
     /**
      * Return a path to a glsl file with helper functions required for the

@@ -207,45 +207,45 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             (_atmosphereRadius + ATM_EPS)*KM_TO_M)
             )
         {
-            program.setUniform("cullAtmosphere", 1);
+            program.setUniform(_uniformCache.cullAtmosphere, 1);
         }
         else {
-            program.setUniform("cullAtmosphere", 0);
-            program.setUniform("Rg", _atmospherePlanetRadius);
-            program.setUniform("Rt", _atmosphereRadius);
+            program.setUniform(_uniformCache.cullAtmosphere, 0);
+            program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
+            program.setUniform(_uniformCache.Rt, _atmosphereRadius);
             program.setUniform(
-                "AverageGroundReflectance",
+                _uniformCache.AverageGroundReflectance,
                 _planetAverageGroundReflectance
             );
-            program.setUniform("groundRadianceEmittion", _planetGroundRadianceEmittion);
-            program.setUniform("HR", _rayleighHeightScale);
-            program.setUniform("betaRayleigh", _rayleighScatteringCoeff);
-            program.setUniform("HM", _mieHeightScale);
-            program.setUniform("betaMieScattering", _mieScatteringCoeff);
-            program.setUniform("betaMieExtinction", _mieExtinctionCoeff);
-            program.setUniform("mieG", _miePhaseConstant);
-            program.setUniform("sunRadiance", _sunRadianceIntensity);
-            program.setUniform("ozoneLayerEnabled", _ozoneEnabled);
-            program.setUniform("HO", _ozoneHeightScale);
-            program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
+            program.setUniform(_uniformCache.groundRadianceEmittion, _planetGroundRadianceEmittion);
+            program.setUniform(_uniformCache.HR, _rayleighHeightScale);
+            program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
+            program.setUniform(_uniformCache.HM, _mieHeightScale);
+            program.setUniform(_uniformCache.betaMieScattering, _mieScatteringCoeff);
+            program.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
+            program.setUniform(_uniformCache.mieG, _miePhaseConstant);
+            program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
+            program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
+            program.setUniform(_uniformCache.HO, _ozoneHeightScale);
+            program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
 
-            program.setUniform("TRANSMITTANCE_W", _transmittance_table_width);
-            program.setUniform("TRANSMITTANCE_H", _transmittance_table_height);
-            program.setUniform("SKY_W", _irradiance_table_width);
-            program.setUniform("SKY_H", _irradiance_table_height);
-            program.setUniform("OTHER_TEXTURES_W", _delta_e_table_width);
-            program.setUniform("OTHER_TEXTURES_H", _delta_e_table_height);
-            program.setUniform("SAMPLES_R", _r_samples);
-            program.setUniform("SAMPLES_MU", _mu_samples);
-            program.setUniform("SAMPLES_MU_S", _mu_s_samples);
-            program.setUniform("SAMPLES_NU", _nu_samples);
+            program.setUniform(_uniformCache.TRANSMITTANCE_W, _transmittance_table_width);
+            program.setUniform(_uniformCache.TRANSMITTANCE_H, _transmittance_table_height);
+            program.setUniform(_uniformCache.SKY_W, _irradiance_table_width);
+            program.setUniform(_uniformCache.SKY_H, _irradiance_table_height);
+            program.setUniform(_uniformCache.OTHER_TEXTURES_W, _delta_e_table_width);
+            program.setUniform(_uniformCache.OTHER_TEXTURES_H, _delta_e_table_height);
+            program.setUniform(_uniformCache.SAMPLES_R, _r_samples);
+            program.setUniform(_uniformCache.SAMPLES_MU, _mu_samples);
+            program.setUniform(_uniformCache.SAMPLES_MU_S, _mu_s_samples);
+            program.setUniform(_uniformCache.SAMPLES_NU, _nu_samples);
 
-            program.setUniform("ModelTransformMatrix", _modelTransform);
+            program.setUniform(_uniformCache2.ModelTransformMatrix, _modelTransform);
 
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
-            program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
-            program.setUniform("dModelTransformMatrix", _modelTransform);
+            program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
+            program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
             /*
             // The following scale comes from PSC transformations.
@@ -270,14 +270,14 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
             ) * dSgctEye2OSEye;
 
-            program.setUniform("dInverseSgctProjectionToTmpRotTransformMatrix", 
+            program.setUniform(_uniformCache2.dInverseSgctProjectionToTmpRotTransformMatrix,
                 dInverseCameraRotationToSgctEyeTransform * dInverseProjection);
 
-            program.setUniform("dInverseSGCTEyeToTmpRotTransformMatrix", 
+            program.setUniform(_uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix, 
                 dInverseCameraRotationToSgctEyeTransform);
 
-            program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
-            program.setUniform("dCampos", renderData.camera.positionVec3());
+            program.setUniform(_uniformCache2.dObjpos, glm::dvec4(renderData.position.dvec3(), 1.0));
+            program.setUniform(_uniformCache2.dCampos, renderData.camera.positionVec3());
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
@@ -303,9 +303,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
 
             // Sun Position in Object Space
-            program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
+            program.setUniform(_uniformCache2.sunDirectionObj, glm::normalize(glm::dvec3(sunPosObj)));
 
-            program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+            program.setUniform(_uniformCache2.ellipsoidRadii, _ellipsoidRadii);
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {
@@ -399,21 +399,21 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     }
                     counter++;
                 }
-                program.setUniform("hardShadows", _hardShadowsEnabled);
+                program.setUniform(_uniformCache2.hardShadows, _hardShadowsEnabled);
             }
         }
     }
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-    program.setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
+    program.setUniform(_uniformCache2.transmittanceTexture, _transmittanceTableTextureUnit);
 
     _irradianceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
-    program.setUniform("irradianceTexture", _irradianceTableTextureUnit);
+    program.setUniform(_uniformCache2.irradianceTexture, _irradianceTableTextureUnit);
 
     _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    program.setUniform("inscatterTexture", _inScatteringTableTextureUnit);
+    program.setUniform(_uniformCache2.inscatterTexture, _inScatteringTableTextureUnit);
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&,
@@ -481,6 +481,10 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache2.transmittanceTexture = program.uniformLocation("transmittanceTexture");
     _uniformCache2.irradianceTexture = program.uniformLocation("irradianceTexture");
     _uniformCache2.inscatterTexture = program.uniformLocation("inscatterTexture");
+}
+
+void AtmosphereDeferredcaster::update(const UpdateData& data) {
+
 }
 
 void AtmosphereDeferredcaster::setModelTransform(const glm::dmat4& transform) {

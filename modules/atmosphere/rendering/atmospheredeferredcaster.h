@@ -64,6 +64,8 @@ public:
 
     void initializeCachedVariables(ghoul::opengl::ProgramObject&) override;
 
+    void update(const UpdateData&) override;
+
     void preCalculateAtmosphereParam();
 
     void setModelTransform(const glm::dmat4 &transform);
