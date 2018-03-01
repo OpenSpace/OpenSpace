@@ -86,6 +86,14 @@ namespace {
         "Minimum allowed distance",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo velocityZoomControl = {
+        "velocityZoomControl",
+        "Velocity zoom control",
+        "Controls the velocity of the camera motion when zooming in to the focus node. "
+        "The higher the value the faster the camera will move towards the focus."
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -109,6 +117,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
+    , _velocitySensitivity(velocityZoomControl, 0.05f, 0.001f, 0.1f)
 {
     auto smoothStep =
         [](double t) {
@@ -160,6 +169,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
+    addProperty(_velocitySensitivity);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -469,7 +479,7 @@ glm::dvec3 OrbitalNavigator::zoomToFocusNode(const glm::dvec3& camPos,
 
     // Calculate and truncate the factor which determines the velocity of the 
     // camera movement towards the focus node
-    double velocityFactor = (1 - focusLimit/distFromCameraToFocus) * 0.05;
+    double velocityFactor = (1 - focusLimit/distFromCameraToFocus) * _velocitySensitivity;
     velocityFactor = (double)((int)(velocityFactor * 1000)) / 1000;
 
     // Return the updated camera position

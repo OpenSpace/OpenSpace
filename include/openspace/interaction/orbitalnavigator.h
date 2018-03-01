@@ -83,6 +83,7 @@ private:
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;
+    properties::FloatProperty _velocitySensitivity;
 
     MouseStates _mouseStates;
 
@@ -136,6 +137,18 @@ private:
                                      const glm::dquat& focusNodeRotationDiff,
                                      const glm::dquat& globalCameraRotation,
                                      const SurfacePositionHandle& positionHandle) const;
+
+    /**
+    * Translates the camera in such a way that it zooms in on the current focusNode.
+    * The velocity of the zooming depend on distFromCameraToFocus and the final frame
+    * where to camera stops moving depends on the radius of the focusNode.
+    * \returns a new position of the camera, closer to the focusNode than the previous 
+    * position.
+    */
+    glm::dvec3 zoomToFocusNode(const glm::dvec3& camPos, 
+                               const double distFromCameraToFocus,
+                               const glm::dvec3 camPosToCenterPosDiff,
+                               const double radius) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the focus
