@@ -27,6 +27,7 @@
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <ghoul/misc/assert.h>
 #include "dashboard_lua.inl"
 
 namespace openspace {

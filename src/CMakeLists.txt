@@ -323,7 +323,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenelicensewriter.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h

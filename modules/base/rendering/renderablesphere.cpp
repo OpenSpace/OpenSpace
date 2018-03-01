@@ -302,16 +302,16 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     float adjustedTransparency = _transparency;
 
     if (_fadeInThreshold > 0.0) {
-        float distCamera = glm::length(data.camera.positionVec3());
+        double distCamera = glm::length(data.camera.positionVec3());
         float funcValue = static_cast<float>(
             (1.0 / double(_fadeInThreshold/1E24))*(distCamera / 1E24)
         );
 
-        adjustedTransparency *= funcValue > 1.0 ? 1.0 : funcValue;
+        adjustedTransparency *= funcValue > 1.f ? 1.f : funcValue;
     }
 
     if (_fadeOutThreshold > -1.0) {
-        float distCamera = glm::distance(
+        double distCamera = glm::distance(
             data.camera.positionVec3(),
             data.position.dvec3()
         );

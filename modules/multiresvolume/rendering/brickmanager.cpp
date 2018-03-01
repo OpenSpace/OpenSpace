@@ -285,13 +285,13 @@ bool BrickManager::FillVolume(float *_in, float *_out,
 void BrickManager::IncCoord() {
     // Update atlas coordinate
     xCoord_++;
-    if (xCoord_ == _header.xNumBricks_) {
+    if (xCoord_ == static_cast<int>(_header.xNumBricks_)) {
         xCoord_ = 0;
         yCoord_++;
-        if (yCoord_ == _header.yNumBricks_) {
+        if (yCoord_ == static_cast<int>(_header.yNumBricks_)) {
             yCoord_ = 0;
             zCoord_++;
-            if (zCoord_ == _header.zNumBricks_) {
+            if (zCoord_ == static_cast<int>(_header.zNumBricks_)) {
                 zCoord_ = 0;
             }
         }
@@ -365,7 +365,7 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
         static_cast<std::ios::pos_type>(brickSize_);
         */
 
-        long offset = TSP::dataPosition() +
+        long long offset = TSP::dataPosition() +
             static_cast<long>(brickIndex)*
             static_cast<long>(brickSize_);
 
@@ -442,16 +442,17 @@ bool BrickManager::PBOToAtlas(BUFFER_INDEX _pboIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle_[_pboIndex]);
     glm::size3_t dim = textureAtlas_->dimensions();
     glBindTexture(GL_TEXTURE_3D, *textureAtlas_);
-    glTexSubImage3D(GL_TEXTURE_3D,    // target
+    glTexSubImage3D(
+        GL_TEXTURE_3D,                // target
         0,                            // level
         0,                            // xoffset
         0,                            // yoffset
         0,                            // zoffset
-        dim[0],                        // width
-        dim[1],                        // height
-        dim[2],                        // depth
-        GL_RED,                        // format
-        GL_FLOAT,                    // type
+        static_cast<GLsizei>(dim[0]), // width
+        static_cast<GLsizei>(dim[1]), // height
+        static_cast<GLsizei>(dim[2]), // depth
+        GL_RED,                       // format
+        GL_FLOAT,                     // type
         NULL);                        // *pixels
     glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

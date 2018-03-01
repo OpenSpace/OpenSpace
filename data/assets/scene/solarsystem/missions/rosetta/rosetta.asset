@@ -425,6 +425,8 @@ local PhilaeTrail = {
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Rosetta,
     RosettaModel,

@@ -25,42 +25,46 @@
 namespace openspace::luascriptfunctions {
 
 int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().clientConnect();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().signalDisconnect();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().requestHostship();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().resignHostship();
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

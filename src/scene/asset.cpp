@@ -27,6 +27,7 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <iterator>
 #include <algorithm>
 #include <unordered_set>
 
@@ -80,12 +81,7 @@ Asset::Asset(AssetLoader* loader,
     , _assetPath(assetPath)
 {}
 
-Asset::~Asset() {
-    for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
-        _synchronizationWatcher->unwatchSynchronization(h);
-    }
-    _loader->untrackAsset(this);
-}
+Asset::~Asset() {}
 
 std::string Asset::resolveLocalResource(std::string resourceName) {
     std::string currentAssetDirectory = assetDirectory();
@@ -186,8 +182,14 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
     _syncWatches.push_back(watch);
 }
 
-void Asset::syncStateChanged(ResourceSynchronization::State state)
-{
+void Asset::clearSynchronizations() {
+    for (const SynchronizationWatcher::WatchHandle& h : _syncWatches) {
+        _synchronizationWatcher->unwatchSynchronization(h);
+    }
+    _syncWatches.clear();
+}
+
+void Asset::syncStateChanged(ResourceSynchronization::State state) {
     if (state == ResourceSynchronization::State::Resolved) {
         if (!isSynchronized() && isSyncResolveReady()) {
             setState(State::SyncResolved);
@@ -273,28 +275,39 @@ bool Asset::isSyncingOrResolved() const {
         s == State::InitializationFailed;
 }
 
-bool Asset::hasLoadedParent() const {
-    for (const auto& p : _requiringAssets) {
-        std::shared_ptr<Asset> parent = p.lock();
-        if (!parent) {
-            continue;
-        }
-        if (parent->isLoaded()) {
-            return true;
-        }
-    }
-    for (const auto& p : _requestingAssets) {
-        std::shared_ptr<Asset> parent = p.lock();
-        if (!parent) {
-            continue;
-        }
-        if (parent->isLoaded()) {
-            return true;
-        }
-        if (parent->hasLoadedParent()) {
-            return true;
+bool Asset::hasLoadedParent() {
+    {
+        std::vector<std::weak_ptr<Asset>>::iterator it = _requiringAssets.begin();
+        while (it != _requiringAssets.end()) {
+            std::shared_ptr<Asset> parent = it->lock();
+            if (!parent) {
+                it = _requiringAssets.erase(it);
+                continue;
+            }
+            if (parent->isLoaded()) {
+                return true;
+            }
+            ++it;
         }
     }
+    {
+        std::vector<std::weak_ptr<Asset>>::iterator it = _requestingAssets.begin();
+        while (it != _requestingAssets.end()) {
+            std::shared_ptr<Asset> parent = it->lock();
+            if (!parent) {
+                it = _requestingAssets.erase(it);
+                continue;
+            }
+            if (parent->isLoaded()) {
+                return true;
+            }
+            if (parent->hasLoadedParent()) {
+                return true;
+            }
+            ++it;
+        }
+    }
+
     return false;
 }
 

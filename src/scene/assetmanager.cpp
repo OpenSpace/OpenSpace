@@ -24,8 +24,6 @@
 
 #include <openspace/scene/assetmanager.h>
 
-#include <openspace/scripting/script_helper.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/exception.h>
@@ -53,6 +51,7 @@ void AssetManager::initialize() {
 
 void AssetManager::deinitialize() {
     _assetLoader->rootAsset()->deinitialize();
+    _assetLoader->rootAsset()->unload();
     _assetLoader->removeAssetListener(this);
     _assetLoader = nullptr;
 }

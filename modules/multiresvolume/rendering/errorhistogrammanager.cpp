@@ -55,8 +55,10 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
     _maxBin = 1.0; // Should be calculated from tsp file as (maxValue - minValue)
 
     unsigned int numOtLevels = _tsp->numOTLevels();
-    unsigned int numOtLeaves = pow(8, numOtLevels - 1);
-    unsigned int numBstLeaves = pow(2, _tsp->numBSTLevels() - 1);
+    unsigned int numOtLeaves = static_cast<unsigned int>(pow(8, numOtLevels - 1));
+    unsigned int numBstLeaves = static_cast<unsigned int>(
+        pow(2, _tsp->numBSTLevels() - 1)
+    );
 
     _numInnerNodes = _tsp->numTotalNodes() - numOtLeaves * numBstLeaves;
     _histograms = std::vector<Histogram>(_numInnerNodes);

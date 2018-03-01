@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scripting/script_helper.h>
-
 namespace openspace::luascriptfunctions {
 
 /**
@@ -34,8 +32,7 @@ namespace openspace::luascriptfunctions {
  */
 
 int loadKernel(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("loadKernel", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
 
     bool isString = (lua_isstring(L, -1) == 1);
     if (!isString) {
@@ -43,13 +40,15 @@ int loadKernel(lua_State* L) {
         return 0;
     }
 
-    std::string argument = lua_tostring(L, -1);
+    std::string argument = ghoul::lua::checkStringAndPop(L);
     if (!FileSys.fileExists(argument)) {
         return luaL_error(L, "Kernel file '%s' did not exist", argument.c_str());
     }
     unsigned int result = SpiceManager::ref().loadKernel(argument);
 
     lua_pushnumber(L, result);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -59,8 +58,7 @@ int loadKernel(lua_State* L) {
  * automatically resolved.
  */
 int unloadKernel(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("unloadKernel", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadKernel");
 
     bool isString = (lua_isstring(L, -1) == 1);
     bool isNumber = (lua_isnumber(L, -1) == 1);
@@ -71,6 +69,8 @@ int unloadKernel(lua_State* L) {
             ghoul::lua::errorLocation(L) <<
             "Expected argument of type 'string' or 'number'"
         );
+        lua_settop(L, 0);
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
 
@@ -84,6 +84,9 @@ int unloadKernel(lua_State* L) {
         SpiceManager::ref().unloadKernel(argument);
     }
 
+    lua_settop(L, 0);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

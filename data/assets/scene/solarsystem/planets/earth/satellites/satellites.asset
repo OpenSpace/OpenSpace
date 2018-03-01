@@ -69,7 +69,7 @@ function  getSat(title, file, lineNum, textureFile)
       Name = title,
       Parent = transforms.EarthInertial.Name,
       Renderable = {
-          Type = "RenderablePlane",
+          Type = "RenderablePlaneImageLocal",
           Size = 3e4,
           Origin = "Center",
           Body = "TLE",

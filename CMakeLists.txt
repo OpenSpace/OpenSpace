@@ -29,7 +29,7 @@ message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
 set(OPENSPACE_VERSION_MINOR 11)
-set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_PATCH 1)
 set(OPENSPACE_VERSION_STRING "Beta-1")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
@@ -229,6 +229,8 @@ if (OPENSPACE_HAVE_TESTS)
         "GTEST_HAS_TR1_TUPLE=0"
     )
     target_link_libraries(OpenSpaceTest gtest libOpenSpace)
+
+    set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
 
     if (MSVC)
         set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS

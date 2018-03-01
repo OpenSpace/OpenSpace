@@ -93,21 +93,26 @@ double getTime(ccmc::Kameleon* kameleon) {
             if (N_CHARS < 19) {
                 // Fall through to add the required characters
                 switch (N_CHARS) {
-                    case 10 : // YYYY-MM-DD             =>       YYYY-MM-DDTHH
+                    case 10: // YYYY-MM-DD             =>       YYYY-MM-DDTHH
                         seqStartStr += "T00";
-                    case 13 : // YYYY-MM-DDTHH          =>       YYYY-MM-DDTHH:
+                        [[fallthrough]];
+                    case 13: // YYYY-MM-DDTHH          =>       YYYY-MM-DDTHH:
                         seqStartStr += ":";
-                    case 14 : // YYYY-MM-DDTHH:         =>       YYYY-MM-DDTHH:MM
+                        [[fallthrough]];
+                    case 14: // YYYY-MM-DDTHH:         =>       YYYY-MM-DDTHH:MM
                         seqStartStr += "00";
-                    case 16 : // YYYY-MM-DDTHH:MM       =>       YYYY-MM-DDTHH:MM:
+                        [[fallthrough]];
+                    case 16: // YYYY-MM-DDTHH:MM       =>       YYYY-MM-DDTHH:MM:
                         seqStartStr += ":";
-                    case 17 : // YYYY-MM-DDTHH:MM:      =>       YYYY-MM-DDTHH:MM:SS
+                        [[fallthrough]];
+                    case 17: // YYYY-MM-DDTHH:MM:      =>       YYYY-MM-DDTHH:MM:SS
                         seqStartStr += "00";
-                    // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
+                        [[fallthrough]];
+                        // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
                     //     seqStartStr += ".000";
                     // case 23 : // YYYY-MM-DDTHH:MM:SS.   =>    YYYY-MM-DDTHH:MM:SS.000Z
                     //     seqStartStr += "Z";
-                    default :
+                    default:
                         break;
                 }
             }

@@ -142,7 +142,6 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,
         /*scaleFactor,*/ color) _uniformCache;
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
