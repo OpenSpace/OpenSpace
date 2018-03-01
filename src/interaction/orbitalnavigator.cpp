@@ -92,7 +92,12 @@ namespace {
         "Velocity zoom control",
         "Controls the velocity of the camera motion when zooming in to the focus node. "
         "The higher the value the faster the camera will move towards the focus."
-        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo flyToNode = {
+        "flyToNode",
+        "Fly to focus node",
+        "Determines whether to fly to the focus node or just focus on it."
     };
 } // namespace
 
@@ -118,6 +123,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
     , _velocitySensitivity(velocityZoomControl, 0.05f, 0.001f, 0.1f)
+    , _flyTo(flyToNode, true)
 {
     auto smoothStep =
         [](double t) {
@@ -170,6 +176,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
     addProperty(_velocitySensitivity);
+    addProperty(_flyTo);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -204,9 +211,18 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
             posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
         glm::dvec3 centerToActualSurface = glm::dmat3(_focusNode->modelTransform()) * centerToActualSurfaceModelSpace;
         double planetRadius = length(centerToActualSurface);
-    
-        // Zoom in on the focusNode and move towards it
-        camPos = zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, planetRadius);
+
+        // The distance from the focus node's center to the camera when zoomed in,
+        // i.e. the distance limit when focus is set optimally
+        double focusLimit = planetRadius * 4;
+
+        // Zoom in on the focusNode and move towards it, but when the camera arrives to
+        // the focus node make it possible for the user to manually zoom even closer
+        if (_flyTo) {
+            camPos =
+                distFromCameraToFocus > (focusLimit) ?
+                zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit) : camPos;
+        }
         
         // Decompose camera rotation so that we can handle global and local rotation
         // individually. Then we combine them again when finished.
@@ -466,17 +482,13 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Add difference to position
     return cameraPosition + rotationDiffVec3;
-}
+}       
 
-                                                                                                         
 glm::dvec3 OrbitalNavigator::zoomToFocusNode(const glm::dvec3& camPos,
                                              const double distFromCameraToFocus,
                                              const glm::dvec3 camPosToCenterPosDiff,
-                                             const double radius) const
+                                             const double focusLimit) const
 {
-    // The distance from the focus node's center to the camera when zoomed in
-    double focusLimit = radius * 4; 
-
     // Calculate and truncate the factor which determines the velocity of the 
     // camera movement towards the focus node
     double velocityFactor = (1 - focusLimit/distFromCameraToFocus) * _velocitySensitivity;

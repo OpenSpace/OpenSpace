@@ -84,6 +84,7 @@ private:
     properties::FloatProperty _minimumAllowedDistance;
     properties::FloatProperty _sensitivity;
     properties::FloatProperty _velocitySensitivity;
+    properties::BoolProperty _flyTo;
 
     MouseStates _mouseStates;
 
@@ -148,7 +149,7 @@ private:
     glm::dvec3 zoomToFocusNode(const glm::dvec3& camPos, 
                                const double distFromCameraToFocus,
                                const glm::dvec3 camPosToCenterPosDiff,
-                               const double radius) const;
+                               const double focusLimit) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the focus
