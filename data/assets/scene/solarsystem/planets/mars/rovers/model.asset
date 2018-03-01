@@ -16,8 +16,8 @@ local models = asset.syncedResource({
 })
 
 
-local MarsCuriosityModel = {
-    Name = "MarsCuriosityModel",
+local CuriosityModel = {
+    Name = "CuriosityModel",
     Parent = transforms.CuriosityPosition.Name,
     Renderable = {
         Type = "RenderableModel",
@@ -30,4 +30,4 @@ local MarsCuriosityModel = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { MarsCuriosityModel })
+assetHelper.registerSceneGraphNodesAndExport(asset, { CuriosityModel })

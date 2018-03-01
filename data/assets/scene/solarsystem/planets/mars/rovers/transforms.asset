@@ -1,10 +1,10 @@
 local assetHelper = asset.require('util/asset_helper')
-local marsTransforms = asset.require('scene/solarsystem/planets/mars/mars')
+local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
 
 
 local CuriosityPosition = {
     Name = "CuriosityPosition",
-    Parent = marsTransforms.Mars.Name,
+    Parent = marsTransforms.MarsBarycenter.Name,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -16,6 +16,7 @@ local CuriosityPosition = {
             SourceFrame = "IAU_MOON",
             DestinationFrame = "GALACTIC"
         }
+
     }
 }
 

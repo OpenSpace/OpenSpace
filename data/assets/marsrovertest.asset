@@ -1,5 +1,5 @@
-local assetHelper = asset.require("util/asset_helper")
-
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('transforms')
 
 local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
@@ -16,7 +16,19 @@ local models = asset.syncedResource({
 })
 
 
+local MarsCuriosityModel = {
+    Name = "MarsCuriosityModel",
+    Parent = transforms.CuriosityPosition.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "CURIOSITY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/NewHorizonsCleanModel.obj"
+        },
+        ColorTexture = textures .. "/NHTexture.jpg"
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { MarsCuriosityModel })
-
-
 

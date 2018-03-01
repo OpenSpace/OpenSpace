@@ -2,20 +2,20 @@ local sceneHelper = asset.require('util/scene_helper')
 local assetHelper = asset.require('util/asset_helper')
 
 asset.require('spice/base')
-asset.request('scene/digitaluniverse/milkyway')
 asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
 
-
-local CurModelAsset = asset.require('curiosityModel')
+local CuriosityModelAsset = asset.require('scene/solarsystem/planets/mars/rovers/model')
+-- local MarsAsset = asset.request('scene/solarsystem/planets/mars/mars')
 
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
     openspace.navigation.setCameraState({
-        Focus = CurModelAsset.MarsCuriosityModel.Name,
+        Focus = CuriosityModelAsset.CuriosityModel.Name,
+        -- Focus = MarsAsset.Mars.Name,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.683224, -0.165934, 0.701234, 0.118073 },
     })
-    
 end)
 
