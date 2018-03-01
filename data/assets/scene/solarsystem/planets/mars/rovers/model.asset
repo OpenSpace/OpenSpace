@@ -1,5 +1,9 @@
+
+-- Rename to curiosity or curiosityModel?
+
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
@@ -12,22 +16,67 @@ local models = asset.syncedResource({
     Name = "Mars Curiosity Model",
     Type = "HttpSynchronization",
     Identifier = "marscuriosity_model",
-    Version = 1
+    Version = 3
 })
 
+-- Curiosity Model --
+
+local Curiosity = {
+    Name = "Curiosity",
+    Parent = transforms.CuriosityPosition.Name,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MOON",
+            Observer = "MARS BARYCENTER",
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_MOON",
+            DestinationFrame = "GALACTIC"
+        }
+    }
+}
 
 local CuriosityModel = {
     Name = "CuriosityModel",
-    Parent = transforms.CuriosityPosition.Name,
+    Parent = Curiosity.Name
+}
+
+local CuriosityBody = {
+    Name = "Curiosity_body",
+    Parent = CuriosityModel.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "CURIOSITY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_clean_test.obj"
+          GeometryFile = models .. "/bodyTest.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { CuriosityModel })
+-- Curiosity Model Instrumetns & Parts --
+
+local CuriosityWheels = {
+    Name = "Curiosity_wheels",
+    Parent = CuriosityModel.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "CURIOSITY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/wheelsTest.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    }
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+    Curiosity,
+    CuriosityModel,
+    CuriosityBody,
+    CuriosityWheels
+})
