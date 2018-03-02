@@ -40,6 +40,8 @@
 
 namespace openspace {
 
+ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
+
 DigitalUniverseModule::DigitalUniverseModule()
     : OpenSpaceModule(DigitalUniverseModule::Name)
 {}

@@ -123,6 +123,8 @@ public:
     void removeRenderProgram(
         const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
+    void removeRenderProgram(ghoul::opengl::ProgramObject* program);
+
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
     */

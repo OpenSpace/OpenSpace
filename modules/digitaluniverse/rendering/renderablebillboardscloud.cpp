@@ -24,12 +24,12 @@
 
 #include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -38,10 +38,8 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
 #include <glm/gtx/string_cast.hpp>
 #include <ghoul/glm.h>
-
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -50,6 +48,8 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderableBillboardsCloud";
+    constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyColor          = "Color";
     constexpr const char* keyUnit           = "Unit";
@@ -622,13 +622,16 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _program = renderEngine.buildRenderProgram(
-        "RenderableBillboardsCloud",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
+    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        ProgramObjectName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramObjectName,
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
+            );
+        }
     );
 
     _uniformCache.modelViewProjection = _program->uniformLocation(
@@ -677,11 +680,13 @@ void RenderableBillboardsCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramObjectName,
+        [](ghoul::opengl::ProgramObject* p) {
+            RenderEngine& renderEngine = OsEng.renderEngine();
+            renderEngine.removeRenderProgram(p);
+        }
+    );
 
     if (_hasSpriteTexture) {
         _spriteTexture = nullptr;
