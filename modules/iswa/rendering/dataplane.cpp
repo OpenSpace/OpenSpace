@@ -27,10 +27,6 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace {
-    constexpr const char* _loggerCat = "DataPlane";
-} // namespace
-
 namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)

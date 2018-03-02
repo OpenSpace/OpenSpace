@@ -37,10 +37,8 @@
 #include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
-#include <glm/ext.hpp>
 #include <ghoul/misc/misc.h>
 
-#include <glm/gtx/component_wise.hpp>
 #include <imgui_internal.h>
 
 namespace openspace {
@@ -505,8 +503,8 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec2Property::ValueType value = *p;
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    float min = glm::compMin(p->minValue());
+    float max = glm::compMax(p->maxValue());
 
     bool changed = ImGui::SliderFloat2(
         name.c_str(),
@@ -541,8 +539,8 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec3Property::ValueType value = *p;
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    float min = glm::compMin(p->minValue());
+    float max = glm::compMax(p->maxValue());
 
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
@@ -586,8 +584,8 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec4Property::ValueType value = *p;
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
+    float min = glm::compMin(p->minValue());
+    float max = glm::compMax(p->maxValue());
 
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
@@ -610,7 +608,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
         renderTooltip(prop, tooltipDelay);
     }
 
-    if (value != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             std::to_string(value),

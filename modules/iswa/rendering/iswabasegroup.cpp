@@ -66,9 +66,9 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
+    , _dataProcessor(nullptr)
     , _registered(false)
     , _type(type)
-    , _dataProcessor(nullptr)
 {
     addProperty(_enabled);
     addProperty(_alpha);
@@ -102,8 +102,7 @@ std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor(){
 
 std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent() {
     return _groupEvent;
-};
-
+}
 
 void IswaBaseGroup::registerProperties(){
     _enabled.onChange([this]{

@@ -41,7 +41,17 @@ end
 asset.export("createGlobe", createGlobe)
 
 local createGlobes = function(t)
+
+    for _,v in pairs(t) do
+        if type(v) ~= "table" then
+            openspace.printWarning("The table passed to 'createGlobes' was not a table of tables")
+            -- We return an empty table of tables to silence a potential future warning
+            return {{}}
+        end
+    end
+
     result = {}
+
     for i, v in ipairs(t) do
         globe, trail = createGlobe(
             v.Name,

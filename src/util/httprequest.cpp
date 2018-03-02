@@ -369,7 +369,7 @@ bool HttpFileDownload::initDownload() {
             LERROR("Cannot open file " << destinationFile);
             return false;
         }
-#endif
+#else
         if (errno) {
 #if defined(__unix__)
             char buffer[255];
@@ -389,6 +389,7 @@ bool HttpFileDownload::initDownload() {
 
         LERROR("Cannot open file " << destinationFile);
         return false;
+#endif
     }
     return true;
 }

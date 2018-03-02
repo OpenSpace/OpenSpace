@@ -102,13 +102,8 @@ int passTest(lua_State* state) {
 }
 
 TEST_F(AssetLoaderTest, Assertions) {
-    try {
-        _assetLoader->add("passassertion");
-    }
-    catch (const std::exception& e) {
-        EXPECT_TRUE(false) << e.what();
-    }
-    EXPECT_THROW(_assetLoader->add("failassertion"), ghoul::lua::LuaRuntimeException);
+    EXPECT_NO_THROW(_assetLoader->add("passassertion"));
+    EXPECT_NO_THROW(_assetLoader->add("failassertion"));
 }
 
 TEST_F(AssetLoaderTest, BasicExportImport) {
@@ -120,7 +115,7 @@ TEST_F(AssetLoaderTest, BasicExportImport) {
     }
 }
 
-TEST_F(AssetLoaderTest, AssetFuncitons) {
+TEST_F(AssetLoaderTest, AssetFunctions) {
     try {
         _assetLoader->add("assetfunctionsexist");
     } catch (const std::exception& e) {
@@ -128,7 +123,7 @@ TEST_F(AssetLoaderTest, AssetFuncitons) {
     }
 }
 
-TEST_F(AssetLoaderTest, DependencyFuncitons) {
+TEST_F(AssetLoaderTest, DependencyFunctions) {
     try {
         _assetLoader->add("dependencyfunctionsexist");
     }

@@ -37,7 +37,7 @@ protected:
     void SetUp() override {
         openspace::SpiceManager::initialize();
         openspace::SpiceManager::ref().loadKernel(
-            "${TESTDIR}/SpiceTest/spicekernels/naif0008.tls"
+            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
         );
     }
     

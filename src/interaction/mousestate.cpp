@@ -56,11 +56,15 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
     bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
     bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl);
-    bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift);
+    bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl) |
+                          inputState.isKeyPressed(Key::RightControl);
+    bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift) |
+                          inputState.isKeyPressed(Key::RightShift);
+    bool keyAltPressed = inputState.isKeyPressed(Key::LeftAlt) |
+                          inputState.isKeyPressed(Key::RightAlt);
 
     // Update the mouse states
-    if (button1Pressed && !keyShiftPressed) {
+    if (button1Pressed && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRotationMouseState.previousPosition - mousePosition;
@@ -87,7 +91,7 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
         _globalRotationMouseState.previousPosition = mousePosition;
         _globalRotationMouseState.velocity.decelerate(deltaTime);
     }
-    if (button2Pressed) {
+    if (button2Pressed || (keyAltPressed && button1Pressed)) {
         glm::dvec2 mousePositionDelta =
             _truckMovementMouseState.previousPosition - mousePosition;
         _truckMovementMouseState.velocity.set(

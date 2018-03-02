@@ -20,12 +20,7 @@ local Styx = {
             Target = "STYX",
             Observer = "PLUTO BARYCENTER",
             Kernels = kernels.Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_STYX",
-            DestinationFrame = "GALACTIC"
-        },
+        }
     },
     Renderable = {
         Type = "RenderablePlanet",
@@ -51,7 +46,7 @@ local StyxText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,
@@ -77,6 +72,8 @@ local StyxTrail = {
     },
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Styx,

@@ -43,7 +43,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
@@ -195,7 +194,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos) {
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
                                                                        double timestamp)
 {
-    return std::move(OsEng.downloadManager().fetchFile(
+    return OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile&) {
                 LDEBUG(
@@ -209,13 +208,13 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );
+        );
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
                                                                       double timestamp)
 {
-    return std::move(OsEng.downloadManager().fetchFile(
+    return OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile&) {
                 LDEBUG(
@@ -229,7 +228,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );
+        );
 }
 
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) {
@@ -704,7 +703,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
                 _cdfInformation[groupName] = std::vector<CdfInfo>();
 
                 json cdfs = cdfGroup["cdfs"];
-                for (int j = 0; j < cdfs.size(); j++) {
+                for (size_t j = 0; j < cdfs.size(); j++) {
                     json cdf = cdfs.at(j);
 
                     std::string name = cdf["name"];

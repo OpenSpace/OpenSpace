@@ -142,11 +142,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(projection, modelView, modelViewProjection, cameraPos, cameraLookup,
+    UniformCache(modelViewProjection, cameraPos, cameraLookup,
         renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
         color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
         spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;

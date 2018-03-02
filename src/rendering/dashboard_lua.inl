@@ -33,10 +33,7 @@ namespace openspace::luascriptfunctions {
 * addDashboardItem(table):
 */
 int addDashboardItem(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
 
     int type = lua_type(L, -1);
     if (type == LUA_TTABLE) {
@@ -46,10 +43,14 @@ int addDashboardItem(lua_State* L) {
         }
         catch (const ghoul::lua::LuaFormatException& e) {
             LERRORC("addDashboardItem", e.what());
+            lua_settop(L, 0);
             return 0;
         }
+        lua_settop(L, 0);
 
         OsEng.dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
     else {
@@ -62,12 +63,11 @@ int addDashboardItem(lua_State* L) {
 * removeDashboardItems():
 */
 int removeDashboardItems(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments > 1) {
-        return luaL_error(L, "Expected %i or %i arguments, got %i", 0, 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeDashboardItems");
 
     OsEng.dashboard().removeDashboardItems();
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

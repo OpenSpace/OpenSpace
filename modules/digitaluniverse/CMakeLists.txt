@@ -50,9 +50,6 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_gs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard2_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard2_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboard2_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_gs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/billboardpolygon_vs.glsl

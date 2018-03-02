@@ -68,16 +68,15 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         return 0;
     }
 
-    float id;
-    d.getValue("CygnetId", id);
+    int id = static_cast<int>(d.value<double>("CygnetId"));
 
     auto cygnetInformation = IswaManager::ref().cygnetInformation();
-    if (cygnetInformation.find((int)id) == cygnetInformation.end()) {
+    if (cygnetInformation.find(id) == cygnetInformation.end()) {
         LWARNING("Could not find Cygnet with id = " + std::to_string(id));
         return 0;
     }
 
-    auto info = cygnetInformation[(int)id];
+    auto info = cygnetInformation[id];
     std::string name = info->name;
     int updateInterval = info->updateInterval;
     info->selected = true;
@@ -88,7 +87,7 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
     } else {
         d.setValue("Name", name);
         d.setValue("Type", "ScreenSpaceCygnet");
-        d.setValue("UpdateInterval", (float) updateInterval);
+        d.setValue("UpdateInterval", static_cast<float>(updateInterval));
 
         std::shared_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)

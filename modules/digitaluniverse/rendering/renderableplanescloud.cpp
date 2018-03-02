@@ -328,7 +328,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _planeMinSize(PlaneMinSizeInfo, 0.5, 0.0, 500.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
-    , _fontRenderer(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _labelFile("")
@@ -530,7 +529,6 @@ void RenderablePlanesCloud::initializeGL() {
         "modelViewProjectionTransform"
     );
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
     _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
 
@@ -539,9 +537,6 @@ void RenderablePlanesCloud::initializeGL() {
     loadTextures();
 
     if (_hasLabel) {
-        if (_fontRenderer == nullptr)
-            _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
-                ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 30;
             _font = OsEng.fontManager().font(
@@ -606,7 +601,6 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         modelViewProjectionMatrix
     );
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
@@ -680,10 +674,6 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
                                          const glm::dvec3& orthoRight,
                                          const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-
     float scale = 0.0;
     switch (_unit) {
         case Meter:
@@ -715,7 +705,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
-        _fontRenderer->render(
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             //_textColor,
@@ -847,7 +837,6 @@ void RenderablePlanesCloud::update(const UpdateData&) {
             "modelViewProjectionTransform"
         );
         _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
         _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
         _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
     }

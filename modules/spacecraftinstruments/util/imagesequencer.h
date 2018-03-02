@@ -125,10 +125,8 @@ public:
      * makes the request. If an instance is not registered in the class then the singleton
      * returns false and no projections will occur.
      */
-    bool getImagePaths(std::vector<Image>& captures,
-                       std::string projectee,
-                       std::string instrumentRequest,
-                       double sinceTime);
+    bool getImagePaths(std::vector<Image>& captures, std::string projectee, 
+        std::string instrumentRequest, double sinceTime);
 
     /*
      * returns true if instrumentID is within a capture range.
@@ -189,8 +187,6 @@ private:
 
     // current simulation time
     double _currentTime;
-    // simulation time of previous frame
-    double _previousTime;
     // time between current simulation time and an upcoming capture
     double _intervalLength;
     // next consecutive capture in time

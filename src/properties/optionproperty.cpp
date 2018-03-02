@@ -75,12 +75,18 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
 }
 
+void OptionProperty::clearOptions() {
+    _options.clear();
+    _value = 0;
+}
+
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (const Option& o : _options) {
+    for (size_t i = 0; i < _options.size(); ++i) {
+        const Option& o = _options[i];
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
-            NumericalProperty::setValue(value);
+            NumericalProperty::setValue(static_cast<int>(i));
             return;
         }
     }
@@ -88,6 +94,11 @@ void OptionProperty::setValue(int value) {
     // Otherwise, log an error
     LERROR("Could not find an option for value '" << value << "' in OptionProperty");
 }
+
+bool OptionProperty::hasOption() const {
+    return value() >= 0 && value() < static_cast<int>(_options.size());
+}
+
 
 const OptionProperty::Option& OptionProperty::option() const {
     return _options[value()];

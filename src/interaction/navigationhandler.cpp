@@ -74,6 +74,10 @@ NavigationHandler::NavigationHandler()
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     _origin.onChange([this]() {
+        if (_origin.value().empty()) {
+            return;
+        }
+
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
             LWARNING(
@@ -213,17 +217,12 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 
     if (!readSuccessful) {
         throw ghoul::RuntimeError(
-            "Position, Rotation and Focus need to be defined for camera dictionary.");
-    }
-
-    SceneGraphNode* node = sceneGraphNode(focus);
-    if (!node) {
-        throw ghoul::RuntimeError(
-            "Could not find a node in scenegraph called '" + focus + "'");
+            "Position, Rotation and Focus need to be defined for camera dictionary."
+        );
     }
 
     // Set state
-    setFocusNode(node);
+    _origin = focus;
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
