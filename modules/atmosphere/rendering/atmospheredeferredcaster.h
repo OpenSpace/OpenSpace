@@ -136,7 +136,7 @@ private:
         SKY_W, SKY_H, OTHER_TEXTURES_W, OTHER_TEXTURES_H, SAMPLES_R,
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
     UniformCache(ModelTransformMatrix, dInverseModelTransformMatrix, dModelTransformMatrix,
-        dInverseSgctProjectionToTmpRotTransformMatrix,
+        dInverseSgctProjectionToModelTransformMatrix,
         dInverseSGCTEyeToTmpRotTransformMatrix,
         dObjpos, dCampos, dCamPosObj, sunDirectionObj, ellipsoidRadii,
         hardShadows, transmittanceTexture, irradianceTexture,

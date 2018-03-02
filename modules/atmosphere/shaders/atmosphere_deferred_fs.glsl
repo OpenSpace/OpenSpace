@@ -86,8 +86,8 @@ uniform sampler2DMS mainColorTexture;
 
 uniform dmat4 dInverseModelTransformMatrix; 
 uniform dmat4 dModelTransformMatrix;
-uniform dmat4 dInverseSgctProjectionToTmpRotTransformMatrix;
 uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
+uniform dmat4 dInverseSgctProjectionToModelTransformMatrix;
 
 uniform dvec4 dObjpos;
 uniform dvec3 dCampos;
@@ -252,17 +252,12 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Using the interpolated coords:
     // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
-                            msaaSamplePatter[mssaSample+1]);
+                             msaaSamplePatter[mssaSample+1]);
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, interpolatedNDCPos.z, 1.0) / gl_FragCoord.w; 
 
-
-    // Clip to OS Cam Rig Rotation
-    dvec4 tmpRInv     = dInverseSgctProjectionToTmpRotTransformMatrix * clipCoords;
-    dvec4 worldCoords = dvec4(tmpRInv.xyz + dCampos, 1.0);
+    // Clip to Object Coords
+    dvec4 objectCoords = dInverseSgctProjectionToModelTransformMatrix * clipCoords;
     
-    // World to Object
-    dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
-
     // Planet Position in Object Space
     // JCC: Applying the inverse of the model transformation on the object postion in World 
     // space results in imprecision. 
