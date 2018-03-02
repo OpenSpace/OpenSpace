@@ -279,6 +279,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dObjpos, glm::dvec4(renderData.position.dvec3(), 1.0));
             program.setUniform(_uniformCache2.dCampos, renderData.camera.positionVec3());
 
+            glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
+            program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
+
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
                 "SUN",
@@ -475,6 +478,7 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix = program.uniformLocation("dInverseSGCTEyeToTmpRotTransformMatrix");
     _uniformCache2.dObjpos = program.uniformLocation("dObjpos");
     _uniformCache2.dCampos = program.uniformLocation("dCampos");
+    _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
     _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
     _uniformCache2.ellipsoidRadii = program.uniformLocation("ellipsoidRadii");
     _uniformCache2.hardShadows = program.uniformLocation("hardShadows");

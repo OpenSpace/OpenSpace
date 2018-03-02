@@ -91,6 +91,7 @@ uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
 
 uniform dvec4 dObjpos;
 uniform dvec3 dCampos;
+uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
 uniform dvec3 ellipsoidRadii;
 
@@ -269,8 +270,8 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     //planetPositionObjectCoords = dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
     // Camera Position in Object Space
-    cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
-      
+    cameraPositionInObject = dCamPosObj;  
+    
     // ============================
     // ====== Building Ray ========
     // Ray in object space (in KM)
@@ -616,7 +617,7 @@ void main() {
                 // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
                 // in the depth buffer is less than the distance to the atmosphere then the atmosphere
                 // is occluded
-                // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
+                // Fragments positions into G-Buffer are written in SGCT Eye Space (View plus Camera Rig Coords)
                 // when using their positions later, one must convert them to the planet's coords
                 
                 // Get data from G-Buffer
@@ -636,7 +637,7 @@ void main() {
                 //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
                 double pixelDepth = length(cameraPositionInObject.xyz - fragObjectCoords.xyz);
                 
-                // JCC (12/13/2017): TRick to remove floating error in texture.
+                // JCC (12/13/2017): Trick to remove floating error in texture.
                 // We see a squared noise on planet's surface when seeing the planet
                 // from far away.
                 float dC = float(length(cameraPositionInObject.xyz));
