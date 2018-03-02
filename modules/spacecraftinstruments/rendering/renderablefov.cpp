@@ -478,7 +478,7 @@ void RenderableFov::initializeGL() {
 }
 
 void RenderableFov::deinitializeGL() {
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    OsEng.renderEngine().removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 
     glDeleteBuffers(1, &_orthogonalPlane.vbo);

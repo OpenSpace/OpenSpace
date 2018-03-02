@@ -244,7 +244,7 @@ void RenderableTrail::initializeGL() {
 void RenderableTrail::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_programObject) {
-        renderEngine.removeRenderProgram(_programObject);
+        renderEngine.removeRenderProgram(_programObject.get());
         _programObject = nullptr;
     }
 }

@@ -189,7 +189,7 @@ void RenderableModel::deinitializeGL() {
     _texture = nullptr;
 
     if (_programObject) {
-        OsEng.renderEngine().removeRenderProgram(_programObject);
+        OsEng.renderEngine().removeRenderProgram(_programObject.get());
         _programObject = nullptr;
     }
 }

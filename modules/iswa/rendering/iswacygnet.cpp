@@ -240,7 +240,7 @@ void IswaCygnet::update(const UpdateData&) {
 bool IswaCygnet::destroyShader() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
+        renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
     return true;

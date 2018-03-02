@@ -322,7 +322,7 @@ void RenderableStars::deinitializeGL() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program);
+        renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }

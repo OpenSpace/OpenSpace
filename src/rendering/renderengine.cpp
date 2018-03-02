@@ -814,12 +814,6 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     return program;
 }
 
-void RenderEngine::removeRenderProgram(
-    const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
-{
-    removeRenderProgram(program.get());
-}
-
 void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
     if (!program) {
         return;

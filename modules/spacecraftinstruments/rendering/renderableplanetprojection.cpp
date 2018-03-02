@@ -427,7 +427,7 @@ void RenderablePlanetProjection::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     glDeleteBuffers(1, &_vertexPositionBuffer);
 
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    OsEng.renderEngine().removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 
     _fboProgramObject = nullptr;

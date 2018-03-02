@@ -279,7 +279,7 @@ void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
     if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader);
+        OsEng.renderEngine().removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 }

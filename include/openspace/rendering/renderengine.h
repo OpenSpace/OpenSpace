@@ -120,9 +120,6 @@ public:
         std::string csPath,
         const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
-    void removeRenderProgram(
-        const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
-
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**

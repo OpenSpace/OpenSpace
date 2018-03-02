@@ -229,7 +229,7 @@ void RenderableConstellationBounds::deinitializeGL() {
     _vao = 0;
 
     if (_program) {
-        OsEng.renderEngine().removeRenderProgram(_program);
+        OsEng.renderEngine().removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
