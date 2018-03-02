@@ -1,13 +1,11 @@
 local assetHelper = asset.require('util/asset_helper')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
---local transforms = asset.require('scene/solarsystem/sun/transforms')
+
 
 
 local CuriosityPosition = {
     Name = "CuriosityPosition",
-    -- Parent = marsTransforms.Mars.Name,
     Parent = marsTransforms.MarsBarycenter.Name,
-    --Parent = transforms.SolarSystemBarycenter.Name,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",

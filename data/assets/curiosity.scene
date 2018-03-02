@@ -7,7 +7,7 @@ asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 
 --local CuriosityModelAsset =
-asset.require('scene/solarsystem/planets/mars/rovers/model')
+asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 local MarsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
 
@@ -22,7 +22,7 @@ asset.onInitialize(function ()
     
     -- Mark the Gaia Instrument Model (and a few stars?) as interesting nodes
     openspace.markInterestingNodes({
-       "CuriosityModel", "Mars"
+       "Curiosity", "Mars"
     })
 
 
@@ -47,10 +47,8 @@ asset.onInitialize(function ()
 end)
 
 asset.onDeinitialize(function ()
-
-
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
     openspace.removeInterestingNodes({
-    	"CuriosityModel", "Mars"
+    	"Curiosity", "Mars"
     })
 end)
