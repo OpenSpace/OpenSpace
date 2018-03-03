@@ -759,7 +759,6 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name, std::string vsPath,
     std::string fsPath, const ghoul::Dictionary& data)
 {
-
     ghoul::Dictionary dict = data;
 
     // set path to the current renderer's main fragment shader
@@ -814,9 +813,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     return program;
 }
 
-void RenderEngine::removeRenderProgram(
-    const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
-{
+void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
     if (!program) {
         return;
     }
@@ -824,7 +821,7 @@ void RenderEngine::removeRenderProgram(
     auto it = std::find(
         _programs.begin(),
         _programs.end(),
-        program.get()
+        program
     );
 
     if (it != _programs.end()) {

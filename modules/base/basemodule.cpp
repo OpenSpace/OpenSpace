@@ -68,6 +68,8 @@
 
 namespace openspace {
 
+ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
+
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
@@ -137,6 +139,10 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fGeometry, "Model geometry factory was not created");
     fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
+}
+
+void BaseModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {

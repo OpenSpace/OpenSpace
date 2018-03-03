@@ -261,7 +261,7 @@ void RenderableModelProjection::deinitializeGL() {
 
     _projectionComponent.deinitialize();
 
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    OsEng.renderEngine().removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 }
 

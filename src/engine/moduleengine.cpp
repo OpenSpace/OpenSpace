@@ -53,14 +53,33 @@ void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
     }
 }
 
+void ModuleEngine::initializeGL() {
+    LDEBUG("Initializing OpenGL of modules");
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG("Initializing OpenGL of module '" << m->name() << "'");
+        m->initializeGL();
+    }
+    LDEBUG("Finished initializing OpenGL of modules");
+}
+
 void ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
-    for (auto& m : _modules) {
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
         LDEBUG("Deinitializing module '" << m->name() << "'");
         m->deinitialize();
     }
     _modules.clear();
-    LDEBUG("Finished destroying modules");
+    LDEBUG("Finished deinitializing modules");
+}
+
+void ModuleEngine::deinitializeGL() {
+    LDEBUG("Deinitializing OpenGL of modules");
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG("Deinitializing OpenGL of module '" << m->name() << "'");
+        m->deinitializeGL();
+
+    }
+    LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,

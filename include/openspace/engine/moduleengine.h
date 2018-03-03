@@ -59,10 +59,20 @@ public:
     void initialize(const ghoul::Dictionary& moduleConfigurations);
 
     /**
+     * Calls the initializeGL functions of all registered OpenSpaceModule%s.
+     */
+    void initializeGL();
+
+    /**
      * Deinitializes all of the contained OpenSpaceModule%s by calling the
      * OpenSpaceModule::deinitialize methods.
      */
     void deinitialize();
+
+    /**
+     * Calls the deinitializeGL functions of all registered OpenSpaceModule%s.
+     */
+    void deinitializeGL();
 
     /**
      * Registers the passed \p module with this ModuleEngine. The OpenSpaceModule::create

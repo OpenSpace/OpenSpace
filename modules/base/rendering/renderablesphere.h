@@ -75,7 +75,7 @@ private:
     float _fadeOutThreshold;
     float _fadeInThreshold;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    ghoul::opengl::ProgramObject* _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::unique_ptr<PowerScaledSphere> _sphere;

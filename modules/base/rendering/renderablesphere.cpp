@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
@@ -39,6 +40,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const char* ProgramName = "Sphere";
+
     enum Orientation {
         Outside = 1,
         Inside = 2
@@ -265,11 +268,15 @@ void RenderableSphere::initializeGL() {
     );
     _sphere->initialize();
 
-    // pscstandard
-    _shader = OsEng.renderEngine().buildRenderProgram(
-        "Sphere",
-        absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+            );
+        }
     );
 
     loadTexture();
@@ -278,10 +285,13 @@ void RenderableSphere::initializeGL() {
 void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
-    if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
+    BaseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
@@ -297,7 +307,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
 
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    setPscUniforms(*_shader, data.camera, data.position);
 
     float adjustedTransparency = _transparency;
 

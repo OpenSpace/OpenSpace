@@ -144,7 +144,7 @@ LayerShaderManager::LayerShaderManager(const std::string& shaderName,
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        renderEngine.removeRenderProgram(_programObject);
+        renderEngine.removeRenderProgram(_programObject.get());
         _programObject = nullptr;
     }
 }
@@ -230,7 +230,7 @@ void LayerShaderManager::recompileShaderProgram(
     }
 
     // Remove old program
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    OsEng.renderEngine().removeRenderProgram(_programObject.get());
 
     _programObject = OsEng.renderEngine().buildRenderProgram(
         _shaderName,
