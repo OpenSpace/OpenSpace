@@ -1,14 +1,38 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local satImageFolder = asset.syncedResource({
+    Name = "Satellite Image Files",
+    Type = "HttpSynchronization",
+    Identifier = "tle_satellites_images",
+    Version = 1
+})
 
-local satImageFolder = asset.require('./satellite_image').SatImageFolder
---local satDataPath = asset.require('./satellite_data').SatDataPath
-local satDataPath = asset.require('./satellite_data').SatDataPath
---satDataPath = "C:\\Users\\openspace\\Desktop\\OpenSpace_20180207\\sync\\http\\satellite_data\\2"
+--Name, URL, and color scheme for each satellite group
+satelliteGroups = {
+    { title = "GPS",
+      url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
+      trailColor = {0.9, 0.5, 0.0}
+    },
+    { title = "SpaceStations",
+      url = "http://celestrak.com/NORAD/elements/stations.txt",
+      trailColor = {0.9, 0.0, 0.0}
+    },
+    { title = "Geostationary",
+      url = "http://celestrak.com/NORAD/elements/geo.txt",
+      trailColor = {0.9, 0.9, 0.0}
+    },
+}
 
-
--- Waiting for URL based download
-DOWNLOAD = false
+local satDataPath = asset.syncedResource({
+    Name = "Satellite TLE Data",
+    Type = "UrlSynchronization",
+    Identifier = "satellite_tle_data",
+    Url = {
+        satelliteGroups[1].url,
+        satelliteGroups[2].url,
+        satelliteGroups[3].url,
+	}
+})
 
 
 
@@ -163,41 +187,38 @@ function printSatTrailElements_debug(satElem)
   print("   " .. satElem.GuiPath)
 end
 
+
+
+if( satDataPath == nil or satDataPath == '' ) then
+  print("### No satDataPath (nil) ###")
+else
+  print("satDataPath = " .. satDataPath)
+end
+
+if( satImageFolder == nil or satImageFolder == '' ) then
+  print("### No satImageFolder (nil) ###")
+else
+  print("satImageFolder = " .. satImageFolder)
+end
+
+
+
 -------------------------------------------------------------
---Name, URL, and color scheme for each satellite group
-satelliteGroups = {
-    { title = "GPS",
-      url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
-      trailColor = {0.9, 0.5, 0.0}
-    },
-    { title = "SpaceStations",
-      url = "http://celestrak.com/NORAD/elements/stations.txt",
-      trailColor = {0.9, 0.0, 0.0}
-    },
-    { title = "Geostationary",
-      url = "http://celestrak.com/NORAD/elements/geo.txt",
-      trailColor = {0.9, 0.9, 0.0}
-    },
-}
+
 
 for sOrbit in values(satelliteGroups) do
   fileErr = ""
   filename = sOrbit.url:match("([^/]+)$")
   filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
-
---  sOrbit.path = satDataPath .. "/tle/" .. filename
-  sOrbit.path = satDataPath .. filename
+  sOrbit.path = satDataPath .. "/" .. filename
   sOrbit.texturePath = satImageFolder .. "/" .. "satB.png"
 
-  if DOWNLOAD then
-    openspace.downloadFile(sOrbit.url, sOrbit.path)
-  end
   local sat_var
   local satTrail_var
 
   line = {} 
-  myfile = io.open(satDataPath  .. "/tle/" .. filename, "r")
-  lines = getNumLinesInFile(satDataPath .. "/tle/" .. filename)
+  myfile = io.open(sOrbit.path, "r")
+  lines = getNumLinesInFile(sOrbit.path)
   --now loop through the tle file and get each set of 3 lines
   if myfile then
     for n=1,lines,3 do

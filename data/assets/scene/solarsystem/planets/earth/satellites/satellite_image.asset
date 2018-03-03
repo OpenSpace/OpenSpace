@@ -1,7 +1,0 @@
-local satImageFolder = asset.syncedResource({
-    Name = "Satellite Image Files",
-    Type = "HttpSynchronization",
-    Identifier = "tle_satellites_images",
-    Version = 1
-})
-asset.export("SatImageFolder", satImageFolder)
