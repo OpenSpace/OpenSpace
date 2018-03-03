@@ -56,6 +56,10 @@ void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
 }
 
+void DigitalUniverseModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+}
+
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
     return {
         RenderablePoints::Documentation(),

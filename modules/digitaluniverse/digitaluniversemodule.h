@@ -43,6 +43,7 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitializeGL() override;
 };
 
 } // namespace openspace

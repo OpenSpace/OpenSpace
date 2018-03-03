@@ -141,6 +141,10 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
+void BaseModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+}
+
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
         DashboardItemDate::Documentation(),

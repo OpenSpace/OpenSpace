@@ -81,6 +81,10 @@ void SpacecraftInstrumentsModule::internalDeinitialize() {
     ImageSequencer::deinitialize();
 }
 
+void SpacecraftInstrumentsModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+}
+
 std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {
