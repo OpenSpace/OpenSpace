@@ -1,14 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
-local satImageFolder = asset.syncedResource({
-    Name = "Satellite Image Files",
-    Type = "HttpSynchronization",
-    Identifier = "tle_satellites_images",
-    Version = 1
-})
 
 --Name, URL, and color scheme for each satellite group
-satelliteGroups = {
+local satelliteGroups = {
     { title = "GPS",
       url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
       trailColor = {0.9, 0.5, 0.0}
@@ -23,32 +17,34 @@ satelliteGroups = {
     },
 }
 
-local satDataPath = asset.syncedResource({
-    Name = "Satellite TLE Data",
-    Type = "UrlSynchronization",
-    Identifier = "satellite_tle_data",
-    Url = {
-        satelliteGroups[1].url,
-        satelliteGroups[2].url,
-        satelliteGroups[3].url,
-	}
-})
-
-
-
-function dirListing(dirname)
-  f = io.popen('ls ' .. dirname)
-  files = {}
-  for name in f:lines() do
-    table.insert(files, name)
-  end
-  return files
-end
-
 function values(t)
   local i = 0
   return function () i = i + 1; return t[i] end
 end
+
+function buildSyncedUrlList(satGroups)
+  urlList = {}
+  for sat in values(satGroups) do
+    table.insert(urlList, sat.url)
+  end
+  return {
+    Name = "Satellite TLE Data",
+    Type = "UrlSynchronization",
+    Identifier = "satellite_tle_data",
+	Url = urlList
+  }
+end
+
+--Define the synced resources for satellite image and TLE files
+local satImageFolder = asset.syncedResource({
+    Name = "Satellite Image Files",
+    Type = "HttpSynchronization",
+    Identifier = "tle_satellites_images",
+    Version = 1
+})
+local satDataPath = asset.syncedResource(buildSyncedUrlList(satelliteGroups))
+
+
 
 function trimString(s)
   s = s:gsub("^%s*(.-)%s*$", "%1")
@@ -188,24 +184,7 @@ function printSatTrailElements_debug(satElem)
 end
 
 
-
-if( satDataPath == nil or satDataPath == '' ) then
-  print("### No satDataPath (nil) ###")
-else
-  print("satDataPath = " .. satDataPath)
-end
-
-if( satImageFolder == nil or satImageFolder == '' ) then
-  print("### No satImageFolder (nil) ###")
-else
-  print("satImageFolder = " .. satImageFolder)
-end
-
-
-
 -------------------------------------------------------------
-
-
 for sOrbit in values(satelliteGroups) do
   fileErr = ""
   filename = sOrbit.url:match("([^/]+)$")
