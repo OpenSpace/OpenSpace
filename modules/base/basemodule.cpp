@@ -68,6 +68,8 @@
 
 namespace openspace {
 
+ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
+
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {

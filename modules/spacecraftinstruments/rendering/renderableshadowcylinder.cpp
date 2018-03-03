@@ -24,18 +24,19 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableshadowcylinder.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* MainFrame = "GALACTIC";
+    constexpr const char* ProgramName = "ShadowCylinderProgram";
+    constexpr const char* MainFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
@@ -265,11 +266,17 @@ void RenderableShadowCylinder::initializeGL() {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram(
-        "ShadowCylinderProgram",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_fs.glsl")
+    _shader = SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                        "terminatorshadow_vs.glsl"),
+                absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                        "terminatorshadow_fs.glsl")
+            );
+        }
     );
 
     _uniformCache.modelViewProjectionTransform = _shader->uniformLocation(
@@ -281,12 +288,14 @@ void RenderableShadowCylinder::initializeGL() {
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader.get());
-        _shader = nullptr;
-    }
-
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
+ 
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vbo);

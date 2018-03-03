@@ -24,35 +24,29 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/space/rendering/planetgeometry.h>
-
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
-
 namespace {
     constexpr const char* _loggerCat = "RenderablePlanetProjection";
+    constexpr const char* ProjectiveProgramName = "ProjectiveProgram";
+    constexpr const char* FBOPassProgramName = "FBOPassProgram";
+
 
     constexpr const char* KeyGeometry = "Geometry";
     constexpr const char* KeyProjection = "Projection";
@@ -328,11 +322,19 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
 void RenderablePlanetProjection::initializeGL() {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
-        "projectiveProgram",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl")
-    );
+    _programObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            ProjectiveProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    ProjectiveProgramName,
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanet_vs.glsl"),
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanet_fs.glsl")
+                );
+            }
+        );
 
     _mainUniformCache.sunPos = _programObject->uniformLocation("sun_pos");
     _mainUniformCache.modelTransform = _programObject->uniformLocation("modelTransform");
@@ -357,15 +359,19 @@ void RenderablePlanetProjection::initializeGL() {
     );
     _mainUniformCache.heightTexture = _programObject->uniformLocation("heightTexture");
 
-    _fboProgramObject = ghoul::opengl::ProgramObject::Build(
-        "fboPassProgram",
-        absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_vs.glsl"
-        ),
-        absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
-        )
-    );
+    _fboProgramObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            FBOPassProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return ghoul::opengl::ProgramObject::Build(
+                    FBOPassProgramName,
+                        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                                "renderablePlanetProjection_vs.glsl"),
+                        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                                "renderablePlanetProjection_fs.glsl")
+                );
+            }
+        );
 
     _fboUniformCache.projectionTexture = _fboProgramObject->uniformLocation(
         "projectionTexture"
@@ -427,9 +433,17 @@ void RenderablePlanetProjection::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     glDeleteBuffers(1, &_vertexPositionBuffer);
 
-    OsEng.renderEngine().removeRenderProgram(_programObject.get());
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        ProjectiveProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
     _programObject = nullptr;
 
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        FBOPassProgramName
+    );
     _fboProgramObject = nullptr;
 }
 
@@ -488,12 +502,12 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     //90 deg rotation w.r.t spice req.
     glm::mat4 rot = glm::rotate(
         _transform,
-        static_cast<float>(M_PI_2),
+        glm::half_pi<float>(),
         glm::vec3(1, 0, 0)
     );
     glm::mat4 roty = glm::rotate(
         _transform,
-        static_cast<float>(M_PI_2),
+        glm::half_pi<float>(),
         glm::vec3(0, -1, 0)
     );
 
@@ -598,13 +612,24 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     // meridian and y completes the right handed coordinate system.
     // Doing this is part of changing from using the transforms defined by the
     // scenegraph node (data.modelTransform) to achieve higher precision rendering. //KB
-    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
+    glm::dmat4 rot = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(1.0, 0.0, 0.0)
+    );
+    glm::dmat4 roty = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(0.0, -1.0, 0.0)
+    );
     modelTransform = modelTransform * rot * roty;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(
+        _mainUniformCache.modelTransform,
+        glm::mat4(modelTransform)
+    );
     _programObject->setUniform(_mainUniformCache
         .modelViewProjectionTransform,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)

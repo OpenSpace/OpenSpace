@@ -49,6 +49,7 @@
 namespace {
     constexpr const char* _loggerCat        = "RenderableBillboardsCloud";
     constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
+    constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
 
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyColor          = "Color";
@@ -390,6 +391,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
     , _program(nullptr)
+    , _renderToPolygonProgram(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _colorMapFile("")
@@ -634,6 +636,20 @@ void RenderableBillboardsCloud::initializeGL() {
         }
     );
 
+    _renderToPolygonProgram =
+        DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+            RenderToPolygonProgram,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return ghoul::opengl::ProgramObject::Build(
+                    RenderToPolygonProgram,
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
+                );
+            }
+        );
+
+
     _uniformCache.modelViewProjection = _program->uniformLocation(
         "modelViewProjectionTransform"
     );
@@ -687,6 +703,12 @@ void RenderableBillboardsCloud::deinitializeGL() {
             renderEngine.removeRenderProgram(p);
         }
     );
+    _program = nullptr;
+
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        RenderToPolygonProgram
+    );
+    _renderToPolygonProgram = nullptr;
 
     if (_hasSpriteTexture) {
         _spriteTexture = nullptr;
@@ -1690,25 +1712,18 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
 }
 
 void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
-    );
-
-    program->activate();
+    _renderToPolygonProgram->activate();
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     glClearBufferfv(GL_COLOR, 0, black);
 
-    program->setUniform("sides", _polygonSides);
-    program->setUniform("polygonColor", _pointColor);
+    _renderToPolygonProgram->setUniform("sides", _polygonSides);
+    _renderToPolygonProgram->setUniform("polygonColor", _pointColor);
 
     glBindVertexArray(vao);
     glDrawArrays(GL_POINTS, 0, 1);
     glBindVertexArray(0);
 
-    program->deactivate();
+    _renderToPolygonProgram->deactivate();
 }
 
 } // namespace openspace

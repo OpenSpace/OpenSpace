@@ -76,8 +76,8 @@ private:
     properties::StringProperty _addHeightMapTexturePath;
     bool _heightMapTextureDirty;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _fboProgramObject;
     UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
         projectionFading, baseTexture, projectionTexture, heightTexture)

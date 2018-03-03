@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <ghoul/opengl/programobjectmanager.h>
+
 namespace openspace {
 
 class SpacecraftInstrumentsModule : public OpenSpaceModule {
@@ -36,6 +38,8 @@ public:
     SpacecraftInstrumentsModule();
 
     std::vector<documentation::Documentation> documentations() const override;
+
+    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;

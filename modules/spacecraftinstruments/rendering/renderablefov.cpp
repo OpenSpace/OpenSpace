@@ -24,24 +24,23 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablefov.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <glm/gtx/projection.hpp>
 
 #include <openspace/performance/performancemeasurement.h>
 
 namespace {
+    constexpr const char* ProgramName             = "FovProgram";
     constexpr const char* KeyBody                 = "Body";
     constexpr const char* KeyFrame                = "Frame";
 //    const char* KeyColor                = "RGB";
@@ -317,12 +316,17 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFov::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram(
-        "FovProgram",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
-    );
+    _programObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            ProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    ProgramName,
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
+                );
+            }
+        );
 
     _uniformCache.modelViewProjection = _programObject->uniformLocation(
         "modelViewProjectionTransform"
@@ -478,7 +482,12 @@ void RenderableFov::initializeGL() {
 }
 
 void RenderableFov::deinitializeGL() {
-    OsEng.renderEngine().removeRenderProgram(_programObject.get());
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
     _programObject = nullptr;
 
     glDeleteBuffers(1, &_orthogonalPlane.vbo);

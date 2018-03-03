@@ -142,6 +142,8 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     ghoul::opengl::ProgramObject* _program;
+    ghoul::opengl::ProgramObject* _renderToPolygonProgram;
+
     UniformCache(modelViewProjection, cameraPos, cameraLookup,
         renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
         color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,

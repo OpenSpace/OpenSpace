@@ -759,7 +759,6 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name, std::string vsPath,
     std::string fsPath, const ghoul::Dictionary& data)
 {
-
     ghoul::Dictionary dict = data;
 
     // set path to the current renderer's main fragment shader

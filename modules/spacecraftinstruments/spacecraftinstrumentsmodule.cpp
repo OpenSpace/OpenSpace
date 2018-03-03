@@ -45,6 +45,8 @@
 
 namespace openspace {
 
+ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectManager;
+
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
