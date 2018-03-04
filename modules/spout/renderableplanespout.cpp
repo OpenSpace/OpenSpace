@@ -29,7 +29,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>

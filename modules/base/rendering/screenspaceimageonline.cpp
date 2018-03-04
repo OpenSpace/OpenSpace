@@ -31,9 +31,9 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     constexpr const char* KeyName = "Name";

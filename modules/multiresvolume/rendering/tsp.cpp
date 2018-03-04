@@ -24,6 +24,7 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>

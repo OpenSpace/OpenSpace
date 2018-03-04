@@ -24,7 +24,7 @@
 
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/time.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>

@@ -38,7 +38,7 @@
 #include <fstream>
 #include <algorithm>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>

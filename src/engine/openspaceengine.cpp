@@ -81,7 +81,10 @@
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/debugcontext.h>
-#include <ghoul/systemcapabilities/systemcapabilities>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include <glbinding/callbacks.h>
 

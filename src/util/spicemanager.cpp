@@ -25,6 +25,7 @@
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
@@ -43,7 +44,7 @@ namespace {
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
     // as the maximum message length
-    const unsigned SpiceErrorBufferSize = 1841;
+    constexpr const unsigned SpiceErrorBufferSize = 1841;
 
     // This method checks if one of the previous SPICE methods has failed. If it has, an
     // exception with the SPICE error message is thrown

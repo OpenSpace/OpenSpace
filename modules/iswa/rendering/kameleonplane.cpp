@@ -25,7 +25,7 @@
 #include <fstream>
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push

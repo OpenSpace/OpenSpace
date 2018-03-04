@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/file.h>
 
 namespace openspace::luascriptfunctions {
 

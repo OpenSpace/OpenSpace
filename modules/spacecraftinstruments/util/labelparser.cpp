@@ -30,6 +30,7 @@
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>

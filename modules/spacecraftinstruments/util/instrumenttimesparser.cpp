@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>

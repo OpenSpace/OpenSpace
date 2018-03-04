@@ -39,7 +39,7 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 

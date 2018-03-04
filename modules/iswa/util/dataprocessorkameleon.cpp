@@ -24,6 +24,7 @@
 
 #include <modules/iswa/util/dataprocessorkameleon.h>
 //#include <algorithm>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 
