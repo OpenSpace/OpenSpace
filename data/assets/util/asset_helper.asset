@@ -93,7 +93,6 @@ local requestAll = function (asset, directory)
        return End=='' or string.sub(String,-string.len(End))==End
     end
 
-    -- directory = asset.localResource('') .. directory
     local files = openspace.walkDirectoryFiles(asset.localResource('') .. directory, true)
     for _, file in pairs(files) do
         if file:ends('.asset') then

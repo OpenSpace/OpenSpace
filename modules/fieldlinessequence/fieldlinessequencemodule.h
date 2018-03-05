@@ -31,7 +31,11 @@ namespace openspace {
 
 class FieldlinesSequenceModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "FieldlinesSequence";
+
     FieldlinesSequenceModule();
+    
+    static std::string DefaultTransferFunctionFile;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
