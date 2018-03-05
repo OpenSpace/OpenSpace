@@ -71,6 +71,7 @@ private:
     
     void createDataSlice(ColumnOption option);
     bool readFitsFile();
+    float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
     properties::StringProperty _fitsFilePath;
     std::unique_ptr<ghoul::filesystem::File> _fitsFile;

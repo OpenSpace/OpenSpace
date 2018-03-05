@@ -13,6 +13,16 @@ return {
             "Velocity_Y",
             "Velocity_Z",
             "Gaia_G_Mag",
+            "Gaia_Parallax",
+            --"Gaia_Parallax_Err",
+            --"Gaia_Proper_Motion_RA",
+            --"Gaia_Proper_Motion_RA_Err",
+            --"Gaia_Proper_Motion_Dec",
+            --"Gaia_Proper_Motion_Dec_Err",
+            --"Tycho_B_Mag",
+            --"Tycho_B_Mag_Err",
+            --"Tycho_V_Mag",
+            --"Tycho_V_Mag_Err",
         }
     }
 }

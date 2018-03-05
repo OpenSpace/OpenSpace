@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
@@ -781,12 +782,17 @@ void RenderableGaiaStars::createDataSlice(ColumnOption option) {
     _slicedData.clear();
 
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        glm::vec3 position = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-        glm::vec3 velocity = glm::vec3(_fullData[i + 3], _fullData[i + 4], _fullData[i + 5]);
+        float parallax = _fullData[i + 7];
 
-        // Convert parsecs -> meter
+        // Convert kiloparsecs -> meter
+        glm::vec3 position = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
         position *= 1000 * static_cast<float>(distanceconstants::Parsec);
-        //velocity *= static_cast<float>(distanceconstants::Parsec); // TODO (adaal): what unit!?
+
+        // Convert milliarcseconds/year to m/s
+        glm::vec3 velocity = glm::vec3(
+            convertMasPerYearToMeterPerSecond(_fullData[i + 3], parallax),
+            convertMasPerYearToMeterPerSecond(_fullData[i + 4], parallax),
+            convertMasPerYearToMeterPerSecond(_fullData[i + 5], parallax));
 
         switch (option) {
         case ColumnOption::Static: {
@@ -842,6 +848,19 @@ void RenderableGaiaStars::createDataSlice(ColumnOption option) {
         }
             
     }
+}
+
+float RenderableGaiaStars::convertMasPerYearToMeterPerSecond(float masPerYear, 
+    float parallax) {
+
+    float degreeFromMas = 1 / 3600000.0;
+    float radiusInMeter = ( static_cast<float>(distanceconstants::Parsec) * 1000 ) 
+        / parallax;
+    float perYearToPerSecond = 1 / SecondsPerYear;
+
+    float meterPerSecond = masPerYear * degreeFromMas * radiusInMeter * perYearToPerSecond;
+    return meterPerSecond;
+
 }
 
 } // namespace openspace
