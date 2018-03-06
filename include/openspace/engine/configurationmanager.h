@@ -62,7 +62,9 @@ public:
     static const std::string KeyLuaDocumentation;
     /// The key that stores the scripting log
     static const std::string KeyScriptLog;
-    /// The key that stores the Property documentation
+    /// The key that stores the Scene Property documentation
+    static const std::string KeyScenePropertyDocumentation;
+    /// The key that stores the Root Property documentation
     static const std::string KeyPropertyDocumentation;
     /// The key that stores the keyboard bindings that should be stored
     static const std::string KeyKeyboardShortcuts;

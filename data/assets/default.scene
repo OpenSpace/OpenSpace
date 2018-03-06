@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
@@ -18,31 +19,31 @@ asset.request('customization/globebrowsing')
 local Keybindings = {
     {
         Key = "s",
-        Command = sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+        Command = propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
         Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
         Local = false
     },
     {
         Key = "b",
-        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
-                  sceneHelper.property.invert('Stars.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.renderable.Enabled'),
         Documentation = "Toggle background (Stars and Milkyway).",
         Local = false
     },
     {
         Key = "g",
-        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
-                  sceneHelper.property.invert('Stars.renderable.Enabled') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
-                  sceneHelper.property.invert('Mars.RenderableGlobe.PerformShading') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  sceneHelper.property.invert('Moon.RenderableGlobe.Enabled') ..
-                  sceneHelper.property.invert('Sun.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Stars.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
+                  propertyHelper.invert('Scene.Mars.RenderableGlobe.PerformShading') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+                  propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
+                  propertyHelper.invert('Scene.Sun.renderable.Enabled'),
         Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
         Local = false
     },
