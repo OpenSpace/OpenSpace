@@ -90,6 +90,7 @@ private:
     properties::FloatProperty _magnitudeExponent;
     properties::FloatProperty _sharpness;
     properties::FloatProperty _billboardSize;
+    properties::FloatProperty _closeUpBoostDist;
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
@@ -100,8 +101,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness, 
-        billboardSize, screenSize, psfTexture, time, colorTexture, columnOption) 
-        _uniformCache;
+        billboardSize, screenSize, psfTexture, time, colorTexture, columnOption, 
+        closeUpBoostDist) _uniformCache;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;

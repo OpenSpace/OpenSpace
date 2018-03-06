@@ -45,6 +45,7 @@ out vec2 texCoord;
 out float ge_observationDistance;
 
 uniform float viewScaling;
+uniform float closeUpBoostDist;
 uniform float billboardSize;
 uniform vec2 screenSize;
 uniform int columnOption;
@@ -63,18 +64,24 @@ void main() {
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
 
+    // Make closer stars look a bit bigger.
+    float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
+    float closeUpBoost = closeUpBoostDist / observedDistance;
+
+    // Take magnitude into account if that option is chosen.
     if ( columnOption == COLUMNOPTION_COLOR ) {
         float absoluteMagnitude = vs_brightness[0];
+        closeUpBoost *= absoluteMagnitude / 5.0;
     }
 
     vs_position = gl_in[0].gl_Position;
+    vec2 starSize = vec2(billboardSize + closeUpBoost) / screenSize * vs_position.w;
 
     // Discard geometry if star has no position (but wasn't a nullArray). 
-    if(length(vs_position) < EPS){
+    // Or if size is smaller than one pixel.
+    if( length(vs_position) < EPS || length(starSize) < 1.5 ){
         return;
     }
-
-    vec2 starSize = vec2(billboardSize) / screenSize * vs_position.w;
 
     for (int i = 0; i < 4; i++) {
         gl_Position = vs_position + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
@@ -83,7 +90,8 @@ void main() {
 
         // G-Buffer
         ge_gPosition  = vs_gPosition[0];
-        ge_observationDistance = safeLength(vs_gPosition[0] / viewScaling);
+        ge_observationDistance = observedDistance;
+        
         EmitVertex();
     }
 

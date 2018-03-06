@@ -111,6 +111,12 @@ namespace {
         "Set the billboard size of all stars"
     };
 
+    static const openspace::properties::Property::PropertyInfo CloseUpBoostDistInfo = {
+        "CloseUpBoostDist",
+        "Close-Up Boost Distance [pc]",
+        "Set the distance where stars starts to increase in size. Unit is Parsec."
+    };
+
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color Texture",
@@ -200,6 +206,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 BillboardSizeInfo.description
             },
             {
+                CloseUpBoostDistInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                CloseUpBoostDistInfo.description
+            },
+            {
                 ColorTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
@@ -240,9 +252,10 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _magnitudeExponent(MagnitudeExponentInfo, 19.f, 0.f, 30.f)
+    , _magnitudeExponent(MagnitudeExponentInfo, 19.f, 0.f, 50.f)
     , _sharpness(SharpnessInfo, 1.f, 0.f, 5.f)
     , _billboardSize(BillboardSizeInfo, 15.f, 1.f, 100.f)
+    , _closeUpBoostDist(CloseUpBoostDistInfo, 10.f, 1.f, 1000.f)
     , _firstRow(FirstRowInfo, 1, 1, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 50000, 1, 2539913)
     , _columnNamesList(ColumnNamesInfo)
@@ -337,6 +350,13 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     }
     addProperty(_billboardSize);
 
+    if (dictionary.hasKey(CloseUpBoostDistInfo.identifier)) {
+        _closeUpBoostDist = static_cast<float>(
+            dictionary.value<double>(CloseUpBoostDistInfo.identifier)
+            );
+    }
+    addProperty(_closeUpBoostDist);
+
     if (dictionary.hasKey(FilePreprocessedInfo.identifier)) {
         _filePreprocessed = dictionary.value<bool>(FilePreprocessedInfo.identifier);
     }
@@ -409,6 +429,7 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
     _uniformCache.sharpness = _program->uniformLocation("sharpness");
     _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+    _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.time = _program->uniformLocation("time");
@@ -459,6 +480,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
     _program->setUniform(_uniformCache.sharpness, _sharpness);
     _program->setUniform(_uniformCache.billboardSize, _billboardSize);
+    _program->setUniform(_uniformCache.closeUpBoostDist, 
+        _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
+    );
     _program->setUniform(_uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
@@ -675,6 +699,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+        _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.time = _program->uniformLocation("time");
