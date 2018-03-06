@@ -36,7 +36,7 @@
 #include <sstream>
 #include <streambuf>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 namespace {
     const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";

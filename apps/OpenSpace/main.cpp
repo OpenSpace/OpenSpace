@@ -43,7 +43,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/stacktrace.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <Windows.h>
 #include <shellapi.h>
@@ -104,7 +104,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         GetCurrentThreadId()
     );
 
-    LINFO("Creating dump file: " << dumpFile);
+    LINFO(fmt::format("Creating dump file: {}", dumpFile));
 
     HANDLE hDumpFile = CreateFile(
         dumpFile.c_str(),
@@ -559,7 +559,9 @@ int main_main(int argc, char** argv) {
     catch (const ghoul::RuntimeError& e) {
         // Write out all of the information about the exception and flush the logs
         LFATALC(e.component, e.message);
-        LogMgr.flushLogs();
+        if (ghoul::logging::LogManager::isInitialized()) {
+            LogMgr.flushLogs();
+        }
         return EXIT_FAILURE;
     }
     catch (const ghoul::AssertionException& e) {
@@ -570,12 +572,16 @@ int main_main(int argc, char** argv) {
     }
     catch (const std::exception& e) {
         LFATALC("Exception", e.what());
-        LogMgr.flushLogs();
+        if (ghoul::logging::LogManager::isInitialized()) {
+            LogMgr.flushLogs();
+        }
         return EXIT_FAILURE;
     }
     catch (...) {
         LFATALC("Exception", "Unknown exception");
-        LogMgr.flushLogs();
+        if (ghoul::logging::LogManager::isInitialized()) {
+            LogMgr.flushLogs();
+        }
         return EXIT_FAILURE;
     }
 
@@ -583,7 +589,9 @@ int main_main(int argc, char** argv) {
         return EXIT_SUCCESS;
     }
 
-    LINFO("Detected OpenGL version: " << glVersion.first << "." << glVersion.second);
+    LINFO(fmt::format(
+        "Detected OpenGL version: {}.{}", glVersion.first, glVersion.second
+    ));
 
     // Create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());

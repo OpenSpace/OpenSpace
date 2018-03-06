@@ -341,8 +341,7 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
         newRenderer = std::make_unique<ABufferRenderer>();
         break;
     case RendererImplementation::Invalid:
-        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-            << "rendering methods");
+        LFATAL(fmt::format("Rendering method '{}' not available", renderingMethod));
     }
 
     setRenderer(std::move(newRenderer));
@@ -384,7 +383,7 @@ void RenderEngine::initialize() {
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
-    LINFO("Setting renderer from string: " << renderingMethod);
+    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL

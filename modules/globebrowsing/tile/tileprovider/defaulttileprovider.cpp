@@ -92,7 +92,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     double pixelSize = 0.0;
     int tilePixelSize = 0;
     if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
-        LDEBUG("Default pixel size overridden: " << pixelSize);
+        LDEBUG(fmt::format("Default pixel size overridden: {}", pixelSize));
         tilePixelSize = static_cast<int>(pixelSize);
     }
 
@@ -106,7 +106,10 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     _performPreProcessing =
         LayerManager::shouldPerformPreProcessingOnLayergroup(_layerGroupID);
     if (dictionary.getValue<bool>(KeyPerformPreProcessing, _performPreProcessing)) {
-        LDEBUG("Default PerformPreProcessing overridden: " << _performPreProcessing);
+        LDEBUG(fmt::format(
+            "Default PerformPreProcessing overridden: {}",
+            _performPreProcessing
+        ));
     }
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
@@ -241,7 +244,11 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
 
     // Tiles are only available for levels 2 and higher.
     if (_preCacheLevel >= 2) {
-        LDEBUG("Precaching '" << _filePath << "' with level '" << _preCacheLevel << "'");
+        LDEBUG(fmt::format(
+            "Precaching '{}' with level '{}'",
+            _filePath.value(),
+            _preCacheLevel
+        ));
         for (int level = 0; level <= _preCacheLevel; ++level) {
             for (int x = 0; x <= level * 2; ++x) {
                 for (int y = 0; y <= level; ++y) {

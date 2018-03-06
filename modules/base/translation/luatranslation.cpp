@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -107,7 +108,10 @@ glm::dvec3 LuaTranslation::position(const Time& time) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            "Script '" << _luaScriptFile << "' does not have a function 'translation'"
+            fmt::format(
+                "Script '{}' does not have a function 'translation'",
+                _luaScriptFile
+            )
         );
         return glm::dvec3(0.0);
     }
@@ -130,7 +134,10 @@ glm::dvec3 LuaTranslation::position(const Time& time) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            "Error executing 'translation': " << lua_tostring(_state, -1)
+            fmt::format(
+                "Error executing 'translation': {}",
+                lua_tostring(_state, -1)
+            )
         );
     }
 

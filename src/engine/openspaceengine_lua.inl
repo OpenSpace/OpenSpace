@@ -233,7 +233,7 @@ int downloadFile(lua_State* L) {
     lua_settop(L, 0);
 
     const std::string _loggerCat = "OpenSpaceEngine";
-    LINFO("Downloading file from " << uri);
+    LINFO(fmt::format("Downloading file from {}", uri));
     DownloadManager dm = openspace::DownloadManager(false);
     std::shared_ptr<openspace::DownloadManager::FileFuture> future =
         dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);

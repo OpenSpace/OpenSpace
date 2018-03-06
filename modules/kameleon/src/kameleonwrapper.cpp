@@ -51,6 +51,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
+#include <ghoul/fmt.h>
 
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -128,9 +129,9 @@ bool KameleonWrapper::open(const std::string& filename) {
         _gridType = getGridType(_xCoordVar, _yCoordVar, _zCoordVar);
         _type = getModelType();
 
-        LDEBUG("x:" << _xCoordVar);
-        LDEBUG("y:" << _yCoordVar);
-        LDEBUG("z:" << _zCoordVar);
+        LDEBUG(fmt::format("x: {}", _xCoordVar));
+        LDEBUG(fmt::format("y: {}", _yCoordVar));
+        LDEBUG(fmt::format("z: {}", _zCoordVar));
 
         _xMin =
             _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat();
@@ -166,18 +167,18 @@ bool KameleonWrapper::open(const std::string& filename) {
         _zValidMax =
             _model->getVariableAttribute(_zCoordVar, "valid_max").getAttributeFloat();
 
-        LDEBUG("_xMin: " << _xMin);
-        LDEBUG("_xMax: " << _xMax);
-        LDEBUG("_yMin: " << _yMin);
-        LDEBUG("_yMax: " << _yMax);
-        LDEBUG("_zMin: " << _zMin);
-        LDEBUG("_zMax: " << _zMax);
-        LDEBUG("_xValidMin: " << _xValidMin);
-        LDEBUG("_xValidMax: " << _xValidMax);
-        LDEBUG("_yValidMin: " << _yValidMin);
-        LDEBUG("_yValidMax: " << _yValidMax);
-        LDEBUG("_zValidMin: " << _zValidMin);
-        LDEBUG("_zValidMax: " << _zValidMax);
+        LDEBUG(fmt::format("_xMin: {}", _xMin));
+        LDEBUG(fmt::format("_xMax: {}", _xMax));
+        LDEBUG(fmt::format("_yMin: {}", _yMin));
+        LDEBUG(fmt::format("_yMax: {}", _yMax));
+        LDEBUG(fmt::format("_zMin: {}", _zMin));
+        LDEBUG(fmt::format("_zMax: {}", _zMax));
+        LDEBUG(fmt::format("_xValidMin: {}", _xValidMin));
+        LDEBUG(fmt::format("_xValidMax: {}", _xValidMax));
+        LDEBUG(fmt::format("_yValidMin: {}", _yValidMin));
+        LDEBUG(fmt::format("_yValidMax: {}", _yValidMax));
+        LDEBUG(fmt::format("_zValidMin: {}", _zValidMin));
+        LDEBUG(fmt::format("_zValidMax: {}", _zValidMax));
 
         return true;
     }
@@ -204,7 +205,7 @@ float* KameleonWrapper::getUniformSampledValues(
     const glm::size3_t& outDimensions)
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
+    LINFO(fmt::format("Loading variable {} from CDF data with a uniform sampling", var));
 
     unsigned int size = static_cast<unsigned int>(
         outDimensions.x * outDimensions.y * outDimensions.z
@@ -219,8 +220,8 @@ float* KameleonWrapper::getUniformSampledValues(
     double stepY = (_yMax-_yMin)/(static_cast<double>(outDimensions.y));
     double stepZ = (_zMax-_zMin)/(static_cast<double>(outDimensions.z));
 
-    LDEBUG(var << "Min: " << varMin);
-    LDEBUG(var << "Max: " << varMax);
+    LDEBUG(fmt::format("{} Min: {}", var, varMin));
+    LDEBUG(fmt::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
     const int bins = 200;
@@ -349,7 +350,7 @@ float* KameleonWrapper::getUniformSampledValues(
             // LDEBUG("====================");
             break;
         }
-        LDEBUG("histogram[" << i << "]: " << histogram[i]);
+        LDEBUG(fmt::format("histogram[{}]: {}", i, histogram[i]));
     }
 
     double dist = varMax - varMin;
@@ -363,10 +364,10 @@ float* KameleonWrapper::getUniformSampledValues(
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
         if(data[i] < 0.0) {
-            LERROR("Datapoint " << i << " less than 0");
+            LERROR(fmt::format("Datapoint {} less than 0", i));
         }
         if(data[i] > 1.0) {
-            LERROR("Datapoint " << i << " more than 1");
+            LERROR(fmt::format("Datapoint {} more than 1", i));
         }
     }
 
@@ -385,7 +386,10 @@ float* KameleonWrapper::getUniformSliceValues(const std::string& var,
                                               const float& slice)
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
+    LINFO(fmt::format(
+        "Loading variable {} from CDF data with a uniform sampling",
+        var
+    ));
 
     unsigned int size = static_cast<unsigned int>(
         outDimensions.x * outDimensions.y * outDimensions.z
@@ -410,8 +414,8 @@ float* KameleonWrapper::getUniformSliceValues(const std::string& var,
     double yDim = (!ySlice)? outDimensions.y-1 : 1.0;
     double zDim = (!zSlice)? outDimensions.z-1 : 1.0;
 
-    LDEBUG(var << "Min: " << varMin);
-    LDEBUG(var << "Max: " << varMax);
+    LDEBUG(fmt::format("{} min: {}", var, varMin));
+    LDEBUG(fmt::format("{} max: {}", var, varMax));
 
     //double maxValue = 0.0;
     //double minValue = std::numeric_limits<double>::max();
@@ -514,10 +518,13 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar,
                                                       const glm::size3_t& outDimensions)
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(
-        "Loading variables " << xVar << " " << yVar << " " << zVar <<
-        " from CDF data with a uniform sampling"
-    );
+
+    LINFO(fmt::format(
+        "loading variables {} {} {} from CDF data with a uniform sampling",
+        xVar,
+        yVar,
+        zVar
+    ));
 
     int channels = 4;
     unsigned int size = static_cast<unsigned int>(
@@ -591,10 +598,13 @@ KameleonWrapper::Fieldlines KameleonWrapper::getClassifiedFieldLines(
     float stepSize )
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(
-        "Creating " << seedPoints.size() << " fieldlines from variables " <<
-        xVar << " " << yVar << " " << zVar
-    );
+    LINFO(fmt::format(
+        "Creating {} fieldlines from variables {} {} {}",
+        seedPoints.size(),
+        xVar,
+        yVar,
+        zVar
+    ));
 
     std::vector<glm::vec3> fLine, bLine;
     std::vector<std::vector<LinePoint> > fieldLines;
@@ -648,10 +658,13 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(const std::string& xV
     const std::vector<glm::vec3>& seedPoints, float stepSize, const glm::vec4& color)
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(
-        "Creating " << seedPoints.size() << " fieldlines from variables " <<
-        xVar << " " << yVar << " " << zVar
-    );
+    LINFO(fmt::format(
+        "Creating {} fieldlines from variables {} {} {}",
+        seedPoints.size(),
+        xVar,
+        yVar,
+        zVar
+    ));
 
     std::vector<glm::vec3> fLine, bLine;
     Fieldlines fieldLines;
@@ -699,7 +712,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::getFieldLines(const std::string& xV
 KameleonWrapper::Fieldlines KameleonWrapper::getLorentzTrajectories(
     const std::vector<glm::vec3>& seedPoints,const glm::vec4& /*color*/, float stepsize)
 {
-    LINFO("Creating " << seedPoints.size() << " Lorentz force trajectories");
+    LINFO(fmt::format("Creating {} Lorentz force trajectories", seedPoints.size()));
 
     Fieldlines trajectories;
     std::vector<glm::vec3> plusTraj, minusTraj;
@@ -927,7 +940,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         ++numSteps;
         if (numSteps > maxSteps) {
-            LDEBUG("Max number of steps taken (" << maxSteps <<")");
+            LDEBUG(fmt::format("Max number of steps taken ({})", maxSteps));
             break;
         }
     }
@@ -1032,7 +1045,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         ++numSteps;
         if (numSteps > maxSteps) {
-            LDEBUG("Max number of steps taken (" << maxSteps <<")");
+            LDEBUG(fmt::format("Max number of steps taken ({})", maxSteps));
             break;
         }
     }

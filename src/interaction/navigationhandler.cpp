@@ -81,9 +81,9 @@ NavigationHandler::NavigationHandler()
 
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
-            LWARNING(
-                "Could not find a node in scenegraph called '" << _origin.value() << "'"
-            );
+            LWARNING(fmt::format(
+                "Could not find a node in scenegraph called '{}'", _origin.value()
+            ));
             return;
         }
         setFocusNode(node);
@@ -249,7 +249,7 @@ ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
 void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         std::string fullpath = absPath(filepath);
-        LINFO("Saving camera position: " << filepath);
+        LINFO(fmt::format("Saving camera position: {}", filepath));
 
         ghoul::Dictionary cameraDict = getCameraStateDictionary();
 
@@ -280,7 +280,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 }
 
 void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
-    LINFO("Reading camera state from file: " << filepath);
+    LINFO(fmt::format("Reading camera state from file: {}", filepath));
     if (!FileSys.fileExists(filepath))
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
 

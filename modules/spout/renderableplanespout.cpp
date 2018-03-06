@@ -35,6 +35,8 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
+    constexpr const char* LoggerCat = "ScreenSpaceSpout";
+
     const char* KeyName = "Name";
 
     static const openspace::properties::Property::PropertyInfo NameInfo = {
@@ -204,8 +206,8 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
         if (!createSuccess) {
             LWARNINGC(
-                "ScreenSpaceSpout",
-                "Could not create receiver for " << _currentSenderName
+                LoggerCat, 
+                fmt::format("Could not create receiver for {}", _currentSenderName)
             );
             return;
         }
@@ -222,8 +224,8 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
     if (!receiveSuccess && !_isErrorMessageDisplayed) {
         LWARNINGC(
-            "ScreenSpaceSpout",
-            "Could not receive texture for " << _currentSenderName
+            LoggerCat,
+            fmt::format("Could not receive texture for {}", _currentSenderName)
         );
         _isErrorMessageDisplayed = true;
     }

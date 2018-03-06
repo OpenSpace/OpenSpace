@@ -382,11 +382,9 @@ void RenderableStars::update(const UpdateData&) {
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
-            LDEBUG("Generating Vertex Array id '" << _vao << "'");
         }
         if (_vbo == 0) {
             glGenBuffers(1, &_vbo);
-            LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
         }
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -507,9 +505,10 @@ void RenderableStars::update(const UpdateData&) {
             );
 
             if (_pointSpreadFunctionTexture) {
-                LDEBUG("Loaded texture from '" <<
-                    absPath(_pointSpreadFunctionTexturePath) << "'"
-               );
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_pointSpreadFunctionTexturePath)
+                ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
             _pointSpreadFunctionTexture->setFilter(
@@ -536,7 +535,10 @@ void RenderableStars::update(const UpdateData&) {
                 absPath(_colorTexturePath)
             );
             if (_colorTexture) {
-                LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_colorTexturePath)
+                ));
                 _colorTexture->uploadTexture();
             }
 
@@ -575,7 +577,11 @@ bool RenderableStars::loadData() {
 
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
+        LINFO(fmt::format(
+            "Cached file '{}' used for Speck file '{}'",
+            cachedFile,
+            _file
+        ));
 
         bool success = loadCachedFile(cachedFile);
         if (success) {
@@ -588,9 +594,9 @@ bool RenderableStars::loadData() {
         }
     }
     else {
-        LINFO("Cache for Speck file '" << _file << "' not found");
+        LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
     }
-    LINFO("Loading Speck file '" << _file << "'");
+    LINFO(fmt::format("Loading Speck file '{}'", _file));
 
     bool success = readSpeckFile();
     if (!success) {
@@ -607,7 +613,7 @@ bool RenderableStars::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
         return false;
     }
 
@@ -700,7 +706,7 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for loading cache file");
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
@@ -728,7 +734,7 @@ bool RenderableStars::saveCachedFile(const std::string& file) const {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
 }

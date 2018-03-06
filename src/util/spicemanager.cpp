@@ -33,7 +33,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
@@ -240,7 +240,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(string filePath) {
     string fileDirectory = ghoul::filesystem::File(path, RawPath::Yes).directoryName();
     FileSys.setCurrentDirectory(fileDirectory);
 
-    LINFO("Loading SPICE kernel '" << path << "'");
+    LINFO(fmt::format("Loading SPICE kernel '{}'", path));
     // Load the kernel
     furnsh_c(path.c_str());
 

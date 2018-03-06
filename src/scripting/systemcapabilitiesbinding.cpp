@@ -25,12 +25,11 @@
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 
 #include <openspace/scripting/scriptengine.h>
-
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-
 #include <cctype>
 
 using namespace ghoul::lua;
@@ -87,7 +86,10 @@ int hasOpenGLVersion(lua_State* L) {
 
     std::vector<std::string> v = ghoul::tokenizeString(ghoul::lua::checkStringAndPop(L));
     if (v.size() != 2 && v.size() != 3) {
-        LERRORC("hasVersion", ghoul::lua::errorLocation(L) << "Malformed version string");
+        LERRORC(
+            "hasVersion",
+            fmt::format("{}: Malformed version string", ghoul::lua::errorLocation(L))
+        );
         return 0;
     }
 
@@ -96,7 +98,9 @@ int hasOpenGLVersion(lua_State* L) {
             if (!std::isdigit(c)) {
                 LERRORC(
                     "hasVersion",
-                    ghoul::lua::errorLocation(L) << "Malformed version string"
+                    fmt::format(
+                        "{}: Malformed version string", ghoul::lua::errorLocation(L)
+                    )
                 );
                 return 0;
             }

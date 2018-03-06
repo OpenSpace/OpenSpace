@@ -20,3 +20,7 @@
   <OfflineMode>false</OfflineMode>
   <Timeout>5</Timeout>
 </GDAL_WMS>
+
+  <Cache>
+    <MaxSize>1073741824</MaxSize>
+  </Cache>

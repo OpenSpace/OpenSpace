@@ -318,7 +318,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
             "Configuration file '" + configurationFilePath + "'"
         );
     }
-    LINFO("Configuration Path: '" << configurationFilePath << "'");
+    LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
 
     // Loading configuration from disk
     LDEBUG("Loading configuration from disk");
@@ -326,7 +326,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         _engine->configurationManager().loadFromFile(configurationFilePath);
     }
     catch (const documentation::SpecificationError& e) {
-        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATAL(fmt::format(
+            "Loading of configuration file '{}' failed", configurationFilePath
+        ));
         for (const documentation::TestResult::Offense& o : e.result.offenses) {
             LERRORC(o.offender, std::to_string(o.reason));
         }
@@ -336,7 +338,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         throw;
     }
     catch (const ghoul::RuntimeError& e) {
-        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATAL(fmt::format(
+            "Loading of configuration file '{}' failed", configurationFilePath
+        ));
         LFATALC(e.component, e.message);
         throw;
     }
@@ -357,8 +361,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
             cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
         }
 
-        LINFO("Old cache: " << absPath("${CACHE}"));
-        LINFO("New cache: " << cacheFolder);
+        LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
+        LINFO(fmt::format("New cache: {}", cacheFolder));
         FileSys.registerPathToken(
             "${CACHE}",
             cacheFolder,
@@ -420,8 +424,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
         ConfigurationManager::KeyConfigSgct, sgctConfigurationPath);
 
     if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
-        LDEBUG("Overwriting SGCT configuration file with commandline argument: " <<
-            commandlineArgumentPlaceholders.sgctConfigurationName);
+        LDEBUG(fmt::format(
+            "Overwriting SGCT configuration file with commandline argument: {}",
+            commandlineArgumentPlaceholders.sgctConfigurationName
+        ));
         sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
     }
 
@@ -525,7 +531,7 @@ void OpenSpaceEngine::initialize() {
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO("Required OpenGL version: " << std::to_string(version));
+    LINFO(fmt::format("Required OpenGL version: {}", std::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -861,14 +867,14 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 
             if (FileSys.fileExists(script)) {
                 try {
-                    LINFO("Running global customization script: " << script);
+                    LINFO(fmt::format("Running global customization script: {}", script));
                     ghoul::lua::runScriptFile(state, script);
                 } catch (ghoul::RuntimeError& e) {
                     LERRORC(e.component, e.message);
                 }
             }
             else {
-                LDEBUG("Ignoring non-existing script file: " << script);
+                LDEBUG(fmt::format("Ignoring non-existing script file: {}", script));
             }
         }
     }
@@ -884,15 +890,15 @@ void OpenSpaceEngine::loadFonts() {
         std::string font = absPath(fonts.value<std::string>(key));
 
         if (!FileSys.fileExists(font)) {
-            LERROR("Could not find font '" << font << "'");
+            LERROR(fmt::format("Could not find font '{}'", font));
             continue;
         }
 
-        LDEBUG("Registering font '" << font << "' with key '" << key << "'");
+        LDEBUG(fmt::format("Registering font '{}' with key '{}'", font, key));
         bool success = _fontManager->registerFontPath(key, font);
 
         if (!success) {
-            LERROR("Error registering font '" << font << "' with key '" << key << "'");
+            LERROR(fmt::format("Error registering font '{}' with key '{}'", font, key));
         }
     }
 
@@ -1144,38 +1150,40 @@ void OpenSpaceEngine::initializeGL() {
                     case GL_INVALID_ENUM:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_INVALID_ENUM"
+                            fmt::format("Function {}: GL_INVALID_ENUM", f.toString())
                         );
                         break;
                     case GL_INVALID_VALUE:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_INVALID_VALUE"
+                            fmt::format("Function {}: GL_INVALID_VALUE", f.toString())
                         );
                         break;
                     case GL_INVALID_OPERATION:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_INVALID_OPERATION"
+                            fmt::format("Function {}: GL_INVALID_OPERATION", f.toString())
                         );
                         break;
                     case GL_INVALID_FRAMEBUFFER_OPERATION:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() <<
-                                ": GL_INVALID_FRAMEBUFFER_OPERATION"
+                            fmt::format(
+                                "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION", 
+                                f.toString()
+                            )
                         );
                         break;
                     case GL_OUT_OF_MEMORY:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_OUT_OF_MEMORY"
+                            fmt::format("Function {}: GL_OUT_OF_MEMORY", f.toString())
                         );
                         break;
                     default:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Unknown error code: " << std::hex << error
+                            fmt::format("Unknown error code: {0:x}", error)
                         );
                 }
             });
@@ -1192,19 +1200,22 @@ void OpenSpaceEngine::initializeGL() {
             setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
             glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
                 std::string arguments = std::accumulate(
-                        call.parameters.begin(),
-                        call.parameters.end(),
-                        std::string("("),
-                        [](std::string a, AbstractValue* v) {
-                            return a + ", " + v->asString();
-                        }
+                    call.parameters.begin(),
+                    call.parameters.end(),
+                    std::string("("),
+                    [](std::string a, AbstractValue* v) {
+                        return a + ", " + v->asString();
+                    }
                 );
 
                 std::string returnValue = call.returnValue ?
                     " -> " + call.returnValue->asString() :
                     "";
 
-                LTRACEC("OpenGL", call.function->name() << arguments << returnValue);
+                LTRACEC(
+                    "OpenGL",
+                    call.function->name() + arguments + returnValue
+                );
             });
         }
     }
@@ -1235,7 +1246,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
     if (_hasScheduledAssetLoading) {
-        LINFO("Loading asset: " << _scheduledAssetPathToLoad);
+        LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
         loadSingleAsset(_scheduledAssetPathToLoad);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad = "";
@@ -1328,13 +1339,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
 
     if (warningCounter > 0) {
-        LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
+        LWARNINGC("Logging", fmt::format("Number of Warnings: {}", warningCounter));
     }
     if (errorCounter > 0) {
-        LWARNINGC("Logging", "Number of Errors raised: " << errorCounter);
+        LWARNINGC("Logging", fmt::format("Number of Errors: {}", errorCounter));
     }
     if (fatalCounter > 0) {
-        LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
+        LWARNINGC("Logging", fmt::format("Number of Fatals: {}", fatalCounter));
     }
 
     LogMgr.resetMessageCounters();

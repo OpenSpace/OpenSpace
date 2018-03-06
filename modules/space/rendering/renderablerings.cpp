@@ -295,7 +295,7 @@ void RenderableRings::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderableRings",
-                "Loaded texture from '" << absPath(_texturePath) << "'"
+                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             _texture = std::move(texture);
 

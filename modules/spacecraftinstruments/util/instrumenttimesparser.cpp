@@ -41,6 +41,7 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <ghoul/fmt.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -98,7 +99,7 @@ bool InstrumentTimesParser::create() {
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
     if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
+        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
         return false;
     }
 
@@ -111,7 +112,7 @@ bool InstrumentTimesParser::create() {
             );
 
             if (!FileSys.fileExists(filepath)) {
-                LERROR("Unable to read file " << filepath << ". Skipping file.");
+                LERROR(fmt::format("Unable to read file '{}'. Skipping file", filepath));
                 continue;
             }
 

@@ -67,8 +67,12 @@ properties::Property* property(const std::string& uri) {
         // <node name>.{<property owner>.}^(0..n)<property id>
         const size_t nameSeparator = uri.find(properties::PropertyOwner::URISeparator);
         if (nameSeparator == std::string::npos) {
-            LERROR("Malformed URI '" << uri << "': At least one '" << nameSeparator
-                   << "' separator must be present.");
+            LERROR(
+                fmt::format("Malformed URI '{}': At least one '{}' separator must exist",
+                    uri,
+                    nameSeparator
+                )
+            );
             return nullptr;
         }
         const std::string nameUri = uri.substr(0, nameSeparator);
@@ -93,7 +97,7 @@ properties::Property* property(const std::string& uri) {
             return property;
         }
 #endif
-        LERROR("Node or ScreenSpaceRenderable' " << nameUri << "' did not exist");
+        LERROR(fmt::format("Node or ScreenSpaceRenderable '{}' did not exist", nameUri));
         return nullptr;
     }
 }

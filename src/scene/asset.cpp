@@ -23,12 +23,12 @@
  ****************************************************************************************/
 
 #include <openspace/scene/asset.h>
+
 #include <openspace/scene/assetloader.h>
-
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-
-#include <iterator>
 #include <algorithm>
+#include <iterator>
 #include <unordered_set>
 
 namespace {
@@ -368,7 +368,7 @@ bool Asset::isInitialized() const {
 
 bool Asset::startSynchronizations() {
     if (!isLoaded()) {
-        LWARNING("Cannot start synchronizations of unloaded asset " << id());
+        LWARNING(fmt::format("Cannot start synchronizations of unloaded asset {}", id()));
         return false;
     }
     for (auto& child : requestedAssets()) {
@@ -502,10 +502,10 @@ bool Asset::initialize() {
         return true;
     }
     if (!isSynchronized()) {
-        LERROR("Cannot initialize unsynchronized asset " << id());
+        LERROR(fmt::format("Cannot initialize unsynchronized asset {}", id()));
         return false;
     }
-    LDEBUG("Initializing asset " << id());
+    LDEBUG(fmt::format("Initializing asset {}", id()));
 
     // 1. Initialize requirements
     for (auto& child : _requiredAssets) {
@@ -523,8 +523,9 @@ bool Asset::initialize() {
     try {
         loader()->callOnInitialize(this);
     } catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR("Failed to initialize asset " << id() << ". " <<
-            e.component << ": " << e.message);
+        LERROR(fmt::format(
+            "Failed to initialize asset {}; {}: {}", id(), e.component, e.message
+        ));
         // TODO: rollback;
         setState(Asset::State::InitializationFailed);
         return false;
@@ -538,9 +539,13 @@ bool Asset::initialize() {
         try {
             loader()->callOnDependencyInitialize(child.get(), this);
         } catch (const ghoul::lua::LuaRuntimeException& e) {
-            LERROR("Failed to initialize required asset " <<
-                child->id() << " of " << id() << ". " <<
-                e.component << ": " << e.message);
+            LERROR(fmt::format(
+                "Failed to initialize required asset {} of {}; {}: {}",
+                child->id(),
+                id(),
+                e.component,
+                e.message
+            ));
             // TODO: rollback;
             setState(Asset::State::InitializationFailed);
             return false;
@@ -553,9 +558,13 @@ bool Asset::initialize() {
             try {
                 loader()->callOnDependencyInitialize(child.get(), this);
             } catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR("Failed to initialize requested asset " <<
-                    child->id() << " of " << id() << ". " <<
-                    e.component << ": " << e.message);
+                LERROR(fmt::format(
+                    "Failed to initialize requested asset {} of {}; {}: {}",
+                    child->id(),
+                    id(),
+                    e.component,
+                    e.message
+                ));
                 // TODO: rollback;
             }
         }
@@ -568,9 +577,13 @@ bool Asset::initialize() {
             try {
                 loader()->callOnDependencyInitialize(this, p.get());
             } catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR("Failed to initialize required asset " <<
-                    id() << " of " << p->id() << ". " <<
-                    e.component << ": " << e.message);
+                LERROR(fmt::format(
+                    "Failed to initialize required asset {} of {}; {}: {}",
+                    id(),
+                    p->id(),
+                    e.component,
+                    e.message
+                ));
                 // TODO: rollback;
             }
         }
@@ -589,7 +602,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG("Deintializing asset " << id());
+    LDEBUG(fmt::format("Deintializing asset {}", id()));
 
     // Perform inverse actions as in initialize, in reverse order (7 - 1)
 
@@ -601,9 +614,13 @@ void Asset::deinitialize() {
                 loader()->callOnDependencyDeinitialize(this, p.get());
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR("Failed to deinitialize requested asset " <<
-                       id() << " of " << p->id() << ". " <<
-                       e.component << ": " << e.message);
+                LERROR(fmt::format(
+                    "Failed to deinitialize requested asset {} of {}; {}: {}",
+                    id(),
+                    p->id(),
+                    e.component,
+                    e.message
+                ));
             }
         }
     }
@@ -615,9 +632,13 @@ void Asset::deinitialize() {
                 loader()->callOnDependencyDeinitialize(child.get(), this);
             }
             catch (const ghoul::lua::LuaRuntimeException& e) {
-                LERROR("Failed to deinitialize requested asset " <<
-                       child->id() << " of " << id() << ". " <<
-                       e.component << ": " << e.message);
+                LERROR(fmt::format(
+                    "Failed to deinitialize requested asset {} of {}; {}: {}",
+                    child->id(),
+                    id(),
+                    e.component,
+                    e.message
+                ));
             }
         }
     }
@@ -628,9 +649,13 @@ void Asset::deinitialize() {
             loader()->callOnDependencyDeinitialize(child.get(), this);
         }
         catch (const ghoul::lua::LuaRuntimeException& e) {
-            LERROR("Failed to deinitialize required asset " <<
-                child->id() << " of " << id() << ". " <<
-                e.component << ": " << e.message);
+            LERROR(fmt::format(
+                "Failed to deinitialize required asset {} of {}; {}: {}",
+                child->id(),
+                id(),
+                e.component,
+                e.message
+            ));
         }
     }
 
@@ -642,8 +667,9 @@ void Asset::deinitialize() {
         loader()->callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR("Failed to deinitialize asset " << id() << ". " <<
-            e.component << ": " << e.message);
+        LERROR(fmt::format(
+            "Failed to deinitialize asset {}; {}: {}", id(), e.component, e.message
+        ));
         return;
     }
 

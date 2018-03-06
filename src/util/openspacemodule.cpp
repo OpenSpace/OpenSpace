@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -63,7 +64,7 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
         ghoul::filesystem::FileSystem::TokenClosingBraces;
 
     std::string path = modulePath();
-    LDEBUG("Registering module path: " << moduleToken << ": " << path);
+    LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
     FileSys.registerPathToken(moduleToken, path);
 
     _moduleEngine = moduleEngine;

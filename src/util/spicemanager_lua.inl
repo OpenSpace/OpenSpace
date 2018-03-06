@@ -38,7 +38,9 @@ int loadKernel(lua_State* L) {
 
     bool isString = (lua_isstring(L, -1) == 1);
     if (!isString) {
-        LERROR(ghoul::lua::errorLocation(L) << "Expected argument of type 'string'");
+        LERROR(fmt::format(
+            "{}: Expected argument of type 'string'", ghoul::lua::errorLocation(L)
+        ));
         return 0;
     }
 
@@ -68,8 +70,10 @@ int unloadKernel(lua_State* L) {
     if (!isString && !isNumber) {
         LERRORC(
             "loadKernel",
-            ghoul::lua::errorLocation(L) <<
-            "Expected argument of type 'string' or 'number'"
+            fmt::format(
+                "{}: Expected argument of type 'string' or 'number'",
+                ghoul::lua::errorLocation(L)
+            )
         );
         lua_settop(L, 0);
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
