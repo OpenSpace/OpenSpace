@@ -374,21 +374,23 @@ bool HttpFileDownload::initDownload() {
         if (errno) {
 #if defined(__unix__)
             char buffer[255];
-            LERROR(
-                "Cannot open file " << destinationFile << ": " <<
+            LERROR(fmt::format(
+                "Cannot open file '{}': {}",
+                destinationFile,
                 std::string(strerror_r(errno, buffer, sizeof(buffer)))
-            );
+            ));
             return false;
 #else
-            LERROR(
-                "Cannot open file " << destinationFile << ": " <<
+            LERROR(fmt::format(
+                "Cannot open file '{}': {}",
+                destinationFile,
                 std::string(strerror(errno))
-            );
+            ));
             return false;
 #endif
         }
 
-        LERROR("Cannot open file " << destinationFile);
+        LERROR(fmt::format("Cannot open file {}", destinationFile));
         return false;
 #endif
     }
