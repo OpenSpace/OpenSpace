@@ -22,48 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__
+#define __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__
 
-in vec4 gs_colorMap;
-in float vs_screenSpaceDepth;
-in vec2 texCoord;
-in float ta;
+#include <openspace/util/openspacemodule.h>
 
-uniform float alphaValue;
-uniform vec3 color;
-uniform sampler2D spriteTexture;
-uniform sampler2D polygonTexture;
-uniform bool hasColorMap;
-uniform bool hasPolygon;
-uniform float fadeInValue;
+namespace openspace {
 
-Fragment getFragment() {      
-   
-    vec4 textureColor = texture(spriteTexture, texCoord);
-    
-    vec4 fullColor = vec4(1.0);
-    
-    if (hasColorMap) {
-        fullColor = vec4(gs_colorMap.rgb * textureColor.rgb, gs_colorMap.a * textureColor.a * alphaValue);
-    } else if (hasPolygon) {
-        vec4 polygon = texture(polygonTexture, texCoord);
-        fullColor = vec4(color.rgb * textureColor.rgb + polygon.rgb, textureColor.a * alphaValue);
-    } else {
-        fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
-    }
+class SpoutModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "Spout";
 
-    fullColor.a *= fadeInValue * ta;
+    SpoutModule();
 
-    if (fullColor.a == 0.f) {
-        discard;
-    }
+    void internalInitialize(const ghoul::Dictionary&) override;
+};
 
-    Fragment frag;
-    frag.color      = fullColor;
-    frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vec4(1e32, 1e32, 1e32, 1.0);
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+} // namespace openspace
 
-
-    return frag;
-}
+#endif // __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__

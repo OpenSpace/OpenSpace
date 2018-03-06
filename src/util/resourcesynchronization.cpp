@@ -38,8 +38,7 @@
 namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyName = "Name";
-    constexpr const char* _loggerCat = "ResourceSynchronization";
-}
+} // namespace
 
 namespace openspace {
 
@@ -72,14 +71,6 @@ documentation::Documentation ResourceSynchronization::Documentation() {
     };
 }
 
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict)
-    : _state(State::Unsynced)
-{
-    _name = dict.value<std::string>(KeyName);
-}
-
-ResourceSynchronization::~ResourceSynchronization() {}
-
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
     const ghoul::Dictionary & dictionary)
 {
@@ -92,14 +83,17 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
     std::unique_ptr<ResourceSynchronization> result =
         factory->create(synchronizationType, dictionary);
-
-    if (result == nullptr) {
-        LERROR("Failed to create a ResourceSynchronization object of type '" <<
-               synchronizationType << "'");
-        return nullptr;
-    }
-
     return result;
+}
+
+ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict) {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dict,
+        "ResourceSynchronization"
+    );
+
+    _name = dict.value<std::string>(KeyName);
 }
 
 ResourceSynchronization::State ResourceSynchronization::state() const {
@@ -119,7 +113,7 @@ bool ResourceSynchronization::isSyncing() {
 }
 
 ResourceSynchronization::CallbackHandle
-    ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
+ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
 {
     std::lock_guard<std::mutex> guard(_callbackMutex);
     CallbackHandle callbackId = _nextCallbackId++;
@@ -150,14 +144,16 @@ void ResourceSynchronization::begin() {
 
 void ResourceSynchronization::setState(State state) {
     _state = state;
+
     _callbackMutex.lock();
     std::vector<StateChangeCallback> callbacks;
     callbacks.reserve(_stateChangeCallbacks.size());
-    for (const auto& it : _stateChangeCallbacks) {
+    for (const std::pair<CallbackHandle, StateChangeCallback>& it : _stateChangeCallbacks)
+    {
         callbacks.push_back(it.second);
     }
     _callbackMutex.unlock();
-    for (auto& cb : callbacks) {
+    for (const StateChangeCallback& cb : callbacks) {
         cb(state);
     }
 }
@@ -176,4 +172,4 @@ std::string ResourceSynchronization::name() const {
     return _name;
 }
 
-}
+} // namespace openspace

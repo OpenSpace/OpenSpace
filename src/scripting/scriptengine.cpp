@@ -81,6 +81,8 @@ void ScriptEngine::deinitialize() {
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");
+    int top = lua_gettop(state);
+
     lua_newtable(state);
     lua_setglobal(state, OpenSpaceLibraryName.c_str());
 
@@ -88,6 +90,8 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     for (LuaLibrary& lib : _registeredLibraries) {
         registerLuaLibrary(state, lib);
     }
+
+    lua_settop(state, top);
 }
 
 ghoul::lua::LuaState * ScriptEngine::luaState() {
@@ -462,6 +466,7 @@ void ScriptEngine::remapPrintFunction() {
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     ghoul_assert(state, "State must not be nullptr");
+    int top = lua_gettop(state);
 
     lua_getglobal(state, OpenSpaceLibraryName.c_str());
     if (library.name.empty()) {
@@ -471,6 +476,7 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     else {
         const bool allowed = isLibraryNameAllowed(state, library.name);
         if (!allowed) {
+            lua_settop(state, top);
             return false;
         }
 
@@ -492,6 +498,8 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
         // Pop the table
         lua_pop(state, 1);
     }
+
+    lua_settop(state, top);
     return true;
 }
 

@@ -152,9 +152,9 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _sourcePath(SourcePathInfo)
     , _transferFunctionPath(TransferFunctionInfo)
+    , _cache(CacheInfo)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-    , _cache(CacheInfo)
 {
 
     glm::vec3 dimensions;

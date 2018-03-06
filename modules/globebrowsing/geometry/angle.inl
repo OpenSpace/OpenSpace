@@ -88,7 +88,7 @@ T Angle<T>::asRadians() const {
 
 template <typename T>
 T Angle<T>::asDegrees() const {
-    return _radians * 180.0 / PI;
+    return _radians * T(180.0) / PI;
 }
 
 template <typename T>

@@ -105,7 +105,7 @@ OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
+    , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
 {
     auto smoothStep =

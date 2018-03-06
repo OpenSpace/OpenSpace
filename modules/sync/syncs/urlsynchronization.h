@@ -22,14 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCRIPT_HELPER___H__
-#define __OPENSPACE_CORE___SCRIPT_HELPER___H__
+#ifndef __OPENSPACE_MODULE_SYNC___URLSYNCHRONIZATION___H__
+#define __OPENSPACE_MODULE_SYNC___URLSYNCHRONIZATION___H__
 
-#define SCRIPT_CHECK_ARGUMENTS(__category__, __stack__, __reqArg__, __realArg__) \
-    if (__realArg__ != __reqArg__) { \
-        LERRORC(__category__, ghoul::lua::errorLocation(__stack__) << "Expected " << \
-            __reqArg__ << " arguments, got " << __realArg__); \
-        return 0; \
-        }
+#include <openspace/util/resourcesynchronization.h>
 
-#endif // __OPENSPACE_CORE___SCRIPT_HELPER___H__
+#include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+
+namespace openspace {
+
+class UrlSynchronization : public ResourceSynchronization {
+public:
+    UrlSynchronization(const ghoul::Dictionary& dict,
+        const std::string& synchronizationRoot);
+
+    virtual ~UrlSynchronization();
+
+    void start() override;
+    void cancel() override;
+    void clear() override;
+
+    size_t nSynchronizedBytes() override;
+    size_t nTotalBytes() override;
+    bool nTotalBytesIsKnown() override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    void createSyncFile();
+    bool hasSyncFile();
+    std::string directory() override;
+
+    std::vector<std::string> _urls;
+    std::string _synchronizationRoot;
+    std::string _identifier;
+
+    std::atomic_bool _nTotalBytesKnown = false;
+    std::atomic_size_t _nTotalBytes = 0;
+    std::atomic_size_t _nSynchronizedBytes = 0;
+    std::atomic_bool _shouldCancel = false;
+
+    std::thread _syncThread;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SYNC___URLSYNCHRONIZATION___H__

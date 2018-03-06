@@ -38,7 +38,7 @@ public:
     StaticTranslation();
     StaticTranslation(const ghoul::Dictionary& dictionary);
 
-    glm::dvec3 position(const Time& time) const;
+    glm::dvec3 position(const Time& time) const override;
     static documentation::Documentation Documentation();
 
 private:

@@ -221,7 +221,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
 
 
 void addScreenSpaceRenderableLocal(std::string texturePath) {
-    if (!FileSys.fileExists(texturePath)) {
+    if (!FileSys.fileExists(absPath(texturePath))) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
     }
@@ -239,7 +239,7 @@ void addScreenSpaceRenderableLocal(std::string texturePath) {
 
 void addScreenSpaceRenderableOnline(std::string texturePath) {
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
+        "{Type = 'ScreenSpaceImageOnline', URL = '" + texturePath + "' }";
     const std::string script = "openspace.addScreenSpaceRenderable(" +
         luaTable + ");";
     OsEng.scriptEngine().queueScript(

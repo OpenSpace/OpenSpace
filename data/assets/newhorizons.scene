@@ -101,7 +101,7 @@ local Keybindings = {
     },
     {
         Key = "l",
-        Command = propertyHelper.invert('Labels.renderable.performFading'),
+        Command = propertyHelper.invert('Scene.Labels.renderable.Enabled'),
         Documentation = "Toggles the visibility of the labels for the New Horizons instruments.",
         Local = false
     },
@@ -163,6 +163,8 @@ asset.onInitialize(function ()
     openspace.markInterestingNodes({
         "Pluto", "NewHorizons", "Charon"
     })
+
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowFocusNodeRotationDistance', 20.000000);
 
     openspace.addVirtualProperty(
         "BoolProperty",

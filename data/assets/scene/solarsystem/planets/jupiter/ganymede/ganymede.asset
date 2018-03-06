@@ -46,7 +46,7 @@ local Ganymede = {
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
     GuiPath = "/Solar System/Planets/Jupiter/Moons"
-},
+}
 
 
 

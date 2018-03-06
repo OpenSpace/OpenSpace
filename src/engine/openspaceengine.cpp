@@ -71,7 +71,6 @@
 
 #include <ghoul/ghoul.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -79,6 +78,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
@@ -310,7 +310,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     if (!FileSys.fileExists(configurationFilePath)) {
         throw ghoul::FileNotFoundError(
-            "Configuration file '" + configurationFilePath + "' not found"
+            "Configuration file '" + configurationFilePath + "'"
         );
     }
     LINFO("Configuration Path: '" << configurationFilePath << "'");
@@ -630,12 +630,10 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
 
     windowWrapper().setBarrier(false);
     windowWrapper().setSynchronization(false);
-    OnExit(
-        [this]() {
-            windowWrapper().setSynchronization(true);
-            windowWrapper().setBarrier(true);
-        }
-    );
+    defer {
+        windowWrapper().setSynchronization(true);
+        windowWrapper().setBarrier(true);
+    };
 
     if (assetPath == "") {
         return;
@@ -817,26 +815,26 @@ void OpenSpaceEngine::writeStaticDocumentation() {
 void OpenSpaceEngine::gatherCommandlineArguments() {
     commandlineArgumentPlaceholders.configurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.configurationName, "-config", "-c",
+        commandlineArgumentPlaceholders.configurationName, "--config", "-c",
         "Provides the path to the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sgctConfigurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sgctConfigurationName, "-sgct", "-s",
+        commandlineArgumentPlaceholders.sgctConfigurationName, "--sgct", "-s",
         "Provides the path to the SGCT configuration file, overriding the value set in "
         "the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.sceneName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
+        commandlineArgumentPlaceholders.sceneName, "--scene", "", "Provides the path to "
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
 
     commandlineArgumentPlaceholders.cacheFolder = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
-        commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
+        commandlineArgumentPlaceholders.cacheFolder, "--cacheDir", "", "Provides the "
         "path to a cache file, overriding the value set in the OpenSpace configuration "
         "file"
     ));
@@ -897,8 +895,11 @@ void OpenSpaceEngine::loadFonts() {
             LERROR("Error initializing default font renderer");
         }
 
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-            _renderEngine->fontResolution()
+        using FR = ghoul::fontrendering::FontRenderer;
+        FR::defaultRenderer().setFramebufferSize(_renderEngine->fontResolution());
+
+        FR::defaultProjectionRenderer().setFramebufferSize(
+            _renderEngine->renderingResolution()
         );
     }
     catch (const ghoul::RuntimeError& err) {
@@ -1235,6 +1236,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
     if (_hasScheduledAssetLoading) {
+        LINFO("Loading asset: " << _scheduledAssetPathToLoad);
         loadSingleAsset(_scheduledAssetPathToLoad);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad = "";
@@ -1352,12 +1354,8 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::render",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
-
-    OnExit([] {
-        LTRACE("OpenSpaceEngine::render(end)");
-    });
 
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
@@ -1371,46 +1369,33 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
         func();
     }
 
-
+    LTRACE("OpenSpaceEngine::render(end)");
 }
 
 void OpenSpaceEngine::drawOverlays() {
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
-    OnExit([] {
-        LTRACE("OpenSpaceEngine::drawOverlays(end)");
-    });
 
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (OsEng.renderEngine().performanceManager()) {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::drawOverlays",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     const bool isGuiWindow =
         _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
 
     if (isGuiWindow) {
-        _renderEngine->renderScreenLog();
-        _renderEngine->renderVersionInformation();
-        _renderEngine->renderDashboard();
-
-        if (!_shutdown.inShutdown) {
-            // We render the camera information in the same location as the shutdown info
-            // and we won't need this if we are shutting down
-            _renderEngine->renderCameraInformation();
-        }
-        else {
-            // If we are in shutdown mode, we can display the remaining time
-            _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
-        }
+        _renderEngine->renderOverlays(_shutdown);
         _console->render();
     }
 
     for (const auto& func : _moduleCallbacks.draw2D) {
         func();
     }
+
+    LTRACE("OpenSpaceEngine::drawOverlays(end)");
 }
 
 void OpenSpaceEngine::postDraw() {
@@ -1421,7 +1406,7 @@ void OpenSpaceEngine::postDraw() {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::postDraw",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     _renderEngine->postDraw();

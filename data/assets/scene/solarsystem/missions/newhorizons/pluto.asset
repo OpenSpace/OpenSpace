@@ -74,7 +74,7 @@ local Pluto = {
         Projection = {
             Sequence       = images,
             EventFile      = assets .. "/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
-            SequenceType   = "image-sequence",
+            SequenceType   = "hybrid",
             Observer       = "NEW HORIZONS",
             Target         = "PLUTO",
             Aberration     = "NONE",
@@ -185,7 +185,7 @@ local PlutoBarycenterLabel = {
     Name = "PlutoBarycenterLabel",
     Parent = transforms.PlutoBarycenter.Name,
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Billboard = true,
         Size = 5E4,
         Texture = encounterTextures .. "/barycenter.png",
@@ -204,7 +204,7 @@ local PlutoText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,
@@ -265,6 +265,8 @@ local PlutoTrail = {
     },
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Pluto,

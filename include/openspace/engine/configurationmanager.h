@@ -171,6 +171,8 @@ public:
     static const std::string PartShowProgressbar;
     /// The key used to specify module specific configurations
     static const std::string KeyModuleConfigurations;
+    /// The key used to specify whether screenshots should contain the current date
+    static const std::string KeyScreenshotUseDate;
 
 
     /**

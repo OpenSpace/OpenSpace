@@ -78,18 +78,7 @@ protected:
      */
     virtual bool updateTextureResource() override;
 
-    // Subclass interface.
-    // ===================
-    virtual bool createGeometry() = 0;
-    virtual bool destroyGeometry() = 0;
-    virtual void renderGeometry() const = 0;
-    /**
-     * This function should return the processed data that
-     * will populate the texture
-     */
     virtual std::vector<float*> textureData() = 0;
-    // This function can call parent setTextureUniforms()
-    virtual void setUniforms() = 0;
 
     properties::SelectionProperty _dataOptions;
     properties::StringProperty _transferFunctionsFile;

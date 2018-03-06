@@ -30,10 +30,7 @@ namespace openspace::luascriptfunctions {
 * Set renderer
 */
 int setRenderer(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setRenderer");
 
     const int type = lua_type(L, -1);
     if (type != LUA_TSTRING) {
@@ -41,6 +38,8 @@ int setRenderer(lua_State* L) {
     }
     std::string r = lua_tostring(L, -1);
     OsEng.renderEngine().setRendererFromString(r);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -50,10 +49,7 @@ int setRenderer(lua_State* L) {
 * Toggle a global fade over (float) seconds
 */
 int toggleFade(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::toggleFade");
 
     double t = luaL_checknumber(L, -1);
 
@@ -61,6 +57,8 @@ int toggleFade(lua_State* L) {
     int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
 
     OsEng.renderEngine().startFading(direction, static_cast<float>(t));
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -70,14 +68,13 @@ int toggleFade(lua_State* L) {
 * start a global fadein over (float) seconds
 */
 int fadeIn(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeIn");
 
     double t = luaL_checknumber(L, -1);
 
     OsEng.renderEngine().startFading(1, static_cast<float>(t));
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 /**
@@ -86,28 +83,25 @@ int fadeIn(lua_State* L) {
 * start a global fadeout over (float) seconds
 */
 int fadeOut(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeOut");
 
     double t = luaL_checknumber(L, -1);
 
     OsEng.renderEngine().startFading(-1, static_cast<float>(t));
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int addScreenSpaceRenderable(lua_State* L) {
-    using ghoul::lua::errorLocation;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addScreenSpaceRenderable");
 
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    using ghoul::lua::errorLocation;
 
     ghoul::Dictionary d;
     try {
         ghoul::lua::luaDictionaryFromState(L, d);
+        lua_settop(L, 0);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addScreenSpaceRenderable", e.what());
@@ -119,18 +113,16 @@ int addScreenSpaceRenderable(lua_State* L) {
     );
     OsEng.renderEngine().addScreenSpaceRenderable(s);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeScreenSpaceRenderable(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
+    
     using ghoul::lua::errorLocation;
 
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
-
-    std::string name = luaL_checkstring(L, -1);
+    std::string name = ghoul::lua::checkStringAndPop(L);
 
     std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(
         name
@@ -140,11 +132,13 @@ int removeScreenSpaceRenderable(lua_State* L) {
             "removeScreenSpaceRenderable",
             errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'"
         );
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
 
     OsEng.renderEngine().removeScreenSpaceRenderable(s);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

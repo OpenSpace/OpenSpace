@@ -27,19 +27,15 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/concurrentjobmanager.h>
-
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/misc/dictionary.h>
-
 #include <unordered_map>
 
 namespace openspace {
 
-class ResourceSynchronization
-    : public std::enable_shared_from_this<ResourceSynchronization>
-{
+class ResourceSynchronization {
 public:
-    enum class State : int {
+    enum class State {
         Unsynced,
         Syncing,
         Resolved,
@@ -49,12 +45,12 @@ public:
     using CallbackHandle = size_t;
     using StateChangeCallback = std::function<void(State)>;
 
-    static documentation::Documentation Documentation();
     static std::unique_ptr<ResourceSynchronization> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     ResourceSynchronization(const ghoul::Dictionary& dictionary);
-    virtual ~ResourceSynchronization();
+    virtual ~ResourceSynchronization() = default;
+
     virtual std::string directory() = 0;
     virtual void start() = 0;
     virtual void cancel() = 0;
@@ -73,6 +69,8 @@ public:
     CallbackHandle addStateChangeCallback(StateChangeCallback cb);
     void removeStateChangeCallback(CallbackHandle id);
 
+    static documentation::Documentation Documentation();
+
 protected:
     void resolve();
     void reject();
@@ -83,7 +81,7 @@ private:
     void setState(State state);
 
     std::string _name;
-    std::atomic<State> _state;
+    std::atomic<State> _state = State::Unsynced;
     std::mutex _callbackMutex;
     CallbackHandle _nextCallbackId = 0;
     std::unordered_map<CallbackHandle, StateChangeCallback> _stateChangeCallbacks;

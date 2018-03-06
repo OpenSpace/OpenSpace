@@ -43,9 +43,10 @@ TextureSliceVolumeReader<VoxelType>::TextureSliceVolumeReader(
                                                            std::vector<std::string> paths,
                                                            size_t sliceCacheNIndices,
                                                            size_t sliceCacheCapacity)
-    : _initialized(false)
-    , _paths(paths)
-    , _cache(sliceCacheCapacity, sliceCacheNIndices) {}
+    : _paths(paths)
+    , _cache(sliceCacheCapacity, sliceCacheNIndices)
+    , _initialized(false)
+{}
 
 template <typename VoxelType>
 void TextureSliceVolumeReader<VoxelType>::initialize() {
@@ -70,8 +71,10 @@ ghoul::opengl::Texture&
 TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
 {
     ghoul_assert(_initialized, "Volume is not initialized");
-    ghoul_assert(sliceIndex >= 0 && sliceIndex < _paths.size(),
-                 "Slice index " + std::to_string(sliceIndex) + "is outside the range.");
+    ghoul_assert(
+        sliceIndex >= 0 && sliceIndex < static_cast<int>(_paths.size()),
+        "Slice index " + std::to_string(sliceIndex) + "is outside the range."
+    );
 
     if (!_cache.has(sliceIndex)) {
         std::shared_ptr<ghoul::opengl::Texture> texture =
