@@ -56,8 +56,8 @@ Fragment getFragment() {
     // }
 
     //frag.color = texture(galaxyTexture, vs_st);
-    frag.depth = vs_screenSpaceDepth;
-    frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+    frag.depth      = vs_screenSpaceDepth;
+    frag.gPosition  = vec4(vs_screenSpaceDepth, vs_screenSpaceDepth, vs_screenSpaceDepth, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
     return frag;

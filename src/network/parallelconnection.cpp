@@ -82,7 +82,6 @@ using SocketResultType = size_t;
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 

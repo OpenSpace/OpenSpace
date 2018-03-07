@@ -23,18 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/iswa/util/dataprocessortext.h>
-//#include <algorithm>
-//#include <boost/iostreams/device/mapped_file.hpp>
-//
-//#include <boost/config/warning_disable.hpp>
-//#include <boost/spirit/include/qi.hpp>
-//#include <boost/spirit/include/phoenix_core.hpp>
-//#include <boost/spirit/include/phoenix_operator.hpp>
-//#include <boost/spirit/include/phoenix_stl.hpp>
-
-namespace {
-    constexpr const char* _loggerCat = "DataProcessorText";
-} // namespace
 
 namespace openspace{
 

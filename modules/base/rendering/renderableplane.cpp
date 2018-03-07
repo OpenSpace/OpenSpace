@@ -33,6 +33,7 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -41,13 +42,6 @@ namespace {
     enum BlendMode {
         BlendModeNormal = 0,
         BlendModeAdditive
-    };
-
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
-        "Texture",
-        "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square."
     };
 
     static const openspace::properties::Property::PropertyInfo BillboardInfo = {
@@ -96,12 +90,6 @@ documentation::Documentation RenderablePlane::Documentation() {
                 new StringInListVerifier({ "Normal", "Additive" }),
                 Optional::Yes,
                 BlendModeInfo.description, // + " The default value is 'Normal'.",
-            },
-            {
-                TextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                TextureInfo.description,
             }
         }
     };
@@ -109,16 +97,13 @@ documentation::Documentation RenderablePlane::Documentation() {
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath(TextureInfo)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shader(nullptr)
-    , _texture(nullptr)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
-    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -158,15 +143,8 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
             _blendMode = BlendModeAdditive;
         }
     }
-    _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
     addProperty(_billboard);
-    addProperty(_texturePath);
-    _texturePath.onChange([this]() {loadTexture(); });
-    _textureFile->setCallback(
-        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-    );
 
     addProperty(_size);
     _size.onChange([this](){ _planeIsDirty = true; });
@@ -175,7 +153,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderablePlane::isReady() const {
-    return _shader && _texture;
+    return _shader != nullptr;
 }
 
 void RenderablePlane::initializeGL() {
@@ -188,8 +166,6 @@ void RenderablePlane::initializeGL() {
         absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
     );
-
-    loadTexture();
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -198,8 +174,6 @@ void RenderablePlane::deinitializeGL() {
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
-
-    _textureFile = nullptr;
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
@@ -210,22 +184,6 @@ void RenderablePlane::deinitializeGL() {
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
-    //if (_projectionListener){
-    //    //get parent node-texture and set with correct dimensions
-    //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(
-    //        _nodeName
-    //    )->parent();
-    //    if (textureNode != nullptr){
-    //        RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(
-    //            textureNode->renderable()
-    //        );
-    //        _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
-    //        unsigned int h = _texture->height();
-    //        unsigned int w = _texture->width();
-    //        float scale = static_cast<float>(h) / static_cast<float>(w);
-    //        scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
-    //    }
-    //}
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 rotationTransform = _billboard ?
@@ -248,7 +206,9 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
+    bindTexture();
+    defer { unbindTexture(); };
+
     _shader->setUniform("texture1", unit);
 
     bool usingFramebufferRenderer =
@@ -280,42 +240,19 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePlane::update(const UpdateData&) {
-    if (_shader->isDirty())
-        _shader->rebuildFromFile();
+void RenderablePlane::bindTexture() {}
 
-    if (_planeIsDirty)
+void RenderablePlane::unbindTexture() {}
+
+
+void RenderablePlane::update(const UpdateData&) {
+    if (_shader->isDirty()) {
+        _shader->rebuildFromFile();
+    }
+
+    if (_planeIsDirty) {
         createPlane();
 
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
-}
-
-void RenderablePlane::loadTexture() {
-    if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-
-        if (texture) {
-            LDEBUGC(
-                "RenderablePlane",
-                "Loaded texture from '" << absPath(_texturePath) << "'"
-            );
-            texture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than
-            // linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-
-            _texture = std::move(texture);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-            _textureFile->setCallback(
-                [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-            );
-        }
     }
 }
 

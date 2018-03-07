@@ -123,10 +123,15 @@ void ScreenSpaceImageLocal::update() {
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
             _texture = std::move(texture);
+            _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
 
     }
+}
+
+void ScreenSpaceImageLocal::bindTexture() {
+    _texture->bind();
 }
 
 } // namespace openspace

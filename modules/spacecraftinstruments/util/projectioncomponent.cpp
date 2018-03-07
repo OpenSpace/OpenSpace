@@ -151,6 +151,17 @@ documentation::Documentation ProjectionComponent::Documentation() {
                 "The aspect ratio of the instrument in relation between x and y axis"
             },
             {
+                keySequenceType,
+                new StringInListVerifier(
+                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid }
+                ),
+                Optional::Yes,
+                "This value determines which type of sequencer is used for generating "
+                "image schedules. The 'playbook' is using a custom format designed by "
+                "the New Horizons team, the 'image-sequence' uses lbl files from a "
+                "directory, and the 'hybrid' uses both methods."
+            },
+            {
                 keyProjObserver,
                 new StringAnnotationVerifier("A SPICE name of the observing object"),
                 Optional::No,
@@ -402,11 +413,8 @@ bool ProjectionComponent::initializeGL() {
         absPath(placeholderFile)
     );
     if (texture) {
-        texture->uploadTexture();
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
+        texture->setWrapping(Texture::WrappingMode::ClampToEdge);
     }
     _placeholderTexture = std::move(texture);
 
@@ -944,6 +952,7 @@ void ProjectionComponent::clearAllProjections() {
 }
 
 void ProjectionComponent::generateMipMap() {
+
     _projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
     _mipMapDirty = false;
 }
@@ -967,10 +976,10 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         if (texture->format() == Texture::Format::Red)
             ghoul::opengl::convertTextureFormat(*texture, Texture::Format::RGB);
         texture->uploadTexture();
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        texture->setWrapping(
+            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
+        );
         texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     return std::move(texture);
 }
@@ -979,15 +988,17 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
     LINFO(
         "Creating projection texture of size '" << size.x << ", " << size.y << "'"
     );
-    _projectionTexture = std::make_unique<ghoul::opengl::Texture> (
+    using namespace ghoul::opengl;
+    _projectionTexture = std::make_unique<Texture>(
         glm::uvec3(size, 1),
-        ghoul::opengl::Texture::Format::RGBA
+        Texture::Format::RGBA
     );
     if (_projectionTexture) {
         _projectionTexture->uploadTexture();
-        //_projectionTexture->setFilter(
-        //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-        //);
+        _projectionTexture->setWrapping(
+            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
+        );
+        _projectionTexture->setFilter(Texture::FilterMode::LinearMipMap);
     }
 
     if (_dilation.isEnabled) {
@@ -1018,9 +1029,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
         }
     }
 
-
     return _projectionTexture != nullptr;
-
 }
 
 bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
@@ -1032,7 +1041,7 @@ bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
         glm::uvec3(size, 1),
         ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F
-        );
+    );
 
     if (_shadowing.texture) {
         _shadowing.texture->uploadTexture();

@@ -51,7 +51,11 @@ protected:
     properties::StringProperty _texturePath;
 
 private:
+    void bindTexture() override;
+
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
+
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
 } // namespace openspace

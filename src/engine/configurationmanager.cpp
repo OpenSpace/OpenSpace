@@ -122,6 +122,8 @@ const string ConfigurationManager::PartShowMessage = "ShowMessage";
 const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
 const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
 
+const string ConfigurationManager::KeyScreenshotUseDate = "ScreenshotUseDate";
+
 const string ConfigurationManager::KeyModuleConfigurations = "ModuleConfigurations";
 
 string ConfigurationManager::findConfiguration(const string& filename) {

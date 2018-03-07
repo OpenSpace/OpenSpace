@@ -58,47 +58,47 @@ namespace spicemanager_constants {
 
 void loadMetaKernel() {
     int k1 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
     EXPECT_EQ(1, k1) << "loadKernel did not return proper id";
 
     int k2 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc")
     );
     EXPECT_EQ(2, k2) << "loadKernel did not return proper id";
 
     int k3 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp")
     );
     EXPECT_EQ(3, k3) << "loadKernel did not return proper id";
 
     int k4 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp")
     );
     EXPECT_EQ(4, k4) << "loadKernel did not return proper id";
 
     int k5 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp")
     );
     EXPECT_EQ(5, k5) << "loadKernel did not return proper id";
 
     int k6 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf")
     );
     EXPECT_EQ(6, k6) << "loadKernel did not return proper id";
 
     int k7 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc")
     );
     EXPECT_EQ(7, k7) << "loadKernel did not return proper id";
 
     int k8 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
     );
     EXPECT_EQ(8, k8) << "loadKernel did not return proper id";
 
     int k9 = openspace::SpiceManager::ref().loadKernel(
-        ("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
+        absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
     );
     EXPECT_EQ(9, k9) << "loadKernel did not return proper id";
 }

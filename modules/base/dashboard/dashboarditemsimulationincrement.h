@@ -27,7 +27,9 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul::fontrendering {
@@ -51,6 +53,8 @@ public:
 private:
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
+    properties::BoolProperty _doSimplification;
+    properties::OptionProperty _requestedUnit;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };

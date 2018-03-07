@@ -27,48 +27,41 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
-
+#include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <vector>
-
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-namespace ccmc {
-    class Kameleon;
-}
-#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 namespace openspace {
 
 class FieldlinesState {
 public:
-    void convertLatLonToCartesian(const float scale = 1.f);
-    void scalePositions(const float scale);
+    void convertLatLonToCartesian(float scale = 1.f);
+    void scalePositions(float scale);
 
     bool loadStateFromOsfls(const std::string& pathToOsflsFile);
     void saveStateToOsfls(const std::string& pathToOsflsFile);
 
-    bool loadStateFromJson(const std::string& pathToJsonFile,
-                           const fls::Model model, const float coordToMeters);
+    bool loadStateFromJson(const std::string& pathToJsonFile, fls::Model model,
+        float coordToMeters);
     void saveStateToJson(const std::string& pathToJsonFile);
 
-    // ----------------------------------- GETTERS ----------------------------------- //
-    const std::vector<std::vector<float>>& extraQuantities()    const;
-    const std::vector<std::string>&        extraQuantityNames() const;
-    const std::vector<GLsizei>&            lineCount()          const;
-    const std::vector<GLint>&              lineStart()          const;
-    fls::Model                             model()              const;
-    size_t                                 nExtraQuantities()   const;
-    double                                 triggerTime()        const;
-    const std::vector<glm::vec3>&          vertexPositions()    const;
+    const std::vector<std::vector<float>>& extraQuantities() const;
+    const std::vector<std::string>& extraQuantityNames() const;
+    const std::vector<GLsizei>& lineCount() const;
+    const std::vector<GLint>& lineStart() const;
 
-    // Special getter. Returns extraQuantities[INDEX].
-    std::vector<float> extraQuantity(const size_t INDEX, bool& isSuccesful) const;
+    fls::Model model() const;
+    size_t nExtraQuantities() const;
+    double triggerTime() const;
+    const std::vector<glm::vec3>& vertexPositions() const;
 
-    void setModel(const fls::Model m)   { _model = m; }
-    void setTriggerTime(const double t) { _triggerTime = t; }
-    void setExtraQuantityNames(std::vector<std::string>& names);
+    // Special getter. Returns extraQuantities[index].
+    std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
+
+    void setModel(fls::Model m) { _model = m; }
+    void setTriggerTime(double t) { _triggerTime = t; }
+    void setExtraQuantityNames(std::vector<std::string> names);
 
     void addLine(std::vector<glm::vec3>& line);
     void appendToExtra(size_t idx, float val) { _extraQuantities[idx].push_back(val); }

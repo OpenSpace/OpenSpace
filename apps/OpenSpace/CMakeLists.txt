@@ -79,19 +79,11 @@ endif()
 #####
 # Spout 
 #####
-if (WIN32)
-    option(OPENSPACE_SPOUT_SUPPORT "Build OpenSpace application with Spout support" OFF)
-endif ()
-
-if (OPENSPACE_SPOUT_SUPPORT)
+if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
     set(SPOUT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout)
     set(SPOUT_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.lib)
     set(SPOUT_DEFINITIONS "OPENSPACE_HAS_SPOUT")
 
-    set(SGCT_SPOUT_SUPPORT ON CACHE BOOL "" FORCE)
-endif ()
-
-if (OPENSPACE_SPOUT_SUPPORT)
     add_external_library_dependencies(${CMAKE_CURRENT_SOURCE_DIR}/ext/spout/SpoutLibrary.dll)
 endif ()
 

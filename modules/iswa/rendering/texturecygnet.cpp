@@ -42,7 +42,7 @@ TextureCygnet::~TextureCygnet() {}
 
 bool TextureCygnet::updateTexture() {
     auto texture = ghoul::io::TextureReader::ref().loadTexture(
-        (void*) _imageFile.buffer,
+        reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         _imageFile.format
     );

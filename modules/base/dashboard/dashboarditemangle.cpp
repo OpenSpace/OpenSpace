@@ -323,11 +323,11 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
         );
     });
     if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(DestinationTypeInfo.identifier);
-        if (value == "Node") {
+        std::string type = dictionary.value<std::string>(DestinationTypeInfo.identifier);
+        if (type == "Node") {
             _destination.type = Type::Node;
         }
-        else if (value == "Focus") {
+        else if (type == "Focus") {
             _destination.type = Type::Focus;
         }
         else {
@@ -391,7 +391,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
-};
+}
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);

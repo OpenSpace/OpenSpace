@@ -47,7 +47,6 @@ namespace {
     const char* KeyPerformPreProcessing = "PerformPreProcessing";
     const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";
-    const char* KeyBasePath = "BasePath";
     const char* KeyPreCacheLevel = "PreCacheLevel";
     const char* KeyPadTiles = "PadTiles";
 

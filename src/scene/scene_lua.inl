@@ -169,8 +169,7 @@ int property_setValueSingle(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("property_setValueSingle", L, 2, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::property_setValueSingle");
 
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
@@ -226,8 +225,8 @@ int property_setValue(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("property_setGroup", L, 2, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::property_setGroup");
+
     std::string regex = luaL_checkstring(L, -2);
     std::string groupName;
 
@@ -271,8 +270,8 @@ int property_setValueRegex(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("property_setValueRegex<", L, 2, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::property_setValueRegex");
+
     std::string regex = luaL_checkstring(L, -2);
     std::string groupName;
 
@@ -309,10 +308,10 @@ int property_getValue(lua_State* L) {
     static const std::string _loggerCat = "property_getValue";
     using ghoul::lua::errorLocation;
 
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("property_getValue", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
 
     std::string uri = luaL_checkstring(L, -1);
+    lua_settop(L, 0);
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {
@@ -320,10 +319,13 @@ int property_getValue(lua_State* L) {
             "property_getValue",
             errorLocation(L) << "Property with URL '" << uri << "' was not found"
         );
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
-    }
-    else
+    } else {
         prop->getLuaValue(L);
+    }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -334,20 +336,19 @@ int property_getValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int loadScene(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("loadScene", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
     std::string sceneFile = luaL_checkstring(L, -1);
     OsEng.scheduleLoadSingleAsset(sceneFile);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int addSceneGraphNode(lua_State* L) {
     using ghoul::lua::errorLocation;
 
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("addSceneGraphNode", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addSceneGraphNode");
 
     ghoul::Dictionary d;
     try {
@@ -377,14 +378,16 @@ int addSceneGraphNode(lua_State* L) {
     } catch (const ghoul::RuntimeError& e) {
         return luaL_error(L, "Error loading scene graph node: %s", e.what());
     }
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeSceneGraphNode(lua_State* L) {
     using ghoul::lua::errorLocation;
 
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("removeSceneGraphNode", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
     std::string nodeName = luaL_checkstring(L, -1);
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
@@ -405,18 +408,23 @@ int removeSceneGraphNode(lua_State* L) {
     }
     node->deinitializeGL();
     parent->detachChild(*node);
-    return 1;
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 
 int hasSceneGraphNode(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("hasSceneGraphNode", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
 
     std::string nodeName = luaL_checkstring(L, -1);
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
 
+    lua_settop(L, 0);
     lua_pushboolean(L, node != nullptr);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

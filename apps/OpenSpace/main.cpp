@@ -22,15 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
 
 #include <sgct.h>
+#include <chrono>
+#include <ctime>
 
 #ifdef WIN32
 
@@ -306,6 +310,44 @@ void mainInitFunc() {
 
 #endif // OPENSPACE_HAS_SPOUT
     }
+    
+    std::string k = openspace::ConfigurationManager::KeyScreenshotUseDate;
+    std::string screenshotPath = "${SCREENSHOTS}";
+    std::string screenshotNames = "OpenSpace";
+    if (OsEng.configurationManager().hasKey(k)) {
+        std::time_t now = std::time(nullptr);
+        std::tm* nowTime = std::localtime(&now);
+        char mbstr[100];
+        strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
+        screenshotPath += "/" + std::string(mbstr);
+
+        std::string p = absPath(screenshotPath);
+        if (!FileSys.directoryExists(p)) {
+            FileSys.createDirectory(p);
+        }
+    }
+
+    for (size_t i = 0; i < nWindows; ++i) {
+        sgct_core::ScreenCapture* cpt0 =
+            SgctEngine->getWindowPtr(i)->getScreenCapturePointer(0);
+        sgct_core::ScreenCapture* cpt1 =
+            SgctEngine->getWindowPtr(i)->getScreenCapturePointer(1);
+        
+        if (cpt0) {
+            cpt0->setPathAndFileName(
+                absPath(screenshotPath),
+                screenshotNames
+            );
+        }
+
+        if (cpt1) {
+            cpt1->setPathAndFileName(
+                screenshotPath,
+                screenshotNames
+            );
+        }
+    }
+
     LTRACE("main::mainInitFunc(end)");
 }
 
@@ -506,12 +548,36 @@ int main_main(int argc, char** argv) {
     // @CLEANUP:  Replace the return valua with throwing an exception --abock
     std::vector<std::string> sgctArguments;
     bool requestQuit = false;
-    openspace::OpenSpaceEngine::create(
-        argc, argv,
-        std::make_unique<openspace::SGCTWindowWrapper>(),
-        sgctArguments,
-        requestQuit
-    );
+    try {
+        openspace::OpenSpaceEngine::create(
+            argc, argv,
+            std::make_unique<openspace::SGCTWindowWrapper>(),
+            sgctArguments,
+            requestQuit
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        // Write out all of the information about the exception and flush the logs
+        LFATALC(e.component, e.message);
+        LogMgr.flushLogs();
+        return EXIT_FAILURE;
+    }
+    catch (const ghoul::AssertionException& e) {
+        // We don't want to catch the assertion exception as we won't be able to add a
+        // breakpoint for debugging
+        LFATALC("Assertion failed", e.what());
+        throw;
+    }
+    catch (const std::exception& e) {
+        LFATALC("Exception", e.what());
+        LogMgr.flushLogs();
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        LFATALC("Exception", "Unknown exception");
+        LogMgr.flushLogs();
+        return EXIT_FAILURE;
+    }
 
     if (requestQuit) {
         return EXIT_SUCCESS;
@@ -621,6 +687,10 @@ int main_main(int argc, char** argv) {
     };
 
     bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
+
+    // Do not print message if slaves are waiting for the master
+    // Only timeout after 15 minutes
+    SgctEngine->setSyncParameters(false, 15.f * 60.f);
 
     if (!initSuccess) {
         LFATAL("Initializing failed");

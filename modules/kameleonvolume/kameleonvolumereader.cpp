@@ -89,12 +89,12 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 }
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
-    const glm::uvec3 & dimensions,
-    const std::string & variable,
-    const glm::vec3 & lowerBound,
-    const glm::vec3 & upperBound,
-    float& minValue,
-    float& maxValue) const
+                                                            const glm::uvec3 & dimensions,
+                                                            const std::string & variable,
+                                                            const glm::vec3 & lowerBound,
+                                                            const glm::vec3 & upperBound,
+                                                            float& minValue,
+                                                            float& maxValue) const
 {
     minValue = FLT_MAX;
     maxValue = FLT_MIN;
@@ -104,9 +104,9 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 diff = upperBound - lowerBound;
 
     auto interpolate =
-        [this](const std::string& variable, glm::vec3 volumeCoords) {
+        [this](const std::string& var, glm::vec3 volumeCoords) {
             return _interpolator->interpolate(
-                variable,
+                var,
                 volumeCoords[0],
                 volumeCoords[1],
                 volumeCoords[2]);

@@ -155,19 +155,21 @@ namespace volume {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clipPlanes(nullptr)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
+    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
+    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
+    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
-    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
-    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _raycaster(nullptr)
     , _transferFunctionHandler(nullptr)
 
@@ -372,7 +374,6 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    using TimeStep = RenderableTimeVaryingVolume::Timestep;
     if (_volumeTimesteps.size() == 0) {
         return nullptr;
     }

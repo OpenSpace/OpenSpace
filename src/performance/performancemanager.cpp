@@ -28,8 +28,8 @@
 #include <openspace/performance/performancelayout.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/misc/sharedmemory.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <algorithm>
@@ -142,7 +142,9 @@ PerformanceManager::PerformanceManager(std::string loggingDirectory, std::string
 
     ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
-    OnExit([&](){sharedMemory.releaseLock();});
+    defer {
+        sharedMemory.releaseLock();
+    };
 
     GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
 

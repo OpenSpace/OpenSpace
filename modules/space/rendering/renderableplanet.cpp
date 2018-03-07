@@ -412,7 +412,7 @@ glm::dmat4 RenderablePlanet::computeModelTransformMatrix(
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
         glm::dmat4(transformData.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
 
     // scale the planet to appropriate size since the planet is a unit sphere
     //glm::mat4 transform = glm::mat4(1);

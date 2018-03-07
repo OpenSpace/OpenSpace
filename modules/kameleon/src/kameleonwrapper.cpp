@@ -432,16 +432,13 @@ float* KameleonWrapper::getUniformSliceValues(const std::string& var,
                 if (_gridType == GridType::Spherical) {
                         // int z = zSlice;
                         // Put r in the [0..sqrt(3)] range
-                        double rNorm = sqrt(3.0) * static_cast<double>(xi) /
-                                       static_cast<double>(xDim);
+                        double rNorm = sqrt(3.0) * static_cast<double>(xi) / xDim;
 
                         // Put theta in the [0..PI] range
-                        double thetaNorm = M_PI * static_cast<double>(yi) /
-                                           static_cast<double>(yDim);
+                        double thetaNorm = M_PI * static_cast<double>(yi) / yDim;
 
                         // Put phi in the [0..2PI] range
-                        double phiNorm = 2.0 * M_PI * static_cast<double>(zi) /
-                                         static_cast<double>(zDim);
+                        double phiNorm = 2.0 * M_PI * static_cast<double>(zi) / zDim;
 
                         // Go to physical coordinates before sampling
                         double rPh = _xMin + rNorm * (_xMax-_xMin);
@@ -546,12 +543,10 @@ float* KameleonWrapper::getUniformSampledVectorValues(const std::string& xVar,
     //LDEBUG(zVar << "Max: " << varZMax);
 
     //ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (int x = 0; x < outDimensions.x; ++x) {
+    for (size_t x = 0; x < outDimensions.x; ++x) {
         //pb.print(x);
-
-        for (int y = 0; y < outDimensions.y; ++y) {
-            for (int z = 0; z < outDimensions.z; ++z) {
-
+        for (size_t y = 0; y < outDimensions.y; ++y) {
+            for (size_t z = 0; z < outDimensions.z; ++z) {
                 unsigned int index = static_cast<unsigned int>(
                     x * channels + y * channels * outDimensions.x +
                     z * channels * outDimensions.x * outDimensions.y

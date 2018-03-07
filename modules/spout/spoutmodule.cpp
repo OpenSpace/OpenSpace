@@ -22,16 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <modules/spout/spoutmodule.h>
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/spout/renderableplanespout.h>
+#include <modules/spout/screenspacespout.h>
 
-in vec4 in_position;
-in vec4 in_colormap;
+#include <openspace/util/factorymanager.h>
 
-out vec4 colorMap;
+#include <ghoul/misc/assert.h>
 
-void main() {
-    colorMap = in_colormap;
-    gl_Position = vec4(in_position);
+namespace openspace {
+
+SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
+
+void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
+
+#ifdef WIN32
+    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
+
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+    fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
+#endif // WIN32
 }
+
+} // namespace openspace
