@@ -320,12 +320,9 @@ void mainInitFunc() {
         char mbstr[100];
         strftime(mbstr, sizeof(mbstr), "%Y-%m-%d-%H-%M", nowTime);
         screenshotPath += "/" + std::string(mbstr);
-
-        std::string p = absPath(screenshotPath);
-        if (!FileSys.directoryExists(p)) {
-            FileSys.createDirectory(p);
-        }
     }
+
+    FileSys.registerPathToken("${THIS_SCREENSHOT_PATH}", screenshotPath);
 
     for (size_t i = 0; i < nWindows; ++i) {
         sgct_core::ScreenCapture* cpt0 =

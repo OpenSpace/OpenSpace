@@ -1302,7 +1302,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::postSynchronizationPreDraw",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     bool master = _windowWrapper->isMaster();
