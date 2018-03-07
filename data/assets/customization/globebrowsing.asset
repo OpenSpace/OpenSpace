@@ -1,6 +1,6 @@
 -- Add require statements for assets exporting the neccessary globes
 -- example:
-asset.require('../scene/solarsystem/planets/mars/mars')
+-- asset.require('../scene/solarsystem/planets/mars/mars')
 
 local CreateFocusNodes = true
 
@@ -18,8 +18,8 @@ local vrt_folders = {
         --
         -- tl;dr:  Specify CTX folders first, then HiRISE 
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
-        'D:/Mars/CTX',
-        'D:/Mars/HiRISE',
+        '',
+        '',
     },
     Moon = {
         -- Add folders here whose contents will be automatically added to the Moon globe
@@ -27,7 +27,7 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-        'C:/ab7512/OpenSpaceData/Moon'
+        ''
     }
 }
 
