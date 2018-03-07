@@ -427,31 +427,30 @@ glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
 }
 
 void ScreenSpaceRenderable::createShaders() {
-    if (!_shader) {
-        ghoul::Dictionary dict = ghoul::Dictionary();
+    ghoul::Dictionary dict = ghoul::Dictionary();
 
-        auto res = OsEng.windowWrapper().currentWindowResolution();
-        ghoul::Dictionary rendererData = {
-            { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
-            { "windowWidth" , res.x },
-            { "windowHeight" , res.y }
-        };
+    auto res = OsEng.windowWrapper().currentWindowResolution();
+    ghoul::Dictionary rendererData = {
+        { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
+        { "windowWidth" , res.x },
+        { "windowHeight" , res.y }
+    };
 
-        dict.setValue("rendererData", rendererData);
-        dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
-        _shader = ghoul::opengl::ProgramObject::Build(
-            "ScreenSpaceProgram",
-            absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
-            absPath("${SHADERS}/render.frag"),
-            dict
-        );
+    dict.setValue("rendererData", rendererData);
+    dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+    _shader = ghoul::opengl::ProgramObject::Build(
+        "ScreenSpaceProgram",
+        absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
+        absPath("${SHADERS}/render.frag"),
+        dict
+    );
 
-        _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
-        _uniformCache.alpha = _shader->uniformLocation("Alpha");
-        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-        _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
-    }
+    _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
+    _uniformCache.alpha = _shader->uniformLocation("Alpha");
+    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
+    _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
+    _uniformCache.texture = _shader->uniformLocation("texture1");
+
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
