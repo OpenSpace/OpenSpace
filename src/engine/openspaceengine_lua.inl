@@ -141,7 +141,15 @@ int removeVirtualProperty(lua_State* L) {
     const std::string name = lua_tostring(L, -1);
     lua_settop(L, 0);
     properties::Property* p = OsEng.virtualPropertyManager().property(name);
-    OsEng.virtualPropertyManager().removeProperty(p);
+    if (p) {
+        OsEng.virtualPropertyManager().removeProperty(p);
+    }
+    else {
+        LWARNINGC(
+            "removeVirtualProperty",
+            fmt::format("Virtual Property with name {} did not exist", name)
+        );
+    }
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
