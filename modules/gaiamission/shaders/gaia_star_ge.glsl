@@ -49,6 +49,7 @@ uniform float closeUpBoostDist;
 uniform float billboardSize;
 uniform vec2 screenSize;
 uniform int columnOption;
+uniform float magnitudeExponent;
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
@@ -77,9 +78,12 @@ void main() {
     vs_position = gl_in[0].gl_Position;
     vec2 starSize = vec2(billboardSize + closeUpBoost) / screenSize * vs_position.w;
 
-    // Discard geometry if star has no position (but wasn't a nullArray). 
-    // Or if size is smaller than one pixel.
-    if( length(vs_position) < EPS || length(starSize) < 1.5 ){
+    float distThreshold = magnitudeExponent - log(observedDistance) / log(4.0);
+
+    // Discard geometry if star has no position (but wasn't a nullArray).
+    // Or if observed distance is above threshold set by magnitudeExponent.
+    // By discarding in gs instead of in fs we save computations for when nothing is visible.
+    if( length(vs_position) < EPS || distThreshold <= 0){
         return;
     }
 

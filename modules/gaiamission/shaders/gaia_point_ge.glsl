@@ -22,53 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
+
 #include "floatoperations.glsl"
 
-// Keep in sync with renderablegaiastars.h:ColumnOption enum
-const int COLUMNOPTION_STATIC = 0;
-const int COLUMNOPTION_MOTION = 1; 
-const int COLUMNOPTION_COLOR = 2;
+layout(points) in;
+layout(points, max_vertices = 1) out;
 
-in vec4 vs_position;
-in vec3 ge_velocity;
-in float ge_brightness;
-in vec4 ge_gPosition;
-in vec2 texCoord;
+out vec4 vs_position;
 
-uniform sampler2D psfTexture;
-uniform sampler1D colorTexture;
-uniform float sharpness;
-uniform int columnOption;
+const float EPS = 1e-5;
 
-vec4 mag2rgb(float magnitude) {
-    // DR1 mag is [4, 20]
-    float st = (magnitude - 4) / (20 - 4);
-    return texture(colorTexture, st);
-}
+void main() {
 
-Fragment getFragment() {
+    vs_position = gl_in[0].gl_Position;
 
-    vec4 color = vec4(1.0);
-
-    if ( columnOption == COLUMNOPTION_COLOR ) {
-        color = mag2rgb(ge_brightness);
+    if( length(vs_position) < EPS ) {
+        return;
     }
+    
+    gl_PointSize = 1.0;
+    gl_Position = vs_position;
+    gl_Position.z = 0.0;
+    EmitVertex();
 
-    vec4 textureColor = texture(psfTexture, texCoord);
-    vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a = pow(fullColor.a, sharpness);
-
-    if (fullColor.a == 0.0) {
-        discard;
-    }
-
-    Fragment frag;
-    frag.color = fullColor;
-    frag.depth = safeLength(vs_position);
-    frag.gPosition = ge_gPosition;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    frag.blend = BLEND_MODE_NORMAL;
-
-    return frag;
+    EndPrimitive();
 }

@@ -416,6 +416,9 @@ void RenderableGaiaStars::initializeGL() {
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
+        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_vs.glsl"),
+        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+        //absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
         
     );
     //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -499,10 +502,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _colorTexture->bind();
     _program->setUniform(_uniformCache.colorTexture, colorUnit);
 
+    glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(_vao);
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
     glDrawArrays(GL_POINTS, 0, nStars);
 
+    glDisable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(0);
     _program->deactivate();
 
