@@ -64,7 +64,7 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::string& path)
               = readImageInternal<T>(_infile->currentExtension());
         return std::move(im);
     } catch (FitsException& e){
-        LERROR("Could not read FITS image from table");
+        LERROR("Could not read FITS image from table. " + e.message() );
     }
 
     return nullptr;
@@ -92,8 +92,8 @@ std::shared_ptr<std::unordered_map<std::string, T>>
             return std::make_pair(key, value);
         });
         return std::make_shared<std::unordered_map<std::string, T>>(std::move(result));
-    } catch (FitsException& e) {
-        LERROR("Could not read FITS header");
+    } catch (const FitsException& e) {
+        LERROR("Could not read FITS header. " + e.message() );
     }
     return nullptr;
 }
@@ -108,7 +108,7 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
         image->readKey(key, value);
         return std::make_unique<T>(value);
     } catch (FitsException& e) {
-        LERROR("Could not read FITS key");
+        LERROR("Could not read FITS key. " + e.message() );
     }
     return nullptr;
 }
@@ -148,7 +148,8 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
         }
     }
     catch (FitsException& e) {
-        LERROR("Could not read FITS table from file. Make sure it's not an image file.");
+        LERROR("Could not read FITS table from file. Make sure it's not an image file." 
+            + e.message() );
     }
 
     return nullptr;
@@ -165,7 +166,7 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& im
         ImageData<T> im = {std::move(contents), image.axis(0), image.axis(1)};
         return std::make_shared<ImageData<T>>(im);
     } catch (FitsException& e){
-        LERROR("Could not read FITS image EXTHDU");
+        LERROR("Could not read FITS image EXTHDU. " + e.message() );
     }
     return nullptr;
 }
@@ -178,7 +179,7 @@ const std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& imag
         ImageData<T> im = {std::move(contents), image.axis(0), image.axis(1)};
         return std::make_shared<ImageData<T>>(im);
     } catch (FitsException& e){
-        LERROR("Could not read FITS image PHDU");
+        LERROR("Could not read FITS image PHDU. " + e.message() );
     }
     return nullptr;
 }

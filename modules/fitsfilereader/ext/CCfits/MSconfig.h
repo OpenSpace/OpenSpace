@@ -57,7 +57,11 @@ compiler.  */
 
 # pragma warning(disable:4244)  // conversion from double to float
 # pragma warning(disable:4305)  // truncation from const double to const float
-# pragma warning(disable:4800)  // forcing value to bool (performance warning)
+//# pragma warning(disable:4800)  // forcing value to bool (performance warning)
+// C4800 no longer generated in VS2017
+# pragma warning(disable:4100) // unreferenced formal parameter
+# pragma warning(disable:4267) // possible loss of data when converting from size_t 
+# pragma warning(disable:4456) // declaration of 'id' hides previous local declaration
 
 #if _MSC_VER < 1300
 

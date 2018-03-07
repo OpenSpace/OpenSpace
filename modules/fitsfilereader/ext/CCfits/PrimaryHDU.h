@@ -46,6 +46,8 @@ namespace CCfits {
         void writeImage (const std::vector<long>& firstVertex, const std::vector<long>& lastVertex, const std::vector<long>& stride, const std::valarray<T>& inData);
         virtual void zero (double value);
         virtual void scale (double value);
+        virtual double zero() const;
+        virtual double scale() const;
         virtual void suppressScaling(bool toggle = true);
         virtual void resetImageRead ();
 
@@ -229,6 +231,18 @@ namespace CCfits {
   {
      PHDU::zero(value);
      m_data.scalingHasChanged();
+  }
+
+  template <typename T>
+  double PrimaryHDU<T>::scale() const
+  {
+      return PHDU::scale();
+  }
+
+  template <typename T>
+  double PrimaryHDU<T>::zero() const
+  {
+      return PHDU::zero();
   }
 
   template <typename T>
