@@ -170,7 +170,6 @@ function (set_openspace_compile_settings project)
             "-Wvla"
             "-Wzero-length-array"
             "-Wno-missing-braces"
-            "-std=c++1z"
         )
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         target_compile_options(

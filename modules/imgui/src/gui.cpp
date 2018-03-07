@@ -219,8 +219,6 @@ static void RenderDrawLists(ImDrawData* drawData) {
     glDisable(GL_SCISSOR_TEST);
 }
 
-
-
 void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(absPath(texturePath))) {
         LWARNING("Could not find image '" << texturePath << "'");
@@ -249,12 +247,6 @@ void addScreenSpaceRenderableOnline(std::string texturePath) {
     );
 }
 
-void addScreenSpaceBrowser(std::string url) {
-    const std::string luaTable =
-        "{Type = 'ScreenSpaceBrowser', URL = '" + url + "'}";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
-}
 static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
     "ShowHelpText",
     "Show tooltip help",
@@ -934,10 +926,6 @@ void GUI::render() {
         ImGuiInputTextFlags_EnterReturnsTrue
     );
 
-//    if (addImage) {
-//        addScreenSpaceImage(std::string(addImageBuffer));
-//    }
-
     if (addImageOnline) {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
@@ -959,21 +947,6 @@ void GUI::render() {
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-    static const int openUrlBufferSize = 256;
-    static char openUrlBuffer[openUrlBufferSize];
-
-    bool openUrl = ImGui::InputText(
-            "Open Browser",
-            openUrlBuffer,
-            openUrlBufferSize,
-            ImGuiInputTextFlags_EnterReturnsTrue
-    );
-    if (openUrl) {
-        addScreenSpaceBrowser(std::string(openUrlBuffer));
-    }
-#endif
 
 #ifdef SHOW_IMGUI_HELPERS
     ImGui::Checkbox("ImGUI Internals", &_showInternals);

@@ -53,6 +53,11 @@ local color_layers = {
         FilePath = mapServiceConfigs .. "/AWS/Mola_PseudoColor.wms"
     },
     {
+        Name = "CTX Mosaic [LiU]",
+        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
         Name = "CTX Mosaic [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
         BlendMode = "Color"
@@ -100,6 +105,12 @@ local height_layers = {
     {
         Name = "Mola Elevation",
         FilePath = mapServiceConfigs .. "/Mars_MGS_MOLA_DEM.wms",
+        TilePixelSize = 90
+    },
+    {
+        Name = "Mola Elevation [Europe]",
+        FilePath = mapServiceConfigs .. "/LiU/Mola_Elevation.wms",
+        Enabled = true,
         TilePixelSize = 90
     },
     {

@@ -45,6 +45,10 @@ local Moon = {
                     Enabled = true
                 },
                 -- LMMP based servers
+                {
+                    Name = "OnMoon",
+                    FilePath = mapServiceConfigs .. "/OnMoonColor.wms"
+                }
             },
             HeightLayers = {
                 -- Utah based servers

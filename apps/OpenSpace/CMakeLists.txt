@@ -26,15 +26,6 @@ include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
 include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
 
-
-# wanted by CEF
-set(CMAKE_BUILD_TYPE Debug CACHE INTERNAL "CMAKE_BUILD_TYPE")
-
-if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
-endif ()
-
-
 #####
 # OpenVR
 #####
@@ -113,30 +104,6 @@ target_link_libraries(OpenSpace
     ${OPENVR_LIBRARY}
     ${SPOUT_LIBRARY}
 )
-
-# Web Browser and Web gui
-# Why not put these in the module's path? Because they do not have access to the
-# target as of July 2017, which is needed.
-if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
-    # Add the CEF binary distribution's cmake/ directory to the module path and
-    # find CEF to initialize it properly.
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
-    include(webbrowser_helpers)
-
-    set_cef_targets("${CEF_ROOT}" OpenSpace)
-    run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-elseif (OPENSPACE_MODULE_WEBBROWSER)
-    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
-endif ()
-
-if (OPENSPACE_MODULE_WEBGUI AND WEBGUI_MODULE_PATH)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
-    include(webgui_helpers)
-    build_webgui_source(OpenSpace)
-elseif(OPENSPACE_MODULE_WEBGUI)
-    message(WARNING "WebGui is configured to be included, but the web source could not be found. Try configuring CMake again.")
-endif()
-
 
 target_compile_definitions(OpenSpace PRIVATE
     ${SGCT_OPENVR_DEFINITIONS}
