@@ -71,6 +71,16 @@ openspace.globebrowsing.documentation = {
             "Usage: openspace.globebrowsing.addBlendingLayersFromDirectory(directory, \"Earth\")"
     },
     {
+        Name = "addFocusNodesFromDirectory",
+        Arguments = "string, string",
+        Documentation =
+            "Retrieves all info files recursively in the directory passed as the first " ..
+            "argument to this function. The name and location retrieved from these info " ..
+            "files are then used to create new SceneGraphNodes that can be used as " ..
+            "focus nodes. " ..
+            "Usage: openspace.globebrowsing.addFocusNodesFromDirectory(directory, \"Mars\")"
+    },
+    {
         Name = "loadWMSServersFromFile",
         Arguments = "string",
         Documentation =
@@ -163,6 +173,11 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local dir = openspace.directoryForPath(file)
     dofile(file)
 
+    local name = nil
+    if Name then
+        name = Name
+    end
+
     local color = nil
     if ColorFile then
         color = {
@@ -183,7 +198,12 @@ openspace.globebrowsing.parseInfoFile = function (file)
         }
     end
 
-    return color, height
+    local location = nil
+    if Location then
+        location = Location
+    end
+
+    return name, color, height, location
 end
 
 openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_name)
@@ -191,7 +211,7 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
 
     for _, file in pairs(files) do
         if file and file:find('.info') then
-            c, h = openspace.globebrowsing.parseInfoFile(file)
+            _, c, h, _ = openspace.globebrowsing.parseInfoFile(file)
 
             if c then
                 openspace.printInfo("Adding color layer '" .. c["Name"] .. "'")
@@ -200,6 +220,36 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
             if h then
                 openspace.printInfo("Adding height layer '" .. h["Name"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
+            end
+        end
+    end
+end
+
+openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
+    local files = openspace.walkDirectoryFiles(dir, true, true)
+
+    for _, file in pairs(files) do
+        if file and file:find('.info') then
+            n, _, _, l = openspace.globebrowsing.parseInfoFile(file)
+
+            if n and l then
+                openspace.printInfo("Creating focus node for '" .. n .. "'")
+
+                local lat = l.Center[2]
+                local long = l.Center[1]
+                local a, b, c = openspace.globebrowsing.getGeoPosition(node_name, lat, long, 0.0)
+                local p = { a, b, c }
+
+                openspace.addSceneGraphNode({
+                    Name = node_name .. " - " .. n,
+                    Parent = node_name,
+                    Transform = {
+                        Translation = {
+                            Type = "StaticTranslation",
+                            Position = { p[1], p[2], p[3] }
+                        }
+                    }
+                })
             end
         end
     end

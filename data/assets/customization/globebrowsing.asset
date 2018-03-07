@@ -1,6 +1,8 @@
 -- Add require statements for assets exporting the neccessary globes
 -- example:
--- asset.require('../scene/solarsystem/planets/mars/mars')
+asset.require('../scene/solarsystem/planets/mars/mars')
+
+local CreateFocusNodes = true
 
 -- Add folders to this list that contain .info files describing patches
 -- OBS: Even on Windows, you have to use forward slashes (/) or double backslashes (\\)
@@ -16,8 +18,8 @@ local vrt_folders = {
         --
         -- tl;dr:  Specify CTX folders first, then HiRISE 
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
-        'C:/ab7512/OpenSpaceData/Mars/CTX',
-        'C:/ab7512/OpenSpaceData/Mars/HiRISE',
+        'D:/Mars/CTX',
+        'D:/Mars/HiRISE',
     },
     Moon = {
         -- Add folders here whose contents will be automatically added to the Moon globe
@@ -34,6 +36,10 @@ asset.onInitialize(function ()
     for obj, list in pairs(vrt_folders) do
         for _, dir in pairs(list) do
             openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+
+            if CreateFocusNodes then
+                openspace.globebrowsing.addFocusNodesFromDirectory(dir, obj)
+            end
         end
     end
 end)
