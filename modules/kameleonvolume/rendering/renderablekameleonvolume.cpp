@@ -155,7 +155,6 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _cache(CacheInfo)
     , _raycaster(nullptr)
     , _transferFunctionHandler(nullptr)
-    , _cache(CacheInfo)
 {
 
     glm::vec3 dimensions;

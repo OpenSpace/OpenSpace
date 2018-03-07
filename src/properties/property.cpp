@@ -187,7 +187,7 @@ const ghoul::Dictionary& Property::metaData() const {
 
 std::string Property::toJson() const {
     std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseDescription() + ", ";
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription() + ", ";
     result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
     result += "}";
     return result;
@@ -245,17 +245,17 @@ void Property::notifyListener() {
     }
 }
 
-std::string Property::generateBaseDescription() const {
+std::string Property::generateBaseJsonDescription() const {
     return 
         "{ \"" + std::string(TypeKey) + "\": \"" + className() + "\", " +
         "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", " +
         "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", " +
-        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataDescription() + ", " +
-        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalDescription() +
+        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataJsonDescription() + ", " +
+        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalJsonDescription() +
         " }";
 }
 
-std::string Property::generateMetaDataDescription() const {
+std::string Property::generateMetaDataJsonDescription() const {
     static const std::map<Visibility, std::string> VisibilityConverter = {
         { Visibility::All, "All" },
         { Visibility::Developer, "Developer" },
@@ -279,7 +279,7 @@ std::string Property::generateMetaDataDescription() const {
     return result;
 }
 
-std::string Property::generateAdditionalDescription() const {
+std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 

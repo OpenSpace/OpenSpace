@@ -165,8 +165,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
-    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
-    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)

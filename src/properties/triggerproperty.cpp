@@ -45,7 +45,7 @@ void TriggerProperty::set(ghoul::any) {
 
 std::string TriggerProperty::toJson() const {
     std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseDescription();
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription();
     result += "}";
     return result;
 }

@@ -386,11 +386,12 @@ void NumericalProperty<T>::setExponent(float exponent) {
 }
 
 template <typename T>
-std::string NumericalProperty<T>::generateAdditionalDescription() const {
+std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
     std::string result = "{ ";
     result += "\"" + MinimumValueKey + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
     result += "\"" + MaximumValueKey + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
-    result += "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping));
+    result += "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping)) + ",";
+    result += "\"" + ExponentValueKey + "\": " + luaToJson(std::to_string(_exponent));
     result += " }";
     return result;
 }

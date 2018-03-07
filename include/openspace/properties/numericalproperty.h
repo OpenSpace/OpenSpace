@@ -72,7 +72,7 @@ protected:
     static const std::string SteppingValueKey;
     static const std::string ExponentValueKey;
 
-    std::string generateAdditionalDescription() const override;
+    std::string generateAdditionalJsonDescription() const override;
 
     /**
      * convert a lua formatted value to a JSON formatted value

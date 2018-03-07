@@ -380,7 +380,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether the OpenGL debug callbacks are performed "
-                    "synchronously. If set to <True> the callbacks are in the same trhead "
+                    "synchronously. If set to <True> the callbacks are in the same thread "
                     "as the context and in the scope of the OpenGL function that "
                     "triggered the message. The default value is <True>."
                 },
