@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___SCENE___H__
 #define __OPENSPACE_CORE___SCENE___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <vector>
 #include <unordered_map>
 #include <set>
@@ -40,6 +38,8 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 
+#include <openspace/properties/propertyowner.h>
+
 #include <ghoul/opengl/programobject.h>
 
 namespace ghoul { class Dictionary; }
@@ -50,9 +50,10 @@ namespace documentation { struct Documentation; }
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene : public DocumentationGenerator {
+class Scene
+    : public properties::PropertyOwner
+{
 public:
-
     using UpdateDependencies = ghoul::Boolean;
 
     struct InvalidSceneError : ghoul::RuntimeError {
@@ -182,8 +183,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    std::string generateJson() const override;
-
     /**
      * Update dependencies.
      */

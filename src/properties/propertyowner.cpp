@@ -29,6 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <numeric>
 
 namespace openspace::properties {
 
@@ -38,7 +39,26 @@ namespace {
 
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
-    : _name(std::move(info.name))
+    : DocumentationGenerator(
+        "Documented",
+        "propertyOwners",
+        {
+            {
+                "mainTemplate",
+                "${WEB}/properties/main.hbs"
+            },
+            {
+                "propertyOwnerTemplate",
+                "${WEB}/properties/propertyowner.hbs"
+            },
+            {
+                "propertyTemplate",
+                "${WEB}/properties/property.hbs"
+            }
+        },
+        "${WEB}/properties/script.js"
+    )
+    , _name(std::move(info.name))
     , _description(std::move(info.description))
     , _owner(nullptr)
 {}
@@ -298,6 +318,64 @@ void PropertyOwner::removeTag(const std::string& tag) {
         std::remove(_tags.begin(), _tags.end(), tag),
         _tags.end()
     );
+}
+
+std::string PropertyOwner::generateJson() const {
+    std::function<std::string(properties::PropertyOwner*)> createJson =
+        [&createJson](properties::PropertyOwner* owner) -> std::string
+    {
+        std::stringstream json;
+        json << "{";
+        json << "\"name\": \"" << owner->name() << "\",";
+
+        json << "\"properties\": [";
+        auto properties = owner->properties();
+        for (properties::Property* p : properties) {
+            json << "{";
+            json << "\"id\": \"" << p->identifier() << "\",";
+            json << "\"type\": \"" << p->className() << "\",";
+            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
+            json << "\"guiName\": \"" << p->guiName() << "\",";
+            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
+            json << "}";
+            if (p != properties.back()) {
+                json << ",";
+            }
+        }
+        json << "],";
+
+        json << "\"propertyOwners\": [";
+        auto propertyOwners = owner->propertySubOwners();
+        for (properties::PropertyOwner* o : propertyOwners) {
+            json << createJson(o);
+            if (o != propertyOwners.back()) {
+                json << ",";
+            }
+        }
+        json << "]";
+        json << "}";
+
+        return json.str();
+    };
+
+
+    std::stringstream json;
+    json << "[";
+    std::vector<PropertyOwner*> subOwners = propertySubOwners();
+    if (!subOwners.empty()) {
+        json << std::accumulate(
+            std::next(subOwners.begin()),
+            subOwners.end(),
+            createJson(*subOwners.begin()),
+            [createJson](std::string a, PropertyOwner* n) {
+            return a + "," + createJson(n);
+        }
+        );
+    }
+
+    json << "]";
+
+    return json.str();
 }
 
 } // namespace openspace::properties

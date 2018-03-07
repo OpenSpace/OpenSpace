@@ -32,7 +32,6 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -160,7 +159,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _networkEngine(new NetworkEngine)
     , _parallelConnection(new ParallelConnection)
     , _renderEngine(new RenderEngine)
-    , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
     , _windowWrapper(std::move(windowWrapper))
@@ -172,7 +170,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
-    , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
     , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
@@ -183,24 +181,24 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
-    _navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    _rootPropertyOwner->addPropertySubOwner(_moduleEngine.get());
 
+    _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
-    _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
-    _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
-    _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
-    if (_windowWrapper) {
-        _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
-    }
-    _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
-    _globalPropertyNamespace->addPropertySubOwner(_console.get());
-    _globalPropertyNamespace->addPropertySubOwner(_dashboard.get());
+    _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
 
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
+    if (_windowWrapper) {
+        _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
+    }
+    _rootPropertyOwner->addPropertySubOwner(_parallelConnection.get());
+    _rootPropertyOwner->addPropertySubOwner(_console.get());
+    _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
     _versionInformation.versionString.setReadOnly(true);
-    _globalPropertyNamespace->addProperty(_versionInformation.versionString);
+    _rootPropertyOwner->addProperty(_versionInformation.versionString);
     _versionInformation.sourceControlInformation.setReadOnly(true);
-    _globalPropertyNamespace->addProperty(_versionInformation.sourceControlInformation);
+    _rootPropertyOwner->addProperty(_versionInformation.sourceControlInformation);
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -575,10 +573,6 @@ void OpenSpaceEngine::initialize() {
         );
     }
 
-    // Initialize the SettingsEngine
-    _settingsEngine->initialize();
-    _settingsEngine->setModules(_moduleEngine->modules());
-
     // Initialize the NavigationHandler
     _navigationHandler->initialize();
 
@@ -660,6 +654,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         _renderEngine->setCamera(nullptr);
         _navigationHandler->setCamera(nullptr);
         _scene->clear();
+        _rootPropertyOwner->removePropertySubOwner(_scene.get());
     }
 
     bool multiThreadedInitialization = configurationManager().hasKeyAndValue<bool>(
@@ -678,6 +673,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    _rootPropertyOwner->addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
     camera->setParent(_scene->root());
@@ -1002,8 +998,16 @@ void OpenSpaceEngine::writeSceneDocumentation() {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+    if (configurationManager().hasKey(ConfigurationManager::KeyScenePropertyDocumentation)) {
         _scene->writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyScenePropertyDocumentation
+                ))
+        );
+    }
+
+    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+        _rootPropertyOwner->writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyPropertyDocumentation
                 ))
@@ -1701,11 +1705,6 @@ RenderEngine& OpenSpaceEngine::renderEngine() {
     return *_renderEngine;
 }
 
-SettingsEngine& OpenSpaceEngine::settingsEngine() {
-    ghoul_assert(_settingsEngine, "Settings Engine must not be nullptr");
-    return *_settingsEngine;
-}
-
 TimeManager& OpenSpaceEngine::timeManager() {
     ghoul_assert(_timeManager, "Download Manager must not be nullptr");
     return *_timeManager;
@@ -1741,12 +1740,12 @@ interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
     return *_keyBindingManager;
 }
 
-properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
+properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {
     ghoul_assert(
-        _globalPropertyNamespace,
-        "Global Property Namespace must not be nullptr"
-    );
-    return *_globalPropertyNamespace;
+                 _rootPropertyOwner,
+                 "Root Property Namespace must not be nullptr"
+                 );
+    return *_rootPropertyOwner;
 }
 
 VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {
