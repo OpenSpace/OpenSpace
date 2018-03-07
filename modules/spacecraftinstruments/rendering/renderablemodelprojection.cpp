@@ -547,7 +547,7 @@ bool RenderableModelProjection::loadTextures() {
             absPath(_colorTexturePath)
         );
         if (_baseTexture) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath)));
             _baseTexture->uploadTexture();
             _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         }

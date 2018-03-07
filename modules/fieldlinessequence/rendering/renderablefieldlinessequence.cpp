@@ -213,8 +213,9 @@ namespace {
             tmp = std::stof(input);
         }
         catch (const std::invalid_argument& ia) {
-            LWARNING("Invalid argument: " << ia.what() << ". '" << input <<
-                "' is NOT a valid number!");
+            LWARNING(fmt::format(
+                "Invalid argument: {}. '{}' is NOT a valid number", ia.what(), input
+            ));
             return backupValue;
         }
         return tmp;
@@ -364,8 +365,9 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
     if (!_dictionary->getValue(KeyInputFileType, inputFileTypeString)) {
-        LERROR(_name << ": The field " << std::string(KeyInputFileType) << " is missing!");
-        return false;
+        LERROR(fmt::format(
+            "{}: The field {} is missing", _name, KeyInputFileType
+        ));
     }
     else {
         std::transform(
@@ -385,10 +387,10 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
             sourceFileType = SourceFileType::Osfls;
         }
         else {
-            LERROR(
-                _name << ": " << inputFileTypeString << " is not a recognized " <<
-                KeyInputFileType
-            );
+            LERROR(fmt::format(
+                "{}: {} is not a recognized {}",
+                _name, inputFileTypeString, KeyInputFileType
+            ));
             sourceFileType = SourceFileType::Invalid;
             return false;
         }
@@ -396,7 +398,9 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     std::string sourceFolderPath;
     if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
-        LERROR(_name << ": The field " << std::string(KeySourceFolder) << " is missing!");
+        LERROR(fmt::format(
+            "{}: The field {} is missing", _name, KeySourceFolder
+        ));
         return false;
     }
 
@@ -425,16 +429,17 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         }), _sourceFiles.end());
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
-            LERROR(
-                _name << ": " << sourceFolderPath << " contains no ." <<
-                inputFileTypeString << " files!"
-            );
+            LERROR(fmt::format(
+                "{}: {} contains no {} files",
+                _name, sourceFolderPath, inputFileTypeString
+            ));
             return false;
         }
     }
     else {
-        LERROR(_name << ": FieldlinesSequence" << sourceFolderPath
-            << " is not a valid directory!");
+        LERROR(fmt::format(
+            "{}: FieldlinesSequence {} is not a valid directory", _name, sourceFolderPath
+        ));
         return false;
     }
 
@@ -451,10 +456,10 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
             outputFolderPath = absPath(outputFolderPath);
         }
         else {
-            LERROR(
-                _name << ": The specified output path: '" <<
-                outputFolderPath << "', does not exist!"
-            );
+            LERROR(fmt::format(
+                "{}: The specified output path: '{}', does not exist",
+                _name, outputFolderPath
+            ));
             outputFolderPath = "";
         }
     }
@@ -512,7 +517,9 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
         model = fls::stringToModel(modelStr);
     }
     else {
-        LERROR(_name << ": Must specify '" << KeyJsonSimulationModel << "'");
+        LERROR(fmt::format(
+            "{}: Must specify '{}'", _name, KeyJsonSimulationModel
+        ));
         return false;
     }
 
@@ -521,8 +528,10 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
         _scalingFactor = scaleFactor;
     }
     else {
-        LWARNING(_name << ": Does not provide scalingFactor! " <<
-            "Assumes coordinates are already expressed in meters!");
+        LWARNING(fmt::format(
+            "{}: Does not provide scalingFactor. Assumes coordinates are in meters",
+            _name
+        ));
     }
     return true;
 }
@@ -573,7 +582,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& out
             }
         }
         else {
-            LWARNING("Failed to load state from: " << filePath);
+            LWARNING(fmt::format("Failed to load state from: {}", filePath));
         }
     }
 }
@@ -584,8 +593,10 @@ void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
         _loadingStatesDynamically = shouldLoadInRealtime;
     }
     else {
-        LWARNING(_name << ": " << KeyOslfsLoadAtRuntime <<
-            " isn't specified! States will be stored in RAM!");
+        LWARNING(fmt::format(
+            "{}: {} is not specified. States will be stored in RAM",
+            _name, KeyOslfsLoadAtRuntime
+        ));
     }
 }
 
@@ -721,7 +732,9 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     _pFocusOnOriginBtn.onChange([this] {
         SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_name);
         if (!node) {
-            LWARNING("Could not find a node in scenegraph called '" << _name << "'");
+            LWARNING(fmt::format(
+                "Could not find a node in scenegraph called '{}'", _name
+            ));
             return;
         }
         OsEng.navigationHandler().setFocusNode(node->parent());
@@ -868,20 +881,23 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
             seedFilePath = absPath(seedFilePath);
         }
         else {
-            LERROR(_name << ": The specified seed point file: '" <<
-                seedFilePath << "', does not exist!");
+            LERROR(fmt::format(
+                "{}: The specified seed poitn file: '{}' does not exist",
+                _name, seedFilePath
+            ));
             return false;
         }
     }
     else {
-        LERROR(_name << ": Must specify '" << KeyCdfSeedPointFile << "'");
+        LERROR(fmt::format("{}: Must specify '{}'", _name, KeyCdfSeedPointFile));
         return false;
     }
 
     if (!_dictionary->getValue(KeyCdfTracingVariable, tracingVar)) {
         tracingVar = "b"; //  Magnetic field variable as default
-        LWARNING(_name << ": No '" << KeyCdfTracingVariable << "', using default: "
-            << tracingVar);
+        LWARNING(fmt::format("{}: No '{}', using default '{}'",
+            _name, KeyCdfTracingVariable, tracingVar
+        ));
     }
 
     ghoul::Dictionary extraQuantityNamesDictionary;
@@ -902,11 +918,11 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
 
     std::ifstream seedFile(FileSys.relativePath(path));
     if (!seedFile.good()) {
-        LERROR("Could not open seed points file '" << path << "'");
+        LERROR(fmt::format("Could not open seed points file '{}'", path));
         return false;
     }
 
-    LDEBUG("Reading seed points from file '" << path << "'");
+    LDEBUG(fmt::format("Reading seed points from file '{}'", path));
     std::string line;
     while (std::getline(seedFile, line)) {
         glm::vec3 point;
@@ -918,7 +934,7 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
     }
 
     if (outVec.size() == 0) {
-        LERROR("Found no seed points in: " << path);
+        LERROR(fmt::format("Found no seed points in: {}", path));
         return false;
     }
 

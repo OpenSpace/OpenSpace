@@ -39,7 +39,7 @@
 #endif // _MSC_VER
 
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/fmt.h>
 
 namespace {
     std::string _loggerCat = "KameleonHelper";
@@ -57,14 +57,17 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
 
     // ---------------------------- CREATE KAMELEON OBJECT ---------------------------- //
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
-    LDEBUG("\tOpening the cdf file: " << cdfFilePath);
+    LDEBUG(fmt::format("\tOpening the cdf file: {}", cdfFilePath));
     long kamStatus = kameleon->open(cdfFilePath);
 
     if (kamStatus != ccmc::FileReader::OK) {
-        LERROR("Failed to create a Kameleon Object from file: " << cdfFilePath);
+        LERROR(fmt::format(
+            "Failed to create a Kameleon Object from file: {}",
+            cdfFilePath
+        ));
        return nullptr;
     }
-    LDEBUG("\tSuccessfully opened : " << cdfFilePath);
+    LDEBUG(fmt::format("\tSuccessfully opened: {}", cdfFilePath));
     return kameleon;
 }
 
@@ -123,8 +126,10 @@ double getTime(ccmc::Kameleon* kameleon) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
         } else {
-            LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<
-                    "Starting time is set to 01.JAN.2000 12:00.");
+            LWARNING(
+                "No starting time attribute could be found in the .cdf file. Starting "
+                "time is set to 01.JAN.2000 12:00."
+            );
             seqStartDbl = 0.0;
         }
 
@@ -137,7 +142,7 @@ double getTime(ccmc::Kameleon* kameleon) {
                     Time::convertTime(
                             seqStartStr.substr(0, seqStartStr.length() - 2));
         } else {
-            LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<
+            LWARNING("No starting time attribute could be found in the .cdf file." 
                 "Starting time is set to 01.JAN.2000 12:00.");
             seqStartDbl = 0.0;
         }
@@ -154,7 +159,7 @@ double getTime(ccmc::Kameleon* kameleon) {
                             "time_physical_time").getAttributeFloat());
         } else {
             stateStartOffset = 0.0;
-            LWARNING("No time offset attribute could be found in the .cdf file.\n\t" <<
+            LWARNING("No time offset attribute could be found in the .cdf file."
                      "The current state starts the same time as the sequence!");
         }
 

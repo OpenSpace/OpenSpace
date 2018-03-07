@@ -197,10 +197,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR(
-            "The scene contains circular dependencies. " <<
-            inDegrees.size() << " nodes will be disabled."
-        );
+        LERROR(fmt::format(
+            "The scene contains circular dependencies. {} nodes will be disabled",
+            inDegrees.size()
+        ));
     }
 
     for (auto it : inDegrees) {
@@ -370,8 +370,10 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     const bool hasParent = dict.hasKey(KeyParentName);
 
     if (_nodesByName.find(nodeName) != _nodesByName.end()) {
-        LERROR("Cannot add scene graph node " << nodeName <<
-               ". A node with that name already exisis.");
+        LERROR(fmt::format(
+            "Cannot add scene graph node '{}'. A node with that name already exists",
+            nodeName
+        ));
         return nullptr;
     }
 

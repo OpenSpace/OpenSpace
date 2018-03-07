@@ -95,11 +95,6 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 

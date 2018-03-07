@@ -206,7 +206,7 @@ void ScreenSpaceSpout::update() {
         if (!createSuccess) {
             LWARNINGC(
                 "ScreenSpaceSpout",
-                "Could not create receiver for " << _currentSenderName
+                fmt::format("Could not create receiver for {}", _currentSenderName)
             );
             return;
         }
@@ -224,7 +224,7 @@ void ScreenSpaceSpout::update() {
     if (!receiveSuccess && !_isErrorMessageDisplayed) {
         LWARNINGC(
             "ScreenSpaceSpout",
-            "Could not receive texture for " << _currentSenderName
+            fmt::format("Could not receive texture for {}", _currentSenderName)
         );
         _isErrorMessageDisplayed = true;
     }

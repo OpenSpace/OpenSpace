@@ -50,7 +50,7 @@ int bindKey(lua_State* L) {
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERRORC("lua.bindKey", "Could not find key '"<< key << "'");
+        LERRORC("lua.bindKey", fmt::format("Could not find key '{}'", key));
         return 0;
     }
 
@@ -96,7 +96,7 @@ int bindKeyLocal(lua_State* L) {
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERRORC("lua.bindKey", "Could not find key '" << key << "'");
+        LERRORC("lua.bindKey", fmt::format("Could not find key '{}'", key));
         return 0;
     }
 

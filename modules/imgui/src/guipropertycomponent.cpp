@@ -35,7 +35,7 @@
 #include <algorithm>
 
 namespace {
-    const ImVec2 size = ImVec2(350, 500);
+    const ImVec2 Size = ImVec2(350, 500);
 
     static const openspace::properties::Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
@@ -252,7 +252,7 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.75f);
+    ImGui::Begin(name().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();

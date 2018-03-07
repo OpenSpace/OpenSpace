@@ -130,7 +130,9 @@ int removeScreenSpaceRenderable(lua_State* L) {
     if (!s) {
         LERRORC(
             "removeScreenSpaceRenderable",
-            errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'"
+            fmt::format(
+                "{}: Could not find ScreenSpaceRenderable '{}'",  errorLocation(L), name
+            )
         );
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;

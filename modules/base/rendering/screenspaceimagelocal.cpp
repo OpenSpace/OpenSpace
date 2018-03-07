@@ -33,7 +33,7 @@
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/textureconversion.h>
 
 namespace {
