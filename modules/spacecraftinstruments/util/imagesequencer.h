@@ -187,8 +187,6 @@ private:
 
     // current simulation time
     double _currentTime;
-    // simulation time of previous frame
-    double _previousTime;
     // time between current simulation time and an upcoming capture
     double _intervalLength;
     // next consecutive capture in time

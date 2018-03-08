@@ -83,14 +83,15 @@ namespace openspace {
 
 DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     : IswaCygnet(dictionary)
-    , _dataProcessor(nullptr)
     , _dataOptions(DataOptionsInfo)
+    , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
+    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _normValues(NormalizeValuesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
     , _useLog(UseLogInfo, false)
     , _useHistogram(UseHistogramInfo, false)
     , _autoFilter(AutoFilterInfo, true)
-    , _normValues(NormalizeValuesInfo, glm::vec2(1.f), glm::vec2(0.f), glm::vec2(5.f))
-    , _backgroundValues(BackgroundInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
-    , _transferFunctionsFile(TransferFunctionsFile, "${SCENE}/iswa/tfs/default.tf")
+
+    , _dataProcessor(nullptr)
     //FOR TESTING
     , _numOfBenchmarks(0)
     , _avgBenchmarkTime(0.0f)
@@ -187,8 +188,11 @@ bool DataCygnet::readyToRender() const{
  */
 void DataCygnet::setTextureUniforms(){
     std::vector<int> selectedOptions = _dataOptions.value();
-    int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
-    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);
+    int activeTextures = std::min(static_cast<int>(selectedOptions.size()), MAX_TEXTURES);
+    int activeTransferfunctions = std::min(
+        static_cast<int>(_transferFunctions.size()),
+        MAX_TEXTURES
+    );
 
     // Set Textures
     ghoul::opengl::TextureUnit txUnits[MAX_TEXTURES];
@@ -207,8 +211,11 @@ void DataCygnet::setTextureUniforms(){
         }
     }
 
-    if(activeTextures > 0 && selectedOptions.back()>=(int)_transferFunctions.size())
+    if (activeTextures > 0 &&
+        selectedOptions.back() >= static_cast<int>(_transferFunctions.size()))
+        {
             activeTransferfunctions = 1;
+        }
 
     ghoul::opengl::TextureUnit tfUnits[MAX_TEXTURES];
     j = 0;

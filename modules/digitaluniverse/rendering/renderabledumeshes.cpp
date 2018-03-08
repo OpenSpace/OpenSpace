@@ -260,7 +260,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
-    , _fontRenderer(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _labelFile("")
@@ -417,9 +416,6 @@ void RenderableDUMeshes::initializeGL() {
     createMeshes();
 
     if (_hasLabel) {
-        if (_fontRenderer == nullptr)
-            _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
-                ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 50;
             _font = OsEng.fontManager().font(
@@ -447,7 +443,7 @@ void RenderableDUMeshes::deinitializeGL() {
     }
 }
 
-void RenderableDUMeshes::renderMeshes(const RenderData&,
+void RenderableDUMeshes::renderMeshes(const RenderData& renderData,
                                       const glm::dmat4& modelViewMatrix,
                                       const glm::dmat4& projectionMatrix)
 {
@@ -475,8 +471,32 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
 
-    _program->activate();
+    _program->activate();   
+    
+    glm::dmat4 cameraRotation = glm::mat4_cast(
+        glm::inverse(static_cast<glm::dquat>((renderData.camera.rotationQuaternion())))
+    );
+     
+    glm::dmat4 viewMatrix(glm::dmat4(renderData.camera.viewMatrix()));
+    glm::dvec3 cameraPosition(renderData.camera.positionVec3());
 
+    //glm::dvec3 offset = 0.95 * cameraPosition;
+
+    glm::dvec4 cSnap = glm::translate(glm::dmat4(), cameraPosition) * glm::mat4_cast(static_cast<glm::dquat>(renderData.camera.rotationQuaternion())) * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+    //cSnap = glm::dvec4(std::round(cSnap.x), std::round(cSnap.y), std::round(cSnap.z), 0.0);
+    glm::dmat4 cTranslationSnapped = glm::translate(glm::dmat4(), -cameraPosition + glm::dvec3(cSnap));
+
+    glm::dmat4 modelMatrix =
+        glm::translate(glm::dmat4(), renderData.modelTransform.translation) * // Translation
+        glm::dmat4(renderData.modelTransform.rotation) *  // Spice rotation
+        glm::scale(glm::dmat4(), glm::dvec3(renderData.modelTransform.scale));
+
+
+    _program->setUniform("offsetMVPMatrix", projectionMatrix * viewMatrix * cameraRotation * cTranslationSnapped);
+    _program->setUniform("modelMatrix", modelMatrix);
+    //_program->setUniform("cameraPosition", cameraPosition);
+    _program->setUniform("offset", cSnap);
+    
     _program->setUniform(_uniformCache.modelViewProjectionTransform, glm::mat4(projectionMatrix * modelViewMatrix));
     _program->setUniform(_uniformCache.modelViewTransform, modelViewMatrix);
     _program->setUniform(_uniformCache.projectionTransform, projectionMatrix);
@@ -556,7 +576,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
-        _fontRenderer->render(
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             _textColor,
@@ -570,7 +590,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
             data.camera.lookUpVectorWorldSpace(),
             _renderOption.value(),
             "%s",
-            pair.second.c_str());
+            pair.second.c_str()
+        );
     }
 }
 

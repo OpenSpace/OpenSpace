@@ -495,9 +495,10 @@ void RenderEngine::updateRenderer() {
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
 
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-            fontResolution()
-        );
+        using FR = ghoul::fontrendering::FontRenderer;
+
+        FR::defaultRenderer().setFramebufferSize(fontResolution());
+        FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
     }
 
     _renderer->update();

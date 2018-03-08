@@ -388,8 +388,8 @@ void RenderablePoints::update(const UpdateData&) {
 
         if (_hasColorMapFile) {
 
-            const size_t nAstronomicalObjects = _fullData.size() /
-                                                        _nValuesPerAstronomicalObject;
+            // const size_t nAstronomicalObjects = _fullData.size() /
+                                                        // _nValuesPerAstronomicalObject;
             // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
             // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
 

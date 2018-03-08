@@ -20,12 +20,7 @@ local Nix = {
             Target = "NIX",
             Observer = "PLUTO BARYCENTER",
             Kernels = kernels.Kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_NIX",
-            DestinationFrame = "ECLIPJ2000"
-        },
+        }
     },
     Renderable = {
         Type = "RenderablePlanet",
@@ -43,7 +38,7 @@ local NixText = {
     Name = "NixText",
     Parent = Nix.Name,
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,
@@ -69,6 +64,8 @@ local NixTrail = {
     },
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Nix,

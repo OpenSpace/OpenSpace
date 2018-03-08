@@ -34,7 +34,9 @@ namespace {
 unsigned long fromLuaConversion(lua_State* state, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
-        return static_cast<unsigned long>(lua_tonumber(state, -1));
+        unsigned long val = static_cast<unsigned long>(lua_tonumber(state, -1));
+        lua_pop(state, 1);
+        return val;
     }
     else {
         return 0ul;

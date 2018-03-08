@@ -390,7 +390,6 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
     , _program(nullptr)
-    , _fontRenderer(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _colorMapFile("")
@@ -671,9 +670,6 @@ void RenderableBillboardsCloud::initializeGL() {
     }
 
     if (_hasLabel) {
-        if (_fontRenderer == nullptr)
-            _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
-                ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 50;
             _font = OsEng.fontManager().font(
@@ -811,8 +807,6 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
 {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
-    _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -844,7 +838,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
-        _fontRenderer->render(
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             textColor,
@@ -858,7 +852,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             data.camera.lookUpVectorWorldSpace(),
             _renderOption.value(),
             "%s",
-            pair.second.c_str());
+            pair.second.c_str()
+        );
     }
 }
 

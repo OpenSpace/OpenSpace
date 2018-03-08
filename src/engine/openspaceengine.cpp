@@ -899,8 +899,11 @@ void OpenSpaceEngine::loadFonts() {
             LERROR("Error initializing default font renderer");
         }
 
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-            _renderEngine->fontResolution()
+        using FR = ghoul::fontrendering::FontRenderer;
+        FR::defaultRenderer().setFramebufferSize(_renderEngine->fontResolution());
+
+        FR::defaultProjectionRenderer().setFramebufferSize(
+            _renderEngine->renderingResolution()
         );
     }
     catch (const ghoul::RuntimeError& err) {

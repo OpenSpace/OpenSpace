@@ -82,7 +82,7 @@ namespace {
             return PathType::Absolute;
         }
         return PathType::RelativeToAssetRoot;
-    };
+    }
 }
 
 namespace openspace {
@@ -671,7 +671,7 @@ int AssetLoader::requestLua(Asset* parent) {
     return 1;
 }
 
-int AssetLoader::existsLua(Asset* asset) {
+int AssetLoader::existsLua(Asset*) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::exists");
 
     std::string assetName = luaL_checkstring(*_luaState, 1);
