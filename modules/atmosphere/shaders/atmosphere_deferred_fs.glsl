@@ -376,11 +376,12 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // From cosine law where t = distance between x and x0
         // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
         r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        float invr0 = 1.0/r0;
         // From the dot product: cos(theta0) = (x0 dot v)/(||ro||*||v||)
         // mu0 = ((x + t) dot v) / r0
         // mu0 = (x dot v + t dot v) / r0
         // mu0 = (r*mu + t) / r0
-        mu0 = (r * mu + t) / r0;
+        mu0 = (r * mu + t) * invr0;
         vec4 inScatterAboveX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
@@ -389,7 +390,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // Below Horizon
         mu  = muHorizon + INTERPOLATION_EPS;
         r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
-        mu0 = (r * mu + t) / r0;
+        mu0 = (r * mu + t) * invr0;
         vec4 inScatterBelowX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
@@ -454,7 +455,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     vec3  x0                 = x + t * v;
     float r0                 = length(x0);
     // Normal of intersection point.
-    vec3  n                  = normalize(normal);
+    // Normal must be normalized.
+    vec3  n                  = normal;
     //vec4 groundReflectance = groundColor * vec4(.37);
     vec4 groundReflectance   = groundColor * 
         vec4(groundRadianceEmittion, groundRadianceEmittion, groundRadianceEmittion, 1.0f);
