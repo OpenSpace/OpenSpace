@@ -51,7 +51,7 @@ const char* configurationFile = "imgui.ini";
 //const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
 const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
 const float FontSize = 14.f;
-const ImVec2 size = ImVec2(500, 500);
+const ImVec2 Size = ImVec2(500, 500);
 
 //GLuint fontTex = 0;
 // A VBO max size of 0 will cause a lazy instantiation of the buffer
@@ -221,7 +221,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
 
 void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(absPath(texturePath))) {
-        LWARNING("Could not find image '" << texturePath << "'");
+        LWARNING(fmt::format("Could not find image '{}'", texturePath));
         return;
     }
 

@@ -273,7 +273,7 @@ void RenderableModel::loadTexture() {
         if (_texture) {
             LDEBUGC(
                 "RenderableModel",
-                "Loaded texture from '" << absPath(_colorTexturePath) << "'"
+                fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
             );
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

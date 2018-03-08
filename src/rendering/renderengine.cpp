@@ -341,8 +341,7 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
         newRenderer = std::make_unique<ABufferRenderer>();
         break;
     case RendererImplementation::Invalid:
-        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-            << "rendering methods");
+        LFATAL(fmt::format("Rendering method '{}' not available", renderingMethod));
     }
 
     setRenderer(std::move(newRenderer));
@@ -384,7 +383,7 @@ void RenderEngine::initialize() {
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
-    LINFO("Setting renderer from string: " << renderingMethod);
+    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
@@ -689,6 +688,16 @@ void RenderEngine::postDraw() {
     }
 
     if (_shouldTakeScreenshot) {
+        // We only create the directory here, as we don't want to spam the users
+        // screenshot folder everytime we start OpenSpace even when we are not taking any
+        // screenshots. So the first time we actually take one, we create the folder:
+        if (!FileSys.directoryExists(absPath("${THIS_SCREENSHOT_PATH}"))) {
+            FileSys.createDirectory(
+                absPath("${THIS_SCREENSHOT_PATH}"),
+                ghoul::filesystem::FileSystem::Recursive::Yes
+            );
+        }
+
         OsEng.windowWrapper().takeScreenshot(_applyWarping);
         _shouldTakeScreenshot = false;
     }

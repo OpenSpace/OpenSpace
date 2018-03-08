@@ -84,7 +84,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
             return true;
         }
         default:
-            LERROR("Unknown type '" << type << "'");
+            LERROR(fmt::format("Unknown type '{}'", type));
             return false;
         }
 }
@@ -217,9 +217,9 @@ void NetworkEngine::sendInitialInformation() {
         std::vector<char> payload = m.body;
         payload.insert(payload.begin(), identifier.data.begin(), identifier.data.end());
         OsEng.windowWrapper().sendMessageToExternalControl(payload);
-        LINFO("Sent initial message: (s=" << m.body.size() << ")" <<
-              "[i=" << identifier.value << "]"
-        );
+        LINFO(fmt::format(
+            "Sent initial message: (s={}) [i={}]", m.body.size(), identifier.value
+        ));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(SleepTime));
     }

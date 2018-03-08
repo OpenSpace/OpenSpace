@@ -34,6 +34,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/query/query.h>
 
 namespace openspace::globebrowsing::luascriptfunctions {
 
@@ -175,7 +176,40 @@ int goToGeo(lua_State* L) {
 }
 
 int getGeoPosition(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPosition");
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::getGeoPosition");
+
+    std::string name = luaL_checkstring(L, 1);
+    double latitude = lua_tonumber(L, 2);
+    double longitude = lua_tonumber(L, 3);
+    double altitude = lua_tonumber(L, 4);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+
+    SceneGraphNode* n = sceneGraphNode(name);
+    Renderable* r = n->renderable();
+    RenderableGlobe* g = dynamic_cast<RenderableGlobe*>(r);
+    if (!g) {
+        return luaL_error(L, "Name must be a RenderableGlobe");
+    }
+
+
+    GlobeBrowsingModule& mod = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
+    glm::vec3 pos = mod.cartesianCoordinatesFromGeo(
+        *g,
+        latitude,
+        longitude,
+        altitude
+    );
+
+    lua_pushnumber(L, pos.x);
+    lua_pushnumber(L, pos.y);
+    lua_pushnumber(L, pos.z);
+    return 3;
+}
+
+int getGeoPositionForCamera(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPositionForCamera");
 
     GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();

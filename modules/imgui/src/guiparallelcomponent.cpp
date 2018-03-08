@@ -32,7 +32,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <algorithm>
 #include <numeric>

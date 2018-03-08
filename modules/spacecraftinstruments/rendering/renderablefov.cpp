@@ -384,7 +384,10 @@ void RenderableFov::initializeGL() {
         }
         const size_t sizeAfter = res.bounds.size();
 
-        LINFOC(_instrument.name, "Simplified from " << sizeBefore << " to " << sizeAfter);
+        LINFOC(
+            _instrument.name,
+            fmt::format("Simplified from {} to {}", sizeBefore, sizeAfter)
+        );
     }
 
 

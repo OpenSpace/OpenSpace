@@ -327,14 +327,13 @@ void RenderableKameleonVolume::updateRaycasterModelTransform() {
     _raycaster->setModelTransform(modelTransform);
 }
 
-
 bool RenderableKameleonVolume::cachingEnabled() {
     return _cache;
 }
 
 void RenderableKameleonVolume::load() {
     if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
-        LERROR("File " << _sourcePath << " does not exist.");
+        LERROR(fmt::format("File '{}' does not exist.", _sourcePath.value()));
         return;
     }
     if (!cachingEnabled()) {

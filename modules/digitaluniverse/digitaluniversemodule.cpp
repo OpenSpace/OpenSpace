@@ -36,7 +36,7 @@
 #include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 
 namespace openspace {
 
