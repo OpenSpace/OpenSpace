@@ -34,7 +34,9 @@ namespace {
 int fromLuaConversion(lua_State* state, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
-        return static_cast<int>(lua_tonumber(state, -1));
+        int val = static_cast<int>(lua_tonumber(state, -1));
+        lua_pop(state, 1);
+        return val;
     }
     else {
         return 0;

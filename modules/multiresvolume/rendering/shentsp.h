@@ -40,7 +40,7 @@ public:
 
 protected:
     // Returns vector of standard deviations for each brick
-    std::vector<float> calculateBrickStdDevs(std::vector<float> brickAverages);
+    std::vector<float> calculateBrickStdDevs(std::vector<float> brickAverages) override;
 
 }; // class ShenTSP
 

@@ -22,33 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SETTINGSENGINE___H__
-#define __OPENSPACE_CORE___SETTINGSENGINE___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__
+#define __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-#include <vector>
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-class OpenSpaceModule;
-
-class SettingsEngine : public properties::PropertyOwner {
+class SpoutModule : public OpenSpaceModule {
 public:
-    SettingsEngine();
+    constexpr static const char* Name = "Spout";
 
-    void initialize();
+    SpoutModule();
 
-    void setModules(const std::vector<OpenSpaceModule*>& modules);
-
-private:
-    properties::OptionProperty _scenes;
+    void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___SETTINGSENGINE___H__
+#endif // __OPENSPACE_MODULE_SPOUT___SPOUTMODULE___H__

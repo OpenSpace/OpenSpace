@@ -29,6 +29,7 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 #include <utility>
@@ -71,6 +72,8 @@ private:
 
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;
+    properties::BoolProperty _doSimplification;
+    properties::OptionProperty _requestedUnit;
 
 
 

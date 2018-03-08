@@ -256,7 +256,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _filename = "";
     bool success = dictionary.getValue(KeyDataSource, _filename);
     if (!success) {
-        LERROR("Node '" << name << "' did not contain a valid '" <<  KeyDataSource << "'");
+        LERROR(fmt::format(
+            "Node '{}' did not contain a valid '{}'",
+            name,
+            KeyDataSource
+        ));
         return;
     }
     _filename = absPath(_filename);
@@ -308,7 +312,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         _loop = false;
     } else {
     _loop = true;
-        LWARNING("Node " << name << " does not provide valid time information. Viewing one image per frame.");
+        LWARNING(fmt::format(
+            "Node '{}' does not provide valid time information. Viewing one image per "
+            "frame.",
+            name
+        ));
     }
 
 
@@ -316,8 +324,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _transferFunctionPath = "";
     success = dictionary.getValue(KeyTransferFunction, _transferFunctionPath);
     if (!success) {
-        LERROR("Node '" << name << "' did not contain a valid '" <<
-            KeyTransferFunction << "'");
+        LERROR(fmt::format(
+            "Node '{}' did not contain a valid '{}'",
+            name,
+            KeyTransferFunction
+        ));
         return;
     }
     _transferFunctionPath = absPath(_transferFunctionPath);
@@ -556,38 +567,38 @@ bool RenderableMultiresVolume::initializeSelector() {
     case Selector::LOCAL:   selector = _localTfBrickSelector.get();     manager = _localErrorHistogramManager;                                      break;
     case Selector::SIMPLE:  selector = _simpleTfBrickSelector.get();    manager = _histogramManager;                                                break;
     case Selector::SHEN:    selector = _shenBrickSelector.get();        return initializeShenSelector();
-    default:                LERROR("No selector " << _selector);        return false;
+    default:                LERROR(fmt::format("No selector {}", _selector));        return false;
     }
 
     if (manager) {
-        LINFO("Histogram Manager: " << manager->getName());
+        LINFO(fmt::format("Histogram Manager: {}", manager->getName()));
         std::stringstream cacheName;
         ghoul::filesystem::File f = _filename;
         cacheName << f.baseName() << "_" << nHistograms << "_" << manager->getName();
         std::string cacheFilename;
         cacheFilename = FileSys.cacheManager()->cachedFilename(
             cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
-        LINFO("Trying to open cache: " << cacheFilename);
+        LINFO(fmt::format("Trying to open cache: {}", cacheFilename));
         std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
         if (cacheFile.is_open()) {
             // Read histograms from cache.
             cacheFile.close();
-            LINFO("Loading histograms from cache: " << cacheFilename);
+            LINFO(fmt::format("Loading histograms from cache: {}", cacheFilename));
             success &= manager->loadFromFile(cacheFilename);
         }
         else {
             if (scenePath != "") {
                 // Read histograms from scene data.
-                LINFO("Loading histograms from scene data: " << scenePath);
+                LINFO(fmt::format("Loading histograms from scene data: {}", scenePath));
                 success &= manager->loadFromFile(scenePath);
             }
             else {
                 // Build histograms from tsp file.
-                LWARNING("Failed to open " << cacheFilename);
+                LWARNING(fmt::format("Failed to open {}", cacheFilename));
                 success &= manager->buildHistograms(nHistograms);
             }
             if (success) {
-                LINFO("Writing cache to " << cacheFilename);
+                LINFO(fmt::format("Writing cache to {}", cacheFilename));
                 manager->saveToFile(cacheFilename);
             }
         }
@@ -666,7 +677,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         case Selector::LOCAL:   s = _localTfBrickSelector.get();    break;
         case Selector::SHEN:    s = _shenBrickSelector.get();       break;
         case Selector::TIME:    s = _timeBrickSelector.get();       break;
-        default:                LERROR("No selector" << _selector); return;
+        default:                LERROR(fmt::format("No selector {}", _selector)); return;
         }
 
         if (s) {

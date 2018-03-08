@@ -32,6 +32,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -74,11 +75,15 @@ NavigationHandler::NavigationHandler()
     , _useKeyFrameInteraction(KeyFrameInfo, false)
 {
     _origin.onChange([this]() {
+        if (_origin.value().empty()) {
+            return;
+        }
+
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
-            LWARNING(
-                "Could not find a node in scenegraph called '" << _origin.value() << "'"
-            );
+            LWARNING(fmt::format(
+                "Could not find a node in scenegraph called '{}'", _origin.value()
+            ));
             return;
         }
         setFocusNode(node);
@@ -213,17 +218,12 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 
     if (!readSuccessful) {
         throw ghoul::RuntimeError(
-            "Position, Rotation and Focus need to be defined for camera dictionary.");
-    }
-
-    SceneGraphNode* node = sceneGraphNode(focus);
-    if (!node) {
-        throw ghoul::RuntimeError(
-            "Could not find a node in scenegraph called '" + focus + "'");
+            "Position, Rotation and Focus need to be defined for camera dictionary."
+        );
     }
 
     // Set state
-    setFocusNode(node);
+    _origin = focus;
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
@@ -249,7 +249,7 @@ ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
 void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         std::string fullpath = absPath(filepath);
-        LINFO("Saving camera position: " << filepath);
+        LINFO(fmt::format("Saving camera position: {}", filepath));
 
         ghoul::Dictionary cameraDict = getCameraStateDictionary();
 
@@ -280,7 +280,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 }
 
 void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
-    LINFO("Reading camera state from file: " << filepath);
+    LINFO(fmt::format("Reading camera state from file: {}", filepath));
     if (!FileSys.fileExists(filepath))
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
 

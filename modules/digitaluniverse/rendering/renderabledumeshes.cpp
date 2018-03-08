@@ -30,7 +30,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -69,12 +69,12 @@ namespace {
         "all point."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    /*static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each point."
-    };
+    };*/
 
     static const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
@@ -179,12 +179,12 @@ documentation::Documentation RenderableDUMeshes::Documentation() {
                 Optional::Yes,
                 TransparencyInfo.description
             },
-            {
+            /*{
                 ScaleFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
                 ScaleFactorInfo.description
-            },
+            },*/
             {
                 DrawLabelInfo.identifier,
                 new BoolVerifier,
@@ -246,7 +246,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _hasLabel(false)
     , _labelDataIsDirty(true)
     , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
+    //, _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 64.f)
     , _textColor(
         TextColorInfo,
         glm::vec4(1.0f, 1.0, 1.0f, 1.f),
@@ -260,7 +260,6 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
-    , _fontRenderer(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _labelFile("")
@@ -328,12 +327,12 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     }
     addProperty(_alphaValue);
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
+    /*if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
         _scaleFactor = static_cast<float>(
             dictionary.value<double>(ScaleFactorInfo.identifier)
         );
     }
-    addProperty(_scaleFactor);
+    addProperty(_scaleFactor);*/
 
     if (dictionary.hasKey(DrawLabelInfo.identifier)) {
         _drawLabels = dictionary.value<bool>(DrawLabelInfo.identifier);
@@ -420,9 +419,6 @@ void RenderableDUMeshes::initializeGL() {
     createMeshes();
 
     if (_hasLabel) {
-        if (_fontRenderer == nullptr)
-            _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
-                ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 50;
             _font = OsEng.fontManager().font(
@@ -525,10 +521,6 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -558,7 +550,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
-        _fontRenderer->render(
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             _textColor,
@@ -572,7 +564,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
             data.camera.lookUpVectorWorldSpace(),
             _renderOption.value(),
             "%s",
-            pair.second.c_str());
+            pair.second.c_str()
+        );
     }
 }
 
@@ -651,7 +644,7 @@ bool RenderableDUMeshes::loadData() {
         // else
         // {
         //     LINFO("Cache for Speck file '" << _file << "' not found");
-            LINFO("Loading Speck file '" << _file << "'");
+            LINFO(fmt::format("Loading Speck file '{}'", _file));
 
             success = readSpeckFile();
             if (!success) {
@@ -686,7 +679,7 @@ bool RenderableDUMeshes::loadData() {
         // }
         // else {
         //     LINFO("Cache for Label file '" << labelFile << "' not found");
-            LINFO("Loading Label file '" << labelFile << "'");
+            LINFO(fmt::format("Loading Label file '{}'", labelFile));
 
             success &= readLabelFile();
             if (!success) {
@@ -703,7 +696,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
         return false;
     }
 
@@ -827,7 +820,7 @@ bool RenderableDUMeshes::readLabelFile() {
     std::string _file = _labelFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Label file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Label file '{}'", _file));
         return false;
     }
 
@@ -940,7 +933,7 @@ bool RenderableDUMeshes::loadCachedFile(const std::string& file) {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for loading cache file");
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
@@ -973,7 +966,7 @@ bool RenderableDUMeshes::saveCachedFile(const std::string& file) const {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
 }

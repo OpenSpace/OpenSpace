@@ -24,6 +24,7 @@
 
 #include <openspace/util/httprequest.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -320,7 +321,7 @@ HttpFileDownload::HttpFileDownload(
 
 bool HttpFileDownload::initDownload() {
     if (!_overwrite && FileSys.fileExists(_destination)) {
-        LWARNING("File " << _destination << " already exists!");
+        LWARNING(fmt::format("File {} already exists", _destination));
         return false;
     }
 
@@ -361,34 +362,37 @@ bool HttpFileDownload::initDownload() {
 
             std::string message(Buffer, size);
 
-            LERROR("Cannot open file " << destinationFile << ": " << message);
+            LERROR(fmt::format("Cannot open file {}: {}", destinationFile, message));
 
             return false;
         }
         else {
-            LERROR("Cannot open file " << destinationFile);
+            LERROR(fmt::format("Cannot open file {}", destinationFile));
             return false;
         }
-#endif
+#else
         if (errno) {
 #if defined(__unix__)
             char buffer[255];
-            LERROR(
-                "Cannot open file " << destinationFile << ": " <<
+            LERROR(fmt::format(
+                "Cannot open file '{}': {}",
+                destinationFile,
                 std::string(strerror_r(errno, buffer, sizeof(buffer)))
-            );
+            ));
             return false;
 #else
-            LERROR(
-                "Cannot open file " << destinationFile << ": " <<
+            LERROR(fmt::format(
+                "Cannot open file '{}': {}",
+                destinationFile,
                 std::string(strerror(errno))
-            );
+            ));
             return false;
 #endif
         }
 
-        LERROR("Cannot open file " << destinationFile);
+        LERROR(fmt::format("Cannot open file {}", destinationFile));
         return false;
+#endif
     }
     return true;
 }

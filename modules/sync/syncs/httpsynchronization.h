@@ -26,23 +26,21 @@
 #define __OPENSPACE_MODULE_SYNC___HTTPSYNCHRONIZATION___H__
 
 #include <openspace/util/resourcesynchronization.h>
-#include <openspace/documentation/documentation.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
 class HttpSynchronization : public ResourceSynchronization {
 public:
-    HttpSynchronization(
-        const ghoul::Dictionary& dict,
+    HttpSynchronization(const ghoul::Dictionary& dict,
         const std::string& synchronizationRoot,
         const std::vector<std::string>& synchronizationRepositories
     );
 
     virtual ~HttpSynchronization();
 
-    static documentation::Documentation Documentation();
 
     std::string directory() override;
     void start() override;
@@ -53,17 +51,18 @@ public:
     size_t nTotalBytes() override;
     bool nTotalBytesIsKnown() override;
 
+    static documentation::Documentation Documentation();
+
 private:
-    std::vector<std::string> fileListUrls();
-    bool trySyncFromUrl(std::string url);
-    bool hasSyncFile();
     void createSyncFile();
+    bool hasSyncFile();
+    bool trySyncFromUrl(std::string url);
 
-    std::atomic_bool _nTotalBytesKnown;
-    std::atomic_size_t _nTotalBytes;
-    std::atomic_size_t _nSynchronizedBytes;
+    std::atomic_bool _nTotalBytesKnown = false;
+    std::atomic_size_t _nTotalBytes = 0;
+    std::atomic_size_t _nSynchronizedBytes = 0;
+    std::atomic_bool _shouldCancel = false;
 
-    std::atomic_bool _shouldCancel;
     std::string _identifier;
     int _version;
     std::string _synchronizationRoot;

@@ -51,7 +51,7 @@ local KerberosText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,
@@ -76,6 +76,8 @@ local KerberosTrail = {
     },
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Kerberos,

@@ -29,7 +29,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem>
+//#include <ghoul/filesystem/filesystem>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>

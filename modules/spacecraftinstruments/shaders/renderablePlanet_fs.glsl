@@ -32,6 +32,7 @@ in vec2 vs_st;
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;
 uniform bool _meridianShift;
+uniform float _ambientBrightness;
 
 uniform float _projectionFading;
 
@@ -51,8 +52,7 @@ Fragment getFragment() {
 
     vec3 l_pos = sun_pos; // sun
     vec3 l_dir = normalize(l_pos - objpos.xyz);
-    const float terminatorBrightness = 0.4;
-    float intensity = min(max(5 * dot(n,l_dir), terminatorBrightness), 1);
+    float intensity = min(max(5 * dot(n,l_dir), _ambientBrightness), 1);
     // float shine = 0.0001;
 
     vec4 ambient = vec4(0.0, 0.0, 0.0, 1.0);

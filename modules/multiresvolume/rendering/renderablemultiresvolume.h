@@ -98,7 +98,7 @@ public:
     bool isReady() const override;
 
     virtual void update(const UpdateData& data) override;
-    virtual void render(const RenderData& data, RendererTasks& tasks);
+    virtual void render(const RenderData& data, RendererTasks& tasks) override;
 
     Selector getSelector();
     TspType getTspType();

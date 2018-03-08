@@ -46,6 +46,19 @@ window.onload = function () {
     return identifier;
   });
 
+  Handlebars.registerHelper('level', function(options, context) {
+    var data = context.data;
+    var level = 0;
+
+    while (data = data._parent) {
+      if (data.key !== undefined) {
+        ++level;
+      }
+    }
+
+    return level;
+  });
+
   propertyOwners.sort(function (a, b) {
     return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
   });

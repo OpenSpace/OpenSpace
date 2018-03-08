@@ -1,4 +1,12 @@
--- Add folders to this list that contain .info files describing HiRISE patches
+-- Add require statements for assets exporting the neccessary globes
+-- example:
+-- asset.require('../scene/solarsystem/planets/mars/mars')
+
+-- Add folders to this list that contain .info files describing patches
+-- OBS: Even on Windows, you have to use forward slashes (/) or double backslashes (\\)
+--      rather than single backslashes (\) as they are otherwise interpreted as escape
+--      sequences
+-- For example:  C:/OpenSpace   or  C:\\OpenSpace    rather than C:\OpenSpace
 local vrt_folders = {
     Mars = {
         -- Add folders here whose contents will be automatically added to the Mars globe
@@ -9,7 +17,7 @@ local vrt_folders = {
         -- tl;dr:  Specify CTX folders first, then HiRISE 
         -- example:   'C:/OpenSpace/GlobeBrowsingData/Mars/CTX'
         '',
-        ''
+        '',
     },
     Moon = {
         -- Add folders here whose contents will be automatically added to the Moon globe
@@ -17,7 +25,6 @@ local vrt_folders = {
         -- if areas overlap, images from the lower results will overwrite the images from former
         -- results
         -- example:  'C:/OpenSpace/GlobeBrowsingData/Moon'
-        '',
         ''
     }
 }

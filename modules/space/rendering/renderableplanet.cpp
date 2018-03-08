@@ -236,6 +236,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     if (dictionary.hasKey(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
+    addProperty(_performShading);
 
     addPropertySubOwner(_geometry.get());
 
@@ -255,11 +256,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         );
     }
     addProperty(_heightExaggeration);
-
-    if (dictionary.hasKey(HeightExaggerationInfo.identifier)) {
-        _performShading = dictionary.value<bool>(HeightExaggerationInfo.identifier);
-    }
-    addProperty(_performShading);
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
@@ -282,11 +278,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
-                    LWARNING(
-                        "No Radius value expecified for Shadow Source Name "
-                        << sourceName << " from " << name
-                        << " planet.\nDisabling shadows for this planet."
-                    );
+                    LWARNING(fmt::format(
+                        "No Radius value specified for Shadow Source Name '{}' from "
+                        "'{}' planet. Disabling shadows for this planet",
+                        sourceName,
+                        name
+                    ));
                     disableShadows = true;
                     break;
                 }
@@ -310,9 +307,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
-                        LWARNING("No Radius value expecified for Shadow Caster Name "
-                            << casterName << " from " << name
-                            << " planet.\nDisabling shadows for this planet.");
+                        LWARNING(fmt::format(
+                            "No Radius value expecified for Shadow Caster Name '{}' from "
+                            "'{}' planet. Disabling shadows for this planet.",
+                            casterName,
+                            name
+                        ));
                         disableShadows = true;
                         break;
                     }
@@ -416,7 +416,7 @@ glm::dmat4 RenderablePlanet::computeModelTransformMatrix(
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), transformData.translation) * // Translation
         glm::dmat4(transformData.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale)));
+        glm::scale(glm::dmat4(1.0), glm::dvec3(transformData.scale));
 
     // scale the planet to appropriate size since the planet is a unit sphere
     //glm::mat4 transform = glm::mat4(1);
@@ -630,7 +630,7 @@ void RenderablePlanet::loadTexture() {
                 _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
             }
 
-            LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
+            LDEBUG(fmt::format("Loaded texture from '{}'", _colorTexturePath.value()));
             _texture->uploadTexture();
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than
@@ -648,9 +648,14 @@ void RenderablePlanet::loadTexture() {
                 absPath(_nightTexturePath)
             );
             if (_nightTexture) {
-                LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    _nightTexturePath.value()
+                ));
                 _nightTexture->uploadTexture();
-                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                _nightTexture->setFilter(
+                    ghoul::opengl::Texture::FilterMode::LinearMipMap
+                );
                 //_nightTexture->setFilter(
                 //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
                 //);
@@ -665,7 +670,10 @@ void RenderablePlanet::loadTexture() {
                 absPath(_heightMapTexturePath)
             );
             if (_heightMapTexture) {
-                LDEBUG("Loaded texture from '" << _heightMapTexturePath << "'");
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    _heightMapTexturePath.value()
+                ));
                 _heightMapTexture->uploadTexture();
                 _heightMapTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
                 //_nightTexture->setFilter(

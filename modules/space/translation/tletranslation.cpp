@@ -25,6 +25,7 @@
 #include <modules/space/translation/tletranslation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 

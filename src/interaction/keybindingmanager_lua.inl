@@ -34,10 +34,7 @@ namespace openspace::luascriptfunctions {
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2 && nArguments != 3) {
-        return luaL_error(L, "Expected %i or %i arguments, got %i", 2, 3, nArguments);
-    }
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKey");
 
     int KeyLocation = nArguments == 3 ? -3 : -2;
     int CommandLocation = nArguments == 3 ? -2 : -1;
@@ -53,7 +50,7 @@ int bindKey(lua_State* L) {
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERRORC("lua.bindKey", "Could not find key '"<< key << "'");
+        LERRORC("lua.bindKey", fmt::format("Could not find key '{}'", key));
         return 0;
     }
 
@@ -69,6 +66,8 @@ int bindKey(lua_State* L) {
         std::move(documentation)
     );
 
+    lua_pop(L, nArguments);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -80,10 +79,8 @@ int bindKey(lua_State* L) {
 int bindKeyLocal(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2 && nArguments != 3) {
-        return luaL_error(L, "Expected %i or %i arguments, got %i", 2, 3, nArguments);
-    }
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
+
 
     int KeyLocation = nArguments == 3 ? -3 : -2;
     int CommandLocation = nArguments == 3 ? -2 : -1;
@@ -99,7 +96,7 @@ int bindKeyLocal(lua_State* L) {
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERRORC("lua.bindKey", "Could not find key '" << key << "'");
+        LERRORC("lua.bindKey", fmt::format("Could not find key '{}'", key));
         return 0;
     }
 
@@ -113,8 +110,10 @@ int bindKeyLocal(lua_State* L) {
         iKey.modifier,
         std::move(command),
         std::move(documentation)
-        );
+    );
 
+    lua_pop(L, nArguments);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -125,12 +124,9 @@ int bindKeyLocal(lua_State* L) {
 * local or remote key binds
 */
 int getKeyBindings(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getKeyBindings");
 
-    std::string key = luaL_checkstring(L, -1);
+    std::string key = ghoul::lua::checkStringAndPop(L);
 
     using KeyInformation = interaction::KeyBindingManager::KeyInformation;
 
@@ -153,6 +149,8 @@ int getKeyBindings(lua_State* L) {
         lua_settable(L, -3);
         ++i;
     }
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -162,15 +160,13 @@ int getKeyBindings(lua_State* L) {
 * Clears the keybinding of the key named as argument
 */
 int clearKey(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::clearKey");
 
-    std::string key = luaL_checkstring(L, -1);
+    std::string key = ghoul::lua::checkStringAndPop(L);
 
     OsEng.keyBindingManager().removeKeyBinding(key);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -180,13 +176,11 @@ int clearKey(lua_State* L) {
 * Clears all key bindings
 */
 int clearKeys(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearKeys");
 
     OsEng.keyBindingManager().resetKeyBindings();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

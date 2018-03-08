@@ -267,7 +267,8 @@ local AliceAirglow = {
             "Pluto",
             "Charon",
             -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
+        },
+        SimplifyBounds = true
     },
     Transform = {
         Translation = {
@@ -334,6 +335,8 @@ local Rex = {
     },
     GuiPath = "/Solar System/Missions/New Horizons"
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Lorri,

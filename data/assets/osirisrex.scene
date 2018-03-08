@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
@@ -64,13 +65,13 @@ local Keybindings = {
     },
     {
         Key = "q",
-        Command = sceneHelper.property.invert('SunMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.SunMarker.renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Sun.",
         Local = false
     },
     {
         Key = "e",
-        Command = sceneHelper.property.invert('EarthMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.EarthMarker.renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Earth.",
         Local = false
     }

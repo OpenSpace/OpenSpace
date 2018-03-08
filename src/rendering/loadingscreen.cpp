@@ -480,7 +480,7 @@ void LoadingScreen::render() {
                 FR::BoundingBoxInformation b = renderer.boundingBox(
                     *_itemFont,
                     "%s",
-                    item.name.c_str()
+                    (item.name + " 100%").c_str()
                 );
 
                 // The maximum count is in here since we can't control the amount of
@@ -593,12 +593,19 @@ void LoadingScreen::render() {
             }
 #endif // LOADINGSCREEN_DEBUGGING
 
+            std::string text = item.name;
+            if (item.status == ItemStatus::Started && item.progress > 0) {
+                text += " " +
+                    std::to_string(static_cast<int>(std::round(item.progress * 100))) +
+                    "%";
+            }
+
             renderer.render(
                 *_itemFont,
                 item.ll,
                 color,
                 "%s",
-                item.name.c_str()
+                text.c_str()
             );
         }
 
@@ -669,7 +676,10 @@ void LoadingScreen::setPhase(Phase phase) {
     _iProgress = 0;
 }
 
-void LoadingScreen::updateItem(const std::string& itemName, ItemStatus newStatus) {
+void LoadingScreen::updateItem(const std::string& itemName,
+                               ItemStatus newStatus,
+                               float newProgress)
+{
     if (!_showNodeNames) {
         // If we don't want to show the node names, we can disable the updating which
         // also would create any of the text information
@@ -686,6 +696,7 @@ void LoadingScreen::updateItem(const std::string& itemName, ItemStatus newStatus
     );
     if (it != _items.end()) {
         it->status = newStatus;
+        it->progress = newProgress;
         if (newStatus == ItemStatus::Finished) {
             it->finishedTime = std::chrono::system_clock::now();
         }
@@ -700,6 +711,7 @@ void LoadingScreen::updateItem(const std::string& itemName, ItemStatus newStatus
         _items.push_back({
             itemName,
             ItemStatus::Started,
+            newProgress,
             false,
 #ifdef LOADINGSCREEN_DEBUGGING
             false,

@@ -40,6 +40,9 @@ uniform mat4 ModelTransform;
 uniform dmat4 modelViewTransform;
 uniform mat4 modelViewProjectionTransform;
 
+uniform sampler2D heightTex;
+uniform bool _hasHeightMap;
+uniform float _heightExaggeration;
 
 void main() {
     vs_st = in_st;
@@ -52,6 +55,13 @@ void main() {
     // vs_normal = vec4(in_normal, 0.0);
     
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1.0);
+
+    if (_hasHeightMap) {
+        float height = texture(heightTex, in_st).r;
+        vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        float displacementFactor = height * _heightExaggeration;
+        position.xyz = position.xyz + displacementDirection * displacementFactor;
+    }
 
     // G-Buffer
     vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;

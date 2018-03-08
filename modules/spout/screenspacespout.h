@@ -22,14 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCRIPT_HELPER___H__
-#define __OPENSPACE_CORE___SCRIPT_HELPER___H__
+#ifndef __OPENSPACE_MODULE_SPOUT___SCREENSPACESPOUT___H__
+#define __OPENSPACE_MODULE_SPOUT___SCREENSPACESPOUT___H__
 
-#define SCRIPT_CHECK_ARGUMENTS(__category__, __stack__, __reqArg__, __realArg__) \
-    if (__realArg__ != __reqArg__) { \
-        LERRORC(__category__, ghoul::lua::errorLocation(__stack__) << "Expected " << \
-            __reqArg__ << " arguments, got " << __realArg__); \
-        return 0; \
-        }
+#ifdef WIN32
 
-#endif // __OPENSPACE_CORE___SCRIPT_HELPER___H__
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <modules/spout/spoutlibrary.h>
+
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/triggerproperty.h>
+
+namespace openspace {
+
+namespace documentation { struct Documentation; }
+
+class ScreenSpaceSpout : public ScreenSpaceRenderable {
+public:
+    ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
+
+    bool deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void update() override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    void bindTexture() override;
+    void unbindTexture() override;
+
+    properties::StringProperty _spoutName;
+    properties::OptionProperty _spoutSelection;
+    properties::TriggerProperty _updateSelection;
+
+    SPOUTHANDLE _receiver;
+
+    bool _isSpoutDirty = false;
+    char _currentSenderName[256];
+    bool _isFirstUpdate = true;
+    bool _isErrorMessageDisplayed = false;
+};
+
+} // namespace openspace
+
+#endif // WIN32
+
+#endif // __OPENSPACE_MODULE_SPOUT___SCREENSPACESPOUT___H__

@@ -27,10 +27,6 @@
 
 #include <fstream>
 
-namespace {
-    constexpr const char* _loggerCat = "DataProcessor";
-} // namespace
-
 namespace openspace {
 
 DataProcessor::DataProcessor()
@@ -43,7 +39,7 @@ DataProcessor::DataProcessor()
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 }
 
-DataProcessor::~DataProcessor() {};
+DataProcessor::~DataProcessor() {}
 
 void DataProcessor::useLog(bool useLog) {
     _useLog = useLog;
