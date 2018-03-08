@@ -49,29 +49,42 @@ namespace {
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
-    const char* KeyInputFileType = "InputFileType";   // [STRING] "cdf", "json" or "osfls"
-    const char* KeySourceFolder = "SourceFolder";    // [STRING] should be path to folder containing the input files
+    // [STRING] "cdf", "json" or "osfls"
+    constexpr const char* KeyInputFileType = "InputFileType";
+    // [STRING] should be path to folder containing the input files
+    constexpr const char* KeySourceFolder = "SourceFolder";
 
-                                                     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
-    const char* KeyCdfSeedPointFile = "SeedPointFile";   // [STRING] Path to a .txt file containing seed points
-    const char* KeyJsonSimulationModel = "SimulationModel"; // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
+    // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
+    // [STRING] Path to a .txt file containing seed points
+    constexpr const char* KeyCdfSeedPointFile = "SeedPointFile";
+    // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
+    constexpr const char* KeyJsonSimulationModel = "SimulationModel";
 
-                                                            // ----------------------- OPTIONAL INPUT TYPE SPECIFIC KEYS ---------------------- //
-    const char* KeyCdfExtraVariables = "ExtraVariables";  // [STRING ARRAY]
-    const char* KeyCdfTracingVariable = "TracingVariable"; // [STRING]
-    const char* KeyJsonScalingFactor = "ScaleToMeters";   // [STRING]
-    const char* KeyOslfsLoadAtRuntime = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
+    // ----------------------- OPTIONAL INPUT TYPE SPECIFIC KEYS ---------------------- //
+    // [STRING ARRAY]
+    constexpr const char* KeyCdfExtraVariables = "ExtraVariables";
+    // [STRING]
+    constexpr const char* KeyCdfTracingVariable = "TracingVariable";
+    // [STRING]
+    constexpr const char* KeyJsonScalingFactor = "ScaleToMeters";
+    // [BOOLEAN] If value False => Load in initializing step and store in RAM
+    constexpr const char* KeyOslfsLoadAtRuntime = "LoadAtRuntime";
 
-                                                           // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
-    const char* KeyColorTablePaths = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
-    const char* KeyColorTableRanges = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    const char* KeyMaskingRanges = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    const char* KeyOutputFolder = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
+    // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
+    // [STRING ARRAY] Values should be paths to .txt files
+    constexpr const char* KeyColorTablePaths = "ColorTablePaths";
+    // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    constexpr const char* KeyColorTableRanges = "ColorTableRanges";
+    // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    constexpr const char* KeyMaskingRanges = "MaskingRanges"
+    // [STRING] Value should be path to folder where states are saved (JSON/CDF input
+    // => osfls output & oslfs input => JSON output)
+    constexpr const char* KeyOutputFolder = "OutputFolder";
 
-                                                     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
-    const char* ValueInputFileTypeCdf = "cdf";
-    const char* ValueInputFileTypeJson = "json";
-    const char* ValueInputFileTypeOsfls = "osfls";
+    // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
+    constexpr const char* ValueInputFileTypeCdf = "cdf";
+    constexpr const char* ValueInputFileTypeJson = "json";
+    constexpr const char* ValueInputFileTypeOsfls = "osfls";
 
     // --------------------------------- Property Info -------------------------------- //
     static const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
@@ -288,7 +301,8 @@ void RenderableFieldlinesSequence::initializeGL() {
     std::string outputFolderPath;
     extractOptionalInfoFromDictionary(outputFolderPath);
 
-    // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
+    // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM
+    // SOURCE
     switch (sourceFileType) {
         case SourceFileType::Cdf:
             if (!getStatesFromCdfFiles(outputFolderPath)) {
@@ -536,7 +550,8 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
     return true;
 }
 
-bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outputFolder) {
+bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outputFolder)
+{
     fls::Model model;
     if (!extractJsonInfoFromDictionary(model)) {
         return false;
@@ -570,7 +585,8 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
 
 }
 
-void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder) {
+void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder)
+{
     // Load states from .osfls files into RAM!
     for (const std::string filePath : _sourceFiles) {
         FieldlinesState newState;
@@ -1107,12 +1123,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         const int nextIdx = _activeTriggerTimeIndex + 1;
         if (
             // true => Previous frame was not within the sequence interval
-            _activeTriggerTimeIndex < 0                                   
+            _activeTriggerTimeIndex < 0
             // true => We stepped back to a time represented by another state
-            || currentTime < _startTimes[_activeTriggerTimeIndex]             
+            || currentTime < _startTimes[_activeTriggerTimeIndex]
             // true => We stepped forward to a time represented by another state
             || (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
-        { 
+        {
             updateActiveTriggerTimeIndex(currentTime);
 
             if (_loadingStatesDynamically) {

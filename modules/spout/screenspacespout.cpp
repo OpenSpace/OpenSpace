@@ -48,7 +48,7 @@ namespace {
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
@@ -115,7 +115,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     }
 
     _spoutName.onChange([this]() {
-        _isSpoutDirty = true; 
+        _isSpoutDirty = true;
         _isErrorMessageDisplayed = false;
 
         _receiver->SetActiveSender(_spoutName.value().c_str());
@@ -214,7 +214,7 @@ void ScreenSpaceSpout::update() {
 
     unsigned int width;
     unsigned int height;
-    
+
     bool receiveSuccess = _receiver->ReceiveTexture(
         _currentSenderName,
         width,

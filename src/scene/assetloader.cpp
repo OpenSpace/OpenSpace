@@ -423,11 +423,11 @@ int AssetLoader::onInitializeDependencyLua(Asset* dependant, Asset* dependency) 
 
 int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onDeinitializeDependency");
-    
+
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onDependencyDeinitializationFunctionRefs[dependant][dependency]
         .push_back(referenceIndex);
-    
+
     lua_settop(*_luaState, 0);
     return 0;
 }

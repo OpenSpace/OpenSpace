@@ -56,7 +56,7 @@ namespace {
     constexpr const char* KeyBoundsSimplification = "SimplifyBounds";
 
     const int InterpolationSteps = 5;
-    
+
     const double Epsilon = 1e-4;
 
     static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -360,7 +360,7 @@ void RenderableFov::initializeGL() {
             "RenderableFov"
         );
     }
-    
+
     if (_simplifyBounds) {
         const size_t sizeBefore = res.bounds.size();
         for (size_t i = 1; i < res.bounds.size() - 1; ++i) {

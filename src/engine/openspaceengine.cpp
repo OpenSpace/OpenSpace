@@ -998,7 +998,10 @@ void OpenSpaceEngine::writeSceneDocumentation() {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    if (configurationManager().hasKey(ConfigurationManager::KeyScenePropertyDocumentation)) {
+    if (configurationManager().hasKey(
+            ConfigurationManager::KeyScenePropertyDocumentation
+        ))
+    {
         _scene->writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyScenePropertyDocumentation
@@ -1173,7 +1176,7 @@ void OpenSpaceEngine::initializeGL() {
                         LERRORC(
                             "OpenGL Invalid State",
                             fmt::format(
-                                "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION", 
+                                "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
                                 f.toString()
                             )
                         );

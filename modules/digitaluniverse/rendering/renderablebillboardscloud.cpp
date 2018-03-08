@@ -730,7 +730,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         "screenSize",
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-    
+
     _program->setUniform(_uniformCache.modelViewProjection, projMatrix * modelViewMatrix);
     _program->setUniform(
         _uniformCache.cameraPos,

@@ -60,7 +60,8 @@ const string ConfigurationManager::PartFile = "File";
 const string ConfigurationManager::KeyLuaDocumentation = "LuaDocumentation";
 const string ConfigurationManager::KeyScriptLog = "ScriptLog";
 const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumentation";
-const string ConfigurationManager::KeyScenePropertyDocumentation = "ScenePropertyDocumentation";
+const string ConfigurationManager::KeyScenePropertyDocumentation =
+                                                             "ScenePropertyDocumentation";
 const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
