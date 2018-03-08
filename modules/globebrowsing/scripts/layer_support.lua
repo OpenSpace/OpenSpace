@@ -153,6 +153,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         "<UnsafeSSL>true</UnsafeSSL>" ..
         "<ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>" ..
         "<ZeroBlockOnServerException>true</ZeroBlockOnServerException>" ..
+        "<Timeout>5</Timeout>" ..
     "</GDAL_WMS>"
 
     return gdalWmsTemplate

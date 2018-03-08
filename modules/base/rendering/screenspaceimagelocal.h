@@ -44,7 +44,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void bindTexture() override;
+
     properties::StringProperty _texturePath;
+
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
     bool _textureIsDirty;
 };
 

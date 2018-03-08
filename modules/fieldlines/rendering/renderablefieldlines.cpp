@@ -38,38 +38,39 @@
 #include <fstream>
 
 namespace {
+
     std::string _loggerCat = "RenderableFieldlines";
 
-    const float defaultFieldlineStepSize = 0.5f;;
+    constexpr const float defaultFieldlineStepSize = 0.5f;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
-    const char* keyVectorField = "VectorField";
-    const char* keyVectorFieldType = "Type";
-    const char* keyVectorFieldFile = "File";
-    const char* keyVectorFieldVolumeModel = "Model";
-    const char* keyVectorFieldVolumeVariable = "Variables";
+    constexpr const char* keyVectorField = "VectorField";
+    constexpr const char* keyVectorFieldType = "Type";
+    constexpr const char* keyVectorFieldFile = "File";
+    constexpr const char* keyVectorFieldVolumeModel = "Model";
+    constexpr const char* keyVectorFieldVolumeVariable = "Variables";
 
-    const char* keyFieldlines = "Fieldlines";
-    const char* keyFieldlinesStepSize = "Stepsize";
-    const char* keyFieldlinesClassification = "Classification";
-    const char* keyFieldlinesColor = "Color";
+    constexpr const char* keyFieldlines = "Fieldlines";
+    constexpr const char* keyFieldlinesStepSize = "Stepsize";
+    constexpr const char* keyFieldlinesClassification = "Classification";
+    constexpr const char* keyFieldlinesColor = "Color";
 
-    const char* keySeedPoints = "SeedPoints";
-    const char* keySeedPointsType = "Type";
-    const char* keySeedPointsFile = "File";
-    const char* keySeedPointsTable = "SeedPoints";
+    constexpr const char* keySeedPoints = "SeedPoints";
+    constexpr const char* keySeedPointsType = "Type";
+    constexpr const char* keySeedPointsFile = "File";
+    constexpr const char* keySeedPointsTable = "SeedPoints";
 
-    const char* seedPointsSourceFile = "File";
-    const char* seedPointsSourceTable = "Table";
+    constexpr const char* seedPointsSourceFile = "File";
+    constexpr const char* seedPointsSourceTable = "Table";
 
-    const char* vectorFieldTypeVolumeKameleon = "VolumeKameleon";
+    constexpr const char* vectorFieldTypeVolumeKameleon = "VolumeKameleon";
 
-    const char* vectorFieldKameleonModelBATSRUS = "BATSRUS";
+    constexpr const char* vectorFieldKameleonModelBATSRUS = "BATSRUS";
 
-    const char* vectorFieldKameleonVariableLorentz = "Lorentz";
+    constexpr const char* vectorFieldKameleonVariableLorentz = "Lorentz";
 
-    const int SeedPointSourceFile = 0;
-    const int SeedPointSourceTable = 1;
+    constexpr const int SeedPointSourceFile = 0;
+    constexpr const int SeedPointSourceTable = 1;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
@@ -135,20 +136,17 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     bool success = dictionary.getValue(keyVectorField, _vectorFieldInfo);
     if (!success) {
-        LERROR("Renderable does not contain a key for '" <<
-            keyVectorField << "'");
+        LERROR(fmt::format("Renderable does not contain a key for '{}'", keyVectorField));
     }
 
     success = dictionary.getValue(keyFieldlines, _fieldlineInfo);
     if (!success) {
-        LERROR("Renderable does not contain a key for '" <<
-            keyFieldlines << "'");
+        LERROR(fmt::format("Renderable does not contain a key for '{}'", keyFieldlines));
     }
 
     success = dictionary.getValue(keySeedPoints, _seedPointsInfo);
     if (!success) {
-        LERROR("Renderable does not contain a key for '" <<
-            keySeedPoints << "'");
+        LERROR(fmt::format("Renderable does not contain a key for '{}", keySeedPoints));
     }
 
     // @TODO a non-magic number perhaps ---abock
@@ -309,7 +307,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         int prevEnd = 0;
         std::vector<LinePoint> vertexData;
         // Arrange data for glMultiDrawArrays
-        for (int j = 0; j < fieldlines.size(); ++j) {
+        for (size_t j = 0; j < fieldlines.size(); ++j) {
             _lineStart.push_back(prevEnd);
             _lineCount.push_back(static_cast<int>(fieldlines[j].size()));
             prevEnd = prevEnd + static_cast<int>(fieldlines[j].size());
@@ -319,7 +317,7 @@ void RenderableFieldlines::update(const UpdateData&) {
                 fieldlines[j].end()
             );
         }
-        LDEBUG("Number of vertices : " << vertexData.size());
+        LDEBUG(fmt::format("Number of vertices: {}", vertexData.size()));
 
         if (_fieldlineVAO == 0) {
             glGenVertexArrays(1, &_fieldlineVAO);
@@ -382,13 +380,14 @@ void RenderableFieldlines::loadSeedPoints() {
 }
 
 void RenderableFieldlines::loadSeedPointsFromFile() {
-    LINFO("Reading seed points from file '" << _seedPointSourceFile.value() << "'");
+    LINFO(fmt::format("Reading seed points from '{}'", _seedPointSourceFile.value()));
 
     std::ifstream seedFile(_seedPointSourceFile);
     if (!seedFile.good())
-        LERROR(
-            "Could not open seed points file '" << _seedPointSourceFile.value() << "'"
-        );
+        LERROR(fmt::format(
+            "Could not open seed points file '{}'",
+            _seedPointSourceFile.value()
+        ));
     else {
         std::string line;
         glm::vec3 point;
@@ -418,8 +417,11 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
     std::string type;
     bool success = _vectorFieldInfo.getValue(keyVectorFieldType, type);
     if (!success) {
-        LERROR(keyVectorField << " does not contain a '" <<
-            keyVectorFieldType << "' key");
+        LERROR(fmt::format(
+            "{} does not contain a '{}' key",
+            keyVectorField,
+            keyVectorFieldType
+        ));
         return {};
     }
 
@@ -427,8 +429,11 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
         return generateFieldlinesVolumeKameleon();
     }
     else {
-        LERROR(keyVectorField << "." << keyVectorFieldType <<
-            " does not name a valid type");
+        LERROR(fmt::format(
+            "{}.{} does not name a valid type",
+            keyVectorField,
+            keyVectorFieldType
+        ));
         return {};
     }
 }
@@ -439,14 +444,14 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     std::string model;
     bool success = _vectorFieldInfo.getValue(keyVectorFieldVolumeModel, model);
     if (!success) {
-        LERROR(keyVectorField << " does not name a model");
+        LERROR(fmt::format("{} does not name a model", keyVectorField));
         return {};
     }
 
     std::string fileName;
     success = _vectorFieldInfo.getValue(keyVectorFieldFile, fileName);
     if (!success) {
-        LERROR(keyVectorField << " does not name a file");
+        LERROR(fmt::format("{} does not name a file", keyVectorField));
         return {};
     }
     fileName = absPath(fileName);
@@ -455,8 +460,12 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     if (model != vectorFieldKameleonModelBATSRUS) {
         //modelType = KameleonWrapper::Model::BATSRUS;
     //else {
-        LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" <<
-            model << "' not supported");
+        LERROR(fmt::format(
+            "{}.{} model '{}' not supported",
+            keyVectorField,
+            keyVectorFieldVolumeModel,
+            model
+        ));
         return {};
     }
 
@@ -474,7 +483,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
       (_vectorFieldInfo.value<std::string>(v1) == vectorFieldKameleonVariableLorentz);
 
     if (!threeVariables && !lorentzForce) {
-        LERROR(keyVectorField << " does not name variables");
+        LERROR(fmt::format("'{}' does not name variables", keyVectorField));
         return {};
     }
 

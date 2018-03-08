@@ -26,63 +26,58 @@
 
 #include <ghoul/glm.h>
 
-#include <chrono>
-
-namespace {
-    constexpr double SecondsPerYear = 31556952; // seconds in average Gregorian year
-    constexpr double SecondsPerMonth = SecondsPerYear / 12;
-    constexpr double SecondsPerDay = static_cast<double>(
-        std::chrono::seconds(std::chrono::hours(24)).count()
-    );
-    constexpr double SecondsPerHour = static_cast<double>(
-        std::chrono::seconds(std::chrono::hours(1)).count()
-    );
-    constexpr double SecondsPerMinute = static_cast<double>(
-        std::chrono::seconds(std::chrono::minutes(1)).count()
-        );
-} // namespace
+#include <cstring>
 
 namespace openspace {
 
-std::pair<double, std::string> simplifyTime(double seconds) {
+std::pair<double, std::string> simplifyTime(double seconds, bool forceSingularForm) {
     double secondsVal = glm::abs(seconds);
 
-    if (secondsVal > 1e-3 && secondsVal < SecondsPerMinute) {
-        return { seconds, seconds == 1.0 ? "second" : "seconds" };
+    if (secondsVal == 0.0) {
+        return { 0.0, forceSingularForm ? "second" : "seconds" };
+    }
+    else if (secondsVal > 1e-3 && secondsVal < SecondsPerMinute) {
+        return { seconds, (seconds == 1.0 || forceSingularForm) ? "second" : "seconds" };
     }
 
     if (secondsVal <= 1e-9) {
         double val = seconds / 1e-9;
-        return { val, val == 1.0 ? "nanosecond" : "nanoseconds" };
+        return { val, (val == 1.0 || forceSingularForm) ? "nanosecond" : "nanoseconds" };
     }
     else if (secondsVal <= 1e-6) {
         double val = seconds / 1e-6;
-        return { val, val == 1.0 ? "microsecond" : "microseconds" };
+        return {
+            val,
+            (val == 1.0 || forceSingularForm) ? "microsecond" : "microseconds"
+        };
     }
     else if (secondsVal <= 1e-3) {
         double val = seconds / 1e-3;
-        return { val, val == 1.0 ? "millisecond" : "milliseconds" };
+        return {
+            val,
+            (val == 1.0 || forceSingularForm) ? "millisecond" : "milliseconds"
+        };
     }
 
     if (secondsVal >= SecondsPerYear) {
         double val = seconds / SecondsPerYear;
-        return { val, val == 1.0 ? "year" : "years" };
+        return { val, (val == 1.0 || forceSingularForm) ? "year" : "years" };
     }
     else if (secondsVal >= SecondsPerMonth) {
         double val = seconds / SecondsPerMonth;
-        return { val, val == 1.0 ? "month" : "months" };
+        return { val, (val == 1.0 || forceSingularForm) ? "month" : "months" };
     }
     else if (secondsVal >= SecondsPerDay) {
         double val = seconds / SecondsPerDay;
-        return { val, val == 1.0 ? "day" : "days" };
+        return { val, (val == 1.0 || forceSingularForm) ? "day" : "days" };
     }
     else if (secondsVal >= SecondsPerHour) {
         double val = seconds / SecondsPerHour;
-        return { val, val == 1.0 ? "hour" : "hours" };
+        return { val, (val == 1.0 || forceSingularForm) ? "hour" : "hours" };
     }
     else {
         double val = seconds / SecondsPerMinute;
-        return { val, val == 1.0 ? "minute" : "minutes" };
+        return { val, (val == 1.0 || forceSingularForm) ? "minute" : "minutes" };
     }
 }
 

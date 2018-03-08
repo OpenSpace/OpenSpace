@@ -10,28 +10,23 @@
 /sync/
 tmp/
 Thumbs.db
-
 *~
 *.swp
 *.gglsl
 *.GhoulGenerated.glsl
 *.OpenSpaceGenerated.glsl
-
 shaders/generated/*
-
 # CMake stuff
 CMakeCache.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
-
 # Eclipse stuff
 .cproject
 .project
-
 shaders/ABuffer/constants.hglsl
 ScriptLog.txt
-
 customization.lua
 COMMIT.md
+screenshots

@@ -61,10 +61,7 @@ namespace luascriptfunctions {
 * addDashboardItemToScreenSpace(string, table):
 */
 int addDashboardItemToScreenSpace(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2) {
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addDashboardItemToScreenSpace");
 
     std::string name = luaL_checkstring(L, -2);
     int type = lua_type(L, -1);
@@ -97,6 +94,8 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+
+        lua_settop(L, 0);
         return 0;
     }
 }
@@ -106,12 +105,9 @@ int addDashboardItemToScreenSpace(lua_State* L) {
 * removeDashboardItemsFromScreenSpace(string):
 */
 int removeDashboardItemsFromScreenSpace(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
-    std::string name = luaL_checkstring(L, -1);
+    std::string name = ghoul::lua::checkStringAndPop(L);
     std::shared_ptr<ScreenSpaceRenderable> ssr =
         OsEng.renderEngine().screenSpaceRenderable(name);
 

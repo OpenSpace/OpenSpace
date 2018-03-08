@@ -39,11 +39,10 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 
-#include <ghoul/misc/onscopeexit.h>
-
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/defer.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <numeric>
 
@@ -70,8 +69,7 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;
     _isCollapsed = ImGui::IsWindowCollapsed();
-    OnExit([]() {ImGui::End(); }); // We escape early from this function in a few places
-
+    defer { ImGui::End(); };
 
     // Render the list of planets
     std::vector<SceneGraphNode*> nodes =
@@ -244,7 +242,7 @@ void GuiGlobeBrowsingComponent::render() {
     if (cap.empty()) {
         LWARNINGC(
             "GlobeBrowsingGUI",
-            "Unknown server: '" << _currentServer << "'"
+            fmt::format("Unknown server: '{}'", _currentServer)
         );
     }
 

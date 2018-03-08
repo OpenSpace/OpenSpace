@@ -8,25 +8,40 @@
 
 .documentation-item {
   background-color: #f4f4f4;
-  border-left: 2px solid #888;
+  border-left: 6px solid;
   padding-left: 10px;
   padding-top: 5px;
   padding-right: 5px;
   margin-bottom: 5px;
 }
 
-.documentation-item .documentation-item {
-  border-left: 2px solid #f00;
-  background-color: #fff;
-}
-
-.documentation-item .documentation-item .documentation-item {
-  border-left: 2px solid #080;
+.item-level-1 {
+  border-color: #343C47;
   background-color: #f4f4f4;
 }
 
-.documentation-item .documentation-item .documentation-item .documentation-item {
-  border-left: 2px solid #00f;
+.item-level-2 {
+  border-color: #505760;
+  background-color: #fff;
+}
+
+.item-level-3 {
+  border-color: #5E6C7C;
+  background-color: #f4f4f4;
+}
+
+.item-level-4 {
+  border-color: #537399;
+  background-color: #fff;
+}
+
+.item-level-5 {
+  border-color: #2569BA;
+  background-color: #f4f4f4;
+}
+
+.item-level-6 {
+  border-color: #208AE2;
   background-color: #fff;
 }
 
@@ -69,16 +84,15 @@
   font-size: 0.8em;
 }
 
-
 /*!
  * Start Bootstrap - Simple Sidebar (http://startbootstrap.com/)
  * Copyright 2013-2016 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
  */
 
- body {
-    overflow-x: hidden;
- }
+body {
+  overflow-x: hidden;
+}
 
 /* Toggle Styles */
 

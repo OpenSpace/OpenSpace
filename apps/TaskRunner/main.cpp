@@ -83,15 +83,14 @@ void performTasks(const std::string& path) {
         LINFO("Task queue has 1 item");
     }
     else {
-        LINFO("Task queue has " << tasks.size() << " items");
+        LINFO(fmt::format("Task queue has {} items", tasks.size()));
     }
 
     for (size_t i = 0; i < tasks.size(); i++) {
         Task& task = *tasks[i].get();
-        LINFO(
-            "Performing task " << (i + 1) << " out of " <<
-            tasks.size() << ": " << task.description()
-        );
+        LINFO(fmt::format(
+            "Performing task {} out of {}: {}", i + 1, tasks.size(), task.description()
+        ));
         ProgressBar progressBar(100);
         auto onProgress = [&progressBar](float progress) {
             progressBar.print(static_cast<int>(progress * 100.f));
@@ -135,7 +134,7 @@ int main(int argc, char** argv) {
 
     // If no task file was specified in as argument, run in CLI mode.
 
-    LINFO("Task root: " << absPath("${TASKS}"));
+    LINFO(fmt::format("Task root: {}", absPath("${TASKS}")));
     FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath("${TASKS}")));
 
     std::cout << "TASK > ";

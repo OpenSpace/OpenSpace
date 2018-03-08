@@ -25,34 +25,39 @@
 namespace openspace::luascriptfunctions::asset {
 
 int add(lua_State* state) {
-    AssetManager *assetManager =
+    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::add");
+
+    AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("add", state, 1, nArguments);
-    std::string assetName = luaL_checkstring(state, -1);
+    std::string assetName = ghoul::lua::checkStringAndPop(state);
     assetManager->add(assetName);
+
     return 0;
 }
 
 int remove(lua_State* state) {
-    AssetManager *assetManager =
+    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::remove");
+
+
+    AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("remove", state, 1, nArguments);
-    std::string assetName = luaL_checkstring(state, -1);
+    std::string assetName = ghoul::lua::checkStringAndPop(state);
     assetManager->remove(assetName);
+
     return 0;
 }
 
 int removeAll(lua_State* state) {
-    AssetManager *assetManager =
+    ghoul::lua::checkArgumentsAndThrow(state, 0, "lua::removeAll");
+
+
+    AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    int nArguments = lua_gettop(state);
-    SCRIPT_CHECK_ARGUMENTS("removeAll", state, 0, nArguments);
     assetManager->removeAll();
+
     return 0;
 }
 

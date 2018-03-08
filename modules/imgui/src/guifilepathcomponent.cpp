@@ -39,6 +39,7 @@ void GuiFilePathComponent::render() {
 
     bool v = _isEnabled;
     ImGui::Begin("File Path", &v);
+    _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     ImGui::Text(

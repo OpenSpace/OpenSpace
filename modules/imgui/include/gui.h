@@ -75,9 +75,12 @@ public:
     GuiGlobeBrowsingComponent _globeBrowsing;
 #endif //  GLOBEBROWSING_USE_GDAL
     GuiPerformanceComponent _performance;
+
     GuiPropertyComponent _globalProperty;
-    GuiPropertyComponent _property;
+    GuiPropertyComponent _sceneProperty;
     GuiPropertyComponent _screenSpaceProperty;
+    GuiPropertyComponent _moduleProperty;
+
     GuiPropertyComponent _virtualProperty;
     GuiSpaceTimeComponent _spaceTime;
     GuiMissionComponent _mission;

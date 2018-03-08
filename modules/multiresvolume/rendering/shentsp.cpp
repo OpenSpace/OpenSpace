@@ -29,6 +29,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
+#include <ghoul/fmt.h>
 
 // boost
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -155,9 +156,9 @@ bool ShenTSP::calculateSpatialError() {
     maxSpatialError_ = maxNorm;
     medianSpatialError_ = medNorm;
 
-    LDEBUG("Min spatial coefficient of variation: " << minNorm);
-    LDEBUG("Max spatial coefficient of variation: " << maxNorm);
-    LDEBUG("Median spatial coefficient of variation: " << medNorm);
+    LDEBUG(fmt::format("Min spatial coefficient of variation: {}", minNorm));
+    LDEBUG(fmt::format("Max spatial coefficient of variation: {}", maxNorm));
+    LDEBUG(fmt::format("Median spatial coefficient of variation: {}", medNorm));
 
     return true;
 }
@@ -247,9 +248,9 @@ bool ShenTSP::calculateTemporalError() {
     maxTemporalError_ = maxNorm;
     medianTemporalError_ = medNorm;
 
-    LDEBUG("Min temporal coefficient of variation: " << minNorm);
-    LDEBUG("Max temporal coefficient of variation: " << maxNorm);
-    LDEBUG("Median temporal coefficient of variation: " << medNorm);
+    LDEBUG(fmt::format("Min temporal coefficient of variation: {}", minNorm));
+    LDEBUG(fmt::format("Max temporal coefficient of variation: {}", maxNorm));
+    LDEBUG(fmt::format("Median temporal coefficient of variation: {}", medNorm));
 
     return true;
 }

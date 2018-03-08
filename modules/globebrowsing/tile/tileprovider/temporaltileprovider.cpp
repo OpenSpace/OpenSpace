@@ -28,11 +28,12 @@
 
 #include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 #include <fstream>
 
 namespace {
@@ -105,7 +106,7 @@ bool TemporalTileProvider::initialize() {
     bool success = TileProvider::initialize();
 
     if (!_preCacheTimes.empty()) {
-        LINFO("Preloading: " << _filePath.value());
+        LINFO(fmt::format("Preloading: {}", _filePath.value()));
         for (const Time& t : _preCacheTimes) {
             getTileProvider(t);
         }
@@ -160,7 +161,7 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
     std::string timeEnd = getXMLValue(
         node,
         TemporalXMLTags::TIME_END,
-        "Now"
+        "Today"
     );
     std::string timeIdFormat = getXMLValue(
         node,
@@ -168,12 +169,13 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
         "YYYY-MM-DDThh:mm:ssZ"
     );
 
-    Time start; start.setTime(timeStart);
+    Time start;
+    start.setTime(timeStart);
     Time end(Time::now());
     if (timeEnd == "Yesterday") {
         end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
     }
-    else if (timeEnd != "Now") {
+    else if (timeEnd != "Today") {
         end.setTime(timeEnd);
     }
 

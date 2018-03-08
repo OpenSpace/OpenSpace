@@ -41,6 +41,7 @@ int toggleShutdown(lua_State* L) {
 
     OsEng.toggleShutdownMode();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -58,6 +59,7 @@ int writeDocumentation(lua_State* L) {
     OsEng.writeStaticDocumentation();
     OsEng.writeSceneDocumentation();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -115,10 +117,13 @@ int addVirtualProperty(lua_State* L) {
         );
     }
     else {
+        lua_settop(L, 0);
         return luaL_error(L, "Unknown property type '%s'", type.c_str());
     }
 
+    lua_settop(L, 0);
     OsEng.virtualPropertyManager().addProperty(std::move(prop));
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -134,8 +139,18 @@ int removeVirtualProperty(lua_State* L) {
     }
 
     const std::string name = lua_tostring(L, -1);
+    lua_settop(L, 0);
     properties::Property* p = OsEng.virtualPropertyManager().property(name);
-    OsEng.virtualPropertyManager().removeProperty(p);
+    if (p) {
+        OsEng.virtualPropertyManager().removeProperty(p);
+    }
+    else {
+        LWARNINGC(
+            "removeVirtualProperty",
+            fmt::format("Virtual Property with name {} did not exist", name)
+        );
+    }
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -146,8 +161,8 @@ int removeVirtualProperty(lua_State* L) {
 */
 int removeAllVirtualProperties(lua_State* L) {
     const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
     std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
@@ -155,6 +170,8 @@ int removeAllVirtualProperties(lua_State* L) {
         OsEng.virtualPropertyManager().removeProperty(p);
         delete p;
     }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -171,6 +188,7 @@ int addTag(lua_State* L) {
 
     const std::string uri = lua_tostring(L, -2);
     const std::string tag = lua_tostring(L, -1);
+    lua_settop(L, 0);
 
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
     if (!node) {
@@ -179,6 +197,7 @@ int addTag(lua_State* L) {
 
     node->addTag(std::move(tag));
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -195,6 +214,7 @@ int removeTag(lua_State* L) {
 
     const std::string uri = lua_tostring(L, -2);
     const std::string tag = lua_tostring(L, -1);
+    lua_settop(L, 0);
 
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
     if (!node) {
@@ -203,6 +223,7 @@ int removeTag(lua_State* L) {
 
     node->removeTag(tag);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -217,9 +238,10 @@ int downloadFile(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
     std::string uri = luaL_checkstring(L, -2);
     std::string savePath = luaL_checkstring(L, -1);
+    lua_settop(L, 0);
 
     const std::string _loggerCat = "OpenSpaceEngine";
-    LINFO("Downloading file from " << uri);
+    LINFO(fmt::format("Downloading file from {}", uri));
     DownloadManager dm = openspace::DownloadManager(false);
     std::shared_ptr<openspace::DownloadManager::FileFuture> future =
         dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);
@@ -229,7 +251,9 @@ int downloadFile(lua_State* L) {
             errorMsg += ": " + future->errorMessage;
         return luaL_error(L, errorMsg.c_str());
     }
-    return 1;
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 } // namespace luascriptfunctions

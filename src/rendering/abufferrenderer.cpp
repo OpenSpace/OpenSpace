@@ -67,9 +67,9 @@ ABufferRenderer::ABufferRenderer()
     , _dirtyRaycastData(true)
     , _dirtyResolveDictionary(true)
     , _resolveProgram(nullptr)
-    , _hdrExposure(0.4)
-    , _hdrBackground(2.8)
-    , _gamma(2.2)
+    , _hdrExposure(0.4f)
+    , _hdrBackground(2.8f)
+    , _gamma(2.2f)
 {}
 
 ABufferRenderer::~ABufferRenderer() {}
@@ -959,10 +959,11 @@ void ABufferRenderer::updateRaycastData() {
     for (auto &raycaster : raycasters) {
         if (nextId > MaxRaycasters) {
             int nIgnored = MaxRaycasters - static_cast<int>(raycasters.size());
-            LWARNING(
-                "ABufferRenderer does not support more than 32 raycasters. " <<
-                "Ignoring " << nIgnored << " raycasters"
-            );
+            LWARNING(fmt::format(
+                "ABufferRenderer does not support more than 32 raycasters. "
+                "Ignoring {} raycasters",
+                nIgnored
+            ));
             break;
         }
 

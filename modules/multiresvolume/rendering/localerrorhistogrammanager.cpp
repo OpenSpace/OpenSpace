@@ -33,6 +33,7 @@
 #include <openspace/util/progressbar.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char* _loggerCat = "LocalErrorHistogramManager";
@@ -119,7 +120,12 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset, un
             if (it != _voxelCache.end()) {
                 childValues = it->second;
             } else {
-                LERROR("Child " << childIndex << " visited without cache, " << bstOffset << ", " << octreeOffset);
+                LERROR(fmt::format(
+                    "Child {} visited without cache, {}, {}",
+                    childIndex,
+                    bstOffset,
+                    octreeOffset
+                ));
                 return false;
             }
         }
@@ -133,7 +139,7 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset, un
             if (it != _voxelCache.end()) {
                 parentValues = it->second;
             } else {
-                LERROR("Parent " << parentIndex << " visited without cache");
+                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }
@@ -204,7 +210,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset, unsig
             if (it != _voxelCache.end()) {
                 childValues = it->second;
             } else {
-                LERROR("Child " << childIndex << " visited without cache");
+                LERROR(fmt::format("Child {} visited without cache", childIndex));
                 return false;
             }
         }
@@ -218,7 +224,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset, unsig
             if (it != _voxelCache.end()) {
                 parentValues = it->second;
             } else {
-                LERROR("Parent " << parentIndex << " visited without cache");
+                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }

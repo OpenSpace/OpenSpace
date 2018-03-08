@@ -132,7 +132,6 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
             galaxyTexture) _uniformCache;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
         std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
         std::unordered_map<int, std::string> _textureFileMap;

@@ -68,7 +68,7 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
     scripting::ScriptEngine scriptEngine;
 
     registerCoreClasses(scriptEngine);
-    ;
+
     for (OpenSpaceModule* m : OsEng.moduleEngine().modules()) {
         scriptEngine.addLibrary(m->luaLibrary());
 
@@ -139,10 +139,10 @@ void SyncAssetTask::RequestListener::assetStateChanged(std::shared_ptr<Asset> as
     Asset::State state)
 {
     if (state == Asset::State::LoadingFailed) {
-        LERROR("Failed to load asset " << asset->id());
+        LERROR(fmt::format("Failed to load asset: {}", asset->id()));
     }
     if (state == Asset::State::SyncRejected) {
-        LERROR("Failed to sync asset " << asset->id());
+        LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
     }
 }
 

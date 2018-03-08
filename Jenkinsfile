@@ -4,13 +4,12 @@ def modules = [
     "fieldlines",
     "galaxy",
     "globebrowsing",
+    "imgui",
     "iswa",
     "kameleon",
     "kameleonvolume",
     "multiresvolume",
-    "newhorizons",
-    "onscreengui",
-    "researchkit",
+    "spacecraftinstruments",
     "space",
     "toyvolume",
     "volume"
@@ -19,7 +18,7 @@ def modules = [
 def flags = "-DGHOUL_USE_DEVIL=OFF "
 
 for (module in modules) {
-    flags += "-DOPENSPACE_OPENSPACE_MODULE_" + module.toUpperCase() + "=ON "
+    flags += "-DOPENSPACE_MODULE_" + module.toUpperCase() + "=ON "
 }
 
 echo flags
@@ -27,7 +26,7 @@ echo flags
 stage('Build') {
     parallel linux: {
         node('linux') {
-            timeout(time: 45, unit: 'MINUTES') {
+            timeout(time: 90, unit: 'MINUTES') {
                 
                 deleteDir()
                 checkout scm
@@ -37,16 +36,16 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make -j2
+                make -j4 OpenSpace
                 '''
             }
         }
     },
     windows: {
         node('windows') {
-            timeout(time: 45, unit: 'MINUTES') {
+            timeout(time: 90, unit: 'MINUTES') {
                 // We specify the workspace directory manually to reduce the path length and thus try to avoid MSB3491 on Visual Studio
-                ws("C:/J/O/${env.BRANCH_NAME}") {
+                ws("C:/J/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
                     deleteDir()
                     checkout scm
                     bat '''
@@ -55,7 +54,7 @@ stage('Build') {
                         cd build
                         cmake -G "Visual Studio 15 2017 Win64" .. ''' +
                         flags + ''' ..
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:2 /p:Configuration=Debug
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug
                     '''
                 }
             }
@@ -63,7 +62,7 @@ stage('Build') {
     },
     osx: {
         node('osx') {
-            timeout(time: 45, unit: 'MINUTES') {
+            timeout(time: 90, unit: 'MINUTES') {
                 deleteDir()
                 checkout scm
                 sh 'git submodule update --init --recursive'
@@ -80,7 +79,7 @@ stage('Build') {
                     cd ${srcDir}/build
                     /Applications/CMake.app/Contents/bin/cmake -G Xcode ${srcDir} .. ''' +
                     flags + '''
-                    xcodebuild -quiet
+                    xcodebuild -quiet -parallelizeTargets -jobs 4
                     '''
             }
         }

@@ -29,6 +29,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/bufferbinding.h>
+#include <ghoul/fmt.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <openspace/util/powerscaledcoordinate.h>

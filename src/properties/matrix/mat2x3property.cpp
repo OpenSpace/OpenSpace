@@ -57,6 +57,8 @@ glm::mat2x3 fromLuaConversion(lua_State* state, bool& success) {
             }
         }
     }
+    // The last accessor argument and the table are still on the stack
+    lua_pop(state, 2);
     success = true;
     return result;
 }
@@ -67,7 +69,7 @@ bool toLuaConversion(lua_State* state, glm::mat2x3 value) {
     for (glm::length_t i = 0; i < ghoul::glm_cols<glm::mat2x3>::value; ++i) {
         for (glm::length_t j = 0; j < ghoul::glm_rows<glm::mat2x3>::value; ++j) {
             lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));
-            lua_setfield(state, -2, std::to_string(number).c_str());
+            lua_rawseti(state, -2, number);
             ++number;
         }
     }

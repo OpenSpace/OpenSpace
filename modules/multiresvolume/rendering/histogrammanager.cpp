@@ -31,6 +31,7 @@
 #include <openspace/util/histogram.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char* _loggerCat = "HistogramManager";
@@ -57,7 +58,7 @@ const Histogram* HistogramManager::getHistogram(unsigned int brickIndex) const {
 }
 
 bool HistogramManager::initHistogramVars(int numBins) {
-    LINFO("Building histograms with " << numBins << " bins each");
+    LINFO(fmt::format("Building histograms with {} bins each", numBins));
     _numBins = numBins;
 
     _file = &(_tsp->file());
@@ -81,7 +82,7 @@ bool HistogramManager::buildHistogram(unsigned int brickIndex) {
         std::vector<float> voxelValues = readValues(brickIndex);
         unsigned int numVoxels = voxelValues.size();
 
-        for (unsigned int v = 0; v < numVoxels; ++v) {
+        for (size_t v = 0; v < numVoxels; ++v) {
             histogram.add(voxelValues[v], 1.0);
         }
     } else {
@@ -100,8 +101,8 @@ bool HistogramManager::buildHistogram(unsigned int brickIndex) {
                 children.push_back(firstChild + c);
             }
         }
-        int numChildren = children.size();
-        for (int c = 0; c < numChildren; c++) {
+        size_t numChildren = children.size();
+        for (size_t c = 0; c < numChildren; c++) {
             // Visit child
             unsigned int childIndex = children[c];
             if (_histograms[childIndex].isValid() || buildHistogram(childIndex)) {
@@ -173,7 +174,7 @@ bool HistogramManager::saveToFile(const std::string& filename) {
     return false;
     }
 
-    int numHistograms = _histograms.size();
+    size_t numHistograms = _histograms.size();
     file.write(reinterpret_cast<char*>(&numHistograms), sizeof(int));
     file.write(reinterpret_cast<char*>(&_numBins), sizeof(int));
     file.write(reinterpret_cast<char*>(&_minBin), sizeof(float));
@@ -182,9 +183,9 @@ bool HistogramManager::saveToFile(const std::string& filename) {
     int nFloats = numHistograms * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (int i = 0; i < numHistograms; ++i) {
-    int offset = i*_numBins;
-    memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
+    for (size_t i = 0; i < numHistograms; ++i) {
+        int offset = i*_numBins;
+        memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
 
     file.write(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);

@@ -107,7 +107,7 @@ class TuioEar : public TUIO::TuioListener {
         /**
         * A list that tracks all of the cursor ID's that got removed since last frame
         */
-        std::vector<int> _removeList;
+        std::vector<long> _removeList;
 };
 
 #endif // __OPENSPACE_MODULE_TOUCH___TUIO_EAR___H__

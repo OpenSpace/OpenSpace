@@ -34,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -45,7 +44,6 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -53,7 +51,6 @@
 #include <chrono>
 #include <iostream>
 #include <iterator>
-#include <numeric>
 #include <fstream>
 #include <string>
 #include <stack>
@@ -71,25 +68,7 @@ namespace {
 namespace openspace {
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
-    : DocumentationGenerator(
-        "Documented",
-        "propertyOwners",
-        {
-            {
-                "mainTemplate",
-                "${WEB}/properties/main.hbs"
-            },
-            {
-                "propertyOwnerTemplate",
-                "${WEB}/properties/propertyowner.hbs"
-            },
-            {
-                "propertyTemplate",
-                "${WEB}/properties/property.hbs"
-            }
-        },
-        "${WEB}/properties/script.js"
-    )
+    : properties::PropertyOwner({"Scene", "Scene"})
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
 {
@@ -127,6 +106,7 @@ void Scene::registerNode(SceneGraphNode* node) {
 
     _topologicallySortedNodes.push_back(node);
     _nodesByName[node->name()] = node;
+    addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
 
@@ -140,6 +120,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
         _topologicallySortedNodes.end()
     );
     _nodesByName.erase(node->name());
+    removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
 
@@ -216,10 +197,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR(
-            "The scene contains circular dependencies. " <<
-            inDegrees.size() << " nodes will be disabled."
-        );
+        LERROR(fmt::format(
+            "The scene contains circular dependencies. {} nodes will be disabled",
+            inDegrees.size()
+        ));
     }
 
     for (auto it : inDegrees) {
@@ -389,8 +370,10 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     const bool hasParent = dict.hasKey(KeyParentName);
 
     if (_nodesByName.find(nodeName) != _nodesByName.end()) {
-        LERROR("Cannot add scene graph node " << nodeName <<
-               ". A node with that name already exisis.");
+        LERROR(fmt::format(
+            "Cannot add scene graph node '{}'. A node with that name already exists",
+            nodeName
+        ));
         return nullptr;
     }
 
@@ -460,74 +443,6 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
-}
-
-std::string Scene::generateJson() const {
-    std::function<std::string(properties::PropertyOwner*)> createJson =
-        [&createJson](properties::PropertyOwner* owner) -> std::string
-    {
-        std::stringstream json;
-        json << "{";
-        json << "\"name\": \"" << owner->name() << "\",";
-
-        json << "\"properties\": [";
-        auto properties = owner->properties();
-        for (properties::Property* p : properties) {
-            json << "{";
-            json << "\"id\": \"" << p->identifier() << "\",";
-            json << "\"type\": \"" << p->className() << "\",";
-            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\",";
-            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
-            json << "}";
-            if (p != properties.back()) {
-                json << ",";
-            }
-        }
-        json << "],";
-
-        json << "\"propertyOwners\": [";
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            json << createJson(o);
-            if (o != propertyOwners.back()) {
-                json << ",";
-            }
-        }
-        json << "]";
-        json << "}";
-
-        return json.str();
-    };
-
-
-    std::stringstream json;
-    json << "[";
-    std::vector<SceneGraphNode*> nodes = allSceneGraphNodes();
-    if (!nodes.empty()) {
-        json << std::accumulate(
-            std::next(nodes.begin()),
-            nodes.end(),
-            createJson(*nodes.begin()),
-            [createJson](std::string a, SceneGraphNode* n) {
-            return a + "," + createJson(n);
-        }
-        );
-    }
-
-    json << "]";
-
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {
