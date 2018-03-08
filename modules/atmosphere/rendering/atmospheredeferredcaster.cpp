@@ -499,7 +499,7 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache2.inscatterTexture = program.uniformLocation("inscatterTexture");
 }
 
-void AtmosphereDeferredcaster::update(const UpdateData& data) {
+void AtmosphereDeferredcaster::update(const UpdateData&) {
 
 }
 
