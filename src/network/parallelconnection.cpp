@@ -157,7 +157,6 @@ void ParallelConnection::connect() {
     );
 }
 
-<<<<<<< HEAD
 void ParallelConnection::disconnect() {
     if (_socket) {
         _socket->disconnect();
@@ -169,123 +168,6 @@ void ParallelConnection::disconnect() {
     _shouldDisconnect = false;
     _socket = nullptr;
     setStatus(Status::Disconnected);
-=======
-void ParallelConnection::establishConnection(addrinfo *info) {
-    _clientSocket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-
-    if (_clientSocket == INVALID_SOCKET) {
-        freeaddrinfo(info);
-        LERROR("Failed to create client socket, disconnecting.");
-
-        // Signal a disconnect
-        signalDisconnect();
-    }
-
-    int trueFlag = 1;
-    int falseFlag = 0;
-    int result;
-
-    // Set no delay
-    result = setsockopt(
-        _clientSocket,                      // socket affected
-        IPPROTO_TCP,                        // set option at TCP level
-        TCP_NODELAY,                        // name of option
-        reinterpret_cast<char*>(&trueFlag), // the cast is historical cruft
-        sizeof(int)                         // length of option value
-    );
-
-    // Set send timeout
-    int timeout = 0;
-    result = setsockopt(
-        _clientSocket,
-        SOL_SOCKET,
-        SO_SNDTIMEO,
-        reinterpret_cast<char*>(&timeout),
-        sizeof(timeout)
-    );
-
-    // Set receive timeout
-    result = setsockopt(
-        _clientSocket,
-        SOL_SOCKET,
-        SO_RCVTIMEO,
-        reinterpret_cast<char*>(&timeout),
-        sizeof(timeout)
-    );
-
-    result = setsockopt(
-        _clientSocket,
-        SOL_SOCKET,
-        SO_REUSEADDR,
-        reinterpret_cast<char*>(&falseFlag),
-        sizeof(int)
-    );
-    if (result == SOCKET_ERROR) {
-        LERROR(fmt::format(
-            "Failed to set socket option 'reuse address'. Error code: {}",
-            _ERRNO
-        ));
-    }
-
-    result = setsockopt(
-        _clientSocket,
-        SOL_SOCKET,
-        SO_KEEPALIVE,
-        reinterpret_cast<char*>(&trueFlag),
-        sizeof(int)
-    );
-    if (result == SOCKET_ERROR) {
-        LERROR(fmt::format(
-            "Failed to set socket option 'keep alive'. Error code: {}",
-            _ERRNO
-        ));
-    }
-
-    LINFO(fmt::format(
-        "Attempting to connect to server {} on port {}",
-        _address.value(),
-        _port.value()
-    ));
-
-    // Try to connect
-    result = connect(_clientSocket, info->ai_addr, static_cast<int>(info->ai_addrlen));
-
-    // If the connection was successfull
-    if (result != SOCKET_ERROR) {
-        LINFO(fmt::format(
-            "Connection established with server at ip: {}",
-            _address.value()
-        ));
-
-        // We're connected
-        _isConnected = true;
-
-        // Start sending messages
-        _sendThread = std::make_unique<std::thread>(&ParallelConnection::sendFunc, this);
-
-        // Start listening for communication
-        _listenThread = std::make_unique<std::thread>(
-            &ParallelConnection::listenCommunication,
-            this
-        );
-
-        // We no longer need to try to establish connection
-        _tryConnect = false;
-
-        _sendBufferMutex.lock();
-        _sendBuffer.clear();
-        _sendBufferMutex.unlock();
-
-        // Send authentication
-        sendAuthentication();
-    } else {
-        LINFO("Connection attempt failed.");
-        signalDisconnect();
-    }
-
-    // Cleanup
-    freeaddrinfo(info);
->>>>>>> cc292dd330ce4110e883a9bb546ae1c8f83dcf13
 }
 
 void ParallelConnection::sendAuthentication() {
@@ -393,7 +275,6 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
     );
 
     switch (static_cast<datamessagestructures::Type>(type)) {
-<<<<<<< HEAD
     case datamessagestructures::Type::CameraData: {
         datamessagestructures::CameraKeyframe kf(buffer);
         kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
@@ -432,59 +313,12 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
         break;
     }
     default: {
-        LERROR("Unidentified data message with identifier " << type <<
-            " received in parallel connection."
-        );
+        LERROR(fmt::format(
+            "Unidentified message with identifier {} received in parallel connection",
+            type
+        ));
         break;
     }
-=======
-        case datamessagestructures::Type::CameraData: {
-            datamessagestructures::CameraKeyframe kf(buffer);
-            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
-
-            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(
-                kf._timestamp);
-            interaction::KeyframeNavigator::CameraPose pose;
-            pose.focusNode = kf._focusNode;
-            pose.position = kf._position;
-            pose.rotation = kf._rotation;
-            pose.followFocusNodeRotation = kf._followNodeRotation;
-
-            OsEng.navigationHandler().keyframeNavigator().addKeyframe(
-                kf._timestamp, pose);
-            break;
-        }
-        case datamessagestructures::Type::TimeData: {
-            datamessagestructures::TimeKeyframe kf(buffer);
-            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
-
-            OsEng.timeManager().removeKeyframesAfter(kf._timestamp);
-            Time time(kf._time);
-            time.setDeltaTime(kf._dt);
-            time.setPause(kf._paused);
-            time.setTimeJumped(kf._requiresTimeJump);
-
-            OsEng.timeManager().addKeyframe(kf._timestamp, time);
-            break;
-        }
-        case datamessagestructures::Type::ScriptData: {
-            datamessagestructures::ScriptMessage sm;
-            sm.deserialize(buffer);
-
-            OsEng.scriptEngine().queueScript(
-                sm._script,
-                scripting::ScriptEngine::RemoteScripting::No
-            );
-            break;
-        }
-        default: {
-            LERROR(fmt::format(
-                "Unidentified message with identifier {} received in parallel connection",
-                type
-            ));
-            break;
-        }
->>>>>>> cc292dd330ce4110e883a9bb546ae1c8f83dcf13
     }
 }
 
@@ -513,71 +347,10 @@ void ParallelConnection::sendMessage(const Message& message) {
     header.push_back('O');
     header.push_back('S');
 
-<<<<<<< HEAD
     header.insert(header.end(),
         reinterpret_cast<const char*>(&ProtocolVersion),
         reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint32_t)
     );
-=======
-        while (!_sendBuffer.empty()) {
-            Message message = _sendBuffer.front();
-            unqlock.unlock();
-            std::vector<char> header;
-
-            //insert header into buffer
-            header.push_back('O');
-            header.push_back('S');
-
-            uint32_t messageTypeOut = static_cast<uint32_t>(message.type);
-            uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
-
-
-            header.insert(header.end(),
-                reinterpret_cast<const char*>(&ProtocolVersion),
-                reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint32_t)
-            );
-
-            header.insert(header.end(),
-                reinterpret_cast<const char*>(&messageTypeOut),
-                reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint32_t)
-            );
-
-            header.insert(header.end(),
-                reinterpret_cast<const char*>(&messageSizeOut),
-                reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
-            );
-
-            // result is most likely size_t, but send might return a different type on
-            // different platforms
-            auto result = send(
-                _clientSocket,
-                header.data(),
-                static_cast<int>(header.size()),
-                0
-            );
-            result = send(
-                _clientSocket,
-                message.content.data(),
-                static_cast<int>(message.content.size()),
-                0
-            );
-
-            if (result == SOCKET_ERROR) {
-                LERROR(fmt::format(
-                    "Failed to send message. Error {} detected in connection"
-                    "; disconnecting",
-                    _ERRNO
-                ));
-                signalDisconnect();
-            }
-
-            unqlock.lock();
-            _sendBuffer.erase(_sendBuffer.begin());
-        }
-    }
-    std::lock_guard<std::mutex> sendLock(_sendBufferMutex);
-    _sendBuffer.clear();
->>>>>>> cc292dd330ce4110e883a9bb546ae1c8f83dcf13
 
     header.insert(header.end(),
         reinterpret_cast<const char*>(&messageTypeOut),
