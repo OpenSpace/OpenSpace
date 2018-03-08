@@ -26,28 +26,12 @@
 #define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
 #include <openspace/network/messagestructures.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/numericalproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 
-#include <glm/gtx/quaternion.hpp>
-
-#include <ghoul/designpattern/event.h>
-#include <ghoul/io/socket/tcpsocket.h>
-
-#include <string>
 #include <vector>
-#include <deque>
-#include <atomic>
-#include <thread>
-#include <mutex>
-#include <map>
-#include <condition_variable>
 
 namespace openspace {
 
-class ParallelConnection : public properties::PropertyOwner {
+class ParallelConnection  {
 public:
     enum class Status : uint32_t {
         Disconnected = 0,
@@ -87,93 +71,7 @@ public:
         std::vector<char> content;
     };
 
-    ParallelConnection();
-    ~ParallelConnection();
-    void connect();
-    void setPort(std::string port);
-    void setAddress(std::string address);
-    void setName(std::string name);
-    bool isHost();
-    const std::string& hostName();
-    void requestHostship();
-    void resignHostship();
-    void setPassword(std::string password);
-    void setHostPassword(std::string hostPassword);
-    void disconnect();
-    void preSynchronization();
-    void sendScript(std::string script);
-    void resetTimeOffset();
-    double latencyStandardDeviation() const;
-    double timeTolerance() const;
 
-    /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * remote OS parallel connection. The functions contained are
-    * -
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
-    static scripting::LuaLibrary luaLibrary();
-    Status status();
-    int nConnections();
-    std::shared_ptr<ghoul::Event<>> connectionEvent();
-
-
-
-private:
-    //@TODO change this into the ghoul hasher for client AND server
-    uint32_t hash(const std::string &val);
-    void sendDataMessage(const DataMessage& dataMessage);
-    void sendMessage(const Message& message);
-    void queueInMessage(const Message& message);
-
-    void sendAuthentication();
-    void handleCommunication();
-
-    void handleMessage(const Message&);
-    void dataMessageReceived(const std::vector<char>& messageContent);
-    void connectionStatusMessageReceived(const std::vector<char>& messageContent);
-    void nConnectionsMessageReceived(const std::vector<char>& messageContent);
-
-    void sendCameraKeyframe();
-    void sendTimeKeyframe();
-
-    void setStatus(Status status);
-    void setHostName(const std::string& hostName);
-    void setNConnections(size_t nConnections);
-
-    double calculateBufferedKeyframeTime(double originalTime);
-
-    properties::StringProperty _password;
-    properties::StringProperty _hostPassword;
-    properties::StringProperty _port;
-    properties::StringProperty _address;
-    properties::StringProperty _name;
-    properties::FloatProperty _bufferTime;
-    properties::FloatProperty _timeKeyframeInterval;
-    properties::FloatProperty _cameraKeyframeInterval;
-    properties::FloatProperty _timeTolerance;
-
-    double _lastTimeKeyframeTimestamp;
-    double _lastCameraKeyframeTimestamp;
-
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
-    std::atomic<bool> _shouldDisconnect;
-
-    std::atomic<size_t> _nConnections;
-    std::atomic<Status> _status;
-    std::string _hostName;
-
-    std::deque<Message> _receiveBuffer;
-    std::mutex _receiveBufferMutex;
-
-    std::atomic<bool> _timeJumped;
-    std::mutex _latencyMutex;
-    std::deque<double> _latencyDiffs;
-    double _initialTimeDiff;
-
-    std::unique_ptr<std::thread> _receiveThread;
-    std::shared_ptr<ghoul::Event<>> _connectionEvent;
 };
 
 } // namespace openspace

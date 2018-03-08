@@ -103,21 +103,18 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    OsEng.parallelConnection().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent()->subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            if (OsEng.parallelConnection().status() ==
-                ParallelConnection::Status::ClientWithHost)
-            {
-                _useKeyFrameInteraction = true;
-            }
+            _useKeyFrameInteraction = (OsEng.parallelPeer().status() ==
+                ParallelConnection::Status::ClientWithHost);
         }
     );
 }
 
 void NavigationHandler::deinitialize() {
-    OsEng.parallelConnection().connectionEvent()->unsubscribe("NavigationHandler");
+    OsEng.parallelPeer().connectionEvent()->unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {

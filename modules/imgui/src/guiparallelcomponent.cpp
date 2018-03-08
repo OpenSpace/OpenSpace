@@ -29,7 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/network/messagestructures.h>
 
 #include <ghoul/fmt.h>
@@ -51,7 +51,7 @@ void GuiParallelComponent::renderDisconnected() {
     const bool connect = ImGui::Button("Connect");
 
     if (connect) {
-        OsEng.parallelConnection().connect();
+        OsEng.parallelPeer().connect();
     }
 }
 
@@ -61,12 +61,12 @@ void GuiParallelComponent::renderConnecting() {
     const bool cancel = ImGui::Button("Cancel connection");
 
     if (cancel) {
-        OsEng.parallelConnection().disconnect();
+        OsEng.parallelPeer().disconnect();
     }
 }
 
 void GuiParallelComponent::renderClientWithHost() {
-    ParallelConnection& parallel = OsEng.parallelConnection();
+    ParallelPeer& parallel = OsEng.parallelPeer();
 
     std::string connectionInfo = "Session hosted by \"" + parallel.hostName() + "\"\n";
     size_t nConnections = parallel.nConnections();
@@ -108,7 +108,7 @@ void GuiParallelComponent::renderClientWithHost() {
 }
 
 void GuiParallelComponent::renderClientWithoutHost() {
-    ParallelConnection& parallel = OsEng.parallelConnection();
+    ParallelPeer& parallel = OsEng.parallelPeer();
 
     std::string connectionInfo = "Connected to parallel session with no host\n";
     size_t nConnections = parallel.nConnections();
@@ -132,7 +132,7 @@ void GuiParallelComponent::renderClientWithoutHost() {
 }
 
 void GuiParallelComponent::renderClientCommon() {
-    ParallelConnection& parallel = OsEng.parallelConnection();
+    ParallelPeer& parallel = OsEng.parallelPeer();
 
     bool requestHostship = ImGui::Button("Request hostship");
     const bool disconnect = ImGui::Button("Disconnect");
@@ -147,7 +147,7 @@ void GuiParallelComponent::renderClientCommon() {
 }
 
 void GuiParallelComponent::renderHost() {
-    ParallelConnection& parallel = OsEng.parallelConnection();
+    ParallelPeer& parallel = OsEng.parallelPeer();
     size_t nConnections = parallel.nConnections();
 
     std::string connectionInfo = "";
@@ -175,7 +175,7 @@ void GuiParallelComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    ParallelConnection::Status status = OsEng.parallelConnection().status();
+    ParallelConnection::Status status = OsEng.parallelPeer().status();
 
     switch (status) {
     case ParallelConnection::Status::Disconnected:
@@ -195,7 +195,7 @@ void GuiParallelComponent::render() {
         break;
     }
 
-    GuiPropertyComponent::renderPropertyOwner(&OsEng.parallelConnection());
+    GuiPropertyComponent::renderPropertyOwner(&OsEng.parallelPeer());
     ImGui::End();
 }
 

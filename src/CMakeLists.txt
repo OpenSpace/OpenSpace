@@ -57,7 +57,9 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
-    ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
+    ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
@@ -223,6 +225,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h

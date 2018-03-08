@@ -22,44 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
-#define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+namespace openspace::luascriptfunctions {
 
-#include <openspace/util/timeline.h>
-#include <openspace/network/parallelpeer.h>
+int connect(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
 
-#include <ghoul/glm.h>
-#include <glm/gtx/quaternion.hpp>
+    if (OsEng.windowWrapper().isMaster()) {
+        OsEng.parallelPeer().connect();
+    }
 
-namespace openspace { class Camera; }
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
-namespace openspace::interaction {
+int disconnect(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
 
-class KeyframeNavigator {
-public:
-    struct CameraPose {
-        glm::dvec3 position;
-        glm::quat rotation;
-        std::string focusNode;
-        bool followFocusNodeRotation;
-    };
+    if (OsEng.windowWrapper().isMaster()) {
+        OsEng.parallelPeer().connect();
+    }
 
-    KeyframeNavigator() = default;
-    ~KeyframeNavigator() = default;
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
-    void updateCamera(Camera& camera);
-    Timeline<CameraPose>& timeline();
+int requestHostship(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
 
-    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
-    void clearKeyframes();
-    size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
+    if (OsEng.windowWrapper().isMaster()) {
+        OsEng.parallelPeer().requestHostship();
+    }
 
-private:
-    Timeline<CameraPose> _cameraPoseTimeline;
-};
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
 
-} // namespace openspace::interaction
+int resignHostship(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
 
-#endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+    if (OsEng.windowWrapper().isMaster()) {
+        OsEng.parallelPeer().resignHostship();
+    }
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+} // namespace openspace::luascriptfunctions

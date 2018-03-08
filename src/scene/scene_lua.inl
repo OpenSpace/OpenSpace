@@ -35,7 +35,7 @@ void executePropertySet(properties::Property* prop, lua_State* L) {
     //ensure properties are synced over parallel connection
     std::string value;
     prop->getStringValue(value);
-    /*OsEng.parallelConnection().scriptMessage(
+    /*OsEng.parallelPeer().scriptMessage(
     prop->fullyQualifiedIdentifier(),
     value
     );*/

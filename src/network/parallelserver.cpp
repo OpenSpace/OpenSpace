@@ -22,44 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
-#define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#include <openspace/network/parallelserver.h>
 
-#include <openspace/util/timeline.h>
-#include <openspace/network/parallelpeer.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <ghoul/glm.h>
-#include <glm/gtx/quaternion.hpp>
+namespace {
+const char* _loggerCat = "ParallelServer";
+} // namespace
 
-namespace openspace { class Camera; }
+namespace openspace {
 
-namespace openspace::interaction {
+void ParallelServer::start(int port, const std::string& password) {
 
-class KeyframeNavigator {
-public:
-    struct CameraPose {
-        glm::dvec3 position;
-        glm::quat rotation;
-        std::string focusNode;
-        bool followFocusNodeRotation;
-    };
+}
 
-    KeyframeNavigator() = default;
-    ~KeyframeNavigator() = default;
+void ParallelServer::stop() {
 
-    void updateCamera(Camera& camera);
-    Timeline<CameraPose>& timeline();
+}
 
-    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
-    void clearKeyframes();
-    size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
-
-private:
-    Timeline<CameraPose> _cameraPoseTimeline;
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+} // namespace openspace

@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 
 namespace openspace {
@@ -108,7 +108,7 @@ void TimeManager::consumeKeyframes(double dt) {
             return;
         }
 
-        const double secondsOffTolerance = OsEng.parallelConnection().timeTolerance();
+        const double secondsOffTolerance = OsEng.parallelPeer().timeTolerance();
 
         double predictedTime = time().j2000Seconds() + time().deltaTime() *
                                (next.timestamp - now);

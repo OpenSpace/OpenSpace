@@ -22,50 +22,82 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::luascriptfunctions {
+#include <iostream>
+#include <string>
+#include <ghoul/glm.h>
 
-int connect(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
+#include <ghoul/opengl/ghoul_gl.h>
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/directory.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
+#include <ghoul/ghoul.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/singlecommand.h>
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/network/parallelserver.h>
+
+namespace {
+    const std::string _loggerCat = "Wormhole Main";
 }
 
-int disconnect(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
+int main(int argc, char** argv) {
+    using namespace openspace;
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
+    std::vector<std::string> arguments(argv, argv + argc);
+
+    ghoul::cmdparser::CommandlineParser commandlineParser(
+        "Wormhole",
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
+
+    std::string portString = "";
+    commandlineParser.addCommand(
+        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+            portString,
+            "--port",
+            "-p",
+            "Sets the port to listen on"
+            )
+    );
+
+    std::string password = "";
+    commandlineParser.addCommand(
+        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+            password,
+            "--password",
+            "-l",
+            "Sets the password to use"
+            )
+    );
+
+    commandlineParser.setCommandLine(arguments);
+    commandlineParser.execute();
+
+    int port = 25001;
+
+    if (portString != "") {
+        try {
+            port = std::stoi(portString);
+        }
+        catch (...) {
+            LERROR(fmt::format("Invalid port: {}", portString));
+        }
     }
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    ParallelServer server;
+    server.start(port, password);
+    LINFO("Server started");
+
+    std::cin.get();
+
+    server.stop();
+    LINFO("Server stopped");
+
     return 0;
-}
-
-int requestHostship(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-int resignHostship(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions
+};
