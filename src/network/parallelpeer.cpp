@@ -384,11 +384,12 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
 
 void ParallelPeer::handleCommunication() {
     while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
-        std::optional<ParallelConnection::Message> m = _connection.receiveMessage();
-        if (m) {
-            queueInMessage(m.value());
-        } else {
+        try {
+            ParallelConnection::Message m = _connection.receiveMessage();
+               queueInMessage(m);
+        } catch (const ParallelConnection::ConnectionLostError&) {
             disconnect();
+            LERROR("Parallel connection lost");
         }
     }
 }

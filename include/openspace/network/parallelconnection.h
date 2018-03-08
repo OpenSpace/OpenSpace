@@ -30,7 +30,6 @@
 #include <ghoul/io/socket/tcpsocket.h>
 
 #include <vector>
-#include <optional>
 
 namespace openspace {
 
@@ -74,6 +73,11 @@ public:
         std::vector<char> content;
     };
 
+    class ConnectionLostError : public ghoul::RuntimeError {
+    public:
+        explicit ConnectionLostError();
+    };
+
     ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
     bool isConnectedOrConnecting();
@@ -81,7 +85,7 @@ public:
     bool sendMessage(const  ParallelConnection::Message& message);
     void disconnect();
 
-    std::optional<ParallelConnection::Message> receiveMessage();
+    ParallelConnection::Message receiveMessage();
 
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;

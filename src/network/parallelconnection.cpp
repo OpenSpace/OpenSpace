@@ -32,6 +32,11 @@ const char* _loggerCat = "ParallelConnection";
 } // namespace
 
 namespace openspace {
+
+ParallelConnection::ConnectionLostError::ConnectionLostError()
+    : ghoul::RuntimeError("Parallel connection lost", "ParallelConnection")
+{}
+
 ParallelConnection::ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket)
     : _socket(std::move(socket))
 {}
@@ -96,7 +101,7 @@ void ParallelConnection::disconnect() {
 }
 
 
-std::optional<ParallelConnection::Message> ParallelConnection::receiveMessage() {
+ParallelConnection::Message ParallelConnection::receiveMessage() {
     // Header consists of 'OS' + majorVersion + minorVersion + messageSize
     constexpr size_t headerSize = 2 * sizeof(char) + 3 * sizeof(uint32_t);
 
@@ -108,13 +113,13 @@ std::optional<ParallelConnection::Message> ParallelConnection::receiveMessage() 
     // Receive the header data
     if (!_socket->get(headerBuffer.data(), headerSize)) {
         LERROR("Failed to read header from socket. Disconencting.");
-        return std::nullopt;
+        throw ConnectionLostError();
     }
 
     // Make sure that header matches this version of OpenSpace
     if (!(headerBuffer[0] == 'O' && headerBuffer[1] && 'S')) {
         LERROR("Expected to read message header 'OS' from socket.");
-        return std::nullopt;
+        throw ConnectionLostError();
     }
 
     uint32_t* ptr = reinterpret_cast<uint32_t*>(&headerBuffer[2]);
@@ -129,7 +134,7 @@ std::optional<ParallelConnection::Message> ParallelConnection::receiveMessage() 
             protocolVersionIn,
             ProtocolVersion
         ));
-        return std::nullopt;
+        throw ConnectionLostError();
     }
 
     size_t messageSize = messageSizeIn;
@@ -138,7 +143,7 @@ std::optional<ParallelConnection::Message> ParallelConnection::receiveMessage() 
     messageBuffer.resize(messageSize);
     if (!_socket->get(messageBuffer.data(), messageSize)) {
         LERROR("Failed to read message from socket. Disconencting.");
-        return std::nullopt;
+        throw ConnectionLostError();
     }
 
     // And delegate decoding depending on type
