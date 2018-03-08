@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/file.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -96,19 +97,22 @@ int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
         case LUA_TFUNCTION:
         case LUA_TUSERDATA:
         case LUA_TTHREAD:
-            LOGC(level, "print", "Function parameter was of type '" <<
-                    luaTypeToString(type) << "'");
+            log(
+                level,
+                "print",
+                fmt::format("Function parameter was of type '{}'", luaTypeToString(type))
+            );
             break;
         case LUA_TNIL:
             break;
         case LUA_TBOOLEAN:
-            LOGC(level, "print", lua_toboolean(L, -1));
+            log(level, "print", fmt::format("{}", lua_toboolean(L, -1)));
             break;
         case LUA_TNUMBER:
-            LOGC(level, "print", lua_tonumber(L, -1));
+            log(level, "print", fmt::format("{}", lua_tonumber(L, -1)));
             break;
         case LUA_TSTRING:
-            LOGC(level, "print", lua_tostring(L, -1));
+            log(level, "print", lua_tostring(L, -1));
             break;
     }
     lua_settop(L, 0);

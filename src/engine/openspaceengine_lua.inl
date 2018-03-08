@@ -141,7 +141,15 @@ int removeVirtualProperty(lua_State* L) {
     const std::string name = lua_tostring(L, -1);
     lua_settop(L, 0);
     properties::Property* p = OsEng.virtualPropertyManager().property(name);
-    OsEng.virtualPropertyManager().removeProperty(p);
+    if (p) {
+        OsEng.virtualPropertyManager().removeProperty(p);
+    }
+    else {
+        LWARNINGC(
+            "removeVirtualProperty",
+            fmt::format("Virtual Property with name {} did not exist", name)
+        );
+    }
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -233,7 +241,7 @@ int downloadFile(lua_State* L) {
     lua_settop(L, 0);
 
     const std::string _loggerCat = "OpenSpaceEngine";
-    LINFO("Downloading file from " << uri);
+    LINFO(fmt::format("Downloading file from {}", uri));
     DownloadManager dm = openspace::DownloadManager(false);
     std::shared_ptr<openspace::DownloadManager::FileFuture> future =
         dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);

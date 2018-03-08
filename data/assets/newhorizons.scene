@@ -1,5 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+local renderableHelper = asset.require('util/renderable_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
@@ -34,94 +36,94 @@ local Keybindings = {
     },
     {
         Key = "F8",
-        Command = "openspace.setPropertyValue('Pluto.renderable.ProjectionComponent.ClearAllProjections', true);" ..
-                  "openspace.setPropertyValue('Charon.renderable.ProjectionComponent.ClearAllProjections', true);",
+        Command = "openspace.setPropertyValue('Scene.Pluto.renderable.ProjectionComponent.ClearAllProjections', true);" ..
+                  "openspace.setPropertyValue('Scene.Charon.renderable.ProjectionComponent.ClearAllProjections', true);",
         Documentation = "Removes all image projections from Pluto and Charon.",
         Local = false
     },
     {
         Key = "F9",
         Command = "openspace.time.setTime('2015-07-14T09:00:00.00');" ..
-                  "openspace.setPropertyValue('Pluto.renderable.ClearAllProjections', true);" ..
-                  "openspace.setPropertyValue('Charon.renderable.ClearAllProjections', true);",
+                  "openspace.setPropertyValue('Scene.Pluto.renderable.ClearAllProjections', true);" ..
+                  "openspace.setPropertyValue('Scene.Charon.renderable.ClearAllProjections', true);",
         Documentation = "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections.",
         Local = false
     },
     {
         Key = "KP_8",
-        Command = sceneHelper.property.increment('Pluto.renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.increment('Scene.Pluto.renderable.HeightExaggeration', 5000000),
         Documentation = "Increases the height map exaggeration on Pluto.",
         Local = false
     },
     {
         Key = "KP_2",
-        Command = sceneHelper.property.decrement('Pluto.renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.decrement('Scene.Pluto.renderable.HeightExaggeration', 5000000),
         Documentation = "Decreases the height map exaggeration on Pluto.",
         Local = false
     },
     {
         Key = "KP_9",
-        Command = sceneHelper.property.increment('Charon.renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.increment('Scene.Charon.renderable.HeightExaggeration', 5000000),
         Documentation = "Increases the height map exaggeration on Charon.",
         Local = false
     },
     {
         Key = "KP_3",
-        Command = sceneHelper.property.decrement('Charon.renderable.HeightExaggeration', 5000000),
+        Command = propertyHelper.decrement('Scene.Charon.renderable.HeightExaggeration', 5000000),
         Documentation = "Decreases the height map exaggeration on Charon.",
         Local = false
     },
     {
         Key = "q",
-        Command = sceneHelper.property.invert('SunMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.SunMarker.renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Sun.",
         Local = false
     },
     {
         Key = "e",
-        Command = sceneHelper.property.invert('EarthMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.EarthMarker.renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Earth.",
         Local = false
     },
     {
         Key = "o",
-        Command = sceneHelper.property.invert('PlutoTrail.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.PlutoTrail.renderable.Enabled'),
         Documentation = "Toggles the visibility of the trail behind Pluto.",
         Local = false
     },
     {
         Key = "j",
-        Command = sceneHelper.renderable.toggle('PlutoText') .. sceneHelper.renderable.toggle('CharonText') ..
-                  sceneHelper.renderable.toggle('HydraText') .. sceneHelper.renderable.toggle('NixText') ..
-                  sceneHelper.renderable.toggle('KerberosText') .. sceneHelper.renderable.toggle('StyxText'),
+        Command = renderableHelper.toggle('Scene.PlutoText') .. renderableHelper.toggle('Scene.CharonText') ..
+                  renderableHelper.toggle('Scene.HydraText') .. renderableHelper.toggle('Scene.NixText') ..
+                  renderableHelper.toggle('Scene.KerberosText') .. renderableHelper.toggle('Scene.StyxText'),
         Documentation = "Toggles the visibility of the text labels of Pluto, Charon, Hydra, Nix, Kerberos, and Styx.",
         Local = false
     },
     {
         Key = "l",
-        Command = sceneHelper.property.invert('Labels.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.Labels.renderable.Enabled'),
         Documentation = "Toggles the visibility of the labels for the New Horizons instruments.",
         Local = false
     },
     {
         Key = "m",
-        Command = sceneHelper.property.invert('NH_LORRI.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_LEISA.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_PAN1.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_PAN2.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_RED.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_BLUE.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_FT.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_METHANE.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_RALPH_MVIC_NIR.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_ALICE_AIRGLOW.renderable.SolidDraw') ..
-                  sceneHelper.property.invert('NH_ALICE_SOC.renderable.SolidDraw'),
+        Command = propertyHelper.invert('Scene.NH_LORRI.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_LEISA.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_PAN1.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_PAN2.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_RED.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_BLUE.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_FT.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_METHANE.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_RALPH_MVIC_NIR.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_ALICE_AIRGLOW.renderable.SolidDraw') ..
+                  propertyHelper.invert('Scene.NH_ALICE_SOC.renderable.SolidDraw'),
         Documentation = "Draws the instrument field of views in a solid color or as lines.",
         Local = false
     },
     {
         Key = "t",
-        Command = sceneHelper.renderable.toggle('PlutoShadow') .. sceneHelper.renderable.toggle('CharonShadow'),
+        Command = renderableHelper.toggle('Scene.PlutoShadow') .. renderableHelper.toggle('Scene.CharonShadow'),
         Documentation = "Toggles the visibility of the shadow visualization of Pluto and Charon.",
         Local = false
     }

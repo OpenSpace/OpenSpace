@@ -58,80 +58,21 @@ Renderable* renderable(const std::string& name) {
 }
 
 properties::Property* property(const std::string& uri) {
-    properties::Property* globalProp = OsEng.globalPropertyOwner().property(uri);
-    if (globalProp) {
-        return globalProp;
-    }
-    else {
-        // The URI consists of the following form at this stage:
-        // <node name>.{<property owner>.}^(0..n)<property id>
-        const size_t nameSeparator = uri.find(properties::PropertyOwner::URISeparator);
-        if (nameSeparator == std::string::npos) {
-            LERROR("Malformed URI '" << uri << "': At least one '" << nameSeparator
-                   << "' separator must be present.");
-            return nullptr;
-        }
-        const std::string nameUri = uri.substr(0, nameSeparator);
-        const std::string remainingUri = uri.substr(nameSeparator + 1);
-
-        SceneGraphNode* node = sceneGraphNode(nameUri);
-        if (node) {
-            properties::Property* property = node->property(remainingUri);
-            return property;
-        }
-
-        std::shared_ptr<ScreenSpaceRenderable> ssr =
-            OsEng.renderEngine().screenSpaceRenderable(nameUri);
-        if (ssr) {
-            properties::Property* property = ssr->property(remainingUri);
-            return property;
-        }
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        std::shared_ptr<IswaBaseGroup> group = IswaManager::ref().iswaGroup(nameUri);
-        if(group){
-            properties::Property* property = group->property(remainingUri);
-            return property;
-        }
-#endif
-        LERROR("Node or ScreenSpaceRenderable' " << nameUri << "' did not exist");
-        return nullptr;
-    }
+    properties::Property* property = OsEng.rootPropertyOwner().property(uri);
+    return property;
 }
 
 std::vector<properties::Property*> allProperties() {
     std::vector<properties::Property*> properties;
 
     std::vector<properties::Property*> p =
-        OsEng.globalPropertyOwner().propertiesRecursive();
+        OsEng.rootPropertyOwner().propertiesRecursive();
 
     properties.insert(
         properties.end(),
         p.begin(),
         p.end()
     );
-
-    std::vector<properties::Property*> q =
-        OsEng.virtualPropertyManager().propertiesRecursive();
-
-    properties.insert(
-        properties.end(),
-        q.begin(),
-        q.end()
-    );
-
-    const Scene* graph = sceneGraph();
-    if (graph) {
-        std::vector<SceneGraphNode*> nodes = graph->allSceneGraphNodes();
-
-        for (SceneGraphNode* n : nodes) {
-            std::vector<properties::Property*> props = n->propertiesRecursive();
-            properties.insert(
-                properties.end(),
-                props.begin(),
-                props.end()
-            );
-        }
-    }
 
     return properties;
 }

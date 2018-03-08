@@ -46,6 +46,7 @@
 #endif
 
 #include <cmath>
+#include <ghoul/fmt.h>
 #include <functional>
 #include <fstream>
 
@@ -256,17 +257,17 @@ TouchInteraction::TouchInteraction()
 
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
-        if (!node) {
-            LWARNING(
-                "Could not find a node in scenegraph called '" << _origin.value() << "'"
-            );
-            return;
+        if (node) {
+            setFocusNode(node);
         }
-        setFocusNode(node);
+        else {
+            LWARNING(fmt::format(
+                "Could not find a node in scenegraph called '{}'", _origin.value()
+            ));
+        }
     });
 
     levmarq_init(&_lmstat);
-
 
     _time.initSession();
 }
@@ -319,12 +320,12 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
         _guiON = !_guiON;
         module.gui.setEnabled(_guiON);
 
-        std::string mode = (_guiON) ? "" : "de";
-        LINFO(
-            "GUI mode is " << mode << "activated. Inside box by: (" <<
-            static_cast<int>(100 * (pos.x / _guiButton.value().x)) << "%, " <<
-            static_cast<int>(100 * (pos.y / _guiButton.value().y)) << "%)\n"
-        );
+        LINFO(fmt::format(
+            "GUI mode is {}. Inside box by: ({}%, {}%)",
+            _guiON ? "activated" : "deactivated",
+            static_cast<int>(100 * (pos.x / _guiButton.value().x)),
+            static_cast<int>(100 * (pos.y / _guiButton.value().y))
+        ));
     }
     else if (_guiON) {
         module.touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse

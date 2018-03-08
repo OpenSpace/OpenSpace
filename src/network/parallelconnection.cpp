@@ -400,7 +400,10 @@ void ParallelConnection::establishConnection(addrinfo *info) {
         sizeof(int)
     );
     if (result == SOCKET_ERROR) {
-        LERROR("Failed to set socket option 'reuse address'. Error code: " << _ERRNO);
+        LERROR(fmt::format(
+            "Failed to set socket option 'reuse address'. Error code: {}",
+            _ERRNO
+        ));
     }
 
     result = setsockopt(
@@ -411,17 +414,27 @@ void ParallelConnection::establishConnection(addrinfo *info) {
         sizeof(int)
     );
     if (result == SOCKET_ERROR) {
-        LERROR("Failed to set socket option 'keep alive'. Error code: " << _ERRNO);
+        LERROR(fmt::format(
+            "Failed to set socket option 'keep alive'. Error code: {}",
+            _ERRNO
+        ));
     }
 
-    LINFO("Attempting to connect to server "<< _address << " on port " << _port);
+    LINFO(fmt::format(
+        "Attempting to connect to server {} on port {}",
+        _address.value(),
+        _port.value()
+    ));
 
     // Try to connect
     result = connect(_clientSocket, info->ai_addr, static_cast<int>(info->ai_addrlen));
 
     // If the connection was successfull
     if (result != SOCKET_ERROR) {
-        LINFO("Connection established with server at ip: "<< _address);
+        LINFO(fmt::format(
+            "Connection established with server at ip: {}",
+            _address.value()
+        ));
 
         // We're connected
         _isConnected = true;
@@ -677,9 +690,10 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             break;
         }
         default: {
-            LERROR("Unidentified data message with identifier " << type <<
-                   " received in parallel connection."
-            );
+            LERROR(fmt::format(
+                "Unidentified message with identifier {} received in parallel connection",
+                type
+            ));
             break;
         }
     }
@@ -761,10 +775,11 @@ void ParallelConnection::sendFunc() {
             );
 
             if (result == SOCKET_ERROR) {
-                LERROR(
-                    "Failed to send message.\nError: " <<
-                    _ERRNO << " detected in connection, disconnecting."
-                );
+                LERROR(fmt::format(
+                    "Failed to send message. Error {} detected in connection"
+                    "; disconnecting",
+                    _ERRNO
+                ));
                 signalDisconnect();
             }
 
@@ -941,10 +956,10 @@ void ParallelConnection::listenCommunication() {
         // If enough data was received
         if (nBytesRead <= 0) {
             if (!_disconnect) {
-                LERROR(
-                    "Error " << _ERRNO <<
-                    " detected in connection when reading header, disconnecting!"
-                );
+                LERROR(fmt::format(
+                    "Error {} detected in connection when reader header; disconnecting!",
+                    _ERRNO
+                ));
                 signalDisconnect();
             }
             break;
@@ -964,10 +979,11 @@ void ParallelConnection::listenCommunication() {
         uint32_t messageSizeIn = *(ptr++);
 
         if (protocolVersionIn != ProtocolVersion) {
-            LERROR(
-                "Protocol versions do not match. Server version: " <<
-                protocolVersionIn << ", Client version: " << ProtocolVersion
-            );
+            LERROR(fmt::format(
+                "Protocol versions do not match. Server version: {}, Client version: {}",
+                protocolVersionIn,
+                ProtocolVersion
+            ));
             signalDisconnect();
             break;
         }
@@ -985,9 +1001,10 @@ void ParallelConnection::listenCommunication() {
 
         if (nBytesRead <= 0) {
             if (!_disconnect) {
-                LERROR(
-                    "Error " << _ERRNO <<
-                    " detected in connection when reading message, disconnecting!");
+                LERROR(fmt::format(
+                    "Error {} detected in connection when reading message; disconnecting",
+                    _ERRNO
+                ));
                 signalDisconnect();
             }
             break;

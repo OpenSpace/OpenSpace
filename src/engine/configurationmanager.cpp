@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
@@ -58,6 +60,7 @@ const string ConfigurationManager::PartFile = "File";
 const string ConfigurationManager::KeyLuaDocumentation = "LuaDocumentation";
 const string ConfigurationManager::KeyScriptLog = "ScriptLog";
 const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumentation";
+const string ConfigurationManager::KeyScenePropertyDocumentation = "ScenePropertyDocumentation";
 const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
@@ -187,11 +190,16 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         std::string p = dictionary.value<std::string>(key);
         std::string fullKey =
             FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
-        LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
+        LDEBUGC("ConfigurationManager",
+            fmt::format("Registering path {}: {}", fullKey, p)
+        );
 
         bool override = (basePathToken == fullKey);
         if (override) {
-            LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");
+            LINFOC(
+                "ConfigurationManager",
+                fmt::format("Overriding base path with '{}'", p)
+            );
         }
 
         using Override = ghoul::filesystem::FileSystem::Override;
