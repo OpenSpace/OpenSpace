@@ -7,6 +7,7 @@ import Error from '../components/common/Error/Error';
 import Overlay from '../components/common/Overlay/Overlay';
 import { startConnection } from '../api/Actions';
 import TouchBar from '../components/TouchBar/TouchBar';
+import styles from './OnTouchGui.scss';
 
 class OnTouchGui extends Component {
   componentDidMount() {
@@ -15,7 +16,7 @@ class OnTouchGui extends Component {
 
   render() {
     return (
-      <div className="OnTouchGui">
+      <div className={styles.app}>
         { this.props.connectionLost && (
           <Overlay>
             <Error>
@@ -23,7 +24,11 @@ class OnTouchGui extends Component {
             </Error>
           </Overlay>
         )}
-        <TouchBar />
+
+        <section className={styles.Grid__Left}>
+          <TouchBar />
+        </section>
+        <section className={styles.Grid__Right} />
       </div>
     );
   }

@@ -39,9 +39,10 @@ class Markers extends Component {
     const { ScreenSpaceProperties } = this.props;
     const markerInfo = ScreenSpaceProperties.map((property, i) => {
       if (this.state.screenSpaceTest[i][0] !== '-1') {
+        const name = property.Description.Identifier.split('.')[1];
         return (<MarkerInfo
           key={property.Description.Identifier}
-          name={property.Description.Identifier}
+          name={name}
           position={this.state.screenSpaceTest[i]}
         />);
       }
