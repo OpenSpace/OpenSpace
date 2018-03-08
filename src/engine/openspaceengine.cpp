@@ -603,26 +603,21 @@ void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
 
 std::unique_ptr<LoadingScreen> OpenSpaceEngine::createLoadingScreen() {
     bool showMessage = true;
-    std::string kMessage =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowMessage;
+    constexpr const char* kMessage = ConfigurationManager::KeyLoadingScreenShowMessage;
     if (configurationManager().hasKey(kMessage)) {
         showMessage = configurationManager().value<bool>(kMessage);
     }
 
     bool showNodeNames = true;
-    std::string kNames =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowNodeNames;
+    constexpr const char* kNames = ConfigurationManager::KeyLoadingScreenShowNodeNames;
 
     if (configurationManager().hasKey(kNames)) {
         showNodeNames = configurationManager().value<bool>(kNames);
     }
 
     bool showProgressbar = true;
-    std::string kProgress =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowProgressbar;
+    constexpr const char* kProgress =
+                                    ConfigurationManager::KeyLoadingScreenShowProgressbar;
 
     if (configurationManager().hasKey(kProgress)) {
         showProgressbar = configurationManager().value<bool>(kProgress);
@@ -917,12 +912,10 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::configureLogging(bool consoleLog) {
-    const std::string KeyLogLevel =
-        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
-    const std::string KeyLogImmediateFlush =
-        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartImmediateFlush;
-    const std::string KeyLogs =
-        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
+    constexpr const char* KeyLogLevel = ConfigurationManager::KeyLoggingLogLevel;
+    constexpr const char* KeyLogImmediateFlush =
+                                           ConfigurationManager::KeyLoggingImmediateFlush;
+    constexpr const char* KeyLogs = ConfigurationManager::KeyLoggingLogs;
 
     if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
         std::string logLevel = "Info";

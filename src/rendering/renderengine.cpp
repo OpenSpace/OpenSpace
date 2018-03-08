@@ -261,16 +261,14 @@ RenderEngine::RenderEngine()
         if (_doPerformanceMeasurements) {
             if (!_performanceManager) {
                 std::string loggingDir = "${BASE}";
-
-                const std::string KeyDir = ConfigurationManager::KeyLogging + "." +
-                                           ConfigurationManager::PartLogDir;
+                constexpr const char* KeyDir = ConfigurationManager::LoggingDirectory;
                 if (OsEng.configurationManager().hasKey(KeyDir)) {
                     loggingDir = OsEng.configurationManager().value<std::string>(KeyDir);
                 }
 
                 std::string prefix = "PM-";
-                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." +
-                                           ConfigurationManager::PartLogPerformancePrefix;
+                constexpr const char* KeyPrefix =
+                                           ConfigurationManager::LoggingPerformancePrefix;
                 if (OsEng.configurationManager().hasKey(KeyPrefix)) {
                     prefix = OsEng.configurationManager().value<std::string>(KeyPrefix);
                 }

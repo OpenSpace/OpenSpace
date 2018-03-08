@@ -76,7 +76,7 @@ namespace {
     // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
     constexpr const char* KeyColorTableRanges = "ColorTableRanges";
     // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    constexpr const char* KeyMaskingRanges = "MaskingRanges"
+    constexpr const char* KeyMaskingRanges = "MaskingRanges";
     // [STRING] Value should be path to folder where states are saved (JSON/CDF input
     // => osfls output & oslfs input => JSON output)
     constexpr const char* KeyOutputFolder = "OutputFolder";
