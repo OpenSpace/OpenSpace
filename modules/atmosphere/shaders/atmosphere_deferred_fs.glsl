@@ -188,12 +188,12 @@ struct dRay {
  *               intersection of the ray with atmosphere when the eye position
  *               is inside atmosphere.
  */
-bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const double atmRadius,
-                             out bool inside, out double offset, out double maxLength ) {
-    dvec3  l  = planetPosition - ray.origin.xyz;
-    double s  = dot(l, ray.direction.xyz);
-    double l2 = dot(l, l);
-    double r2 = atmRadius * atmRadius; // avoiding surface acne
+bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const float atmRadius,
+                             out bool inside, out float offset, out float maxLength ) {
+    vec3  l  = vec3(planetPosition) - vec3(ray.origin.xyz);
+    float s  = dot(l, vec3(ray.direction.xyz));
+    float l2 = dot(l, l);
+    float r2 = atmRadius * atmRadius; // avoiding surface acne
 
     // Ray origin (eye position) is behind sphere
     if ((s < 0.0) && (l2 > r2)) {
@@ -203,7 +203,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
         return false;
     }
 
-    double m2 = l2 - s*s;
+    float m2 = l2 - s*s;
 
     // Ray misses atmospere
     if (m2 > r2) {
@@ -216,7 +216,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
     // We already now the ray hits the atmosphere
 
     // If q = 0.0f, there is only one intersection
-    double q = sqrt(r2 - m2);
+    float q = sqrt(r2 - m2);
 
     // If l2 < r2, the ray origin is inside the sphere
     if (l2 > r2) {
@@ -618,16 +618,16 @@ void main() {
                 // when using their positions later, one must convert them to the planet's coords
                 
                 // Get data from G-Buffer
-                vec4 normal     = texelFetch(mainNormalTexture, fragCoords, i);
+                vec4 normal   = texelFetch(mainNormalTexture, fragCoords, i);
                 // Data in the mainPositionTexture are written in view space (view plus camera rig)
-                vec4 position   = texelFetch(mainPositionTexture, fragCoords, i);
+                vec4 position = texelFetch(mainPositionTexture, fragCoords, i);
                
                 // OS Eye to World coords                
-                dvec4 tmpRInvPos            = dInverseSGCTEyeToTmpRotTransformMatrix * position;
-                dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
+                dvec4 tmpRInvPos       = dInverseSGCTEyeToTmpRotTransformMatrix * position;
+                dvec4 fragWorldCoords  = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
-                dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;
+                dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
                 
                 // Distance of the pixel in the gBuffer to the observer
                 // JCC (12/12/2017): AMD distance function is buggy.
