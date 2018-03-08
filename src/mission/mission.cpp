@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/verifier.h>
 
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 

@@ -159,7 +159,7 @@ std::string KeyBindingManager::generateJson() const {
         first = false;
         json << "{";
         json << "\"key\": \"" << std::to_string(p.first) << "\",";
-        json << "\"script\": \"" << p.second.command << "\",";
+        json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
         json << "\"remoteScripting\": "
              << (p.second.synchronization ? "true," : "false,");
         json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
@@ -167,16 +167,7 @@ std::string KeyBindingManager::generateJson() const {
     }
     json << "]";
 
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        } else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 scripting::LuaLibrary KeyBindingManager::luaLibrary() {

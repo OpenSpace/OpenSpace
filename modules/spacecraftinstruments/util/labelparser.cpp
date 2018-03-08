@@ -30,11 +30,13 @@
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 
+#include <ghoul/fmt.h>
 #include <fstream>
 #include <iterator>
 #include <iomanip>
@@ -159,7 +161,7 @@ bool LabelParser::create() {
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
     if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
+        LERROR(fmt::format("Could not load Label Directory '{}'", sequenceDir.path()));
         return false;
     }
     using Recursive = ghoul::filesystem::Directory::Recursive;
@@ -173,10 +175,10 @@ bool LabelParser::create() {
                 if (extension == "lbl" || extension == "LBL") { // discovered header file
                     std::ifstream file(currentFile.path());
 
-                    if (!file.good()){
-                        LERROR(
-                            "Failed to open label file '" << currentFile.path() << "'"
-                        );
+                    if (!file.good()) {
+                        LERROR(fmt::format(
+                            "Failed to open label file '{}'", currentFile.path()
+                        ));
                         return false;
                     }
 

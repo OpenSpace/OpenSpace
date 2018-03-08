@@ -31,7 +31,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>

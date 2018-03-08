@@ -51,7 +51,7 @@ const char* configurationFile = "imgui.ini";
 //const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
 const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
 const float FontSize = 14.f;
-const ImVec2 size = ImVec2(500, 500);
+const ImVec2 Size = ImVec2(500, 500);
 
 //GLuint fontTex = 0;
 // A VBO max size of 0 will cause a lazy instantiation of the buffer
@@ -222,7 +222,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
 
 void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(absPath(texturePath))) {
-        LWARNING("Could not find image '" << texturePath << "'");
+        LWARNING(fmt::format("Could not find image '{}'", texturePath));
         return;
     }
 
@@ -280,9 +280,10 @@ void CaptionText(const char* text) {
 
 GUI::GUI()
     : GuiComponent("Main")
-    , _globalProperty("Global")
-    , _property(
-        "Properties",
+    , _globalProperty("Global Properties")
+    , _moduleProperty("Module Properties")
+    , _sceneProperty(
+        "Scene Properties",
         GuiPropertyComponent::UseTreeLayout::Yes
     )
     , _screenSpaceProperty("ScreenSpace Properties")
@@ -297,7 +298,8 @@ GUI::GUI()
     addPropertySubOwner(_help);
     addPropertySubOwner(_performance);
     addPropertySubOwner(_globalProperty);
-    addPropertySubOwner(_property);
+    addPropertySubOwner(_moduleProperty);
+    addPropertySubOwner(_sceneProperty);
     addPropertySubOwner(_screenSpaceProperty);
     _featuredProperties.setEnabled(true);
     addPropertySubOwner(_featuredProperties);
@@ -323,7 +325,8 @@ GUI::GUI()
 #endif // GLOBEBROWSING_USE_GDAL
             _performance.setShowHelpTooltip(_showHelpText);
             _globalProperty.setShowHelpTooltip(_showHelpText);
-            _property.setShowHelpTooltip(_showHelpText);
+            _moduleProperty.setShowHelpTooltip(_showHelpText);
+            _sceneProperty.setShowHelpTooltip(_showHelpText);
             _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
             _virtualProperty.setShowHelpTooltip(_showHelpText);
             _spaceTime.setShowHelpTooltip(_showHelpText);
@@ -348,7 +351,8 @@ GUI::GUI()
 #endif // GLOBEBROWSING_USE_GDAL
             _performance.setShowHelpTooltipDelay(_helpTextDelay);
             _globalProperty.setShowHelpTooltipDelay(_helpTextDelay);
-            _property.setShowHelpTooltipDelay(_helpTextDelay);
+            _moduleProperty.setShowHelpTooltipDelay(_helpTextDelay);
+            _sceneProperty.setShowHelpTooltipDelay(_helpTextDelay);
             _screenSpaceProperty.setShowHelpTooltipDelay(_helpTextDelay);
             _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
             _spaceTime.setShowHelpTooltipDelay(_helpTextDelay);
@@ -479,12 +483,14 @@ void GUI::initialize() {
         style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
         style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
     }
-    _property.initialize();
-    _property.setHasRegularProperties(true);
+    _sceneProperty.initialize();
+    _sceneProperty.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
     _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
+    _moduleProperty.initialize();
+    _moduleProperty.setHasRegularProperties(true);
     _featuredProperties.initialize();
     _featuredProperties.setHasRegularProperties(true);
     _virtualProperty.initialize();
@@ -518,6 +524,7 @@ void GUI::deinitialize() {
     _help.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
+    _moduleProperty.deinitialize();
     _featuredProperties.deinitialize();
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
@@ -526,7 +533,7 @@ void GUI::deinitialize() {
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitialize();
 #endif // GLOBEBROWSING_USE_GDAL
-    _property.deinitialize();
+    _sceneProperty.deinitialize();
 
     delete iniFileBuffer;
 }
@@ -614,9 +621,10 @@ void GUI::initializeGL() {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    _property.initializeGL();
+    _sceneProperty.initializeGL();
     _screenSpaceProperty.initializeGL();
     _globalProperty.initializeGL();
+    _moduleProperty.initializeGL();
     _featuredProperties.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
@@ -656,13 +664,14 @@ void GUI::deinitializeGL() {
     _performance.deinitializeGL();
     _featuredProperties.deinitializeGL();
     _globalProperty.deinitializeGL();
+    _moduleProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitializeGL();
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.deinitializeGL();
     _asset.deinitializeGL();
-    _property.deinitializeGL();
+    _sceneProperty.deinitializeGL();
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
@@ -709,8 +718,11 @@ void GUI::endFrame() {
         if (_globalProperty.isEnabled()) {
             _globalProperty.render();
         }
-        if (_property.isEnabled()) {
-            _property.render();
+        if (_moduleProperty.isEnabled()) {
+            _moduleProperty.render();
+        }
+        if (_sceneProperty.isEnabled()) {
+            _sceneProperty.render();
         }
         if (_screenSpaceProperty.isEnabled()) {
             _screenSpaceProperty.render();
@@ -832,9 +844,9 @@ void GUI::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    bool property = _property.isEnabled();
-    ImGui::Checkbox("Scene Graph Properties", &property);
-    _property.setEnabled(property);
+    bool sceneProperty = _sceneProperty.isEnabled();
+    ImGui::Checkbox("Scene Graph Properties", &sceneProperty);
+    _sceneProperty.setEnabled(sceneProperty);
 
     bool screenSpaceProperty = _screenSpaceProperty.isEnabled();
     ImGui::Checkbox("ScreenSpace Properties", &screenSpaceProperty);
@@ -847,6 +859,10 @@ void GUI::render() {
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool moduleProperty = _moduleProperty.isEnabled();
+    ImGui::Checkbox("Module Properties", &moduleProperty);
+    _moduleProperty.setEnabled(moduleProperty);
 
     bool spacetime = _spaceTime.isEnabled();
     ImGui::Checkbox("Space/Time", &spacetime);
@@ -961,7 +977,8 @@ void GUI::renderAndUpdatePropertyVisibility() {
 
     _currentVisibility = static_cast<V>(t);
     _globalProperty.setVisibility(_currentVisibility);
-    _property.setVisibility(_currentVisibility);
+    _moduleProperty.setVisibility(_currentVisibility);
+    _sceneProperty.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
     _virtualProperty.setVisibility(_currentVisibility);
     _featuredProperties.setVisibility(_currentVisibility);

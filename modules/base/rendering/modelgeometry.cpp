@@ -29,6 +29,7 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/invariants.h>
@@ -208,7 +209,11 @@ bool ModelGeometry::loadObj(const std::string& filename) {
 
     const bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO("Cached file '" << cachedFile << "' used for file '" << filename << "'");
+        LINFO(fmt::format(
+            "Cached file '{}' used for file '{}",
+            cachedFile,
+            filename
+        ));
 
         const bool success = loadCachedFile(cachedFile);
         if (success) {
@@ -221,12 +226,14 @@ bool ModelGeometry::loadObj(const std::string& filename) {
         // file for the next run
     }
     else {
-        LINFO(
-            "Cached file '" << cachedFile << "' for file '" << filename << "' not found"
-        );
+        LINFO(fmt::format(
+            "Cached file '{}' for file '{}' not found",
+            cachedFile,
+            filename
+        ));
     }
 
-    LINFO("Loading Model file '" << filename << "'");
+    LINFO(fmt::format("Loading Model file '{}'", filename));
     const bool modelSuccess = loadModel(filename);
 
     if (!modelSuccess) {
@@ -262,7 +269,7 @@ bool ModelGeometry::saveCachedFile(const std::string& filename) {
         return fileStream.good();
     }
     else {
-        LERROR("Error opening file '" << filename << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", filename));
         return false;
     }
 }
@@ -284,7 +291,10 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
         fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
 
         if (vSize == 0 || iSize == 0) {
-            LERROR("Error opening file '" << filename << "' for loading cache file");
+            LERROR(fmt::format(
+                "Error opening file '{}' for loading cache file",
+                filename
+            ));
             return false;
         }
 
@@ -300,7 +310,10 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
         return fileStream.good();
     }
     else {
-        LERROR("Error opening file '" << filename << "' for loading cache file");
+        LERROR(fmt::format(
+            "Error opening file '{}' for loading cache file",
+            filename
+        ));
         return false;
     }
 }

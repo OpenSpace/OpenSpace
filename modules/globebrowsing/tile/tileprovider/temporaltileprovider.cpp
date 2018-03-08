@@ -28,11 +28,12 @@
 
 #include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 #include <fstream>
 
 namespace {
@@ -105,7 +106,7 @@ bool TemporalTileProvider::initialize() {
     bool success = TileProvider::initialize();
 
     if (!_preCacheTimes.empty()) {
-        LINFO("Preloading: " << _filePath.value());
+        LINFO(fmt::format("Preloading: {}", _filePath.value()));
         for (const Time& t : _preCacheTimes) {
             getTileProvider(t);
         }

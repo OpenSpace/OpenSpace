@@ -386,7 +386,7 @@ void RenderableSphere::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
-                "Loaded texture from '" << absPath(_texturePath) << "'"
+                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             texture->uploadTexture();
 

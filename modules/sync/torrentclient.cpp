@@ -46,6 +46,8 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
+#include <ghoul/fmt.h>
+
 #endif // SYNC_USE_LIBTORRENT
 
 namespace {
@@ -189,11 +191,11 @@ TorrentClient::TorrentId TorrentClient::addTorrentFile(const std::string& torren
     p.save_path = destination;
     p.ti = std::make_shared<libtorrent::torrent_info>(torrentFile, ec);
     if (ec) {
-        LERROR(torrentFile << ": " << ec.message());
+        LERROR(fmt::format("{}: {}", torrentFile, ec.message()));
     }
     libtorrent::torrent_handle h = _session.add_torrent(p, ec);
     if (ec) {
-        LERROR(torrentFile << ": " << ec.message());
+        LERROR(fmt::format("{}: {}", torrentFile, ec.message()));
     }
 
     TorrentId id = h.id();
@@ -219,13 +221,13 @@ TorrentClient::TorrentId TorrentClient::addMagnetLink(const std::string& magnetL
     libtorrent::error_code ec;
     libtorrent::add_torrent_params p = libtorrent::parse_magnet_uri(magnetLink, ec);
     if (ec) {
-        LERROR(magnetLink << ": " << ec.message());
+        LERROR(fmt::format("{}: {}", magnetLink, ec.message()));
     }
     p.save_path = destination;
     p.storage_mode = libtorrent::storage_mode_allocate;
     libtorrent::torrent_handle h = _session.add_torrent(p, ec);
     if (ec) {
-        LERROR(magnetLink << ": " << ec.message());
+        LERROR(fmt::format("{}: {}", magnetLink, ec.message()));
     }
 
     TorrentId id = h.id();

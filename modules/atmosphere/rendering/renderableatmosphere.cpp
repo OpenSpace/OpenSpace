@@ -331,9 +331,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
-                    LWARNING("No Radius value expecified for Shadow Source Name "
-                        << sourceName << " from " << name
-                        << " planet.\nDisabling shadows for this planet.");
+                    LWARNING(fmt::format(
+                        "No Radius value expecified for Shadow Source Name '{}' from "
+                        "'{}' planet. Disabling shadows for this planet.",
+                        sourceName,
+                        name
+                    ));
                     disableShadows = true;
                     break;
                 }
@@ -357,9 +360,12 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                         casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
-                        LWARNING("No Radius value expecified for Shadow Caster Name "
-                            << casterName << " from " << name
-                            << " planet.\nDisabling shadows for this planet.");
+                        LWARNING(fmt::format(
+                            "No Radius value expecified for Shadow Caster Name '{}' from "
+                            "'{}' planet. Disabling shadows for this planet.",
+                            casterName,
+                            name
+                        ));
                         disableShadows = true;
                         break;
                     }
@@ -391,14 +397,20 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     if (success) {
         if (!atmosphereDictionary.getValue(keyAtmosphereRadius, _atmosphereRadius)) {
             errorReadingAtmosphereData = true;
-            LWARNING("No Atmosphere Radius value expecified for Atmosphere Effects of "
-                << name << " planet.\nDisabling atmosphere effects for this planet.");
+            LWARNINGC(
+                name,
+                "No Atmosphere Radius value specified for Atmosphere Effects. "
+                "Disabling atmosphere effects for this planet."
+            );
         }
 
         if (!atmosphereDictionary.getValue(keyPlanetRadius, _atmospherePlanetRadius)) {
             errorReadingAtmosphereData = true;
-            LWARNING("No Planet Radius value expecified for Atmosphere Effects of "
-                << name << " planet.\nDisabling atmosphere effects for this planet.");
+            LWARNINGC(
+                name,
+                "No Planet Radius value expecified for Atmosphere Effects. "
+                "Disabling atmosphere effects for this planet."
+            );
         }
 
         if (!atmosphereDictionary.getValue(
@@ -406,10 +418,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 _planetAverageGroundReflectance))
         {
             errorReadingAtmosphereData = true;
-            LWARNING(
-                "No Average Atmosphere Ground Reflectance value expecified for "
-                "Atmosphere Effects of " << name << " planet.\nDisabling atmosphere "
-                "effects for this planet."
+            LWARNINGC(
+                name,
+                "No Average Atmosphere Ground Reflectance value specified for "
+                "Atmosphere Effects. Disabling atmosphere effects for this planet."
             );
         }
 
@@ -418,10 +430,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 _planetGroundRadianceEmittion))
         {
             errorReadingAtmosphereData = true;
-            LWARNING(
-                "No Ground Radiance Emitted percentage value expecified for Atmosphere "
-                "Effects of " << name << " planet.\nDisabling atmosphere effects for "
-                "this planet."
+            LWARNINGC(
+                name,
+                "No Ground Radiance Emitted percentage value specified for Atmosphere "
+                "Effects. Disabling atmosphere effects for this planet."
             );
         }
 
@@ -441,10 +453,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                 _rayleighScatteringCoeff))
             {
                 errorReadingAtmosphereData = true;
-                LWARNING(
-                    "No Rayleigh Scattering parameters expecified for Atmosphere Effects "
-                    "of " << name << " planet.\nDisabling atmosphere effects for this "
-                    "planet."
+                LWARNINGC(
+                    name,
+                    "No Rayleigh Scattering parameters specified for Atmosphere Effects. "
+                    "Disabling atmosphere effects for this planet."
                 );
             }
 
@@ -453,16 +465,20 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                     _rayleighHeightScale))
             {
                 errorReadingAtmosphereData = true;
-                LWARNING(
-                    "No Rayleigh Height Scale value expecified for Atmosphere Effects of "
-                    << name << " planet.\nDisabling atmosphere effects for this planet."
+                LWARNINGC(
+                    name,
+                    "No Rayleigh Height Scale value specified for Atmosphere Effects. "
+                    "Disabling atmosphere effects for this planet."
                 );
             }
         }
         else {
             errorReadingAtmosphereData = true;
-            LWARNING("No Rayleigh parameters expecified for Atmosphere Effects of "
-                << name << " planet.\nDisabling atmosphere effects for this planet.");
+            LWARNINGC(
+                name,
+                "No Rayleigh parameters specified for Atmosphere Effects. "
+                "Disabling atmosphere effects for this planet."
+            );
         }
 
         ghoul::Dictionary ozoneDictionary;
@@ -489,41 +505,46 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         if (success) {
             if (!mieDictionary.getValue(keyMieHeightScale, _mieHeightScale)) {
                 errorReadingAtmosphereData = true;
-                LWARNING(
-                    "No Mie Height Scale value expecified for Atmosphere Effects of "
-                    << name << " planet.\nDisabling atmosphere effects for this planet."
+                LWARNINGC(
+                    name,
+                    "No Mie Height Scale value specified for Atmosphere Effects. "
+                    "Disabling atmosphere effects for this planet."
                 );
             }
 
             if (!mieDictionary.getValue("Coefficients.Scattering", _mieScatteringCoeff)) {
                 errorReadingAtmosphereData = true;
-                LWARNING(
-                    "No Mie Scattering parameters expecified for Atmosphere Effects of "
-                    << name << " planet.\nDisabling atmosphere effects for this planet."
+                LWARNINGC(
+                    name,
+                    "No Mie Scattering parameters specified for Atmosphere Effects. "
+                    "Disabling atmosphere effects for this planet."
                 );
             }
 
             if (!mieDictionary.getValue("Coefficients.Extinction", _mieExtinctionCoeff)) {
                 errorReadingAtmosphereData = true;
-                LWARNING(
-                    "No Mie Extinction parameters expecified for Atmosphere Effects of "
-                    << name << " planet.\nDisabling atmosphere effects for this planet."
+                LWARNINGC(
+                    name,
+                    "No Mie Extinction parameters specified for Atmosphere Effects. "
+                    "Disabling atmosphere effects for this planet."
                 );
             }
 
             if (!mieDictionary.getValue(keyMiePhaseConstant, _miePhaseConstant)) {
                 errorReadingAtmosphereData = true;
-                LWARNING(
-                    "No Mie Phase Constant value expecified for Atmosphere Effects of "
-                    << name << " planet.\nDisabling atmosphere effects for this planet."
+                LWARNINGC(
+                    name,
+                    "No Mie Phase Constant value specified for Atmosphere Effects. "
+                    "Disabling atmosphere effects for this planet."
                 );
             }
         }
         else {
             errorReadingAtmosphereData = true;
-            LWARNING(
-                "No Mie parameters expecified for Atmosphere Effects of "
-                << name << " planet.\nDisabling atmosphere effects for this planet."
+            LWARNINGC(
+                name,
+                "No Mie parameters specified for Atmosphere Effects. "
+                "Disabling atmosphere effects for this planet."
             );
         }
 
@@ -531,7 +552,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         success = atmosphereDictionary.getValue(keyImage, ImageDictionary);
         if (success) {
             if (ImageDictionary.getValue(keyToneMappingOp, _preCalculatedTexturesScale)) {
-                LDEBUG("Atmosphere Texture Scaled to " << _preCalculatedTexturesScale);
+                LDEBUG(fmt::format(
+                    "Atmosphere Texture Scaled to {}",
+                    _preCalculatedTexturesScale
+                ));
             }
         }
 
@@ -539,7 +563,10 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         success = atmosphereDictionary.getValue(keyATMDebug, debugDictionary);
         if (success) {
             if (debugDictionary.getValue(keyTextureScale, _preCalculatedTexturesScale)) {
-                LDEBUG("Atmosphere Texture Scaled to " << _preCalculatedTexturesScale);
+                LDEBUG(fmt::format(
+                    "Atmosphere Texture Scaled to {}",
+                    _preCalculatedTexturesScale
+                ));
             }
 
             if (debugDictionary.getValue(keySaveTextures, _saveCalculationsToTexture)) {
