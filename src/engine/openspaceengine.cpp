@@ -445,7 +445,7 @@ void OpenSpaceEngine::destroy() {
     if (_engine->parallelConnection().status() !=
         ParallelConnection::Status::Disconnected)
     {
-        _engine->parallelConnection().signalDisconnect();
+        _engine->parallelConnection().disconnect();
     }
 
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
