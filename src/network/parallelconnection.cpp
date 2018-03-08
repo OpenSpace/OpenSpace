@@ -130,7 +130,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
 
     if (protocolVersionIn != ProtocolVersion) {
         LERROR(fmt::format(
-            "Protocol versions do not match. Server version: {}, Client version: {}",
+            "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
             ProtocolVersion
         ));

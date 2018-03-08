@@ -92,9 +92,9 @@ int main(int argc, char** argv) {
 
     ParallelServer server;
     server.start(port, password);
-    LINFO("Server started");
+    LINFO(fmt::format("Server listening to port {}", port));
 
-    std::cin.get();
+    while (std::cin.get() != 'q') {}
 
     server.stop();
     LINFO("Server stopped");

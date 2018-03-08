@@ -209,7 +209,7 @@ void ParallelPeer::sendAuthentication() {
 }
 
 void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
-    std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
+    std::lock_guard<std::mutex> unqlock(_receiveBufferMutex);
     _receiveBuffer.push_back(message);
 }
 
@@ -388,7 +388,7 @@ void ParallelPeer::handleCommunication() {
             ParallelConnection::Message m = _connection.receiveMessage();
                queueInMessage(m);
         } catch (const ParallelConnection::ConnectionLostError&) {
-            disconnect();
+            //disconnect();
             LERROR("Parallel connection lost");
         }
     }

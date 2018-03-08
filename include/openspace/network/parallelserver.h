@@ -25,7 +25,16 @@
 #ifndef __OPENSPACE_CORE___PARALLELSERVER___H__
 #define __OPENSPACE_CORE___PARALLELSERVER___H__
 
+#include <openspace/network/parallelconnection.h>
+
+#include <openspace/util/concurrentqueue.h>
+
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/tcpsocket.h>
+
 #include <string>
+#include <unordered_map>
+#include <atomic>
 
 namespace openspace {
 
@@ -33,6 +42,41 @@ class ParallelServer {
 public:
     void start(int port, const std::string& password);
     void stop();
+private:
+    struct Peer {
+        size_t id;
+        ParallelConnection parallelConnection;
+        std::thread thread;
+    };
+
+    struct PeerMessage {
+        size_t peerId;
+        ParallelConnection::Message message;
+    };
+
+    void queueInMessage(const ParallelConnection::Message& message);
+
+    void handleAuthentication(size_t id, std::vector<char> data);
+    void handleData(size_t id, std::vector<char> data);
+    void handleHostshipRequest(size_t id, std::vector<char> data);
+    void handleHostshipResignation(size_t id, std::vector<char> data);
+
+    void handleNewPeers();
+    void eventLoop();
+    void handlePeer(size_t id);
+    void handlePeerMessage(PeerMessage peerMessage);
+
+    std::unordered_map<size_t, Peer> _peers;
+    std::mutex _peerListMutex;
+
+    std::thread _serverThread;
+    std::thread _eventLoopThread;
+    ghoul::io::TcpSocketServer _socketServer;
+    std::string _password;
+    size_t _nextConnectionId = 0;
+    std::atomic_bool _shouldStop = false;
+
+    ConcurrentQueue<PeerMessage> _incomingMessages;
 };
 
 } // namespace openspace
