@@ -121,8 +121,8 @@ ParallelPeer::ParallelPeer()
     , _status(ParallelConnection::Status::Disconnected)
     , _hostName("")
     , _receiveThread(nullptr)
-    , _socket(nullptr)
     , _shouldDisconnect(false)
+    , _connection(nullptr)
 {
     addProperty(_name);
     addProperty(_port);
@@ -148,8 +148,13 @@ void ParallelPeer::connect() {
 
     setStatus(ParallelConnection::Status::Connecting);
     std::string port = _port;
-    _socket = std::make_unique<ghoul::io::TcpSocket>(_address, atoi(port.c_str()));
-    _socket->connect();
+
+    std::unique_ptr<ghoul::io::TcpSocket> socket =
+        std::make_unique<ghoul::io::TcpSocket>(_address, atoi(port.c_str()));
+
+    socket->connect();
+    _connection = ParallelConnection(std::move(socket));
+
     sendAuthentication();
 
     _receiveThread = std::make_unique<std::thread>(
@@ -158,15 +163,13 @@ void ParallelPeer::connect() {
 }
 
 void ParallelPeer::disconnect() {
-    if (_socket) {
-        _socket->disconnect();
-    }
+    _connection.disconnect();
+
     if (_receiveThread && _receiveThread->joinable()) {
         _receiveThread->join();
         _receiveThread = nullptr;
     }
     _shouldDisconnect = false;
-    _socket = nullptr;
     setStatus(ParallelConnection::Status::Disconnected);
 }
 
@@ -202,7 +205,7 @@ void ParallelPeer::sendAuthentication() {
     buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
-    sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::Authentication, buffer));
+    _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::Authentication, buffer));
 }
 
 void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
@@ -322,57 +325,6 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& messageContent) 
     }
 }
 
-void ParallelPeer::sendDataMessage(const ParallelConnection::DataMessage& dataMessage) {
-    uint32_t dataMessageTypeOut = static_cast<uint32_t>(dataMessage.type);
-
-    std::vector<char> messageContent;
-    messageContent.insert(messageContent.end(),
-        reinterpret_cast<const char*>(&dataMessageTypeOut),
-        reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint32_t));
-
-    messageContent.insert(messageContent.end(),
-        dataMessage.content.begin(),
-        dataMessage.content.end());
-
-    sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::Data, messageContent));
-}
-
-void ParallelPeer::sendMessage(const  ParallelConnection::Message& message) {
-    uint32_t messageTypeOut = static_cast<uint32_t>(message.type);
-    uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
-
-    std::vector<char> header;
-
-    //insert header into buffer
-    header.push_back('O');
-    header.push_back('S');
-
-    header.insert(header.end(),
-        reinterpret_cast<const char*>(&ProtocolVersion),
-        reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint32_t)
-    );
-
-    header.insert(header.end(),
-        reinterpret_cast<const char*>(&messageTypeOut),
-        reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint32_t)
-    );
-
-    header.insert(header.end(),
-        reinterpret_cast<const char*>(&messageSizeOut),
-        reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
-    );
-
-    if (!_socket->put<char>(header.data(), header.size())) {
-        LERROR("Failed to send header. Disconnecting.");
-        disconnect();
-        return;
-    }
-    if (!_socket->put<char>(message.content.data(), message.content.size())) {
-        LERROR("Failed to send message. Disconnecting.");
-        disconnect();
-        return;
-    }
-}
 
 void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& message)
 {
@@ -431,56 +383,13 @@ void ParallelPeer::nConnectionsMessageReceived(const std::vector<char>& message)
 }
 
 void ParallelPeer::handleCommunication() {
-    // Header consists of 'OS' + majorVersion + minorVersion + messageSize
-    constexpr size_t headerSize = 2 * sizeof(char) + 3 * sizeof(uint32_t);
-
-    // Create basic buffer for receiving first part of messages
-    std::vector<char> headerBuffer(headerSize);
-    std::vector<char> messageBuffer;
-
-    while (!_shouldDisconnect && _socket && (_socket->isConnected() || _socket->isConnecting())) {
-        // Receive the header data
-        if (!_socket->get(headerBuffer.data(), headerSize)) {
-            _shouldDisconnect = true;
-            LERROR("Failed to read header from socket. Disconencting.");
-            break;
+    while (!_shouldDisconnect && _connection.isConnectedOrConnecting()) {
+        std::optional<ParallelConnection::Message> m = _connection.receiveMessage();
+        if (m) {
+            queueInMessage(m.value());
+        } else {
+            disconnect();
         }
-
-        // Make sure that header matches this version of OpenSpace
-        if (!(headerBuffer[0] == 'O' && headerBuffer[1] && 'S')) {
-            _shouldDisconnect = true;
-            LERROR("Expected to read message header 'OS' from socket.");
-            break;
-        }
-
-        uint32_t* ptr = reinterpret_cast<uint32_t*>(&headerBuffer[2]);
-
-        uint32_t protocolVersionIn = *(ptr++);
-        uint32_t messageTypeIn = *(ptr++);
-        uint32_t messageSizeIn = *(ptr++);
-
-        if (protocolVersionIn != ProtocolVersion) {
-            _shouldDisconnect = true;
-            LERROR(fmt::format(
-                "Protocol versions do not match. Server version: {}, Client version: {}",
-                protocolVersionIn,
-                ProtocolVersion
-            ));
-            break;
-        }
-
-        size_t messageSize = messageSizeIn;
-
-        // Receive the payload
-        messageBuffer.resize(messageSize);
-        if (!_socket->get(messageBuffer.data(), messageSize)) {
-            _shouldDisconnect = true;
-            LERROR("Failed to read message from socket. Disconencting.");
-            break;
-        }
-
-        // And delegate decoding depending on type
-        queueInMessage(ParallelConnection::Message(static_cast<ParallelConnection::MessageType>(messageTypeIn), messageBuffer));
     }
 }
 
@@ -504,12 +413,12 @@ void ParallelPeer::requestHostship() {
         reinterpret_cast<char*>(&passcode),
         reinterpret_cast<char*>(&passcode) + sizeof(uint32_t)
     );
-    sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipRequest, buffer));
+    _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipRequest, buffer));
 }
 
 void ParallelPeer::resignHostship() {
     std::vector<char> buffer;
-    sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipResignation, buffer));
+    _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipResignation, buffer));
 }
 
 void ParallelPeer::setPassword(std::string pwd) {
@@ -532,7 +441,7 @@ void ParallelPeer::sendScript(std::string script) {
     sm.serialize(buffer);
 
     ParallelConnection::DataMessage message(datamessagestructures::Type::ScriptData, buffer);
-    sendDataMessage(message);
+    _connection.sendDataMessage(message);
 }
 
 void ParallelPeer::resetTimeOffset() {
@@ -640,7 +549,7 @@ void ParallelPeer::sendCameraKeyframe() {
     kf.serialize(buffer);
 
     // Send message
-    sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::CameraData, buffer));
+    _connection.sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::CameraData, buffer));
 }
 
 void ParallelPeer::sendTimeKeyframe() {
@@ -664,7 +573,7 @@ void ParallelPeer::sendTimeKeyframe() {
     kf.serialize(buffer);
 
     // Send message
-    sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::TimeData, buffer));
+    _connection.sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::TimeData, buffer));
     _timeJumped = false;
 }
 

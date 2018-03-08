@@ -86,8 +86,6 @@ public:
 private:
     //@TODO change this into the ghoul hasher for client AND server
     uint32_t hash(const std::string &val);
-    void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);
-    void sendMessage(const ParallelConnection::Message& message);
     void queueInMessage(const ParallelConnection::Message& message);
 
     void sendAuthentication();
@@ -120,7 +118,6 @@ private:
     double _lastTimeKeyframeTimestamp;
     double _lastCameraKeyframeTimestamp;
 
-    std::unique_ptr<ghoul::io::TcpSocket> _socket;
     std::atomic<bool> _shouldDisconnect;
 
     std::atomic<size_t> _nConnections;
@@ -137,6 +134,8 @@ private:
 
     std::unique_ptr<std::thread> _receiveThread;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
+
+    ParallelConnection _connection;
 };
 
 } // namespace openspace

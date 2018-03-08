@@ -27,7 +27,10 @@
 
 #include <openspace/network/messagestructures.h>
 
+#include <ghoul/io/socket/tcpsocket.h>
+
 #include <vector>
+#include <optional>
 
 namespace openspace {
 
@@ -71,7 +74,17 @@ public:
         std::vector<char> content;
     };
 
+    ParallelConnection(std::unique_ptr<ghoul::io::TcpSocket> socket);
 
+    bool isConnectedOrConnecting();
+    void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);
+    bool sendMessage(const  ParallelConnection::Message& message);
+    void disconnect();
+
+    std::optional<ParallelConnection::Message> receiveMessage();
+
+private:
+    std::unique_ptr<ghoul::io::TcpSocket> _socket;
 };
 
 } // namespace openspace
