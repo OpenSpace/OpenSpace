@@ -30,11 +30,23 @@
 #include <ghoul/misc/assert.h>
 #include "dashboard_lua.inl"
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "IsEnabled",
+        "Enabled",
+        "If this value is 'false', this dashboard will be invisible, regardless of the "
+        "state of the individual components"
+    };
+} // namespace
+
 namespace openspace {
 
 Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
-{}
+    , _isEnabled(EnabledInfo, true)
+{
+    addProperty(_isEnabled);
+}
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
     std::string originalName = item->name();
@@ -85,6 +97,10 @@ void Dashboard::removeDashboardItems() {
 }
 
 void Dashboard::render(glm::vec2& penPosition) {
+    if (!_isEnabled) {
+        return;
+    }
+
     for (const std::unique_ptr<DashboardItem>& item : _items) {
         if (item->isEnabled()) {
             item->render(penPosition);
