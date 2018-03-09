@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
+#include <modules/gaiamission/rendering/octreemanager.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
@@ -261,6 +262,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _columnNamesList(ColumnNamesInfo)
     , _program(nullptr)
     , _nValuesPerStar(0)
+    , _numLevelsInOctree(2) // TODO: Make editable?
     , _vao(0)
     , _vbo(0)
 {
@@ -271,6 +273,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableGaiaStars"
     );
+
+    _octreeManager = std::make_shared<OctreeManager>();
 
     _fitsFilePath = absPath(dictionary.value<std::string>(FitsFileInfo.identifier));
     _fitsFile = std::make_unique<File>(_fitsFilePath);
@@ -715,6 +719,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 bool RenderableGaiaStars::readFitsFile() {
     std::string _file = _fitsFilePath;
     _fullData.clear();
+    _octreeManager->constructOctree(_numLevelsInOctree);
 
     LINFO("Loading FITS file: " + _file);
 
@@ -753,6 +758,8 @@ bool RenderableGaiaStars::readFitsFile() {
 
         _nValuesPerStar = _columnNames.size();
         int nNullArr = 0;
+        size_t defaultCols = 8;
+        unsigned int insertIndex = 0;
 
         std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
         std::vector<float> posXcol = tableContent[_columnNames[0]];
@@ -762,6 +769,16 @@ bool RenderableGaiaStars::readFitsFile() {
         std::vector<float> velYcol = tableContent[_columnNames[4]];
         std::vector<float> velZcol = tableContent[_columnNames[5]];
         std::vector<float> magCol = tableContent[_columnNames[6]];
+        std::vector<float> parallax = tableContent[_columnNames[7]];
+        //std::vector<float> parallax_err = tableContent[_columnNames[8]];
+        //std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
+        //std::vector<float> pr_mot_ra_err = tableContent[_columnNames[10]];
+        //std::vector<float> pr_mot_dec = tableContent[_columnNames[11]];
+        //std::vector<float> pr_mot_dec_err = tableContent[_columnNames[12]];
+        //std::vector<float> tycho_b = tableContent[_columnNames[13]];
+        //std::vector<float> tycho_b_err = tableContent[_columnNames[14]];
+        //std::vector<float> tycho_v = tableContent[_columnNames[15]];
+        //std::vector<float> tycho_v_err = tableContent[_columnNames[16]];
 
         for (int i = 0; i < nStars; ++i) {
             std::vector<float> values(_nValuesPerStar);
@@ -775,27 +792,49 @@ bool RenderableGaiaStars::readFitsFile() {
             values[idx++] = velYcol[i];
             values[idx++] = velZcol[i];
             values[idx++] = magCol[i];
+            values[idx++] = parallax[i];
+            //values[idx++] = parallax_err[i];
+            //values[idx++] = pr_mot_ra[i];
+            //values[idx++] = pr_mot_ra_err[i];
+            //values[idx++] = pr_mot_dec[i];
+            //values[idx++] = pr_mot_dec_err[i];
+            //values[idx++] = tycho_b[i];
+            //values[idx++] = tycho_b_err[i];
+            //values[idx++] = tycho_v[i];
+            //values[idx++] = tycho_v_err[i];
 
             // Read extra columns, if any. This will slow down the sorting tremendously!
-            for (size_t col = 7; col < _nValuesPerStar; ++col) {
+            for (size_t col = defaultCols; col < _nValuesPerStar; ++col) {
                 std::vector<float> vecData = tableContent[_columnNames[col]];
                 values[idx++] = vecData[i];
             }
 
             bool nullArray = true;
             for (size_t j = 0; j < _nValuesPerStar; ++j) {
+                // The astronomers in Vienna use -999 as default value. Change it to 0.
                 if (values[j] != -999) {
                     nullArray = false;
-                    break;
+                }
+                else {
+                    values[j] = 0;
                 }
             }
-            if (i % 10000 == 0) {
+
+            /*if (i % 100000 == 0) {
                 LINFO(std::to_string(i / 1000) + "k out of " + std::to_string(nStars) +
                     " stars sorted!");
-            }
+            }*/
 
             if (!nullArray) {
-                _fullData.insert(_fullData.end(), values.begin(), values.end());
+                // Get index of Octree leaf and insert star data.
+                insertIndex = _octreeManager->getLeafIndex(posXcol[i], posYcol[i], posZcol[i]);
+                /*LINFO("Index: " + std::to_string(insertIndex) + " Pos (" + 
+                    std::to_string(posXcol[i]) + ", " + std::to_string(posYcol[i]) + ", " + 
+                    std::to_string(posZcol[i]) + ") ");*/
+                _octreeManager->insert(insertIndex, values);
+                // TODO: Insert into correct subfile!
+                // Sort in Morton order (z-order?)
+                //_fullData.insert(_fullData.end(), values.begin(), values.end());
             }
             else {
                 nNullArr++;
@@ -803,6 +842,9 @@ bool RenderableGaiaStars::readFitsFile() {
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
+
+        //_fullData = _octreeManager->getOctreeData();
+        _octreeManager->printStarsPerNode();
     }
    
     return true;

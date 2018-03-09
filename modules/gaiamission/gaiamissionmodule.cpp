@@ -29,7 +29,6 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
-#include <modules/gaiamission/rendering/renderableskycloud.h>
 #include <modules/gaiamission/rendering/renderablegaiastars.h>
 #include <modules/gaiamission/tasks/readfitstask.h>
 
@@ -40,7 +39,6 @@ GaiaMissionModule::GaiaMissionModule() : OpenSpaceModule(Name) {}
 void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableSkyCloud>("RenderableSkyCloud");
     fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
 
     auto fTask = FactoryManager::ref().factory<Task>();
@@ -50,7 +48,6 @@ void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
 
 std::vector<documentation::Documentation> GaiaMissionModule::documentations() const {
     return {
-    	//RenderableSkyCloud::Documentation(),
         RenderableGaiaStars::Documentation(),
         ReadFitsTask::Documentation(),
     };

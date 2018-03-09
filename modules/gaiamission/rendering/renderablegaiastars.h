@@ -45,6 +45,8 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+class OctreeManager;
+
 namespace documentation { struct Documentation; }
 
 class RenderableGaiaStars : public Renderable {
@@ -103,6 +105,9 @@ private:
     UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness, 
         billboardSize, screenSize, psfTexture, time, colorTexture, columnOption, 
         closeUpBoostDist) _uniformCache;
+
+    std::shared_ptr<OctreeManager> _octreeManager;
+    size_t _numLevelsInOctree;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;

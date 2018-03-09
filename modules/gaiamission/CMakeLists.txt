@@ -25,17 +25,17 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.h  
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableskycloud.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h 
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.cpp  
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableskycloud.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -44,6 +44,9 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_ge.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_ge.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

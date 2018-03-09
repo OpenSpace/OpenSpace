@@ -22,60 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___RENDERABLESKYCLOUD___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___RENDERABLESKYCLOUD___H__
+#ifndef __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
+#define __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
 
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/boxgeometry.h>
-#include <modules/volume/rawvolume.h>
+#include <vector>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-struct RenderData;
-
-class RenderableSkyCloud : public Renderable {
+class OctreeManager {
 public:
-    RenderableSkyCloud(const ghoul::Dictionary& dictionary);
-    ~RenderableSkyCloud();
+    struct LeafNode {
+        std::vector<float> _data;
+        int _originX;
+        int _originY;
+        int _originZ;
+        size_t _halfDimesion;
+        size_t _numStars;
+    };
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+    OctreeManager();
+    ~OctreeManager();
 
-    bool isReady() const override;
-    
-    void render(const RenderData& data, RendererTasks& tasks) override;
-    void update(const UpdateData& data) override;
+    bool constructOctree(size_t totalDepth);
+    size_t getLeafIndex(float posX, float posY, float posZ, float origX = 0.0, 
+        float origY = 0.0, float origZ = 0.0, int depth = 1, size_t index = 0);
+    void insert(size_t insertIndex, std::vector<float> starValues);
+    void printStarsPerNode() const;
+
+    size_t numTotalNodes() const;
+    size_t numStarsPerNode(size_t nodeIndex) const;
+    size_t numNodesPerFile() const;
+    size_t totalDepth() const;
 
 private:
-    float safeLength(const glm::vec3& vector);
+    const size_t MAX_DIST = 100; // Radius of Gaia DR1 in kParsec
+    std::vector<LeafNode> _allLeafNodes;
 
-    glm::vec3 _volumeSize;
-    glm::vec3 _pointScaling;
-    properties::FloatProperty _stepSize;
-    properties::FloatProperty _pointStepSize;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::FloatProperty _enabledPointsRatio;
+    size_t getFirstChild(size_t idx) const;
+    size_t getParent(size_t idx) const;
 
-    std::string _volumeFilename;
-    glm::ivec3 _volumeDimensions;
-    std::string _pointsFilename;
+    size_t _totalNodes;
+    size_t _numNodesPerFile;
+    size_t _totalDepth;
+    size_t _numLeafNodes;
+    size_t _numInnerNodes;
 
-    std::unique_ptr<volume::RawVolume<glm::tvec4<GLfloat>>> _volume;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    glm::mat4 _pointTransform;
-    glm::vec3 _aspect;
-    float _opacityCoefficient;
+}; // class OctreeManager
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
-    size_t _nPoints;
-    GLuint _pointsVao;
-    GLuint _positionVbo;
-    GLuint _colorVbo;
-};
+}  // namespace openspace
 
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GAIAMISSION___RENDERABLESKYCLOUD___H__
+#endif // __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
