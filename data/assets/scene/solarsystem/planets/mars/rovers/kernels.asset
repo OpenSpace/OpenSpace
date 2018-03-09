@@ -1,0 +1,98 @@
+local kernels = asset.syncedResource({
+    Name = "Curiosity Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "marscuriosity_kernels",
+    Version = 1
+})
+
+local CuriosityKernels = {
+
+    -------- SCLK --------
+    kernels .. "/SCLK/msl.tsc",
+    kernels .. "/SCLK/msl_lmst_gc120806_v3.tsc",
+    kernels .. "/SCLK/msl_lmst_ops120808_v1.tsc",
+    
+    -------- FK --------
+
+    kernels .. "/FK/msl.tf",
+    
+    -- Master, Reference frame is defined relatively to antoher frame
+    -- Defenition of surface, rover, instruments
+    kernels .. "/FK/msl_v08.tf",
+
+    -- sites along the path relative to the landing site and location of the rover relative to these sites
+    kernels .. "/FK/msl_tp_gc120806_iau2000_v3.tf",
+    kernels .. "/FK/msl_tp_ops120808_iau2000_v1.tf",
+
+    -------- IK --------
+
+    -- Instrument kernels provide: geometric parameters, field of view size, shape and orientation for the named instruments
+    -- Includes cameras, a few other rover-mounted instruments, all cruise stage, decent stage and rover mounted antennas
+
+    -- Temporary IK for MSL instruments 
+    kernels .. "/IK/msl_aux_v00.ti",
+    
+    -- CHEMCAM 
+    kernels .. "/IK/msl_chrmi_20120731_c03.ti",
+    
+    -- HAZCAM BACK: left A, left B, right A, right B
+    kernels .. "/IK/msl_hbla_20120731_c03.ti",
+    kernels .. "/IK/msl_hblb_20120731_c03.ti",
+    kernels .. "/IK/msl_hbra_20120731_c03.ti",
+    kernels .. "/IK/msl_hbrb_20120731_c03.ti",
+
+    -- HAZCAM FRONT: left A, left B, right A, right B
+    kernels .. "/IK/msl_hfla_20120731_c03.ti",
+    kernels .. "/IK/msl_hflb_20120731_c03.ti",
+    kernels .. "/IK/msl_hfra_20120731_c03.ti",
+    kernels .. "/IK/msl_hfrb_20120731_c03.ti",
+    
+    -- Mahli and Mardi cameras
+    kernels .. "/IK/msl_mahli_20120731_c02.ti",
+    kernels .. "/IK/msl_mardi_20120731_c02.ti",
+    
+    -- MASTCAM front and back
+    kernels .. "/IK/msl_ml_20120731_c03.ti",
+    kernels .. "/IK/msl_mr_20120731_c03.ti",
+
+    -- NAVCAM: left A, left B, right A, right B
+    kernels .. "/IK/msl_nla_20120731_c04.ti",
+    kernels .. "/IK/msl_nlb_20120731_c04.ti",
+    kernels .. "/IK/msl_nra_20120731_c04.ti",
+    kernels .. "/IK/msl_nrb_20130530_c05.ti",
+    
+    -- Antennas
+    kernels .. "/IK/msl_struct_v01.ti",
+
+    -------- CK --------
+    
+    kernels .. "/CK/msl_ra_toolsref_v1.bc",
+    kernels .. "/CK/msl_cruise_recon_rawrt_v2.bc",
+    kernels .. "/CK/msl_cruise_recon_raweng_v1.bc",
+    kernels .. "/CK/msl_edl_v01.bc",
+    kernels .. "/CK/msl_surf_hga_tlm.bc",
+    kernels .. "/CK/msl_surf_ra_tlmenc.bc",
+    kernels .. "/CK/msl_surf_ra_tlmres.bc",
+    kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
+    kernels .. "/CK/msl_surf_rsm_tlmres.bc",
+    kernels .. "/CK/msl_surf_rover_tlm.bc",
+
+    -------- PCK -------- 
+    kernels .. "/PCK/pck00008.tpc",
+
+    -------- SPK --------
+    -- an ever-growing SPK file containing the position of the rover relative to the sites
+    -- along the path and position of the sites relative to the landing site
+    
+    kernels .. "/SPK/msl_struct_v02.bsp",
+    kernels .. "/SPK/de425s.bsp",
+    kernels .. "/SPK/mar085s.bsp",
+    kernels .. "/SPK/msl_cruise_v1.bsp",
+    kernels .. "/SPK/msl_edl_v01.bsp",
+    kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
+    kernels .. "/SPK/msl_surf_rover_tlm.bsp"
+}
+
+asset.export("kernels", kernels)
+asset.export("CuriosityKernels", CuriosityKernels)
+

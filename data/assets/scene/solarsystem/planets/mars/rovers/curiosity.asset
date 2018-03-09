@@ -1,7 +1,5 @@
 local assetHelper = asset.require('util/asset_helper')
-local transforms = asset.require('transforms')
-
-
+local transforms = asset.require('./transforms')
 
 local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
@@ -26,20 +24,18 @@ local Curiosity = {
     GuiPath = "Solar System/Planets/Mars/Curiosity"
 }
 
-
 local CuriosityModel = {
     Name = "CuriosityModel",
     Parent = Curiosity.Name,
     GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
 }
 
-
 local CuriosityBody = {
     Name = "Curiosity_body",
     Parent = CuriosityModel.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "CURIOSITY",
+        Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/bodyTest.obj"
@@ -49,14 +45,15 @@ local CuriosityBody = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
--- Curiosity Model Instrumetns & Parts --
+-- Curiosity Model Instruments --
+-- Test Model
 
 local CuriosityWheels = {
     Name = "Curiosity_wheels",
     Parent = CuriosityModel.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "CURIOSITY",
+        Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/wheelsTest.obj"
@@ -66,7 +63,6 @@ local CuriosityWheels = {
     Tag = {"planet_solarsystem", "planet_terrestrial"},
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     Curiosity,

@@ -1,20 +1,24 @@
 local assetHelper = asset.require('util/asset_helper')
+local kernels = asset.require('./kernels')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
-
 
 
 local CuriosityPosition = {
     Name = "CuriosityPosition",
-    Parent = marsTransforms.MarsBarycenter.Name,
+    Parent = "MarsBarycenter",
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "CURIOSITY BARYCENTER",
-            Observer = "CURIOSITY",
+            Target = "MARS BARYCENTER",
+            Observer = "MARS SCIENCE LABORATORY",
+            Kernels = kernels.CuriosityKernels
         }
-    }
+    },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { CuriosityPosition })
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+    CuriosityPosition
+})
 
