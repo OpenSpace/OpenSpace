@@ -1,0 +1,24 @@
+local assetHelper = asset.require("util/asset_helper")
+asset.require("spice/base")
+
+local Enlil = {
+    Name = "Enlil",
+    Parent = "SolarSystemBarycenter",
+    Renderable = {
+        Type = "RenderableMultiresVolume",
+        TspType = "sand",
+        ReferenceFrame = "HEEQ",
+        Translation = {0, 0, 0},
+        Rotation = {2.1, 0, 0},
+        Scaling = {1, 1, 1},
+        ScalingExponent = 13,
+        Source = "${ASSETS}/scene/multires/tsp/enlil_nh_128_128_16.tsp",
+        ErrorHistogramsSource = "${ASSETS}/scene/multires/tsp/enlil_nh_128_128_16_50.errorHistograms",
+        TransferFunction = "${ASSETS}/scene/multires/enlil/transferfunctions/fire.txt",
+        BrickSelector = "local"
+    },
+    GuiPath = "/Solar System/Enlil"
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Enlil })

@@ -5,6 +5,7 @@ local propertyHelper = asset.require('util/property_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/multires/enlil')
 asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
