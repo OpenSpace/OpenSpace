@@ -310,7 +310,7 @@ int directoryForPath(lua_State* L) {
     const std::string path = ghoul::filesystem::File(file).directoryName();
 
     lua_pushstring(L, path.c_str());
-    
+
     return 1;
 }
 

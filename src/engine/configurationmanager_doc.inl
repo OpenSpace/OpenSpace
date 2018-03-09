@@ -69,7 +69,8 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "in all other configuration files or scripts."
         },
         {
-            ConfigurationManager::KeyPaths + '.' + ConfigurationManager::KeyCache,
+            
+            ConfigurationManager::KeyCachePath,
             new StringVerifier,
             Optional::No,
             "The path to be used as a cache folder. If per scene caching is enabled, the "
@@ -219,19 +220,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
                 Optional::Yes,
                 "String containing white listed client IP addresses that won't need to be"
                 "authorized with the server. Space separated"
-        },
-        {
-            ConfigurationManager::KeyWebHelperLocation,
-            new StringVerifier,
-            Optional::Yes,
-            "The location of the CEF Web helper executable. No extension should be added. "
-            "If not provided, it will search for the executable name in the bin folder."
-        },
-        {
-            ConfigurationManager::KeyWebGuiUrl,
-            new StringVerifier,
-            Optional::No,
-            "The web URL for the GUI."
         },
         {
             ConfigurationManager::KeySceneLicenseDocumentation,

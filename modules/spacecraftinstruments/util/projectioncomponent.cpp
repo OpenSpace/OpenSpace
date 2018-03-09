@@ -515,7 +515,7 @@ void ProjectionComponent::imageProjectBegin() {
             if (!FramebufferObject::errorChecking(status).empty()) {
                 LERROR(fmt::format(
                     "Read Buffer ({}): {}",
-                    msg, 
+                    msg,
                     FramebufferObject::errorChecking(status)
                 ));
             }

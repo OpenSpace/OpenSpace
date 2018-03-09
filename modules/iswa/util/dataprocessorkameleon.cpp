@@ -28,10 +28,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 
-namespace {
-    constexpr const char* _loggerCat = "DataProcessorKameleon";
-} // namespace
-
 namespace openspace {
 
 DataProcessorKameleon::DataProcessorKameleon()
@@ -165,10 +161,12 @@ void DataProcessorKameleon::dimensions(glm::size3_t dimensions) {
     _dimensions = dimensions;
 }
 
-void DataProcessorKameleon::initializeKameleonWrapper(std::string path){
+void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
     const std::string& extension = ghoul::filesystem::File(absPath(path)).fileExtension();
-    if(FileSys.fileExists(absPath(path)) && extension == "cdf"){
-        if(_kw) _kw->close();
+    if (FileSys.fileExists(absPath(path)) && extension == "cdf") {
+        if (_kw) {
+            _kw->close();
+        }
 
         _kwPath = path;
         _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));

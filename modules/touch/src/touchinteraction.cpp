@@ -617,9 +617,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
             glm::dvec4(xCo, yCo, -1.0, 1.0));
         glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
 
-        int id = c.getSessionID();
+        long id = c.getSessionID();
 
-       for (SceneGraphNode* node : selectableNodes) {
+        for (SceneGraphNode* node : selectableNodes) {
             double boundingSphere = node->boundingSphere();
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
             double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) /
@@ -755,7 +755,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     }
     // find the slowest moving finger - used in roll interpretation
     double minDiff = 1000;
-    int id = 0;
+    long id = 0;
     for (const TuioCursor& c : list) {
         TuioPoint itPoint = std::find_if(
             lastProcessed.begin(),

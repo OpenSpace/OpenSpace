@@ -42,152 +42,208 @@ namespace documentation {  struct Documentation; }
 class ConfigurationManager : public ghoul::Dictionary {
 public:
     /// The key that stores the subdirectory containing all predefined path tokens
-    static const std::string KeyPaths;
+    static constexpr const char* KeyPaths = "Paths";
+
     /// The key that stores the location to the cache directory used to store all the
     /// permanent and non-permanent cached files
-    static const std::string KeyCache;
+    static constexpr const char* KeyCachePath = "Paths.CACHE";
+
     /// The key that stores the main directory for fonts
-    static const std::string KeyFonts;
+    static constexpr const char* KeyFonts = "Fonts";
+
     /// The key that stores the location of the SGCT configuration file that is used on
     /// application launch
-    static const std::string KeyConfigSgct;
+    static constexpr const char* KeyConfigSgct = "SGCTConfig";
+
     /// The key that defines a list of scripts for global customization that get executed
     /// regardless of which scene is loaded
-    static const std::string KeyGlobalCustomizationScripts;
+    static constexpr const char* KeyGlobalCustomizationScripts =
+                                                             "GlobalCustomizationScripts";
+
     /// The part of the key that defines the type
-    static const std::string PartType;
+    // static constexpr const char* PartType = "Type";
     /// The part of the key that defines the file
-    static const std::string PartFile;
+    // static constexpr const char* PartFile = "File";
+
     /// The key that stores the Lua documentation
-    static const std::string KeyLuaDocumentation;
+    static constexpr const char* KeyLuaDocumentation = "LuaDocumentation";
+
     /// The key that stores the scripting log
-    static const std::string KeyScriptLog;
+    static constexpr const char* KeyScriptLog = "ScriptLog";
+
     /// The key that stores the Scene Property documentation
-    static const std::string KeyScenePropertyDocumentation;
+    static constexpr const char* KeyScenePropertyDocumentation =
+                                                             "ScenePropertyDocumentation";
+
     /// The key that stores the Root Property documentation
-    static const std::string KeyPropertyDocumentation;
+    static constexpr const char* KeyPropertyDocumentation = "PropertyDocumentation";
+
     /// The key that stores the keyboard bindings that should be stored
-    static const std::string KeyKeyboardShortcuts;
+    static constexpr const char* KeyKeyboardShortcuts = "KeyboardShortcuts";
+
     /// The key that stores the main documentation
-    static const std::string KeyDocumentation;
+    static constexpr const char* KeyDocumentation = "Documentation";
+
     /// The key that stores the factory documentation values
-    static const std::string KeyFactoryDocumentation;
+    static constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
     /// The key that decides whether or not we should require incoming web socket connections
     /// to authorize or not
-    static const std::string KeyRequireSocketAuthentication;
-    /// The key that stores the location of the scene file that is initially loaded
-    static const std::string KeyConfigScene;
+    static constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
+    
     /// The key that stores the location of the tasks files
-    static const std::string KeyConfigTasksRoot;
+    static constexpr const char* KeyConfigTasksRoot = "TasksRoot";
+
     /// The key that stores the location of the asset file that is initially loaded
-    static const std::string KeyConfigAsset;
+    static constexpr const char* KeyConfigAsset = "Asset";
+
     /// The key that stores the scene license documentation values
-    static const std::string KeySceneLicenseDocumentation;
-    /// The key that stores the subdirectory containing a list of all startup scripts to
-    /// be executed on application start before the scene file is loaded
-    static const std::string KeyStartupScript;
-    /// The key that stores the subdirectory containing a list of all settings scripts to
-    /// be executed on application start and after the scene file is loaded
-    static const std::string KeySettingsScript;
+    static constexpr const char* KeySceneLicenseDocumentation = "LicenseDocumentation";
+
     /// The key that stores the settings for determining log-related settings
-    static const std::string KeyLogging;
+    static constexpr const char* KeyLogging = "Logging";
+
     /// The key that stores the directory for Logging
-    static const std::string PartLogDir;
+    static constexpr const char* LoggingDirectory = "Logging.LogDir";
+    static constexpr const char* PartLogDir = "LogDir";
+
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
-    static const std::string PartLogLevel;
+    static constexpr const char* KeyLoggingLogLevel = "Logging.LogLevel";
+    static constexpr const char* PartLogLevel = "LogLevel";
+
     /// The key that stores whether the log should be immediately flushed after a n
     /// \sa ghoul::logging::LogManager
-    static const std::string PartImmediateFlush;
+    static constexpr const char* KeyLoggingImmediateFlush = "Logging.ImmediateFlush";
+    static constexpr const char* PartImmediateFlush = "ImmediateFlush";
+
     /// The key for prefixing PerformanceMeasurement logfiles
-    static const std::string PartLogPerformancePrefix;
+    static constexpr const char* LoggingPerformancePrefix = "Logging.PerformancePrefix";
+    static constexpr const char* PartLogPerformancePrefix = "PerformancePrefix";
     /// The key that stores a subdirectory with a description for additional
     /// ghoul::logging::Log%s to be created
     /// \sa LogFactory
-    static const std::string PartLogs;
+    static constexpr const char* KeyLoggingLogs = "Logging.Logs";
+    static constexpr const char* PartLogs = "Logs";
+
     /// The key that stores whether a log should be appended to or should be overwritten
-    static const std::string PartAppend;
+    static constexpr const char* PartAppend = "Append";
+
     /// The key that stores the verbosity (None, Minimal, Default, Full) of the system
     /// capabilities components
-    static const std::string PartCapabilitiesVerbosity;
+    static constexpr const char* PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
+
     /// The key that stores the settings for determining Launcher-related settings
-    static const std::string KeyLauncher;
+    static constexpr const char* KeyLauncher = "Launcher";
+
     /// The full key that stores the verbosity of the system capabilities component
-    static const std::string KeyCapabilitiesVerbosity;
+    static constexpr const char* KeyCapabilitiesVerbosity =
+                                                          "Logging.CapabilitiesVerbosity";
+
     /// The key that stores the time (in seconds) that the application will wait before
     /// shutting down after the shutdown call is made
-    static const std::string KeyShutdownCountdown;
+    static constexpr const char* KeyShutdownCountdown = "ShutdownCountdown";
+
     /// The key that stores whether the onscreen text should be scaled to the window size
     /// or the window resolution
-    static const std::string KeyOnScreenTextScaling;
+    static constexpr const char* KeyOnScreenTextScaling = "OnScreenTextScaling";
+
     /// The key that stores whether the master node should perform rendering just function
     /// as a pure manager
-    static const std::string KeyDisableMasterRendering;
+    static constexpr const char* KeyDisableMasterRendering = "DisableRenderingOnMaster";
+
     /// The key that stores whether the master node should apply the scene transformation
-    static const std::string KeyDisableSceneOnMaster;
+    static constexpr const char* KeyDisableSceneOnMaster = "DisableSceneOnMaster";
+
     /// The key that stores the switch for enabling/disabling the rendering on a master
     /// computer
-    static const std::string KeyRenderingMethod;
+    static constexpr const char* KeyRenderingMethod = "RenderingMethod";
+
     /// The key that determines whether a new cache folder is used for each scene file
-    static const std::string KeyPerSceneCache;
+    static constexpr const char* KeyPerSceneCache = "PerSceneCache";
+
     /// The key that stores the http proxy settings for the downloadmanager
-    static const std::string KeyHttpProxy;
+    static constexpr const char* KeyHttpProxy = "HttpProxy";
+
     /// The key that stores the address of the http proxy
-    static const std::string PartHttpProxyAddress;
+    static constexpr const char* PartHttpProxyAddress = "Address";
+
     /// The key that stores the port of the http proxy
-    static const std::string PartHttpProxyPort;
+    static constexpr const char* PartHttpProxyPort = "Port";
+
     /// The key that stores the authentication method of the http proxy
-    static const std::string PartHttpProxyAuthentication;
+    static constexpr const char* PartHttpProxyAuthentication = "Authentication";
+
     /// Key that stores the username to use for authentication to access the http proxy
-    static const std::string PartHttpProxyUser;
+    static constexpr const char* PartHttpProxyUser = "User";
+
     /// Key that stores the password to use for authentication to access the http proxy
-    static const std::string PartHttpProxyPassword;
+    static constexpr const char* PartHttpProxyPassword = "Password";
+
     /// The key that stores the dictionary containing information about debug contexts
-    static const std::string KeyOpenGLDebugContext;
+    static constexpr const char* KeyOpenGLDebugContext = "OpenGLDebugContext";
+
     /// The part of the key storing whether an OpenGL Debug context should be created
-    static const std::string PartActivate;
+    static constexpr const char* PartActivate = "Activate";
+
     /// The part of the key storing whether the debug callbacks are performed synchronous
-    static const std::string PartSynchronous;
+    static constexpr const char* PartSynchronous = "Synchronous";
+
     /// The part of the key storing a list of identifiers that should be filtered out
-    static const std::string PartFilterIdentifier;
+    static constexpr const char* PartFilterIdentifier = "FilterIdentifier";
+
     /// The part of the key that stores the source of the ignored identifier
-    static const std::string PartFilterIdentifierSource;
+    static constexpr const char* PartFilterIdentifierSource = "Source";
+
     /// The part of the key that stores the type of the ignored identifier
-    static const std::string PartFilterIdentifierType;
+    static constexpr const char* PartFilterIdentifierType = "Type";
+
     /// The part of the key that stores the identifier of the ignored identifier
-    static const std::string PartFilterIdentifierIdentifier;
+    static constexpr const char* PartFilterIdentifierIdentifier = "Identifier";
+
     /// The part of the key storing a list of severities that should be filtered out
-    static const std::string PartFilterSeverity;
-    /// The key to store the location of the web helper executable
-    static const std::string KeyWebHelperLocation;
-    /// The key to store the url of the web gui
-    static const std::string KeyWebGuiUrl;
+    static constexpr const char* PartFilterSeverity = "PartFilterSeverity";
+
     /// The part of the key storing whether the OpenGL state should be checked each call
-    static const std::string KeyCheckOpenGLState;
-    /// The part of the key storing whether each OpenGL call should be logged
-    static const std::string KeyLogEachOpenGLCall;
-    /// Password to limit server access
-    static const std::string KeyServerPasskey;
+    static constexpr const char* KeyCheckOpenGLState = "CheckOpenGLState";
+
+    /// The part of the key storing whether the OpenGL state should be checked each call
+    static constexpr const char* KeyServerPasskey = "ServerPasskey";
+
     /// Whitelist of client addresses that won't need autorization
-    static const std::string KeyServerClientAddressWhitelist;
+    static constexpr const char* KeyServerClientAddressWhitelist =
+                                                        "KeyServerClientAddressWhitelist";
+
+    static constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
     /// This key determines whether the scene graph nodes should initialized multithreaded
-    static const std::string KeyUseMultithreadedInitialization;
+    static constexpr const char* KeyUseMultithreadedInitialization =
+                                                         "UseMultithreadedInitialization";
 
     /// The key under which all of the loading settings are grouped
-    static const std::string KeyLoadingScreen;
+    static constexpr const char* KeyLoadingScreen = "LoadingScreen";
+
     /// The part of the key storing whether the loading screen should display the message
     /// about current status
-    static const std::string PartShowMessage;
+    static constexpr const char* KeyLoadingScreenShowMessage =
+                                                              "LoadingScreen.ShowMessage";
+    static constexpr const char* PartShowMessage = "ShowMessage";
+
     /// The part of the key storing whether the loading screen should display node names
-    static const std::string PartShowNodeNames;
+    static constexpr const char* KeyLoadingScreenShowNodeNames =
+                                                            "LoadingScreen.ShowNodeNames";
+    static constexpr const char* PartShowNodeNames = "ShowNodeNames";
+
     /// The part of the key storing whether the loading screen should contain a progress
     /// bar
-    static const std::string PartShowProgressbar;
+    static constexpr const char* KeyLoadingScreenShowProgressbar =
+                                                          "LoadingScreen.ShowProgressbar";
+    static constexpr const char* PartShowProgressbar = "ShowProgressbar";
+
     /// The key used to specify module specific configurations
-    static const std::string KeyModuleConfigurations;
+    static constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
+
     /// The key used to specify whether screenshots should contain the current date
-    static const std::string KeyScreenshotUseDate;
+    static constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
 
 
     /**
@@ -216,6 +272,7 @@ public:
      * \pre \p filename must exist
      */
     void loadFromFile(const std::string& filename);
+
 
     static documentation::Documentation Documentation();
 };

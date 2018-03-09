@@ -280,12 +280,12 @@ void CaptionText(const char* text) {
 GUI::GUI()
     : GuiComponent("Main")
     , _globalProperty("Global Properties")
-    , _moduleProperty("Module Properties")
     , _sceneProperty(
         "Scene Properties",
         GuiPropertyComponent::UseTreeLayout::Yes
     )
     , _screenSpaceProperty("ScreenSpace Properties")
+    , _moduleProperty("Module Properties")
     , _virtualProperty("Virtual Properties")
     , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)

@@ -132,8 +132,7 @@ namespace {
     };
 } // namespace
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -180,7 +179,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     if (dictionary.getValue(KeySource, sourcePath)) {
         _sourcePath = absPath(sourcePath);
     }
-    
+
     std::string variable;
     if (dictionary.getValue(KeyVariable, variable)) {
         _variable = variable;
@@ -254,12 +253,12 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         }
     }
 }
-    
+
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
 void RenderableKameleonVolume::initializeGL() {
     load();
-    
+
     _volumeTexture->uploadTexture();
     _transferFunctionHandler->initialize();
 
@@ -318,7 +317,7 @@ void RenderableKameleonVolume::initializeGL() {
 void RenderableKameleonVolume::updateRaycasterModelTransform() {
     glm::vec3 lowerBoundingBoxBound = _domainScale.value() * _lowerDomainBound.value();
     glm::vec3 upperBoundingBoxBound = _domainScale.value() * _upperDomainBound.value();
-    
+
     glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
     glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
@@ -393,7 +392,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     std::vector<std::string> variables = reader.gridVariableNames();
-   
+
     if (variables.size() == 3 && _autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
@@ -453,18 +452,18 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
     volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }
-    
+
 void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-    
+
 bool RenderableKameleonVolume::isReady() const {
     return true;
 }
-    
+
 void RenderableKameleonVolume::update(const UpdateData&) {
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
@@ -474,6 +473,5 @@ void RenderableKameleonVolume::update(const UpdateData&) {
 void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tasks) {
     tasks.raycasterTasks.push_back({ _raycaster.get(), data });
 }
-       
-}
-}
+
+}  // openspace::kameleonvolume

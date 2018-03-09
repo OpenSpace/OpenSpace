@@ -65,7 +65,6 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     if (status != ccmc::FileReader::OK) {
         LERROR(fmt::format("Failed to open file '{}' with Kameleon", _path));
         throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
-        return;
     }
 
     _model = _kameleon.model;

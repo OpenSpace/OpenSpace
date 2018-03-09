@@ -53,7 +53,7 @@ namespace {
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
@@ -120,7 +120,7 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
     }
 
     _spoutName.onChange([this]() {
-        _isSpoutDirty = true; 
+        _isSpoutDirty = true;
         _isErrorMessageDisplayed = false;
 
         _receiver->SetActiveSender(_spoutName.value().c_str());
@@ -206,7 +206,7 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
         if (!createSuccess) {
             LWARNINGC(
-                LoggerCat, 
+                LoggerCat,
                 fmt::format("Could not create receiver for {}", _currentSenderName)
             );
             return;
@@ -215,7 +215,7 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
     unsigned int width;
     unsigned int height;
-    
+
     bool receiveSuccess = _receiver->ReceiveTexture(
         _currentSenderName,
         width,

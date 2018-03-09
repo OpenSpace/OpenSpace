@@ -310,7 +310,7 @@ void mainInitFunc() {
 
 #endif // OPENSPACE_HAS_SPOUT
     }
-    
+
     std::string k = openspace::ConfigurationManager::KeyScreenshotUseDate;
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
@@ -329,7 +329,7 @@ void mainInitFunc() {
             SgctEngine->getWindowPtr(i)->getScreenCapturePointer(0);
         sgct_core::ScreenCapture* cpt1 =
             SgctEngine->getWindowPtr(i)->getScreenCapturePointer(1);
-        
+
         if (cpt0) {
             cpt0->setPathAndFileName(
                 absPath(screenshotPath),

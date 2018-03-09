@@ -33,10 +33,6 @@
 #include <math.h>
 #endif
 
-namespace {
-    constexpr const char* _loggerCat = "DataSphere";
-} // namespace
-
 namespace openspace {
 
 DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
