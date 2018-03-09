@@ -117,11 +117,11 @@ ParallelPeer::ParallelPeer()
     , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
+    , _shouldDisconnect(false)
     , _nConnections(0)
     , _status(ParallelConnection::Status::Disconnected)
     , _hostName("")
     , _receiveThread(nullptr)
-    , _shouldDisconnect(false)
     , _connection(nullptr)
 {
     addProperty(_name);
@@ -163,8 +163,8 @@ void ParallelPeer::connect() {
 }
 
 void ParallelPeer::disconnect() {
+    _shouldDisconnect = true;
     _connection.disconnect();
-
     if (_receiveThread && _receiveThread->joinable()) {
         _receiveThread->join();
         _receiveThread = nullptr;
@@ -388,10 +388,10 @@ void ParallelPeer::handleCommunication() {
             ParallelConnection::Message m = _connection.receiveMessage();
                queueInMessage(m);
         } catch (const ParallelConnection::ConnectionLostError&) {
-            //disconnect();
             LERROR("Parallel connection lost");
         }
     }
+    setStatus(ParallelConnection::Status::Disconnected);
 }
 
 void ParallelPeer::setPort(std::string port) {
