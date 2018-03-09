@@ -39,6 +39,7 @@
 namespace {
     constexpr const char* KeyUrl = "Url";
     constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyOverride = "Override";
 } // namespace
 
 namespace openspace {
@@ -63,6 +64,16 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 "This optional identifier will be part of the used folder structure and, "
                 "if provided, can be used to manually find the downloaded folder in the "
                 "synchronization folder."
+            },
+            {
+                KeyOverride,
+                new BoolVerifier,
+                Optional::Yes,
+                "If this value is set to 'true' and it is not overwritten by the global "
+                "settings, the file(s) pointed to by this URLSynchronization will always "
+                "be downloaded, thus overwriting the local files. This is useful for "
+                "files that are updated regularly remotely and should be fetch at every "
+                "startup."
             }
         }
     };
@@ -101,6 +112,10 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     else {
         _identifier = std::to_string(hash);
     }
+
+    if (dict.hasValue<bool>(KeyOverride)) {
+        _forceOverride = dict.value<bool>(KeyOverride);
+    }
 }
 
 UrlSynchronization::~UrlSynchronization() {
@@ -116,7 +131,7 @@ void UrlSynchronization::start() {
     }
     begin();
 
-    if (hasSyncFile()) {
+    if (hasSyncFile() && !_forceOverride) {
         resolve();
         return;
     }
