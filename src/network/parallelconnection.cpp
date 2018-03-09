@@ -100,6 +100,9 @@ void ParallelConnection::disconnect() {
     }
 }
 
+ghoul::io::TcpSocket* ParallelConnection::socket() {
+    return _socket.get();
+}
 
 ParallelConnection::Message ParallelConnection::receiveMessage() {
     // Header consists of 'OS' + majorVersion + minorVersion + messageSize

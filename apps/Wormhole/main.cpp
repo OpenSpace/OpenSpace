@@ -43,7 +43,7 @@
 #include <openspace/network/parallelserver.h>
 
 namespace {
-    const std::string _loggerCat = "Wormhole Main";
+    const std::string _loggerCat = "Wormhole";
 }
 
 int main(int argc, char** argv) {
@@ -76,6 +76,16 @@ int main(int argc, char** argv) {
             )
     );
 
+    std::string changeHostPassword = "";
+    commandlineParser.addCommand(
+        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+            password,
+            "--hostpassword",
+            "-h",
+            "Sets the host password to use"
+            )
+    );
+
     commandlineParser.setCommandLine(arguments);
     commandlineParser.execute();
 
@@ -91,7 +101,7 @@ int main(int argc, char** argv) {
     }
 
     ParallelServer server;
-    server.start(port, password);
+    server.start(port, password, changeHostPassword);
     LINFO(fmt::format("Server listening to port {}", port));
 
     while (std::cin.get() != 'q') {}

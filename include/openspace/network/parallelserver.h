@@ -40,12 +40,20 @@ namespace openspace {
 
 class ParallelServer {
 public:
-    void start(int port, const std::string& password);
+    void start(int port,
+        const std::string& password,
+        const std::string& changeHostPassword);
+
     void stop();
+
+    size_t nConnections() const;
+
 private:
     struct Peer {
         size_t id;
+        std::string name;
         ParallelConnection parallelConnection;
+        ParallelConnection::Status status;
         std::thread thread;
     };
 
@@ -54,12 +62,28 @@ private:
         ParallelConnection::Message message;
     };
 
-    void queueInMessage(const ParallelConnection::Message& message);
+    void sendMessage(size_t peerId,
+        ParallelConnection::MessageType messageType,
+        const std::vector<char>& message);
 
-    void handleAuthentication(size_t id, std::vector<char> data);
-    void handleData(size_t id, std::vector<char> data);
-    void handleHostshipRequest(size_t id, std::vector<char> data);
-    void handleHostshipResignation(size_t id, std::vector<char> data);
+    void sendMessageToAll(ParallelConnection::MessageType messageType,
+        const std::vector<char>& message);
+
+    void sendMessageToClients(ParallelConnection::MessageType messageType,
+        const std::vector<char>& message);
+
+    void disconnect(size_t peerId);
+    void setName(size_t peerId, std::string name);
+    void assignHost(size_t peerId);
+    void setToClient(size_t peerId);
+    void setNConnections(size_t nConnections);
+    void setConnectionStatus(size_t peerId, ParallelConnection::Status status);
+    void sendConnectionStatus(size_t peerId);
+
+    void handleAuthentication(size_t peerId, std::vector<char> data);
+    void handleData(size_t peerId, std::vector<char> data);
+    void handleHostshipRequest(size_t peerId, std::vector<char> data);
+    void handleHostshipResignation(size_t peerId, std::vector<char> data);
 
     void handleNewPeers();
     void eventLoop();
@@ -72,9 +96,17 @@ private:
     std::thread _serverThread;
     std::thread _eventLoopThread;
     ghoul::io::TcpSocketServer _socketServer;
-    std::string _password;
-    size_t _nextConnectionId = 0;
+    size_t _passwordHash;
+    size_t _changeHostPasswordHash;
+    size_t _nextConnectionId = 1;
     std::atomic_bool _shouldStop = false;
+
+    std::atomic_size_t _nConnections;
+    std::atomic_size_t _hostPeerId;
+
+    std::mutex _hostInfoMutex;
+    std::string _hostAddress;
+    std::string _hostName;
 
     ConcurrentQueue<PeerMessage> _incomingMessages;
 };

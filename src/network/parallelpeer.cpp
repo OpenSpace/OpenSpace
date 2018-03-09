@@ -179,19 +179,19 @@ void ParallelPeer::sendAuthentication() {
     uint32_t nameLength = static_cast<uint32_t>(name.length());
 
     // Total size of the buffer: (passcode + namelength + name)
-    size_t size = 2 * sizeof(uint32_t) + nameLength;
+    size_t size = sizeof(uint64_t) + sizeof(uint32_t) + nameLength;
 
     // Create and reserve buffer
     std::vector<char> buffer;
     buffer.reserve(size);
 
-    uint32_t passCode = hash(_password.value());
+    uint64_t passCode = std::hash<std::string>{}(_password.value());
 
-    // Write passcode to buffer
+    // Write the hashed password to buffer
     buffer.insert(
         buffer.end(),
         reinterpret_cast<char*>(&passCode),
-        reinterpret_cast<char*>(&passCode) + sizeof(uint32_t)
+        reinterpret_cast<char*>(&passCode) + sizeof(uint64_t)
     );
 
     // Write the length of the nodes name to buffer
@@ -408,11 +408,11 @@ void ParallelPeer::setName(std::string name) {
 
 void ParallelPeer::requestHostship() {
     std::vector<char> buffer;
-    uint32_t passcode = hash(_hostPassword);
+    uint64_t passwordHash = std::hash<std::string>{}(_hostPassword);
     buffer.insert(
         buffer.end(),
-        reinterpret_cast<char*>(&passcode),
-        reinterpret_cast<char*>(&passcode) + sizeof(uint32_t)
+        reinterpret_cast<char*>(&passwordHash),
+        reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
     );
     _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipRequest, buffer));
 }
@@ -576,23 +576,6 @@ void ParallelPeer::sendTimeKeyframe() {
     // Send message
     _connection.sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::TimeData, buffer));
     _timeJumped = false;
-}
-
-uint32_t ParallelPeer::hash(const std::string& val) {
-    uint32_t hashVal = 0, i;
-    size_t len = val.length();
-
-    for (hashVal = i = 0; i < len; ++i) {
-        hashVal += val.c_str()[i];
-        hashVal += (hashVal << 10);
-        hashVal ^= (hashVal >> 6);
-    }
-
-    hashVal += (hashVal << 3);
-    hashVal ^= (hashVal >> 11);
-    hashVal += (hashVal << 15);
-
-    return hashVal;
 }
 
 std::shared_ptr<ghoul::Event<>> ParallelPeer::connectionEvent() {

@@ -84,6 +84,7 @@ public:
     void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);
     bool sendMessage(const  ParallelConnection::Message& message);
     void disconnect();
+    ghoul::io::TcpSocket* socket();
 
     ParallelConnection::Message receiveMessage();
 
