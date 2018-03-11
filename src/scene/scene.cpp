@@ -548,41 +548,41 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "interpolatePropertyValue",
                 &luascriptfunctions::property_interpolateValue,
                 {},
-                "string, *",
-                "Sets all property(s) identified by the URI (with potential wildcards) "
-                "in the first argument. The second argument can be any type, but it has "
-                "to match the type that the property (or properties) expect. If the "
-                "first term (separated by '.') in the uri is bracketed with { }, then "
-                "this term is treated as a group tag name, and the function will "
-                "search through all property owners to find those that are tagged with "
-                "this group name, and set their property values accordingly."
+                "string, number, value",
+                "Interpolates all property(s) identified by the URI (with potential"
+                "wildcards) in the first argument. The second argument determines the "
+                "time over which the properties are interpolated from their currect "
+                "value to the final value provided as the third argument. If the first "
+                "term (separated by '.') in the URI is surrounded with { }, then this "
+                "term is treated as a group tag name, and the function will search "
+                "through all property owners to find those that are tagged with this "
+                "group name, and interpolate their property values accordingly."
             },
             {
                 "interpolatePropertyValueRegex",
                 &luascriptfunctions::property_interpolateValueRegex,
                 {},
-                "string, *",
-                "Sets all property(s) that pass the regular expression in the first "
-                "argument. The second argument can be any type, but it has to match "
-                "the type of the properties that matched the regular expression. "
-                "The regular expression has to be of the ECMAScript grammar. If the "
-                "first term (separated by '.') in the uri is bracketed with { }, then "
-                "this term is treated as a group tag name, and the function will search "
-                "through all property owners to find those that are tagged with this "
-                "group name, and set their property values accordingly."
+                "string, number, value",
+                "Interpolates all property(s) that pass the regular expression in the "
+                "first argument. The second argument determines the time over which the "
+                "properties are interpolated from their currect value to the final value "
+                "provided as the third argument. All properties that pass the regular "
+                "expression must receive the value type that is passed in the third "
+                "argument. If the first term (separated by '.') in the URI is surrounded "
+                "with { }, then this term is treated as a group tag name, and the "
+                "function will search through all property owners to find those that are "
+                "tagged with this group name, and interpolate their property values "
+                "accordingly."
             },
             {
                 "interpolatePropertyValueSingle",
                 &luascriptfunctions::property_interpolateValueSingle,
                 {},
-                "string, *",
-                "Sets all property(s) identified by the URI in the first argument to the "
-                "value passed in the second argument. The type of the second argument is "
-                "arbitrary, but it must agree with the type the denoted Property expects."
-                " If the first term (separated by '.') in the uri is bracketed with { }, "
-                " then this term is treated as a group tag name, and the function will "
-                "search through all property owners to find those that are tagged with "
-                "this group name, and set their property values accordingly."
+                "string, number, value",
+                "Interpolates a single property with the URI passed in the first "
+                "argument. The second argument determines the time over which the "
+                "properties are interpolated from their currect value to the final value "
+                "provided as the third argument."
             },
             {
                 "getPropertyValue",

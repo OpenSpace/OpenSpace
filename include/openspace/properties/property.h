@@ -366,15 +366,11 @@ public:
 
 
     /// Interpolation methods
-    virtual void setInterpolationStart(ghoul::any value);
-    virtual void setInterpolationEnd(ghoul::any value);
-    virtual void setLuaInterpolationStart(lua_State* state);
-    virtual void setLuaInterpolationEnd(lua_State* state);
-    virtual void setStringInterpolationStart(std::string value);
-    virtual void setStringInterpolationEnd(std::string value);
-
+    virtual void setInterpolationTarget(ghoul::any value);
+    virtual void setLuaInterpolationTarget(lua_State* state);
+    virtual void setStringInterpolationTarget(std::string value);
+    
     virtual void interpolateValue(float t);
-
 
 protected:
     static const char* IdentifierKey;

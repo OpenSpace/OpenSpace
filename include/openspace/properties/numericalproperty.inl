@@ -396,27 +396,11 @@ std::string NumericalProperty<T>::generateAdditionalDescription() const {
 }
 
 template <typename T>
-void NumericalProperty<T>::setInterpolationStart(ghoul::any value) {
+void NumericalProperty<T>::setInterpolationTarget(ghoul::any value) {
     try {
         T v = ghoul::any_cast<T>(std::move(value));
-        _interpolationStart = std::move(v);
-    }
-    catch (ghoul::bad_any_cast&) {
-        LERRORC(
-            "TemplateProperty",
-            fmt::format(
-                "Illegal cast from '{}' to '{}'",
-                value.type().name(),
-                typeid(T).name()
-            )
-        );
-    }
-}
 
-template <typename T>
-void NumericalProperty<T>::setInterpolationEnd(ghoul::any value) {
-    try {
-        T v = ghoul::any_cast<T>(std::move(value));
+        _interpolationStart = TemplateProperty<T>::_value;
         _interpolationEnd = std::move(v);
     }
     catch (ghoul::bad_any_cast&) {
@@ -432,49 +416,27 @@ void NumericalProperty<T>::setInterpolationEnd(ghoul::any value) {
 }
 
 template <typename T>
-void NumericalProperty<T>::setLuaInterpolationStart(lua_State* state) {
+void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
     bool success = false;
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
         state,
         success
-        );
+    );
     if (success) {
-        _interpolationStart = std::move(thisValue);
-    }
-}
-
-template <typename T>
-void NumericalProperty<T>::setLuaInterpolationEnd(lua_State* state) {
-    bool success = false;
-    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
-        state,
-        success
-        );
-    if (success) {
+        _interpolationStart = TemplateProperty<T>::_value;
         _interpolationEnd = std::move(thisValue);
     }
 }
 
 template <typename T>
-void NumericalProperty<T>::setStringInterpolationStart(std::string value) {
+void NumericalProperty<T>::setStringInterpolationTarget(std::string value) {
     bool success = false;
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
         value,
         success
-        );
+    );
     if (success) {
-        _interpolationStart = std::move(thisValue);
-    }
-}
-
-template <typename T>
-void NumericalProperty<T>::setStringInterpolationEnd(std::string value) {
-    bool success = false;
-    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
-        value,
-        success
-        );
-    if (success) {
+        _interpolationStart = TemplateProperty<T>::_value;
         _interpolationEnd = std::move(thisValue);
     }
 }

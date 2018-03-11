@@ -250,13 +250,9 @@ std::string Property::generateAdditionalDescription() const {
     return "";
 }
 
-void Property::setInterpolationStart(ghoul::any value) {}
-void Property::setInterpolationEnd(ghoul::any value) {}
-void Property::setLuaInterpolationStart(lua_State* state) {}
-void Property::setLuaInterpolationEnd(lua_State* state) {}
-void Property::setStringInterpolationStart(std::string value) {}
-void Property::setStringInterpolationEnd(std::string value) {}
-
-void Property::interpolateValue(float t) {}
+void Property::setInterpolationTarget(ghoul::any) {}
+void Property::setLuaInterpolationTarget(lua_State*) {}
+void Property::setStringInterpolationTarget(std::string) {}
+void Property::interpolateValue(float) {}
 
 } // namespace openspace::properties

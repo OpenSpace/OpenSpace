@@ -65,13 +65,10 @@ public:
     using TemplateProperty<T>::operator=;
 
 
-    void setInterpolationStart(ghoul::any value) override;
-    void setInterpolationEnd(ghoul::any value) override;
-    void setLuaInterpolationStart(lua_State* state) override;
-    void setLuaInterpolationEnd(lua_State* state) override;
-    void setStringInterpolationStart(std::string value) override;
-    void setStringInterpolationEnd(std::string value) override;
-
+    void setInterpolationTarget(ghoul::any value) override;
+    void setLuaInterpolationTarget(lua_State* state) override;
+    void setStringInterpolationTarget(std::string value) override;
+    
     void interpolateValue(float t) override;
 
 

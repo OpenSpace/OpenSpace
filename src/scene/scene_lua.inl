@@ -55,10 +55,7 @@ void executePropertySet(properties::Property* prop, lua_State* L) {
 
 void interpolatePropertySet(properties::Property* prop, lua_State* L) {
     double duration = luaL_checknumber(L, 2);
-    lua_pushvalue(L, 3);
-    prop->setLuaInterpolationStart(L);
-    lua_pushvalue(L, 4);
-    prop->setLuaInterpolationEnd(L);
+    prop->setLuaInterpolationTarget(L);
 
     OsEng.renderEngine().scene()->addInterpolation(prop, static_cast<float>(duration));
 
@@ -430,32 +427,10 @@ int property_setValueRegex(lua_State* L) {
 */
 
 int property_interpolateValue(lua_State* L) {
-    //using ghoul::lua::errorLocation;
-    //using ghoul::lua::luaTypeToString;
-
-    //ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValue");
-
-    //std::string propName = luaL_checkstring(L, 1);
-    //double duration = luaL_checknumber(L, 2);
-
-    //properties::Property* prop = property(propName);
-
-    //lua_pushvalue(L, 3);
-    //prop->setLuaInterpolationStart(L);
-    //lua_pushvalue(L, 4);
-    //prop->setLuaInterpolationEnd(L);
-
-    //OsEng.renderEngine().scene()->addInterpolation(prop, static_cast<float>(duration));
-
-    //lua_settop(L, 0);
-
-    //lua_type(L, -1);
-
-
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValue");
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::property_interpolateValue");
 
     std::string regex = luaL_checkstring(L, 1);
     std::string groupName;
@@ -489,7 +464,7 @@ int property_interpolateValueRegex(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValueRegex");
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::property_interpolateValueRegex");
 
     std::string regex = luaL_checkstring(L, 1);
     std::string groupName;
@@ -525,7 +500,7 @@ int property_interpolateValueSingle(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValueSingle");
+    ghoul::lua::checkArgumentsAndThrow(L, 3, "lua::property_interpolateValueSingle");
 
     std::string uri = luaL_checkstring(L, 1);
     const int type = lua_type(L, -1);
