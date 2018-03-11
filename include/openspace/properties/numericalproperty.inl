@@ -395,4 +395,95 @@ std::string NumericalProperty<T>::generateAdditionalDescription() const {
     return result;
 }
 
+template <typename T>
+void NumericalProperty<T>::setInterpolationStart(ghoul::any value) {
+    try {
+        T v = ghoul::any_cast<T>(std::move(value));
+        _interpolationStart = std::move(v);
+    }
+    catch (ghoul::bad_any_cast&) {
+        LERRORC(
+            "TemplateProperty",
+            fmt::format(
+                "Illegal cast from '{}' to '{}'",
+                value.type().name(),
+                typeid(T).name()
+            )
+        );
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setInterpolationEnd(ghoul::any value) {
+    try {
+        T v = ghoul::any_cast<T>(std::move(value));
+        _interpolationEnd = std::move(v);
+    }
+    catch (ghoul::bad_any_cast&) {
+        LERRORC(
+            "TemplateProperty",
+            fmt::format(
+                "Illegal cast from '{}' to '{}'",
+                value.type().name(),
+                typeid(T).name()
+            )
+        );
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setLuaInterpolationStart(lua_State* state) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
+        state,
+        success
+        );
+    if (success) {
+        _interpolationStart = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setLuaInterpolationEnd(lua_State* state) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
+        state,
+        success
+        );
+    if (success) {
+        _interpolationEnd = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setStringInterpolationStart(std::string value) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
+        value,
+        success
+        );
+    if (success) {
+        _interpolationStart = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setStringInterpolationEnd(std::string value) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
+        value,
+        success
+        );
+    if (success) {
+        _interpolationEnd = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::interpolateValue(float t) {
+    TemplateProperty<T>::setValue(static_cast<T>(
+        glm::mix(_interpolationStart, _interpolationEnd, t)
+    ));
+}
+
 } // namespace openspace::properties

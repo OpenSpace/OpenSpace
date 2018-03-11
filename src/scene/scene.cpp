@@ -48,6 +48,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <iterator>
@@ -440,6 +441,58 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     return rawNodePointer;
 }
 
+void Scene::addInterpolation(properties::Property* prop, float durationMilliSeconds) {
+    // First check if the current property already has an interpolation information
+    for (std::vector<InterpolationInfo>::iterator it = _interpolationInfos.begin();
+        it != _interpolationInfos.end();
+        ++it)
+    {
+        if (it->prop == prop) {
+            it->beginTime = std::chrono::steady_clock::now();
+            it->durationMilliSeconds = durationMilliSeconds;
+            // If we found it, we can break since we make sure that each property is only
+            // represented once in this
+            return;
+        }
+    }
+
+    InterpolationInfo i;
+    i.prop = prop;
+    i.beginTime = std::chrono::steady_clock::now();
+    i.durationMilliSeconds = durationMilliSeconds;
+
+    _interpolationInfos.push_back(std::move(i));
+}
+
+void Scene::updateInterpolations() {
+    using namespace std::chrono;
+    auto now = steady_clock::now();
+
+    for (InterpolationInfo& i : _interpolationInfos) {
+        long long usPassed = duration_cast<std::chrono::microseconds>(
+            now - i.beginTime
+        ).count();
+
+        float t = static_cast<double>(usPassed) /
+                  static_cast<double>(i.durationMilliSeconds * 1000);
+        i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f));
+
+        i.isExpired = (t >= 1.f);
+    }
+
+    _interpolationInfos.erase(
+        std::remove_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [](const InterpolationInfo& i) {
+                return i.isExpired;
+            }
+        ),
+        _interpolationInfos.end()
+    );
+}
+
+
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
@@ -489,6 +542,46 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "search through all property owners to find those that are tagged with "
                 "this group name, and set their property values accordingly."
             },
+            {
+                "interpolatePropertyValue",
+                &luascriptfunctions::property_interpolateValue,
+                {},
+                "string, *",
+                "Sets all property(s) identified by the URI (with potential wildcards) "
+                "in the first argument. The second argument can be any type, but it has "
+                "to match the type that the property (or properties) expect. If the "
+                "first term (separated by '.') in the uri is bracketed with { }, then "
+                "this term is treated as a group tag name, and the function will "
+                "search through all property owners to find those that are tagged with "
+                "this group name, and set their property values accordingly."
+            },
+            //{
+            //    "interpolatePropertyValueRegex",
+            //    &luascriptfunctions::property_interpolateValueRegex,
+            //    {},
+            //    "string, *",
+            //    "Sets all property(s) that pass the regular expression in the first "
+            //    "argument. The second argument can be any type, but it has to match "
+            //    "the type of the properties that matched the regular expression. "
+            //    "The regular expression has to be of the ECMAScript grammar. If the "
+            //    "first term (separated by '.') in the uri is bracketed with { }, then "
+            //    "this term is treated as a group tag name, and the function will search "
+            //    "through all property owners to find those that are tagged with this "
+            //    "group name, and set their property values accordingly."
+            //},
+            //{
+            //    "interpolatePropertyValueSingle",
+            //    &luascriptfunctions::property_interpolateValueSingle,
+            //    {},
+            //    "string, *",
+            //    "Sets all property(s) identified by the URI in the first argument to the "
+            //    "value passed in the second argument. The type of the second argument is "
+            //    "arbitrary, but it must agree with the type the denoted Property expects."
+            //    " If the first term (separated by '.') in the uri is bracketed with { }, "
+            //    " then this term is treated as a group tag name, and the function will "
+            //    "search through all property owners to find those that are tagged with "
+            //    "this group name, and set their property values accordingly."
+            //},
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,

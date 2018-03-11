@@ -64,6 +64,17 @@ public:
 
     using TemplateProperty<T>::operator=;
 
+
+    void setInterpolationStart(ghoul::any value) override;
+    void setInterpolationEnd(ghoul::any value) override;
+    void setLuaInterpolationStart(lua_State* state) override;
+    void setLuaInterpolationEnd(lua_State* state) override;
+    void setStringInterpolationStart(std::string value) override;
+    void setStringInterpolationEnd(std::string value) override;
+
+    void interpolateValue(float t) override;
+
+
 protected:
     static const std::string MinimumValueKey;
     static const std::string MaximumValueKey;
@@ -76,6 +87,9 @@ protected:
     T _maximumValue;
     T _stepping;
     float _exponent;
+
+    T _interpolationStart;
+    T _interpolationEnd;
 };
 
 } // namespace openspace::properties

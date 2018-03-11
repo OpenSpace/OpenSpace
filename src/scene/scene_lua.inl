@@ -322,6 +322,67 @@ int property_setValueRegex(lua_State* L) {
 }
 
 /**
+* \ingroup LuaScripts
+* setPropertyValue(string, *):
+* Sets all property(s) identified by the URI (with potential wildcards) in the first
+* argument. The second argument can be any type, but it has to match the type that the
+* property (or properties) expect.
+* If the first term (separated by '.') in the uri is bracketed with { }, then this
+* term is treated as a group tag name, and the function will search through all
+* property owners to find those that are tagged with this group name, and set their
+* property values accordingly.
+*/
+
+int property_interpolateValue(lua_State* L) {
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValue");
+
+    std::string propName = luaL_checkstring(L, 1);
+    double duration = luaL_checknumber(L, 2);
+
+    properties::Property* prop = property(propName);
+
+    lua_pushvalue(L, 3);
+    prop->setLuaInterpolationStart(L);
+    lua_pushvalue(L, 4);
+    prop->setLuaInterpolationEnd(L);
+
+    OsEng.renderEngine().scene()->addInterpolation(prop, static_cast<float>(duration));
+
+    lua_settop(L, 0);
+
+
+    //std::string regex = luaL_checkstring(L, -2);
+    //std::string groupName;
+
+    //// Replace all wildcards *  with the correct regex (.*)
+    //size_t startPos = regex.find("*");
+    //while (startPos != std::string::npos) {
+    //    regex.replace(startPos, 1, "(.*)");
+    //    startPos += 4;
+    //    startPos = regex.find("*", startPos);
+    //}
+
+    //if (doesUriContainGroupTag(regex, groupName)) {
+    //    std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
+    //    //Remove group name from start of regex and replace with '.*'
+    //    regex = replaceUriWithGroupName(regex, ".*");
+    //}
+
+    //applyRegularExpression(
+    //    L,
+    //    std::regex(regex/*, std::regex_constants::optimize*/),
+    //    allProperties(),
+    //    lua_type(L, -1),
+    //    groupName
+    //);
+
+    return 0;
+}
+
+/**
  * \ingroup LuaScripts
  * getPropertyValue(string):
  * Returns the value of the property identified by the passed URI as a Lua object that can

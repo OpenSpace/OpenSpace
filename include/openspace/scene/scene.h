@@ -172,6 +172,10 @@ public:
      */
     bool isInitializing() const;
 
+    void addInterpolation(properties::Property* prop, float duration);
+
+    void updateInterpolations();
+
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
@@ -203,6 +207,17 @@ private:
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
+
+    struct InterpolationInfo {
+        // @TODO(abock): The property might have been deleted underneath us, which would
+        // cause us to crash;  needs to hook up into the removeSceneGraphNode method and
+        // the remoteProperty methods
+        properties::Property* prop;
+        std::chrono::time_point<std::chrono::steady_clock> beginTime;
+        float durationMilliSeconds;
+        bool isExpired = false;
+    };
+    std::vector<InterpolationInfo> _interpolationInfos;
 };
 
 } // namespace openspace
