@@ -473,8 +473,10 @@ void Scene::updateInterpolations() {
             now - i.beginTime
         ).count();
 
-        float t = static_cast<double>(usPassed) /
-                  static_cast<double>(i.durationMilliSeconds * 1000);
+        float t = static_cast<float>(
+            static_cast<double>(usPassed) /
+            static_cast<double>(i.durationMilliSeconds * 1000)
+        );
         i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f));
 
         i.isExpired = (t >= 1.f);
@@ -555,33 +557,33 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "search through all property owners to find those that are tagged with "
                 "this group name, and set their property values accordingly."
             },
-            //{
-            //    "interpolatePropertyValueRegex",
-            //    &luascriptfunctions::property_interpolateValueRegex,
-            //    {},
-            //    "string, *",
-            //    "Sets all property(s) that pass the regular expression in the first "
-            //    "argument. The second argument can be any type, but it has to match "
-            //    "the type of the properties that matched the regular expression. "
-            //    "The regular expression has to be of the ECMAScript grammar. If the "
-            //    "first term (separated by '.') in the uri is bracketed with { }, then "
-            //    "this term is treated as a group tag name, and the function will search "
-            //    "through all property owners to find those that are tagged with this "
-            //    "group name, and set their property values accordingly."
-            //},
-            //{
-            //    "interpolatePropertyValueSingle",
-            //    &luascriptfunctions::property_interpolateValueSingle,
-            //    {},
-            //    "string, *",
-            //    "Sets all property(s) identified by the URI in the first argument to the "
-            //    "value passed in the second argument. The type of the second argument is "
-            //    "arbitrary, but it must agree with the type the denoted Property expects."
-            //    " If the first term (separated by '.') in the uri is bracketed with { }, "
-            //    " then this term is treated as a group tag name, and the function will "
-            //    "search through all property owners to find those that are tagged with "
-            //    "this group name, and set their property values accordingly."
-            //},
+            {
+                "interpolatePropertyValueRegex",
+                &luascriptfunctions::property_interpolateValueRegex,
+                {},
+                "string, *",
+                "Sets all property(s) that pass the regular expression in the first "
+                "argument. The second argument can be any type, but it has to match "
+                "the type of the properties that matched the regular expression. "
+                "The regular expression has to be of the ECMAScript grammar. If the "
+                "first term (separated by '.') in the uri is bracketed with { }, then "
+                "this term is treated as a group tag name, and the function will search "
+                "through all property owners to find those that are tagged with this "
+                "group name, and set their property values accordingly."
+            },
+            {
+                "interpolatePropertyValueSingle",
+                &luascriptfunctions::property_interpolateValueSingle,
+                {},
+                "string, *",
+                "Sets all property(s) identified by the URI in the first argument to the "
+                "value passed in the second argument. The type of the second argument is "
+                "arbitrary, but it must agree with the type the denoted Property expects."
+                " If the first term (separated by '.') in the uri is bracketed with { }, "
+                " then this term is treated as a group tag name, and the function will "
+                "search through all property owners to find those that are tagged with "
+                "this group name, and set their property values accordingly."
+            },
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,

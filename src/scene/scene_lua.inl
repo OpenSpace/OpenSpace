@@ -30,15 +30,39 @@ namespace openspace {
 
 namespace {
 
+// @TODO(abock)  The method for doing something to properties should be only a single
+//               method, since it is only an optimization whether a regex is constructeed
+//               or not, it would be better to differentiate those with an enum parameter
+
+// @TODO(abock)  The Lua functions should only take the target value and just get the
+//               current value as the start
+
+
+// @TODO(abock) This should be moved into a lambda expression that gets passed to
+//              applyRegularExpressions
 void executePropertySet(properties::Property* prop, lua_State* L) {
     prop->setLuaValue(L);
     //ensure properties are synced over parallel connection
+
+    // this can probably go?? (abock)
     std::string value;
     prop->getStringValue(value);
     /*OsEng.parallelConnection().scriptMessage(
     prop->fullyQualifiedIdentifier(),
     value
     );*/
+}
+
+void interpolatePropertySet(properties::Property* prop, lua_State* L) {
+    double duration = luaL_checknumber(L, 2);
+    lua_pushvalue(L, 3);
+    prop->setLuaInterpolationStart(L);
+    lua_pushvalue(L, 4);
+    prop->setLuaInterpolationEnd(L);
+
+    OsEng.renderEngine().scene()->addInterpolation(prop, static_cast<float>(duration));
+
+    lua_settop(L, 0);
 }
 
 template <class T>
@@ -111,6 +135,52 @@ void applyRegularExpression(lua_State* L, std::regex regex,
     }
 }
 
+void applyRegularExpressionInterpolation(lua_State* L, std::regex regex,
+                                         std::vector<properties::Property*> properties,
+                                         int type, std::string groupName = "")
+{
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+    bool isGroupMode = !groupName.empty();
+
+    for (properties::Property* prop : properties) {
+        // Check the regular expression for all properties
+        std::string id = prop->fullyQualifiedIdentifier();
+
+        if (std::regex_match(id, regex)) {
+            // If the fully qualified id matches the regular expression, we queue the
+            // value change if the types agree
+            if (isGroupMode) {
+                properties::PropertyOwner* matchingTaggedOwner =
+                    findPropertyOwnerWithMatchingGroupTag(
+                        prop,
+                        groupName
+                    );
+                if (!matchingTaggedOwner) {
+                    continue;
+                }
+            }
+
+            if (type != prop->typeLua()) {
+                LERRORC(
+                    "property_setValue",
+                    fmt::format(
+                        "{}: Property '{}' does not accept input of type '{}'. "
+                        "Requested type: '{}'",
+                        errorLocation(L),
+                        prop->fullyQualifiedIdentifier(),
+                        luaTypeToString(type),
+                        luaTypeToString(prop->typeLua())
+                    )
+                );
+            }
+            else {
+                interpolatePropertySet(prop, L);
+            }
+        }
+    }
+}
+
 //Checks to see if URI contains a group tag (with { } around the first term). If so,
 // returns true and sets groupName with the tag
 bool doesUriContainGroupTag(const std::string& command, std::string& groupName) {
@@ -162,6 +232,32 @@ int setPropertyCall_single(properties::Property* prop, std::string uri, lua_Stat
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
+    }
+
+    return 0;
+}
+
+int interpolatePropertyCall_single(properties::Property* prop,
+                                   std::string uri, lua_State* L, const int type)
+{
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    if (type != prop->typeLua()) {
+        LERRORC(
+            "property_setValue",
+            fmt::format(
+                "{}: Property '{}' does not accept input of type '{}'. "
+                "Requested type: '{}'",
+                errorLocation(L),
+                uri,
+                luaTypeToString(type),
+                luaTypeToString(prop->typeLua())
+            )
+        );
+    }
+    else {
+        interpolatePropertySet(prop, L);
     }
 
     return 0;
@@ -334,50 +430,144 @@ int property_setValueRegex(lua_State* L) {
 */
 
 int property_interpolateValue(lua_State* L) {
+    //using ghoul::lua::errorLocation;
+    //using ghoul::lua::luaTypeToString;
+
+    //ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValue");
+
+    //std::string propName = luaL_checkstring(L, 1);
+    //double duration = luaL_checknumber(L, 2);
+
+    //properties::Property* prop = property(propName);
+
+    //lua_pushvalue(L, 3);
+    //prop->setLuaInterpolationStart(L);
+    //lua_pushvalue(L, 4);
+    //prop->setLuaInterpolationEnd(L);
+
+    //OsEng.renderEngine().scene()->addInterpolation(prop, static_cast<float>(duration));
+
+    //lua_settop(L, 0);
+
+    //lua_type(L, -1);
+
+
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
     ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValue");
 
-    std::string propName = luaL_checkstring(L, 1);
-    double duration = luaL_checknumber(L, 2);
+    std::string regex = luaL_checkstring(L, 1);
+    std::string groupName;
 
-    properties::Property* prop = property(propName);
+    // Replace all wildcards *  with the correct regex (.*)
+    size_t startPos = regex.find("*");
+    while (startPos != std::string::npos) {
+        regex.replace(startPos, 1, "(.*)");
+        startPos += 4;
+        startPos = regex.find("*", startPos);
+    }
 
-    lua_pushvalue(L, 3);
-    prop->setLuaInterpolationStart(L);
-    lua_pushvalue(L, 4);
-    prop->setLuaInterpolationEnd(L);
+    if (doesUriContainGroupTag(regex, groupName)) {
+        std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
+        //Remove group name from start of regex and replace with '.*'
+        regex = replaceUriWithGroupName(regex, ".*");
+    }
 
-    OsEng.renderEngine().scene()->addInterpolation(prop, static_cast<float>(duration));
+    applyRegularExpressionInterpolation(
+        L,
+        std::regex(regex/*, std::regex_constants::optimize*/),
+        allProperties(),
+        lua_type(L, -1),
+        groupName
+    );
 
-    lua_settop(L, 0);
+    return 0;
+}
 
+int property_interpolateValueRegex(lua_State* L) {
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
 
-    //std::string regex = luaL_checkstring(L, -2);
-    //std::string groupName;
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValueRegex");
 
-    //// Replace all wildcards *  with the correct regex (.*)
-    //size_t startPos = regex.find("*");
-    //while (startPos != std::string::npos) {
-    //    regex.replace(startPos, 1, "(.*)");
-    //    startPos += 4;
-    //    startPos = regex.find("*", startPos);
-    //}
+    std::string regex = luaL_checkstring(L, 1);
+    std::string groupName;
 
-    //if (doesUriContainGroupTag(regex, groupName)) {
-    //    std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
-    //    //Remove group name from start of regex and replace with '.*'
-    //    regex = replaceUriWithGroupName(regex, ".*");
-    //}
+    if (doesUriContainGroupTag(regex, groupName)) {
+        std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
+        //Remove group name from start of regex and replace with '.*'
+        regex = replaceUriWithGroupName(regex, ".*");
+    }
 
-    //applyRegularExpression(
-    //    L,
-    //    std::regex(regex/*, std::regex_constants::optimize*/),
-    //    allProperties(),
-    //    lua_type(L, -1),
-    //    groupName
-    //);
+    try {
+        applyRegularExpressionInterpolation(
+            L,
+            std::regex(regex, std::regex_constants::optimize),
+            allProperties(),
+            lua_type(L, -1),
+            groupName
+        );
+    }
+    catch (const std::regex_error& e) {
+        LERRORC(
+            "property_setValueRegex",
+            fmt::format(
+                "Malformed regular expression: '{}': {}", regex, e.what()
+            )
+        );
+    }
+
+    return 0;
+}
+
+int property_interpolateValueSingle(lua_State* L) {
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    ghoul::lua::checkArgumentsAndThrow(L, 4, "lua::property_interpolateValueSingle");
+
+    std::string uri = luaL_checkstring(L, 1);
+    const int type = lua_type(L, -1);
+    std::string tagToMatch;
+
+    if (doesUriContainGroupTag(uri, tagToMatch)) {
+        std::string pathRemainderToMatch = extractUriWithoutGroupName(uri);
+        for (properties::Property* prop : allProperties()) {
+            std::string propFullId = prop->fullyQualifiedIdentifier();
+            //Look for a match in the uri with the group name (first term) removed
+            int propMatchLength =
+                static_cast<int>(propFullId.length()) -
+                static_cast<int>(pathRemainderToMatch.length());
+
+            if (propMatchLength >= 0) {
+                std::string thisPropMatchId = propFullId.substr(propMatchLength);
+                //If remainder of uri matches (with group name removed),
+                if (pathRemainderToMatch.compare(thisPropMatchId) == 0) {
+                    properties::PropertyOwner* matchingTaggedOwner
+                        = findPropertyOwnerWithMatchingGroupTag(prop, tagToMatch);
+                    if (matchingTaggedOwner) {
+                        setPropertyCall_single(prop, uri, L, type);
+                    }
+                }
+            }
+        }
+    }
+    else {
+        properties::Property* prop = property(uri);
+        if (!prop) {
+            LERRORC(
+                "property_setValue",
+                fmt::format(
+                    "{}: Property with URI '{}' was not found",
+                    errorLocation(L),
+                    uri
+                )
+            );
+            return 0;
+        }
+        interpolatePropertyCall_single(prop, uri, L, type);
+    }
 
     return 0;
 }
