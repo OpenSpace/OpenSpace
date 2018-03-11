@@ -172,7 +172,7 @@ public:
      */
     bool isInitializing() const;
 
-    void addInterpolation(properties::Property* prop, float duration);
+    void addInterpolation(properties::Property* prop, float durationSeconds);
 
     void updateInterpolations();
 
@@ -214,7 +214,7 @@ private:
         // the remoteProperty methods
         properties::Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
-        float durationMilliSeconds;
+        float durationSeconds;
         bool isExpired = false;
     };
     std::vector<InterpolationInfo> _interpolationInfos;

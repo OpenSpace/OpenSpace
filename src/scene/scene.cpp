@@ -441,7 +441,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     return rawNodePointer;
 }
 
-void Scene::addInterpolation(properties::Property* prop, float durationMilliSeconds) {
+void Scene::addInterpolation(properties::Property* prop, float durationSeconds) {
     // First check if the current property already has an interpolation information
     for (std::vector<InterpolationInfo>::iterator it = _interpolationInfos.begin();
         it != _interpolationInfos.end();
@@ -449,7 +449,7 @@ void Scene::addInterpolation(properties::Property* prop, float durationMilliSeco
     {
         if (it->prop == prop) {
             it->beginTime = std::chrono::steady_clock::now();
-            it->durationMilliSeconds = durationMilliSeconds;
+            it->durationSeconds = durationSeconds;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
             return;
@@ -459,7 +459,7 @@ void Scene::addInterpolation(properties::Property* prop, float durationMilliSeco
     InterpolationInfo i;
     i.prop = prop;
     i.beginTime = std::chrono::steady_clock::now();
-    i.durationMilliSeconds = durationMilliSeconds;
+    i.durationSeconds = durationSeconds;
 
     _interpolationInfos.push_back(std::move(i));
 }
@@ -475,7 +475,7 @@ void Scene::updateInterpolations() {
 
         float t = static_cast<float>(
             static_cast<double>(usPassed) /
-            static_cast<double>(i.durationMilliSeconds * 1000)
+            static_cast<double>(i.durationSeconds * 1000000)
         );
         i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f));
 
@@ -508,81 +508,35 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 {},
-                "string, *",
+                "name, value [, duration, optimization]",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
                 "to match the type that the property (or properties) expect. If the "
-                "first term (separated by '.') in the uri is bracketed with { }, then "
-                "this term is treated as a group tag name, and the function will "
-                "search through all property owners to find those that are tagged with "
-                "this group name, and set their property values accordingly."
-            },
-            {
-                "setPropertyValueRegex",
-                &luascriptfunctions::property_setValueRegex,
-                {},
-                "string, *",
-                "Sets all property(s) that pass the regular expression in the first "
-                "argument. The second argument can be any type, but it has to match "
-                "the type of the properties that matched the regular expression. "
-                "The regular expression has to be of the ECMAScript grammar. If the "
-                "first term (separated by '.') in the uri is bracketed with { }, then "
-                "this term is treated as a group tag name, and the function will search "
-                "through all property owners to find those that are tagged with this "
-                "group name, and set their property values accordingly."
+                "third is not present or is '0', the value changes instantly, otherwise "
+                "the change will take that many seconds and the value is interpolated at "
+                "each steap in between. The fourth argument must be either empty, "
+                "'regex', or 'single'. If the last argument is empty (the default), the "
+                "URI is interpreted using a wildcard in which '*' is expanded to '(.*)' "
+                "and bracketed components '{ }' are interpreted as group tag names. "
+                "Then, the passed value will be set on all properties that fit the regex "
+                "+ group name combination. If the third argument is 'regex' neither the "
+                "'*' expansion, nor the group tag expansion is performed and the first "
+                "argument is used as an ECMAScript style regular expression that matches "
+                "against the fully qualified IDs of properties. If the third arugment is "
+                "'single' no substitutions are performed and exactly 0 or 1 properties "
+                "are changed."
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
                 {},
-                "string, *",
-                "Sets all property(s) identified by the URI in the first argument to the "
-                "value passed in the second argument. The type of the second argument is "
-                "arbitrary, but it must agree with the type the denoted Property expects."
-                " If the first term (separated by '.') in the uri is bracketed with { }, "
-                " then this term is treated as a group tag name, and the function will "
-                "search through all property owners to find those that are tagged with "
-                "this group name, and set their property values accordingly."
-            },
-            {
-                "interpolatePropertyValue",
-                &luascriptfunctions::property_interpolateValue,
-                {},
-                "string, number, value",
-                "Interpolates all property(s) identified by the URI (with potential"
-                "wildcards) in the first argument. The second argument determines the "
-                "time over which the properties are interpolated from their currect "
-                "value to the final value provided as the third argument. If the first "
-                "term (separated by '.') in the URI is surrounded with { }, then this "
-                "term is treated as a group tag name, and the function will search "
-                "through all property owners to find those that are tagged with this "
-                "group name, and interpolate their property values accordingly."
-            },
-            {
-                "interpolatePropertyValueRegex",
-                &luascriptfunctions::property_interpolateValueRegex,
-                {},
-                "string, number, value",
-                "Interpolates all property(s) that pass the regular expression in the "
-                "first argument. The second argument determines the time over which the "
-                "properties are interpolated from their currect value to the final value "
-                "provided as the third argument. All properties that pass the regular "
-                "expression must receive the value type that is passed in the third "
-                "argument. If the first term (separated by '.') in the URI is surrounded "
-                "with { }, then this term is treated as a group tag name, and the "
-                "function will search through all property owners to find those that are "
-                "tagged with this group name, and interpolate their property values "
-                "accordingly."
-            },
-            {
-                "interpolatePropertyValueSingle",
-                &luascriptfunctions::property_interpolateValueSingle,
-                {},
-                "string, number, value",
-                "Interpolates a single property with the URI passed in the first "
-                "argument. The second argument determines the time over which the "
-                "properties are interpolated from their currect value to the final value "
-                "provided as the third argument."
+                "URI, value [, duration]",
+                "Sets the property identified by the URI in the first argument. The "
+                "second argument can be any type, but it has to match the type that the "
+                "property expects. If the third is not present or is '0', the value "
+                "changes instantly, otherwise the change will take that many seconds and "
+                "the value is interpolated at each steap in between. This is the same as "
+                "calling the setValue method and passing 'single' as the fourth argument."
             },
             {
                 "getPropertyValue",
