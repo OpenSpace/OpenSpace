@@ -106,13 +106,14 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     registerProperties();
 }
 
-DataCygnet::~DataCygnet(){}
+DataCygnet::~DataCygnet() {}
 
-bool DataCygnet::updateTexture(){
+bool DataCygnet::updateTexture() {
     std::vector<float*> data = textureData();
 
-    if(data.empty())
+    if (data.empty()) {
         return false;
+    }
 
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
@@ -148,16 +149,17 @@ bool DataCygnet::updateTexture(){
     return texturesReady;
 }
 
-bool DataCygnet::downloadTextureResource(double timestamp){
-    if(_futureObject.valid())
+bool DataCygnet::downloadTextureResource(double timestamp) {
+    if (_futureObject.valid()) {
         return false;
+    }
 
     std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(
         _data->id,
         timestamp
     );
 
-    if(future.valid()){
+    if (future.valid()) {
         _futureObject = std::move(future);
         return true;
     }
@@ -168,8 +170,9 @@ bool DataCygnet::downloadTextureResource(double timestamp){
 bool DataCygnet::updateTextureResource(){
     DownloadManager::MemoryFile dataFile = _futureObject.get();
 
-     if(dataFile.corrupted)
+     if (dataFile.corrupted) {
         return false;
+    }
 
     _dataBuffer = std::string(dataFile.buffer, dataFile.size);
     delete[] dataFile.buffer;
@@ -197,8 +200,8 @@ void DataCygnet::setTextureUniforms(){
     // Set Textures
     ghoul::opengl::TextureUnit txUnits[MAX_TEXTURES];
     int j = 0;
-    for(int option : selectedOptions){
-        if(_textures[option]){
+    for (int option : selectedOptions) {
+        if (_textures[option]) {
             txUnits[j].activate();
             _textures[option]->bind();
             _shader->setUniform(
@@ -207,7 +210,9 @@ void DataCygnet::setTextureUniforms(){
             );
 
             j++;
-            if(j >= MAX_TEXTURES) break;
+            if (j >= MAX_TEXTURES) {
+                break;
+            }
         }
     }
 
@@ -220,17 +225,16 @@ void DataCygnet::setTextureUniforms(){
     ghoul::opengl::TextureUnit tfUnits[MAX_TEXTURES];
     j = 0;
 
-    if((activeTransferfunctions == 1)){
+    if (activeTransferfunctions == 1) {
         tfUnits[0].activate();
         _transferFunctions[0]->bind();
         _shader->setUniform(
             "transferFunctions[0]",
             tfUnits[0]
         );
-    }else{
-        for(int option : selectedOptions){
-
-            if(_transferFunctions[option]){
+    } else {
+        for (int option : selectedOptions) {
+            if (_transferFunctions[option]) {
                 tfUnits[j].activate();
                 _transferFunctions[option]->bind();
                 _shader->setUniform(
@@ -247,7 +251,6 @@ void DataCygnet::setTextureUniforms(){
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("numTextures", activeTextures);
 }
-
 
 void DataCygnet::readTransferFunctions(std::string tfPath){
     std::string line;
@@ -280,7 +283,7 @@ void DataCygnet::fillOptions(std::string& source) {
         _textureDimensions
     );
 
-    for (int i = 0; i < options.size(); i++) {
+    for (int i = 0; i < static_cast<int>(options.size()); i++) {
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);
     }
@@ -297,43 +300,45 @@ void DataCygnet::fillOptions(std::string& source) {
     }
 }
 
-void DataCygnet::setPropertyCallbacks(){
-    _normValues.onChange([this](){
+void DataCygnet::setPropertyCallbacks() {
+    _normValues.onChange([this]() {
         _dataProcessor->normValues(_normValues.value());
         updateTexture();
     });
 
-    _useLog.onChange([this](){
+    _useLog.onChange([this]() {
         _dataProcessor->useLog(_useLog.value());
         updateTexture();
     });
 
-    _useHistogram.onChange([this](){
+    _useHistogram.onChange([this]() {
         _dataProcessor->useHistogram(_useHistogram.value());
         updateTexture();
-        if(_autoFilter.value())
+        if (_autoFilter.value()) {
             _backgroundValues.setValue(_dataProcessor->filterValues());
+        }
     });
 
-    _dataOptions.onChange([this](){
-        if(_dataOptions.value().size() > MAX_TEXTURES)
+    _dataOptions.onChange([this]() {
+        if (_dataOptions.value().size() > MAX_TEXTURES) {
             LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
+        }
         updateTexture();
     });
 
-    _transferFunctionsFile.onChange([this](){
+    _transferFunctionsFile.onChange([this]() {
         readTransferFunctions(_transferFunctionsFile.value());
     });
 }
 
-void DataCygnet::subscribeToGroup(){
+void DataCygnet::subscribeToGroup() {
     auto groupEvent = _group->groupEvent();
 
     groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event dataOptionsChanged");
         std::vector<int> values;
         bool success = dict.getValue<std::vector<int> >("dataOptions", values);
-        if(success){
+        if (success) {
             _dataOptions.setValue(values);
         }
     });
@@ -342,7 +347,7 @@ void DataCygnet::subscribeToGroup(){
         LDEBUG(name() + " Event normValuesChanged");
         glm::vec2 values;
         bool success = dict.getValue("normValues", values);
-        if(success){
+        if (success) {
             _normValues.setValue(values);
         }
     });
@@ -351,7 +356,7 @@ void DataCygnet::subscribeToGroup(){
         LDEBUG(name() + " Event backgroundValuesChanged");
         glm::vec2 values;
         bool success = dict.getValue("backgroundValues", values);
-        if(success){
+        if (success) {
             _backgroundValues.setValue(values);
         }
     });
@@ -377,13 +382,13 @@ void DataCygnet::subscribeToGroup(){
         _autoFilter.setValue(dict.value<bool>("autoFilter"));
     });
 
-    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict) {
+    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary) {
         LDEBUG(name() + " Event updateGroup");
-        if(_autoFilter.value())
+        if (_autoFilter.value()) {
             _backgroundValues.setValue(_dataProcessor->filterValues());
+        }
         updateTexture();
     });
-
 }
 
 } //namespace openspace

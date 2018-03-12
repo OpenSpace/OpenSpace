@@ -37,7 +37,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Renderable";
     constexpr const char* keyStart = "StartTime";
     constexpr const char* keyEnd = "EndTime";
     constexpr const char* KeyType = "Type";

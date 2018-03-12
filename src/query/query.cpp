@@ -37,10 +37,6 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <modules/iswa/rendering/iswacygnet.h>
 
-namespace {
-    constexpr const char* _loggerCat = "Query";
-} // namespace
-
 namespace openspace {
 
 Scene* sceneGraph() {
@@ -76,6 +72,5 @@ std::vector<properties::Property*> allProperties() {
 
     return properties;
 }
-
 
 }  // namespace
