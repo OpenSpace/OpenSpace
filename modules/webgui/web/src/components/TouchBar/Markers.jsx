@@ -63,6 +63,7 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let nodes = [];
   const ScreenSpaceProperties = [];
+  const ClipSpaceProperties = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners.filter(element => element.name === sceneType);
@@ -75,9 +76,14 @@ const mapStateToProps = (state) => {
     nodes.forEach((node) => {
       ScreenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ScreenSpacePosition`));
     });
+
+    nodes.forEach((node) => {
+      ClipSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ClipSpaceCoordinates`));
+    });
   }
   return {
     ScreenSpaceProperties,
+    ClipSpaceProperties,
   };
 };
 

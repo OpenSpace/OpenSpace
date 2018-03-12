@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vectorproperty.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>

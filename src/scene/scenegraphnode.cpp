@@ -514,17 +514,26 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
     const std::string tag = "Touch.Interesting";
 
     if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
+
+        properties::PropertyOwner* renderableGlobe = this->propertySubOwner("RenderableGlobe");
+
         // Get the previous screenSpacePos
-        properties::Property* ScreenSpacePosition = this->propertySubOwner("RenderableGlobe")->property("ScreenSpacePosition");
-        properties::IVec2Property* p = static_cast<properties::IVec2Property*>(ScreenSpacePosition);
-        properties::IVec2Property::ValueType value = *p;
-        glm::ivec2 prevScreenSpacePos = glm::ivec2(value[0], value[1]);
+        properties::Property* ScreenSpacePosition = renderableGlobe->property("ScreenSpacePosition");
+        properties::IVec2Property* p1 = static_cast<properties::IVec2Property*>(ScreenSpacePosition);
+        properties::IVec2Property::ValueType screenSpaceValue = *p1;
+        glm::ivec2 prevScreenSpacePos = glm::ivec2(screenSpaceValue[0], screenSpaceValue[1]);
+
+        // Get the previous clipSpaceCoords
+        properties::Property* clipSpaceCoordinates = renderableGlobe->property("ClipSpaceCoordinates");
+        properties::DVec4Property* p2 = static_cast<properties::DVec4Property*>(clipSpaceCoordinates);
+        properties::DVec4Property::ValueType clipSpaceValue = *p2;
+        glm::dvec4 prevClipSpaceCoord = glm::dvec4(clipSpaceValue[0], clipSpaceValue[1], clipSpaceValue[2], clipSpaceValue[3]);
 
         // Calculate ndc
         Camera cam = newData.camera;
         glm::dvec3 worldPos = this->_worldPositionCached;
         glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(worldPos, 1.0);
-        glm::dvec2 ndc = clipSpace / clipSpace.w;
+        glm::dvec3 ndc = clipSpace / clipSpace.w;
 
          // If the object is not in the screen, we dont want to consider it at all
         if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0) {
@@ -532,8 +541,13 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
             glm::ivec2 res = wrapper.currentWindowSize();
             glm::ivec2 screenPos = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
 
-            int threshold = 2;
-            if (abs(screenPos.x - prevScreenSpacePos.x) > threshold || abs(screenPos.y - prevScreenSpacePos.y) > threshold) {
+            int depthThreshold = 80000000000, zoomThreshold = 1000000, moveThreshold = 2;
+
+            if (clipSpace.z < depthThreshold && abs(prevClipSpaceCoord.z - clipSpace.z) > zoomThreshold) {
+                clipSpaceCoordinates->set(clipSpace);
+            }
+
+            if (abs(screenPos.x - prevScreenSpacePos.x) > moveThreshold || abs(screenPos.y - prevScreenSpacePos.y) > moveThreshold) {
                 ScreenSpacePosition->set(screenPos);
             }
         }

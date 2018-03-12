@@ -169,6 +169,12 @@ namespace {
         "ScreenSpacePosition",
         "" // @TODO Missing documentation
     };
+    static const openspace::properties::Property::PropertyInfo ClipSpaceCoordinatesInfo = {
+        "ClipSpaceCoordinates",
+        "ClipSpaceCoordinates",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 using namespace openspace::properties;
@@ -202,6 +208,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
         IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)),
+        DVec4Property(ClipSpaceCoordinatesInfo, glm::dvec4(-1,-1,-1,-1))
     })
     , _debugPropertyOwner({ "Debug" })
 {
@@ -253,6 +260,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
     addProperty(_generalProperties.screenSpacePosition);
+    addProperty(_generalProperties.clipSpaceCoordinates);
 
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
