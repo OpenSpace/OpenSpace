@@ -536,9 +536,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // TODO: This is where the optimization will take place later on!?
         // Use Camera Pos, Dir & FoV to decide which nodes to render!?
         // Therefore is will be moved to render() later on!
-        _fullData.clear();
-        auto insertData = _octreeManager->traverseData();
-        _fullData.insert(_fullData.end(), insertData.begin(), insertData.end());
+        //_fullData.clear();
+        //auto insertData = _octreeManager->traverseData();
+        //_fullData.insert(_fullData.end(), insertData.begin(), insertData.end());
 
         createDataSlice(ColumnOption(option));
 
@@ -727,7 +727,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 bool RenderableGaiaStars::readFitsFile() {
     std::string _file = _fitsFilePath;
     _fullData.clear();
-    _octreeManager->constructOctree(_numLevelsInOctree);
+    _octreeManager->initOctree();
 
     LINFO("Loading FITS file: " + _file);
 
@@ -828,23 +828,11 @@ bool RenderableGaiaStars::readFitsFile() {
                 }
             }
 
-            /*if (i % 100000 == 0) {
-                LINFO(std::to_string(i / 1000) + "k out of " + std::to_string(nStars) +
-                    " stars sorted!");
-            }*/
-
             if (!nullArray) {
-                // Get index of Octree leaf (when using a full octree).
-                insertIndex = _octreeManager->getLeafIndex(posXcol[i], posYcol[i], posZcol[i]);
-                /*LINFO("Index: " + std::to_string(insertIndex) + " Pos (" + 
-                    std::to_string(posXcol[i]) + ", " + std::to_string(posYcol[i]) + ", " + 
-                    std::to_string(posZcol[i]) + ") ");*/
-
-                // Insert star into octree (direct to leaf node with full octrees).
-                // TODO: Insert into correct subfile!
-                // Sort in Morton order (z-order?)
-                _octreeManager->insert(insertIndex, values);
-                //_fullData.insert(_fullData.end(), values.begin(), values.end());
+                // Insert star into octree.
+                // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
+                _octreeManager->insert(values);
+                _fullData.insert(_fullData.end(), values.begin(), values.end());
             }
             else {
                 nNullArr++;
@@ -852,11 +840,11 @@ bool RenderableGaiaStars::readFitsFile() {
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
-        //_octreeManager->printStarsPerNode();
+        _octreeManager->printStarsPerNode();
 
         // Insert dummy data so isReady() accepts it.
         float dummy = 0.0;
-        _fullData.insert(_fullData.end(), dummy);
+        //_fullData.insert(_fullData.end(), dummy);
     }
    
     return true;

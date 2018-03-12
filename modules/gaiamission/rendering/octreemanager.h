@@ -32,37 +32,41 @@ namespace openspace {
 
 class OctreeManager {
 public:
-    struct LeafNode {
-        std::vector<float> _data;
-        int _originX;
-        int _originY;
-        int _originZ;
-        size_t _halfDimesion;
-        size_t _numStars;
+    struct OctreeNode {
+        std::shared_ptr<OctreeNode> Children[8];
+        std::shared_ptr<OctreeNode> Parent; // Remove?
+        std::vector<float> data;
+        float originX;
+        float originY;
+        float originZ;
+        float halfDimension;
+        size_t numStars;
+        bool isLeaf;
     };
 
     OctreeManager();
     ~OctreeManager();
 
-    bool constructOctree(size_t totalDepth);
-    size_t getLeafIndex(float posX, float posY, float posZ, float origX = 0.0, 
-        float origY = 0.0, float origZ = 0.0, int depth = 1, size_t index = 0);
-    void insert(size_t insertIndex, std::vector<float> starValues);
+    bool initOctree();
+    size_t getChildIndex(float posX, float posY, float posZ, 
+        float origX = 0.0, float origY = 0.0, float origZ = 0.0);
+    void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
     std::vector<float> traverseData();
 
-    size_t numTotalNodes() const;
-    size_t numStarsPerNode(size_t nodeIndex) const;
-    size_t numNodesPerFile() const;
-    size_t totalDepth() const;
-
 private:
     const size_t MAX_DIST = 100; // Radius of Gaia DR1 in kParsec
-    std::vector<LeafNode> _allLeafNodes;
+    const size_t MAX_STARS_PER_NODE = 50000;
 
     size_t getFirstChild(size_t idx) const;
     size_t getParent(size_t idx) const;
 
+    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
+        std::string prefix) const;
+    bool insertInNode(std::shared_ptr<OctreeNode> node,
+        std::vector<float> starValues, int depth = 1);
+
+    std::unique_ptr<OctreeNode> _root;
     size_t _totalNodes;
     size_t _numNodesPerFile;
     size_t _totalDepth;

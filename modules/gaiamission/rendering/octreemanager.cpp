@@ -50,111 +50,150 @@ OctreeManager::OctreeManager()
 OctreeManager::~OctreeManager() {   }
 
 
-bool OctreeManager::constructOctree(size_t totalDepth) {
+bool OctreeManager::initOctree() {
     
-    LDEBUG("Constructing Octree");
-
-    _totalDepth = totalDepth;
-    _totalNodes = static_cast<size_t>((pow(8, _totalDepth + 1) - 1) / 7);
-    _numLeafNodes = static_cast<size_t>(pow(8, _totalDepth));
-    _numInnerNodes = _totalNodes - _numLeafNodes;
-
-    _allLeafNodes.clear();
-    _allLeafNodes.resize(_numLeafNodes);
-
-    for (size_t i = 0; i < _numLeafNodes; ++i) {
-        _allLeafNodes[i] = LeafNode();
-        _allLeafNodes[i]._numStars = 0;
-        _allLeafNodes[i]._halfDimesion = MAX_DIST / static_cast<size_t>(pow(2, _totalDepth));
-        _allLeafNodes[i]._data = std::vector<float>();
+    LDEBUG("Initializing Octree");
+    _root = std::make_unique<OctreeNode>();
+    
+    for (size_t i = 0; i < 8; ++i) {
+        _numLeafNodes++;
+        _root->Children[i] = std::make_unique<OctreeNode>();
+        //_root->Children[i]->Parent = _root;
+        _root->Children[i]->data = std::vector<float>();
+        _root->Children[i]->isLeaf = true;
+        _root->Children[i]->numStars = 0;
+        _root->Children[i]->halfDimension = MAX_DIST / 2;
+        _root->Children[i]->originX = (i%2 == 0) ? _root->Children[i]->halfDimension
+            : -_root->Children[i]->halfDimension;
+        _root->Children[i]->originY = (i%4 < 2) ? _root->Children[i]->halfDimension
+            : -_root->Children[i]->halfDimension;
+        _root->Children[i]->originZ = (i < 4) ? _root->Children[i]->halfDimension
+            : -_root->Children[i]->halfDimension;
     }
-   
+
     return true;
 }
 
-size_t OctreeManager::getLeafIndex(float posX, float posY, float posZ, float origX, 
-    float origY, float origZ, int depth, size_t index) {
+size_t OctreeManager::getChildIndex(float posX, float posY, float posZ, float origX, 
+    float origY, float origZ) {
 
-    // Get the corresponding leaf node index by recursion.
-    if (depth > _totalDepth) return index;
-    //LDEBUG("Current Depth: " + std::to_string(depth));
+    size_t index = 0;
 
-    // Get the halfDimension and starting index of this layer.
-    size_t halfDim = MAX_DIST / static_cast<size_t>(pow(2, depth));
-    //size_t index = static_cast<size_t>((pow(8, depth) - 1) / 7);;
-    index = getFirstChild(index);
+    if (posX < origX) index += 1;
+    if (posY < origY) index += 2;
+    if (posZ < origZ) index += 4;
 
-    if (posX < origX) {
-        index += 1;
-        origX = origX - halfDim;
-    }
-    else {
-        origX = origX + halfDim;
-    }
-    if (posY < origY) {
-        index += 2;
-        origY = origY - halfDim;
-    }
-    else {
-        origY = origY + halfDim;
-    }
-    if (posZ < origZ) {
-        index += 4;
-        origZ = origZ - halfDim;
-    }
-    else {
-        origZ = origZ + halfDim;
-    }
-
-    return getLeafIndex(posX, posY, posZ, origX, origY, origZ, ++depth, index);
+    return index;
 }
 
-void OctreeManager::insert(size_t insertIndex, std::vector<float> starValues) {
+bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node, 
+    std::vector<float> starValues, int depth) {
 
-    size_t leafIndex = insertIndex - _numInnerNodes;
-    // Test: Simple optimization - Only store 100 stars per node!
-    if (_allLeafNodes[leafIndex]._numStars < 100) {
-        _allLeafNodes[leafIndex]._numStars++;
-        _allLeafNodes[leafIndex]._data.insert(_allLeafNodes[leafIndex]._data.end(),
-            starValues.begin(), starValues.end());
+    if (node->isLeaf && node->numStars < MAX_STARS_PER_NODE) {
+        // Node is a leaf and it's not yet full -> insert star.
+        node->numStars++;
+        node->data.insert(node->data.end(), starValues.begin(), starValues.end());
+        if (depth > _totalDepth) _totalDepth = depth;
+        return true;
     }
+    else if (node->isLeaf) {
+        // Too many stars in leaf node, subdivide into 8 new nodes.
+        size_t valuesPerStar = starValues.size();
+        
+        // Create children.
+        for (size_t i = 0; i < 8; ++i) {
+            _numLeafNodes++;
+            node->Children[i] = std::make_unique<OctreeNode>();
+            node->Children[i]->isLeaf = true;
+            node->Children[i]->numStars = 0;
+            node->Children[i]->data = std::vector<float>();
+            node->Children[i]->Parent = node;
+            node->Children[i]->halfDimension = node->halfDimension / 2;
+            
+            // Calculate new origin.
+            node->Children[i]->originX = node->originX;
+            node->Children[i]->originX += (i % 2 == 0) ? node->Children[i]->halfDimension
+                : -node->Children[i]->halfDimension;
+            node->Children[i]->originY = node->originY;
+            node->Children[i]->originY += (i % 4 < 2) ? node->Children[i]->halfDimension
+                : -node->Children[i]->halfDimension;
+            node->Children[i]->originZ = node->originZ;
+            node->Children[i]->originZ += (i < 4) ? node->Children[i]->halfDimension
+                : -node->Children[i]->halfDimension;
+        }
+
+        // Distribute stars from parent node. 
+        for (size_t n = 0; n < node->numStars; ++n) {
+            auto first = node->data.begin() + n * valuesPerStar;
+            auto last = node->data.begin() + n * valuesPerStar + valuesPerStar;
+            std::vector<float> tmpValues(first, last);
+            //LINFO("tmpValues.size: " + std::to_string(tmpValues.size()));
+
+            size_t index = getChildIndex(tmpValues[0], tmpValues[1], tmpValues[2], 
+                node->originX, node->originY, node->originZ);
+            insertInNode(node->Children[index], tmpValues, depth);
+        }
+
+        // Clean up parent.
+        node->isLeaf = false;
+        node->data.clear();
+        node->numStars = 0;
+        _numLeafNodes--;
+        _numInnerNodes++;
+
+    }
+
+    // Node is an inner node, keep recursion going.
+    // This will also take care of the new star when a subdivision has taken place.
+    size_t index = getChildIndex(starValues[0], starValues[1], starValues[2], 
+        node->originX, node->originY, node->originZ);
+
+    return insertInNode(node->Children[index], starValues, ++depth);
+}
+
+void OctreeManager::insert(std::vector<float> starValues) {
+
+    size_t index = getChildIndex(starValues[0], starValues[1], starValues[2]);
+
+    insertInNode(_root->Children[index], starValues);
 }
 
 void OctreeManager::printStarsPerNode() const {
 
-    for (size_t i = 0; i < _numLeafNodes; ++i) {
-        LINFO("NumStars in node " + std::to_string(i) + ": " + 
-            std::to_string(numStarsPerNode(i)));
-    }
+    auto accumulatedString = std::string();
 
+    for (int i = 0; i < 8; ++i) {
+        auto prefix = "{" + std::to_string(i);
+        accumulatedString += printStarsPerNode(_root->Children[i], prefix);
+    }
+    LINFO("Number of stars per node: " + accumulatedString);
+    LINFO("Number of leaf nodes: " + std::to_string(_numLeafNodes));
+    LINFO("Number of inner nodes: " + std::to_string(_numInnerNodes));
+    LINFO("Depth of tree: " + std::to_string(_totalDepth));
+}
+
+std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node, 
+    std::string prefix) const {
+    
+    if (node->isLeaf) {
+        return prefix + "} : " + std::to_string(node->numStars) + "\n";
+    }
+    else {
+        auto str = std::string();
+        for (int i = 0; i < 8; ++i) {
+            auto pref = prefix + "->" + std::to_string(i);
+            str += printStarsPerNode(node->Children[i], pref);
+        }
+        return str;
+    }
 }
 
 std::vector<float> OctreeManager::traverseData() {
     auto renderData = std::vector<float>();
 
-    for (size_t i = 0; i < _numLeafNodes; ++i) {
-        renderData.insert(renderData.end(), 
-            _allLeafNodes[i]._data.begin(), _allLeafNodes[i]._data.end());
-    }
     //LINFO("RenderData.size: " + std::to_string(renderData.size()));
 
     return renderData;
-}
-
-size_t OctreeManager::numTotalNodes() const { 
-    return _totalNodes;
-}
-
-size_t OctreeManager::numStarsPerNode(size_t nodeIndex) const {
-    return _allLeafNodes[nodeIndex]._numStars;
-}
-
-size_t OctreeManager::numNodesPerFile() const { 
-    return _numNodesPerFile;
-}
-
-size_t OctreeManager::totalDepth() const {
-    return _totalDepth;
 }
 
 size_t OctreeManager::getFirstChild(size_t idx) const {
