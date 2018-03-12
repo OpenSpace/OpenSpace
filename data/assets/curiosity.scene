@@ -6,7 +6,7 @@ asset.require('spice/base')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 
---local CuriosityModelAsset =
+local CuriosityModelAsset =
 asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 local MarsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
