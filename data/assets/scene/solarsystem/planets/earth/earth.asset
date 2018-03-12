@@ -16,6 +16,7 @@ local Earth = {
         Type = "RenderableGlobe",
         Radii = earthEllipsoid,
         SegmentsPerPatch = 64,
+        PerformShading = false,
         Layers = {
             ColorLayers = {
                 {
