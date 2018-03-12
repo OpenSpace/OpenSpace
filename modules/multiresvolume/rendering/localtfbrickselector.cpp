@@ -30,10 +30,6 @@
 #include <algorithm>
 #include <cassert>
 
-namespace {
-    constexpr const char* _loggerCat = "LocalTfBrickSelector";
-} // namespace
-
 namespace openspace {
 
 LocalTfBrickSelector::LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm,
@@ -355,7 +351,7 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
                 brickIndex
             );
             float error = 0;
-            for (int i = 0; i < gradients.size(); i++) {
+            for (size_t i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
                 ghoul_assert(sample >= 0, "@MISSING");
@@ -372,7 +368,7 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
                 brickIndex
             );
             float error = 0;
-            for (int i = 0; i < gradients.size(); i++) {
+            for (size_t i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5f) / tfWidth;
                 float sample = histogram->interpolate(x);
                 ghoul_assert(sample >= 0, "@MISSING");

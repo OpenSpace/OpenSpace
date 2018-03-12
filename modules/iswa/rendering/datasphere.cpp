@@ -54,7 +54,11 @@ void DataSphere::initialize() {
     IswaCygnet::initialize();
 
     //rotate 90 degrees because of the texture coordinates in PowerScaledSphere
-    _rotation = glm::rotate(_rotation, (float)M_PI_2, glm::vec3(1.0, 0.0, 0.0));
+    _rotation = glm::rotate(
+        _rotation,
+        static_cast<float>(M_PI_2),
+        glm::vec3(1.0, 0.0, 0.0)
+    );
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();

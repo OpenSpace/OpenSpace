@@ -122,9 +122,7 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child,
-    Asset::State childState)
-{
+void Asset::requiredAssetChangedState(std::shared_ptr<Asset>, Asset::State childState) {
     if (!isLoaded()) {
         // Prohibit state change to SyncResolved if additional requirements
         // may still be added.

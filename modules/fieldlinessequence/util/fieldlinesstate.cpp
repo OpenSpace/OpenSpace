@@ -345,13 +345,13 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 
     const std::string timeStr = Time(_triggerTime).ISO8601();
     const size_t nLines       = _lineStart.size();
-    const size_t nPoints      = _vertexPositions.size();
+    // const size_t nPoints      = _vertexPositions.size();
     const size_t nExtras      = _extraQuantities.size();
 
     size_t pointIndex = 0;
     for (size_t lineIndex = 0; lineIndex < nLines; ++lineIndex) {
         json jData = json::array();
-        for (size_t i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
+        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = {pos.x, pos.y, pos.z};
 
