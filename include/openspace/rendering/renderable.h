@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -99,6 +100,9 @@ public:
 
 protected:
     properties::BoolProperty _enabled;
+    properties::FloatProperty _opacity;
+
+    void setRenderBinFromOpacity();
 
 private:
     RenderBin _renderBin;

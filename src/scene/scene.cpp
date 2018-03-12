@@ -526,6 +526,13 @@ void Scene::updateInterpolations() {
             static_cast<double>(usPassed) /
             static_cast<double>(i.durationSeconds * 1000000)
         );
+
+        // @FRAGILE(abock): This method might crash if someone deleted the property
+        //                  underneath us. We take care of removing entire PropertyOwners,
+        //                  but we assume that Propertys live as long as their
+        //                  SceneGraphNodes. This is true in general, but if Propertys are
+        //                  created and destroyed often by the SceneGraphNode, this might
+        //                  become a problem.
         i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f), i.easingFunction);
 
         i.isExpired = (t >= 1.f);
