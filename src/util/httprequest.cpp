@@ -397,6 +397,10 @@ bool HttpFileDownload::initDownload() {
     return true;
 }
 
+const std::string& HttpFileDownload::destination() const {
+    return _destination;
+}
+
 bool HttpFileDownload::deinitDownload() {
     _file.close();
     --nCurrentFilehandles;
