@@ -131,7 +131,7 @@ void NavigationHandler::setCamera(Camera* camera) {
 }
 
 void NavigationHandler::resetCameraDirection() {
-    LINFO("Setting camera direction to point at focus node: " << focusNode()->name());
+    LINFO("Setting camera direction to point at focus node.");
     _orbitalNavigator->startInterpolateCameraDirection(*_camera);    
 }
 
@@ -208,7 +208,7 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
 {
     bool readSuccessful = true;
 
-    std::string focus = "Moon";
+    std::string focus;
     glm::dvec3 cameraPosition;
     glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
 
