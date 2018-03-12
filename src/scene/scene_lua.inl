@@ -24,6 +24,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/easing.h>
 #include <regex>
 
 namespace openspace {
@@ -57,7 +58,9 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
 
 void applyRegularExpression(lua_State* L, std::regex regex,
                             std::vector<properties::Property*> properties,
-                            double interpolationDuration, std::string groupName = "")
+                            double interpolationDuration,
+                            const std::string& groupName,
+                            ghoul::EasingFunction easingFunction)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -97,13 +100,15 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                 );
             } else {
                 if (interpolationDuration == 0.0) {
+                    OsEng.renderEngine().scene()->removeInterpolation(prop);
                     prop->setLuaValue(L);
                 }
                 else {
                     prop->setLuaInterpolationTarget(L);
                     OsEng.renderEngine().scene()->addInterpolation(
                         prop,
-                        static_cast<float>(interpolationDuration)
+                        static_cast<float>(interpolationDuration),
+                        easingFunction
                     );
                 }
             }
@@ -139,7 +144,8 @@ std::string extractUriWithoutGroupName(std::string uri) {
 namespace openspace::luascriptfunctions {
 
 int setPropertyCall_single(properties::Property& prop, const std::string& uri,
-                          lua_State* L, double duration)
+                          lua_State* L, double duration,
+                          ghoul::EasingFunction eastingFunction)
 {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -160,13 +166,15 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     }
     else {
         if (duration == 0.0) {
+            OsEng.renderEngine().scene()->removeInterpolation(&prop);
             prop.setLuaValue(L);
         }
         else {
             prop.setLuaInterpolationTarget(L);
             OsEng.renderEngine().scene()->addInterpolation(
                 &prop,
-                static_cast<float>(duration)
+                static_cast<float>(duration),
+                eastingFunction
             );
         }
     }
@@ -189,12 +197,14 @@ int property_setValue(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-    ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::property_setValue");
+    ghoul::lua::checkArgumentsAndThrow(L, { 2, 5 }, "lua::property_setValue");
     defer { lua_settop(L, 0); };
 
     std::string uriOrRegex = luaL_checkstring(L, 1);
     std::string optimization;
     double interpolationDuration = 0.0;
+    std::string easingMethodName;
+    ghoul::EasingFunction easingMethod = ghoul::EasingFunction::Linear;
 
     if (lua_gettop(L) >= 3) {
         if (lua_type(L, 3) == LUA_TNUMBER) {
@@ -204,7 +214,7 @@ int property_setValue(lua_State* L) {
             optimization = luaL_checkstring(L, 3);
         }
 
-        if (lua_gettop(L) == 4) {
+        if (lua_gettop(L) >= 4) {
             if (lua_type(L, 4) == LUA_TNUMBER) {
                 interpolationDuration = luaL_checknumber(L, 4);
             }
@@ -213,8 +223,32 @@ int property_setValue(lua_State* L) {
             }
         }
 
+        if (lua_gettop(L) == 5) {
+            easingMethodName = luaL_checkstring(L, 5);
+        }
+
         // Later functions expect the value to be at the last position on the stack
         lua_pushvalue(L, 2);
+    }
+
+    if (interpolationDuration == 0.0 && !easingMethodName.empty()) {
+        LWARNINGC(
+            "property_setValue",
+            "Easing method specified while interpolation duration is equal to 0"
+        );
+    }
+
+    if (!easingMethodName.empty()) {
+        bool correctName = ghoul::isValidEasingFunctionName(easingMethodName.c_str());
+        if (!correctName) {
+            LWARNINGC(
+                "property_setValue",
+                fmt::format("{} is not a valid easing method", easingMethodName)
+            );
+        }
+        else {
+            easingMethod = ghoul::easingFunctionFromName(easingMethodName.c_str());
+        }
     }
 
     if (optimization.empty()) {
@@ -239,12 +273,13 @@ int property_setValue(lua_State* L) {
                 std::regex(uriOrRegex),
                 allProperties(),
                 interpolationDuration,
-                groupName
+                groupName,
+                easingMethod
             );
         }
         catch (const std::regex_error& e) {
             LERRORC(
-                "property_setValueRegex",
+                "property_setValue",
                 fmt::format(
                     "Malformed regular expression: '{}': {}", uriOrRegex, e.what()
                 )
@@ -258,7 +293,9 @@ int property_setValue(lua_State* L) {
                 L,
                 std::regex(uriOrRegex),
                 allProperties(),
-                interpolationDuration
+                interpolationDuration,
+                "",
+                easingMethod
             );
         }
         catch (const std::regex_error& e) {
@@ -283,7 +320,13 @@ int property_setValue(lua_State* L) {
             );
             return 0;
         }
-        return setPropertyCall_single(*prop, uriOrRegex, L, interpolationDuration);
+        return setPropertyCall_single(
+            *prop,
+            uriOrRegex,
+            L,
+            interpolationDuration,
+            easingMethod
+        );
     }
     else {
         LERRORC(

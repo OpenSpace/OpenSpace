@@ -442,7 +442,12 @@ void NumericalProperty<T>::setStringInterpolationTarget(std::string value) {
 }
 
 template <typename T>
-void NumericalProperty<T>::interpolateValue(float t) {
+void NumericalProperty<T>::interpolateValue(float t,
+                                            ghoul::EasingFunc<float> easingFunction)
+{
+    if (easingFunction) {
+        t = easingFunction(t);
+    }
     TemplateProperty<T>::setValue(static_cast<T>(
         glm::mix(_interpolationStart, _interpolationEnd, t)
     ));

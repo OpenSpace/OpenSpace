@@ -253,6 +253,6 @@ std::string Property::generateAdditionalDescription() const {
 void Property::setInterpolationTarget(ghoul::any) {}
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::setStringInterpolationTarget(std::string) {}
-void Property::interpolateValue(float) {}
+void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

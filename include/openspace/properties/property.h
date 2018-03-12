@@ -28,6 +28,7 @@
 #include <openspace/properties/propertydelegate.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/easing.h>
 
 #include <functional>
 #include <string>
@@ -370,7 +371,8 @@ public:
     virtual void setLuaInterpolationTarget(lua_State* state);
     virtual void setStringInterpolationTarget(std::string value);
     
-    virtual void interpolateValue(float t);
+    virtual void interpolateValue(float t,
+        ghoul::EasingFunc<float> easingFunction = nullptr);
 
 protected:
     static const char* IdentifierKey;

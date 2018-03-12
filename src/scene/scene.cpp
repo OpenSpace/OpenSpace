@@ -35,19 +35,17 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-
 #include <algorithm>
 #include <chrono>
 #include <iostream>
@@ -121,6 +119,11 @@ void Scene::unregisterNode(SceneGraphNode* node) {
         _topologicallySortedNodes.end()
     );
     _nodesByName.erase(node->name());
+    // Just try to remove all properties; if the property doesn't exist, the
+    // removeInterpolation will not do anything
+    for (properties::Property* p : node->properties()) {
+        removeInterpolation(p);
+    }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
@@ -441,7 +444,28 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     return rawNodePointer;
 }
 
-void Scene::addInterpolation(properties::Property* prop, float durationSeconds) {
+void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
+                             ghoul::EasingFunction easingFunction)
+{
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    ghoul_precondition(durationSeconds > 0.0, "durationSeconds must be positive");
+    ghoul_postcondition(
+        std::find_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [prop](const InterpolationInfo& info) {
+                return info.prop == prop && !info.isExpired;
+            }
+        ) != _interpolationInfos.end(),
+        "A new interpolation record exists for p that is not expired"
+    );
+
+    ghoul::EasingFunc<float> func =
+        easingFunction == ghoul::EasingFunction::Linear
+         ?
+        nullptr :
+        ghoul::easingFunction<float>(easingFunction);
+
     // First check if the current property already has an interpolation information
     for (std::vector<InterpolationInfo>::iterator it = _interpolationInfos.begin();
         it != _interpolationInfos.end();
@@ -450,6 +474,7 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds) 
         if (it->prop == prop) {
             it->beginTime = std::chrono::steady_clock::now();
             it->durationSeconds = durationSeconds;
+            it->easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
             return;
@@ -460,8 +485,32 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds) 
     i.prop = prop;
     i.beginTime = std::chrono::steady_clock::now();
     i.durationSeconds = durationSeconds;
+    i.easingFunction = func;
 
     _interpolationInfos.push_back(std::move(i));
+}
+
+void Scene::removeInterpolation(properties::Property* prop) {
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    ghoul_postcondition(
+        std::find_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [prop](const InterpolationInfo& info) {
+                return info.prop == prop;
+            }
+        ) == _interpolationInfos.end(),
+        "No interpolation record exists for prop"
+    );
+
+    _interpolationInfos.erase(
+        std::remove_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [prop](const InterpolationInfo& info) { return info.prop == prop; }
+        ),
+        _interpolationInfos.end()
+    );
 }
 
 void Scene::updateInterpolations() {
@@ -477,7 +526,7 @@ void Scene::updateInterpolations() {
             static_cast<double>(usPassed) /
             static_cast<double>(i.durationSeconds * 1000000)
         );
-        i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f));
+        i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f), i.easingFunction);
 
         i.isExpired = (t >= 1.f);
     }
@@ -494,7 +543,6 @@ void Scene::updateInterpolations() {
     );
 }
 
-
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
@@ -508,35 +556,42 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 {},
-                "name, value [, duration, optimization]",
+                "name, value [, duration, easing, optimization]",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
                 "to match the type that the property (or properties) expect. If the "
                 "third is not present or is '0', the value changes instantly, otherwise "
                 "the change will take that many seconds and the value is interpolated at "
-                "each steap in between. The fourth argument must be either empty, "
-                "'regex', or 'single'. If the last argument is empty (the default), the "
-                "URI is interpreted using a wildcard in which '*' is expanded to '(.*)' "
-                "and bracketed components '{ }' are interpreted as group tag names. "
-                "Then, the passed value will be set on all properties that fit the regex "
-                "+ group name combination. If the third argument is 'regex' neither the "
-                "'*' expansion, nor the group tag expansion is performed and the first "
-                "argument is used as an ECMAScript style regular expression that matches "
-                "against the fully qualified IDs of properties. If the third arugment is "
-                "'single' no substitutions are performed and exactly 0 or 1 properties "
-                "are changed."
+                "each steap in between. The fourth parameter is an optional easing "
+                "function if a 'duration' has been specified. If 'duration' is 0, this "
+                "parameter value is ignored. Otherwise, it can be one of many supported "
+                "easing functions. See easing.h for available functions. The fifth "
+                "argument must be either empty, 'regex', or 'single'. If the last "
+                "argument is empty (the default), the URI is interpreted using a "
+                "wildcard in which '*' is expanded to '(.*)' and bracketed components "
+                "'{ }' are interpreted as group tag names. Then, the passed value will "
+                "be set on all properties that fit the regex + group name combination. "
+                "If the third argument is 'regex' neither the '*' expansion, nor the "
+                "group tag expansion is performed and the first argument is used as an "
+                "ECMAScript style regular expression that matches against the fully "
+                "qualified IDs of properties. If the third arugment is 'single' no "
+                "substitutions are performed and exactly 0 or 1 properties are changed."
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
                 {},
-                "URI, value [, duration]",
+                "URI, value [, duration, easing]",
                 "Sets the property identified by the URI in the first argument. The "
                 "second argument can be any type, but it has to match the type that the "
                 "property expects. If the third is not present or is '0', the value "
                 "changes instantly, otherwise the change will take that many seconds and "
-                "the value is interpolated at each steap in between. This is the same as "
-                "calling the setValue method and passing 'single' as the fourth argument."
+                "the value is interpolated at each steap in between. The fourth "
+                "parameter is an optional easing function if a 'duration' has been "
+                "specified. If 'duration' is 0, this parameter value is ignored. "
+                "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
+                "This is the same as calling the setValue method and passing 'single' as "
+                "the fourth argument to setPropertyValue."
             },
             {
                 "getPropertyValue",
