@@ -262,7 +262,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _columnNamesList(ColumnNamesInfo)
     , _program(nullptr)
     , _nValuesPerStar(0)
-    , _numLevelsInOctree(2) // TODO: Make editable?
+    , _numLevelsInOctree(8) // TODO: Make editable?
     , _vao(0)
     , _vbo(0)
 {
@@ -525,13 +525,20 @@ void RenderableGaiaStars::update(const UpdateData&) {
         const int option = _columnOption;
 
         // Reload fits file (as long as it's not the first initialization)!
-        if (_vao != 0) {
-            // Bypass cached files and go directly to read function.
+        if (_vao != 0) { 
+            // This will reconstruct the Octree as well!
             bool success = readFitsFile();
             if (!success) {
                 throw ghoul::RuntimeError("Error loading FITS data");
             }
         }
+        // Traverse Octree and build _fulldata in correct order!
+        // TODO: This is where the optimization will take place later on!?
+        // Use Camera Pos, Dir & FoV to decide which nodes to render!?
+        // Therefore is will be moved to render() later on!
+        _fullData.clear();
+        auto insertData = _octreeManager->traverseData();
+        _fullData.insert(_fullData.end(), insertData.begin(), insertData.end());
 
         createDataSlice(ColumnOption(option));
 
@@ -556,6 +563,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         const size_t nStars = _fullData.size() / _nValuesPerStar;
         const size_t nValues = _slicedData.size() / nStars;
+        LINFO("nStars: " + std::to_string(nStars));
 
         GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
@@ -826,14 +834,16 @@ bool RenderableGaiaStars::readFitsFile() {
             }*/
 
             if (!nullArray) {
-                // Get index of Octree leaf and insert star data.
+                // Get index of Octree leaf (when using a full octree).
                 insertIndex = _octreeManager->getLeafIndex(posXcol[i], posYcol[i], posZcol[i]);
                 /*LINFO("Index: " + std::to_string(insertIndex) + " Pos (" + 
                     std::to_string(posXcol[i]) + ", " + std::to_string(posYcol[i]) + ", " + 
                     std::to_string(posZcol[i]) + ") ");*/
-                _octreeManager->insert(insertIndex, values);
+
+                // Insert star into octree (direct to leaf node with full octrees).
                 // TODO: Insert into correct subfile!
                 // Sort in Morton order (z-order?)
+                _octreeManager->insert(insertIndex, values);
                 //_fullData.insert(_fullData.end(), values.begin(), values.end());
             }
             else {
@@ -842,9 +852,11 @@ bool RenderableGaiaStars::readFitsFile() {
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
+        //_octreeManager->printStarsPerNode();
 
-        //_fullData = _octreeManager->getOctreeData();
-        _octreeManager->printStarsPerNode();
+        // Insert dummy data so isReady() accepts it.
+        float dummy = 0.0;
+        _fullData.insert(_fullData.end(), dummy);
     }
    
     return true;

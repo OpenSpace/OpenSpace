@@ -49,6 +49,7 @@ public:
         float origY = 0.0, float origZ = 0.0, int depth = 1, size_t index = 0);
     void insert(size_t insertIndex, std::vector<float> starValues);
     void printStarsPerNode() const;
+    std::vector<float> traverseData();
 
     size_t numTotalNodes() const;
     size_t numStarsPerNode(size_t nodeIndex) const;

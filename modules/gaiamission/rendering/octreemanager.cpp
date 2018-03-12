@@ -45,9 +45,7 @@ OctreeManager::OctreeManager()
     , _totalDepth(0)
     , _numLeafNodes(0)
     , _numInnerNodes(0)
-{
-
-}
+{   }
 
 OctreeManager::~OctreeManager() {   }
 
@@ -114,18 +112,33 @@ size_t OctreeManager::getLeafIndex(float posX, float posY, float posZ, float ori
 void OctreeManager::insert(size_t insertIndex, std::vector<float> starValues) {
 
     size_t leafIndex = insertIndex - _numInnerNodes;
-    _allLeafNodes[leafIndex]._numStars++;
-    _allLeafNodes[leafIndex]._data.insert(_allLeafNodes[leafIndex]._data.end(),
-        starValues.begin(), starValues.end());
-
+    // Test: Simple optimization - Only store 100 stars per node!
+    if (_allLeafNodes[leafIndex]._numStars < 100) {
+        _allLeafNodes[leafIndex]._numStars++;
+        _allLeafNodes[leafIndex]._data.insert(_allLeafNodes[leafIndex]._data.end(),
+            starValues.begin(), starValues.end());
+    }
 }
 
 void OctreeManager::printStarsPerNode() const {
 
     for (size_t i = 0; i < _numLeafNodes; ++i) {
-        LINFO("NumStars in node " + std::to_string(i) + ": " + std::to_string(numStarsPerNode(i)));
+        LINFO("NumStars in node " + std::to_string(i) + ": " + 
+            std::to_string(numStarsPerNode(i)));
     }
 
+}
+
+std::vector<float> OctreeManager::traverseData() {
+    auto renderData = std::vector<float>();
+
+    for (size_t i = 0; i < _numLeafNodes; ++i) {
+        renderData.insert(renderData.end(), 
+            _allLeafNodes[i]._data.begin(), _allLeafNodes[i]._data.end());
+    }
+    //LINFO("RenderData.size: " + std::to_string(renderData.size()));
+
+    return renderData;
 }
 
 size_t OctreeManager::numTotalNodes() const { 
