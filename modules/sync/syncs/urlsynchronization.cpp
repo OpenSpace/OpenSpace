@@ -35,10 +35,14 @@
 #include <fstream>
 #include <numeric>
 #include <memory>
+#include <cstdio>
 
 namespace {
     constexpr const char* KeyUrl = "Url";
     constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyOverride = "Override";
+
+    constexpr const char* TempSuffix = ".tmp";
 } // namespace
 
 namespace openspace {
@@ -63,6 +67,16 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 "This optional identifier will be part of the used folder structure and, "
                 "if provided, can be used to manually find the downloaded folder in the "
                 "synchronization folder."
+            },
+            {
+                KeyOverride,
+                new BoolVerifier,
+                Optional::Yes,
+                "If this value is set to 'true' and it is not overwritten by the global "
+                "settings, the file(s) pointed to by this URLSynchronization will always "
+                "be downloaded, thus overwriting the local files. This is useful for "
+                "files that are updated regularly remotely and should be fetch at every "
+                "startup."
             }
         }
     };
@@ -84,7 +98,7 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     }
     else {
         ghoul::Dictionary urls = dict.value<ghoul::Dictionary>(KeyUrl);
-        for (int i = 1; i <= urls.size(); ++i) {
+        for (size_t i = 1; i <= urls.size(); ++i) {
             std::string url = urls.value<std::string>(std::to_string(i));
             _urls.push_back(std::move(url));
         }
@@ -101,6 +115,10 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
     else {
         _identifier = std::to_string(hash);
     }
+
+    if (dict.hasValue<bool>(KeyOverride)) {
+        _forceOverride = dict.value<bool>(KeyOverride);
+    }
 }
 
 UrlSynchronization::~UrlSynchronization() {
@@ -116,7 +134,7 @@ void UrlSynchronization::start() {
     }
     begin();
 
-    if (hasSyncFile()) {
+    if (hasSyncFile() && !_forceOverride) {
         resolve();
         return;
     }
@@ -134,7 +152,7 @@ void UrlSynchronization::start() {
 
             std::string fileDestination = directory() +
                 ghoul::filesystem::FileSystem::PathSeparator +
-                filename;
+                filename += TempSuffix;
 
             std::unique_ptr<AsyncHttpFileDownload> download =
                 std::make_unique<AsyncHttpFileDownload>(
@@ -174,7 +192,6 @@ void UrlSynchronization::start() {
             HttpRequest::RequestOptions opt;
             opt.requestTimeoutSeconds = 0;
             fileDownload->start(opt);
-
         }
 
         startedAllDownloads = true;
@@ -182,7 +199,31 @@ void UrlSynchronization::start() {
         bool failed = false;
         for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
             d->wait();
-            if (!d->hasSucceeded()) {
+            if (d->hasSucceeded()) {
+                // If we are forcing the override, we download to a temporary file first,
+                // so when we are done here, we need to rename the file to the original
+                // name
+                
+                const std::string& tempName = d->destination();
+                std::string originalName = tempName.substr(
+                    0,
+                    tempName.size() - strlen(TempSuffix)
+                );
+
+                FileSys.deleteFile(originalName);
+                int success = rename(tempName.c_str(), originalName.c_str());
+                if (success != 0) {
+                    LERRORC(
+                        "URLSynchronization",
+                        fmt::format(
+                            "Error renaming file {} to {}", tempName, originalName
+                        )
+                    );
+
+                    failed = true;
+                }
+            }
+            else {
                 failed = true;
             }
         }
@@ -191,7 +232,7 @@ void UrlSynchronization::start() {
             createSyncFile();
         }
         else {
-            for (auto& d : downloads) {
+            for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
                 d->cancel();
             }
         }

@@ -24,18 +24,15 @@
 
 #include <openspace/properties/optionproperty.h>
 
-using namespace openspace::properties;
-
 class Issue527 : public testing::Test {};
 
 TEST_F(Issue527, Regression) {
     // Error in OptionProperty if values not starting at 0 are used
-
-    OptionProperty p({ "id", "gui", "desc"});
+    openspace::properties::OptionProperty p({ "id", "gui", "desc"});
 
     p.addOptions({
-        {-1, "a" },
-        {-2, "b" }
+        { -1, "a" },
+        { -2, "b" }
     });
 
 

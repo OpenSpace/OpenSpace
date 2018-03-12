@@ -29,12 +29,14 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
 namespace {
+    constexpr const char* LoggerCat = "ScreenSpaceSpout";
+
     const char* KeyName = "Name";
 
     static const openspace::properties::Property::PropertyInfo NameInfo = {
@@ -51,7 +53,7 @@ namespace {
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
@@ -118,7 +120,7 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
     }
 
     _spoutName.onChange([this]() {
-        _isSpoutDirty = true; 
+        _isSpoutDirty = true;
         _isErrorMessageDisplayed = false;
 
         _receiver->SetActiveSender(_spoutName.value().c_str());
@@ -204,8 +206,8 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
         if (!createSuccess) {
             LWARNINGC(
-                "ScreenSpaceSpout",
-                "Could not create receiver for " << _currentSenderName
+                LoggerCat,
+                fmt::format("Could not create receiver for {}", _currentSenderName)
             );
             return;
         }
@@ -213,7 +215,7 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
     unsigned int width;
     unsigned int height;
-    
+
     bool receiveSuccess = _receiver->ReceiveTexture(
         _currentSenderName,
         width,
@@ -222,8 +224,8 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
     if (!receiveSuccess && !_isErrorMessageDisplayed) {
         LWARNINGC(
-            "ScreenSpaceSpout",
-            "Could not receive texture for " << _currentSenderName
+            LoggerCat,
+            fmt::format("Could not receive texture for {}", _currentSenderName)
         );
         _isErrorMessageDisplayed = true;
     }

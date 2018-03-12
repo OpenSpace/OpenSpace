@@ -51,7 +51,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture();
+    virtual void bindTexture() override;
 
 private:
     void loadTexture();

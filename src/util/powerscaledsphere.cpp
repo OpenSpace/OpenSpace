@@ -94,12 +94,12 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const int t = segments + 1;
             _iarray[nr] = t * (i - 1) + j + 0; //1
             ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0; //2 
+            _iarray[nr] = t * (i + 0) + j + 0; //2
             ++nr;
             _iarray[nr] = t * (i + 0) + j + 1; //3
             ++nr;
 
-            _iarray[nr] = t * (i - 1) + j + 0; //4 
+            _iarray[nr] = t * (i - 1) + j + 0; //4
             ++nr;
             _iarray[nr] = t * (i + 0) + j + 1; //5
             ++nr;
@@ -109,20 +109,20 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             /*
             _iarray[nr] = t * (i - 1) + j + 0; //1
             ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0; //2 
+            _iarray[nr] = t * (i + 0) + j + 0; //2
             ++nr;
             _iarray[nr] = t * (i + 0) + j + 1; //3
             ++nr;
             _iarray[nr] = t * (i - 1) + j + 1; //6
             ++nr;
-            _iarray[nr] = t * (i - 1) + j + 0; //4 
+            _iarray[nr] = t * (i - 1) + j + 0; //4
             ++nr;
             */
         }
     }
 }
 
-// Alternative Constructor for using accurate triaxial ellipsoid 
+// Alternative Constructor for using accurate triaxial ellipsoid
 PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
     : _vaoID(0)
     , _vBufferID(0)
@@ -181,12 +181,12 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             const int t = segments + 1;
             _iarray[nr] = t * (i - 1) + j + 0; //1
             ++nr;
-            _iarray[nr] = t * (i + 0) + j + 0; //2 
+            _iarray[nr] = t * (i + 0) + j + 0; //2
             ++nr;
             _iarray[nr] = t * (i + 0) + j + 1; //3
             ++nr;
 
-            _iarray[nr] = t * (i - 1) + j + 0; //4 
+            _iarray[nr] = t * (i - 1) + j + 0; //4
             ++nr;
             _iarray[nr] = t * (i + 0) + j + 1; //5
             ++nr;
@@ -196,7 +196,7 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
     }
 }
 
-PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy) 
+PowerScaledSphere::PowerScaledSphere(const PowerScaledSphere& cpy)
     : _vaoID(cpy._vaoID)
     , _vBufferID(cpy._vBufferID)
     , _iBufferID(cpy._iBufferID)

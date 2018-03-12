@@ -42,7 +42,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/defer.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <numeric>
 
@@ -242,7 +242,7 @@ void GuiGlobeBrowsingComponent::render() {
     if (cap.empty()) {
         LWARNINGC(
             "GlobeBrowsingGUI",
-            "Unknown server: '" << _currentServer << "'"
+            fmt::format("Unknown server: '{}'", _currentServer)
         );
     }
 

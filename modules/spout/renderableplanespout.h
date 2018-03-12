@@ -69,6 +69,6 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__
-
 #endif // WIN32
+
+#endif // __OPENSPACE_MODULE_SPOUT___RENDERABLEPLANESPOUT___H__

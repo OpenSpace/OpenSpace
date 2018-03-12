@@ -29,6 +29,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
 
 namespace {
@@ -533,7 +534,7 @@ bool FixedRotation::initialize() {
     return res;
 }
 
-glm::dmat3 FixedRotation::matrix(const Time& time) const {
+glm::dmat3 FixedRotation::matrix(const Time&) const {
     if (!_enabled) {
         return glm::dmat3();
     }
@@ -550,8 +551,11 @@ glm::dmat3 FixedRotation::matrix(const Time& time) const {
     {
         LWARNINGC(
             "FixedRotation",
-            "Dangerously collinear vectors detected: " <<
-            "x: " << x << "  y: " << y << "  z: " << z
+            fmt::format("Dangerously collinear vectors detected: x ({}) y ({}) z ({})",
+                x,
+                y,
+                z
+            )
         );
         return glm::dmat3();
     }

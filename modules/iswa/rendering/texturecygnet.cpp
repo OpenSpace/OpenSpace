@@ -42,13 +42,15 @@ TextureCygnet::~TextureCygnet() {}
 
 bool TextureCygnet::updateTexture() {
     auto texture = ghoul::io::TextureReader::ref().loadTexture(
-        (void*) _imageFile.buffer,
+        reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         _imageFile.format
     );
 
     if (texture) {
-        LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
+        LDEBUG(fmt::format(
+            "Loaded texture from image iswa cygnet with id: '{}'", _data->id
+        ));
         texture->uploadTexture();
         // Textures of planets looks much smoother with AnisotropicMipMap
         texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

@@ -38,7 +38,6 @@
 namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyName = "Name";
-    constexpr const char* _loggerCat = "ResourceSynchronization";
 } // namespace
 
 namespace openspace {

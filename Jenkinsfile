@@ -4,12 +4,12 @@ def modules = [
     "fieldlines",
     "galaxy",
     "globebrowsing",
+    "imgui",
     "iswa",
     "kameleon",
     "kameleonvolume",
     "multiresvolume",
-    "newhorizons",
-    "onscreengui",
+    "spacecraftinstruments",
     "space",
     "toyvolume",
     "volume"
@@ -36,7 +36,7 @@ stage('Build') {
                     cd build
                     cmake .. ''' +
                     flags + ''' ..
-                make -j4
+                make -j4 OpenSpace
                 '''
             }
         }
@@ -45,7 +45,7 @@ stage('Build') {
         node('windows') {
             timeout(time: 90, unit: 'MINUTES') {
                 // We specify the workspace directory manually to reduce the path length and thus try to avoid MSB3491 on Visual Studio
-                ws("C:/J/O/${env.BRANCH_NAME}") {
+                ws("C:/J/O/${env.BRANCH_NAME}/${env.BUILD_ID}") {
                     deleteDir()
                     checkout scm
                     bat '''
@@ -54,7 +54,7 @@ stage('Build') {
                         cd build
                         cmake -G "Visual Studio 15 2017 Win64" .. ''' +
                         flags + ''' ..
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:4 /p:Configuration=Debug
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug
                     '''
                 }
             }

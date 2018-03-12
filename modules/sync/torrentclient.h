@@ -35,8 +35,19 @@
 #include <unordered_map>
 
 #ifdef SYNC_USE_LIBTORRENT
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4265)
+#pragma warning (disable : 4996)
+#endif // _MSC_VER
+
 #include <libtorrent/torrent_handle.hpp>
 #include <libtorrent/session.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
+
 
 #else // SYNC_USE_LIBTORRENT
 // Dummy definition to make TorrentClient compile, these is not actually used if
@@ -86,7 +97,7 @@ public:
         TorrentProgressCallback cb);
 
     void removeTorrent(TorrentId id);
-    
+
 private:
     struct Torrent {
         TorrentId id;

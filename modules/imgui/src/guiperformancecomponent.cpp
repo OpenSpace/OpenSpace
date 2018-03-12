@@ -33,7 +33,7 @@
 
 #include <ghoul/misc/sharedmemory.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <algorithm>
 #include <numeric>

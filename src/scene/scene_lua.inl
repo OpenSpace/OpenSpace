@@ -93,11 +93,16 @@ void applyRegularExpression(lua_State* L, std::regex regex,
             }
 
             if (type != prop->typeLua()) {
-                LERRORC("property_setValue",
-                        errorLocation(L) << "Property '" <<
-                        prop->fullyQualifiedIdentifier() <<
-                        "' does not accept input of type '" << luaTypeToString(type) <<
-                        "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'"
+                LERRORC(
+                    "property_setValue",
+                    fmt::format(
+                        "{}: Property '{}' does not accept input of type '{}'. "
+                        "Requested type: '{}'",
+                        errorLocation(L),
+                        prop->fullyQualifiedIdentifier(),
+                        luaTypeToString(type),
+                        luaTypeToString(prop->typeLua())
+                    )
                 );
             } else {
                executePropertySet(prop, L);
@@ -140,9 +145,17 @@ int setPropertyCall_single(properties::Property* prop, std::string uri, lua_Stat
     using ghoul::lua::luaTypeToString;
 
     if (type != prop->typeLua()) {
-        LERRORC("property_setValue", errorLocation(L) << "Property '" << uri <<
-            "' does not accept input of type '" << luaTypeToString(type) <<
-            "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
+        LERRORC(
+            "property_setValue",
+            fmt::format(
+                "{}: Property '{}' does not accept input of type '{}'. "
+                "Requested type: '{}'",
+                errorLocation(L),
+                uri,
+                luaTypeToString(type),
+                luaTypeToString(prop->typeLua())
+            )
+        );
     }
     else {
         prop->setLuaValue(L);
@@ -199,8 +212,14 @@ int property_setValueSingle(lua_State* L) {
     } else {
         properties::Property* prop = property(uri);
         if (!prop) {
-            LERRORC("property_setValue", errorLocation(L) << "Property with URI '"
-                << uri << "' was not found");
+            LERRORC(
+                "property_setValue",
+                fmt::format(
+                    "{}: Property with URI '{}' was not found",
+                    errorLocation(L),
+                    uri
+                )
+            );
             return 0;
         }
         setPropertyCall_single(prop, uri, L, type);
@@ -291,8 +310,12 @@ int property_setValueRegex(lua_State* L) {
         );
     }
     catch (const std::regex_error& e) {
-        LERRORC("property_setValueRegex", "Malformed regular expression: '"
-            << regex << "':" << e.what());
+        LERRORC(
+            "property_setValueRegex",
+            fmt::format(
+                "Malformed regular expression: '{}': {}", regex, e.what()
+            )
+        );
     }
 
     return 0;
@@ -317,7 +340,11 @@ int property_getValue(lua_State* L) {
     if (!prop) {
         LERRORC(
             "property_getValue",
-            errorLocation(L) << "Property with URL '" << uri << "' was not found"
+            fmt::format(
+                "{}: Property with URI '{}' was not found",
+                errorLocation(L),
+                uri
+            )
         );
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
@@ -394,16 +421,16 @@ int removeSceneGraphNode(lua_State* L) {
     if (!node) {
         LERRORC(
             "removeSceneGraphNode",
-            errorLocation(L) << "Could not find node '" << nodeName << "'"
-            );
+            fmt::format("{}: Could not find node '{}'", errorLocation(L), nodeName)
+        );
         return 0;
     }
     SceneGraphNode* parent = node->parent();
     if (!parent) {
         LERRORC(
             "removeSceneGraphNode",
-            errorLocation(L) << "Cannot remove root node"
-            );
+            fmt::format("{}: Cannot remove root node", errorLocation(L))
+        );
         return 0;
     }
     node->deinitializeGL();
