@@ -71,21 +71,14 @@ public:
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
-    * remote OS parallel connection. The functions contained are
-    * -
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
+    * remote OS parallel connection.
     */
     static scripting::LuaLibrary luaLibrary();
     ParallelConnection::Status status();
     int nConnections();
     std::shared_ptr<ghoul::Event<>> connectionEvent();
 
-
-
 private:
-    //@TODO change this into the ghoul hasher for client AND server
-    uint32_t hash(const std::string &val);
     void queueInMessage(const ParallelConnection::Message& message);
 
     void sendAuthentication();
