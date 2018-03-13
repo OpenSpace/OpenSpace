@@ -74,6 +74,10 @@
 #include <ghoul/io/texture/texturewritersoil.h>
 #endif //GHOUL_USE_SOIL
 
+#ifdef GHOUL_USE_STB
+#include <ghoul/io/texture/texturereaderstb.h>
+#endif // GHOUL_USE_STB
+
 #include <array>
 #include <stack>
 
@@ -257,16 +261,14 @@ RenderEngine::RenderEngine()
         if (_doPerformanceMeasurements) {
             if (!_performanceManager) {
                 std::string loggingDir = "${BASE}";
-
-                const std::string KeyDir = ConfigurationManager::KeyLogging + "." +
-                                           ConfigurationManager::PartLogDir;
+                constexpr const char* KeyDir = ConfigurationManager::LoggingDirectory;
                 if (OsEng.configurationManager().hasKey(KeyDir)) {
                     loggingDir = OsEng.configurationManager().value<std::string>(KeyDir);
                 }
 
                 std::string prefix = "PM-";
-                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." +
-                                           ConfigurationManager::PartLogPerformancePrefix;
+                constexpr const char* KeyPrefix =
+                                           ConfigurationManager::LoggingPerformancePrefix;
                 if (OsEng.configurationManager().hasKey(KeyPrefix)) {
                     prefix = OsEng.configurationManager().value<std::string>(KeyPrefix);
                 }
@@ -404,6 +406,11 @@ void RenderEngine::initialize() {
         std::make_shared<ghoul::io::TextureWriterSOIL>()
     );
 #endif // GHOUL_USE_SOIL
+#ifdef GHOUL_USE_STB
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderSTB>()
+    );    
+#endif
 
     ghoul::io::TextureReader::ref().addReader(
         std::make_shared<ghoul::io::TextureReaderCMAP>()
@@ -463,7 +470,11 @@ void RenderEngine::deinitializeGL() {
 }
 
 void RenderEngine::updateScene() {
-    if (!_scene) return;
+    if (!_scene) {
+        return;
+    }
+
+    _scene->updateInterpolations();
 
     const Time& currentTime = OsEng.timeManager().time();
     _scene->update({

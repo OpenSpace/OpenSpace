@@ -62,7 +62,8 @@ documentation::Documentation RenderablePlaneImageOnline::Documentation() {
     };
 }
 
-RenderablePlaneImageOnline::RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary)
+RenderablePlaneImageOnline::RenderablePlaneImageOnline(
+                                                      const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
     , _texture(nullptr)

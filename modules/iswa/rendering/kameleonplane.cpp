@@ -27,13 +27,17 @@
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#ifdef __GNUC__
+#ifdef __clang__
+#elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif // __GNUC__
 
 #include <modules/iswa/ext/json.h>
-#ifdef __GNUC__
+
+#ifdef __clang__
+
+#elif defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif // __GNUC__
 

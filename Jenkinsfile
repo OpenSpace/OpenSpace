@@ -54,7 +54,7 @@ stage('Build') {
                         cd build
                         cmake -G "Visual Studio 15 2017 Win64" .. ''' +
                         flags + ''' ..
-                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /m:4 /p:Configuration=Debug
+                        msbuild.exe OpenSpace.sln /nologo /verbosity:minimal /p:Configuration=Debug /target:OpenSpace
                     '''
                 }
             }

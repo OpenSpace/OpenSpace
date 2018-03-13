@@ -231,7 +231,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
     // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
-    for (const glm::vec3 p : state.vertexPositions()) {
+    for (const glm::vec3& p : state.vertexPositions()) {
         // Load the scalars!
         for (size_t i = 0; i < nXtraScalars; i++) {
             float val;
@@ -298,7 +298,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
 
     // Load the existing SCALAR variables into kameleon.
     // Remove non-existing variables from vector
-    for (int i = 0; i < extraScalarVars.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); ++i) {
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&

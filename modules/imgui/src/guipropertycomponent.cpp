@@ -317,8 +317,8 @@ void GuiPropertyComponent::render() {
 
                     if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
                         if (lhsToken[1] != rhsToken[1]) {
-                            // If both top-level groups are in the ordering list, the order
-                            // of the iterators gives us the order of the groups
+                            // If both top-level groups are in the ordering list, the
+                            // order of the iterators gives us the order of the groups
                             return lhsIt < rhsIt;
                         }
                         else {

@@ -27,10 +27,6 @@
 
 #include <fstream>
 
-namespace {
-    constexpr const char* _loggerCat = "DataProcessor";
-} // namespace
-
 namespace openspace {
 
 DataProcessor::DataProcessor()

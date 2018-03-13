@@ -225,7 +225,9 @@ void RenderableModelProjection::initializeGL() {
     _fboUniformCache.ProjectorMatrix = _fboProgramObject->uniformLocation(
         "ProjectorMatrix"
     );
-    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation("ModelTransform");
+    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation(
+        "ModelTransform"
+    );
     _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
 
 

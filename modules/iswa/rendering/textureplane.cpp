@@ -28,10 +28,6 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
 
-namespace {
-    constexpr const char* _loggerCat = "TexturePlane";
-} // namespace
-
 namespace openspace {
 
 TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
