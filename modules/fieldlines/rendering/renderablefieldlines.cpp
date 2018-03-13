@@ -355,7 +355,7 @@ void RenderableFieldlines::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(LinePoint),
-            (void*)(sizeof(glm::vec3))
+            reinterpret_cast<void*>(sizeof(glm::vec3))
         );
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);

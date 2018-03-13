@@ -140,7 +140,7 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-    for (int i = 0; i < nBrickIndices; i++) {
+    for (size_t i = 0; i < nBrickIndices; i++) {
         _atlasMap[i] = _brickMap[brickIndices[i]];
     }
 

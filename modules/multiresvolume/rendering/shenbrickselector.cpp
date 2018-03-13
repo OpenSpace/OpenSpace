@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -23,12 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/multiresvolume/rendering/shenbrickselector.h>
-
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    constexpr const char* _loggerCat = "ShenBrickSelector";
-} // namespace
 
 namespace openspace {
 

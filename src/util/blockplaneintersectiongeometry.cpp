@@ -36,12 +36,11 @@ namespace {
 
 namespace openspace {
 
-BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(
-        glm::vec3 blockSize,
-        glm::vec3 planeNormal,
-        float planeDistance)
-    : _initialized(false)
-    , _vaoId(0)
+BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSize,
+                                                               glm::vec3 planeNormal,
+                                                               float planeDistance)
+    // : _initialized(false)
+    : _vaoId(0)
     , _vBufferId(0)
     , _size(blockSize)
 {}

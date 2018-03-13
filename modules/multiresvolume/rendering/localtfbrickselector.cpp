@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,10 +28,6 @@
 #include <openspace/util/histogram.h>
 #include <algorithm>
 #include <cassert>
-
-namespace {
-    constexpr const char* _loggerCat = "LocalTfBrickSelector";
-} // namespace
 
 namespace openspace {
 

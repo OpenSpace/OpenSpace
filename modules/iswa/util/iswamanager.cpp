@@ -51,8 +51,8 @@
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wuseless-cast"
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+// #pragma clang diagnostic ignored "-Wuseless-cast"
+// #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #elif (defined __GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuseless-cast"
@@ -661,7 +661,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
 
         for (auto list : lists) {
             json jsonList = j[list];
-            for (int i=0; i<jsonList.size(); i++) {
+            for (size_t i = 0; i < jsonList.size(); ++i) {
                 json jCygnet = jsonList.at(i);
 
                 std::string name = jCygnet["cygnetDisplayTitle"];
@@ -689,7 +689,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
-            for(int i=0; i<cdfGroups.size(); i++){
+            for(size_t i = 0; i < cdfGroups.size(); ++i) {
                 json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];
