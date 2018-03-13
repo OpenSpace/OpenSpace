@@ -121,7 +121,8 @@ void IswaDataGroup::registerProperties(){
 
 
     _useLog.onChange([this]{
-        LDEBUG("Group " + name() + " published useLogChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published useLogChanged");
         _groupEvent->publish(
             "useLogChanged",
             ghoul::Dictionary({{"useLog", _useLog.value()}})
@@ -129,7 +130,8 @@ void IswaDataGroup::registerProperties(){
     });
 
     _useHistogram.onChange([this]{
-        LDEBUG("Group " + name() + " published useHistogramChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published useHistogramChanged");
         _groupEvent->publish(
             "useHistogramChanged",
             ghoul::Dictionary({{"useHistogram", _useHistogram.value()}})
@@ -138,7 +140,8 @@ void IswaDataGroup::registerProperties(){
 
     //If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this](){
-        LDEBUG("Group " + name() + " published autoFilterChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published autoFilterChanged");
         // If autofiler is selected, use _dataProcessor to set backgroundValues
         // and unregister backgroundvalues property.
         if(_autoFilter.value()){
@@ -157,7 +160,8 @@ void IswaDataGroup::registerProperties(){
     });
 
     _normValues.onChange([this]{
-        LDEBUG("Group " + name() + " published normValuesChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published normValuesChanged");
         _groupEvent->publish(
             "normValuesChanged",
             ghoul::Dictionary({{"normValues", _normValues.value()}})
@@ -165,7 +169,8 @@ void IswaDataGroup::registerProperties(){
     });
 
     _backgroundValues.onChange([this]{
-        LDEBUG("Group " + name() + " published backgroundValuesChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
         _groupEvent->publish(
             "backgroundValuesChanged",
             ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}})
@@ -173,7 +178,8 @@ void IswaDataGroup::registerProperties(){
     });
 
     _transferFunctionsFile.onChange([this]{
-        LDEBUG("Group " + name() + " published transferFunctionsChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
         _groupEvent->publish(
             "transferFunctionsChanged",
             ghoul::Dictionary({{"transferFunctions", _transferFunctionsFile.value()}})
@@ -181,7 +187,8 @@ void IswaDataGroup::registerProperties(){
     });
 
     _dataOptions.onChange([this]{
-        LDEBUG("Group " + name() + " published dataOptionsChanged");
+        // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
         dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());
         _groupEvent->publish("dataOptionsChanged", dict);

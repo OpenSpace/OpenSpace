@@ -178,7 +178,8 @@ std::vector<float*> DataPlane::textureData(){
     std::chrono::duration<double> elapsed_seconds = end-start;
     _avgBenchmarkTime = ((_avgBenchmarkTime * (_numOfBenchmarks - 1))
                          + elapsed_seconds.count()) / _numOfBenchmarks;
-    std::cout << " processData() " << name() << std::endl;
+    // @TODO(abock): change back to name()
+    std::cout << " processData() " << identifier() << std::endl;
     std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
     std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
     // ===========

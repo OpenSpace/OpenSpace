@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -62,7 +63,8 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 {
     std::string name;
     dictionary.getValue("Name", name);
-    setName(name);
+    // @TODO(abock): Add name name()
+    setIdentifier(name);
 
     _data = std::make_shared<Metadata>();
 
@@ -124,7 +126,7 @@ void IswaCygnet::initialize() {
         _delete.onChange([this]() {
             deinitialize();
             OsEng.scriptEngine().queueScript(
-                "openspace.removeSceneGraphNode('" + name() + "')",
+                "openspace.removeSceneGraphNode('" + identifier() + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         });
@@ -138,7 +140,7 @@ void IswaCygnet::initialize() {
 
 void IswaCygnet::deinitialize() {
     if (!_data->groupName.empty()) {
-        _group->groupEvent()->unsubscribe(name());
+        _group->groupEvent()->unsubscribe(identifier());
     }
 
     unregisterProperties();
@@ -282,20 +284,31 @@ void IswaCygnet::initializeGroup() {
 
     //Subscribe to enable and delete property
     auto groupEvent = _group->groupEvent();
-    groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict) {
-        LDEBUG(name() + " Event enabledChanged");
-        _enabled.setValue(dict.value<bool>("enabled"));
-    });
+    groupEvent->subscribe(
+        identifier(),
+        "enabledChanged",
+        [&](const ghoul::Dictionary& dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event enabledChanged");
+            _enabled.setValue(dict.value<bool>("enabled"));
+        }
+    );
 
-    groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict) {
-        LDEBUG(name() + " Event alphaChanged");
-        _alpha.setValue(dict.value<float>("alpha"));
-    });
+    groupEvent->subscribe(
+        identifier(),
+        "alphaChanged",
+        [&](const ghoul::Dictionary& dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event alphaChanged");
+            _alpha.setValue(dict.value<float>("alpha"));
+        }
+    );
 
-    groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary){
-        LDEBUG(name() + " Event clearGroup");
+    groupEvent->subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
+        // @TODO(abock): change back to name()
+        LDEBUG(identifier() + " Event clearGroup");
         OsEng.scriptEngine().queueScript(
-            "openspace.removeSceneGraphNode('" + name() + "')",
+            "openspace.removeSceneGraphNode('" + identifier() + "')",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     });

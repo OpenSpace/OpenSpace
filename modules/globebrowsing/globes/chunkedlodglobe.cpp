@@ -57,7 +57,9 @@ const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
                                  std::shared_ptr<LayerManager> layerManager)
-    : Renderable({ { "Name", owner.name() } })
+    // @TODO(abock): Change key to identifier
+    // @TODO(abock): Add name()
+    : Renderable({ { "Name", owner.identifier() } })
     , minSplitDepth(2)
     , maxSplitDepth(22)
     , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))

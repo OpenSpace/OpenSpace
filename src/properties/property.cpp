@@ -81,7 +81,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     std::string identifier = _identifier;
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
-        std::string ownerId = currentOwner->name();
+        std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
             identifier = ownerId + "." + identifier;
         }

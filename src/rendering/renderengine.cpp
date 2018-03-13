@@ -994,13 +994,13 @@ void RenderEngine::removeScreenSpaceRenderable(const std::string& name) {
 }
 
 std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(
-                                                                  const std::string& name)
+                                                            const std::string& identifier)
 {
     auto it = std::find_if(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
-        [name](const std::shared_ptr<ScreenSpaceRenderable>& s) {
-            return s->name() == name;
+        [&identifier](const std::shared_ptr<ScreenSpaceRenderable>& s) {
+            return s->identifier() == identifier;
         }
     );
 

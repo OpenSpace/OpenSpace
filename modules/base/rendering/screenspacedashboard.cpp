@@ -159,16 +159,19 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         "ScreenSpaceDashboard"
     );
 
+    // @TODO(abock): change key to identifier
     if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
+        setIdentifier(dictionary.value<std::string>(KeyName));
     }
     else {
         static int id = 0;
         if (id == 0) {
-            setName("ScreenSpaceDashboard");
+            // @TODO(abock): Also set name
+            setIdentifier("ScreenSpaceDashboard");
         }
         else {
-            setName("ScreenSpaceDashboard" + std::to_string(id));
+            // @TODO(abock): Also set name
+            setIdentifier("ScreenSpaceDashboard" + std::to_string(id));
         }
         ++id;
     }

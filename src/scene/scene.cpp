@@ -72,7 +72,7 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
 {
-    _rootDummy.setName(SceneGraphNode::RootNodeName);
+    _rootDummy.setIdentifier(SceneGraphNode::RootNodeName);
     _rootDummy.setScene(this);
 }
 
@@ -98,14 +98,15 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByName.count(node->name())){
+    if (_nodesByName.count(node->identifier())){
         throw Scene::InvalidSceneError(
-            "Node with name " + node->name() + " already exits."
+            // @TODO(abock): Use also name()?
+            "Node with name " + node->identifier() + " already exits."
         );
     }
 
     _topologicallySortedNodes.push_back(node);
-    _nodesByName[node->name()] = node;
+    _nodesByName[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
@@ -119,7 +120,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
         ),
         _topologicallySortedNodes.end()
     );
-    _nodesByName.erase(node->name());
+    _nodesByName.erase(node->identifier());
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
@@ -304,9 +305,9 @@ void Scene::update(const UpdateData& data) {
     }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::update(begin '" + node->name() + "')");
+            LTRACE("Scene::update(begin '" + node->identifier() + "')");
             node->update(data);
-            LTRACE("Scene::update(end '" + node->name() + "')");
+            LTRACE("Scene::update(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -317,9 +318,9 @@ void Scene::update(const UpdateData& data) {
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::render(begin '" + node->name() + "')");
+            LTRACE("Scene::render(begin '" + node->identifier() + "')");
             node->render(data, tasks);
-            LTRACE("Scene::render(end '" + node->name() + "')");
+            LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());

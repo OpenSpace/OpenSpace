@@ -203,7 +203,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
-    _clipPlanes->setName("clipPlanes");
+    // @TODO(abock): Add name name()
+    _clipPlanes->setIdentifier("clipPlanes");
 
     if (dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(

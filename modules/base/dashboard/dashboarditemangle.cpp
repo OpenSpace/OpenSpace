@@ -381,7 +381,8 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 
     switch (comp.type) {
         case Type::Node:
-            return { comp.node->worldPosition(), comp.node->name() };
+            // @TODO(abock): Maybe change back to name()?
+            return { comp.node->worldPosition(), comp.node->identifier() };
         case Type::Focus:
             return {
                 OsEng.navigationHandler().focusNode()->worldPosition(),

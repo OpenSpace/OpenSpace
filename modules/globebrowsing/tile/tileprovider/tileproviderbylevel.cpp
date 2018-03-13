@@ -93,9 +93,11 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             ))
         );
 
+        // @TODO(abock): change key to identifier
         std::string providerName;
         providerDict.getValue("Name", providerName);
-        _levelTileProviders.back()->setName(providerName);
+        // @TODO(abock): change back to name()
+        _levelTileProviders.back()->setIdentifier(providerName);
         addPropertySubOwner(_levelTileProviders.back().get());
 
         // Ensure we can represent the max level

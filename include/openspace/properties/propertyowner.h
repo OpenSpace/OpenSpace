@@ -55,7 +55,8 @@ public:
     static const char URISeparator = '.';
 
     struct PropertyOwnerInfo {
-        std::string name;
+        std::string identifier;
+        std::string name = "";
         std::string description = "";
     };
 
@@ -69,20 +70,22 @@ public:
     virtual ~PropertyOwner();
 
     /**
-     * Sets the name for this PropertyOwner. If the PropertyOwner does not have an owner
-     * itself, the name must be globally unique. If the PropertyOwner has an owner, the
-     * name must be unique to the owner (including the owner's properties). No uniqueness
-     * check will be preformed here, but rather in the PropertyOwner::addProperty and
-     * PropertyOwner::addPropertySubOwner methods).
-     * \param name The name of this PropertyOwner. It may not contain any <code>.</code>s
+     * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
+     * owner itself, the identifier must be globally unique. If the PropertyOwner has an
+     * owner, the identifier must be unique to the owner (including the owner's 
+     * properties). No uniqueness check will be preformed here, but rather in the 
+     * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
+     *
+     * \param identifier The identifier of this PropertyOwner. It may not contain any
+     *        <code>.</code>s
      */
-    void setName(std::string name);
+    void setIdentifier(std::string identifier);
 
     /**
-     * Returns the name of this PropertyOwner.
-     * \return The name of this PropertyOwner
+     * Returns the identifier of this PropertyOwner.
+     * \return The identifier of this PropertyOwner
      */
-    std::string name() const;
+    std::string identifier() const;
 
     void setDescription(std::string description);
 
@@ -91,12 +94,14 @@ public:
     /**
      * Returns a list of all Propertys directly owned by this PropertyOwner. This list not
      * include Propertys owned by other sub-owners.
+     *
      * \return A list of all Propertys directly owned by this PropertyOwner
      */
     std::vector<Property*> properties() const;
 
     /**
      * Returns a list of all Propertys directly or indirectly owned by this PropertyOwner.
+     *
      * \return A list of all Propertys directly or indirectly owned by this PropertyOwner
      */
     std::vector<Property*> propertiesRecursive() const;
@@ -242,7 +247,9 @@ public:
 private:
     std::string generateJson() const override;
 
-    /// The name of this PropertyOwner
+    /// The unique identifier of this PropertyOwner
+    std::string _identifier;
+    /// The user-facing GUI name for this PropertyOwner
     std::string _name;
     /// The description for this PropertyOwner
     std::string _description;

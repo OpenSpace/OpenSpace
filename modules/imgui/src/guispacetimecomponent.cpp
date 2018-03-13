@@ -95,7 +95,8 @@ GuiSpaceTimeComponent::GuiSpaceTimeComponent()
 void GuiSpaceTimeComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    // @TODO(abock): change back to name()
+    ImGui::Begin(identifier().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
@@ -106,7 +107,8 @@ void GuiSpaceTimeComponent::render() {
         nodes.begin(),
         nodes.end(),
         [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            return lhs->name() < rhs->name();
+            // @TODO(abock): change back to name()
+            return lhs->identifier() < rhs->identifier();
         }
     );
 
@@ -119,12 +121,13 @@ void GuiSpaceTimeComponent::render() {
         const std::vector<std::string>& tags = n->tags();
         auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {
-            bool pressed = ImGui::Button(n->name().c_str());
+            // @TODO(abock): change back to name()
+            bool pressed = ImGui::Button(n->identifier().c_str());
             ImGui::SameLine();
             if (pressed) {
                 OsEng.scriptEngine().queueScript(
                     "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-                    n->name() + "');",
+                    n->identifier() + "');",
                     scripting::ScriptEngine::RemoteScripting::Yes
                 );
             }
@@ -138,7 +141,7 @@ void GuiSpaceTimeComponent::render() {
 
     std::string nodeNames = "";
     for (SceneGraphNode* n : nodes) {
-        nodeNames += n->name() + '\0';
+        nodeNames += n->identifier() + '\0';
     }
 
     auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
@@ -153,7 +156,7 @@ void GuiSpaceTimeComponent::render() {
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('NavigationHandler.Origin', '" +
-            nodes[currentPosition]->name() + "');",
+            nodes[currentPosition]->identifier() + "');",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }

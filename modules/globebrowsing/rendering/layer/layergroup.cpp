@@ -110,8 +110,9 @@ std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) 
     }
     auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
-    if (hasPropertySubOwner(layer->name())) {
-        LINFO("Layer with name " + layer->name() + " already exists.");
+    if (hasPropertySubOwner(layer->identifier())) {
+        // @TODO(abock): Add name()
+        LINFO("Layer with identifier " + layer->identifier() + " already exists.");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
         return nullptr;
     }
@@ -132,7 +133,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
          it != _layers.end();
          ++it)
     {
-        if (it->get()->name() == layerName) {
+        if (it->get()->identifier() == layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);

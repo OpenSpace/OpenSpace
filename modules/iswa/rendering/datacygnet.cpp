@@ -334,61 +334,100 @@ void DataCygnet::setPropertyCallbacks() {
 void DataCygnet::subscribeToGroup() {
     auto groupEvent = _group->groupEvent();
 
-    groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event dataOptionsChanged");
-        std::vector<int> values;
-        bool success = dict.getValue<std::vector<int> >("dataOptions", values);
-        if (success) {
-            _dataOptions.setValue(values);
+    groupEvent->subscribe(
+        identifier(),
+        "dataOptionsChanged",
+        [&](ghoul::Dictionary dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event dataOptionsChanged");
+            std::vector<int> values;
+            bool success = dict.getValue<std::vector<int> >("dataOptions", values);
+            if (success) {
+                _dataOptions.setValue(values);
+            }
         }
-    });
+    );
 
-    groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event normValuesChanged");
-        glm::vec2 values;
-        bool success = dict.getValue("normValues", values);
-        if (success) {
-            _normValues.setValue(values);
+    groupEvent->subscribe(
+        identifier(),
+        "normValuesChanged",
+        [&](ghoul::Dictionary dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event normValuesChanged");
+            glm::vec2 values;
+            bool success = dict.getValue("normValues", values);
+            if (success) {
+                _normValues.setValue(values);
+            }
         }
-    });
+    );
 
-    groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(name() + " Event backgroundValuesChanged");
-        glm::vec2 values;
-        bool success = dict.getValue("backgroundValues", values);
-        if (success) {
-            _backgroundValues.setValue(values);
+    groupEvent->subscribe(
+        identifier(),
+        "backgroundValuesChanged",
+        [&](ghoul::Dictionary dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event backgroundValuesChanged");
+            glm::vec2 values;
+            bool success = dict.getValue("backgroundValues", values);
+            if (success) {
+                _backgroundValues.setValue(values);
+            }
         }
-    });
+    );
 
-    groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict)
-    {
-        LDEBUG(name() + " Event transferFunctionsChanged");
-        _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
-    });
-
-    groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict) {
-        LDEBUG(name() + " Event useLogChanged");
-        _useLog.setValue(dict.value<bool>("useLog"));
-    });
-
-    groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(name() + " Event useHistogramChanged");
-        _useHistogram.setValue(dict.value<bool>("useHistogram"));
-    });
-
-    groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(name() + " Event autoFilterChanged");
-        _autoFilter.setValue(dict.value<bool>("autoFilter"));
-    });
-
-    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary) {
-        LDEBUG(name() + " Event updateGroup");
-        if (_autoFilter.value()) {
-            _backgroundValues.setValue(_dataProcessor->filterValues());
+    groupEvent->subscribe(
+        identifier(),
+        "transferFunctionsChanged",
+        [&](ghoul::Dictionary dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event transferFunctionsChanged");
+            _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
         }
-        updateTexture();
-    });
+    );
+
+    groupEvent->subscribe(
+        identifier(),
+        "useLogChanged",
+        [&](const ghoul::Dictionary& dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event useLogChanged");
+            _useLog.setValue(dict.value<bool>("useLog"));
+        }
+    );
+
+    groupEvent->subscribe(
+        identifier(),
+        "useHistogramChanged",
+        [&](ghoul::Dictionary dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event useHistogramChanged");
+            _useHistogram.setValue(dict.value<bool>("useHistogram"));
+        }
+    );
+
+    groupEvent->subscribe(
+        identifier(),
+        "autoFilterChanged",
+        [&](ghoul::Dictionary dict) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event autoFilterChanged");
+            _autoFilter.setValue(dict.value<bool>("autoFilter"));
+        }
+    );
+
+    groupEvent->subscribe(
+        identifier(),
+        "updateGroup",
+        [&](ghoul::Dictionary) {
+            // @TODO(abock): change back to name()
+            LDEBUG(identifier() + " Event updateGroup");
+            if (_autoFilter.value()) {
+                _backgroundValues.setValue(_dataProcessor->filterValues());
+            }
+            updateTexture();
+        }
+    );
 }
 
 } //namespace openspace

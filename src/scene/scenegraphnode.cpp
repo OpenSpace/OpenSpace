@@ -66,6 +66,7 @@ namespace {
 namespace openspace {
 
 // Constants used outside of this file
+// @TODO(abock): change back to RootNodeIdentifier
 const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
@@ -83,8 +84,9 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
 
+    // @TODO(abock): Change key to identifier 
     std::string name = dictionary.value<std::string>(KeyName);
-    result->setName(name);
+    result->setIdentifier(name);
 
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
@@ -94,13 +96,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         );
         if (result->_transform.translation == nullptr) {
             LERROR(fmt::format(
-                "Failed to create ephemeris for SceneGraphNode '{}'", result->name()
+                "Failed to create ephemeris for SceneGraphNode '{}'", result->identifier()
             ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.translation.get());
         LDEBUG(fmt::format(
-            "Successfully created ephemeris for '{}'", result->name()
+            "Successfully created ephemeris for '{}'", result->identifier()
         ));
     }
 

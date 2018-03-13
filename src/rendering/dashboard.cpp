@@ -49,14 +49,14 @@ Dashboard::Dashboard()
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
-    std::string originalName = item->name();
+    std::string originalIdentifier = item->identifier();
     int suffix = 1;
     while (true) {
         auto it = std::find_if(
             _items.begin(),
             _items.end(),
             [&item](const std::unique_ptr<DashboardItem>& i) {
-                return (i->name() == item->name());
+                return (i->identifier() == item->identifier());
             }
         );
 
@@ -65,7 +65,7 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
             break;
         }
         else {
-            item->setName(originalName + " " + std::to_string(suffix));
+            item->setIdentifier(originalIdentifier + " " + std::to_string(suffix));
             ++suffix;
         }
     }

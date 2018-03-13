@@ -80,7 +80,8 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
-                return !(n->renderable() && n->renderable()->name() == "RenderableGlobe");
+                return !(n->renderable() &&
+                         n->renderable()->identifier() == "RenderableGlobe");
             }
         ),
         nodes.end()
@@ -88,11 +89,12 @@ void GuiGlobeBrowsingComponent::render() {
     std::sort(
         nodes.begin(),
         nodes.end(),
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); }
+        // @TODO(abock): change back to name()
+        [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->identifier() < rhs->identifier(); }
     );
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {
-        nodeNames += n->name() + '\0';
+        nodeNames += n->identifier() + '\0';
     }
 
     int iNode = -1;
@@ -104,7 +106,7 @@ void GuiGlobeBrowsingComponent::render() {
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = focus->name();
+            _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
         }
     }
@@ -113,7 +115,7 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.cbegin(),
             nodes.cend(),
             [this](SceneGraphNode* lhs) {
-                return lhs->name() == _currentNode;
+                return lhs->identifier() == _currentNode;
             }
         );
         iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
@@ -127,7 +129,7 @@ void GuiGlobeBrowsingComponent::render() {
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = focus->name();
+            _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
             nodeChanged = true;
         }
@@ -138,7 +140,7 @@ void GuiGlobeBrowsingComponent::render() {
         // or if there are no nodes
         return;
     }
-    _currentNode = nodes[iNode]->name();
+    _currentNode = nodes[iNode]->identifier();
 
     if (nodeChanged) {
         _currentServer = "";

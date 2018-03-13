@@ -58,6 +58,7 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
         },
         "${WEB}/properties/script.js"
     )
+    , _identifier(std::move(info.identifier))
     , _name(std::move(info.name))
     , _description(std::move(info.description))
     , _owner(nullptr)
@@ -125,14 +126,14 @@ std::vector<PropertyOwner*> PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
 
-PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
+PropertyOwner* PropertyOwner::propertySubOwner(const std::string& identifier) const {
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [&name](PropertyOwner* owner) { return owner->name() == name;  }
+        [&identifier](PropertyOwner* owner) { return owner->identifier() == identifier; }
     );
 
-    if (it == _subOwners.end() || (*it)->name() != name) {
+    if (it == _subOwners.end() || (*it)->identifier() != identifier) {
         return nullptr;
     }
     else {
@@ -140,12 +141,12 @@ PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
     }
 }
 
-bool PropertyOwner::hasPropertySubOwner(const std::string& name) const {
-    return propertySubOwner(name) != nullptr;
+bool PropertyOwner::hasPropertySubOwner(const std::string& identifier) const {
+    return propertySubOwner(identifier) != nullptr;
 }
 
-void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) {
-    _groupNames[std::move(groupID)] = std::move(name);
+void PropertyOwner::setPropertyGroupName(std::string groupID, std::string identifier) {
+    _groupNames[std::move(groupID)] = std::move(identifier);
 }
 
 std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
@@ -177,7 +178,8 @@ void PropertyOwner::addProperty(Property* prop) {
         LERROR(fmt::format(
             "Property identifier '{}' already present in PropertyOwner '{}'",
             prop->identifier(),
-            name()
+            // @TODO(abock): change back to name()
+            identifier()
         ));
         return;
     } else {
@@ -203,29 +205,31 @@ void PropertyOwner::addProperty(Property& prop) {
 
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
     ghoul_assert(owner != nullptr, "owner must not be nullptr");
-    ghoul_assert(!owner->name().empty(), "PropertyOwner must have a name");
+    ghoul_assert(!owner->identifier().empty(), "PropertyOwner must have an identifier");
 
     // See if we can find the name of the propertyowner to add using the lower bound
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
+        [identifier = owner->identifier()](PropertyOwner* o) {
+            return o->identifier() == identifier;
+        }
     );
 
     // If we found the propertyowner's name, we need to bail out
-    if (it != _subOwners.end() && (*it)->name() == owner->name()) {
+    if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         LERROR(fmt::format(
             "PropertyOwner '{}' already present in PropertyOwner '{}'",
-            owner->name(),
-            name()
+            owner->identifier(),
+            identifier()
         ));
         return;
     } else {
         // We still need to check if the PropertyOwners name is used in a Property
-        const bool hasProp = hasProperty(owner->name());
+        const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
             LERROR(fmt::format(
-                "PropertyOwner '{}'s name already names a Property", owner->name()
+                "PropertyOwner '{}'s name already names a Property", owner->identifier()
             ));
             return;
         }
@@ -272,15 +276,17 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
+        [identifier = owner->identifier()](PropertyOwner* o) {
+            return o->identifier() == identifier;
+        }
     );
 
     // If we found the propertyowner, we can delete it
-    if (it != _subOwners.end() && (*it)->name() == owner->name()) {
+    if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         _subOwners.erase(it);
     } else {
         LERROR(fmt::format(
-            "PropertyOwner with name '{}' not found for removal", owner->name()
+            "PropertyOwner with name '{}' not found for removal", owner->identifier()
         ));
     }
 }
@@ -289,12 +295,12 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
     removePropertySubOwner(&owner);
 }
 
-void PropertyOwner::setName(std::string name) {
-    _name = std::move(name);
+void PropertyOwner::setIdentifier(std::string identifier) {
+    _identifier = std::move(identifier);
 }
 
-std::string PropertyOwner::name() const {
-    return _name;
+std::string PropertyOwner::identifier() const {
+    return _identifier;
 }
 
 void PropertyOwner::setDescription(std::string description) {
@@ -326,7 +332,7 @@ std::string PropertyOwner::generateJson() const {
     {
         std::stringstream json;
         json << "{";
-        json << "\"name\": \"" << owner->name() << "\",";
+        json << "\"name\": \"" << owner->identifier() << "\",";
 
         json << "\"properties\": [";
         auto properties = owner->properties();

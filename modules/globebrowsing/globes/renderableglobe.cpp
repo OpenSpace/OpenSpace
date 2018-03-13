@@ -199,7 +199,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     })
     , _debugPropertyOwner({ "Debug" })
 {
-    setName("RenderableGlobe");
+    setIdentifier("RenderableGlobe");
 
     dictionary.getValue(keyFrame, _frame);
 

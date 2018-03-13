@@ -83,16 +83,17 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
         "ScreenSpaceImage"
     );
 
+    // @TODO(abock): Change key to identifier
     if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
+        setIdentifier(dictionary.value<std::string>(KeyName));
     }
     else {
         static int id = 0;
         if (id == 0) {
-            setName("ScreenSpaceImageOnline");
+            setIdentifier("ScreenSpaceImageOnline");
         }
         else {
-            setName("ScreenSpaceImageOnline " + std::to_string(id));
+            setIdentifier("ScreenSpaceImageOnline " + std::to_string(id));
         }
         ++id;
     }

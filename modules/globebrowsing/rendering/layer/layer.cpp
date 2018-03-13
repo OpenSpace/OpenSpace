@@ -180,7 +180,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
             }
         }
         catch (...) {
-            _parent.deleteLayer(name());
+            _parent.deleteLayer(identifier());
             throw;
         }
     });

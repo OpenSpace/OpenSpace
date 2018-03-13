@@ -128,9 +128,10 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         "Renderable does not have a name"
     );
 
+    // @TODO(abock): change key to identifier
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
-    setName(name);
+    setIdentifier(name);
 
     _loggerCat = "RenderableFieldlines [" + name + "]";
 

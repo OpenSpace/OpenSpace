@@ -98,7 +98,8 @@ void IswaKameleonGroup::registerProperties() {
     //OsEng.gui()._iswa.registerProperty(&_fieldlines);
 
     _resolution.onChange([this]{
-        LDEBUG("Group " + name() + " published resolutionChanged");
+    // @TODO(abock): change back to name()
+        LDEBUG("Group " + identifier() + " published resolutionChanged");
         _groupEvent->publish(
             "resolutionChanged",
             ghoul::Dictionary({{"resolution", _resolution.value()}})
@@ -132,7 +133,7 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile) {
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
-                    name() + "/" + it.key(),
+                    identifier() + "/" + it.key(),
                     it.value(),
                     false
                 );
