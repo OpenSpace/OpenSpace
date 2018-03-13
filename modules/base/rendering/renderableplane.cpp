@@ -112,7 +112,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     );
 
     addProperty(_opacity);
-    setRenderBinFromOpacity();
+    registerUpdateRenderBinFromOpacity();
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
 

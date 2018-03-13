@@ -124,7 +124,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     );
 
     addProperty(_opacity);
-    setRenderBinFromOpacity();
+    registerUpdateRenderBinFromOpacity();
 
 
     if (dictionary.hasKey(KeyGeometry)) {

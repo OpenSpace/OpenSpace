@@ -138,7 +138,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     );
 
     addProperty(_opacity);
-    setRenderBinFromOpacity();
+    registerUpdateRenderBinFromOpacity();
 
     if (dictionary.hasKey(GridMatrixInfo.identifier)) {
         _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);

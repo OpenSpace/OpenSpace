@@ -246,7 +246,7 @@ void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     });
 }
 
-void Renderable::setRenderBinFromOpacity() {
+void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this](){
         if (_opacity > 0.f && _opacity < 1.f) {
             setRenderBin(Renderable::RenderBin::Transparent);

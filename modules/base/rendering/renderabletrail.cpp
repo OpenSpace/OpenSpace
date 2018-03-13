@@ -170,7 +170,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     )
 {
     addProperty(_opacity);
-    setRenderBinFromOpacity();
+    registerUpdateRenderBinFromOpacity();
 
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)

@@ -168,7 +168,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     );
 
     addProperty(_opacity);
-    setRenderBinFromOpacity();
+    registerUpdateRenderBinFromOpacity();
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
     _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
