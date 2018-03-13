@@ -72,6 +72,7 @@ asset.onInitialize(function ()
         "Earth", "Mars", "Moon"
     })
 
+    openspace.setPropertyValue("Scene.Earth.RenderableGlobe.PerformShading", false)
 
     openspace.addVirtualProperty(
         "BoolProperty",
