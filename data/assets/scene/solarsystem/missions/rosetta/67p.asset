@@ -130,6 +130,7 @@ local Trail67P = {
 }
 
 
+
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Barycenter,
     Comet67P,

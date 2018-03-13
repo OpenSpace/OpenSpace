@@ -40,7 +40,7 @@
 
 #include <modules/marsrover/scale/luascale.h>
 #include <modules/marsrover/scale/staticscale.h>
-#include <ghoul/filesystem/filesystem>
+
 
 namespace openspace {
 

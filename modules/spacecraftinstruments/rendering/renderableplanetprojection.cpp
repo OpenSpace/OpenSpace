@@ -61,6 +61,8 @@ namespace {
 //    const char* keyShading = "PerformShading";
     constexpr const char* _mainFrame = "GALACTIC";
 
+    constexpr const char* NoImageText = "No Image";
+
     static const openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
         "Color Texture",
@@ -106,6 +108,12 @@ namespace {
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
         "shift."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
+        "AmbientBrightness",
+        "Ambient Brightness",
+        "This value determines the ambient brightness of the dark side of the planet."
     };
 } // namespace
 
@@ -158,6 +166,12 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 MeridianShiftInfo.description
+            },
+            {
+                AmbientBrightnessInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                AmbientBrightnessInfo.description
             }
         }
     };
@@ -175,8 +189,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 100.f)
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f, 3.f)
     , _meridianShift(MeridianShiftInfo, false)
+    , _ambientBrightness(AmbientBrightnessInfo, 0.075f, 0.f, 1.f)
     , _capture(false)
 {
     documentation::testSpecificationAndThrow(
@@ -199,7 +214,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     _projectionComponent.initialize(dict.value<ghoul::Dictionary>(KeyProjection));
 
-    _colorTexturePaths.addOption(0, "");
+    _colorTexturePaths.addOption(0, NoImageText);
     _colorTexturePaths.onChange([this](){
         _colorTextureDirty = true;
     });
@@ -244,7 +259,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 
 
-    _heightMapTexturePaths.addOption(0, "");
+    _heightMapTexturePaths.addOption(0, NoImageText);
     _heightMapTexturePaths.onChange([this]() {
         _heightMapTextureDirty = true;
     });
@@ -307,6 +322,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_heightExaggeration);
     addProperty(_meridianShift);
+    addProperty(_ambientBrightness);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
@@ -329,6 +345,9 @@ void RenderablePlanetProjection::initializeGL() {
         "_heightExaggeration"
     );
     _mainUniformCache.meridianShift = _programObject->uniformLocation("_meridianShift");
+    _mainUniformCache.ambientBrightness = _programObject->uniformLocation(
+        "_ambientBrightness"
+    );
     _mainUniformCache.projectionFading = _programObject->uniformLocation(
         "_projectionFading"
     );
@@ -585,7 +604,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(
+        _mainUniformCache.modelTransform,
+        glm::mat4(modelTransform)
+    );
     _programObject->setUniform(_mainUniformCache
         .modelViewProjectionTransform,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
@@ -598,6 +620,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     );
     _programObject->setUniform(_mainUniformCache.heightExaggeration, _heightExaggeration);
     _programObject->setUniform(_mainUniformCache.meridianShift, _meridianShift);
+    _programObject->setUniform(_mainUniformCache.ambientBrightness, _ambientBrightness);
     _programObject->setUniform(
         _mainUniformCache.projectionFading,
         _projectionComponent.projectionFading()
@@ -642,6 +665,9 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         );
         _mainUniformCache.meridianShift = _programObject->uniformLocation(
             "_meridianShift"
+        );
+        _mainUniformCache.ambientBrightness = _programObject->uniformLocation(
+            "_ambientBrightness"
         );
         _mainUniformCache.projectionFading = _programObject->uniformLocation(
             "_projectionFading"
@@ -713,13 +739,16 @@ void RenderablePlanetProjection::loadColorTexture() {
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _baseTexture = nullptr;
-    if (!selectedPath.empty()) {
+    if (selectedPath != NoImageText) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath)
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
             _baseTexture->uploadTexture();
+            _baseTexture->setWrapping(
+                { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat}
+            );
             _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
         }
     }
@@ -732,7 +761,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _heightMapTexture = nullptr;
-    if (!selectedPath.empty()) {
+    if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath)
         );

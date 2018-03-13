@@ -118,7 +118,6 @@ private:
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
     GLuint _mainColorTexture;
-    GLuint _mainOtherDataTexture;
     GLuint _mainPositionTexture;
     GLuint _mainNormalTexture;
     GLuint _mainDepthTexture;

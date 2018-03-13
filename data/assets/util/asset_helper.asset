@@ -1,3 +1,10 @@
+local tableLength = function(table)
+    local count = 0
+    for _ in pairs(table) do count = count + 1 end
+    return count
+end
+
+
 local registerSpiceKernels = function (spiceAsset, kernels)
     spiceAsset.onInitialize(function ()
         for i, kernel in ipairs(kernels) do
@@ -12,7 +19,16 @@ local registerSpiceKernels = function (spiceAsset, kernels)
     end)
 end
 
-local registerSceneGraphNodes = function (sceneAsset, nodes)
+local registerSceneGraphNodes = function (sceneAsset, nodes, override)
+    override = override or false
+    if not override then
+        if tableLength(nodes) == 0 then
+            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            return
+        end
+    end
+
+
     sceneAsset.onInitialize(function ()
         for i, node in ipairs(nodes) do
             openspace.addSceneGraphNode(node)
@@ -26,7 +42,16 @@ local registerSceneGraphNodes = function (sceneAsset, nodes)
     end)
 end
 
-local registerSceneGraphNodesAndExport = function (sceneAsset, nodes)
+local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
+    override = override or false
+    if not override then
+        if tableLength(nodes) == 0 then
+            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            return
+        end
+    end
+    
+
     sceneAsset.onInitialize(function ()
         for i, node in ipairs(nodes) do
             openspace.addSceneGraphNode(node)
@@ -68,7 +93,6 @@ local requestAll = function (asset, directory)
        return End=='' or string.sub(String,-string.len(End))==End
     end
 
-    -- directory = asset.localResource('') .. directory
     local files = openspace.walkDirectoryFiles(asset.localResource('') .. directory, true)
     for _, file in pairs(files) do
         if file:ends('.asset') then

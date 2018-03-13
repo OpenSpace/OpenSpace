@@ -96,7 +96,7 @@ double LuaScale::scaleValue(const Time& time) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            "Script '" << _luaScriptFile << "' does not have a function 'scale'"
+            fmt::format("Script '{}' does not have a function 'scale'", _luaScriptFile)
         );
         return 0.0;
     }
@@ -119,7 +119,7 @@ double LuaScale::scaleValue(const Time& time) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            "Error executing 'scale': " << lua_tostring(_state, -1)
+            fmt::format("Error executing 'scale': {}", lua_tostring(_state, -1))
         );
     }
 

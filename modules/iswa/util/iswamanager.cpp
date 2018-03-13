@@ -38,7 +38,7 @@
 #include <fstream>
 #include <algorithm>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
@@ -51,8 +51,8 @@
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wuseless-cast"
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+// #pragma clang diagnostic ignored "-Wuseless-cast"
+// #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #elif (defined __GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuseless-cast"
@@ -194,7 +194,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos) {
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
                                                                        double timestamp)
 {
-    return std::move(OsEng.downloadManager().fetchFile(
+    return OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile&) {
                 LDEBUG(
@@ -208,13 +208,13 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id,
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );
+        );
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
                                                                       double timestamp)
 {
-    return std::move(OsEng.downloadManager().fetchFile(
+    return OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile&) {
                 LDEBUG(
@@ -228,7 +228,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id,
                     std::to_string(id) + ": " + err
                 );
             }
-        ) );
+        );
 }
 
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) {
@@ -661,7 +661,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
 
         for (auto list : lists) {
             json jsonList = j[list];
-            for (int i=0; i<jsonList.size(); i++) {
+            for (size_t i = 0; i < jsonList.size(); ++i) {
                 json jCygnet = jsonList.at(i);
 
                 std::string name = jCygnet["cygnetDisplayTitle"];
@@ -689,7 +689,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
         if (jsonFile.is_open()) {
             json cdfGroups = json::parse(jsonFile);
-            for(int i=0; i<cdfGroups.size(); i++){
+            for(size_t i = 0; i < cdfGroups.size(); ++i) {
                 json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];
@@ -703,7 +703,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
                 _cdfInformation[groupName] = std::vector<CdfInfo>();
 
                 json cdfs = cdfGroup["cdfs"];
-                for (int j = 0; j < cdfs.size(); j++) {
+                for (size_t j = 0; j < cdfs.size(); j++) {
                     json cdf = cdfs.at(j);
 
                     std::string name = cdf["name"];

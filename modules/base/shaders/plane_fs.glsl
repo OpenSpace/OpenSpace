@@ -31,6 +31,7 @@ in vec3 vs_gNormal;
 
 uniform sampler2D texture1;
 uniform bool additiveBlending;
+uniform float opacity = 1.0;
 
 
 Fragment getFragment() {
@@ -42,6 +43,7 @@ Fragment getFragment() {
         frag.color = texture(texture1, vec2(1 - vs_st.s, vs_st.t));
     }
 
+    frag.color.a *= opacity;
     if (frag.color.a == 0.0) {
         discard;
     }

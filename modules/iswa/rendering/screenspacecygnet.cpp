@@ -24,28 +24,18 @@
 
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/time.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
-
-namespace {
-    constexpr const char* _loggerCat = "ScreenSpaceCygnet";
-} // namespace
 
 namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceImageOnline(dictionary)
 {
-    // hacky, have to first get as float and then cast to int.
-    float cygnetid;
-    dictionary.getValue("CygnetId", cygnetid);
-    _cygnetId = (int)cygnetid;
-
-    float interval;
-    dictionary.getValue("UpdateInterval", interval);
-    _updateTime = (int) interval;
+    _cygnetId = static_cast<int>(dictionary.value<double>("CygnetId"));
+    _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
 
     _downloadImage = true;
     _texturePath = IswaManager::ref().iswaUrl(_cygnetId);

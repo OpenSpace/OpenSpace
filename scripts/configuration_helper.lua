@@ -1,4 +1,4 @@
--- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}-- Helper functions that are useful to customize the openspace.cfg loading
+-- Helper functions that are useful to customize the openspace.cfg loading
 
 --[[
 ########################################################################################## 

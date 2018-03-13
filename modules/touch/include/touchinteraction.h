@@ -62,7 +62,7 @@ public:
     // Stores the selected node, the cursor ID as well as the surface coordinates the
     // cursor touched
     struct SelectedBody {
-        int id;
+        long id;
         SceneGraphNode* node;
         glm::dvec3 coordinates;
     };

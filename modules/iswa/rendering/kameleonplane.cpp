@@ -25,8 +25,22 @@
 #include <fstream>
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
+
+#ifdef __clang__
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif // __GNUC__
+
 #include <modules/iswa/ext/json.h>
+
+#ifdef __clang__
+
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif // __GNUC__
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 
@@ -147,7 +161,7 @@ void KameleonPlane::initialize() {
 
     // Set Property callback specific to KameleonPlane
     _resolution.onChange([this](){
-        for(int i=0; i<_textures.size(); i++){
+        for (size_t i = 0; i < _textures.size(); i++) {
             _textures[i] = std::move(nullptr);
         }
 
@@ -210,7 +224,7 @@ bool KameleonPlane::createGeometry() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
@@ -247,7 +261,7 @@ std::vector<float*> KameleonPlane::textureData() {
         _dimensions,
         _slice
     );
-};
+}
 
 bool KameleonPlane::updateTextureResource() {
     _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
@@ -308,7 +322,7 @@ void KameleonPlane::updateFieldlineSeeds() {
 }
 
 void KameleonPlane::readFieldlinePaths(std::string indexFile) {
-    LINFO("Reading seed points paths from file '" << indexFile << "'");
+    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
         std::dynamic_pointer_cast<IswaKameleonGroup>(_group)->setFieldlineInfo(
             indexFile,
@@ -320,7 +334,7 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile) {
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR("Could not open seed points file '" << indexFile << "'");
+        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
     }
     else {
         try {
@@ -377,7 +391,7 @@ void KameleonPlane::setDimensions() {
     // the cdf files has an offset of 0.5 in normali resolution.
     // with lower resolution the offset increases.
     _data->offset = _origOffset - 0.5f*  (100.f / _resolution.value());
-    _dimensions = glm::size3_t(_data->scale * ((float)_resolution.value() /  100.f));
+    _dimensions = glm::size3_t(_data->scale * (_resolution.value() / 100.f));
     _dimensions[_cut] = 1;
 
     if (_cut == 0) {

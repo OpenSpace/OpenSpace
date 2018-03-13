@@ -48,10 +48,10 @@ namespace openspace {
 MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
                                                std::shared_ptr<AtlasManager> atlasManager,
                                        std::shared_ptr<TransferFunction> transferFunction)
-    : _tsp(tsp)
+    : _boundingBox(glm::vec3(1.0))
+    , _tsp(tsp)
     , _atlasManager(atlasManager)
     , _transferFunction(transferFunction)
-    , _boundingBox(glm::vec3(1.0))
 {}
 
 MultiresVolumeRaycaster::~MultiresVolumeRaycaster() {}

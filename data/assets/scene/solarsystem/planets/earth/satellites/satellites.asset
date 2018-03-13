@@ -63,7 +63,7 @@ function  getSat(title, file, lineNum)
       Name = title,
       Parent = "EarthInertial",
       Renderable = {
-          Type = "RenderablePlane",
+          Type = "RenderablePlaneImageLocal",
           Size = 3e4,
           Origin = "Center",
           Body = "TLE",
