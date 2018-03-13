@@ -466,10 +466,7 @@ void RenderableGaiaStars::deinitializeGL() {
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glDepthMask(false);
-    _program->activate();
-
+    
     glm::mat4 model =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
@@ -478,6 +475,136 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     float viewScaling = 1.0f; //data.camera.scaling();
     glm::mat4 view = data.camera.combinedViewMatrix();
     glm::mat4 projection = data.camera.projectionMatrix();
+
+    glm::mat4 modelViewProjMat = projection * view * model;
+
+    // Traverse Octree and build _fulldata in correct order!
+    // Use Camera to decide which nodes to render! Should move this to a seperate thread.
+    _fullData.clear();
+    auto insertData = _octreeManager->traverseData(modelViewProjMat);
+    _fullData.insert(_fullData.end(), insertData.begin(), insertData.end());
+    
+    // Construct _slicedData depending on what parameters to use.
+    // First try: brute force every frame!
+    // TODO (adaal): use some sort of cache system so this only is done when needed.
+    const int option = _columnOption;
+    createDataSlice(ColumnOption(option));
+
+    int size = static_cast<int>(_slicedData.size());
+
+    // Resize VAO & VBO!
+    // TODO (adaal): Only resize should be needed, not reconstructing the whole thing every frame!?
+    if (_vao == 0) {
+        glGenVertexArrays(1, &_vao);
+        LDEBUG("Generating Vertex Array id '" << _vao << "'");
+    }
+    if (_vbo == 0) {
+        glGenBuffers(1, &_vbo);
+        LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+    }
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        size * sizeof(GLfloat),
+        &_slicedData[0],
+        GL_STATIC_DRAW
+    );
+
+    const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
+    const size_t nValues = _slicedData.size() / nStars;
+    
+    //LINFO("nStars: " + std::to_string(nStars));
+
+    GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
+
+    switch (option) {
+    case ColumnOption::Static: {
+        GLint positionAttrib = _program->attributeLocation("in_position");
+
+        glEnableVertexAttribArray(positionAttrib);
+
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr // = offsetof(StaticVBOLayout, position)
+        );
+
+        break;
+    }
+    case ColumnOption::Motion: {
+        GLint positionAttrib = _program->attributeLocation("in_position");
+        GLint velocityAttrib = _program->attributeLocation("in_velocity");
+
+        glEnableVertexAttribArray(positionAttrib);
+        glEnableVertexAttribArray(velocityAttrib);
+
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr // = offsetof(MotionVBOLayout, position)
+        );
+        glVertexAttribPointer(
+            velocityAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            reinterpret_cast<void*>(offsetof(MotionVBOLayout, velocity))
+        );
+
+        break;
+    }
+    case ColumnOption::Color: {
+        GLint positionAttrib = _program->attributeLocation("in_position");
+        GLint velocityAttrib = _program->attributeLocation("in_velocity");
+        GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+
+        glEnableVertexAttribArray(positionAttrib);
+        glEnableVertexAttribArray(velocityAttrib);
+        glEnableVertexAttribArray(brightnessDataAttrib);
+
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr // = offsetof(ColorVBOLayout, position)
+        );
+        glVertexAttribPointer(
+            velocityAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            reinterpret_cast<void*>(offsetof(ColorVBOLayout, velocity))
+        );
+        glVertexAttribPointer(
+            brightnessDataAttrib,
+            1,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            reinterpret_cast<void*>(offsetof(ColorVBOLayout, magnitude))
+        );
+        break;
+    }
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    
+    // Ordinary render function.
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(false);
+    _program->activate();
 
     _program->setUniform(_uniformCache.model, model);
     _program->setUniform(_uniformCache.view, view);
@@ -508,7 +635,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(_vao);
-    const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
+    //const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
     glDrawArrays(GL_POINTS, 0, nStars);
 
     glDisable(GL_PROGRAM_POINT_SIZE);
@@ -532,10 +659,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 throw ghoul::RuntimeError("Error loading FITS data");
             }
         }
+        /*
         // Traverse Octree and build _fulldata in correct order!
         // TODO: This is where the optimization will take place later on!?
         // Use Camera Pos, Dir & FoV to decide which nodes to render!?
-        // Therefore is will be moved to render() later on!
+        // Therefore it will be moved to render() later on! 
         //_fullData.clear();
         //auto insertData = _octreeManager->traverseData();
         //_fullData.insert(_fullData.end(), insertData.begin(), insertData.end());
@@ -649,6 +777,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+        */
 
         _dataIsDirty = false;
     }
@@ -767,7 +896,6 @@ bool RenderableGaiaStars::readFitsFile() {
         _nValuesPerStar = _columnNames.size();
         int nNullArr = 0;
         size_t defaultCols = 8;
-        unsigned int insertIndex = 0;
 
         std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
         std::vector<float> posXcol = tableContent[_columnNames[0]];
@@ -832,7 +960,7 @@ bool RenderableGaiaStars::readFitsFile() {
                 // Insert star into octree.
                 // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
                 _octreeManager->insert(values);
-                _fullData.insert(_fullData.end(), values.begin(), values.end());
+                //_fullData.insert(_fullData.end(), values.begin(), values.end());
             }
             else {
                 nNullArr++;
@@ -840,11 +968,11 @@ bool RenderableGaiaStars::readFitsFile() {
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
-        _octreeManager->printStarsPerNode();
+        //_octreeManager->printStarsPerNode();
 
         // Insert dummy data so isReady() accepts it.
         float dummy = 0.0;
-        //_fullData.insert(_fullData.end(), dummy);
+        _fullData.insert(_fullData.end(), dummy);
     }
    
     return true;

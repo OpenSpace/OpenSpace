@@ -28,6 +28,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h 
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -36,6 +37,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/gaiamissionmodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

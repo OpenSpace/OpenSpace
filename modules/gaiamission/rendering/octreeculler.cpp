@@ -22,64 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
-
-#include <vector>
+#include <modules/gaiamission/rendering/octreeculler.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+
+namespace {
+    constexpr const char* _loggerCat = "OctreeCuller";
+} // namespace
 
 namespace openspace {
 
-class OctreeCuller;
 
-class OctreeManager {
-public:
-    struct OctreeNode {
-        std::shared_ptr<OctreeNode> Children[8];
-        std::shared_ptr<OctreeNode> Parent; // Remove?
-        std::vector<float> data;
-        float originX;
-        float originY;
-        float originZ;
-        float halfDimension;
-        size_t numStars;
-        bool isLeaf;
-    };
+OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
+    : _viewFrustum(std::move(viewFrustum))
+    , _nodeBounds(globebrowsing::AABB3())
+{   }
 
-    OctreeManager();
-    ~OctreeManager();
+OctreeCuller::~OctreeCuller() {   }
 
-    bool initOctree();
-    size_t getChildIndex(float posX, float posY, float posZ, 
-        float origX = 0.0, float origY = 0.0, float origZ = 0.0);
-    void insert(std::vector<float> starValues);
-    void printStarsPerNode() const;
-    std::vector<float> traverseData(const glm::mat4 mvp);
 
-private:
-    const size_t MAX_DIST = 100; // Radius of Gaia DR1 in kParsec
-    const size_t MAX_STARS_PER_NODE = 50000;
-    const float MIN_SIZE_IN_PIXELS = 2.0;
+bool OctreeCuller::isVisible(std::vector<glm::dvec4> corners, const glm::mat4 mvp) {
+    
+    // Create a bounding box in screen space from node boundaries.
+    _nodeBounds = globebrowsing::AABB3();
 
-    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
-        std::string prefix) const;
-    bool insertInNode(std::shared_ptr<OctreeNode> node,
-        std::vector<float> starValues, int depth = 1);
-    std::vector<float> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
-        const glm::mat4 mvp);
+    for (size_t i = 0; i < 8; ++i) {
+        glm::dvec4 cornerClippingSpace = mvp * corners[i];
 
-    std::unique_ptr<OctreeNode> _root;
-    std::unique_ptr<OctreeCuller> _culler;
+        glm::dvec3 ndc = glm::dvec3(
+            (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
+        );
+        _nodeBounds.expand(ndc);
+        /*LINFO("Corner[" + std::to_string(i) + "]: " + std::to_string(corners[i]) + 
+            "cornerClippingSpace: " + std::to_string(cornerClippingSpace) + 
+            "NDC: " + std::to_string(ndc));*/
+    }
 
-    size_t _totalNodes;
-    size_t _numNodesPerFile;
-    size_t _totalDepth;
-    size_t _numLeafNodes;
-    size_t _numInnerNodes;
+    return _viewFrustum.intersects(_nodeBounds);
+}
 
-}; // class OctreeManager
+float OctreeCuller::getNodeSizeInPixels() {
+    // Use the same AABB as before.
+    return length(_nodeBounds.size());
+}
 
-}  // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
+} // namespace openspace
