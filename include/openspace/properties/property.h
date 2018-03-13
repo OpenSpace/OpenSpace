@@ -28,6 +28,7 @@
 #include <openspace/properties/propertydelegate.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/easing.h>
 
 #include <functional>
 #include <string>
@@ -363,6 +364,15 @@ public:
      * \return The Dictionary containing all meta data information about this Property
      */
     const ghoul::Dictionary& metaData() const;
+
+
+    /// Interpolation methods
+    virtual void setInterpolationTarget(ghoul::any value);
+    virtual void setLuaInterpolationTarget(lua_State* state);
+    virtual void setStringInterpolationTarget(std::string value);
+    
+    virtual void interpolateValue(float t,
+        ghoul::EasingFunc<float> easingFunction = nullptr);
 
 protected:
     static const char* IdentifierKey;

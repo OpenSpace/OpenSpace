@@ -64,8 +64,6 @@
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
 
-#include <ghoul/filesystem/filesystem>
-
 namespace openspace {
 
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}

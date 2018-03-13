@@ -31,7 +31,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
@@ -111,6 +111,9 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         "RenderablePlane"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
 
     if (dictionary.hasKey(BillboardInfo.identifier)) {
@@ -184,6 +187,8 @@ void RenderablePlane::deinitializeGL() {
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
+
+    _shader->setUniform("opacity", _opacity);
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 rotationTransform = _billboard ?

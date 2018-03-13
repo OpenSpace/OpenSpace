@@ -3,7 +3,7 @@
     <ul class="sidebar-nav">
       <li class="sidebar-brand">
         <a href="#">
-            OpenSpace Scene Properties
+            OpenSpace Properties
         </a>
       </li>
       {{#each propertyOwners}}
@@ -28,8 +28,6 @@
             {{/each}}
             {{#each propertyOwners}}
               {{> propertyOwner}}
-            {{else}}
-              <p>{{name}} has no property owners</p>
             {{/each}}
           </div>
         </div>

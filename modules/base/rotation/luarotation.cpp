@@ -105,7 +105,7 @@ glm::dmat3 LuaRotation::matrix(const Time& time) const {
     if (!isFunction) {
         LERRORC(
             "LuaRotation",
-            "Script '" << _luaScriptFile << "' does not have a function 'rotation'"
+            fmt::format("Script '{}' does nto have a function 'rotation'", _luaScriptFile)
         );
         return glm::dmat3(1.0);
     }
@@ -128,7 +128,7 @@ glm::dmat3 LuaRotation::matrix(const Time& time) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            "Error executing 'rotation': " << lua_tostring(_state, -1)
+            fmt::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
         );
     }
 

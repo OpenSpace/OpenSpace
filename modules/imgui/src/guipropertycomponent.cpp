@@ -35,7 +35,7 @@
 #include <algorithm>
 
 namespace {
-    const ImVec2 size = ImVec2(350, 500);
+    const ImVec2 Size = ImVec2(350, 500);
 
     static const openspace::properties::Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
@@ -252,7 +252,7 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, size, 0.75f);
+    ImGui::Begin(name().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
@@ -317,8 +317,8 @@ void GuiPropertyComponent::render() {
 
                     if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
                         if (lhsToken[1] != rhsToken[1]) {
-                            // If both top-level groups are in the ordering list, the order
-                            // of the iterators gives us the order of the groups
+                            // If both top-level groups are in the ordering list, the
+                            // order of the iterators gives us the order of the groups
                             return lhsIt < rhsIt;
                         }
                         else {

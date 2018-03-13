@@ -213,7 +213,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // 3
     if (!report.permanentPointsNeedUpdate) {
         if (report.floatingPointNeedsUpdate) {
-            // If no other values have been touched, we only need to upload the floating value
+            // If no other values have been touched, we only need to upload the
+            // floating value
             glBufferSubData(
                 GL_ARRAY_BUFFER,
                 _primaryRenderInformation.first * sizeof(TrailVBOLayout),

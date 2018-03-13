@@ -64,6 +64,15 @@ public:
 
     using TemplateProperty<T>::operator=;
 
+
+    void setInterpolationTarget(ghoul::any value) override;
+    void setLuaInterpolationTarget(lua_State* state) override;
+    void setStringInterpolationTarget(std::string value) override;
+    
+    void interpolateValue(float t,
+        ghoul::EasingFunc<float> easingFunc = nullptr) override;
+
+
 protected:
     static const std::string MinimumValueKey;
     static const std::string MaximumValueKey;
@@ -76,6 +85,9 @@ protected:
     T _maximumValue;
     T _stepping;
     float _exponent;
+
+    T _interpolationStart;
+    T _interpolationEnd;
 };
 
 } // namespace openspace::properties

@@ -96,7 +96,6 @@ void RenderablePlaneImageLocal::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-
 void RenderablePlaneImageLocal::bindTexture() {
     _texture->bind();
 }
@@ -118,7 +117,7 @@ void RenderablePlaneImageLocal::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderablePlane",
-                "Loaded texture from '" << absPath(_texturePath) << "'"
+                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             texture->uploadTexture();
 

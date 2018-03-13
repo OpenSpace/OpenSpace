@@ -33,6 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 

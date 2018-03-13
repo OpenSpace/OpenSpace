@@ -33,7 +33,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <modules/iswa/ext/json.h>
 
