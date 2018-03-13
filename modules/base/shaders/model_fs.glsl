@@ -33,6 +33,7 @@ in vec3 vs_normalObjSpace;
 uniform bool performShading = true;
 uniform vec3 directionToSunViewSpace;
 uniform sampler2D texture1;
+uniform float opacity = 1.0;
 
 const vec3 SpecularAlbedo = vec3(1.0);
 
@@ -69,7 +70,7 @@ Fragment getFragment() {
         frag.color.rgb = diffuseAlbedo;
     }
 
-    frag.color.a    = 1.0;
+    frag.color.a    = opacity;
     frag.depth      = vs_screenSpaceDepth;
     frag.gPosition  = vs_positionCameraSpace;
     frag.gNormal    = vec4(vs_normalObjSpace, 1.0);
