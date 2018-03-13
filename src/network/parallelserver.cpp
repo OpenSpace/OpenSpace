@@ -32,6 +32,7 @@ namespace {
 const char* _loggerCat = "ParallelServer";
 } // namespace
 
+
 namespace openspace {
 
 void ParallelServer::start(
@@ -156,6 +157,7 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
             break;
         case ParallelConnection::MessageType::Disconnection:
             disconnect(peer);
+            break;
         default:
             LERROR(fmt::format("Unsupported message type: {}",
                 static_cast<int>(messageType)));
