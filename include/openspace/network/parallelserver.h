@@ -66,6 +66,8 @@ private:
         ParallelConnection::Message message;
     };
 
+    bool isConnected(std::shared_ptr<Peer> peer) const;
+
     void sendMessage(std::shared_ptr<Peer> peer,
         ParallelConnection::MessageType messageType,
         const std::vector<char>& message);

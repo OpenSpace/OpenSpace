@@ -270,10 +270,13 @@ void ParallelServer::handleHostshipResignation(std::shared_ptr<Peer> peer,
     }
 
     setToClient(peer);
-    for (auto& it : _peers) {
-        sendConnectionStatus(peer);
-    }
+
     LINFO(fmt::format("Connection {} resigned as host.", peer->id));
+}
+
+bool ParallelServer::isConnected(std::shared_ptr<Peer> peer) const {
+    return peer->status != ParallelConnection::Status::Connecting &&
+        peer->status != ParallelConnection::Status::Disconnected;
 }
 
 void ParallelServer::sendMessage(std::shared_ptr<Peer> peer,
@@ -289,8 +292,7 @@ void ParallelServer::sendMessageToAll(ParallelConnection::MessageType messageTyp
     const std::vector<char>& message)
 {
     for (auto& it : _peers) {
-        if (it.second->status != ParallelConnection::Status::Connecting &&
-            it.second->status != ParallelConnection::Status::Disconnected)
+        if (isConnected(it.second))
         {
             it.second->parallelConnection.sendMessage(
                 ParallelConnection::Message(messageType, message)
@@ -312,10 +314,7 @@ void ParallelServer::sendMessageToClients(ParallelConnection::MessageType messag
 }
 
 void ParallelServer::disconnect(std::shared_ptr<Peer> peer) {
-    if (peer->status != ParallelConnection::Status::Connecting &&
-        peer->status != ParallelConnection::Status::Disconnected)
-    {
-        peer->status = ParallelConnection::Status::Disconnected;
+    if (isConnected(peer)) {
         setNConnections(nConnections() - 1);
     }
 
@@ -325,11 +324,10 @@ void ParallelServer::disconnect(std::shared_ptr<Peer> peer) {
         hostPeerId = _hostPeerId;
     }
 
+    // Make sure any disconnecting host is first degraded to client,
+    // in order to notify other clients about host disconnection.
     if (peer->id == hostPeerId) {
         setToClient(peer);
-        for (auto& it : _peers) {
-            sendConnectionStatus(peer);
-        }
     }
 
     peer->parallelConnection.disconnect();
@@ -372,29 +370,29 @@ void ParallelServer::assignHost(std::shared_ptr<Peer> newHost) {
     newHost->status = ParallelConnection::Status::Host;
 
     for (auto& it : _peers) {
+        if (it.second != newHost) {
+            it.second->status = ParallelConnection::Status::ClientWithHost;
+        }
         sendConnectionStatus(it.second);
     }
 }
 
 void ParallelServer::setToClient(std::shared_ptr<Peer> peer) {
-    ParallelConnection::Status status = ParallelConnection::Status::ClientWithHost;
-    {
-        // If the peer was previously the host, there will no longer be any host.
-        std::lock_guard<std::mutex> lock(_hostInfoMutex);
-        if (_hostPeerId == peer->id) {
+    if (peer->status == ParallelConnection::Status::Host) {
+        {
+            std::lock_guard<std::mutex> lock(_hostInfoMutex);
             _hostPeerId = 0;
             _hostName = "";
-            status = ParallelConnection::Status::ClientWithoutHost;
         }
-    }
 
-    if (peer->status == ParallelConnection::Status::Host) {
-        peer->status = status;
+        // If host becomes client, make all clients hostless.
         for (auto& it : _peers) {
+            it.second->status = ParallelConnection::Status::ClientWithoutHost;
             sendConnectionStatus(it.second);
         }
     } else {
-        peer->status = status;
+        peer->status = (_hostPeerId > 0) ? ParallelConnection::Status::ClientWithHost
+                                         : ParallelConnection::Status::ClientWithoutHost;
         sendConnectionStatus(peer);
     }
 }
