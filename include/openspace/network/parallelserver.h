@@ -44,6 +44,10 @@ public:
         const std::string& password,
         const std::string& changeHostPassword);
 
+    void setDefaultHostAddress(std::string);
+
+    std::string defaultHostAddress() const;
+
     void stop();
 
     size_t nConnections() const;
@@ -62,7 +66,7 @@ private:
         ParallelConnection::Message message;
     };
 
-    void sendMessage(size_t peerId,
+    void sendMessage(std::shared_ptr<Peer> peer,
         ParallelConnection::MessageType messageType,
         const std::vector<char>& message);
 
@@ -72,26 +76,27 @@ private:
     void sendMessageToClients(ParallelConnection::MessageType messageType,
         const std::vector<char>& message);
 
-    void disconnect(size_t peerId);
-    void setName(size_t peerId, std::string name);
-    void assignHost(size_t peerId);
-    void setToClient(size_t peerId);
+    void disconnect(std::shared_ptr<Peer> peer);
+    void setName(std::shared_ptr<Peer> peer, std::string name);
+    void assignHost(std::shared_ptr<Peer> peer);
+    void setToClient(std::shared_ptr<Peer> peer);
     void setNConnections(size_t nConnections);
-    void setConnectionStatus(size_t peerId, ParallelConnection::Status status);
-    void sendConnectionStatus(size_t peerId);
+    void sendConnectionStatus(std::shared_ptr<Peer> peer);
 
-    void handleAuthentication(size_t peerId, std::vector<char> data);
-    void handleData(size_t peerId, std::vector<char> data);
-    void handleHostshipRequest(size_t peerId, std::vector<char> data);
-    void handleHostshipResignation(size_t peerId, std::vector<char> data);
+    void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleData(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleHostshipResignation(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleDisconnection(std::shared_ptr<Peer> peer);
 
     void handleNewPeers();
     void eventLoop();
+    std::shared_ptr<Peer> peer(size_t i);
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
 
-    std::unordered_map<size_t, Peer> _peers;
-    std::mutex _peerListMutex;
+    std::unordered_map<size_t, std::shared_ptr<Peer>> _peers;
+    mutable std::mutex _peerListMutex;
 
     std::thread _serverThread;
     std::thread _eventLoopThread;
@@ -104,9 +109,9 @@ private:
     std::atomic_size_t _nConnections;
     std::atomic_size_t _hostPeerId;
 
-    std::mutex _hostInfoMutex;
-    std::string _hostAddress;
+    mutable std::mutex _hostInfoMutex;
     std::string _hostName;
+    std::string _defaultHostAddress;
 
     ConcurrentQueue<PeerMessage> _incomingMessages;
 };

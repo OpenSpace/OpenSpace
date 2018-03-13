@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
 
     ParallelServer server;
     server.start(port, password, changeHostPassword);
+    server.setDefaultHostAddress("127.0.0.1");
     LINFO(fmt::format("Server listening to port {}", port));
 
     while (std::cin.get() != 'q') {}

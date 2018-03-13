@@ -49,7 +49,8 @@ public:
         ConnectionStatus,
         HostshipRequest,
         HostshipResignation,
-        NConnections
+        NConnections,
+        Disconnection
     };
 
     struct Message {
