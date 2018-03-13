@@ -121,7 +121,6 @@ void IswaDataGroup::registerProperties(){
 
 
     _useLog.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published useLogChanged");
         _groupEvent->publish(
             "useLogChanged",
@@ -130,7 +129,6 @@ void IswaDataGroup::registerProperties(){
     });
 
     _useHistogram.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published useHistogramChanged");
         _groupEvent->publish(
             "useHistogramChanged",
@@ -140,7 +138,6 @@ void IswaDataGroup::registerProperties(){
 
     //If autofiler is on, background values property should be hidden
     _autoFilter.onChange([this](){
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published autoFilterChanged");
         // If autofiler is selected, use _dataProcessor to set backgroundValues
         // and unregister backgroundvalues property.
@@ -160,7 +157,6 @@ void IswaDataGroup::registerProperties(){
     });
 
     _normValues.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published normValuesChanged");
         _groupEvent->publish(
             "normValuesChanged",
@@ -169,7 +165,6 @@ void IswaDataGroup::registerProperties(){
     });
 
     _backgroundValues.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
         _groupEvent->publish(
             "backgroundValuesChanged",
@@ -178,7 +173,6 @@ void IswaDataGroup::registerProperties(){
     });
 
     _transferFunctionsFile.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
         _groupEvent->publish(
             "transferFunctionsChanged",
@@ -187,7 +181,6 @@ void IswaDataGroup::registerProperties(){
     });
 
     _dataOptions.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
         dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());

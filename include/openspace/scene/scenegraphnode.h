@@ -71,7 +71,7 @@ public:
         long long updateTimeScaling;  // time in ns
     };
 
-    static const std::string RootNodeName;
+    static const std::string RootNodeIdentifier;
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;

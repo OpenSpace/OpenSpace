@@ -95,8 +95,7 @@ GuiSpaceTimeComponent::GuiSpaceTimeComponent()
 void GuiSpaceTimeComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
-    // @TODO(abock): change back to name()
-    ImGui::Begin(identifier().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin(guiName().c_str(), &v, Size, 0.5f, ImGuiWindowFlags_AlwaysAutoResize);
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
@@ -107,8 +106,7 @@ void GuiSpaceTimeComponent::render() {
         nodes.begin(),
         nodes.end(),
         [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            // @TODO(abock): change back to name()
-            return lhs->identifier() < rhs->identifier();
+            return lhs->guiName() < rhs->guiName();
         }
     );
 
@@ -121,8 +119,7 @@ void GuiSpaceTimeComponent::render() {
         const std::vector<std::string>& tags = n->tags();
         auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {
-            // @TODO(abock): change back to name()
-            bool pressed = ImGui::Button(n->identifier().c_str());
+            bool pressed = ImGui::Button(n->guiName().c_str());
             ImGui::SameLine();
             if (pressed) {
                 OsEng.scriptEngine().queueScript(

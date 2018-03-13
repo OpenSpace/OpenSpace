@@ -99,16 +99,20 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
         "RenderablePlaneSpout"
     );
 
+    // @TODO(abock): Change key to identifier
     if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
+        // @TODO(abock): Also set the name?
+        setIdentifier(dictionary.value<std::string>(KeyName));
     }
     else {
         static int id = 0;
         if (id == 0) {
-            setName("ScreenSpaceSpout");
+            setIdentifier("ScreenSpaceSpout");
         }
         else {
-            setName("ScreenSpaceSpout  " + std::to_string(id));
+            setIdentifier("ScreenSpaceSpout" + std::to_string(id));
+            // Add an addtional space to the user-facing name to make it look nicer
+            setGuiName("ScreenSpaceSpout " + std::to_string(id));
         }
         ++id;
     }

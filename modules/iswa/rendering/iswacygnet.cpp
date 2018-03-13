@@ -288,7 +288,6 @@ void IswaCygnet::initializeGroup() {
         identifier(),
         "enabledChanged",
         [&](const ghoul::Dictionary& dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event enabledChanged");
             _enabled.setValue(dict.value<bool>("enabled"));
         }
@@ -298,14 +297,12 @@ void IswaCygnet::initializeGroup() {
         identifier(),
         "alphaChanged",
         [&](const ghoul::Dictionary& dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event alphaChanged");
             _alpha.setValue(dict.value<float>("alpha"));
         }
     );
 
     groupEvent->subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
-        // @TODO(abock): change back to name()
         LDEBUG(identifier() + " Event clearGroup");
         OsEng.scriptEngine().queueScript(
             "openspace.removeSceneGraphNode('" + identifier() + "')",

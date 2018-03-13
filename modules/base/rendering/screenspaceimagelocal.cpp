@@ -91,11 +91,11 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
     else {
         static int id = 0;
         if (id == 0) {
-            // @TODO(abock): Also set name
             setIdentifier("ScreenSpaceImageLocal");
         }
         else {
-            // @TODO(abock): Also set name
+            setIdentifier("ScreenSpaceImageLocal" + std::to_string(id));
+            // Add an additional space to the user-facing name to make it look nicer
             setIdentifier("ScreenSpaceImageLocal " + std::to_string(id));
         }
         ++id;

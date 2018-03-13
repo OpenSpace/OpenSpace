@@ -85,7 +85,6 @@ bool IswaBaseGroup::isType(std::string type){
 }
 
 void IswaBaseGroup::updateGroup(){
-    // @TODO(abock): change back to name()
     LDEBUG("Group " + identifier() + " published updateGroup");
     _groupEvent->publish("updateGroup", ghoul::Dictionary());
 
@@ -93,7 +92,6 @@ void IswaBaseGroup::updateGroup(){
 
 void IswaBaseGroup::clearGroup(){
     _groupEvent->publish("clearGroup", ghoul::Dictionary());
-    // @TODO(abock): change back to name()
     LDEBUG("Group " + identifier() + " published clearGroup");
     unregisterProperties();
 }
@@ -108,7 +106,6 @@ std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent() {
 
 void IswaBaseGroup::registerProperties(){
     _enabled.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published enabledChanged");
         _groupEvent->publish(
             "enabledChanged",
@@ -117,7 +114,6 @@ void IswaBaseGroup::registerProperties(){
     });
 
     _alpha.onChange([this]{
-        // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published alphaChanged");
         _groupEvent->publish(
             "alphaChanged",

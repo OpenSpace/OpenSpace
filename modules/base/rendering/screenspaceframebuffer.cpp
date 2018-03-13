@@ -67,12 +67,12 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 
     _id = id();
     if (_id == 0) {
-        // @TODO(abock): Also set name
         setIdentifier("ScreenSpaceFramebuffer");
     }
     else {
-        // @TODO(abock): Also set name
-        setIdentifier("ScreenSpaceFramebuffer " + std::to_string(_id));
+        setIdentifier("ScreenSpaceFramebuffer" + std::to_string(_id));
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceFramebuffer " + std::to_string(_id));
     }
 
     glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();

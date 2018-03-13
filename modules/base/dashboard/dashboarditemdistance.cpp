@@ -382,7 +382,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
     switch (mainComp.type) {
         case Type::Node:
             // @TODO(abock): Maybe change back to name()?
-            return { mainComp.node->worldPosition(), mainComp.node->identifier() };
+            return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
             glm::dvec3 otherPos;
@@ -399,8 +399,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             glm::dvec3 dir = glm::normalize(otherPos - thisPos);
             glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            // @TODO(abock): change back to name()
-            return { thisPos + dirLength, "surface of " + mainComp.node->identifier() };
+            return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
         }
         case Type::Focus:
             return {

@@ -368,7 +368,6 @@ void KameleonPlane::subscribeToGroup() {
     //Add additional Events specific to KameleonPlane
     auto groupEvent = _group->groupEvent();
     groupEvent->subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
-        // @TODO(abock): change back to name()
         LDEBUG(identifier() + " Event resolutionChanged");
         float resolution;
         bool success = dict.getValue("resolution", resolution);
@@ -378,7 +377,6 @@ void KameleonPlane::subscribeToGroup() {
     });
 
     groupEvent->subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
-        // @TODO(abock): change back to name()
         LDEBUG(identifier() + " Event cdfChanged");
         std::string path;
         bool success = dict.getValue("path", path);

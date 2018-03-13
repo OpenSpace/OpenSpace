@@ -59,10 +59,19 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
         "${WEB}/properties/script.js"
     )
     , _identifier(std::move(info.identifier))
-    , _name(std::move(info.name))
+    , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
     , _owner(nullptr)
-{}
+{
+    ghoul_assert(
+        _identifier.find_first_of("\t\n ") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+    ghoul_assert(
+        _identifier.find_first_of(".") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+}
 
 PropertyOwner::~PropertyOwner() {
     _properties.clear();
@@ -178,7 +187,6 @@ void PropertyOwner::addProperty(Property* prop) {
         LERROR(fmt::format(
             "Property identifier '{}' already present in PropertyOwner '{}'",
             prop->identifier(),
-            // @TODO(abock): change back to name()
             identifier()
         ));
         return;
@@ -296,11 +304,28 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 }
 
 void PropertyOwner::setIdentifier(std::string identifier) {
+    ghoul_assert(
+        _identifier.find_first_of("\t\n ") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+    ghoul_assert(
+        _identifier.find_first_of(".") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+
     _identifier = std::move(identifier);
 }
 
 std::string PropertyOwner::identifier() const {
     return _identifier;
+}
+
+void PropertyOwner::setGuiName(std::string guiName) {
+    _guiName = std::move(guiName);
+}
+
+const std::string& PropertyOwner::guiName() const {
+    return _guiName.empty() ? _identifier : _guiName;
 }
 
 void PropertyOwner::setDescription(std::string description) {

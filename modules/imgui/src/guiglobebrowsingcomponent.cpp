@@ -89,8 +89,9 @@ void GuiGlobeBrowsingComponent::render() {
     std::sort(
         nodes.begin(),
         nodes.end(),
-        // @TODO(abock): change back to name()
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->identifier() < rhs->identifier(); }
+        [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
+            return lhs->guiName() < rhs->guiName();
+        }
     );
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {

@@ -72,7 +72,7 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
 {
-    _rootDummy.setIdentifier(SceneGraphNode::RootNodeName);
+    _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
 }
 
@@ -98,15 +98,14 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByName.count(node->identifier())){
+    if (_nodesByIdentifier.count(node->identifier())){
         throw Scene::InvalidSceneError(
-            // @TODO(abock): Use also name()?
-            "Node with name " + node->identifier() + " already exits."
+            "Node with identifier " + node->identifier() + " already exits."
         );
     }
 
     _topologicallySortedNodes.push_back(node);
-    _nodesByName[node->identifier()] = node;
+    _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
@@ -120,7 +119,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
         ),
         _topologicallySortedNodes.end()
     );
-    _nodesByName.erase(node->identifier());
+    _nodesByIdentifier.erase(node->identifier());
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
@@ -147,7 +146,7 @@ void Scene::sortTopologically() {
     _circularNodes.clear();
 
     ghoul_assert(
-        _topologicallySortedNodes.size() == _nodesByName.size(),
+        _topologicallySortedNodes.size() == _nodesByIdentifier.size(),
         "Number of scene graph nodes is inconsistent"
     );
 
@@ -156,7 +155,7 @@ void Scene::sortTopologically() {
     }
 
     // Only the Root node can have an in-degree of 0
-    SceneGraphNode* root = _nodesByName[SceneGraphNode::RootNodeName];
+    SceneGraphNode* root = _nodesByIdentifier[SceneGraphNode::RootNodeIdentifier];
     if (!root) {
         throw Scene::InvalidSceneError("No root node found");
     }
@@ -333,8 +332,8 @@ void Scene::clear() {
     _rootDummy.clearChildren();
 }
 
-const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
-    return _nodesByName;
+const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
+    return _nodesByIdentifier;
 }
 
 SceneGraphNode* Scene::root() {
@@ -346,8 +345,8 @@ const SceneGraphNode* Scene::root() const {
 }
 
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
-    auto it = _nodesByName.find(name);
-    if (it != _nodesByName.end()) {
+    auto it = _nodesByIdentifier.find(name);
+    if (it != _nodesByIdentifier.end()) {
         return it->second;
     }
     return nullptr;
@@ -370,7 +369,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     const std::string nodeName = dict.value<std::string>(KeyName);
     const bool hasParent = dict.hasKey(KeyParentName);
 
-    if (_nodesByName.find(nodeName) != _nodesByName.end()) {
+    if (_nodesByIdentifier.find(nodeName) != _nodesByIdentifier.end()) {
         LERROR(fmt::format(
             "Cannot add scene graph node '{}'. A node with that name already exists",
             nodeName

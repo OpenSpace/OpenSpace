@@ -56,11 +56,22 @@ public:
 
     struct PropertyOwnerInfo {
         std::string identifier;
-        std::string name = "";
+        std::string guiName = "";
         std::string description = "";
     };
 
-    /// The constructor initializing the PropertyOwner's name to <code>""</code>
+    /**
+     * The constructor of PropertyOwner.
+     *
+     * \param info the PropertyOwnerInfo struct that contains the
+     * #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
+     * #PropertyOwnerInfo::description of this PropertyOwner.
+     *
+     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
+     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any
+     *      <code>.</code>
+     */
+
     PropertyOwner(PropertyOwnerInfo info);
 
     /**
@@ -76,8 +87,11 @@ public:
      * properties). No uniqueness check will be preformed here, but rather in the 
      * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
      *
-     * \param identifier The identifier of this PropertyOwner. It may not contain any
-     *        <code>.</code>s
+     * \param identifier The identifier of this PropertyOwner. It must not contain any
+     *        <code>.</code>s or whitespaces
+     *
+     * \pre \p identifier must not contain any whitespaces
+     * \pre \p identifier must not contain any <code>.</code>
      */
     void setIdentifier(std::string identifier);
 
@@ -86,6 +100,21 @@ public:
      * \return The identifier of this PropertyOwner
      */
     std::string identifier() const;
+
+    /**
+     * Sets the user-facing name of this PropertyOwner. This name does not have to be 
+     * unique, but it is recommended to be.
+     *
+     * \param guiName The new user-facing name for this PropertyOwner
+     */
+    void setGuiName(std::string guiName);
+
+    /**
+     * Returns the current user-facing name for this PropertyOwner.
+     *
+     * \return The current user-facing name for this PropertyOwner
+     */
+    const std::string& guiName() const;
 
     void setDescription(std::string description);
 
@@ -250,7 +279,7 @@ private:
     /// The unique identifier of this PropertyOwner
     std::string _identifier;
     /// The user-facing GUI name for this PropertyOwner
-    std::string _name;
+    std::string _guiName;
     /// The description for this PropertyOwner
     std::string _description;
     /// The owner of this PropertyOwner

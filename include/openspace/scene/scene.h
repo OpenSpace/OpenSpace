@@ -153,10 +153,9 @@ public:
     void writeSceneLicenseDocumentation(const std::string& path) const;
 
     /**
-     * Return a a map from name to scene graph node.
+     * Returns a map from identifier to scene graph node.
      */
-    // @TODO(abock): Rename to nodesByIdentifier
-    const std::unordered_map<std::string, SceneGraphNode*>& nodesByName() const;
+    const std::unordered_map<std::string, SceneGraphNode*>& nodesByIdentifier() const;
 
     /**
      * Load a scene graph node from a dictionary and return it.
@@ -194,8 +193,7 @@ private:
     std::unique_ptr<Camera> _camera;
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
-    // @TODO(abock): Change to _nodesByIdentifier
-    std::unordered_map<std::string, SceneGraphNode*> _nodesByName;
+    std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
     bool _dirtyNodeRegistry;
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;

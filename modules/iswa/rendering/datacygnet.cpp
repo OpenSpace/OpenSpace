@@ -338,7 +338,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "dataOptionsChanged",
         [&](ghoul::Dictionary dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event dataOptionsChanged");
             std::vector<int> values;
             bool success = dict.getValue<std::vector<int> >("dataOptions", values);
@@ -352,7 +351,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "normValuesChanged",
         [&](ghoul::Dictionary dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event normValuesChanged");
             glm::vec2 values;
             bool success = dict.getValue("normValues", values);
@@ -366,7 +364,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "backgroundValuesChanged",
         [&](ghoul::Dictionary dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event backgroundValuesChanged");
             glm::vec2 values;
             bool success = dict.getValue("backgroundValues", values);
@@ -380,7 +377,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "transferFunctionsChanged",
         [&](ghoul::Dictionary dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event transferFunctionsChanged");
             _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
         }
@@ -390,7 +386,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "useLogChanged",
         [&](const ghoul::Dictionary& dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event useLogChanged");
             _useLog.setValue(dict.value<bool>("useLog"));
         }
@@ -400,7 +395,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "useHistogramChanged",
         [&](ghoul::Dictionary dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event useHistogramChanged");
             _useHistogram.setValue(dict.value<bool>("useHistogram"));
         }
@@ -410,7 +404,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "autoFilterChanged",
         [&](ghoul::Dictionary dict) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event autoFilterChanged");
             _autoFilter.setValue(dict.value<bool>("autoFilter"));
         }
@@ -420,7 +413,6 @@ void DataCygnet::subscribeToGroup() {
         identifier(),
         "updateGroup",
         [&](ghoul::Dictionary) {
-            // @TODO(abock): change back to name()
             LDEBUG(identifier() + " Event updateGroup");
             if (_autoFilter.value()) {
                 _backgroundValues.setValue(_dataProcessor->filterValues());

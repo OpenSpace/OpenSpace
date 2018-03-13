@@ -93,7 +93,9 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
             setIdentifier("ScreenSpaceImageOnline");
         }
         else {
-            setIdentifier("ScreenSpaceImageOnline " + std::to_string(id));
+            setIdentifier("ScreenSpaceImageOnline" + std::to_string(id));
+            // Add an additional space to the user-facing name to make it look nicer
+            setGuiName("ScreenSpaceImageOnline " + std::to_string(id));
         }
         ++id;
     }

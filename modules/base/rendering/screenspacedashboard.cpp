@@ -166,12 +166,12 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     else {
         static int id = 0;
         if (id == 0) {
-            // @TODO(abock): Also set name
             setIdentifier("ScreenSpaceDashboard");
         }
         else {
-            // @TODO(abock): Also set name
             setIdentifier("ScreenSpaceDashboard" + std::to_string(id));
+            // Add an extra space in the user-facing name as it looks nicer
+            setGuiName("ScreenSpaceDashboard " + std::to_string(id));
         }
         ++id;
     }

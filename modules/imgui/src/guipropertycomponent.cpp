@@ -201,8 +201,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
             renderPropertyOwner(subOwner);
         }
         else {
-            // @TODO(abock): change back to name()
-            bool opened = ImGui::TreeNode(subOwner->identifier().c_str());
+            bool opened = ImGui::TreeNode(subOwner->guiName().c_str());
             renderTooltip(subOwner);
             if (opened) {
                 renderPropertyOwner(subOwner);
@@ -253,8 +252,7 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    // @TODO(abock): change back to name()
-    ImGui::Begin(identifier().c_str(), &v, Size, 0.75f);
+    ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
@@ -267,8 +265,7 @@ void GuiPropertyComponent::render() {
             owners.begin(),
             owners.end(),
             [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
-                // @TODO(abock): change back to name()
-                return lhs->identifier() < rhs->identifier();
+                return lhs->guiName() < rhs->guiName();
             }
         );
 
@@ -361,13 +358,11 @@ void GuiPropertyComponent::render() {
             auto header = [&]() -> bool {
                 if (owners.size() > 1) {
                     // Create a header in case we have multiple owners
-                    // @TODO(abock): change back to name()
-                    return ImGui::CollapsingHeader(pOwner->identifier().c_str());
+                    return ImGui::CollapsingHeader(pOwner->guiName().c_str());
                 }
                 else if (!pOwner->identifier().empty()) {
                     // If the owner has a name, print it first
-                    // @TODO(abock): change back to name()
-                    ImGui::Text("%s", pOwner->identifier().c_str());
+                    ImGui::Text("%s", pOwner->guiName().c_str());
                     ImGui::Spacing();
                     return true;
                 }
@@ -468,7 +463,6 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
             if (owner) {
                 it->second(
                     prop,
-                    // @TODO(abock): change back to name()?
                     owner->identifier(),
                     IsRegularProperty(_hasOnlyRegularProperties),
                     ShowToolTip(_showHelpTooltip),
