@@ -32,7 +32,6 @@ namespace {
 const char* _loggerCat = "ParallelServer";
 } // namespace
 
-
 namespace openspace {
 
 void ParallelServer::start(

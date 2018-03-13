@@ -22,9 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
-#include <string>
-#include <ghoul/glm.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -42,6 +39,14 @@
 
 #include <openspace/network/parallelserver.h>
 
+#include <iostream>
+#include <string>
+#include <ghoul/glm.h>
+#include <functional>
+#include <sstream>
+#include <iomanip>
+#include <ios>
+
 namespace {
     const std::string _loggerCat = "Wormhole";
 }
@@ -55,6 +60,18 @@ int main(int argc, char** argv) {
         "Wormhole",
         ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     );
+
+    std::stringstream defaultPassword;
+    defaultPassword << std::hex << std::setfill('0') << std::setw(6) << 
+        (std::hash<size_t>{}(
+            std::chrono::system_clock::now().time_since_epoch().count()
+        ) % 0xffffff);
+
+    std::stringstream defaultChangeHostPassword;
+    defaultChangeHostPassword << std::hex << std::setfill('0') << std::setw(6) <<
+        (std::hash<size_t>{}(
+            std::chrono::system_clock::now().time_since_epoch().count() + 1
+        ) % 0xffffff);
 
     std::string portString = "";
     commandlineParser.addCommand(
@@ -76,6 +93,11 @@ int main(int argc, char** argv) {
             )
     );
 
+    if (password == "") {
+        password = defaultPassword.str();
+        LINFO(fmt::format("Connection password: {}", password));
+    }
+
     std::string changeHostPassword = "";
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
@@ -85,6 +107,11 @@ int main(int argc, char** argv) {
             "Sets the host password to use"
             )
     );
+
+    if (changeHostPassword == "") {
+        changeHostPassword = defaultChangeHostPassword.str();
+        LINFO(fmt::format("Host password: {}", changeHostPassword));
+    }
 
     commandlineParser.setCommandLine(arguments);
     commandlineParser.execute();

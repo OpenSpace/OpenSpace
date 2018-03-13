@@ -106,8 +106,8 @@ private:
     size_t _nextConnectionId = 1;
     std::atomic_bool _shouldStop = false;
 
-    std::atomic_size_t _nConnections;
-    std::atomic_size_t _hostPeerId;
+    std::atomic_size_t _nConnections = 0;
+    std::atomic_size_t _hostPeerId = 0;
 
     mutable std::mutex _hostInfoMutex;
     std::string _hostName;
