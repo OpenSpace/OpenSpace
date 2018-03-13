@@ -115,7 +115,7 @@ namespace openspace {
         }
 
         void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
-            _histogramProperty.setValue(openspace::properties::VectorProperty{ histogram->getDataAsVector() });
+            _histogramProperty.setValue(histogram->getBinaryData());
         }
 
         void TransferFunctionHandler::setTexture() {

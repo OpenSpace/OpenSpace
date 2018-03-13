@@ -313,10 +313,11 @@ float Histogram::entropy() {
     return entropy;
 }
 
-std::vector<float> Histogram::getDataAsVector() const {
-    std::vector<float> dataVector;
-    for (int i = 0; i < _numBins; i++)
-        dataVector.emplace_back(_data[i]);
+std::vector<char> Histogram::getBinaryData() const {
+    std::vector<char> dataVector(
+        reinterpret_cast<char*>(_data),
+        reinterpret_cast<char*>(_data + _numValues)
+    );
     return dataVector;
 }
 
