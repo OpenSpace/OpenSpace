@@ -35,12 +35,13 @@
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaiamission/rendering/octreemanager.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/fmt.h>
 
 #include <array>
 #include <fstream>
@@ -496,11 +497,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // TODO (adaal): Only resize should be needed, not reconstructing the whole thing every frame!?
     if (_vao == 0) {
         glGenVertexArrays(1, &_vao);
-        LDEBUG("Generating Vertex Array id '" << _vao << "'");
+        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
         glGenBuffers(1, &_vbo);
-        LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -791,9 +792,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
 
             if (_pointSpreadFunctionTexture) {
-                LDEBUG("Loaded texture from '" <<
-                    absPath(_pointSpreadFunctionTexturePath) << "'"
-               );
+                LDEBUG(fmt::format("Loaded texture from '{}'",
+                    absPath(_pointSpreadFunctionTexturePath)
+               ));
                 _pointSpreadFunctionTexture->uploadTexture();
             }
             _pointSpreadFunctionTexture->setFilter(
@@ -820,7 +821,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 absPath(_colorTexturePath)
             );
             if (_colorTexture) {
-                LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+                LDEBUG(fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath)));
                 _colorTexture->uploadTexture();
             }
 
@@ -877,7 +878,8 @@ bool RenderableGaiaStars::readFitsFile() {
             return success;
         }
         else {
-            LERROR("Error opening file '" << _file << "' for loading preprocessed file!");
+            LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
+                , _file));
             return false;
         }
     }
@@ -889,7 +891,7 @@ bool RenderableGaiaStars::readFitsFile() {
             _firstRow, _lastRow);
 
         if (!table) {
-            LERROR("Failed to open Fits file '" << _file << "'");
+            LERROR(fmt::format("Failed to open Fits file '{}'", _file));
             return false;
         }
 

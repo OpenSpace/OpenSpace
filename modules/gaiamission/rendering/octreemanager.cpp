@@ -28,6 +28,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
+#include <ghoul/fmt.h>
 
 
 namespace {
@@ -171,10 +172,10 @@ namespace openspace {
             auto prefix = "{" + std::to_string(i);
             accumulatedString += printStarsPerNode(_root->Children[i], prefix);
         }
-        LINFO("Number of stars per node: " + accumulatedString);
-        LINFO("Number of leaf nodes: " + std::to_string(_numLeafNodes));
-        LINFO("Number of inner nodes: " + std::to_string(_numInnerNodes));
-        LINFO("Depth of tree: " + std::to_string(_totalDepth));
+        LINFO(fmt::format("Number of stars per node: {}", accumulatedString));
+        LINFO(fmt::format("Number of leaf nodes: {}", std::to_string(_numLeafNodes)));
+        LINFO(fmt::format("Number of inner nodes: {}", std::to_string(_numInnerNodes)));
+        LINFO(fmt::format("Depth of tree: {}", std::to_string(_totalDepth)));
     }
 
     std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,

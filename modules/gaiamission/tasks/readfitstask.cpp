@@ -30,6 +30,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 #include <fstream>
 
@@ -86,7 +87,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
         _columnNames, _firstRow, _lastRow);
 
     if (!table) {
-        LERROR("Failed to open Fits file '" << _inFilePath << "'");
+        LERROR(fmt::format("Failed to open Fits file '{}'", _inFilePath));
     }
     progressCallback(0.5f);
 
@@ -181,7 +182,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
         fileStream.close();
     }
     else {
-        LERROR("Error opening file: " << _outFilePath << " as output data file.");
+        LERROR(fmt::format("Error opening file: {} as output data file.", _outFilePath));
     }
 
     progressCallback(1.0f);
