@@ -30,14 +30,12 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
-
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/boxgeometry.h>
-#include <openspace/util/histogram.h>
 
 namespace openspace {
 
@@ -68,12 +66,10 @@ private:
         glm::uvec3 dimensions;
         glm::vec3 lowerDomainBound;
         glm::vec3 upperDomainBound;
-        std::string unit;
         bool inRam;
         bool onGpu;
         std::unique_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
-        std::shared_ptr<openspace::Histogram> histogram;
     };
 
     Timestep* currentTimestep();
@@ -94,6 +90,8 @@ private:
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
+    properties::FloatProperty _lowerValueBound;
+    properties::FloatProperty _upperValueBound;
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;
@@ -102,8 +100,7 @@ private:
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
-
+    std::shared_ptr<TransferFunction> _transferFunction;
 };
 
 } // namespace volume
