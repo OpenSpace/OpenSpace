@@ -98,7 +98,6 @@ void IswaKameleonGroup::registerProperties() {
     //OsEng.gui()._iswa.registerProperty(&_fieldlines);
 
     _resolution.onChange([this]{
-    // @TODO(abock): change back to name()
         LDEBUG("Group " + identifier() + " published resolutionChanged");
         _groupEvent->publish(
             "resolutionChanged",

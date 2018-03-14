@@ -187,11 +187,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _shadowEnabled(false)
     , _time(0.f)
 {
-    ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "RenderablePlanet needs the name to be specified"
-    );
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,

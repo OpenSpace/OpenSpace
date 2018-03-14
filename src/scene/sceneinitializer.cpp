@@ -53,10 +53,9 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     auto initFunction = [this, node]() {
         LoadingScreen& loadingScreen = OsEng.loadingScreen();
 
-        // @TODO(abock): Maybe replace (or add) name to this???
-
         loadingScreen.updateItem(
             node->identifier(),
+            node->guiName(),
             LoadingScreen::ItemStatus::Initializing,
             1.f
         );
@@ -68,6 +67,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
 
         loadingScreen.updateItem(
             node->identifier(),
+            node->guiName(),
             LoadingScreen::ItemStatus::Finished,
             1.f
         );
@@ -77,6 +77,7 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     loadingScreen.setItemNumber(loadingScreen.itemNumber() + 1);
     loadingScreen.updateItem(
         node->identifier(),
+        node->guiName(),
         LoadingScreen::ItemStatus::Started,
         0.f
     );

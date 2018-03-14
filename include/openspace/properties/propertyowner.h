@@ -273,15 +273,18 @@ public:
      */
     void removeTag(const std::string& tag);
 
-private:
-    std::string generateJson() const override;
 
+protected:
     /// The unique identifier of this PropertyOwner
     std::string _identifier;
     /// The user-facing GUI name for this PropertyOwner
     std::string _guiName;
     /// The description for this PropertyOwner
     std::string _description;
+
+private:
+    std::string generateJson() const override;
+
     /// The owner of this PropertyOwner
     PropertyOwner* _owner;
     /// A list of all registered Property's

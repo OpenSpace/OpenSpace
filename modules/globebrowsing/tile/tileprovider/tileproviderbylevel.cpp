@@ -29,18 +29,15 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* KeyProviders = "LevelTileProviders";
-    const char* KeyMaxLevel = "MaxLevel";
-    const char* KeyTileProvider = "TileProvider";
-    const char* KeyLayerGroupID = "LayerGroupID";
+    constexpr const char* KeyProviders = "LevelTileProviders";
+    constexpr const char* KeyMaxLevel = "MaxLevel";
+    constexpr const char* KeyTileProvider = "TileProvider";
+    constexpr const char* KeyLayerGroupID = "LayerGroupID";
 } // namespace
 
 namespace openspace::globebrowsing::tileprovider {
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
-    std::string name = "Name unspecified";
-    dictionary.getValue("Name", name);
-
     layergroupid::GroupID layerGroupID;
     dictionary.getValue(KeyLayerGroupID, layerGroupID);
 
@@ -93,10 +90,14 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             ))
         );
 
-        // @TODO(abock): change key to identifier
+        std::string providerIdentifier;
+        providerDict.getValue("Identifier", providerIdentifier);
+        _levelTileProviders.back()->setIdentifier(providerIdentifier);
+
         std::string providerName;
         providerDict.getValue("Name", providerName);
-        _levelTileProviders.back()->setIdentifier(providerName);
+        _levelTileProviders.back()->setGuiName(providerName);
+
         addPropertySubOwner(_levelTileProviders.back().get());
 
         // Ensure we can represent the max level

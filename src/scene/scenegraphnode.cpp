@@ -58,6 +58,8 @@ namespace {
     constexpr const char* KeyRenderable = "Renderable";
     constexpr const char* KeyGuiPath = "GuiPath";
 
+    constexpr const char* KeyName = "Name";
+
     constexpr const char* keyTransformTranslation = "Transform.Translation";
     constexpr const char* keyTransformRotation = "Transform.Rotation";
     constexpr const char* keyTransformScale = "Transform.Scale";
@@ -136,8 +138,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        // @TODO(abock):  Change the key to identifier
-        renderableDictionary.setValue(KeyName, identifier);
+        renderableDictionary.setValue(KeyIdentifier, identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {

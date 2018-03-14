@@ -72,7 +72,6 @@ public:
     };
 
     static constexpr const char* RootNodeIdentifier = "Root";
-    static constexpr const char* KeyName = "Name";
     static constexpr const char* KeyIdentifier = "Identifier";
     static constexpr const char* KeyParentName = "Parent";
     static constexpr const char* KeyDependencies = "Dependencies";

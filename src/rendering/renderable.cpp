@@ -80,13 +80,6 @@ documentation::Documentation Renderable::Documentation() {
 std::unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    // The name is passed down from the SceneGraphNode
-    ghoul_assert(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "The SceneGraphNode did not set the 'name' key"
-    );
-    std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
-
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
@@ -105,11 +98,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _endTime("")
     , _hasTimeInterval(false)
 {
-    ghoul_assert(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        std::string("SceneGraphNode must specify '") + SceneGraphNode::KeyName + "'"
-    );
-
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
 
@@ -130,7 +118,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (_startTime != "" && _endTime != "") {
+    if (!_startTime.empty() && !_endTime.empty()) {
         _hasTimeInterval = true;
     }
 

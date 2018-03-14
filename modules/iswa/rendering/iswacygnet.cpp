@@ -61,10 +61,10 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _textureDirty(false)
     , _rotation(glm::mat4(1.0f))
 {
+    // This changed from setIdentifier to setGuiName, 2018-03-14 ---abock
     std::string name;
     dictionary.getValue("Name", name);
-    // @TODO(abock): Add name name()
-    setIdentifier(name);
+    setGuiName(name);
 
     _data = std::make_shared<Metadata>();
 

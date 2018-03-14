@@ -381,7 +381,6 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 
     switch (mainComp.type) {
         case Type::Node:
-            // @TODO(abock): Maybe change back to name()?
             return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
