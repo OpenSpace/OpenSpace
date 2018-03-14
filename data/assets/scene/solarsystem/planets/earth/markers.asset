@@ -5,8 +5,8 @@ local texturesPath = asset.require('./earth_textures').TexturesPath
 
 
 local EarthMarker = {
-    Name = "EarthMarker",
-    Parent = transforms.EarthIAU.Name,
+    Identifier = "EarthMarker",
+    Parent = transforms.EarthIAU.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageLocal",
         Enabled = false,
@@ -16,6 +16,7 @@ local EarthMarker = {
         Texture = texturesPath .. "/marker.png",
         BlendMode = "Additive"
     },
+    Name = "Earth Marker",
     GuiPath = "/Solar System/Planets/Earth"
 }
 

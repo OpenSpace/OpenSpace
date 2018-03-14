@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Exoplanets",
+    Identifier = "Exoplanets",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,

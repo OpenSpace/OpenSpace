@@ -5,16 +5,16 @@ local kernels112 = asset.require('./ura112').Kernels
 
 
 
-local parentName = transforms.UranusBarycenter.Name
+local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_prograde" }
 local trailColor = { 0.60, 0.65, 0.84 }
 
 local irregularMoons = {
     {
-        Name = "Margaret",
+        Identifier = "Margaret",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "MARGARET",

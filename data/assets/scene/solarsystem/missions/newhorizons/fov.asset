@@ -9,8 +9,8 @@ local AliceOffset = {   -7.9, -1.7,  8.3  }
 local RexOffset   = {      0,    0,    0  }
 
 local Lorri = {
-    Name = "NH_LORRI",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_LORRI",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -36,8 +36,8 @@ local Lorri = {
 }
 
 local RalphLeisa = {
-    Name = "NH_RALPH_LEISA",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_LEISA",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -63,8 +63,8 @@ local RalphLeisa = {
 }
 
 local RalphMvicPan1 = {
-    Name = "NH_RALPH_MVIC_PAN1",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_PAN1",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -90,8 +90,8 @@ local RalphMvicPan1 = {
 }
 
 local RalphMvicPan2 = {
-    Name = "NH_RALPH_MVIC_PAN2",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_PAN2",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -117,8 +117,8 @@ local RalphMvicPan2 = {
 }
 
 local RalphMvicRed = {
-    Name = "NH_RALPH_MVIC_RED",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_RED",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -144,8 +144,8 @@ local RalphMvicRed = {
 }
 
 local RalphMvicBlue = {
-    Name = "NH_RALPH_MVIC_BLUE",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_BLUE",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -171,8 +171,8 @@ local RalphMvicBlue = {
 }
 
 local RalphMvicFt = {
-    Name = "NH_RALPH_MVIC_FT",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_FT",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -198,8 +198,8 @@ local RalphMvicFt = {
 }
 
 local RalphMvicMethane = {
-    Name = "NH_RALPH_MVIC_METHANE",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_METHANE",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -225,8 +225,8 @@ local RalphMvicMethane = {
 }
 
 local RalphMvicNir = {
-    Name = "NH_RALPH_MVIC_NIR",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_NIR",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -252,8 +252,8 @@ local RalphMvicNir = {
 }
 
 local AliceAirglow = {
-    Name = "NH_ALICE_AIRGLOW",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_ALICE_AIRGLOW",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -280,8 +280,8 @@ local AliceAirglow = {
 }
 
 local AliceSoc = {
-    Name = "NH_ALICE_SOC",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_ALICE_SOC",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -307,8 +307,8 @@ local AliceSoc = {
 }
 
 local Rex = {
-    Name = "NH_REX",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_REX",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableCrawlingLine",
         Source = "NH_REX",

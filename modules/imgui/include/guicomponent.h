@@ -38,7 +38,7 @@ class GUI;
 class GuiComponent : public properties::PropertyOwner {
 public:
     /// Constructor that initializes this components member variables
-    GuiComponent(std::string name);
+    GuiComponent(std::string identifier, std::string guiName = "");
 
     /**
      * Returns if this component is enabled, that is, if it is currently active and

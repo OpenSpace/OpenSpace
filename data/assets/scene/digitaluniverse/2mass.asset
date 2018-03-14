@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "2MASS Galaxies",
+    Identifier = "2MASS",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -31,6 +31,7 @@ local object = {
         Unit = "Mpc",
         ScaleFactor = 508.0
     },
+    Name = "2MASS Galaxies",
     GuiPath = "/Universe/Galaxies"
 }
 

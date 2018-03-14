@@ -617,8 +617,8 @@ local KernelFiles = {
 }
 
 local Dawn = {
-    Name = "Dawn",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "Dawn",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -647,8 +647,8 @@ local Dawn = {
 
 -- Dawn Solar Array module 1
 local DawnSolarArray1 = {
-    Name = "DawnSolar1",
-    Parent = Dawn.Name,
+    Identifier = "DawnSolar1",
+    Parent = Dawn.Identifier,
     Transformation = {
         Rotation = {
             Type = "SpiceRotation",
@@ -665,13 +665,14 @@ local DawnSolarArray1 = {
         },
         ColorTexture = textures .. "/gray.png"
     },
+    Name = "Dawn Solar 1",
     GuiPath = "/Solar System/Missions/Dawn"
 }
 
 -- Dawn Solar Array module 2
 local DawnSolarArray2 = {
-    Name = "DawnSolar2",
-    Parent = Dawn.Name,
+    Identifier = "DawnSolar2",
+    Parent = Dawn.Identifier,
     Transformation = {
         Rotation = {
             Type = "SpiceRotation",
@@ -688,12 +689,13 @@ local DawnSolarArray2 = {
         },
         ColorTexture = textures .. "/gray.png"
     },
+    Name = "Dawn Solar 2",
     GuiPath = "/Solar System/Missions/Dawn"
 }
 
 local DawnTrail = {
-    Name = "DawnTrail",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "DawnTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -711,13 +713,14 @@ local DawnTrail = {
         EnableFade = false,
         Rendering = "Lines+Points"
     },
+    Name = "Dawn Trail",
     GuiPath = "/Solar System/Missions/Dawn"
 }
 
 -- DawnFov 1
 local DawnFramingCamera1 = {
-    Name = "Dawn_framing_camera_1",
-    Parent = Dawn.Name,
+    Identifier = "Dawn_framing_camera_1",
+    Parent = Dawn.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "DAWN",
@@ -730,12 +733,13 @@ local DawnFramingCamera1 = {
         },
         PotentialTargets = { "VESTA", "CERES" }
     },
+    Name = "Dawn Framing Camera 1",
     GuiPath = "/Solar System/Missions/Dawn"
 }
 
 local DawnFramingCamera2 = {
-    Name = "Dawn_framing_camera_2",
-    Parent = Dawn.Name,
+    Identifier = "Dawn_framing_camera_2",
+    Parent = Dawn.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "DAWN",
@@ -748,6 +752,7 @@ local DawnFramingCamera2 = {
         },
         PotentialTargets = { "VESTA", "CERES" }
     },
+    Name = "Dawn Framing Camera 2",
     GuiPath = "/Solar System/Missions/Dawn"
 }
 

@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Dione = {
-    Name = "Dione",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Dione",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Dione = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Dione Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/dione.jpg",
                     Enabled = true
                 }

@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Nearby Galaxy Groups",
+    Identifier = "NearbyGalaxyGroups",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -23,6 +23,7 @@ local object = {
         TextMinSize = 8.0,
         Unit = "Mpc"
     },
+    Name = "Nearby Galaxy Groups",
     GuiPath = "/Universe/Galaxies"
 }
 

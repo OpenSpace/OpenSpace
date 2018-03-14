@@ -76,7 +76,7 @@ namespace {
 namespace openspace::gui {
 
 GuiSpaceTimeComponent::GuiSpaceTimeComponent()
-    : GuiComponent("Space/Time")
+    : GuiComponent("SpaceTime", "Space/Time")
     , _deltaTime(0.f)
     , _deltaTimeUnit(static_cast<int>(TimeUnit::Second))
     , _accelerationDelta(0.f)

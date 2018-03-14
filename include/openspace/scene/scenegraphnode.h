@@ -71,11 +71,12 @@ public:
         long long updateTimeScaling;  // time in ns
     };
 
-    static const std::string RootNodeIdentifier;
-    static const std::string KeyName;
-    static const std::string KeyParentName;
-    static const std::string KeyDependencies;
-    static const std::string KeyTag;
+    static constexpr const char* RootNodeIdentifier = "Root";
+    static constexpr const char* KeyName = "Name";
+    static constexpr const char* KeyIdentifier = "Identifier";
+    static constexpr const char* KeyParentName = "Parent";
+    static constexpr const char* KeyDependencies = "Dependencies";
+    static constexpr const char* KeyTag = "Tag";
 
     SceneGraphNode();
     ~SceneGraphNode();

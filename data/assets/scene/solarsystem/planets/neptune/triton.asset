@@ -6,9 +6,9 @@ local kernels081 = asset.require('./nep081').Kernels
 
 
 local Triton = {
-    Name = "Triton",
+    Identifier = "Triton",
     Parent = {
-        Name = transforms.NeptuneBarycenter.Name,
+        Name = transforms.NeptuneBarycenter.Identifier,
         Spice = "NEPTUNE BARYCENTER"
     },
     Spice = "TRITON",

@@ -15,8 +15,8 @@ local textures = asset.syncedResource({
 local charonRadius = 6.035E5
 
 local Charon = {
-    Name = "Charon",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Charon",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -70,8 +70,8 @@ local Charon = {
 }
 
 local CharonText = {
-    Name = "CharonText",
-    Parent = Charon.Name,
+    Identifier = "CharonText",
+    Parent = Charon.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -86,12 +86,13 @@ local CharonText = {
         Texture = textures .. "/Charon-Text.png",
         BlendMode = "Additive"
     },
+    Name = "Charon Text",
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 
 local CharonShadow = {
-    Name = "CharonShadow",
-    Parent = Charon.Name,
+    Identifier = "CharonShadow",
+    Parent = Charon.Identifier,
     Renderable = {
         Type = "RenderableShadowCylinder",
         TerminatorType = "PENUMBRAL",
@@ -101,12 +102,13 @@ local CharonShadow = {
         BodyFrame = "IAU_CHARON",
         Aberration = "NONE"
     },
+    Name = "Charon Shadow",
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 
 local CharonTrail = {
-    Name = "CharonTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "CharonTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -118,6 +120,7 @@ local CharonTrail = {
         Period = 6.38725,
         Resolution = 1000
     },
+    Name = "Charon Trail",
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 

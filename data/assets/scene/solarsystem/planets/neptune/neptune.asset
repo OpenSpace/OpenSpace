@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Neptune = {
-    Name = "Neptune",
-    Parent = transforms.NeptuneBarycenter.Name,
+    Identifier = "Neptune",
+    Parent = transforms.NeptuneBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -29,7 +29,7 @@ local Neptune = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/neptune.jpg",
                     Enabled = true
                 }

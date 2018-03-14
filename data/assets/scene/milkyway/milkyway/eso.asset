@@ -10,7 +10,7 @@ local textures = asset.syncedResource({
 })
 
 local object = {
-    Name = "MilkyWay (ESO)",
+    Identifier = "MilkyWay-ESO",
     Renderable = {
         Type = "RenderableSphere",
         Size = 9.2E20,
@@ -20,6 +20,7 @@ local object = {
         Orientation = "Inside/Outside",
         FadeOutThreshould = 0.01
     },
+    Name = "Milky Way (ESO)",
     GuiPath = "/Milky Way/Milky Way"
 }
 

@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local ecliptic = {
-    Name = "Ecliptic Sphere",
+    Identifier = "EclipticSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableSphericalGrid",
@@ -23,11 +23,12 @@ local ecliptic = {
                        -0.09647644,  0.8622859,  0.4971472   , 0.0,
                         0.0       ,  0.0      ,  0.0         , 1.0 }
     },
+    Name = "Ecliptic Sphere",
     GuiPath = "/Other/Grids"
 }
 
 local eclipticLabels = {
-    Name = "Ecliptic Sphere Labels",
+    Identifier = "EclipticSphereLabels",
     Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableBillboardsCloud",
@@ -46,11 +47,12 @@ local eclipticLabels = {
             0.0,          0.0,        0.0,          1.0
         }
     },
+    Name = "Ecliptic Sphere Labels",
     GuiPath = "/Other/Grids"
 }
 
 local equatorial = {
-    Name = "Equatorial Sphere",
+    Identifier = "EquatorialSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableSphericalGrid",
@@ -63,11 +65,12 @@ local equatorial = {
                        -0.483835  ,  0.7469823,  0.4559838, 0.0,
                         0.0       ,  0.0      ,  0.0      , 1.0 },
     },
+    Name = "Equatorial Sphere",
     GuiPath = "/Other/Grids"
 }
 
 local equatorialLabels = {
-    Name = "Equatorial Sphere Labels",
+    Identifier = "EquatorialSphereLabels",
     Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableBillboardsCloud",
@@ -86,11 +89,12 @@ local equatorialLabels = {
             0.0,          0.0,        0.0,          1.0
         }
     },
+    Name = "Equatorial Sphere Labels",
     GuiPath = "/Other/Grids"
 }
 
 local galactic = {
-    Name = "Galactic Sphere",
+    Identifier = "GalacticSphere",
     Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableSphericalGrid",
@@ -99,11 +103,12 @@ local galactic = {
         Radius = 9.46377307652E18;
         GridColor = { 0.0, 0.6, 0.6, 0.6}
     },
+    Name = "Galactic Sphere",
     GuiPath = "/Other/Grids"
 }
 
 local galacticLabels = {
-    Name = "Galactic Sphere Labels",
+    Identifier = "GalacticSphereLabels",
     Parent = transforms.SolarSystemBarycenter.Name,
     Renderable = {
         Type = "RenderableBillboardsCloud",
@@ -116,11 +121,12 @@ local galacticLabels = {
         TextMinSize = 5.0,
         Unit = "pc"
     },
+    Name = "Galactic Sphere Labels",
     GuiPath = "/Other/Grids"
 }
 
 local plane100kly = {
-    Name = "100kly Grid",
+    Identifier = "100klyGrid",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -135,11 +141,12 @@ local plane100kly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
+    Name = "100kly Grid",
     GuiPath = "/Other/Grids"
 }
 
 local plane1Mly = {
-    Name = "1Mly Grid",
+    Identifier = "1MlyGrid",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -154,11 +161,12 @@ local plane1Mly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
+    Name = "1Mly Grid",
     GuiPath = "/Other/Grids"
 }
 
 local plane10Mly = {
-    Name = "10Mly Grid",
+    Identifier = "10MlyGrid",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -173,11 +181,12 @@ local plane10Mly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
+    Name = "10Mly Grid",
     GuiPath = "/Other/Grids"
 }
 
 local plane100Mly = {
-    Name = "100Mly Grid",
+    Identifier = "100MlyGrid",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -192,11 +201,12 @@ local plane100Mly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
+    Name = "100Mly Grid",
     GuiPath = "/Other/Grids"
 }
 
 local plane20Gly = {
-    Name = "20Gly Grid",
+    Identifier = "20GlyGrid",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -211,6 +221,7 @@ local plane20Gly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
+    Name = "20Gly Grid",
     GuiPath = "/Other/Grids"
 }
 

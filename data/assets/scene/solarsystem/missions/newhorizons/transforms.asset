@@ -5,8 +5,8 @@ local kernels = asset.require('./kernels')
 
 
 local PlutoBarycenter = {
-    Name = "PlutoBarycenter",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "PlutoBarycenter",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -15,12 +15,13 @@ local PlutoBarycenter = {
             Kernels = kernels.PlutoKernels
         },
     },
+    Name = "Pluto Barycenter",
     GuiPath = "/Solar System/Dwarf Planets/Pluto"
 }
 
 local NewHorizonsPosition = {
-    Name = "NewHorizonsPosition",
-    Parent = PlutoBarycenter.Name,
+    Identifier = "NewHorizonsPosition",
+    Parent = PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -34,6 +35,7 @@ local NewHorizonsPosition = {
             DestinationFrame = "GALACTIC"
         }
     },
+    Name = "New Horizons Position",
     GuiPath = "/Solar System/Missions/New Horizons"
 }
 

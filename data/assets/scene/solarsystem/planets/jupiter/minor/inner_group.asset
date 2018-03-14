@@ -5,16 +5,16 @@ local kernels341 = asset.require('../jup341').Kernels
 
 
 
-local parentName = transforms.JupiterBarycenter.Name
+local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_inner" }
 local trailColor = { 0.4, 0.3, 0.01 }
 
 local innerMoons = {
     {
-        Name = "Metis",
+        Identifier = "Metis",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "METIS",
@@ -26,9 +26,9 @@ local innerMoons = {
         Kernels = kernels341
     },
     {
-        Name = "Adrastea",
+        Identifier = "Adrastea",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ADRASTEA",
@@ -40,9 +40,9 @@ local innerMoons = {
         Kernels = kernels341
     },
     {
-        Name = "Amalthea",
+        Identifier = "Amalthea",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "AMALTHEA",
@@ -54,9 +54,9 @@ local innerMoons = {
         Kernels = kernels341
     },
     {
-        Name = "Thebe",
+        Identifier = "Thebe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "THEBE",

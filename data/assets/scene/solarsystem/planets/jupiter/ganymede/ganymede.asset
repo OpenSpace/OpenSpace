@@ -14,8 +14,8 @@ local textures = asset.syncedResource({
 })
 
 local Ganymede = {
-    Name = "Ganymede",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Ganymede",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -37,7 +37,7 @@ local Ganymede = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Ganymede Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/ganymede.jpg",
                     Enabled = true
                 }

@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Tethys = {
-    Name = "Tethys",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Tethys",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Tethys = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Tethys Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/tethys.jpg",
                     Enabled = true
                 }

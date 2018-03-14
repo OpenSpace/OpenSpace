@@ -104,8 +104,8 @@ void LayerGroup::update() {
 }
 
 std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
-    if (!layerDict.hasKeyAndValue<std::string>("Name")) {
-        LERROR("'Name' must be specified for layer.");
+    if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
+        LERROR("'Identifier' must be specified for layer.");
         return nullptr;
     }
     auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);

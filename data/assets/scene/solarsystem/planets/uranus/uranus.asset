@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Uranus = {
-    Name = "Uranus",
-    Parent = transforms.UranusBarycenter.Name,
+    Identifier = "Uranus",
+    Parent = transforms.UranusBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -29,7 +29,7 @@ local Uranus = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/uranus.jpg",
                     Enabled = true
                 }

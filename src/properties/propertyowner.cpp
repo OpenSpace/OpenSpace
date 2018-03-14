@@ -28,15 +28,15 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/invariants.h>
 #include <algorithm>
 #include <numeric>
-
-namespace openspace::properties {
 
 namespace {
     constexpr const char* _loggerCat = "PropertyOwner";
 } // namespace
 
+namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     : DocumentationGenerator(
@@ -63,11 +63,11 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     , _description(std::move(info.description))
     , _owner(nullptr)
 {
-    ghoul_assert(
+    ghoul_precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
         "Identifier must contain any whitespaces"
     );
-    ghoul_assert(
+    ghoul_precondition(
         _identifier.find_first_of(".") == std::string::npos,
         "Identifier must contain any whitespaces"
     );
@@ -169,7 +169,7 @@ std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
 }
 
 void PropertyOwner::addProperty(Property* prop) {
-    ghoul_assert(prop != nullptr, "prop must not be nullptr");
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     if (prop->identifier().empty()) {
         LERROR("No property identifier specified");
@@ -212,8 +212,11 @@ void PropertyOwner::addProperty(Property& prop) {
 }
 
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
-    ghoul_assert(owner != nullptr, "owner must not be nullptr");
-    ghoul_assert(!owner->identifier().empty(), "PropertyOwner must have an identifier");
+    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
+    ghoul_precondition(
+        !owner->identifier().empty(),
+        "PropertyOwner must have an identifier"
+    );
 
     // See if we can find the name of the propertyowner to add using the lower bound
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
@@ -253,7 +256,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& ow
 }
 
 void PropertyOwner::removeProperty(Property* prop) {
-    ghoul_assert(prop != nullptr, "prop must not be nullptr");
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     // See if we can find the identifier of the property to add in the properties list
     std::vector<Property*>::const_iterator it = std::find_if(
@@ -278,7 +281,7 @@ void PropertyOwner::removeProperty(Property& prop) {
 }
 
 void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner* owner) {
-    ghoul_assert(owner != nullptr, "owner must not be nullptr");
+    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the propertyowner to add
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
@@ -304,11 +307,11 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
 }
 
 void PropertyOwner::setIdentifier(std::string identifier) {
-    ghoul_assert(
+    ghoul_precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
         "Identifier must contain any whitespaces"
     );
-    ghoul_assert(
+    ghoul_precondition(
         _identifier.find_first_of(".") == std::string::npos,
         "Identifier must contain any whitespaces"
     );

@@ -7,16 +7,16 @@ local kernels088 = asset.require('./nep088').Kernels
 
 
 
-local parentName = transforms.NeptuneBarycenter.Name
+local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner" }
 local trailColor = { 0.2, 0.5, 0.75 }
 
 local innerMoons = {
     {
-        Name = "Naiad",
+        Identifier = "Naiad",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "NAIAD",
@@ -28,9 +28,9 @@ local innerMoons = {
         Kernels = kernels088
     },
     {
-        Name = "Thalassa",
+        Identifier = "Thalassa",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "THALASSA",
@@ -42,9 +42,9 @@ local innerMoons = {
         Kernels = kernels088
     },
     {
-        Name = "Despina",
+        Identifier = "Despina",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "DESPINA",
@@ -56,9 +56,9 @@ local innerMoons = {
         Kernels = kernels088
     },
     {
-        Name = "Galatea",
+        Identifier = "Galatea",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "GALATEA",
@@ -70,9 +70,9 @@ local innerMoons = {
         Kernels = kernels088
     },
     {
-        Name = "Larissa",
+        Identifier = "Larissa",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LARISSA",
@@ -84,23 +84,24 @@ local innerMoons = {
         Kernels = kernels088
     },
     {
-        Name = "S/2004 N 1",
+        Identifier = "S2004N1",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "814",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
+        Name = "S/2004 N 1",
         GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
         TrailColor = trailColor,
         OrbitPeriod = 0.936,
         Kernels = kernels088
     },
     {
-        Name = "Proteus",
+        Identifier = "Proteus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PROTEUS",

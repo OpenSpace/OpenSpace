@@ -62,7 +62,8 @@
 namespace {
     constexpr const char* _loggerCat = "Scene";
     constexpr const char* KeyName = "Name";
-    constexpr const char* KeyParentName = "Parent";
+    constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyParent = "Parent";
 } // namespace
 
 namespace openspace {
@@ -360,30 +361,26 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 
-    if (!dict.hasKey(KeyName)) {
-        // TODO: Throw exception
-        LERROR("Name missing for scene graph node");
-        return nullptr;
-    }
+    const std::string nodeIdentifier = dict.value<std::string>(KeyIdentifier);
+    const bool hasParent = dict.hasKey(KeyParent);
 
-    const std::string nodeName = dict.value<std::string>(KeyName);
-    const bool hasParent = dict.hasKey(KeyParentName);
-
-    if (_nodesByIdentifier.find(nodeName) != _nodesByIdentifier.end()) {
+    if (_nodesByIdentifier.find(nodeIdentifier) != _nodesByIdentifier.end()) {
         LERROR(fmt::format(
             "Cannot add scene graph node '{}'. A node with that name already exists",
-            nodeName
+            nodeIdentifier
         ));
         return nullptr;
     }
 
     SceneGraphNode* parent = nullptr;
     if (hasParent) {
-        std::string parentName = dict.value<std::string>(KeyParentName);
-        parent = sceneGraphNode(parentName);
+        const std::string parentIdentifier = dict.value<std::string>(KeyParent);
+        parent = sceneGraphNode(parentIdentifier);
         if (!parent) {
             // TODO: Throw exception
-            LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
+            LERROR(fmt::format(
+                "Could not find parent '{}' for '{}'", parentIdentifier, nodeIdentifier
+            ));
             return nullptr;
         }
     }
@@ -391,7 +388,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
     if (!node) {
         // TODO: Throw exception
-        LERROR("Could not create node from dictionary: " + nodeName);
+        LERROR("Could not create node from dictionary: " + nodeIdentifier);
     }
 
     if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
@@ -412,11 +409,13 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // Make sure all dependencies are found
     std::vector<SceneGraphNode*> dependencies;
     bool foundAllDeps = true;
-    for (const auto& depName : dependencyNames) {
+    for (const std::string& depName : dependencyNames) {
         SceneGraphNode* dep = sceneGraphNode(depName);
         if (!dep) {
             // TODO: Throw exception
-            LERROR("Could not find dependency '" + depName + "' for '" + nodeName + "'");
+            LERROR(fmt::format(
+                "Could not find dependency '{}' for '{}'", depName, nodeIdentifier
+            ));
             foundAllDeps = false;
             continue;
         }

@@ -95,7 +95,9 @@ namespace {
 
 namespace openspace::gui {
 
-GuiMissionComponent::GuiMissionComponent() : GuiComponent("Mission Information") {}
+GuiMissionComponent::GuiMissionComponent() :
+    GuiComponent("Missions", "Mission Information")
+{}
 
 void GuiMissionComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);

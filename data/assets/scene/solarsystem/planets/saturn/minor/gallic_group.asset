@@ -5,16 +5,16 @@ local kernels368 = asset.require('../sat368').Kernels
 
 
 
-local parentName = transforms.SaturnBarycenter.Name
+local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_gallic" }
 local trailColor = { 0.5, 0.3, 0.3 }
 
 local gallicGroup = {
     {
-        Name = "Albiorix",
+        Identifier = "Albiorix",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ALBIORIX",
@@ -26,9 +26,9 @@ local gallicGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Bebhionn",
+        Identifier = "Bebhionn",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "BEBHIONN",
@@ -40,9 +40,9 @@ local gallicGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Erriapus",
+        Identifier = "Erriapus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ERRIAPUS",
@@ -54,9 +54,9 @@ local gallicGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Tarvos",
+        Identifier = "Tarvos",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "TARVOS",

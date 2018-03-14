@@ -53,7 +53,7 @@ namespace {
 namespace openspace::gui {
 
 GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
-    : GuiPropertyComponent("GlobeBrowsing")
+    : GuiPropertyComponent("GlobeBrowsing", "Globe Browsing")
 {}
 
 void GuiGlobeBrowsingComponent::render() {

@@ -5,8 +5,8 @@ asset.require("spice/base")
 
 
 local NeptuneBarycenter = {
-    Name = "NeptuneBarycenter",
-    Parent = sun_transforms_asset.SolarSystemBarycenter.Name,
+    Identifier = "NeptuneBarycenter",
+    Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -14,6 +14,7 @@ local NeptuneBarycenter = {
             Observer = "SUN"
         }
     },
+    Name = "Neptune Barycenter",
     GuiPath = "/Solar System/Planets/Neptune"
 }
 

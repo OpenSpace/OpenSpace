@@ -6,8 +6,8 @@ local kernels = asset.require('../jup310').Kernels
 
 
 local CallistoTrail = {
-    Name = "CallistoTrail",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "CallistoTrail",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -21,6 +21,7 @@ local CallistoTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+    Name = "Callisto Trail",
     GuiPath = "/Solar System/Planets/Jupiter/Moons"
 }
 

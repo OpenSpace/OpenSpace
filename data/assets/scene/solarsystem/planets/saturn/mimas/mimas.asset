@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Mimas = {
-    Name = "Mimas",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Mimas",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Mimas = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Mimas Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/mimas.jpg",
                     Enabled = true
                 }

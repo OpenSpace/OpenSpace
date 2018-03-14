@@ -5,16 +5,16 @@ local kernels091 = asset.require('./ura091').Kernels
 
 
 
-local parentName = transforms.UranusBarycenter.Name
+local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_inner" }
 local trailColor = { 0.60, 0.65, 0.84 }
 
 local innerMoons = {
     {
-        Name = "Cordelia",
+        Identifier = "Cordelia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CORDELIA",
@@ -26,9 +26,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Ophelia",
+        Identifier = "Ophelia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "OPHELIA",
@@ -40,9 +40,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Bianca",
+        Identifier = "Bianca",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "BIANCA",
@@ -54,9 +54,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Cressida",
+        Identifier = "Cressida",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CRESSIDA",
@@ -68,9 +68,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Desdemona",
+        Identifier = "Desdemona",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "DESDEMONA",
@@ -82,9 +82,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Juliet",
+        Identifier = "Juliet",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "JULIET",
@@ -96,9 +96,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Portia",
+        Identifier = "Portia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PORTIA",
@@ -110,9 +110,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Rosalind",
+        Identifier = "Rosalind",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ROSALIND",
@@ -124,9 +124,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Cupid",
+        Identifier = "Cupid",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CUPID",
@@ -138,9 +138,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Belinda",
+        Identifier = "Belinda",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "BELINDA",
@@ -152,9 +152,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Perdita",
+        Identifier = "Perdita",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PERDITA",
@@ -166,9 +166,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Puck",
+        Identifier = "Puck",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PUCK",
@@ -180,9 +180,9 @@ local innerMoons = {
         Kernels = kernels091
     },
     {
-        Name = "Mab",
+        Identifier = "Mab",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "MAB",

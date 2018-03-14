@@ -5,16 +5,16 @@ local kernels341 = asset.require('../jup341').Kernels
 
 
 
-local parentName = transforms.JupiterBarycenter.Name
+local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_pasiphae" }
 local trailColor = { 0.4, 0.3, 0.01 }
 
 local pasiphaeGroup = {
     {
-        Name = "Euporie",
+        Identifier = "Euporie",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "EUPORIE",
@@ -26,23 +26,24 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 18",
+        Identifier = "S2003J18",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "555",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        Name = "S/2003 J 18",
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
         TrailColor = trailColor,
         OrbitPeriod = 587.38,
         Kernels = kernels341
     },
     {
-        Name = "Helike",
+        Identifier = "Helike",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HELIKE",
@@ -54,9 +55,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Orthosie",
+        Identifier = "Orthosie",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ORTHOSIE",
@@ -68,37 +69,39 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "S/2016 J 1",
+        Identifier = "S2016J1",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "554",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
+        Name = "S/2016 J 1",
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
         TrailColor = trailColor,
         OrbitPeriod = 603.83,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 15",
+        Identifier = "S2003J15",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "558",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        Name = "S/2003 J 15",
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
         TrailColor = trailColor,
         OrbitPeriod = 699.68,
         Kernels = kernels341
     },
     {
-        Name = "Aoede",
+        Identifier = "Aoede",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "AOEDE",
@@ -110,9 +113,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Callirrhoe",
+        Identifier = "Callirrhoe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CALLIRRHOE",
@@ -124,9 +127,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Eurydome",
+        Identifier = "Eurydome",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "EURYDOME",
@@ -138,9 +141,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Kore",
+        Identifier = "Kore",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "KORE",
@@ -152,9 +155,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Cyllene",
+        Identifier = "Cyllene",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CYLLENE",
@@ -166,51 +169,54 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "S/2011 J 2",
+        Identifier = "S2011J2",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "556",
         Radii = { 1000, 1000, 1000 },
         Tags = tags,
+        Name = "S/2011 J 2",
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
         TrailColor = trailColor,
         OrbitPeriod = 731.32,
         Kernels = kernels341
     },
     {
-        Name = "S/2017 J 1",
+        Identifier = "S2017J1",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "559",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        Name = "S/2017 J 1",
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
         TrailColor = trailColor,
         OrbitPeriod = 734.15,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 4",
+        Identifier = "S2003J4",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55062",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
+        Name = "S/2003 J 4",
         GuiPath = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
         TrailColor = trailColor,
         OrbitPeriod = 739.29,
         Kernels = kernels341
     },
     {
-        Name = "Pasiphae",
+        Identifier = "Pasiphae",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PASIPHAE",
@@ -222,9 +228,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Hegemone",
+        Identifier = "Hegemone",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HEGEMONE",
@@ -236,9 +242,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Sinope",
+        Identifier = "Sinope",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SINOPE",
@@ -250,9 +256,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Sponde",
+        Identifier = "Sponde",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SPONDE",
@@ -264,9 +270,9 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Autonoe",
+        Identifier = "Autonoe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "AUTONOE",
@@ -278,12 +284,12 @@ local pasiphaeGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Megaclite",
+        Identifier = "Megaclite",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
-        -- sic:  The name in the SPICE kernel is wrong
+        -- sic:  The Identifier in the SPICE kernel is wrong
         Spice = "MAGACLITE",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,

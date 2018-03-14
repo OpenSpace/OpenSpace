@@ -6,8 +6,8 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local RenderablePlaneImageOnline = {
-    Name = "RenderablePlaneImageOnline",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "RenderablePlaneImageOnline",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageOnline",
         Size = 3.0E11,

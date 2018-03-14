@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Dwarfs",
+    Identifier = "Dwarfs",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,

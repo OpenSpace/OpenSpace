@@ -5,14 +5,14 @@ asset.require("spice/base")
 
 -- Barycenter of the solar system, expressed in the Galactic frame
 local SolarSystemBarycenter = {
-    Name = "SolarSystemBarycenter"
+    Identifier = "SolarSystemBarycenter"
     -- No parent; this node is attached to the scene graph root
 }
 
 -- Spice frame for the Sun
 local SunIAU = {
-    Name = "SunIAU",
-    Parent = SolarSystemBarycenter.Name,
+    Identifier = "SunIAU",
+    Parent = SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -25,6 +25,7 @@ local SunIAU = {
             DestinationFrame = "GALACTIC"
         }
     },
+    Name = "SUN IAU",
     GuiPath = "/Solar System/Sun"
 }
 

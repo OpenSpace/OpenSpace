@@ -65,7 +65,8 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
             break;
         }
         else {
-            item->setIdentifier(originalIdentifier + " " + std::to_string(suffix));
+            item->setIdentifier(originalIdentifier + std::to_string(suffix));
+            item->setGuiName(originalIdentifier + " " + std::to_string(suffix));
             ++suffix;
         }
     }

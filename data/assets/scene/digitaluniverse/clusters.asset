@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Galaxy Cluster Labels",
+    Identifier = "GalaxyClusterLabels",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -23,6 +23,7 @@ local object = {
         TextMinSize = 8.0,
         Unit = "Mpc"
     },
+    Name = "Galaxy Cluster Labels",
     GuiPath = "/Universe/Galaxies"
 }
 

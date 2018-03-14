@@ -6,8 +6,8 @@ asset.require("spice/base")
 
 
 local SunMarker = {
-    Name = "SunMarker",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "SunMarker",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Enabled = false,
         Type = "RenderablePlaneImageLocal",
@@ -17,6 +17,7 @@ local SunMarker = {
         Texture = textures .. "/marker.png",
         BlendMode = "Additive"
     },
+    Name = "Sun Marker",
     GuiPath = "/Solar System/Sun"
 }
 

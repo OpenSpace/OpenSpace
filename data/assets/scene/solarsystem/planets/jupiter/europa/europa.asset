@@ -14,8 +14,8 @@ local textures = asset.syncedResource({
 })
 
 local Europa = {
-    Name = "Europa",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Europa",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -37,7 +37,7 @@ local Europa = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Europa Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/europa.jpg",
                     Enabled = true
                 }

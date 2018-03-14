@@ -6,16 +6,16 @@ local kernels375 = asset.require('../sat375').Kernels
 
 
 
-local parentName = transforms.SaturnBarycenter.Name
+local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other" }
 local trailColor = { 0.5, 0.3, 0.3 }
 
 local otherGroup = {
     {
-        Name = "Atlas",
+        Identifier = "Atlas",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ATLAS",
@@ -27,9 +27,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Prometheus",
+        Identifier = "Prometheus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PROMETHEUS",
@@ -41,9 +41,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Pandora",
+        Identifier = "Pandora",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PANDORA",
@@ -55,9 +55,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Epimetheus",
+        Identifier = "Epimetheus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "EPIMETHEUS",
@@ -69,9 +69,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Janus",
+        Identifier = "Janus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "JANUS",
@@ -83,9 +83,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Aegaeon",
+        Identifier = "Aegaeon",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "AEGAEON",
@@ -97,9 +97,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Methone",
+        Identifier = "Methone",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "METHONE",
@@ -111,9 +111,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Anthe",
+        Identifier = "Anthe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ANTHE",
@@ -125,9 +125,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Pallene",
+        Identifier = "Pallene",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PALLENE",
@@ -139,9 +139,9 @@ local otherGroup = {
         Kernels = kernels393
     },
     {
-        Name = "Telesto",
+        Identifier = "Telesto",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "TELESTO",
@@ -153,9 +153,9 @@ local otherGroup = {
         Kernels = kernels375
     },
     {
-        Name = "Calypso",
+        Identifier = "Calypso",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CALYPSO",
@@ -167,9 +167,9 @@ local otherGroup = {
         Kernels = kernels375
     },
     {
-        Name = "Helene",
+        Identifier = "Helene",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HELENE",
@@ -181,9 +181,9 @@ local otherGroup = {
         Kernels = kernels375
     },
     {
-        Name = "Polydeuces",
+        Identifier = "Polydeuces",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "POLYDEUCES",

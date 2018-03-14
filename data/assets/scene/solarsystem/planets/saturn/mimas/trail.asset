@@ -5,8 +5,8 @@ local kernels375 = asset.require('../sat375').Kernels
 
 
 local MimasTrail = {
-    Name = "MimasTrail",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "MimasTrail",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -20,6 +20,7 @@ local MimasTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
+    Name = "Mimas Trail",
     GuiPath = "/Solar System/Planets/Saturn/Moons"
 }
 

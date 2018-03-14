@@ -22,10 +22,10 @@ local BENNU_BODY = "2101955"
 
 
 local Bennu = {
-    Name = "Bennu",
-    Parent = transforms.BennuBarycenter.Name,
-    Transform = 
-{        Rotation = {
+    Identifier = "Bennu",
+    Parent = transforms.BennuBarycenter.Identifier,
+    Transform = {
+        Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_BENNU",
             DestinationFrame = "GALACTIC"
@@ -88,8 +88,8 @@ local Bennu = {
 }
 
 local BennuTrail = {
-    Name = "BennuTrail",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "BennuTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -102,6 +102,7 @@ local BennuTrail = {
         EndTime = "2023 MAY 31 00:00:00.000",
         SampleInterval = 3600
     },
+    Name = "Bennu Trail",
     GuiPath = "/Solar System/Asteroid"
 
 }

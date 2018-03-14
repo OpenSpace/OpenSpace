@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "OB Associations",
+    Identifier = "OBAssociations",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -33,6 +33,7 @@ local object = {
         TextMinSize = 5.76,
         Unit = "pc"
     },
+    Name = "OB Associations",
     GuiPath = "/Milky Way/OB Associations"
 }
 

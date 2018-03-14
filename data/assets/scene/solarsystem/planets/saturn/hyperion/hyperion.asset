@@ -13,8 +13,8 @@ asset.request('./trail')
 -- })
 
 local Hyperion = {
-    Name = "Hyperion",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Hyperion",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",

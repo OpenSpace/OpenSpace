@@ -82,8 +82,8 @@ local RotationMatrix = {
 }
 
 local Rosetta = {
-    Name = "Rosetta",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Rosetta",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -101,8 +101,8 @@ local Rosetta = {
 }
 
 local RosettaModel = {
-    Name = "RosettaModel",
-    Parent = Rosetta.Name,
+    Identifier = "RosettaModel",
+    Parent = Rosetta.Identifier,
     Transform = {
         Scale = {
             Type = "StaticScale",
@@ -110,12 +110,13 @@ local RosettaModel = {
             Scale = 0.01
         }
     },
+    Name = "Rosetta Model",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaBlackFoil = {
-    Name = "Rosetta_black_foil",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_black_foil",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -126,12 +127,13 @@ local RosettaBlackFoil = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Black Foil",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaBlackParts = {
-    Name = "Rosetta_black_parts",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_black_parts",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -142,12 +144,13 @@ local RosettaBlackParts = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Black Parts",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaDish = {
-    Name = "Rosetta_dish",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_dish",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -158,12 +161,13 @@ local RosettaDish = {
         ColorTexture = textures .. "/dish_AO.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Dish",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaParts = {
-    Name = "Rosetta_parts",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_parts",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -174,12 +178,13 @@ local RosettaParts = {
         ColorTexture = textures .. "/parts2_AO.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Parts",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaSilverFoil = {
-    Name = "Rosetta_silver_foil",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_silver_foil",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -190,12 +195,13 @@ local RosettaSilverFoil = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Silver Foil",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaVents = {
-    Name = "Rosetta_vents",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_vents",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -206,12 +212,13 @@ local RosettaVents = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Vents",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaWingA = {
-    Name = "Rosetta_wing_a",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_wing_a",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -222,12 +229,13 @@ local RosettaWingA = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Wing A",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaWingB = {
-    Name = "Rosetta_wing_b",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_wing_b",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -238,12 +246,13 @@ local RosettaWingB = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Wing B",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaYellowFoil = {
-    Name = "Rosetta_yellow_foil",
-    Parent = RosettaModel.Name,
+    Identifier = "Rosetta_yellow_foil",
+    Parent = RosettaModel.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -254,12 +263,13 @@ local RosettaYellowFoil = {
         ColorTexture = textures .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Rosetta Model Part Yellow Foil",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local Philae = {
-    Name = "Philae",
-    Parent = transforms.Barycenter.Name,
+    Identifier = "Philae",
+    Parent = transforms.Barycenter.Identifier,
     -- This should need a transform, but currently the model is intrinsically
     -- translated
     Transform = {
@@ -280,12 +290,13 @@ local Philae = {
             Scale = 0.01
         }
     },
+    Name = "Philae Model",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local PhilaeFoil = {
-    Name = "Philae_foil",
-    Parent = Philae.Name,
+    Identifier = "Philae_foil",
+    Parent = Philae.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -296,12 +307,13 @@ local PhilaeFoil = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Philae Model Part Foil",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local PhilaeLids = {
-    Name = "Philae_lids",
-    Parent = Philae.Name,
+    Identifier = "Philae_lids",
+    Parent = Philae.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -312,12 +324,13 @@ local PhilaeLids = {
         ColorTexture = textures .. "/parts2_AO.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Philae Model Part Lids",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local PhilaeParts = {
-    Name = "Philae_parts",
-    Parent = Philae.Name,
+    Identifier = "Philae_parts",
+    Parent = Philae.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -328,12 +341,13 @@ local PhilaeParts = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Philae Model Part Parts",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local PhilaeSolarPanels = {
-    Name = "Philae_solarp",
-    Parent = Philae.Name,
+    Identifier = "Philae_solarp",
+    Parent = Philae.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "ROSETTA",
@@ -344,18 +358,19 @@ local PhilaeSolarPanels = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
+    Name = "Philae Model Parts Solar Panels",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local NavCam = {
-    Name = "NAVCAM",
-    Parent = Rosetta.Name,
+    Identifier = "NAVCAM",
+    Parent = Rosetta.Identifier,
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local NavCamFov = {
-    Name = "NAVCAM FOV",
-    Parent = NavCam.Name,
+    Identifier = "NAVCAM_FOV",
+    Parent = NavCam.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "ROSETTA",
@@ -371,12 +386,13 @@ local NavCamFov = {
             ["CHURYUMOV-GERASIMENKO"] = "67P/C-G_CK"
         }
     },
+    Name = "NAVCAM FOV",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local ImagePlane = {
-    Name = "ImagePlaneRosetta",
-    Parent = transforms.Comet67P.Name,
+    Identifier = "ImagePlaneRosetta",
+    Parent = transforms.Comet67P.Identifier,
     Renderable = {
         Type = "RenderablePlaneProjection",
         Frame = "67P/C-G_CK",
@@ -386,12 +402,13 @@ local ImagePlane = {
         Moving = false,
         Texture = textures .. "/defaultProj.png"
     },
+    Name = "Rosetta Image Plane",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local RosettaCometTrail = {
-    Name = "RosettaCometTrail",
-    Parent = transforms.Barycenter.Name,
+    Identifier = "RosettaCometTrail",
+    Parent = transforms.Barycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -404,12 +421,13 @@ local RosettaCometTrail = {
         EndTime = "2016 SEP 30 12:00:00",
         SampleInterval = 3600
     },
+    Name = "Rosetta Comet Trail",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 
 local PhilaeTrail = {
-    Name = "PhilaeTrail",
-    Parent = transforms.Barycenter.Name,
+    Identifier = "PhilaeTrail",
+    Parent = transforms.Barycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -422,6 +440,7 @@ local PhilaeTrail = {
         EndTime = "2014 NOV 12 17:00:00",
         SampleInterval = 2
     },
+    Name = "Philae Trail",
     GuiPath = "/Solar System/Missions/Rosetta"
 }
 

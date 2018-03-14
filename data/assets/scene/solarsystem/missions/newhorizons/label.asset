@@ -9,8 +9,8 @@ local textures = NewHorizonsModel.NewHorizonsTextures
 local models = NewHorizonsModel.NewHorizonsModels
 
 local Labels = {
-    Name = "Labels",
-    Parent = NewHorizonsModel.NewHorizons.Name,
+    Identifier = "Labels",
+    Parent = NewHorizonsModel.NewHorizons.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "NEW HORIZONS",

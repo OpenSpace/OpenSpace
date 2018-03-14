@@ -6,8 +6,8 @@ asset.require("spice/base")
 
 
 local Sun = {
-    Name = "Sun",
-    Parent = transforms.SunIAU.Name,
+    Identifier = "Sun",
+    Parent = transforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderablePlanet",
         Frame = "IAU_SUN",

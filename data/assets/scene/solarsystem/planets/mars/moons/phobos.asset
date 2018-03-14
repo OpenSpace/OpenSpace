@@ -12,8 +12,8 @@ local kernels = asset.require('../mar097').Kernels
 
 
 local Phobos = {
-    Name = "Phobos",
-    Parent = transforms.MarsBarycenter.Name,
+    Identifier = "Phobos",
+    Parent = transforms.MarsBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -40,8 +40,8 @@ local Phobos = {
 }
 
 local PhobosTrail = {
-    Name = "PhobosTrail",
-    Parent = transforms.MarsBarycenter.Name,
+    Identifier = "PhobosTrail",
+    Parent = transforms.MarsBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -54,6 +54,7 @@ local PhobosTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
+    Name = "Phobos Trail",
     GuiPath = "/Solar System/Planets/Mars"
 }
 

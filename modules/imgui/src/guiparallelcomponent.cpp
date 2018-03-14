@@ -40,7 +40,7 @@
 namespace openspace::gui {
 
 GuiParallelComponent::GuiParallelComponent()
-    : GuiPropertyComponent("GuiParallelComponent")
+    : GuiPropertyComponent("Parallel", "Parallel Connection")
 {
     setVisibility(properties::Property::Visibility::All);
 }

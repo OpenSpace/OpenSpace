@@ -6,8 +6,8 @@ local assetHelper = asset.require('util/asset_helper')
 -- local earthEllipsoid = { 6378137.0, 6378137.0, 6356752.314245 }
 local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
 local Atmosphere = {
-    Name = "EarthAtmosphere",
-    Parent = transforms.Earth.Name,
+    Identifier = "EarthAtmosphere",
+    Parent = transforms.Earth.Identifier,
     Renderable = {
         Type = "RenderableAtmosphere",
         Atmosphere = {
@@ -93,6 +93,7 @@ local Atmosphere = {
             --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
          }
     },
+    Name = "Earth Atmosphere",
     GuiPath = "/Solar System/Planets/Earth"
 }
 

@@ -4,8 +4,8 @@ local assetHelper = asset.require('util/asset_helper')
 
 
 local Atmosphere = {
-    Name = "MarsAtmosphere",
-    Parent = transforms.Mars.Name,
+    Identifier = "MarsAtmosphere",
+    Parent = transforms.Mars.Identifier,
     Renderable = {
         Type = "RenderableAtmosphere",
         Atmosphere = {
@@ -55,6 +55,7 @@ local Atmosphere = {
             }
         }
     },
+    Name = "Mars Atmosphere",
     GuiPath = "/Solar System/Planets/Mars"
 }
 

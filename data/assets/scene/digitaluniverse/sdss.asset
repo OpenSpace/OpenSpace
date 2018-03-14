@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Sloan Digital Sky Survey",
+    Identifier = "SloanDigitalSkySurvey",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -38,6 +38,7 @@ local object = {
         TextMinSize = 10.0,
         TextMaxSize = 50.0
     },
+    Name = "Sloan Digital Sky Survey",
     GuiPath = "/Universe/Galaxies"
 }
 

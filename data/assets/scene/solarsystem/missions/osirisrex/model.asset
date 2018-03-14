@@ -184,8 +184,8 @@ for i = 0, #CaseDependentKernels do
 end
 
 local OsirisRex = {
-    Name = "OsirisRex",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "OsirisRex",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -208,12 +208,13 @@ local OsirisRex = {
         },
         ColorTexture = textures .. "/osirisTex.png"
     },
+    Name = "OSIRIS REx",
     GuiPath = "/Solar System/Missions/OSIRIS REx"
 }
 
 local PolyCam = {
-    Name = "ORX_OCAMS_POLYCAM",
-    Parent = OsirisRex.Name,
+    Identifier = "ORX_OCAMS_POLYCAM",
+    Parent = OsirisRex.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -238,8 +239,8 @@ local PolyCam = {
 }
 
 local Rexis = {
-    Name = "ORX_REXIS",
-    Parent = OsirisRex.Name,
+    Identifier = "ORX_REXIS",
+    Parent = OsirisRex.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "OSIRIS-REX",
@@ -264,8 +265,8 @@ local Rexis = {
 }
 
 local PolyCamFov = {
-    Name = "POLYCAM FOV",
-    Parent = PolyCam.Name,
+    Identifier = "POLYCAM FOV",
+    Parent = PolyCam.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "OSIRIS-REX",
@@ -282,8 +283,8 @@ local PolyCamFov = {
 }
 
 local RexisFov = {
-    Name = "REXIS FOV",
-    Parent = Rexis.Name,
+    Identifier = "REXIS FOV",
+    Parent = Rexis.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "OSIRIS-REX",

@@ -51,6 +51,7 @@
 #include <math.h>
 
 namespace {
+    constexpr const char* KeyBody         = "Body";
     constexpr const char* KeyGeometry     = "Geometry";
     constexpr const char* KeyRadius       = "Radius";
     constexpr const char* _loggerCat      = "RenderablePlanet";
@@ -118,7 +119,15 @@ documentation::Documentation RenderablePlanet::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 "Specifies the radius of the planet. If this value is not specified, it "
-                "will try to query the SPICE library for radius values."
+                "will try to query the SPICE library for radius values using the body "
+                "key."
+            },
+            {
+                KeyBody,
+                new StringVerifier,
+                Optional::Yes,
+                "If that radius is not specified, this name is used to query the SPICE "
+                "library for the radius values."
             },
             {
                 ColorTextureInfo.identifier,
@@ -189,26 +198,37 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         "RenderablePlanet"
     );
 
-    const std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
-
     ghoul::Dictionary geomDict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
 
     if (dictionary.hasKey(KeyRadius)) {
         // If the user specified a radius, we want to use this
         _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
     }
-    else if (SpiceManager::ref().hasValue(name, "RADII") ) {
+    else {
+        if (!dictionary.hasKey(KeyBody)) {
+            documentation::TestResult res;
+            res.success = false;
+            documentation::TestResult::Offense offense = {
+                fmt::format("{} or {}", KeyRadius, KeyBody),
+                documentation::TestResult::Offense::Reason::MissingKey
+            };
+            res.offenses.push_back(std::move(offense));
+            throw documentation::SpecificationError(
+                std::move(res),
+                std::move("RenderablePlanet")
+            );
+        }
+
+        const std::string body = dictionary.value<std::string>(KeyBody);
+
         // If the user didn't specfify a radius, but Spice has a radius, we can use this
         glm::dvec3 radius;
-        SpiceManager::ref().getValue(name, "RADII", radius);
+        SpiceManager::ref().getValue(body, "RADII", radius);
         radius *= 1000.0; // Spice gives radii in KM.
         std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
         geomDict.setValue(KeyRadius, radius);
 
         _planetRadius = static_cast<float>((radius.x + radius.y + radius.z) / 3.0);
-    }
-    else {
-        LERRORC("RenderablePlanet", "Missing radius specification");
     }
 
     _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);
@@ -282,7 +302,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         "No Radius value specified for Shadow Source Name '{}' from "
                         "'{}' planet. Disabling shadows for this planet",
                         sourceName,
-                        name
+                        identifier()
                     ));
                     disableShadows = true;
                     break;
@@ -311,7 +331,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                             "No Radius value expecified for Shadow Caster Name '{}' from "
                             "'{}' planet. Disabling shadows for this planet.",
                             casterName,
-                            name
+                            identifier()
                         ));
                         disableShadows = true;
                         break;

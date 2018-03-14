@@ -6,8 +6,8 @@ local kernels = asset.require('../jup310').Kernels
 
 
 local IoTrail = {
-    Name = "IoTrail",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "IoTrail",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -21,6 +21,7 @@ local IoTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
+    Name = "Io Trail",
     GuiPath = "/Solar System/Planets/Jupiter/Moons"
 }
 

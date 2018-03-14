@@ -14,8 +14,8 @@ local textures = asset.syncedResource({
 })
 
 local Io = {
-    Name = "Io",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Io",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -37,7 +37,7 @@ local Io = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Io Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/io.jpg",
                     Enabled = true
                 }

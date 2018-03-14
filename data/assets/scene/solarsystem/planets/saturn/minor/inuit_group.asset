@@ -5,16 +5,16 @@ local kernels368 = asset.require('../sat368').Kernels
 
 
 
-local parentName = transforms.SaturnBarycenter.Name
+local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_inuit" }
 local trailColor = { 0.5, 0.3, 0.3 }
 
 local inuitGroup = {
     {
-        Name = "Kiviuq",
+        Identifier = "Kiviuq",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "KIVIUQ",
@@ -26,9 +26,9 @@ local inuitGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Ijiraq",
+        Identifier = "Ijiraq",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "IJIRAQ",
@@ -40,9 +40,9 @@ local inuitGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Paaliaq",
+        Identifier = "Paaliaq",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PAALIAQ",
@@ -54,9 +54,9 @@ local inuitGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Siarnaq",
+        Identifier = "Siarnaq",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SIARNAQ",
@@ -68,9 +68,9 @@ local inuitGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Tarqeq",
+        Identifier = "Tarqeq",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "TARQEQ",

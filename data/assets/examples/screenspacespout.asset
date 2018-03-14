@@ -6,8 +6,8 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local Spout = {
-    Name = "Spouty",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "Spouty",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderablePlaneSpout",
         Size = 3.0E11,

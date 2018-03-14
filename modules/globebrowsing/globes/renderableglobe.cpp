@@ -29,7 +29,6 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
-
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";

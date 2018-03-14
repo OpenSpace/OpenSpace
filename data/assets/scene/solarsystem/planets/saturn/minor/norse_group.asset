@@ -6,16 +6,16 @@ local kernels375 = asset.require('../sat375').Kernels
 
 
 
-local parentName = transforms.SaturnBarycenter.Name
+local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_norse" }
 local trailColor = { 0.5, 0.3, 0.3 }
 
 local norseGroup = {
     {
-        Name = "Phoebe",
+        Identifier = "Phoebe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PHOEBE",
@@ -27,9 +27,9 @@ local norseGroup = {
         Kernels = kernels375
     },
     {
-        Name = "Skathi",
+        Identifier = "Skathi",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SKATHI",
@@ -41,23 +41,24 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "S/2007 S 2",
+        Identifier = "S2007S2",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65055",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        Name = "S/2007 S 2",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 792.96,
         Kernels = kernels368
     },
     {
-        Name = "Skoll",
+        Identifier = "Skoll",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SKOLL",
@@ -69,23 +70,24 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "S/2004 S 13",
+        Identifier = "S2004S13",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65041",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        Name = "S/2004 S 13",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 905.85,
         Kernels = kernels368
     },
     {
-        Name = "Greip",
+        Identifier = "Greip",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "GREIP",
@@ -97,9 +99,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Hyrrokkin",
+        Identifier = "Hyrrokkin",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HYRROKKIN",
@@ -111,9 +113,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Jarnsaxa",
+        Identifier = "Jarnsaxa",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "JARNSAXA",
@@ -125,9 +127,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Mundilfari",
+        Identifier = "Mundilfari",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "MUNDILFARI",
@@ -139,37 +141,39 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "S/2006 S 1",
+        Identifier = "S2006S1",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65048",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        Name = "S/2006 S 1",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 972.41,
         Kernels = kernels368
     },
     {
-        Name = "S/2004 S 17",
+        Identifier = "S2004S17",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65045",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
+        Name = "S/2004 S 17",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 985.45,
         Kernels = kernels368
     },
     {
-        Name = "Bergelmir",
+        Identifier = "Bergelmir",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "BERGELMIR",
@@ -181,9 +185,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Narvi",
+        Identifier = "Narvi",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "NARVI",
@@ -195,9 +199,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Suttungr",
+        Identifier = "Suttungr",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SUTTUNGR",
@@ -209,9 +213,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Hati",
+        Identifier = "Hati",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HATI",
@@ -223,23 +227,24 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "S/2004 S 12",
+        Identifier = "S2004S12",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65040",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        Name = "S/2004 S 12",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 1048.54,
         Kernels = kernels368
     },
     {
-        Name = "Farbauti",
+        Identifier = "Farbauti",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "FARBAUTI",
@@ -251,9 +256,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Thrymr",
+        Identifier = "Thrymr",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "THRYMR",
@@ -265,9 +270,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Aegir",
+        Identifier = "Aegir",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "AEGIR",
@@ -279,23 +284,24 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "S/2007 S 3",
+        Identifier = "S2007S3",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65056",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
+        Name = "S/2007 S 3",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 1100,
         Kernels = kernels368
     },
     {
-        Name = "Bestla",
+        Identifier = "Bestla",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "BESTLA",
@@ -307,37 +313,39 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "S/2004 S 7",
+        Identifier = "S2004S7",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65035",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        Name = "S/2004 S 7",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 1101.99,
         Kernels = kernels368
     },
     {
-        Name = "S/2006 S 3",
+        Identifier = "S2006S3",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "65050",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
+        Name = "S/2006 S 3",
         GuiPath = "/Solar System/Planets/Saturn/Moons/Norse Group",
         TrailColor = trailColor,
         OrbitPeriod = 1142.37,
         Kernels = kernels368
     },
     {
-        Name = "FENRIR",
+        Identifier = "FENRIR",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "FENRIR",
@@ -350,9 +358,9 @@ local norseGroup = {
     },
     -- Not yet in the Spice kernels
     -- {
-    --     Name = "Sutur", -- Rising
+    --     Identifier = "Sutur", -- Rising
     --     Parent = {
-    --         Name = parentName,
+    --         Identifier = parentIdentifier,
     --         Spice = parentSpice
     --     },
     --     Spice = "SUTUR",
@@ -364,9 +372,9 @@ local norseGroup = {
     --     Kernels = kernels368
     -- },
     {
-        Name = "Kari",
+        Identifier = "Kari",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "KARI",
@@ -378,9 +386,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Ymir",
+        Identifier = "Ymir",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "YMIR",
@@ -392,9 +400,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Loge",
+        Identifier = "Loge",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LOGE",
@@ -406,9 +414,9 @@ local norseGroup = {
         Kernels = kernels368
     },
     {
-        Name = "Fornjot",
+        Identifier = "Fornjot",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "FORNJOT",

@@ -5,16 +5,16 @@ local kernels112 = asset.require('./ura112').Kernels
 
 
 
-local parentName = transforms.UranusBarycenter.Name
+local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_irregular_retrograde" }
 local trailColor = { 0.60, 0.65, 0.84 }
 
 local irregularMoons = {
     {
-        Name = "Francisco",
+        Identifier = "Francisco",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "FRANCISCO",
@@ -26,9 +26,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Caliban",
+        Identifier = "Caliban",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CALIBAN",
@@ -40,9 +40,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Stephano",
+        Identifier = "Stephano",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "STEPHANO",
@@ -54,9 +54,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Trinculo",
+        Identifier = "Trinculo",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "TRINCULO",
@@ -68,9 +68,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Sycorax",
+        Identifier = "Sycorax",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SYCORAX",
@@ -82,9 +82,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Prospero",
+        Identifier = "Prospero",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PROSPERO",
@@ -96,9 +96,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Setebos",
+        Identifier = "Setebos",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "SETEBOS",
@@ -110,9 +110,9 @@ local irregularMoons = {
         Kernels = kernels112
     },
     {
-        Name = "Ferdinand",
+        Identifier = "Ferdinand",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "FERDINAND",

@@ -7,16 +7,16 @@ local kernels088 = asset.require('./nep088').Kernels
 
 
 
-local parentName = transforms.NeptuneBarycenter.Name
+local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_prograde" }
 local trailColor = { 0.2, 0.5, 0.75 }
 
 local irregularProgradeMoons = {
     {
-        Name = "Halimede",
+        Identifier = "Halimede",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HALIMEDE",
@@ -28,9 +28,9 @@ local irregularProgradeMoons = {
         Kernels = kernels086
     },
     {
-        Name = "Psamathe",
+        Identifier = "Psamathe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PSAMATHE",
@@ -42,9 +42,9 @@ local irregularProgradeMoons = {
         Kernels = kernels086
     },
     {
-        Name = "Neso",
+        Identifier = "Neso",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "NESO",

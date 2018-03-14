@@ -1,8 +1,8 @@
 asset.require('spice/base')
 
-local createGlobe = function(name, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
+local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
     return {
-        Name = name,
+        Identifier = identifier,
         Parent = parent,
         Transform = {
             Translation = {
@@ -22,7 +22,7 @@ local createGlobe = function(name, parent, parentSpiceName, spiceName, radii, ta
         GuiPath = guiPath
     },
     {
-        Name = name .. "Trail",
+        Identifier = identifier .. "Trail",
         Parent = parent,
         Renderable = {
             Type = "RenderableTrailOrbit",
@@ -38,10 +38,20 @@ local createGlobe = function(name, parent, parentSpiceName, spiceName, radii, ta
         GuiPath = guiPath
     }
 end
-asset.export("createGlobe", createGlobe)
+
+local createGlobeWithName = function(identifier, name, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
+    g, t = createGlobeWithoutName(identifier, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
+
+    g.Name = name
+    t.Name = name .. " Trail"
+
+    return g, t
+end
+asset.export("createGlobeWithoutName", createGlobeWithoutName)
+asset.export("createGlobeWithName", createGlobeWithName)
+
 
 local createGlobes = function(t)
-
     for _,v in pairs(t) do
         if type(v) ~= "table" then
             openspace.printWarning("The table passed to 'createGlobes' was not a table of tables")
@@ -53,18 +63,36 @@ local createGlobes = function(t)
     result = {}
 
     for i, v in ipairs(t) do
-        globe, trail = createGlobe(
-            v.Name,
-            v.Parent.Name,
-            v.Parent.Spice,
-            v.Spice,
-            v.Radii,
-            v.Tags,
-            v.GuiPath,
-            v.TrailColor,
-            v.OrbitPeriod,
-            v.Kernels
-        )
+        local globe = nil
+        local trail = nil
+        if v.Name then
+            globe, trail = createGlobeWithName(
+                v.Identifier,
+                v.Name,
+                v.Parent.Identifier,
+                v.Parent.Spice,
+                v.Spice,
+                v.Radii,
+                v.Tags,
+                v.GuiPath,
+                v.TrailColor,
+                v.OrbitPeriod,
+                v.Kernels
+            )
+        else
+            globe, trail = createGlobeWithoutName(
+                v.Identifier,
+                v.Parent.Identifier,
+                v.Parent.Spice,
+                v.Spice,
+                v.Radii,
+                v.Tags,
+                v.GuiPath,
+                v.TrailColor,
+                v.OrbitPeriod,
+                v.Kernels
+            )
+        end
 
         table.insert(result, globe)
         table.insert(result, trail)

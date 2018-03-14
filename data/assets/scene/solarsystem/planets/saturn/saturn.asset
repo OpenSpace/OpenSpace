@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Saturn = {
-    Name = "Saturn",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Saturn",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -29,7 +29,7 @@ local Saturn = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Saturn Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/saturn.jpg",
                     Enabled = true
                 }
@@ -41,14 +41,15 @@ local Saturn = {
 }
 
 local SaturnRings = {
-    Name = "SaturnRings",
-    Parent = Saturn.Name,
+    Identifier = "SaturnRings",
+    Parent = Saturn.Identifier,
     Renderable = {
         Type = "RenderableRings",
         Texture = textures .. "/saturn_rings.png",
         Size = 140220000,
         Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
     },
+    Name = "Saturn Rings",
     GuiPath = "/Solar System/Planets/Saturn"
 },
 

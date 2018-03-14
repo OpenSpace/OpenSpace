@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "6dF Galaxies",
+    Identifier = "6dF",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -30,6 +30,7 @@ local object = {
         ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
         Unit = "Mpc"
     },
+    Name = "6dF Galaxies",
     GuiPath = "/Universe/Galaxies"
 }
 

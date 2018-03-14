@@ -65,13 +65,6 @@ namespace {
 
 namespace openspace {
 
-// Constants used outside of this file
-const std::string SceneGraphNode::RootNodeIdentifier = "Root";
-const std::string SceneGraphNode::KeyName = "Name";
-const std::string SceneGraphNode::KeyParentName = "Parent";
-const std::string SceneGraphNode::KeyDependencies = "Dependencies";
-const std::string SceneGraphNode::KeyTag = "Tag";
-
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
@@ -83,9 +76,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
 
-    // @TODO(abock): Change key to identifier 
-    std::string name = dictionary.value<std::string>(KeyName);
-    result->setIdentifier(name);
+    std::string identifier = dictionary.value<std::string>(KeyIdentifier);
+    result->setIdentifier(std::move(identifier));
+
+    if (dictionary.hasKey(KeyName)) {
+        result->setGuiName(dictionary.value<std::string>(KeyName));
+    }
 
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
@@ -140,7 +136,8 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        renderableDictionary.setValue(KeyName, name);
+        // @TODO(abock):  Change the key to identifier
+        renderableDictionary.setValue(KeyName, identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {

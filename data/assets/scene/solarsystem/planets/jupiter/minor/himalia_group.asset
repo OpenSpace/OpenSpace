@@ -5,16 +5,16 @@ local kernels341 = asset.require('../jup341').Kernels
 
 
 
-local parentName = transforms.JupiterBarycenter.Name
+local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia" }
 local trailColor = { 0.4, 0.3, 0.01 }
 
 local himaliaGroup = {
     {
-        Name = "Leda",
+        Identifier = "Leda",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LEDA",
@@ -26,9 +26,9 @@ local himaliaGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Himalia",
+        Identifier = "Himalia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HIMALIA",
@@ -40,9 +40,9 @@ local himaliaGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Lysithea",
+        Identifier = "Lysithea",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LYSITHEA",
@@ -54,9 +54,9 @@ local himaliaGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Elara",
+        Identifier = "Elara",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ELARA",
@@ -68,12 +68,12 @@ local himaliaGroup = {
         Kernels = kernels341
     },
     {
-        Name = "Dia",
+        Identifier = "Dia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
-        -- Spice = "DIA", -- The name is not correctly registered in the Spice kernel
+        -- Spice = "DIA", -- The Identifier is not correctly registered in the Spice kernel
         Spice = "553",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,

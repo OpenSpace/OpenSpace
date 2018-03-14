@@ -98,8 +98,8 @@ namespace {
             node.children.begin(),
             node.children.end(),
             [p = *path.begin()](const std::unique_ptr<TreeNode>& c) {
-            return c.get()->path == p;
-        }
+                return c.get()->path == p;
+            }
         );
 
         TreeNode* n;
@@ -112,7 +112,6 @@ namespace {
             std::unique_ptr<TreeNode> newNode = std::make_unique<TreeNode>(*path.begin());
             n = newNode.get();
             node.children.push_back(std::move(newNode));
-
         }
 
         // Recurse into the tree and chop off the first path
@@ -162,8 +161,9 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree)
-    : GuiComponent(std::move(name))
+GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string guiName,
+                                           UseTreeLayout useTree)
+    : GuiComponent(std::move(identifier), std::move(guiName))
     , _useTreeLayout(UseTreeInfo, useTree)
     , _treeOrdering(OrderingInfo)
 {

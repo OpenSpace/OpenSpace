@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Globular Clusters",
+    Identifier = "GlobularClusters",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -33,6 +33,7 @@ local object = {
         TextMinSize = 10.0,
         Unit = "pc"
     },
+    Name = "Globular Clusters",
     GuiPath = "/Milky Way/Globular Clusters"
 }
 
