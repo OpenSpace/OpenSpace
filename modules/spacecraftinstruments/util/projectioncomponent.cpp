@@ -153,7 +153,8 @@ documentation::Documentation ProjectionComponent::Documentation() {
             {
                 keySequenceType,
                 new StringInListVerifier(
-                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid }
+                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
+                      sequenceTypeInstrumentTimes }
                 ),
                 Optional::Yes,
                 "This value determines which type of sequencer is used for generating "

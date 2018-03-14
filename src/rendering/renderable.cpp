@@ -143,7 +143,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (_startTime != "" && _endTime != "") {
+    if (!_startTime.empty() && !_endTime.empty()) {
         _hasTimeInterval = true;
     }
 
