@@ -50,24 +50,26 @@ public:
     OctreeManager();
     ~OctreeManager();
 
-    bool initOctree();
-    size_t getChildIndex(float posX, float posY, float posZ, 
-        float origX = 0.0, float origY = 0.0, float origZ = 0.0);
+    void initOctree();
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
-    std::vector<float> traverseData(const glm::mat4 mvp);
+    std::vector<float> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize);
 
 private:
-    const size_t MAX_DIST = 100; // Radius of Gaia DR1 in kParsec
-    const size_t MAX_STARS_PER_NODE = 50000;
-    const float MIN_SIZE_IN_PIXELS = 2.0;
+    const size_t MAX_DIST = 5; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
+    // Stars/node depend on max_dist because it needs to be big enough to hold all stars
+    // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
+    const size_t MAX_STARS_PER_NODE = 1000; 
+    const float MIN_SIZE_IN_PIXELS = 10.0;
 
-    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
-        std::string prefix) const;
+    size_t getChildIndex(float posX, float posY, float posZ,
+        float origX = 0.0, float origY = 0.0, float origZ = 0.0);
     bool insertInNode(std::shared_ptr<OctreeNode> node,
         std::vector<float> starValues, int depth = 1);
-    std::vector<float> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
-        const glm::mat4 mvp);
+    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
+        std::string prefix) const;
+    std::vector<float> checkNodeIntersection(std::shared_ptr<OctreeNode> node,
+        const glm::mat4 mvp, const glm::vec2 screenSize);
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;

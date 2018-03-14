@@ -50,7 +50,7 @@ public:
     ~OctreeCuller();
 
     bool isVisible(std::vector<glm::dvec4> corners, const glm::mat4 mvp);
-    float getNodeSizeInPixels();
+    glm::vec2 getNodeSizeInPixels(const glm::vec2 screenSize);
 
 private:
     const globebrowsing::AABB3 _viewFrustum;

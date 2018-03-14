@@ -478,11 +478,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::mat4 projection = data.camera.projectionMatrix();
 
     glm::mat4 modelViewProjMat = projection * view * model;
+    glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
 
     // Traverse Octree and build _fulldata in correct order!
     // Use Camera to decide which nodes to render! Should move this to a seperate thread.
     _fullData.clear();
-    auto insertData = _octreeManager->traverseData(modelViewProjMat);
+    auto insertData = _octreeManager->traverseData(modelViewProjMat, screenSize);
     _fullData.insert(_fullData.end(), insertData.begin(), insertData.end());
     
     // Construct _slicedData depending on what parameters to use.
@@ -618,9 +619,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.closeUpBoostDist, 
         _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
     );
-    _program->setUniform(_uniformCache.screenSize,
-        glm::vec2(OsEng.renderEngine().renderingResolution())
-    );
+    _program->setUniform(_uniformCache.screenSize, screenSize);
     _program->setUniform(_uniformCache.time, static_cast<float>(data.time.j2000Seconds()));
 
 
@@ -922,10 +921,18 @@ bool RenderableGaiaStars::readFitsFile() {
             std::vector<float> values(_nValuesPerStar);
             size_t idx = 0;
 
-            // Read default values.
+            // Read positions.
             values[idx++] = posXcol[i];
             values[idx++] = posYcol[i];
             values[idx++] = posZcol[i];
+
+            // Return early if star doesn't have a measured position.
+            if (values[0] == -999 && values[1] == -999 && values[2] == -999) {
+                nNullArr++;
+                continue;
+            }
+
+            // Read the rest of the default values.
             values[idx++] = velXcol[i];
             values[idx++] = velYcol[i];
             values[idx++] = velZcol[i];
@@ -947,26 +954,17 @@ bool RenderableGaiaStars::readFitsFile() {
                 values[idx++] = vecData[i];
             }
 
-            bool nullArray = true;
             for (size_t j = 0; j < _nValuesPerStar; ++j) {
                 // The astronomers in Vienna use -999 as default value. Change it to 0.
-                if (values[j] != -999) {
-                    nullArray = false;
-                }
-                else {
-                    values[j] = 0;
+                if (values[j] == -999) {
+                    values[j] = 0.f;
                 }
             }
 
-            if (!nullArray) {
-                // Insert star into octree.
-                // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
-                _octreeManager->insert(values);
-                //_fullData.insert(_fullData.end(), values.begin(), values.end());
-            }
-            else {
-                nNullArr++;
-            }
+            // Insert star into octree.
+            // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
+            _octreeManager->insert(values);
+            //_fullData.insert(_fullData.end(), values.begin(), values.end());
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
