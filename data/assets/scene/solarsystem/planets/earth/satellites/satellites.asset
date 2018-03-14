@@ -1,233 +1,404 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
---Name, URL, and color scheme for each satellite group
+-- Name, URL, and color scheme for each satellite group
 local satelliteGroups = {
-    { title = "GPS",
-      url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
-      trailColor = {0.9, 0.5, 0.0}
+    {
+        Title = "GPS",
+        Url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
+        TrailColor = { 0.9, 0.5, 0.0 }
     },
-    { title = "SpaceStations",
-      url = "http://celestrak.com/NORAD/elements/stations.txt",
-      trailColor = {0.9, 0.0, 0.0}
+    {
+        Title = "SpaceStations",
+        Url = "http://celestrak.com/NORAD/elements/stations.txt",
+        TrailColor = { 0.9, 0.0, 0.0 }
     },
-    { title = "Geostationary",
-      url = "http://celestrak.com/NORAD/elements/geo.txt",
-      trailColor = {0.9, 0.9, 0.0}
+    {
+        Title = "Geostationary",
+        Url = "http://celestrak.com/NORAD/elements/geo.txt",
+        TrailColor = { 0.9, 0.9, 0.0 }
     },
+    {
+        Title = "Last 30 Days",
+        Url = "http://www.celestrak.com/NORAD/elements/tle-new.txt",
+        TrailColor = { 0.65, 0.25, 0.45 }
+    },
+    {
+        Title = "100 Brightest",
+        Url = "http://www.celestrak.com/NORAD/elements/visual.txt",
+        TrailColor = { 0.55, 0.25, 0.65 }
+    },
+    {
+        Title = "Fengyun Debris",
+        Url = "http://www.celestrak.com/NORAD/elements/1999-025.txt",
+        TrailColor = { 0.25, 0.35, 0.45 }
+    },
+    {
+        Title = "Iridium 33 Debris",
+        Url = "http://www.celestrak.com/NORAD/elements/iridium-33-debris.txt",
+        TrailColor = { 0.25, 0.35, 0.45 }
+    },
+    {
+        Title = "Kosmos 2251 Debris",
+        Url = "http://www.celestrak.com/NORAD/elements/cosmos-2251-debris.txt",
+        TrailColor = { 0.25, 0.35, 0.45 }
+    },
+    {
+        Title = "Breeze-M Breakup",
+        Url = "http://www.celestrak.com/NORAD/elements/2012-044.txt",
+        TrailColor = { 0.25, 0.35, 0.45 }
+    },
+    {
+        Title = "Weather",
+        Url = "http://www.celestrak.com/NORAD/elements/weather.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "NOAA",
+        Url = "http://www.celestrak.com/NORAD/elements/noaa.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "GOES",
+        Url = "http://www.celestrak.com/NORAD/elements/goes.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Earth Resources",
+        Url = "http://www.celestrak.com/NORAD/elements/resource.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Search & Rescue (SARSAT)",
+        Url = "http://www.celestrak.com/NORAD/elements/sarsat.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Disaster Monitoring",
+        Url = "http://www.celestrak.com/NORAD/elements/dmc.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Tracking and Data Relay Satellite System (TDRSS)",
+        Url = "http://www.celestrak.com/NORAD/elements/tdrss.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "ARGOS",
+        Url = "http://www.celestrak.com/NORAD/elements/argos.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Planet",
+        Url = "http://www.celestrak.com/NORAD/elements/planet.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Spire",
+        Url = "http://www.celestrak.com/NORAD/elements/spire.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Intelsat",
+        Url = "http://www.celestrak.com/NORAD/elements/intelsat.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "SES",
+        Url = "http://www.celestrak.com/NORAD/elements/ses.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Iridium",
+        Url = "http://www.celestrak.com/NORAD/elements/iridium.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Iridium NEXT",
+        Url = "http://www.celestrak.com/NORAD/elements/iridium-NEXT.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Orbcomm",
+        Url = "http://www.celestrak.com/NORAD/elements/orbcomm.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "GlobalStar",
+        Url = "http://www.celestrak.com/NORAD/elements/globalstar.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Amateur Radio",
+        Url = "http://www.celestrak.com/NORAD/elements/amateur.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Experimental",
+        Url = "http://www.celestrak.com/NORAD/elements/x-comm.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Other comm",
+        Url = "http://www.celestrak.com/NORAD/elements/other-comm.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Gorizont",
+        Url = "http://www.celestrak.com/NORAD/elements/gorizont.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Raduga",
+        Url = "http://www.celestrak.com/NORAD/elements/raduga.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Molniya",
+        Url = "http://www.celestrak.com/NORAD/elements/molniya.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Glosnass",
+        Url = "http://www.celestrak.com/NORAD/elements/glo-ops.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Galileo",
+        Url = "http://www.celestrak.com/NORAD/elements/galileo.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Beidou",
+        Url = "http://www.celestrak.com/NORAD/elements/beidou.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Satellite Based Augmentation System",
+        Url = "http://www.celestrak.com/NORAD/elements/sbas.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Navy Navigation Satellite System",
+        Url = "http://www.celestrak.com/NORAD/elements/nnss.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Russian LEO Navigation",
+        Url = "http://www.celestrak.com/NORAD/elements/musson.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Space & Earth Science",
+        Url = "http://www.celestrak.com/NORAD/elements/science.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Geodect",
+        Url = "http://www.celestrak.com/NORAD/elements/geodetic.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Engineering",
+        Url = "http://www.celestrak.com/NORAD/elements/engineering.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Military",
+        Url = "http://www.celestrak.com/NORAD/elements/military.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Radar Calibration",
+        Url = "http://www.celestrak.com/NORAD/elements/radar.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "CubeSat",
+        Url = "http://www.celestrak.com/NORAD/elements/cubesat.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    },
+    {
+        Title = "Other",
+        Url = "http://www.celestrak.com/NORAD/elements/other.txt",
+        TrailColor = { 0.75, 0.75, 0.35 }
+    }
 }
 
-function values(t)
-  local i = 0
-  return function () i = i + 1; return t[i] end
-end
-
-function buildSyncedUrlList(satGroups)
-  urlList = {}
-  for sat in values(satGroups) do
-    table.insert(urlList, sat.url)
-  end
-  return {
-    Name = "Satellite TLE Data",
-    Type = "UrlSynchronization",
-    Identifier = "satellite_tle_data",
-    Url = urlList
-  }
-end
-
---Define the synced resources for satellite image and TLE files
+-- Define the synced resources for satellite image and TLE files
 local satImageFolder = asset.syncedResource({
     Name = "Satellite Image Files",
     Type = "HttpSynchronization",
     Identifier = "tle_satellites_images",
     Version = 1
 })
-local satDataPath = asset.syncedResource(buildSyncedUrlList(satelliteGroups))
 
-local thisAsset = asset
+local satDataPath = asset.syncedResource({
+    Name = "Satellite TLE Data",
+    Type = "UrlSynchronization",
+    Identifier = "satellite_tle_data",
+    Url = (function ()
+        urlList = {}
+        for _, sat in ipairs(satelliteGroups) do
+            table.insert(urlList, sat.Url)
+        end
+        return urlList
+    end)()
+})
+
+
+-- We need to store all of the names of added scene graph nodes so that we can remove them
+-- when this asset gets unloaded
+local objectNames = {}
 
 asset.onInitialize(function ()
-  function trimString(s)
-    s = s:gsub("^%s*(.-)%s*$", "%1")
-    s = s:gsub("%s+", "_")
-    s = s:gsub("[%-()]", "")
-    return s
-  end
-
-  function getPeriodFromFile(line2)
-    return tonumber(string.sub(line2, 53, 63))
-  end
-
-  function getNumLinesInFile(filename)
-    local ctr = 0
-    for _ in io.lines(filename) do
-      ctr = ctr + 1
-    end
-    return ctr
-  end
-
-  function isEmpty(s)
-    return s == nil or s == ''
-  end
-
-  --Check format of a set of 3 TLE file lines and return nonzero if there is a format error
-  function checkTleFileFormat(lineArr)
-    if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
-      return -1
-    end
-    if string.sub(lineArr[2], 1, 2) ~= "1 " then
-      return -1
-    end
-    if string.sub(lineArr[3], 1, 2) ~= "2 " then
-      return -1
-    end
-    return 0
-  end
-
-
-  function  getSat(title, file, lineNum, textureFile)
-    return {
-        Name = title,
-        Parent = transforms.EarthInertial.Name,
-        Renderable = {
-            Type = "RenderablePlaneImageLocal",
-            Size = 3e4,
-            Origin = "Center",
-            Body = "TLE",
-            Billboard = true,
-            Texture = textureFile
-        },
-        Transform = {
-            Translation = {
-                Type = "TLETranslation",
-                Body = title,
-                Observer = transforms.EarthInertial.Name,
-                File = file,
-                LineNum = lineNum
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            }
-        },
-        GuiPath = "/Solar System/Planets/Earth/Satellites"
-    }
-  end
-
-  function getSatTrail(title, file, lineNum, per, color)
-    trailName = title .. "_trail"
-    return {
-        Name = trailName,
-        Parent = transforms.EarthInertial.Name,
-        Renderable = {
-            Type = "RenderableTrailOrbit",
-            Translation = {
-                Type = "TLETranslation",
-                Body = title,
-                Observer = transforms.EarthInertial.Name,
-                File = file,
-                LineNum = lineNum
-            },
-            Color = color,
-            Period = per,
-            Resolution = 160
-        },
-        GuiPath = "/Solar System/Planets/Earth/Satellites"
-    }
-  end
-
-  function printSatElements_debug(satElem)
-    print(">SATELLITE")
-    print("  " .. satElem.Name)
-    print("  " .. satElem.Parent)
-    print("  (Renderable)")
-    print("   " .. satElem.Renderable.Type)
-    print("   " .. satElem.Renderable.Size)
-    print("   " .. satElem.Renderable.Origin)
-    print("   " .. satElem.Renderable.Body)
-    if satElem.Renderable.Billboard then
-      print("   Billboard = true")
-    end
-    print("   " .. satElem.Renderable.Texture)
-    print("  (Transform.Translation)")
-    print("   " .. satElem.Transform.Translation.Type)
-    print("   " .. satElem.Transform.Translation.Body)
-    print("   " .. satElem.Transform.Translation.Observer)
-    print("   " .. satElem.Transform.Translation.File)
-    print("   " .. satElem.Transform.Translation.LineNum)
-    print("  (Transform.Scale)")
-    print("   " .. satElem.Transform.Scale.Type)
-    print("   " .. satElem.Transform.Scale.Scale)
-    print("  (GuiPath)")
-    print("   " .. satElem.GuiPath)
-  end
-
-  function printSatTrailElements_debug(satElem)
-    print(">SAT_TRAIL")
-    print("  " .. satElem.Name)
-    print("  " .. satElem.Parent)
-    print("  (Renderable)")
-    print("   " .. satElem.Renderable.Type)
-    print("   " .. satElem.Renderable.Translation.Type)
-    print("   " .. satElem.Renderable.Translation.Body)
-    print("   " .. satElem.Renderable.Translation.Observer)
-    print("   " .. satElem.Renderable.Translation.File)
-    print("   " .. satElem.Renderable.Translation.LineNum)
-    print("  ((Misc))")
-    print("    (color)")
-    print("   " .. satElem.Renderable.Color[1] .. ","
-          .. satElem.Renderable.Color[2] .. ","
-      .. satElem.Renderable.Color[3])
-    print("   " .. satElem.Renderable.Period)
-    print("   " .. satElem.Renderable.Resolution)
-    print("  (GuiPath)")
-    print("   " .. satElem.GuiPath)
-  end
-
-
-  -------------------------------------------------------------
-  for sOrbit in values(satelliteGroups) do
-    fileErr = ""
-    filename = sOrbit.url:match("([^/]+)$")
-    filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
-    sOrbit.path = satDataPath .. "/" .. filename
-    sOrbit.texturePath = satImageFolder .. "/" .. "satB.png"
-
-    local sat_var
-    local satTrail_var
-
-    line = {} 
-    myfile = io.open(sOrbit.path, "r")
-    lines = getNumLinesInFile(sOrbit.path)
-    --now loop through the tle file and get each set of 3 lines
-    if myfile then
-      for n=1,lines,3 do
-        line[1] = myfile:read('*l') --title line
-        line[2] = myfile:read('*l')
-        line[3] = myfile:read('*l')
-        if( checkTleFileFormat(line) == 0 ) then
-          title = trimString(line[1])
-          per = getPeriodFromFile(line[3])
-          per = 1.0 / per * 2 --trail for 2x a single revolution
-          satName = filenameSansExt .. "_" .. title
-          --register satellite object and trail
-          sat_var = getSat(satName, sOrbit.path, n, sOrbit.texturePath)
-          openspace.addSceneGraphNode(sat_var)
-          -- assetHelper.registerSceneGraphNodesAndExport(thisAsset, {sat_var})
-          satTrail_var = getSatTrail(satName, sOrbit.path, n, per, sOrbit.trailColor)
-          openspace.addSceneGraphNode(satTrail_var)
-          -- assetHelper.registerSceneGraphNodesAndExport(thisAsset, {satTrail_var})
-        else
-          fileErr = " TLE file syntax error on line " .. n .. ": " .. sOrbit.path
-          break
+    local addSatelliteGroup = function(group)
+        function contains(table, element)
+            for i = 1, #table do
+                if table[i] == element then
+                    return true
+                end
+            end
+            return false
         end
-      end
-    else
-      fileErr = " File not found: " .. sOrbit.path
-      break
+
+        function numLinesInFile(filename)
+            local ctr = 0
+            for _ in io.lines(filename) do ctr = ctr + 1 end
+            return ctr
+        end
+
+        -- Check format of a set of 3 TLE file lines and return nonzero if there is a format error
+        function isValidTLEFileFormat(lineArr)
+            function isEmpty(s) return s == nil or s == '' end
+
+            if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
+                return false
+            end
+            if string.sub(lineArr[2], 1, 2) ~= "1 " then
+                return false
+            end
+            if string.sub(lineArr[3], 1, 2) ~= "2 " then
+                return false
+            end
+            return true
+        end
+
+        function getSat(title, file, lineNum, textureFile, group)
+            return {
+                Name = title,
+                Parent = transforms.EarthInertial.Name,
+                Renderable = {
+                    Type = "RenderablePlaneImageLocal",
+                    Enabled = false,
+                    Size = 3e4,
+                    Origin = "Center",
+                    Body = "TLE",
+                    Billboard = true,
+                    Texture = textureFile
+                },
+                Transform = {
+                    Translation = {
+                        Type = "TLETranslation",
+                        Body = title,
+                        Observer = transforms.EarthInertial.Name,
+                        File = file,
+                        LineNumber = lineNum
+                    },
+                    Scale = {
+                        Type = "StaticScale",
+                        Scale = 1
+                    }
+                },
+                Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
+                GuiPath = "/Solar System/Planets/Earth/Satellites"
+            }
+        end
+
+        function getSatTrail(title, file, lineNum, per, color, group)
+            return {
+                Name = title .. "_trail",
+                Parent = transforms.EarthInertial.Name,
+                Renderable = {
+                    Type = "RenderableTrailOrbit",
+                    Translation = {
+                        Type = "TLETranslation",
+                        Body = title,
+                        Observer = transforms.EarthInertial.Name,
+                        File = file,
+                        LineNumber = lineNum
+                    },
+                    Color = color,
+                    Period = per,
+                    Resolution = 160
+                },
+                Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
+                GuiPath = "/Solar System/Planets/Earth/Satellites"
+            }
+        end
+
+
+        local filename = group.Url:match("([^/]+)$")
+        local filenameSansExt = filename:gsub(filename:match("(%.%w+)$"), "")
+
+        local path = satDataPath .. "/" .. filename
+        local texture = satImageFolder .. "/" .. "satB.png"
+
+
+        myfile = io.open(path, "r")
+        assert(myfile, "File not found: " .. path)
+
+        --now loop through the tle file and get each set of 3 lines
+        for n = 1, numLinesInFile(path), 3 do
+            local line = {
+                myfile:read('*l'), --title line
+                myfile:read('*l'),
+                myfile:read('*l')
+            }
+            assert(isValidTLEFileFormat(line), "TLE file syntax error on line " .. n .. ": " .. path)
+
+            -- Trim string
+            line[1] = line[1]:gsub("^%s*(.-)%s*$", "%1")
+            line[1] = line[1]:gsub("%s+", "_")
+            line[1] = line[1]:gsub("[%-()]", "")
+            local title = line[1]
+
+            -- Get period from correct location of the string
+            local per = tonumber(string.sub(line[3], 53, 63))
+            -- Trail for 2x a single revolution
+            per = 1.0 / per * 2.0
+
+            local satName = filenameSansExt .. "_" .. title
+
+            if contains(objectNames, satName) then
+                local originalSatName = satName
+                local i = 1
+                while contains(objectNames, satName) do
+                    satName = originalSatName .. "_" .. tostring(i)
+                    i = i + 1
+                end
+            end
+
+
+            -- Register satellite object and trail
+            local sat_var = getSat(satName, path, n, texture, group.Title)
+            table.insert(objectNames, sat_var.Name)
+            openspace.addSceneGraphNode(sat_var)
+
+            local satTrail_var = getSatTrail(satName, path, n, per, group.TrailColor, group.Title)
+            table.insert(objectNames, satTrail_var.Name)
+            openspace.addSceneGraphNode(satTrail_var)
+
+        end
     end
-    assert(fileErr == "", fileErr)
-  end
 
+    for _, group in ipairs(satelliteGroups) do
+        addSatelliteGroup(group)
+    end
+end)
 
+asset.onDeinitialize(function ()
+    for _, n in ipairs(objectNames) do
+        openspace.removeSceneGraphNode(n)
+    end
 end)
