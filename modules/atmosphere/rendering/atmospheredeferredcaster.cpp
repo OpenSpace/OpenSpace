@@ -192,7 +192,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
         _modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    double distance = glm::distance(tPlanetPosWorld, renderData.camera.positionVec3());
+    double distance = glm::distance(tPlanetPosWorld, renderData.camera.eyePositionVec3());
     if (distance > DISTANCE_CULLING) {
         program.setUniform("cullAtmosphere", 1);
     }
@@ -268,7 +268,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             glm::dmat4 dInverseCameraRotationToSgctEyeTransform = glm::mat4_cast(
                 static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-            ) * dSgctEye2OSEye;
+            ) * glm::inverse(renderData.camera.viewScaleMatrix()) * dSgctEye2OSEye;
             
             
             glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = 
@@ -289,7 +289,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 dInverseCameraRotationToSgctEyeTransform);
 
             program.setUniform(_uniformCache2.dObjpos, glm::dvec4(renderData.position.dvec3(), 1.0));
-            program.setUniform(_uniformCache2.dCampos, renderData.camera.positionVec3());
+            program.setUniform(_uniformCache2.dCampos, renderData.camera.eyePositionVec3());
 
             glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
             program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
@@ -308,7 +308,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             // Sun following camera position
             if (_sunFollowingCameraEnabled) {
                 sunPosObj = inverseModelMatrix * glm::dvec4(
-                    renderData.camera.positionVec3(),
+                    renderData.camera.eyePositionVec3(),
                     1.0
                 );
             }
