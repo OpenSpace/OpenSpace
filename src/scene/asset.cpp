@@ -23,12 +23,12 @@
  ****************************************************************************************/
 
 #include <openspace/scene/asset.h>
+
 #include <openspace/scene/assetloader.h>
-
 #include <ghoul/logging/logmanager.h>
-
-#include <iterator>
 #include <algorithm>
+#include <fmt/format.h>
+#include <iterator>
 #include <unordered_set>
 
 namespace {
@@ -198,8 +198,9 @@ void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
             setState(State::SyncResolved);
         }
     } else if (state == ResourceSynchronization::State::Rejected) {
-        LERROR("Failed to synchronize resource \"" <<
-            sync->name() << "\" in asset \"" << id() << "\"");
+        LERROR(fmt::format(
+            "Failed to synchronize resource '{}'' in asset '{}'", sync->name(), id()
+        ));
 
         setState(State::SyncRejected);
     }

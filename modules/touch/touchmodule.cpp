@@ -25,7 +25,6 @@
 #include <modules/touch/touchmodule.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
