@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/multiresvolume/rendering/histogrammanager.h>
+
+#include <openspace/util/histogram.h>
+#include <cassert>
 #include <float.h>
 #include <math.h>
 #include <string.h>
-#include <cassert>
-
-#include <modules/multiresvolume/rendering/histogrammanager.h>
-#include <openspace/util/histogram.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
@@ -180,11 +180,11 @@ bool HistogramManager::saveToFile(const std::string& filename) {
     file.write(reinterpret_cast<char*>(&_minBin), sizeof(float));
     file.write(reinterpret_cast<char*>(&_maxBin), sizeof(float));
 
-    int nFloats = numHistograms * _numBins;
+    size_t nFloats = numHistograms * _numBins;
     float* histogramData = new float[nFloats];
 
     for (size_t i = 0; i < numHistograms; ++i) {
-        int offset = i*_numBins;
+        size_t offset = i*_numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
 

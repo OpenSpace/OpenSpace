@@ -147,6 +147,7 @@ protected:
     std::string _programName;
 
     glm::mat4 _rotation; //to rotate objects with fliped texture coordniates
+
 private:
     bool destroyShader();
     glm::dmat3 _stateMatrix;

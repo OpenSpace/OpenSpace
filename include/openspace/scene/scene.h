@@ -25,21 +25,21 @@
 #ifndef __OPENSPACE_CORE___SCENE___H__
 #define __OPENSPACE_CORE___SCENE___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <vector>
 #include <unordered_map>
 #include <set>
 #include <mutex>
 
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicense.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
-
-#include <openspace/properties/propertyowner.h>
-
+#include <ghoul/misc/easing.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace ghoul { class Dictionary; }
@@ -173,6 +173,47 @@ public:
     bool isInitializing() const;
 
     /**
+     * Adds an interpolation request for the passed \p prop that will run for
+     * \p durationSeconds seconds. Every time the #updateInterpolations method is called
+     * the Property will be notified that it has to update itself using the stored
+     * interpolation values. If an interpolation record already exists for the passed 
+     * \p prop, the previous record will be overwritten and the remaining time of the old
+     * interpolation is ignored.
+     *
+     * \param prop The property that should be called to update itself every frame until
+     *        \p durationSeconds seconds have passed
+     * \param durationSeconds The number of seconds that the interpolation will run for
+     *
+     * \pre \p prop must not be \c nullptr
+     * \pre \p durationSeconds must be positive and not 0
+     * \post A new interpolation record exists for \p that is not expired 
+     */
+    void addInterpolation(properties::Property* prop, float durationSeconds,
+        ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
+
+    /**
+     * Removes the passed \p prop from the list of Property%s that are update each time
+     * the #updateInterpolations method is called
+     *
+     * \param prop The Property that should not longer be updated
+     *
+     * \pre \prop must not be nullptr
+     * \post No interpolation record exists for \p prop
+     */
+    void removeInterpolation(properties::Property* prop);
+
+    /**
+     * Informs all Property%s with active interpolations about applying a new update tick
+     * using the Property::interpolateValue method, passing a parameter \c t which is \c 0
+     * if no time has passed between the #addInterpolation method and \c 1 if an amount of
+     * time equal to the requested interpolation time has passed. The parameter \c t is
+     * updated with a resolution of 1 microsecond, which means that if this function is
+     * called twice within 1 microsecond, the passed parameter \c t might be the same for
+     * both calls
+     */
+    void updateInterpolations();
+
+    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
      * - openspace::luascriptfunctions::property_setValue
@@ -203,6 +244,15 @@ private:
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
+
+    struct InterpolationInfo {
+        properties::Property* prop;
+        std::chrono::time_point<std::chrono::steady_clock> beginTime;
+        float durationSeconds;
+        ghoul::EasingFunc<float> easingFunction;
+        bool isExpired = false;
+    };
+    std::vector<InterpolationInfo> _interpolationInfos;
 };
 
 } // namespace openspace

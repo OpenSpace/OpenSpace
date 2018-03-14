@@ -29,10 +29,6 @@
 #include <algorithm>
 #include <cassert>
 
-namespace {
-    constexpr const char* _loggerCat = "LocalTfBrickSelector";
-} // namespace
-
 namespace openspace {
 
 LocalTfBrickSelector::LocalTfBrickSelector(std::shared_ptr<TSP> tsp,

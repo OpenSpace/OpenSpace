@@ -588,7 +588,7 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
 void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder)
 {
     // Load states from .osfls files into RAM!
-    for (const std::string filePath : _sourceFiles) {
+    for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
@@ -666,7 +666,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         // the given sequence have the same extra quantities! */
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
-        for (int i = 0; i < nExtraQuantities; ++i) {
+        for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
             _pColorQuantity.addOption(i, extraNamesVec[i]);
             _pMaskingQuantity.addOption(i, extraNamesVec[i]);
         }
@@ -962,7 +962,7 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
                                                    std::vector<std::string>& extraMagVars)
 {
 
-    for (int i = 0; i < extraVars.size(); i++) {
+    for (int i = 0; i < static_cast<int>(extraVars.size()); i++) {
         const std::string str = extraVars[i];
         // Check if string is in the format specified for magnitude variables
         if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
@@ -1120,7 +1120,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
-        const int nextIdx = _activeTriggerTimeIndex + 1;
+        const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
             // true => Previous frame was not within the sequence interval
             _activeTriggerTimeIndex < 0

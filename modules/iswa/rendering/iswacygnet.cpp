@@ -53,8 +53,8 @@ namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete(DeleteInfo)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _delete(DeleteInfo)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)

@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -28,10 +28,6 @@
 #include <openspace/util/histogram.h>
 #include <algorithm>
 #include <cassert>
-
-namespace {
-    constexpr const char* _loggerCat = "TfBrickSelector";
-} // namespace
 
 namespace openspace {
 
@@ -303,7 +299,7 @@ bool TfBrickSelector::calculateBrickErrors() {
         } else {
             const Histogram* histogram = _histogramManager->getHistogram(brickIndex);
             float error = 0;
-            for (int i = 0; i < gradients.size(); i++) {
+            for (size_t i = 0; i < gradients.size(); i++) {
                 float x = static_cast<float>(i + 0.5f) / static_cast<float>(tfWidth);
                 float sample = histogram->interpolate(x);
                 ghoul_assert(sample >= 0, "@MISSING");

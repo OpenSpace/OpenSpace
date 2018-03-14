@@ -395,4 +395,62 @@ std::string NumericalProperty<T>::generateAdditionalDescription() const {
     return result;
 }
 
+template <typename T>
+void NumericalProperty<T>::setInterpolationTarget(ghoul::any value) {
+    try {
+        T v = ghoul::any_cast<T>(std::move(value));
+
+        _interpolationStart = TemplateProperty<T>::_value;
+        _interpolationEnd = std::move(v);
+    }
+    catch (ghoul::bad_any_cast&) {
+        LERRORC(
+            "TemplateProperty",
+            fmt::format(
+                "Illegal cast from '{}' to '{}'",
+                value.type().name(),
+                typeid(T).name()
+            )
+        );
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
+        state,
+        success
+    );
+    if (success) {
+        _interpolationStart = TemplateProperty<T>::_value;
+        _interpolationEnd = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setStringInterpolationTarget(std::string value) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
+        value,
+        success
+    );
+    if (success) {
+        _interpolationStart = TemplateProperty<T>::_value;
+        _interpolationEnd = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::interpolateValue(float t,
+                                            ghoul::EasingFunc<float> easingFunction)
+{
+    if (easingFunction) {
+        t = easingFunction(t);
+    }
+    TemplateProperty<T>::setValue(static_cast<T>(
+        glm::mix(_interpolationStart, _interpolationEnd, t)
+    ));
+}
+
 } // namespace openspace::properties
