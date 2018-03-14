@@ -94,7 +94,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-        
+
         lua_settop(L, 0);
         return 0;
     }

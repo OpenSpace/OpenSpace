@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
 
@@ -151,8 +152,10 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             innerBoundaryLimit = 0.11f; // TODO specify in Lua?
             break;
         default:
-            LERROR("OpenSpace's fieldlines sequence currently only supports CDFs from "
-                    << "the BATSRUS and ENLIL models!");
+            LERROR(
+                "OpenSpace's fieldlines sequence currently only supports CDFs from the "
+                "BATSRUS and ENLIL models!"
+            );
             return false;
     }
 
@@ -228,7 +231,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
             std::make_unique<ccmc::KameleonInterpolator>(kameleon->model);
 
     // ------ Extract all the extraQuantities from kameleon and store in state! ------ //
-    for (const glm::vec3 p : state.vertexPositions()) {
+    for (const glm::vec3& p : state.vertexPositions()) {
         // Load the scalars!
         for (size_t i = 0; i < nXtraScalars; i++) {
             float val;
@@ -295,21 +298,23 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
 
     // Load the existing SCALAR variables into kameleon.
     // Remove non-existing variables from vector
-    for (int i = 0; i < extraScalarVars.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); ++i) {
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
             (model == fls::Model::Batsrus && (str == TAsPOverRho || str == "T" )))
         {
             LDEBUG("BATSRUS doesn't contain variable T for temperature. Trying to "
-                   << "calculate it using the ideal gas law: T = pressure/density");
+                   "calculate it using the ideal gas law: T = pressure/density");
             const std::string p = "p", r = "rho";
             success = kameleon->doesVariableExist(p) && kameleon->loadVariable(p) &&
                       kameleon->doesVariableExist(r) && kameleon->loadVariable(r);
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING("Failed to load extra variable: '" << str << "'. Ignoring it!");
+            LWARNING(fmt::format(
+                "Failed to load extra variable: '{}'. Ignoring", str
+            ));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         } else {
@@ -346,9 +351,11 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 name = JParallelB;
             }
             if (!success) {
-                LWARNING("Failed to load at least one of the magnitude variables: "
-                        << s1 << ", " << s2 <<  " & " << s3
-                        << ". Removing ability to store corresponding magnitude!");
+                LWARNING(fmt::format(
+                    "Failed to load at least one of the magnitude variables: {}, {}, {} "
+                    "& {}. Removing ability to store corresponding magnitude",
+                    s1, s2, s3
+                ));
                 extraMagVars.erase(
                     extraMagVars.begin() + i,
                     extraMagVars.begin() + i + 3
@@ -361,9 +368,11 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
     } else {
         // WRONG NUMBER OF MAGNITUDE VARIABLES.. REMOVE ALL!
         extraMagVars.clear();
-        LWARNING("Wrong number of variables provided for storing magnitudes. "
-                << "Expects multiple of 3 but " << extraMagVars.size()
-                << " are provided");
+        LWARNING(fmt::format(
+            "Wrong number of variables provided for storing magnitudes. Expects multiple "
+            "of 3 but {} are provided",
+            extraMagVars.size()
+        ));
     }
     state.setExtraQuantityNames(std::move(extraQuantityNames));
 }

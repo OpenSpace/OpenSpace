@@ -29,10 +29,12 @@ in float vs_screenSpaceDepth;
 in vec4 vs_positionViewSpace;
 
 uniform vec4 gridColor;
+uniform float opacity;
 
 Fragment getFragment() {
     Fragment frag;
     frag.color      = gridColor;
+    frag.color.a    *= opacity;
     frag.depth      = vs_screenSpaceDepth;
     frag.gPosition  = vs_positionViewSpace;
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);

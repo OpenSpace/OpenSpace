@@ -24,6 +24,7 @@
 
 #include <openspace/engine/downloadmanager.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -239,7 +240,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     const std::string& url,
     SuccessCallback successCallback, ErrorCallback errorCallback)
 {
-    LDEBUG("Start downloading file: '" << url << "' into memory");
+    LDEBUG(fmt::format("Start downloading file: '{}' into memory", url));
 
     auto downloadFunction = [url, successCallback, errorCallback]() {
         DownloadManager::MemoryFile file;
@@ -284,7 +285,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             if (errorCallback) {
                 errorCallback(err);
             } else {
-                LWARNING("Error downloading '" << url << "': " << err);
+                LWARNING(fmt::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);
             // Throw an error and use try-catch around call to future.get()

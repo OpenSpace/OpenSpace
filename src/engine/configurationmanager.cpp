@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
@@ -45,79 +47,80 @@ namespace {
 
 namespace openspace {
 
-const string ConfigurationManager::KeyPaths = "Paths";
-const string ConfigurationManager::KeyCache = "CACHE";
-const string ConfigurationManager::KeyFonts = "Fonts";
-const string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
-const string ConfigurationManager::KeyGlobalCustomizationScripts =
-    "GlobalCustomizationScripts";
+// static constexpr const char* ConfigurationManager::KeyPaths = "Paths";
+// const string ConfigurationManager::KeyCache = "CACHE";
+// const string ConfigurationManager::KeyFonts = "Fonts";
+// const string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
+// const string ConfigurationManager::KeyGlobalCustomizationScripts =
+    // "GlobalCustomizationScripts";
 
-const string ConfigurationManager::PartType = "Type";
-const string ConfigurationManager::PartFile = "File";
+// const string ConfigurationManager::PartType = "Type";
+// const string ConfigurationManager::PartFile = "File";
 
-const string ConfigurationManager::KeyLuaDocumentation = "LuaDocumentation";
-const string ConfigurationManager::KeyScriptLog = "ScriptLog";
-const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumentation";
-const string ConfigurationManager::KeyScenePropertyDocumentation = "ScenePropertyDocumentation";
-const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
-const string ConfigurationManager::KeyDocumentation = "Documentation";
-const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
+// const string ConfigurationManager::KeyLuaDocumentation = "LuaDocumentation";
+// const string ConfigurationManager::KeyScriptLog = "ScriptLog";
+// const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumentation";
+// const string ConfigurationManager::KeyScenePropertyDocumentation =
+                                                             // "ScenePropertyDocumentation";
+// const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
+// const string ConfigurationManager::KeyDocumentation = "Documentation";
+// const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
 
-const string ConfigurationManager::KeyConfigAsset = "Asset";
-const string ConfigurationManager::KeySceneLicenseDocumentation = "LicenseDocumentation";
+// const string ConfigurationManager::KeyConfigAsset = "Asset";
+// const string ConfigurationManager::KeySceneLicenseDocumentation = "LicenseDocumentation";
 
-const string ConfigurationManager::KeyLogging = "Logging";
-const string ConfigurationManager::PartLogDir = "LogDir";
-const string ConfigurationManager::PartLogLevel = "LogLevel";
-const string ConfigurationManager::PartImmediateFlush = "ImmediateFlush";
-const string ConfigurationManager::PartLogPerformancePrefix = "PerformancePrefix";
+// const string ConfigurationManager::KeyLogging = "Logging";
+// const string ConfigurationManager::PartLogDir = "LogDir";
+// const string ConfigurationManager::PartLogLevel = "LogLevel";
+// const string ConfigurationManager::PartImmediateFlush = "ImmediateFlush";
+// const string ConfigurationManager::PartLogPerformancePrefix = "PerformancePrefix";
 
-const string ConfigurationManager::PartLogs = "Logs";
-const string ConfigurationManager::PartAppend = "Append";
-const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
+// const string ConfigurationManager::PartLogs = "Logs";
+// const string ConfigurationManager::PartAppend = "Append";
+// const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
 
-const string ConfigurationManager::KeyLauncher = "Launcher";
+// const string ConfigurationManager::KeyLauncher = "Launcher";
 
-const string ConfigurationManager::KeyCapabilitiesVerbosity =
-    KeyLogging + "." + PartCapabilitiesVerbosity;
+// const string ConfigurationManager::KeyCapabilitiesVerbosity =
+    // KeyLogging + "." + PartCapabilitiesVerbosity;
 
-const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
-const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
-const string ConfigurationManager::KeyDisableSceneOnMaster = "DisableSceneOnMaster";
-const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
-const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
+// const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
+// const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
+// const string ConfigurationManager::KeyDisableSceneOnMaster = "DisableSceneOnMaster";
+// const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
+// const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
 
-const string ConfigurationManager::KeyOnScreenTextScaling = "OnScreenTextScaling";
+// const string ConfigurationManager::KeyOnScreenTextScaling = "OnScreenTextScaling";
 
-const string ConfigurationManager::KeyHttpProxy = "HttpProxy";
-const string ConfigurationManager::PartHttpProxyAddress = "Address";
-const string ConfigurationManager::PartHttpProxyPort = "Port";
-const string ConfigurationManager::PartHttpProxyAuthentication = "Authentication";
-const string ConfigurationManager::PartHttpProxyUser = "User";
-const string ConfigurationManager::PartHttpProxyPassword = "Password";
+// const string ConfigurationManager::KeyHttpProxy = "HttpProxy";
+// const string ConfigurationManager::PartHttpProxyAddress = "Address";
+// const string ConfigurationManager::PartHttpProxyPort = "Port";
+// const string ConfigurationManager::PartHttpProxyAuthentication = "Authentication";
+// const string ConfigurationManager::PartHttpProxyUser = "User";
+// const string ConfigurationManager::PartHttpProxyPassword = "Password";
 
-const string ConfigurationManager::KeyOpenGLDebugContext = "OpenGLDebugContext";
-const string ConfigurationManager::PartActivate = "Activate";
-const string ConfigurationManager::PartSynchronous = "Synchronous";
-const string ConfigurationManager::PartFilterIdentifier = "FilterIdentifier";
-const string ConfigurationManager::PartFilterIdentifierSource = "Source";
-const string ConfigurationManager::PartFilterIdentifierType = "Type";
-const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
-const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
-const string ConfigurationManager::KeyCheckOpenGLState = "CheckOpenGLState";
-const string ConfigurationManager::KeyLogEachOpenGLCall = "LogEachOpenGLCall";
+// const string ConfigurationManager::KeyOpenGLDebugContext = "OpenGLDebugContext";
+// const string ConfigurationManager::PartActivate = "Activate";
+// const string ConfigurationManager::PartSynchronous = "Synchronous";
+// const string ConfigurationManager::PartFilterIdentifier = "FilterIdentifier";
+// const string ConfigurationManager::PartFilterIdentifierSource = "Source";
+// const string ConfigurationManager::PartFilterIdentifierType = "Type";
+// const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
+// const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
+// const string ConfigurationManager::KeyCheckOpenGLState = "CheckOpenGLState";
+// const string ConfigurationManager::KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
-const string ConfigurationManager::KeyUseMultithreadedInitialization =
-    "UseMultithreadedInitialization";
+// const string ConfigurationManager::KeyUseMultithreadedInitialization =
+    // "UseMultithreadedInitialization";
 
-const string ConfigurationManager::KeyLoadingScreen = "LoadingScreen";
-const string ConfigurationManager::PartShowMessage = "ShowMessage";
-const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
-const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
+// const string ConfigurationManager::KeyLoadingScreen = "LoadingScreen";
+// const string ConfigurationManager::PartShowMessage = "ShowMessage";
+// const string ConfigurationManager::PartShowNodeNames = "ShowNodeNames";
+// const string ConfigurationManager::PartShowProgressbar = "ShowProgressbar";
 
-const string ConfigurationManager::KeyScreenshotUseDate = "ScreenshotUseDate";
+// const string ConfigurationManager::KeyScreenshotUseDate = "ScreenshotUseDate";
 
-const string ConfigurationManager::KeyModuleConfigurations = "ModuleConfigurations";
+// const string ConfigurationManager::KeyModuleConfigurations = "ModuleConfigurations";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
@@ -188,11 +191,16 @@ void ConfigurationManager::loadFromFile(const string& filename) {
         std::string p = dictionary.value<std::string>(key);
         std::string fullKey =
             FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
-        LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
+        LDEBUGC("ConfigurationManager",
+            fmt::format("Registering path {}: {}", fullKey, p)
+        );
 
         bool override = (basePathToken == fullKey);
         if (override) {
-            LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");
+            LINFOC(
+                "ConfigurationManager",
+                fmt::format("Overriding base path with '{}'", p)
+            );
         }
 
         using Override = ghoul::filesystem::FileSystem::Override;

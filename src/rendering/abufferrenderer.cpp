@@ -951,10 +951,11 @@ void ABufferRenderer::updateRaycastData() {
     for (auto &raycaster : raycasters) {
         if (nextId > MaxRaycasters) {
             int nIgnored = MaxRaycasters - static_cast<int>(raycasters.size());
-            LWARNING(
-                "ABufferRenderer does not support more than 32 raycasters. " <<
-                "Ignoring " << nIgnored << " raycasters"
-            );
+            LWARNING(fmt::format(
+                "ABufferRenderer does not support more than 32 raycasters. "
+                "Ignoring {} raycasters",
+                nIgnored
+            ));
             break;
         }
 

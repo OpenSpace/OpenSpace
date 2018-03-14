@@ -49,10 +49,6 @@ private:
     bool _firstFrame;
 
     std::string _timeUnits;
-
-
-    //properties::FloatProperty _minMaxDeltaTime;
-    //float _localMinMaxDeltatime; // We don't want the default display inside the component
 };
 
 } // namespace openspace::gui

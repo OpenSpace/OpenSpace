@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 namespace openspace::properties {
 
@@ -202,8 +203,14 @@ void TemplateProperty<T>::set(ghoul::any value) {
         }
     }
     catch (ghoul::bad_any_cast&) {
-        LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
-            << "' to '" << typeid(T).name() << "'");
+        LERRORC(
+            "TemplateProperty",
+            fmt::format(
+                "Illegal cast from '{}' to '{}'",
+                value.type().name(),
+                typeid(T).name()
+            )
+        );
     }
 }
 

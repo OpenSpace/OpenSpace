@@ -62,7 +62,8 @@ documentation::Documentation RenderablePlaneImageOnline::Documentation() {
     };
 }
 
-RenderablePlaneImageOnline::RenderablePlaneImageOnline(const ghoul::Dictionary& dictionary)
+RenderablePlaneImageOnline::RenderablePlaneImageOnline(
+                                                      const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
     , _texture(nullptr)
@@ -117,7 +118,7 @@ void RenderablePlaneImageOnline::update(const UpdateData&) {
             if (imageFile.corrupted) {
                 LERRORC(
                     "ScreenSpaceImageOnline",
-                    "Error loading image from URL '" << _texturePath << "'"
+                    fmt::format("Error loading image from URL '{}'", _texturePath)
                 );
                 return;
             }

@@ -55,6 +55,7 @@ private:
     std::string directory() override;
 
     std::vector<std::string> _urls;
+    bool _forceOverride = false;
     std::string _synchronizationRoot;
     std::string _identifier;
 

@@ -49,7 +49,7 @@ local Keybindings = {
     },
     {
         Key = "h",
-        Command = "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
+        Command = "openspace.setPropertyValue('Scene.*Trail.renderable.Enabled', false)",
         Documentation = "Disables visibility of the trails",
         Local = false
     },
@@ -72,11 +72,10 @@ asset.onInitialize(function ()
         "Earth", "Mars", "Moon"
     })
 
-
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "Scene.*Trail.renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,

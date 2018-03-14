@@ -65,14 +65,14 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-void gdalErrorHandler(CPLErr eErrClass, int, const char *msg) {
+void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
     if (GdalWrapper::ref().logGdalErrors()) {
         switch (eErrClass) {
             case CE_None: break;
-            case CE_Debug:    LDEBUG  ("GDAL " << msg); break;
-            case CE_Warning:  LWARNING("GDAL " << msg); break;
-            case CE_Failure:  LERROR  ("GDAL " << msg); break;
-            case CE_Fatal:    LFATAL  ("GDAL " << msg); break;
+            case CE_Debug:    LDEBUGC  ("GDAL", msg); break;
+            case CE_Warning:  LWARNINGC("GDAL", msg); break;
+            case CE_Failure:  LERRORC  ("GDAL", msg); break;
+            case CE_Fatal:    LFATALC  ("GDAL", msg); break;
         }
     }
 }
@@ -188,12 +188,12 @@ void GdalWrapper::setGdalProxyConfiguration() {
         if (success) {
             std::string proxy = proxyAddress + ":" + proxyPort;
             CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
-            LDEBUG("Using proxy server " << proxy);
+            LDEBUG(fmt::format("Using proxy server {}", proxy));
             if (userAndPassword) {
                 std::string proxyUserPwd = proxyUser + ":" + proxyPassword;
                 CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", proxyUserPwd.c_str());
                 CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", proxyAuthString.c_str());
-                LDEBUG("Using authentication method: " << proxyAuthString);
+                LDEBUG(fmt::format("Using authentication method: {}", proxyAuthString));
             }
         } else {
             LERROR("Invalid proxy settings for GDAL");

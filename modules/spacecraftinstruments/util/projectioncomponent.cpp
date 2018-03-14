@@ -153,7 +153,8 @@ documentation::Documentation ProjectionComponent::Documentation() {
             {
                 keySequenceType,
                 new StringInListVerifier(
-                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid }
+                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
+                      sequenceTypeInstrumentTimes }
                 ),
                 Optional::Yes,
                 "This value determines which type of sequencer is used for generating "
@@ -482,7 +483,7 @@ void ProjectionComponent::imageProjectBegin() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     if (_textureSizeDirty) {
-        LDEBUG("Changing texture size to " << std::to_string(_textureSize));
+        LDEBUG(fmt::format("Changing texture size to {}", std::to_string(_textureSize)));
 
         // If the texture size has changed, we have to allocate new memory and copy
         // the image texture to the new target
@@ -513,10 +514,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Read Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Read Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glFramebufferTexture(
@@ -528,10 +530,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Draw Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Draw Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glBlitFramebuffer(
@@ -554,10 +557,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Read Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Read Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glFramebufferTexture(
@@ -569,10 +573,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Draw Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Draw Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glBlitFramebuffer(
@@ -985,9 +990,8 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
-    LINFO(
-        "Creating projection texture of size '" << size.x << ", " << size.y << "'"
-    );
+    LINFO(fmt::format("Creating projection texture of size '{}, {}'", size.x, size.y));
+
     using namespace ghoul::opengl;
     _projectionTexture = std::make_unique<Texture>(
         glm::uvec3(size, 1),
@@ -1033,9 +1037,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
 }
 
 bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
-    LINFO(
-        "Creating depth texture of size '" << size.x << ", " << size.y << "'"
-        );
+    LINFO(fmt::format("Creating depth texture of size '{}, {}'", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),
