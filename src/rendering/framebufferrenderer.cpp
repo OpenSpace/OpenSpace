@@ -333,7 +333,12 @@ namespace openspace {
 
         for (auto &program : _deferredcastPrograms) {
             if (program.second && program.second->isDirty()) {
-                program.second->rebuildFromFile();
+                try {
+                    program.second->rebuildFromFile();
+                }
+                catch (const ghoul::RuntimeError& e) {
+                    LERRORC(e.component, e.message);
+                }
             }
         }
     }
@@ -543,6 +548,7 @@ namespace openspace {
                     absPath(vsPath),
                     absPath(deferredShaderPath),
                     deferredDict);
+
                 using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
                 _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
                     IgnoreError::Yes
@@ -550,6 +556,8 @@ namespace openspace {
                 _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
                     IgnoreError::Yes
                 );
+
+                caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
             }
             catch (ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -1207,21 +1215,7 @@ namespace openspace {
             }
         }
 
-        if (!tasks.deferredcasterTasks.empty()) {
-            // JCC: Temporarily disabled. Need to test it on mac and linux before final
-            // merging.
-            /*glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
-            GLenum dBuffer[] = { GL_COLOR_ATTACHMENT0 };
-            glDrawBuffers(1, dBuffer);
-            glReadBuffer(GL_COLOR_ATTACHMENT0);
-            glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-            */
-            //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-        }
-        else {
+        if (tasks.deferredcasterTasks.empty()) {
             glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
             _resolveProgram->activate();
 
