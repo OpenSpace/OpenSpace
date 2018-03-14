@@ -247,17 +247,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
-            /*
-            // The following scale comes from PSC transformations.
-            float fScaleFactor = renderData.camera.scaling().x *
-                                 pow(10.f, renderData.camera.scaling().y);
-            glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(fScaleFactor));
-            program.setUniform(
-                "dInverseScaleTransformMatrix",
-                glm::inverse(dfScaleCamTransf)
-            );
-            */
-            
             // Eye Space in OS to Eye Space in SGCT
             glm::dmat4 dSgctEye2OSEye = glm::inverse(
                 glm::dmat4(renderData.camera.viewMatrix()));

@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
@@ -100,25 +101,24 @@ namespace {
         "stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Transparency",
-        "Transparency",
-        "This value is a multiplicative factor that is applied to the transparency of "
-        "all stars."
+    static const openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
+        "MagnitudeExponent",
+        "MagnitudeExponent",
+        "Adjust star magnitude by 10^MagnitudeExponent. "
+        "Stars closer than this distance are given full opacity. "
+        "Farther away, stars dim proportionally to the logarithm of their distance."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each star."
+    static const openspace::properties::Property::PropertyInfo SharpnessInfo = {
+        "Sharpness",
+        "Sharpness",
+        "Adjust star sharpness"
     };
 
-    static const openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
-        "MinBillboardSize",
-        "Min Billboard Size",
-        "This value is used as a lower limit on the size of stars that are rendered. Any "
-        "stars that have a smaller apparent size will be discarded entirely."
+    static const openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
+        "BillboardSize",
+        "Billboard Size",
+        "Set the billboard size of all stars"
     };
 }  // namespace
 
@@ -163,22 +163,22 @@ documentation::Documentation RenderableStars::Documentation() {
                 ColorOptionInfo.description
             },
             {
-                TransparencyInfo.identifier,
+                MagnitudeExponentInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                TransparencyInfo.description
+                MagnitudeExponentInfo.description
             },
             {
-                ScaleFactorInfo.identifier,
+                SharpnessInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                ScaleFactorInfo.description
+                SharpnessInfo.description
             },
             {
-                MinBillboardSizeInfo.identifier,
+                BillboardSizeInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                MinBillboardSizeInfo.description
+                BillboardSizeInfo.description
             }
         }
     };
@@ -194,9 +194,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _colorTextureIsDirty(true)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _dataIsDirty(true)
-    , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-    , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
-    , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
+    , _magnitudeExponent(MagnitudeExponentInfo, 19.f, 0.f, 30.f)
+    , _sharpness(SharpnessInfo, 1.f, 0.f, 5.f)
+    , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 100.f)
     , _program(nullptr)
     , _speckFile("")
     , _nValuesPerStar(0)
@@ -259,26 +259,26 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     );
     addProperty(_colorTexturePath);
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _alphaValue = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
+    if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
+        _magnitudeExponent = static_cast<float>(
+            dictionary.value<double>(MagnitudeExponentInfo.identifier)
         );
     }
-    addProperty(_alphaValue);
+    addProperty(_magnitudeExponent);
 
-    if (dictionary.hasKey(ScaleFactorInfo.identifier)) {
-        _scaleFactor = static_cast<float>(
-            dictionary.value<double>(ScaleFactorInfo.identifier)
-        );
+    if (dictionary.hasKey(SharpnessInfo.identifier)) {
+        _sharpness = static_cast<float>(
+            dictionary.value<double>(SharpnessInfo.identifier)
+            );
     }
-    addProperty(_scaleFactor);
+    addProperty(_sharpness);
 
-    if (dictionary.hasKey(MinBillboardSizeInfo.identifier)) {
-        _minBillboardSize = static_cast<float>(
-            dictionary.value<double>(MinBillboardSizeInfo.identifier)
+    if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
+        _billboardSize = static_cast<float>(
+            dictionary.value<double>(BillboardSizeInfo.identifier)
         );
     }
-    addProperty(_minBillboardSize);
+    addProperty(_billboardSize);
 }
 
 RenderableStars::~RenderableStars() {}
@@ -295,14 +295,15 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
+    _uniformCache.model = _program->uniformLocation("model");
     _uniformCache.view = _program->uniformLocation("view");
+    _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.projection = _program->uniformLocation("projection");
     _uniformCache.colorOption = _program->uniformLocation("colorOption");
-    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+    _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
+    _uniformCache.sharpness = _program->uniformLocation("sharpness");
+    _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.scaling = _program->uniformLocation("scaling");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
 
@@ -329,27 +330,33 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
+
     _program->activate();
 
-    // @Check overwriting the scaling from the camera; error as parsec->meter conversion
-    // is done twice? ---abock
-    glm::vec2 scaling = glm::vec2(1, -19);
+    glm::mat4 model =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
-    _program->setUniform(_uniformCache.view, data.camera.viewMatrix());
-    _program->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    glm::mat4 view = data.camera.combinedViewMatrix();
+    glm::mat4 projection = data.camera.projectionMatrix();
+    float viewScaling = data.camera.scaling();
+
+    _program->setUniform(_uniformCache.model, model);
+    _program->setUniform(_uniformCache.view, view);
+    _program->setUniform(_uniformCache.projection, projection);
+    _program->setUniform(_uniformCache.viewScaling, viewScaling);
 
     _program->setUniform(_uniformCache.colorOption, _colorOption);
-    _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
-    _program->setUniform(_uniformCache.minBillboardSize, _minBillboardSize);
+    _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
+    _program->setUniform(_uniformCache.sharpness, _sharpness);
+    _program->setUniform(_uniformCache.billboardSize, _billboardSize);
     _program->setUniform(
         _uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-
-    setPscUniforms(*_program.get(), data.camera, data.position);
-    _program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
@@ -369,6 +376,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->deactivate();
 
     glDepthMask(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void RenderableStars::update(const UpdateData&) {
@@ -555,14 +563,15 @@ void RenderableStars::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
 
+        _uniformCache.model = _program->uniformLocation("model");
         _uniformCache.view = _program->uniformLocation("view");
+        _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
         _uniformCache.projection = _program->uniformLocation("projection");
         _uniformCache.colorOption = _program->uniformLocation("colorOption");
-        _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
-        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+        _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
+        _uniformCache.sharpness = _program->uniformLocation("sharpness");
+        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.scaling = _program->uniformLocation("scaling");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
     }
@@ -742,51 +751,20 @@ bool RenderableStars::saveCachedFile(const std::string& file) const {
 void RenderableStars::createDataSlice(ColorOption option) {
     _slicedData.clear();
 
-    // This is only temporary until the scalegraph is in place ---abock
-    float minDistance = std::numeric_limits<float>::max();
-    float maxDistance = -std::numeric_limits<float>::max();
-
-    for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
-        float distLy = _fullData[i + 6];
-        //if (distLy < 20.f) {
-            minDistance = std::min(minDistance, distLy);
-            maxDistance = std::max(maxDistance, distLy);
-        //}
-    }
-
     for (size_t i = 0; i < _fullData.size(); i+=_nValuesPerStar) {
         glm::vec3 p = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-
-        // This is only temporary until the scalegraph is in place. It places all stars
-        // on a sphere with a small variation in the distance to account for blending
-        // issues ---abock
-        //if (p != glm::vec3(0.f))
-        //    p = glm::normalize(p);
-
-        //float distLy = _fullData[i + 6];
-        //float normalizedDist = (distLy - minDistance) / (maxDistance - minDistance);
-        //float distance = 18.f - normalizedDist / 1.f ;
-
-
-        //psc position = psc(glm::vec4(p, distance));
-
-        // Convert parsecs -> meter
-        psc position = psc(glm::vec4(p * 0.308567756f, 17));
-
-        //position[1] *= parsecsToMetersFactor[0];
-        //position[2] *= parsecsToMetersFactor[0];
-        //position[3] += parsecsToMetersFactor[1];
+        p *= openspace::distanceconstants::Parsec;
 
         switch (option) {
         case ColorOption::Color:
             {
                 union {
                     ColorVBOLayout value;
-                    std::array<float, sizeof(ColorVBOLayout)> data;
+                    std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
                 } layout;
 
                 layout.value.position = { {
-                    position[0], position[1], position[2], position[3]
+                    p[0], p[1], p[2], 1.0
                 } };
 
 #ifdef USING_STELLAR_TEST_GRID
@@ -809,11 +787,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
             {
                 union {
                     VelocityVBOLayout value;
-                    std::array<float, sizeof(VelocityVBOLayout)> data;
+                    std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
                 } layout;
 
                 layout.value.position = { {
-                        position[0], position[1], position[2], position[3]
+                        p[0], p[1], p[2], 1.0
                     } };
 
                 layout.value.bvColor = _fullData[i + 3];
@@ -833,11 +811,11 @@ void RenderableStars::createDataSlice(ColorOption option) {
             {
                 union {
                     SpeedVBOLayout value;
-                    std::array<float, sizeof(SpeedVBOLayout)> data;
+                    std::array<float, sizeof(SpeedVBOLayout) / sizeof(float)> data;
                 } layout;
 
                 layout.value.position = { {
-                        position[0], position[1], position[2], position[3]
+                        p[0], p[1], p[2], 1.0
                     } };
 
                 layout.value.bvColor = _fullData[i + 3];
