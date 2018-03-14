@@ -28,6 +28,8 @@
 
 namespace openspace {
 
+constexpr const char* _loggerCat = "TransformationManager";
+
 TransformationManager::TransformationManager(){
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = std::make_shared<ccmc::Kameleon>();
