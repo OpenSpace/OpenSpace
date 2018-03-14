@@ -33,6 +33,7 @@
 #include <openspace/util/progressbar.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char* _loggerCat = "ErrorHistogramManager";
@@ -55,12 +56,14 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
     _maxBin = 1.0; // Should be calculated from tsp file as (maxValue - minValue)
 
     unsigned int numOtLevels = _tsp->numOTLevels();
-    unsigned int numOtLeaves = pow(8, numOtLevels - 1);
-    unsigned int numBstLeaves = pow(2, _tsp->numBSTLevels() - 1);
+    unsigned int numOtLeaves = static_cast<unsigned int>(pow(8, numOtLevels - 1));
+    unsigned int numBstLeaves = static_cast<unsigned int>(
+        pow(2, _tsp->numBSTLevels() - 1)
+    );
 
     _numInnerNodes = _tsp->numTotalNodes() - numOtLeaves * numBstLeaves;
     _histograms = std::vector<Histogram>(_numInnerNodes);
-    LINFO("Build " << _numInnerNodes << " histograms with " << numBins << " bins each");
+    LINFO(fmt::format("Build {} histograms with {} bins each", _numInnerNodes, numBins));
 
     // All TSP Leaves
     int numOtNodes = _tsp->numOTNodes();

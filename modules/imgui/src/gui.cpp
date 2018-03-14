@@ -51,7 +51,7 @@ const char* configurationFile = "imgui.ini";
 //const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
 const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
 const float FontSize = 14.f;
-const ImVec2 size = ImVec2(500, 500);
+const ImVec2 Size = ImVec2(500, 500);
 
 //GLuint fontTex = 0;
 // A VBO max size of 0 will cause a lazy instantiation of the buffer
@@ -220,10 +220,9 @@ static void RenderDrawLists(ImDrawData* drawData) {
 }
 
 
-
 void addScreenSpaceRenderableLocal(std::string texturePath) {
-    if (!FileSys.fileExists(texturePath)) {
-        LWARNING("Could not find image '" << texturePath << "'");
+    if (!FileSys.fileExists(absPath(texturePath))) {
+        LWARNING(fmt::format("Could not find image '{}'", texturePath));
         return;
     }
 
@@ -240,7 +239,7 @@ void addScreenSpaceRenderableLocal(std::string texturePath) {
 
 void addScreenSpaceRenderableOnline(std::string texturePath) {
     const std::string luaTable =
-        "{Type = 'ScreenSpaceImageOnline', TexturePath = '" + texturePath + "' }";
+        "{Type = 'ScreenSpaceImageOnline', URL = '" + texturePath + "' }";
     const std::string script = "openspace.addScreenSpaceRenderable(" +
         luaTable + ");";
     OsEng.scriptEngine().queueScript(
@@ -249,12 +248,6 @@ void addScreenSpaceRenderableOnline(std::string texturePath) {
     );
 }
 
-void addScreenSpaceBrowser(std::string url) {
-    const std::string luaTable =
-        "{Type = 'ScreenSpaceBrowser', URL = '" + url + "'}";
-    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
-}
 static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
     "ShowHelpText",
     "Show tooltip help",
@@ -288,12 +281,12 @@ void CaptionText(const char* text) {
 GUI::GUI()
     : GuiComponent("Main")
     , _globalProperty("Global Properties")
-    , _moduleProperty("Module Properties")
     , _sceneProperty(
         "Scene Properties",
         GuiPropertyComponent::UseTreeLayout::Yes
     )
     , _screenSpaceProperty("ScreenSpace Properties")
+    , _moduleProperty("Module Properties")
     , _virtualProperty("Virtual Properties")
     , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
     , _showInternals(false)
@@ -933,11 +926,6 @@ void GUI::render() {
         addImageBufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
-
-//    if (addImage) {
-//        addScreenSpaceImage(std::string(addImageBuffer));
-//    }
-
     if (addImageOnline) {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
@@ -960,22 +948,6 @@ void GUI::render() {
         );
     }
 
-#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
-    static const int openUrlBufferSize = 256;
-    static char openUrlBuffer[openUrlBufferSize];
-
-    bool openUrl = ImGui::InputText(
-            "Open Browser",
-            openUrlBuffer,
-            openUrlBufferSize,
-            ImGuiInputTextFlags_EnterReturnsTrue
-    );
-    if (openUrl) {
-        addScreenSpaceBrowser(std::string(openUrlBuffer));
-    }
-#endif
-
-#ifdef SHOW_IMGUI_HELPERS
     ImGui::Checkbox("ImGUI Internals", &_showInternals);
     if (_showInternals) {
         ImGui::Begin("Style Editor");
@@ -990,7 +962,6 @@ void GUI::render() {
         ImGui::ShowMetricsWindow();
         ImGui::End();
     }
-#endif
 
     ImGui::End();
 }

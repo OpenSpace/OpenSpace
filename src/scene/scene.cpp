@@ -34,7 +34,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -45,7 +44,6 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -199,10 +197,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR(
-            "The scene contains circular dependencies. " <<
-            inDegrees.size() << " nodes will be disabled."
-        );
+        LERROR(fmt::format(
+            "The scene contains circular dependencies. {} nodes will be disabled",
+            inDegrees.size()
+        ));
     }
 
     for (auto it : inDegrees) {
@@ -372,8 +370,10 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     const bool hasParent = dict.hasKey(KeyParentName);
 
     if (_nodesByName.find(nodeName) != _nodesByName.end()) {
-        LERROR("Cannot add scene graph node " << nodeName <<
-               ". A node with that name already exisis.");
+        LERROR(fmt::format(
+            "Cannot add scene graph node '{}'. A node with that name already exists",
+            nodeName
+        ));
         return nullptr;
     }
 

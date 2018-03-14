@@ -25,7 +25,6 @@
 #include <modules/touch/include/tuioear.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -46,11 +45,11 @@ void TuioEar::addTuioCursor(TuioCursor* tcur) {
     _tap = false;
     // find same id in _list if it exists in _removeList (new input with same ID as a
     // previously stored)
-    int i = tcur->getSessionID();
-    std::vector<int>::iterator foundID = std::find_if(
+    long i = tcur->getSessionID();
+    std::vector<long>::iterator foundID = std::find_if(
         _removeList.begin(),
         _removeList.end(),
-        [&i](int id) { return id == i; });
+        [&i](long id) { return id == i; });
 
     // if found, remove id from _removeList and update, otherwise add new id to list
     if (foundID != _removeList.end()) {
@@ -58,8 +57,9 @@ void TuioEar::addTuioCursor(TuioCursor* tcur) {
             _list.begin(),
             _list.end(),
             [&i](const TuioCursor& cursor) {
-            return cursor.getSessionID() == i;
-        })->update(tcur);
+                return cursor.getSessionID() == i;
+            }
+        )->update(tcur);
         _removeList.erase(foundID);
     }
     else {
@@ -71,13 +71,14 @@ void TuioEar::addTuioCursor(TuioCursor* tcur) {
 void TuioEar::updateTuioCursor(TuioCursor* tcur) {
     _mx.lock();
     _tap = false;
-    int i = tcur->getSessionID();
+    long i = tcur->getSessionID();
     std::find_if(
         _list.begin(),
         _list.end(),
         [&i](const TuioCursor& cursor) {
             return cursor.getSessionID() == i;
-    })->update(tcur);
+        }
+    )->update(tcur);
     _mx.unlock();
 }
 
@@ -140,15 +141,16 @@ void TuioEar::clearInput() {
             _list.begin(),
             _list.end(),
             [this](const TuioCursor& cursor) {
-        return std::find_if(
-            _removeList.begin(),
-            _removeList.end(),
-            [&cursor](int id) {
-            return cursor.getSessionID() == id;
-        }
-        ) != _removeList.end();
-    }),
-    _list.end()
+                return std::find_if(
+                    _removeList.begin(),
+                    _removeList.end(),
+                    [&cursor](long id) {
+                        return cursor.getSessionID() == id;
+                    }
+                ) != _removeList.end();
+            }
+        ),
+        _list.end()
     );
     _removeList.clear();
     _mx.unlock();

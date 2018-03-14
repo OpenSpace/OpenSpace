@@ -73,8 +73,8 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
 
 Translation::Translation()
     : properties::PropertyOwner({ "Translation" })
-    , _cachedPosition(glm::dvec3(0.0))
     , _needsUpdate(true)
+    , _cachedPosition(glm::dvec3(0.0))
 {}
 
 bool Translation::initialize() {

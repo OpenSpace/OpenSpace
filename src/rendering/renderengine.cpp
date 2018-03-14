@@ -74,6 +74,10 @@
 #include <ghoul/io/texture/texturewritersoil.h>
 #endif //GHOUL_USE_SOIL
 
+#ifdef GHOUL_USE_STB
+#include <ghoul/io/texture/texturereaderstb.h>
+#endif // GHOUL_USE_STB
+
 #include <array>
 #include <stack>
 
@@ -114,6 +118,13 @@ namespace {
         "the frame time, is shown in the top left corner of the rendering window if a "
         "regular rendering window is used (as opposed to a fisheye rendering, for "
         "example)."
+    };
+
+    static const openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
+        "ShowOverlayOnSlaves",
+        "Show Overlay Information on Slaves",
+        "If this value is enabled, the overlay information text is also automatically "
+        "rendered on the slave nodes. This values is disabled by default."
     };
 
     static const openspace::properties::Property::PropertyInfo ShowLogInfo = {
@@ -226,6 +237,7 @@ RenderEngine::RenderEngine()
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _log(nullptr)
+    , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
     , _showCameraInfo(ShowCameraInfo, true)
@@ -249,16 +261,14 @@ RenderEngine::RenderEngine()
         if (_doPerformanceMeasurements) {
             if (!_performanceManager) {
                 std::string loggingDir = "${BASE}";
-
-                const std::string KeyDir = ConfigurationManager::KeyLogging + "." +
-                                           ConfigurationManager::PartLogDir;
+                constexpr const char* KeyDir = ConfigurationManager::LoggingDirectory;
                 if (OsEng.configurationManager().hasKey(KeyDir)) {
                     loggingDir = OsEng.configurationManager().value<std::string>(KeyDir);
                 }
 
                 std::string prefix = "PM-";
-                const std::string KeyPrefix = ConfigurationManager::KeyLogging + "." +
-                                           ConfigurationManager::PartLogPerformancePrefix;
+                constexpr const char* KeyPrefix =
+                                           ConfigurationManager::LoggingPerformancePrefix;
                 if (OsEng.configurationManager().hasKey(KeyPrefix)) {
                     prefix = OsEng.configurationManager().value<std::string>(KeyPrefix);
                 }
@@ -276,6 +286,7 @@ RenderEngine::RenderEngine()
     });
     addProperty(_doPerformanceMeasurements);
 
+    addProperty(_showOverlayOnSlaves);
     addProperty(_showLog);
     addProperty(_showVersionInfo);
     addProperty(_showCameraInfo);
@@ -332,8 +343,7 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
         newRenderer = std::make_unique<ABufferRenderer>();
         break;
     case RendererImplementation::Invalid:
-        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-            << "rendering methods");
+        LFATAL(fmt::format("Rendering method '{}' not available", renderingMethod));
     }
 
     setRenderer(std::move(newRenderer));
@@ -375,7 +385,7 @@ void RenderEngine::initialize() {
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
-    LINFO("Setting renderer from string: " << renderingMethod);
+    LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
@@ -396,6 +406,11 @@ void RenderEngine::initialize() {
         std::make_shared<ghoul::io::TextureWriterSOIL>()
     );
 #endif // GHOUL_USE_SOIL
+#ifdef GHOUL_USE_STB
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderSTB>()
+    );    
+#endif
 
     ghoul::io::TextureReader::ref().addReader(
         std::make_shared<ghoul::io::TextureReaderCMAP>()
@@ -486,9 +501,10 @@ void RenderEngine::updateRenderer() {
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
 
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-            fontResolution()
-        );
+        using FR = ghoul::fontrendering::FontRenderer;
+
+        FR::defaultRenderer().setFramebufferSize(fontResolution());
+        FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
     }
 
     _renderer->update();
@@ -602,6 +618,25 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     LTRACE("RenderEngine::render(end)");
 }
 
+void RenderEngine::renderOverlays(const ShutdownInformation& info) {
+    const bool isMaster = OsEng.windowWrapper().isMaster();
+    if (isMaster || _showOverlayOnSlaves) {
+        renderScreenLog();
+        renderVersionInformation();
+        renderDashboard();
+
+        if (!info.inShutdown) {
+            // We render the camera information in the same location as the shutdown info
+            // and we won't need this if we are shutting down
+            renderCameraInformation();
+        }
+        else {
+            // If we are in shutdown mode, we can display the remaining time
+            renderShutdownInformation(info.timer, info.waitTime);
+        }
+    }
+}
+
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     timer = timer < 0.f ? 0.f : timer;
 
@@ -660,6 +695,16 @@ void RenderEngine::postDraw() {
     }
 
     if (_shouldTakeScreenshot) {
+        // We only create the directory here, as we don't want to spam the users
+        // screenshot folder everytime we start OpenSpace even when we are not taking any
+        // screenshots. So the first time we actually take one, we create the folder:
+        if (!FileSys.directoryExists(absPath("${THIS_SCREENSHOT_PATH}"))) {
+            FileSys.createDirectory(
+                absPath("${THIS_SCREENSHOT_PATH}"),
+                ghoul::filesystem::FileSystem::Recursive::Yes
+            );
+        }
+
         OsEng.windowWrapper().takeScreenshot(_applyWarping);
         _shouldTakeScreenshot = false;
     }

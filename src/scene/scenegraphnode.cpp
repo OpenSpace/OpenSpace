@@ -94,12 +94,15 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             translationDictionary
         );
         if (result->_transform.translation == nullptr) {
-            LERROR("Failed to create ephemeris for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create ephemeris for SceneGraphNode '{}'", result->name()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.translation.get());
-        LDEBUG("Successfully created ephemeris for '" << result->name() << "'");
+        LDEBUG(fmt::format(
+            "Successfully created ephemeris for '{}'", result->name()
+        ));
     }
 
     if (dictionary.hasKey(keyTransformRotation)) {
@@ -107,12 +110,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         dictionary.getValue(keyTransformRotation, rotationDictionary);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
-            LERROR("Failed to create rotation for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create rotation for SceneGraphNode '{}'", result->name()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.rotation.get());
-        LDEBUG("Successfully created rotation for '" << result->name() << "'");
+        LDEBUG(fmt::format("Successfully created rotation for '{}'", result->name()));
     }
 
     if (dictionary.hasKey(keyTransformScale)) {
@@ -120,12 +124,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         dictionary.getValue(keyTransformScale, scaleDictionary);
         result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
-            LERROR("Failed to create scale for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create scale for SceneGraphNode '{}'", result->name()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.scale.get());
-        LDEBUG("Successfully created scale for '" << result->name() << "'");
+        LDEBUG(fmt::format("Successfully created scale for '{}'", result->name()));
     }
 
     // We initialize the renderable last as it probably has the most dependencies
@@ -137,12 +142,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
-            LERROR("Failed to create renderable for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create renderable for SceneGraphNode '{}'", result->name()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG("Successfully created renderable for '" << result->name() << "'");
+        LDEBUG(fmt::format("Successfully created renderable for '{}'", result->name()));
     }
 
     if (dictionary.hasKey(KeyTag)) {
@@ -168,8 +174,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
     }
 
-    LDEBUG("Successfully created SceneGraphNode '"
-                   << result->name() << "'");
+    LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->name()));
     return result;
 }
 
@@ -190,7 +195,7 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
-    LDEBUG("Initialize: " << name());
+    LDEBUG(fmt::format("Initialize: {}", name()));
     if (_renderable) {
         _renderable->initialize();
     }
@@ -215,7 +220,7 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
-    LDEBUG("Deinitialize: " << name());
+    LDEBUG(fmt::format("Deinitialize: {}", name()));
 
     setScene(nullptr);
 

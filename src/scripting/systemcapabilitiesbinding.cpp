@@ -24,14 +24,12 @@
 
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 
-#include <openspace/scripting/script_helper.h>
 #include <openspace/scripting/scriptengine.h>
-
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-
 #include <cctype>
 
 using namespace ghoul::lua;
@@ -84,12 +82,14 @@ int extensions(lua_State* L) {
 namespace luascripting::opengl {
 
 int hasOpenGLVersion(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("hasVersion", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasOpenGLVersion");
 
-    std::vector<std::string> v = ghoul::tokenizeString(luaL_checkstring(L, -1));
+    std::vector<std::string> v = ghoul::tokenizeString(ghoul::lua::checkStringAndPop(L));
     if (v.size() != 2 && v.size() != 3) {
-        LERRORC("hasVersion", ghoul::lua::errorLocation(L) << "Malformed version string");
+        LERRORC(
+            "hasVersion",
+            fmt::format("{}: Malformed version string", ghoul::lua::errorLocation(L))
+        );
         return 0;
     }
 
@@ -98,7 +98,9 @@ int hasOpenGLVersion(lua_State* L) {
             if (!std::isdigit(c)) {
                 LERRORC(
                     "hasVersion",
-                    ghoul::lua::errorLocation(L) << "Malformed version string"
+                    fmt::format(
+                        "{}: Malformed version string", ghoul::lua::errorLocation(L)
+                    )
                 );
                 return 0;
             }
@@ -144,10 +146,9 @@ int extensions(lua_State* L) {
 }
 
 int isExtensionSupported(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("hasVersion", L, 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasExtension");
 
-    std::string extension = luaL_checkstring(L, -1);
+    std::string extension = ghoul::lua::checkStringAndPop(L);
 
     lua_pushboolean(L, OpenGLCap.isExtensionSupported(extension));
     return 1;

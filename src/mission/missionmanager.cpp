@@ -24,6 +24,7 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>

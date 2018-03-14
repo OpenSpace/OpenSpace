@@ -30,6 +30,7 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -191,7 +192,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
-    
+
     penPosition.y -= _font->height();
     RenderFont(
         *_font,

@@ -25,8 +25,7 @@
 namespace openspace::luascriptfunctions {
 
 int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().clientConnect();
@@ -37,8 +36,7 @@ int connect(lua_State* L) {
 }
 
 int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().signalDisconnect();
@@ -49,8 +47,7 @@ int disconnect(lua_State* L) {
 }
 
 int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().requestHostship();
@@ -61,8 +58,7 @@ int requestHostship(lua_State* L) {
 }
 
 int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
 
     if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().resignHostship();

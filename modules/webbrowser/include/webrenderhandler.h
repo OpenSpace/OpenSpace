@@ -26,10 +26,16 @@
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
 #include <memory>
-#include <ghoul/opengl/opengl>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 #include <include/cef_render_handler.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/shadermanager.h>
+#include <ghoul/opengl/shaderobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/texturemanager.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace openspace {
 

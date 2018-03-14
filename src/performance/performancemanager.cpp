@@ -28,14 +28,15 @@
 #include <openspace/performance/performancelayout.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/misc/sharedmemory.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char* _loggerCat = "PerformanceManager";
@@ -78,10 +79,11 @@ void PerformanceManager::createGlobalSharedMemory() {
         sharedMemory.acquireLock();
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
         ++(m->referenceCount);
-        LINFO(
+        LINFO(fmt::format(
             "Using global shared memory block for performance measurements. "
-            "Reference count: " << int(m->referenceCount)
-        );
+            "Reference count: {}",
+            int(m->referenceCount)
+        ));
         sharedMemory.releaseLock();
     }
     else {
@@ -110,7 +112,10 @@ void PerformanceManager::destroyGlobalSharedMemory() {
     sharedMemory.acquireLock();
     GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
     --(m->referenceCount);
-    LINFO("Global shared performance memory reference count: " << int(m->referenceCount));
+    LINFO(fmt::format(
+        "Global shared performance memory reference count: {}",
+        int(m->referenceCount)
+    ));
     if (m->referenceCount == 0) {
         LINFO("Removing global shared performance memory");
 
@@ -120,7 +125,7 @@ void PerformanceManager::destroyGlobalSharedMemory() {
         for (int i = 0; i < std::numeric_limits<uint8_t>::max(); ++i) {
             std::string localName = LocalSharedMemoryNameBase + std::to_string(i);
             if (SharedMemory::exists(localName)) {
-                LINFO("Removing shared memory: " << localName);
+                LINFO(fmt::format("Removing shared memory: {}", localName));
                 SharedMemory::remove(localName);
             }
         }
@@ -142,7 +147,9 @@ PerformanceManager::PerformanceManager(std::string loggingDirectory, std::string
 
     ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
-    OnExit([&](){sharedMemory.releaseLock();});
+    defer {
+        sharedMemory.releaseLock();
+    };
 
     GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
 
@@ -154,7 +161,11 @@ PerformanceManager::PerformanceManager(std::string loggingDirectory, std::string
 
     // Compute the total size
     const int totalSize = sizeof(PerformanceLayout);
-    LINFO("Create shared memory '" + localName + "' of " << totalSize << " bytes");
+    LINFO(fmt::format(
+        "Create shared memory '{}' of {} bytes",
+        localName,
+        totalSize
+    ));
 
     if (ghoul::SharedMemory::exists(localName)) {
         throw ghoul::RuntimeError(
@@ -181,7 +192,7 @@ PerformanceManager::~PerformanceManager() {
         --(m->number);
         sharedMemory.releaseLock();
 
-        LINFO("Remove shared memory '" << _performanceMemory->name() << "'");
+        LINFO(fmt::format("Remove shared memory '{}'", _performanceMemory->name()));
         ghoul::SharedMemory::remove(_performanceMemory->name());
 
         _performanceMemory = nullptr;
@@ -319,7 +330,7 @@ bool PerformanceManager::createLogDir() {
         FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
     }
     catch (const ghoul::filesystem::FileSystem::FileSystemException& e) {
-        LERROR("Could not create log directory: " << e.message);
+        LERROR(fmt::format("Could not create log directory: {}", e.message));
         return false;
     }
     return true;

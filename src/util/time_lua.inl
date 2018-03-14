@@ -24,7 +24,7 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 #include <ctime>
 
 namespace openspace::luascriptfunctions {
@@ -78,12 +78,10 @@ int time_deltaTime(lua_State* L) {
  * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
  */
 int time_togglePause(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_togglePause");
 
     OsEng.timeManager().time().togglePause();
+
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -94,10 +92,7 @@ int time_togglePause(lua_State* L) {
  * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
  */
 int time_setPause(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setPause");
 
     bool pause = lua_toboolean(L, -1) == 1;
     OsEng.timeManager().time().setPause(pause);

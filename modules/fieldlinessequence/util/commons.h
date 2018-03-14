@@ -27,23 +27,21 @@
 
 #include <string>
 
-namespace openspace {
-namespace fls { // (F)ield(L)ines(S)equence
+namespace openspace::fls { // (F)ield(L)ines(S)equence
 
-enum Model : int {
+enum class Model : int {
     Batsrus = 0,
     Enlil,
     Pfss,
     Invalid
 };
 
-Model stringToModel(const std::string s);
+Model stringToModel(const std::string& s);
 
-const float AuToMeter = 149597870700.f;  // Astronomical Units
-const float ReToMeter = 6371000.f;       // Earth radius
-const float RsToMeter = 695700000.f;     // Sun radius
+constexpr const float AuToMeter = 149597870700.f;  // Astronomical Units
+constexpr const float ReToMeter = 6371000.f;       // Earth radius
+constexpr const float RsToMeter = 695700000.f;     // Sun radius
 
-} // namespace fls
-} // namespace openspace
+} // namespace openspace::fls
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__

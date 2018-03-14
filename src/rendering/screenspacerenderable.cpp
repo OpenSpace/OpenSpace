@@ -33,6 +33,9 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/defer.h>
+
 namespace {
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
@@ -214,7 +217,6 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _delete(DeleteInfo)
     , _quad(0)
     , _vertexPositionBuffer(0)
-    , _texture(nullptr)
     , _shader(nullptr)
     , _radius(PlaneDepth)
 {
@@ -327,8 +329,6 @@ bool ScreenSpaceRenderable::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    _texture = nullptr;
-
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -343,7 +343,7 @@ void ScreenSpaceRenderable::render() {
 }
 
 bool ScreenSpaceRenderable::isReady() const {
-    return _shader && _texture;
+    return _shader != nullptr;
 }
 
 void ScreenSpaceRenderable::update() {}
@@ -441,8 +441,8 @@ void ScreenSpaceRenderable::createShaders(std::string shaderPath) {
         dict.setValue("fragmentPath", shaderPath + "screenspace_fs.glsl");
         _shader = ghoul::opengl::ProgramObject::Build(
             "ScreenSpaceProgram",
-            shaderPath + "screenspace_vs.glsl",
-            "${SHADERS}/render.frag",
+            absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
+            absPath("${SHADERS}/render.frag"),
             dict
         );
 
@@ -459,7 +459,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     //to scale the plane
     float textureRatio =
-        static_cast<float>(_texture->height()) / static_cast<float>(_texture->width());
+        static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
     float scalingRatioX = _originalViewportSize.x / resolution.x;
     float scalingRatioY = _originalViewportSize.y / resolution.y;
@@ -520,7 +520,8 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
+    bindTexture();
+    defer { unbindTexture(); };
     _shader->setUniform(_uniformCache.texture, unit);
 
     glBindVertexArray(_quad);
@@ -530,5 +531,10 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->deactivate();
 }
+
+void ScreenSpaceRenderable::bindTexture() {}
+
+void ScreenSpaceRenderable::unbindTexture() {}
+
 
 } // namespace openspace

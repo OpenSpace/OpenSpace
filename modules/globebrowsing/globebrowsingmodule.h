@@ -53,6 +53,9 @@ public:
     void goToGeo(double latitude, double longitude);
     void goToGeo(double latitude, double longitude, double altitude);
 
+    glm::vec3 cartesianCoordinatesFromGeo(globebrowsing::RenderableGlobe& globe,
+        double latitude, double longitude, double altitude);
+
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
     globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();

@@ -132,8 +132,7 @@ namespace {
     };
 } // namespace
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -152,9 +151,9 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _sourcePath(SourcePathInfo)
     , _transferFunctionPath(TransferFunctionInfo)
-    , _raycaster(nullptr)
-    , _transferFunctionHandler(nullptr)
     , _cache(CacheInfo)
+    , _raycaster(nullptr)
+    , _transferFunction(nullptr)
 {
 
     glm::vec3 dimensions;
@@ -173,14 +172,16 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     std::string transferFunctionPath;
     if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
-        _transferFunctionHandler = std::make_shared<volume::TransferFunctionHandler>(_transferFunctionPath);
+        _transferFunction = std::make_shared<TransferFunction>(
+            absPath(transferFunctionPath)
+        );
     }
 
     std::string sourcePath;
     if (dictionary.getValue(KeySource, sourcePath)) {
         _sourcePath = absPath(sourcePath);
     }
-    
+
     std::string variable;
     if (dictionary.getValue(KeyVariable, variable)) {
         _variable = variable;
@@ -254,16 +255,20 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         }
     }
 }
-    
+
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
 
 void RenderableKameleonVolume::initializeGL() {
     load();
-    
-    _volumeTexture->uploadTexture();
-    _transferFunctionHandler->initialize();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(_volumeTexture, _transferFunctionHandler, _clipPlanes);
+    _volumeTexture->uploadTexture();
+    _transferFunction->update();
+
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        _volumeTexture,
+        _transferFunction,
+        _clipPlanes
+    );
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {
@@ -312,13 +317,12 @@ void RenderableKameleonVolume::initializeGL() {
     addProperty(_gridType);
     addProperty(_cache);
     addPropertySubOwner(_clipPlanes.get());
-    addPropertySubOwner(_transferFunctionHandler.get());
 }
 
 void RenderableKameleonVolume::updateRaycasterModelTransform() {
     glm::vec3 lowerBoundingBoxBound = _domainScale.value() * _lowerDomainBound.value();
     glm::vec3 upperBoundingBoxBound = _domainScale.value() * _upperDomainBound.value();
-    
+
     glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
     glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
@@ -327,14 +331,13 @@ void RenderableKameleonVolume::updateRaycasterModelTransform() {
     _raycaster->setModelTransform(modelTransform);
 }
 
-
 bool RenderableKameleonVolume::cachingEnabled() {
     return _cache;
 }
 
 void RenderableKameleonVolume::load() {
     if (!FileSys.fileExists(ghoul::filesystem::File(_sourcePath))) {
-        LERROR("File " << _sourcePath << " does not exist.");
+        LERROR(fmt::format("File '{}' does not exist.", _sourcePath.value()));
         return;
     }
     if (!cachingEnabled()) {
@@ -394,7 +397,7 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
     }
 
     std::vector<std::string> variables = reader.gridVariableNames();
-   
+
     if (variables.size() == 3 && _autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
@@ -454,18 +457,18 @@ void RenderableKameleonVolume::storeRaw(const std::string& path) {
     volume::RawVolumeWriter<float> writer(path);
     writer.write(*_rawVolume);
 }
-    
+
 void RenderableKameleonVolume::deinitializeGL() {
     if (_raycaster) {
         OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }
 }
-    
+
 bool RenderableKameleonVolume::isReady() const {
     return true;
 }
-    
+
 void RenderableKameleonVolume::update(const UpdateData&) {
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
@@ -475,6 +478,5 @@ void RenderableKameleonVolume::update(const UpdateData&) {
 void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tasks) {
     tasks.raycasterTasks.push_back({ _raycaster.get(), data });
 }
-       
-}
-}
+
+}  // openspace::kameleonvolume

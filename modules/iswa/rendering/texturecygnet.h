@@ -48,12 +48,6 @@ protected:
     bool readyToRender() const override;
     bool updateTextureResource() override;
 
-    // Interface for concrete subclasses
-    virtual void setUniforms() = 0;
-    virtual bool createGeometry() = 0;
-    virtual bool destroyGeometry() = 0;
-    virtual void renderGeometry() const = 0;
-
 private:
     DownloadManager::MemoryFile _imageFile;
 };
