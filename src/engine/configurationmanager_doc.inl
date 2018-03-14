@@ -69,7 +69,8 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "in all other configuration files or scripts."
         },
         {
-            ConfigurationManager::KeyPaths + '.' + ConfigurationManager::KeyCache,
+            
+            ConfigurationManager::KeyCachePath,
             new StringVerifier,
             Optional::No,
             "The path to be used as a cache folder. If per scene caching is enabled, the "

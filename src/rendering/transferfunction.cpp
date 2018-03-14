@@ -164,9 +164,9 @@ void TransferFunction::setTextureFromTxt() {
     }
 
     // allocate new float array with zeros
-    float* transferFunction = new float[width*4]();
-    for (int i = 0; i < 4*width; ++i) {
-        transferFunction[i] = 0.0f;
+    float* transferFunction = new float[width * 4];
+    for (int i = 0; i < 4 * width; ++i) {
+        transferFunction[i] = 0.f;
     }
 
     size_t lowerIndex = static_cast<size_t>(floorf(lower * static_cast<float>(width-1)));
@@ -176,9 +176,9 @@ void TransferFunction::setTextureFromTxt() {
     auto currentKey = prevKey + 1;
     auto lastKey = mappingKeys.end() -1;
 
-    for (size_t i=lowerIndex; i<=upperIndex; i++) {
-        float fpos = static_cast<float>(i)/static_cast<float>(width-1);
-        if (fpos > (*currentKey).position) {
+    for (size_t i = lowerIndex; i <= upperIndex; ++i) {
+        float fpos = static_cast<float>(i) / static_cast<float>(width-1);
+        if (fpos > currentKey->position) {
             prevKey = currentKey;
             currentKey++;
             if (currentKey == mappingKeys.end()) {
@@ -186,18 +186,18 @@ void TransferFunction::setTextureFromTxt() {
             }
         }
 
-        float dist = fpos-(*prevKey).position;
-        float weight = dist/((*currentKey).position-(*prevKey).position);
+        float dist = fpos - prevKey->position;
+        float weight = dist / (currentKey->position - prevKey->position);
 
-        for (size_t channel=0; channel<4; ++channel) {
-            size_t position = 4*i + channel;
+        for (size_t channel = 0; channel < 4; ++channel) {
+            size_t position = 4 * i + channel;
             // Interpolate linearly between prev and next mapping key
-            float value = ((*prevKey).color[channel] * (1.f - weight) +
-                          (*currentKey).color[channel] * weight) / 255.f;
+            float value = (prevKey->color[channel] * (1.f - weight) +
+                          currentKey->color[channel] * weight) / 255.f;
             if (channel < 3) {
                 // Premultiply with alpha
-                value *= ((*prevKey).color[3] * (1.f - weight) +
-                         (*currentKey).color[3] * weight) / 255.f;
+                value *= (prevKey->color[3] * (1.f - weight) +
+                         currentKey->color[3] * weight) / 255.f;
             }
             transferFunction[position] = value;
         }
@@ -221,13 +221,19 @@ void TransferFunction::setTextureFromImage() {
 }
 
 glm::vec4 TransferFunction::sample(size_t offset) {
-    if (!_texture) return glm::vec4(0.0);
+    if (!_texture) {
+        return glm::vec4(0.f);
+    }
 
     int nPixels = _texture->width();
 
     // Clamp to range.
-    if (offset >= nPixels) offset = nPixels - 1;
-    if (offset < 0) offset = 0;
+    if (offset >= nPixels) {
+        offset = nPixels - 1;
+    }
+    if (offset < 0) {
+        offset = 0;
+    }
 
     return _texture->texelAsFloat(offset);
 }

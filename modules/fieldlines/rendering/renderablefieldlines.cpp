@@ -136,20 +136,17 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     bool success = dictionary.getValue(keyVectorField, _vectorFieldInfo);
     if (!success) {
-        LERROR("Renderable does not contain a key for '" <<
-            keyVectorField << "'");
+        LERROR(fmt::format("Renderable does not contain a key for '{}'", keyVectorField));
     }
 
     success = dictionary.getValue(keyFieldlines, _fieldlineInfo);
     if (!success) {
-        LERROR("Renderable does not contain a key for '" <<
-            keyFieldlines << "'");
+        LERROR(fmt::format("Renderable does not contain a key for '{}'", keyFieldlines));
     }
 
     success = dictionary.getValue(keySeedPoints, _seedPointsInfo);
     if (!success) {
-        LERROR("Renderable does not contain a key for '" <<
-            keySeedPoints << "'");
+        LERROR(fmt::format("Renderable does not contain a key for '{}", keySeedPoints));
     }
 
     // @TODO a non-magic number perhaps ---abock
@@ -320,7 +317,7 @@ void RenderableFieldlines::update(const UpdateData&) {
                 fieldlines[j].end()
             );
         }
-        LDEBUG("Number of vertices : " << vertexData.size());
+        LDEBUG(fmt::format("Number of vertices: {}", vertexData.size()));
 
         if (_fieldlineVAO == 0) {
             glGenVertexArrays(1, &_fieldlineVAO);
@@ -358,7 +355,7 @@ void RenderableFieldlines::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(LinePoint),
-            (void*)(sizeof(glm::vec3))
+            reinterpret_cast<void*>(sizeof(glm::vec3))
         );
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -383,13 +380,14 @@ void RenderableFieldlines::loadSeedPoints() {
 }
 
 void RenderableFieldlines::loadSeedPointsFromFile() {
-    LINFO("Reading seed points from file '" << _seedPointSourceFile.value() << "'");
+    LINFO(fmt::format("Reading seed points from '{}'", _seedPointSourceFile.value()));
 
     std::ifstream seedFile(_seedPointSourceFile);
     if (!seedFile.good())
-        LERROR(
-            "Could not open seed points file '" << _seedPointSourceFile.value() << "'"
-        );
+        LERROR(fmt::format(
+            "Could not open seed points file '{}'",
+            _seedPointSourceFile.value()
+        ));
     else {
         std::string line;
         glm::vec3 point;
@@ -419,8 +417,11 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
     std::string type;
     bool success = _vectorFieldInfo.getValue(keyVectorFieldType, type);
     if (!success) {
-        LERROR(keyVectorField << " does not contain a '" <<
-            keyVectorFieldType << "' key");
+        LERROR(fmt::format(
+            "{} does not contain a '{}' key",
+            keyVectorField,
+            keyVectorFieldType
+        ));
         return {};
     }
 
@@ -428,8 +429,11 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
         return generateFieldlinesVolumeKameleon();
     }
     else {
-        LERROR(keyVectorField << "." << keyVectorFieldType <<
-            " does not name a valid type");
+        LERROR(fmt::format(
+            "{}.{} does not name a valid type",
+            keyVectorField,
+            keyVectorFieldType
+        ));
         return {};
     }
 }
@@ -440,14 +444,14 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     std::string model;
     bool success = _vectorFieldInfo.getValue(keyVectorFieldVolumeModel, model);
     if (!success) {
-        LERROR(keyVectorField << " does not name a model");
+        LERROR(fmt::format("{} does not name a model", keyVectorField));
         return {};
     }
 
     std::string fileName;
     success = _vectorFieldInfo.getValue(keyVectorFieldFile, fileName);
     if (!success) {
-        LERROR(keyVectorField << " does not name a file");
+        LERROR(fmt::format("{} does not name a file", keyVectorField));
         return {};
     }
     fileName = absPath(fileName);
@@ -456,8 +460,12 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     if (model != vectorFieldKameleonModelBATSRUS) {
         //modelType = KameleonWrapper::Model::BATSRUS;
     //else {
-        LERROR(keyVectorField << "." << keyVectorFieldVolumeModel << " model '" <<
-            model << "' not supported");
+        LERROR(fmt::format(
+            "{}.{} model '{}' not supported",
+            keyVectorField,
+            keyVectorFieldVolumeModel,
+            model
+        ));
         return {};
     }
 
@@ -475,7 +483,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
       (_vectorFieldInfo.value<std::string>(v1) == vectorFieldKameleonVariableLorentz);
 
     if (!threeVariables && !lorentzForce) {
-        LERROR(keyVectorField << " does not name variables");
+        LERROR(fmt::format("'{}' does not name variables", keyVectorField));
         return {};
     }
 

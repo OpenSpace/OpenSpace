@@ -79,7 +79,7 @@ int saveCameraStateToFile(lua_State* L) {
 
 int resetCameraDirection(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resetCameraDirection");
-    
+
     using ghoul::lua::luaTypeToString;
 
     OsEng.navigationHandler().resetCameraDirection();

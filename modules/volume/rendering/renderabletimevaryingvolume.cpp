@@ -23,9 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
+
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolume.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -34,13 +34,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/fmt.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace {
@@ -222,7 +221,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
 
     if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load sequence directory '" << sequenceDir.path() << "'");
+        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
         return;
     }
 
@@ -340,16 +339,11 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
     ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-    try {
-        documentation::testSpecificationAndThrow(
-            TimestepDocumentation(),
-            dictionary,
-            "TimeVaryingVolumeTimestep"
-        );
-    } catch (const documentation::SpecificationError& e) {
-        LERROR(e.message << e.component);
-        return;
-    }
+    documentation::testSpecificationAndThrow(
+        TimestepDocumentation(),
+        dictionary,
+        "TimeVaryingVolumeTimestep"
+    );
 
     Timestep t;
     t.baseName = ghoul::filesystem::File(path).baseName();

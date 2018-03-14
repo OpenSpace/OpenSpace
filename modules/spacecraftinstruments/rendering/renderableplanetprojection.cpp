@@ -604,7 +604,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(
+        _mainUniformCache.modelTransform,
+        glm::mat4(modelTransform)
+    );
     _programObject->setUniform(_mainUniformCache
         .modelViewProjectionTransform,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)

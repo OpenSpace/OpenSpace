@@ -31,7 +31,7 @@ int loadMission(lua_State* L) {
     if (missionFileName.empty()) {
         return luaL_error(L, "Filepath is empty");
     }
-    
+
     std::string name = MissionManager::ref().loadMission(absPath(missionFileName));
     lua_pushstring(L, name.c_str());
 
@@ -64,7 +64,7 @@ int hasMission(lua_State* L) {
     if (missionName.empty()) {
         return luaL_error(L, "Missing name is empty");
     }
-    
+
     bool hasMission = MissionManager::ref().hasMission(missionName);
 
     lua_pushboolean(L, hasMission);

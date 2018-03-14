@@ -33,6 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -173,7 +174,7 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 }
 
 DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
-    : DashboardItem("Distance")
+    : DashboardItem("Angle")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{

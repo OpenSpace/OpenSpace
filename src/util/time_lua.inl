@@ -24,7 +24,7 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 #include <ctime>
 
 namespace openspace::luascriptfunctions {
