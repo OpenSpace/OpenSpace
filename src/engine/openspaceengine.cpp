@@ -188,6 +188,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
+
     if (_windowWrapper) {
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
