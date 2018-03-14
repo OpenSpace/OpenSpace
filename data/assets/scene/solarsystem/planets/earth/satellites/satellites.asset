@@ -31,7 +31,7 @@ function buildSyncedUrlList(satGroups)
     Name = "Satellite TLE Data",
     Type = "UrlSynchronization",
     Identifier = "satellite_tle_data",
-	Url = urlList
+    Url = urlList
   }
 end
 
@@ -44,184 +44,190 @@ local satImageFolder = asset.syncedResource({
 })
 local satDataPath = asset.syncedResource(buildSyncedUrlList(satelliteGroups))
 
+local thisAsset = asset
 
-
-function trimString(s)
-  s = s:gsub("^%s*(.-)%s*$", "%1")
-  s = s:gsub("%s+", "_")
-  s = s:gsub("[%-()]", "")
-  return s
-end
-
-function getPeriodFromFile(line2)
-  return tonumber(string.sub(line2, 53, 63))
-end
-
-function getNumLinesInFile(filename)
-  local ctr = 0
-  for _ in io.lines(filename) do
-    ctr = ctr + 1
+asset.onInitialize(function ()
+  function trimString(s)
+    s = s:gsub("^%s*(.-)%s*$", "%1")
+    s = s:gsub("%s+", "_")
+    s = s:gsub("[%-()]", "")
+    return s
   end
-  return ctr
-end
 
-function isEmpty(s)
-  return s == nil or s == ''
-end
-
---Check format of a set of 3 TLE file lines and return nonzero if there is a format error
-function checkTleFileFormat(lineArr)
-  if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
-    return -1
+  function getPeriodFromFile(line2)
+    return tonumber(string.sub(line2, 53, 63))
   end
-  if string.sub(lineArr[2], 1, 2) ~= "1 " then
-    return -1
-  end
-  if string.sub(lineArr[3], 1, 2) ~= "2 " then
-    return -1
-  end
-  return 0
-end
 
-
-function  getSat(title, file, lineNum, textureFile)
-  return {
-      Name = title,
-      Parent = transforms.EarthInertial.Name,
-      Renderable = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 3e4,
-          Origin = "Center",
-          Body = "TLE",
-          Billboard = true,
-          Texture = textureFile
-      },
-      Transform = {
-          Translation = {
-              Type = "TLETranslation",
-              Body = title,
-              Observer = transforms.EarthInertial.Name,
-              File = file,
-              LineNum = lineNum
-          },
-          Scale = {
-              Type = "StaticScale",
-              Scale = 1,
-          }
-      },
-      GuiPath = "/Solar System/Planets/Earth/Satellites"
-  }
-end
-
-function getSatTrail(title, file, lineNum, per, color)
-  trailName = title .. "_trail"
-  return {
-      Name = trailName,
-      Parent = transforms.EarthInertial.Name,
-      Renderable = {
-          Type = "RenderableTrailOrbit",
-          Translation = {
-              Type = "TLETranslation",
-              Body = title,
-              Observer = transforms.EarthInertial.Name,
-              File = file,
-              LineNum = lineNum
-          },
-          Color = color,
-          Period = per,
-          Resolution = 160
-      },
-      GuiPath = "/Solar System/Planets/Earth/Satellites"
-  }
-end
-
-function printSatElements_debug(satElem)
-  print(">SATELLITE")
-  print("  " .. satElem.Name)
-  print("  " .. satElem.Parent)
-  print("  (Renderable)")
-  print("   " .. satElem.Renderable.Type)
-  print("   " .. satElem.Renderable.Size)
-  print("   " .. satElem.Renderable.Origin)
-  print("   " .. satElem.Renderable.Body)
-  if satElem.Renderable.Billboard then
-    print("   Billboard = true")
-  end
-  print("   " .. satElem.Renderable.Texture)
-  print("  (Transform.Translation)")
-  print("   " .. satElem.Transform.Translation.Type)
-  print("   " .. satElem.Transform.Translation.Body)
-  print("   " .. satElem.Transform.Translation.Observer)
-  print("   " .. satElem.Transform.Translation.File)
-  print("   " .. satElem.Transform.Translation.LineNum)
-  print("  (Transform.Scale)")
-  print("   " .. satElem.Transform.Scale.Type)
-  print("   " .. satElem.Transform.Scale.Scale)
-  print("  (GuiPath)")
-  print("   " .. satElem.GuiPath)
-end
-
-function printSatTrailElements_debug(satElem)
-  print(">SAT_TRAIL")
-  print("  " .. satElem.Name)
-  print("  " .. satElem.Parent)
-  print("  (Renderable)")
-  print("   " .. satElem.Renderable.Type)
-  print("   " .. satElem.Renderable.Translation.Type)
-  print("   " .. satElem.Renderable.Translation.Body)
-  print("   " .. satElem.Renderable.Translation.Observer)
-  print("   " .. satElem.Renderable.Translation.File)
-  print("   " .. satElem.Renderable.Translation.LineNum)
-  print("  ((Misc))")
-  print("    (color)")
-  print("   " .. satElem.Renderable.Color[1] .. ","
-        .. satElem.Renderable.Color[2] .. ","
-		.. satElem.Renderable.Color[3])
-  print("   " .. satElem.Renderable.Period)
-  print("   " .. satElem.Renderable.Resolution)
-  print("  (GuiPath)")
-  print("   " .. satElem.GuiPath)
-end
-
-
--------------------------------------------------------------
-for sOrbit in values(satelliteGroups) do
-  fileErr = ""
-  filename = sOrbit.url:match("([^/]+)$")
-  filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
-  sOrbit.path = satDataPath .. "/" .. filename
-  sOrbit.texturePath = satImageFolder .. "/" .. "satB.png"
-
-  local sat_var
-  local satTrail_var
-
-  line = {} 
-  myfile = io.open(sOrbit.path, "r")
-  lines = getNumLinesInFile(sOrbit.path)
-  --now loop through the tle file and get each set of 3 lines
-  if myfile then
-    for n=1,lines,3 do
-      line[1] = myfile:read('*l') --title line
-      line[2] = myfile:read('*l')
-      line[3] = myfile:read('*l')
-      if( checkTleFileFormat(line) == 0 ) then
-        title = trimString(line[1])
-        per = getPeriodFromFile(line[3])
-        per = 1.0 / per * 2 --trail for 2x a single revolution
-        satName = filenameSansExt .. "_" .. title
-        --register satellite object and trail
-        sat_var = getSat(satName, sOrbit.path, n, sOrbit.texturePath)
-        assetHelper.registerSceneGraphNodesAndExport(asset, {sat_var})
-        satTrail_var = getSatTrail(satName, sOrbit.path, n, per, sOrbit.trailColor)
-        assetHelper.registerSceneGraphNodesAndExport(asset, {satTrail_var})
-      else
-        fileErr = " TLE file syntax error on line " .. n .. ": " .. sOrbit.path
-        break
-      end
+  function getNumLinesInFile(filename)
+    local ctr = 0
+    for _ in io.lines(filename) do
+      ctr = ctr + 1
     end
-  else
-    fileErr = " File not found: " .. sOrbit.path
-    break
+    return ctr
   end
-  assert(fileErr == "", fileErr)
-end
+
+  function isEmpty(s)
+    return s == nil or s == ''
+  end
+
+  --Check format of a set of 3 TLE file lines and return nonzero if there is a format error
+  function checkTleFileFormat(lineArr)
+    if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
+      return -1
+    end
+    if string.sub(lineArr[2], 1, 2) ~= "1 " then
+      return -1
+    end
+    if string.sub(lineArr[3], 1, 2) ~= "2 " then
+      return -1
+    end
+    return 0
+  end
+
+
+  function  getSat(title, file, lineNum, textureFile)
+    return {
+        Name = title,
+        Parent = transforms.EarthInertial.Name,
+        Renderable = {
+            Type = "RenderablePlaneImageLocal",
+            Size = 3e4,
+            Origin = "Center",
+            Body = "TLE",
+            Billboard = true,
+            Texture = textureFile
+        },
+        Transform = {
+            Translation = {
+                Type = "TLETranslation",
+                Body = title,
+                Observer = transforms.EarthInertial.Name,
+                File = file,
+                LineNum = lineNum
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            }
+        },
+        GuiPath = "/Solar System/Planets/Earth/Satellites"
+    }
+  end
+
+  function getSatTrail(title, file, lineNum, per, color)
+    trailName = title .. "_trail"
+    return {
+        Name = trailName,
+        Parent = transforms.EarthInertial.Name,
+        Renderable = {
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "TLETranslation",
+                Body = title,
+                Observer = transforms.EarthInertial.Name,
+                File = file,
+                LineNum = lineNum
+            },
+            Color = color,
+            Period = per,
+            Resolution = 160
+        },
+        GuiPath = "/Solar System/Planets/Earth/Satellites"
+    }
+  end
+
+  function printSatElements_debug(satElem)
+    print(">SATELLITE")
+    print("  " .. satElem.Name)
+    print("  " .. satElem.Parent)
+    print("  (Renderable)")
+    print("   " .. satElem.Renderable.Type)
+    print("   " .. satElem.Renderable.Size)
+    print("   " .. satElem.Renderable.Origin)
+    print("   " .. satElem.Renderable.Body)
+    if satElem.Renderable.Billboard then
+      print("   Billboard = true")
+    end
+    print("   " .. satElem.Renderable.Texture)
+    print("  (Transform.Translation)")
+    print("   " .. satElem.Transform.Translation.Type)
+    print("   " .. satElem.Transform.Translation.Body)
+    print("   " .. satElem.Transform.Translation.Observer)
+    print("   " .. satElem.Transform.Translation.File)
+    print("   " .. satElem.Transform.Translation.LineNum)
+    print("  (Transform.Scale)")
+    print("   " .. satElem.Transform.Scale.Type)
+    print("   " .. satElem.Transform.Scale.Scale)
+    print("  (GuiPath)")
+    print("   " .. satElem.GuiPath)
+  end
+
+  function printSatTrailElements_debug(satElem)
+    print(">SAT_TRAIL")
+    print("  " .. satElem.Name)
+    print("  " .. satElem.Parent)
+    print("  (Renderable)")
+    print("   " .. satElem.Renderable.Type)
+    print("   " .. satElem.Renderable.Translation.Type)
+    print("   " .. satElem.Renderable.Translation.Body)
+    print("   " .. satElem.Renderable.Translation.Observer)
+    print("   " .. satElem.Renderable.Translation.File)
+    print("   " .. satElem.Renderable.Translation.LineNum)
+    print("  ((Misc))")
+    print("    (color)")
+    print("   " .. satElem.Renderable.Color[1] .. ","
+          .. satElem.Renderable.Color[2] .. ","
+      .. satElem.Renderable.Color[3])
+    print("   " .. satElem.Renderable.Period)
+    print("   " .. satElem.Renderable.Resolution)
+    print("  (GuiPath)")
+    print("   " .. satElem.GuiPath)
+  end
+
+
+  -------------------------------------------------------------
+  for sOrbit in values(satelliteGroups) do
+    fileErr = ""
+    filename = sOrbit.url:match("([^/]+)$")
+    filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
+    sOrbit.path = satDataPath .. "/" .. filename
+    sOrbit.texturePath = satImageFolder .. "/" .. "satB.png"
+
+    local sat_var
+    local satTrail_var
+
+    line = {} 
+    myfile = io.open(sOrbit.path, "r")
+    lines = getNumLinesInFile(sOrbit.path)
+    --now loop through the tle file and get each set of 3 lines
+    if myfile then
+      for n=1,lines,3 do
+        line[1] = myfile:read('*l') --title line
+        line[2] = myfile:read('*l')
+        line[3] = myfile:read('*l')
+        if( checkTleFileFormat(line) == 0 ) then
+          title = trimString(line[1])
+          per = getPeriodFromFile(line[3])
+          per = 1.0 / per * 2 --trail for 2x a single revolution
+          satName = filenameSansExt .. "_" .. title
+          --register satellite object and trail
+          sat_var = getSat(satName, sOrbit.path, n, sOrbit.texturePath)
+          openspace.addSceneGraphNode(sat_var)
+          -- assetHelper.registerSceneGraphNodesAndExport(thisAsset, {sat_var})
+          satTrail_var = getSatTrail(satName, sOrbit.path, n, per, sOrbit.trailColor)
+          openspace.addSceneGraphNode(satTrail_var)
+          -- assetHelper.registerSceneGraphNodesAndExport(thisAsset, {satTrail_var})
+        else
+          fileErr = " TLE file syntax error on line " .. n .. ": " .. sOrbit.path
+          break
+        end
+      end
+    else
+      fileErr = " File not found: " .. sOrbit.path
+      break
+    end
+    assert(fileErr == "", fileErr)
+  end
+
+
+end)
