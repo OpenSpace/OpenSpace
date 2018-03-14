@@ -13,7 +13,7 @@ local Enlil = {
         Scaling = {1, 1, 1},
         ScalingExponent = 13,
         Source = "${ASSETS}/scene/multires/tsp/enlil_nh_128_128_16.tsp",
-        ErrorHistogramsSource = "${ASSETS}/scene/multires/tsp/enlil_nh_128_128_16_50.errorHistograms",
+        --ErrorHistogramsSource = "${ASSETS}/scene/multires/tsp/enlil_nh_128_128_16_50.errorHistograms",
         TransferFunction = "${ASSETS}/scene/multires/enlil/transferfunctions/fire.txt",
         BrickSelector = "local"
     },

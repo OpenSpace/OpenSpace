@@ -399,11 +399,11 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     switch (_selector) {
         case Selector::TF:
             if (!_tfBrickSelector) {
-                std::shared_ptr<TfBrickSelector> tbs;
+                std::shared_ptr<TfBrickSelector> tfbs;
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
-                _tfBrickSelector = tbs = std::make_shared<TfBrickSelector>(_tsp, _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-                _transferFunction->setCallback([tbs](const TransferFunction&) {
-                    tbs->initialize();
+                _tfBrickSelector = tfbs = std::make_shared<TfBrickSelector>(_tsp, _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+                _transferFunction->setCallback([tfbs](const TransferFunction&) {
+                    tfbs->initialize();
                 });
                 return initializeSelector();
             }
@@ -594,7 +594,7 @@ bool RenderableMultiresVolume::initializeSelector() {
             }
             else {
                 // Build histograms from tsp file.
-                LWARNING(fmt::format("Failed to open {}", cacheFilename));
+                LINFO(fmt::format("No cache to load. Generating from TSP file and caching in: {}", cacheFilename));
                 success &= manager->buildHistograms(nHistograms);
             }
             if (success) {

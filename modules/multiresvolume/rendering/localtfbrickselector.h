@@ -73,8 +73,6 @@ public:
     bool calculateBrickErrors();
 
 private:
-    TSP* _tsp;
-
     LocalErrorHistogramManager* _histogramManager;
     std::vector<Error> _brickErrors;
 

@@ -30,6 +30,7 @@
 #include <list>
 #include <iostream>
 #include <fstream>
+#include <cstdint>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -41,15 +42,15 @@ namespace openspace {
 class TSP {
 public:
     struct Header {
-        size_t gridType_;
-        size_t numOrigTimesteps_;
-        size_t numTimesteps_;
-        size_t xBrickDim_;
-        size_t yBrickDim_;
-        size_t zBrickDim_;
-        size_t xNumBricks_;
-        size_t yNumBricks_;
-        size_t zNumBricks_;
+        std::uint32_t gridType_;
+        std::uint32_t numOrigTimesteps_;
+        std::uint32_t numTimesteps_;
+        std::uint32_t xBrickDim_;
+        std::uint32_t yBrickDim_;
+        std::uint32_t zBrickDim_;
+        std::uint32_t xNumBricks_;
+        std::uint32_t yNumBricks_;
+        std::uint32_t zNumBricks_;
     };
 
     enum NodeData {
