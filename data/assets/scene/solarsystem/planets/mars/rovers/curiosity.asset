@@ -18,10 +18,6 @@ local models = asset.syncedResource({
 })
 
 
-
-
-
-
 -- Curiosity Model --
 
 local Curiosity = {
@@ -61,36 +57,14 @@ local CuriosityRA = {
 
 local CuriosityMastCam = {
     Name = "CuriosityMastCam",
-    Parent = transforms.RSM_AZ_Orientation.Name,
+    Parent = Curiosity.Name,
     GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
 }
-
-
 
 
 -- Curiosity Model Instruments --
 -- Test Model
 
---local RexisFov = {
---    Name = "REXIS FOV",
---    Parent = Rexis.Name,
---    Renderable = {
---        Type  = "RenderableFov",
---        Body  = "OSIRIS-REX",
---        Frame = "ORX_REXIS",
---        RGB   = { 0.8, 0.7, 0.7 },
---        Instrument = {
---            Name       = "ORX_REXIS",
---            Method     = "ELLIPSOID",
---            Aberration = "NONE"
---        },
---        PotentialTargets = { BENNU_BODY },
---        FrameConversions = {
---            [BENNU_BODY] = "IAU_BENNU"
---        }
---    },
---    GuiPath = "/Solar System/Missions/OSIRIS REx"
---}
 
 local Body = {
     Name = "body",
@@ -113,31 +87,12 @@ local MastCam_Arm1 = {
     Parent = CuriosityMastCam.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Frame = "MSL_RSM_AZ",
-        Instrument = {
-            Name       = "MSL_RSM_AZ",
-            Method     = "RenderableModel",
-            Aberration = "NONE",
-        },
+        Body = "MSL_RSM_AZ",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_MastCam_arm_1.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MARS SCIENCE LABORATORY",
-            Observer = "MARS SCIENCE LABORATORY",
-            Kernels = kernels.CuriosityKernels,
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "MSL_RSM_ZERO_AZ",
-            DestinationFrame = "MSL_RSM_ZERO_EL"
-        }
     },
     Tag = {"planet_solarsystem", "planet_terrestrial"},
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
@@ -164,7 +119,7 @@ local MastCam_NavCam = {
     Parent = CuriosityMastCam.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MSL_NAVCAM_RIGHT_A",
+        Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_MastCam_NavCam.obj"
@@ -193,14 +148,7 @@ local MastCam = {
 
 
 
-
-
-
-
-
-
-
--- front/back?
+-- front/back ?
 local HazCam = {
     Name = "HazCam",
     Parent = CuriosityModel.Name,
@@ -342,7 +290,7 @@ local RA_Arm1 = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_arm_1.obj"
         },
-        -- ColorTexture = textures .. "/MSLTextureTest.png"
+        ColorTexture = textures .. "/MSLTextureTest.png"
     },
     Tag = {"planet_solarsystem", "planet_terrestrial"},
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
@@ -482,7 +430,7 @@ local Wheels_All = {
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     Curiosity,
-    --TestPlane,
+    -- TestPlane,
     CuriosityModel,
     CuriosityMastCam,
     CuriosityRA,

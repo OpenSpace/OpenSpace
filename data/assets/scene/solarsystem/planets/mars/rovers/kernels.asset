@@ -66,15 +66,23 @@ local CuriosityKernels = {
 
     -------- CK --------
     
-    kernels .. "/CK/msl_ra_toolsref_v1.bc",
     kernels .. "/CK/msl_cruise_recon_rawrt_v2.bc",
     kernels .. "/CK/msl_cruise_recon_raweng_v1.bc",
     kernels .. "/CK/msl_edl_v01.bc",
+    
+    -- HGA
     kernels .. "/CK/msl_surf_hga_tlm.bc",
+    
+    -- robotic arm
+    kernels .. "/CK/msl_ra_toolsref_v1.bc",
     kernels .. "/CK/msl_surf_ra_tlmenc.bc",
     kernels .. "/CK/msl_surf_ra_tlmres.bc",
+    
+    -- MastCam
     kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
     kernels .. "/CK/msl_surf_rsm_tlmres.bc",
+    
+
     kernels .. "/CK/msl_surf_rover_tlm.bc",
 
     -------- PCK -------- 

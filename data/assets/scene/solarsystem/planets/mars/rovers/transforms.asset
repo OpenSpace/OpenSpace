@@ -10,8 +10,8 @@ local CuriosityPosition = {
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "MARS BARYCENTER",
-            Observer = "MARS SCIENCE LABORATORY",
+            Target = "MARS SCIENCE LABORATORY",
+            Observer = "MARS BARYCENTER",
             Kernels = kernels.CuriosityKernels
         }
     },
