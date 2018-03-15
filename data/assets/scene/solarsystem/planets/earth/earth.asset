@@ -163,7 +163,7 @@ local Earth = {
                         Identifier = "Earth_Night",
                         Name = "Earth Night",
                         FilePath = texturesPath .. "/earth_night.jpg",
-                        Enabled = true,                        
+                        Enabled = true,
                     }
                 },
                 {

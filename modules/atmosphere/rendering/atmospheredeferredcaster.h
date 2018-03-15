@@ -29,6 +29,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/uniformcache.h>
 
 #include <string>
 #include <vector>
@@ -60,6 +61,10 @@ public:
     std::string deferredcastVSPath() const override;
     std::string deferredcastFSPath() const override;
     std::string helperPath() const override;
+
+    void initializeCachedVariables(ghoul::opengl::ProgramObject&) override;
+
+    void update(const UpdateData&) override;
 
     void preCalculateAtmosphereParam();
 
@@ -123,6 +128,19 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
+
+    UniformCache(cullAtmosphere, Rg, Rt, AverageGroundReflectance,
+        groundRadianceEmittion, HR, betaRayleigh, HM, betaMieScattering,
+        betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled,
+        HO, betaOzoneExtinction, TRANSMITTANCE_W, TRANSMITTANCE_H,
+        SKY_W, SKY_H, OTHER_TEXTURES_W, OTHER_TEXTURES_H, SAMPLES_R,
+        SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
+    UniformCache(ModelTransformMatrix, dInverseModelTransformMatrix, dModelTransformMatrix,
+        dInverseSgctProjectionToModelTransformMatrix,
+        dInverseSGCTEyeToTmpRotTransformMatrix,
+        dObjpos, dCampos, dCamPosObj, sunDirectionObj, ellipsoidRadii,
+        hardShadows, transmittanceTexture, irradianceTexture,
+        inscatterTexture) _uniformCache2;
 
     GLuint _transmittanceTableTexture;
     GLuint _irradianceTableTexture;

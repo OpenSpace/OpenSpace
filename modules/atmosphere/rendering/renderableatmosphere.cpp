@@ -764,6 +764,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         _deferredcaster->setTime(data.time.j2000Seconds());
         glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
         _deferredcaster->setModelTransform(modelTransform);
+        _deferredcaster->update(data);
     }
 }
 

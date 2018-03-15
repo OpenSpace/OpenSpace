@@ -84,17 +84,14 @@ uniform sampler2DMS mainPositionTexture;
 uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
 
-// Model Transform Matrix Used for Globe Rendering
-uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
-uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
-uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
-uniform dmat4 dInverseCamRotTransform; 
 uniform dmat4 dInverseModelTransformMatrix; 
 uniform dmat4 dModelTransformMatrix;
-//uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
+uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
+uniform dmat4 dInverseSgctProjectionToModelTransformMatrix;
 
 uniform dvec4 dObjpos;
 uniform dvec3 dCampos;
+uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
 uniform dvec3 ellipsoidRadii;
 
@@ -191,12 +188,12 @@ struct dRay {
  *               intersection of the ray with atmosphere when the eye position
  *               is inside atmosphere.
  */
-bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const double atmRadius,
-                             out bool inside, out double offset, out double maxLength ) {
-    dvec3  l  = planetPosition - ray.origin.xyz;
-    double s  = dot(l, ray.direction.xyz);
-    double l2 = dot(l, l);
-    double r2 = atmRadius * atmRadius; // avoiding surface acne
+bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const float atmRadius,
+                             out bool inside, out float offset, out float maxLength ) {
+    vec3  l  = vec3(planetPosition) - vec3(ray.origin.xyz);
+    float s  = dot(l, vec3(ray.direction.xyz));
+    float l2 = dot(l, l);
+    float r2 = atmRadius * atmRadius; // avoiding surface acne
 
     // Ray origin (eye position) is behind sphere
     if ((s < 0.0) && (l2 > r2)) {
@@ -206,7 +203,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
         return false;
     }
 
-    double m2 = l2 - s*s;
+    float m2 = l2 - s*s;
 
     // Ray misses atmospere
     if (m2 > r2) {
@@ -219,7 +216,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
     // We already now the ray hits the atmosphere
 
     // If q = 0.0f, there is only one intersection
-    double q = sqrt(r2 - m2);
+    float q = sqrt(r2 - m2);
 
     // If l2 < r2, the ray origin is inside the sphere
     if (l2 > r2) {
@@ -255,23 +252,12 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Using the interpolated coords:
     // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
-                            msaaSamplePatter[mssaSample+1]);
+                             msaaSamplePatter[mssaSample+1]);
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, interpolatedNDCPos.z, 1.0) / gl_FragCoord.w; 
 
-    // Clip to SGCT Eye
-    dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
-    sgctEyeCoords.w     = 1.0;
+    // Clip to Object Coords
+    dvec4 objectCoords = dInverseSgctProjectionToModelTransformMatrix * clipCoords;
     
-    // SGCT Eye to OS Eye
-    dvec4 tOSEyeCoordsInv = dSgctEyeToOSEyeTranform * sgctEyeCoords;
-    
-    // OS Eye to World coords
-    dvec4 tmpRInv     = dInverseCamRotTransform * tOSEyeCoordsInv;
-    dvec4 worldCoords = dvec4(dvec3(tmpRInv) + dCampos, 1.0);
-    
-    // World to Object
-    dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
-
     // Planet Position in Object Space
     // JCC: Applying the inverse of the model transformation on the object postion in World 
     // space results in imprecision. 
@@ -279,8 +265,8 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     //planetPositionObjectCoords = dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
     // Camera Position in Object Space
-    cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
-      
+    cameraPositionInObject = dCamPosObj;  
+    
     // ============================
     // ====== Building Ray ========
     // Ray in object space (in KM)
@@ -390,11 +376,12 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // From cosine law where t = distance between x and x0
         // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
         r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
+        float invr0 = 1.0/r0;
         // From the dot product: cos(theta0) = (x0 dot v)/(||ro||*||v||)
         // mu0 = ((x + t) dot v) / r0
         // mu0 = (x dot v + t dot v) / r0
         // mu0 = (r*mu + t) / r0
-        mu0 = (r * mu + t) / r0;
+        mu0 = (r * mu + t) * invr0;
         vec4 inScatterAboveX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
@@ -403,7 +390,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
         // Below Horizon
         mu  = muHorizon + INTERPOLATION_EPS;
         r0  = sqrt(r2 + t2 + 2.0f * r * t * mu);
-        mu0 = (r * mu + t) / r0;
+        mu0 = (r * mu + t) * invr0;
         vec4 inScatterBelowX  = texture4D(inscatterTexture, r, mu, muSun, nu);
         vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu);
         // Attention for the attenuation.r value applied to the S_Mie
@@ -468,7 +455,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     vec3  x0                 = x + t * v;
     float r0                 = length(x0);
     // Normal of intersection point.
-    vec3  n                  = normalize(normal);
+    // Normal must be normalized.
+    vec3  n                  = normal;
     //vec4 groundReflectance = groundColor * vec4(.37);
     vec4 groundReflectance   = groundColor * 
         vec4(groundRadianceEmittion, groundRadianceEmittion, groundRadianceEmittion, 1.0f);
@@ -546,25 +534,28 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
     return transmittance * sunFinalColor;      
 }
 
-void main() {    
+void main() {
+    ivec2 fragCoords = ivec2(gl_FragCoord);    
     if (cullAtmosphere == 0) {
         vec4 atmosphereFinalColor = vec4(0.0f);
-
+        int nSamples = 1;
         // First we determine if the pixel is complex (different fragments on it)
         bool complex = false;
         vec4 oldColor, currentColor;
         //vec4 colorArray[16];
         //int colorIndexArray[16];
 
-        oldColor = texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);        
+        oldColor = texelFetch(mainColorTexture, fragCoords, 0);        
         //colorArray[0] = oldColor;
         //colorIndexArray[0] = 0;
         for (int i = 1; i < nAaSamples; i++) {
-            //vec4 normal = texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
-            vec4 currentColor  = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+            //vec4 normal = texelFetch(mainNormalTexture, fragCoords, i);
+            vec4 currentColor  = texelFetch(mainColorTexture, fragCoords, i);
             //colorArray[i] = currentColor;
             if (currentColor != oldColor) {
                 complex = true;
+                //nSamples = nAaSamples;
+                nSamples = nAaSamples > 1 ? nAaSamples / 2 : nAaSamples;
                 break;
                 // for (int c = 0; c < nAaSamples; c++) {
                 //     if (currentColor == colorArray[c]) {
@@ -583,18 +574,10 @@ void main() {
             // }            
             oldColor = currentColor;
         }
-
-        int nSamples = 1;
-        if (complex) {
-            //nSamples = nAaSamples;
-            nSamples = nAaSamples > 1 ? nAaSamples/2 : nAaSamples;
-        }
         
         for (int i = 0; i < nSamples; i++) {
-            vec4 normal     = texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
-            vec4 color      = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
-            // Data in the mainPositionTexture are written in view space (view plus camera rig)
-            vec4 position   = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
+            // Color from G-Buffer
+            vec4 color = texelFetch(mainColorTexture, fragCoords, i);
             
             // Ray in object space
             dRay ray;
@@ -612,9 +595,9 @@ void main() {
             bool  intersectATM = false;
 
             // Instead of ray-ellipsoid intersection lets transform the ray to a sphere:
-            dRay transfRay;
-            transfRay.origin    = ray.origin;
-            transfRay.direction = ray.direction;
+            //dRay transfRay;
+            //transfRay.origin    = ray.origin;
+            //transfRay.direction = ray.direction;
 
             // transfRay.origin.z *= 1000.0/ellipsoidRadii.x;
             // transfRay.direction.z *= 1000.0/ellipsoidRadii.x;        
@@ -624,47 +607,52 @@ void main() {
             // transfRay.direction.y *= 1000.0/ellipsoidRadii.z;
             // transfRay.direction.xyz = normalize(transfRay.direction.xyz);
 
-            intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  
-                                                  Rt - ATM_EPSILON/100.0, insideATM, offset, maxLength );
-
+            intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  
+                                                  Rt - (ATM_EPSILON * 0.001), insideATM, offset, maxLength );
+               
             if ( intersectATM ) {
                 // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
                 // in the depth buffer is less than the distance to the atmosphere then the atmosphere
                 // is occluded
-                // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
+                // Fragments positions into G-Buffer are written in SGCT Eye Space (View plus Camera Rig Coords)
                 // when using their positions later, one must convert them to the planet's coords
                 
+                // Get data from G-Buffer
+                vec4 normal   = texelFetch(mainNormalTexture, fragCoords, i);
+                // Data in the mainPositionTexture are written in view space (view plus camera rig)
+                vec4 position = texelFetch(mainPositionTexture, fragCoords, i);
+               
                 // OS Eye to World coords                
-                dvec4 tmpRInvPos            = dInverseCamRotTransform * dSgctEyeToOSEyeTranform * position;        
-                dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
+                dvec4 tmpRInvPos       = dInverseSGCTEyeToTmpRotTransformMatrix * position;
+                dvec4 fragWorldCoords  = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
-                dvec4 fragObjectCoords       = dInverseModelTransformMatrix * fragWorldCoords;
+                dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
                 
                 // Distance of the pixel in the gBuffer to the observer
                 // JCC (12/12/2017): AMD distance function is buggy.
                 //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
                 double pixelDepth = length(cameraPositionInObject.xyz - fragObjectCoords.xyz);
                 
-                // JCC (12/13/2017): TRick to remove floating error in texture.
+                // JCC (12/13/2017): Trick to remove floating error in texture.
                 // We see a squared noise on planet's surface when seeing the planet
                 // from far away.
                 float dC = float(length(cameraPositionInObject.xyz));
                 float x1 = 1e8;
                 if (dC > x1) {
-                    pixelDepth += 1000.0;
+                    pixelDepth     += 1000.0;
                     float alpha     = 1000.0;
                     float beta      = 1000000.0;
                     float x2        = 1e9; 
                     float diffGreek = beta - alpha;
                     float diffDist  = x2 - x1;
-                    float varA = diffGreek/diffDist;
-                    float varB = (alpha - varA * x1);
-                    pixelDepth += double(varA * dC + varB); 
+                    float varA      = diffGreek/diffDist;
+                    float varB      = (alpha - varA * x1);
+                    pixelDepth     += double(varA * dC + varB); 
                 }
 
                 // All calculations are done in Km:
-                pixelDepth *= 0.001;
+                pixelDepth           *= 0.001;
                 fragObjectCoords.xyz *= 0.001;
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
@@ -679,9 +667,9 @@ void main() {
                     // If the observer is already inside the atm, offset = 0.0
                     // and no changes at all.
                     vec3  x  = vec3(ray.origin.xyz + t*ray.direction.xyz);
-                    float r  = 0.0;//length(x);
+                    float r  = 0.0f;//length(x);
                     vec3  v  = vec3(ray.direction.xyz);
-                    float mu = 0.0;//dot(x, v) / r;
+                    float mu = 0.0f;//dot(x, v) / r;
                     vec3  s  = vec3(sunDirectionObj);
                     float tF = float(maxLength - t);
 
@@ -690,7 +678,7 @@ void main() {
                     // next comparison with the planet's ground make sense:
                     pixelDepth -= offset;
                     
-                    dvec4 onATMPos           = dModelTransformMatrix * dvec4(x*1000.0, 1.0);
+                    dvec4 onATMPos           = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
                     vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
                     vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, fragWorldCoords.xyz, true);
                   
@@ -718,7 +706,7 @@ void main() {
             else { // no intersection
                 //discard;
                 atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);
-            }
+            }           
         }  
 
         renderTarget = atmosphereFinalColor / float(nSamples);        
@@ -727,7 +715,7 @@ void main() {
         if (firstPaint) {
             vec4 bColor = vec4(0.0f);
             for (int f = 0; f < nAaSamples; f++) {
-                bColor += texelFetch(mainColorTexture, ivec2(gl_FragCoord), f);
+                bColor += texelFetch(mainColorTexture, fragCoords, f);
             }
             bColor /= float(nAaSamples);
             renderTarget = vec4(HDR(bColor.xyz * backgroundConstant, atmExposure), bColor.a);
