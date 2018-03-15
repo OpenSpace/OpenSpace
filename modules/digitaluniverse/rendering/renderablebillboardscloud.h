@@ -146,7 +146,6 @@ private:
         renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
         color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
         spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
-    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;

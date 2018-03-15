@@ -225,7 +225,9 @@ void RenderableModelProjection::initializeGL() {
     _fboUniformCache.ProjectorMatrix = _fboProgramObject->uniformLocation(
         "ProjectorMatrix"
     );
-    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation("ModelTransform");
+    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation(
+        "ModelTransform"
+    );
     _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
 
 
@@ -547,7 +549,7 @@ bool RenderableModelProjection::loadTextures() {
             absPath(_colorTexturePath)
         );
         if (_baseTexture) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath)));
             _baseTexture->uploadTexture();
             _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         }

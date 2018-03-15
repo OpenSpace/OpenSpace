@@ -22,52 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "httpsynchronization.h"
+#include <modules/sync/syncs/httpsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
-
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
-
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/documentation/verifier.h>
-
-#include <sstream>
+#include <ghoul/logging/logmanager.h>
+#include <cstdio>
 #include <fstream>
 #include <numeric>
 #include <memory>
+#include <sstream>
 
 namespace {
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyVersion = "Version";
 
+    constexpr const char* TempSuffix = ".tmp";
+
     constexpr const char* QueryKeyIdentifier = "identifier";
     constexpr const char* QueryKeyFileVersion = "file_version";
     constexpr const char* QueryKeyApplicationVersion = "application_version";
     constexpr const int ApplicationVersion = 1;
-}
+} // namespace
 
 namespace openspace {
 
-HttpSynchronization::HttpSynchronization(
-    const ghoul::Dictionary& dict,
-    const std::string& synchronizationRoot,
-    const std::vector<std::string>& synchronizationRepositories
+documentation::Documentation HttpSynchronization::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "HttpSynchronization",
+        "http_synchronization",
+    {
+        {
+            KeyIdentifier,
+            new StringVerifier,
+            Optional::No,
+            "A unique identifier for this resource"
+        },
+        {
+            KeyVersion,
+            new IntVerifier,
+            Optional::No,
+            "The version of this resource"
+        }
+    }
+    };
+}
+
+HttpSynchronization::HttpSynchronization(const ghoul::Dictionary& dict,
+                                         const std::string& synchronizationRoot,
+                               const std::vector<std::string>& synchronizationRepositories
 )
     : openspace::ResourceSynchronization(dict)
-    , _nTotalBytesKnown(false)
-    , _nTotalBytes(0)
-    , _nSynchronizedBytes(0)
-    , _shouldCancel(false)
     , _synchronizationRoot(synchronizationRoot)
     , _synchronizationRepositories(synchronizationRepositories)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dict,
-        "HttpSynchroniztion"
+        "HttpSynchronization"
     );
 
     _identifier = dict.value<std::string>(KeyIdentifier);
@@ -79,28 +96,6 @@ HttpSynchronization::~HttpSynchronization() {
         cancel();
         _syncThread.join();
     }
-}
-
-documentation::Documentation HttpSynchronization::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "HttpSynchronization",
-        "http_synchronization",
-        {
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::No,
-                "A unique identifier for this resource"
-            },
-            {
-                KeyVersion,
-                new IntVerifier,
-                Optional::No,
-                "The version of this resource"
-            }
-        }
-    };
 }
 
 std::string HttpSynchronization::directory() {
@@ -128,10 +123,13 @@ void HttpSynchronization::start() {
         return;
     }
 
-    std::vector<std::string> listUrls = fileListUrls();
-    _syncThread = std::thread([this, listUrls] {
-        for (const auto& url : listUrls) {
-            if (trySyncFromUrl(url)) {
+    std::string query = std::string("?") + QueryKeyIdentifier + "=" + _identifier +
+        "&" + QueryKeyFileVersion + "=" + std::to_string(_version) +
+        "&" + QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
+
+    _syncThread = std::thread([this](const std::string& q) {
+        for (const std::string& url : _synchronizationRepositories) {
+            if (trySyncFromUrl(url + q)) {
                 createSyncFile();
                 resolve();
                 return;
@@ -140,7 +138,7 @@ void HttpSynchronization::start() {
         if (!_shouldCancel) {
             reject();
         }
-    });
+    }, query);
 }
 
 void HttpSynchronization::cancel() {
@@ -153,17 +151,27 @@ void HttpSynchronization::clear() {
     // TODO: Remove all files from directory.
 }
 
-std::vector<std::string> HttpSynchronization::fileListUrls() {
-    std::string query = std::string("?") + QueryKeyIdentifier + "=" + _identifier +
-        "&" + QueryKeyFileVersion + "=" + std::to_string(_version) +
-        "&" + QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
+size_t HttpSynchronization::nSynchronizedBytes() {
+    return _nSynchronizedBytes;
+}
 
-    std::vector<std::string> urls;
-    for (const auto& repoUrl : _synchronizationRepositories) {
-        urls.push_back(repoUrl + query);
-    }
+size_t HttpSynchronization::nTotalBytes() {
+    return _nTotalBytes;
+}
 
-    return urls;
+bool HttpSynchronization::nTotalBytesIsKnown() {
+    return _nTotalBytesKnown;
+}
+
+void HttpSynchronization::createSyncFile() {
+    std::string directoryName = directory();
+    std::string filepath = directoryName + ".ossync";
+
+    FileSys.createDirectory(directoryName, ghoul::filesystem::Directory::Recursive::Yes);
+
+    std::ofstream syncFile(filepath, std::ofstream::out);
+    syncFile << "Synchronized";
+    syncFile.close();
 }
 
 bool HttpSynchronization::hasSyncFile() {
@@ -175,9 +183,9 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     HttpRequest::RequestOptions opt;
     opt.requestTimeoutSeconds = 0;
 
-    SyncHttpMemoryDownload fileListDownload(listUrl);
-    fileListDownload.onProgress([this](HttpRequest::Progress) {
-        return !_shouldCancel;
+    SyncHttpMemoryDownload fileListDownload(std::move(listUrl));
+    fileListDownload.onProgress([&c = _shouldCancel](HttpRequest::Progress) {
+        return !c;
     });
     fileListDownload.download(opt);
 
@@ -206,8 +214,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         std::string filename = line.substr(lastSlash + 1);
 
         std::string fileDestination = directory() +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        filename;
+            ghoul::filesystem::FileSystem::PathSeparator +
+            filename + TempSuffix;
 
         downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
             line, fileDestination, HttpFileDownload::Overwrite::Yes));
@@ -246,41 +254,43 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     startedAllDownloads = true;
 
     bool failed = false;
-    for (auto& d : downloads) {
+    for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
         d->wait();
-        if (!d->hasSucceeded()) {
+        if (d->hasSucceeded()) {
+            // If we are forcing the override, we download to a temporary file
+            // first, so when we are done here, we need to rename the file to the
+            // original name
+
+            const std::string& tempName = d->destination();
+            std::string originalName = tempName.substr(
+                0,
+                tempName.size() - strlen(TempSuffix)
+            );
+
+            FileSys.deleteFile(originalName);
+            int success = rename(tempName.c_str(), originalName.c_str());
+            if (success != 0) {
+                LERRORC(
+                    "URLSynchronization",
+                    fmt::format(
+                        "Error renaming file {} to {}", tempName, originalName
+                    )
+                );
+
+                failed = true;
+            }
+        }
+        else {
             failed = true;
         }
     }
     if (!failed) {
         return true;
     }
-    for (auto& d : downloads) {
+    for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
         d->cancel();
     }
     return false;
 }
 
-void HttpSynchronization::createSyncFile() {
-    std::string dir = directory();
-    std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
-    std::ofstream syncFile(filepath, std::ofstream::out);
-    syncFile << "Synchronized";
-    syncFile.close();
-}
-
-size_t HttpSynchronization::nSynchronizedBytes() {
-    return _nSynchronizedBytes;
-}
-
-size_t HttpSynchronization::nTotalBytes() {
-    return _nTotalBytes;
-}
-
-bool HttpSynchronization::nTotalBytesIsKnown() {
-    return _nTotalBytesKnown;
-}
-
 } // namespace openspace
-

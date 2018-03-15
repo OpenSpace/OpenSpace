@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <ghoul/fmt.h>
 
 namespace {
     constexpr const char* _loggerCat = "BrickManager";
@@ -68,20 +69,29 @@ bool BrickManager::readHeader() {
 
     _header = _tsp->header();
 
-    LDEBUG("Grid type: " << _header.gridType_);
-    LDEBUG("Original num timesteps: " << _header.numOrigTimesteps_);
-    LDEBUG("Num timesteps: " << _header.numTimesteps_);
-    LDEBUG("Brick dims: " << _header.xBrickDim_ << " " << _header.yBrickDim_ << " " << _header.zBrickDim_);
-    LDEBUG("Num bricks: " << _header.xNumBricks_ << " " << _header.yNumBricks_ << " " << _header.zNumBricks_);
-    LDEBUG("");
+    LDEBUG(fmt::format("Grid type: {}", _header.gridType_));
+    LDEBUG(fmt::format("Original num timesteps: {}", _header.numOrigTimesteps_));
+    LDEBUG(fmt::format("Num timesteps: {}", _header.numTimesteps_));
+    LDEBUG(fmt::format(
+        "Brick dims: {} {} {}",
+        _header.xBrickDim_,
+        _header.yBrickDim_,
+        _header.zBrickDim_
+    ));
+    LDEBUG(fmt::format(
+        "Num bricks: {} {} {}",
+        _header.xNumBricks_,
+        _header.yNumBricks_,
+        _header.zNumBricks_
+    ));
 
     brickDim_ = _header.xBrickDim_;
     numBricks_ = _header.xNumBricks_;
     paddedBrickDim_ = brickDim_ + paddingWidth_ * 2;
     atlasDim_ = paddedBrickDim_*numBricks_;
 
-    LDEBUG("Padded brick dim: " << paddedBrickDim_);
-    LDEBUG("Atlas dim: " << atlasDim_);
+    LDEBUG(fmt::format("Padded brick dim: {}", paddedBrickDim_));
+    LDEBUG(fmt::format("Atlas dim: {}", atlasDim_));
 
     numBrickVals_ = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
     // Number of bricks per frame
@@ -92,11 +102,11 @@ bool BrickManager::readHeader() {
     unsigned int numOTNodes = static_cast<unsigned int>((pow(8, numOTLevels) - 1) / 7);
     unsigned int numBSTNodes = static_cast<unsigned int>(_header.numTimesteps_ * 2 - 1);
     numBricksTree_ = numOTNodes * numBSTNodes;
-    LDEBUG("Num OT levels: " << numOTLevels);
-    LDEBUG("Num OT nodes: " << numOTNodes);
-    LDEBUG("Num BST nodes: " << numBSTNodes);
-    LDEBUG("Num bricks in tree: " << numBricksTree_);
-    LDEBUG("Num values per brick: " << numBrickVals_);
+    LDEBUG(fmt::format("Num OT levels: {}", numOTLevels));
+    LDEBUG(fmt::format("Num OT nodes: {}", numOTNodes));
+    LDEBUG(fmt::format("Num BST nodes: {}", numBSTNodes));
+    LDEBUG(fmt::format("Num bricks in tree: {}", numBricksTree_));
+    LDEBUG(fmt::format("Num values per brick: {}", numBrickVals_));
 
     brickSize_ = sizeof(float)*numBrickVals_;
     volumeSize_ = brickSize_*numBricksFrame_;
@@ -110,8 +120,8 @@ bool BrickManager::readHeader() {
 
     if (fileSize != calcFileSize) {
         LERROR("Sizes don't match");
-        LERROR("calculated file size: " << calcFileSize);
-        LERROR("file size: " << fileSize);
+        LERROR(fmt::format("Calculated file size: {}", calcFileSize));
+        LERROR(fmt::format("File size: {}", fileSize));
         return false;
     }
 
@@ -285,13 +295,13 @@ bool BrickManager::FillVolume(float *_in, float *_out,
 void BrickManager::IncCoord() {
     // Update atlas coordinate
     xCoord_++;
-    if (xCoord_ == _header.xNumBricks_) {
+    if (xCoord_ == static_cast<int>(_header.xNumBricks_)) {
         xCoord_ = 0;
         yCoord_++;
-        if (yCoord_ == _header.yNumBricks_) {
+        if (yCoord_ == static_cast<int>(_header.yNumBricks_)) {
             yCoord_ = 0;
             zCoord_++;
-            if (zCoord_ == _header.zNumBricks_) {
+            if (zCoord_ == static_cast<int>(_header.zNumBricks_)) {
                 zCoord_ = 0;
             }
         }
@@ -365,7 +375,7 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
         static_cast<std::ios::pos_type>(brickSize_);
         */
 
-        long offset = TSP::dataPosition() +
+        long long offset = TSP::dataPosition() +
             static_cast<long>(brickIndex)*
             static_cast<long>(brickSize_);
 
@@ -442,16 +452,17 @@ bool BrickManager::PBOToAtlas(BUFFER_INDEX _pboIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle_[_pboIndex]);
     glm::size3_t dim = textureAtlas_->dimensions();
     glBindTexture(GL_TEXTURE_3D, *textureAtlas_);
-    glTexSubImage3D(GL_TEXTURE_3D,    // target
+    glTexSubImage3D(
+        GL_TEXTURE_3D,                // target
         0,                            // level
         0,                            // xoffset
         0,                            // yoffset
         0,                            // zoffset
-        dim[0],                        // width
-        dim[1],                        // height
-        dim[2],                        // depth
-        GL_RED,                        // format
-        GL_FLOAT,                    // type
+        static_cast<GLsizei>(dim[0]), // width
+        static_cast<GLsizei>(dim[1]), // height
+        static_cast<GLsizei>(dim[2]), // depth
+        GL_RED,                       // format
+        GL_FLOAT,                     // type
         NULL);                        // *pixels
     glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

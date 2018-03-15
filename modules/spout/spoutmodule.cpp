@@ -22,33 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SETTINGSENGINE___H__
-#define __OPENSPACE_CORE___SETTINGSENGINE___H__
+#include <modules/spout/spoutmodule.h>
 
-#include <openspace/properties/propertyowner.h>
+#include <modules/spout/renderableplanespout.h>
+#include <modules/spout/screenspacespout.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/factorymanager.h>
 
-#include <vector>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-class OpenSpaceModule;
+SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
 
-class SettingsEngine : public properties::PropertyOwner {
-public:
-    SettingsEngine();
+void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 
-    void initialize();
+#ifdef WIN32
+    auto fSsRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
+    fSsRenderable->registerClass<ScreenSpaceSpout>("ScreenSpaceSpout");
 
-    void setModules(const std::vector<OpenSpaceModule*>& modules);
-
-private:
-    properties::OptionProperty _scenes;
-};
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+    fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
+#endif // WIN32
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___SETTINGSENGINE___H__

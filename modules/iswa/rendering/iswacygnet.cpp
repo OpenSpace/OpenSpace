@@ -53,8 +53,8 @@ namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete(DeleteInfo)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _delete(DeleteInfo)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
@@ -82,8 +82,8 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("CoordinateType", _data->coordinateType);
     dictionary.getValue("XOffset", xOffset);
 
-    _data->id = (int) renderableId;
-    _data->updateTime = (int) updateTime;
+    _data->id = static_cast<int>(renderableId);
+    _data->updateTime = static_cast<int>(updateTime);
     _data->spatialScale = spatialScale;
     _data->gridMin = min;
     _data->gridMax = max;
@@ -98,7 +98,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
         (max.z - min.z)
     );
 
-
     offset = glm::vec3(
         (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f)+xOffset,
         (min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
@@ -112,7 +111,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     addProperty(_delete);
 
     dictionary.getValue("Group", _data->groupName);
-
 }
 
 IswaCygnet::~IswaCygnet(){}
@@ -294,7 +292,7 @@ void IswaCygnet::initializeGroup() {
         _alpha.setValue(dict.value<float>("alpha"));
     });
 
-    groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary){
         LDEBUG(name() + " Event clearGroup");
         OsEng.scriptEngine().queueScript(
             "openspace.removeSceneGraphNode('" + name() + "')",

@@ -220,6 +220,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = static_cast<int>(patchSegmentsd);
 
+    if (dictionary.hasValue<bool>("PerformShading")) {
+        _generalProperties.performShading = dictionary.value<bool>("PerformShading");
+    }
+
     // Init layer manager
     ghoul::Dictionary layersDictionary;
     if (!dictionary.getValue(keyLayers, layersDictionary)) {

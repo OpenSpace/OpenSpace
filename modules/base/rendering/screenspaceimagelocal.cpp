@@ -33,7 +33,7 @@
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/textureconversion.h>
 
 namespace {
@@ -123,10 +123,15 @@ void ScreenSpaceImageLocal::update() {
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
             _texture = std::move(texture);
+            _objectSize = _texture->dimensions();
             _textureIsDirty = false;
         }
 
     }
+}
+
+void ScreenSpaceImageLocal::bindTexture() {
+    _texture->bind();
 }
 
 } // namespace openspace

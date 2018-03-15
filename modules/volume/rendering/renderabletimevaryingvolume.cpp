@@ -23,9 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
+
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolume.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -34,13 +34,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/fmt.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace {
@@ -156,21 +155,21 @@ namespace volume {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clipPlanes(nullptr)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
+    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
+    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
+    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
-    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
-    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
-    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
-    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -222,7 +221,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
 
     if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load sequence directory '" << sequenceDir.path() << "'");
+        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
         return;
     }
 
@@ -340,16 +339,11 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
     ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-    try {
-        documentation::testSpecificationAndThrow(
-            TimestepDocumentation(),
-            dictionary,
-            "TimeVaryingVolumeTimestep"
-        );
-    } catch (const documentation::SpecificationError& e) {
-        LERROR(e.message << e.component);
-        return;
-    }
+    documentation::testSpecificationAndThrow(
+        TimestepDocumentation(),
+        dictionary,
+        "TimeVaryingVolumeTimestep"
+    );
 
     Timestep t;
     t.baseName = ghoul::filesystem::File(path).baseName();
@@ -368,7 +362,6 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    using TimeStep = RenderableTimeVaryingVolume::Timestep;
     if (_volumeTimesteps.size() == 0) {
         return nullptr;
     }

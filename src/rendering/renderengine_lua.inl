@@ -101,6 +101,7 @@ int addScreenSpaceRenderable(lua_State* L) {
     ghoul::Dictionary d;
     try {
         ghoul::lua::luaDictionaryFromState(L, d);
+        lua_settop(L, 0);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addScreenSpaceRenderable", e.what());
@@ -118,7 +119,7 @@ int addScreenSpaceRenderable(lua_State* L) {
 
 int removeScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
-    
+
     using ghoul::lua::errorLocation;
 
     std::string name = ghoul::lua::checkStringAndPop(L);
@@ -129,7 +130,9 @@ int removeScreenSpaceRenderable(lua_State* L) {
     if (!s) {
         LERRORC(
             "removeScreenSpaceRenderable",
-            errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'"
+            fmt::format(
+                "{}: Could not find ScreenSpaceRenderable '{}'",  errorLocation(L), name
+            )
         );
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;

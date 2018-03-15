@@ -67,14 +67,14 @@ out float vs_depth;
 
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
-    const float lookUpVal = (in_color_scalar - colorTableRange.x) /
+    float lookUpVal = (in_color_scalar - colorTableRange.x) /
                             (colorTableRange.y - colorTableRange.x);
     return texture(colorTable, lookUpVal);
 }
 
 bool isPartOfParticle(const double time, const int vertexId, const int particleSize,
                       const int particleSpeed, const int particleSpacing) {
-    const int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
+    int modulusResult = int(double(particleSpeed) * time + vertexId) % particleSpacing;
     return modulusResult > 0 && modulusResult <= particleSize;
 }
 
@@ -88,7 +88,7 @@ void main() {
     }
 
     if (usingDomain && hasColor) {
-        const float radius = length(in_position);
+        float radius = length(in_position);
 
         if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
             in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
@@ -100,7 +100,7 @@ void main() {
     }
 
     if (hasColor) {
-        const bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
+        bool isParticle = usingParticles && isPartOfParticle(time, gl_VertexID,
                                                                     particleSize,
                                                                     particleSpeed,
                                                                     particleSpacing);
@@ -112,7 +112,7 @@ void main() {
         }
 
         if (colorMethod == colorByQuantity) {
-            const vec4 quantityColor = getTransferFunctionColor();
+            vec4 quantityColor = getTransferFunctionColor();
             vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
         }
     } else {

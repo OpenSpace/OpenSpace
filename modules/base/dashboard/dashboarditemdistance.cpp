@@ -34,6 +34,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -409,7 +410,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
-};
+}
 
 void DashboardItemDistance::render(glm::vec2& penPosition) {
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(

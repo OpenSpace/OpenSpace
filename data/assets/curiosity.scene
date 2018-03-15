@@ -6,8 +6,7 @@ asset.require('spice/base')
 asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
 
-local CuriosityModelAsset =
-asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
+local CuriosityModelAsset = asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 local MarsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
 
@@ -21,8 +20,6 @@ asset.onInitialize(function ()
     openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
-    
-    -- Mark the Gaia Instrument Model (and a few stars?) as interesting nodes
     openspace.markInterestingNodes({
        "Curiosity", "Mars"
     })

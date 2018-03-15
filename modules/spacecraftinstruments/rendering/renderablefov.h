@@ -100,6 +100,7 @@ private:
     // instance variables
     bool _rebuild = false;
 
+    bool _simplifyBounds = false;
 
     //std::vector<float> _fovBounds;
     //std::vector<float> _fovPlane;

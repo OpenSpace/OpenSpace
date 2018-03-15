@@ -388,8 +388,8 @@ void RenderableMarsrover::loadTexture() {
         );
         if (texture) {
             LDEBUGC(
-                "RenderableMarsrover",
-                "Loaded texture from '" << absPath(_texturePath) << "'"
+                "RenderableSphere",
+                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             texture->uploadTexture();
 

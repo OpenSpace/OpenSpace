@@ -33,8 +33,6 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 
-#include <ghoul/filesystem/filesystem>
-
 // Error: cannot open source file "wms/wmsdriver.h"
 //#include "wms/wmsdriver.h" 
 

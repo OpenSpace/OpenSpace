@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "torrentsynchronization.h"
+#include <modules/sync/syncs/torrentsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
 
@@ -32,37 +32,52 @@
 
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
 
 
 namespace {
-    constexpr const char* _loggerCat = "TorrentSynchronization";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyMagnet = "Magnet";
-}
+} // namespace
 
 namespace openspace {
 
+documentation::Documentation TorrentSynchronization::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "TorrentSynchronization",
+        "torrent_synchronization",
+    {
+        {
+            KeyIdentifier,
+            new StringVerifier,
+            Optional::No,
+            "A unique identifier for this torrent"
+        },
+        {
+            KeyMagnet,
+            new StringVerifier,
+            Optional::No,
+            "A magnet link identifying the torrent"
+        }
+    }
+    };
+}
+
 TorrentSynchronization::TorrentSynchronization(const ghoul::Dictionary& dict,
                                                const std::string& synchronizationRoot,
-                                               TorrentClient* torrentClient)
+                                               TorrentClient& torrentClient)
     : ResourceSynchronization(dict)
-    , _enabled(false)
     , _synchronizationRoot(synchronizationRoot)
     , _torrentClient(torrentClient)
 {
     documentation::testSpecificationAndThrow(
-        ResourceSynchronization::Documentation(),
-        dict,
-        "ResourceSynchronization::TorrentSynchronization"
-    );
-
-    documentation::testSpecificationAndThrow(
         Documentation(),
         dict,
-        "TorrentSynchronization::TorrentSynchronization"
+        "TorrentSynchronization"
     );
 
     _identifier = dict.value<std::string>(KeyIdentifier);
@@ -73,36 +88,18 @@ TorrentSynchronization::~TorrentSynchronization() {
     cancel();
 }
 
-documentation::Documentation TorrentSynchronization::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "TorrentSynchronization",
-        "torrent_synchronization",
-        {
-            {
-                KeyIdentifier,
-                new StringVerifier,
-                Optional::No,
-                "A unique identifier for this torrent"
-            },
-            {
-                KeyMagnet,
-                new StringVerifier,
-                Optional::No,
-                "A magnet link identifying the torrent"
-            }
-        }
-    };
-}
-
 std::string TorrentSynchronization::uniformResourceName() const {
     size_t begin = _magnetLink.find("=urn") + 1;
     size_t end = _magnetLink.find('&', begin);
-    std::string xs = _magnetLink.substr(begin, end == std::string::npos ?
-        end : (end - begin));
+    std::string xs = _magnetLink.substr(
+        begin,
+        end == std::string::npos ? end : (end - begin)
+    );
 
     std::transform(xs.begin(), xs.end(), xs.begin(), [](char x) {
-        if (x == ':') return '.';
+        if (x == ':') {
+            return '.';
+        }
         return x;
     });
     return xs;
@@ -134,16 +131,15 @@ void TorrentSynchronization::start() {
 
     _enabled = true;
     try {
-        _torrentId = _torrentClient->addMagnetLink(
+        _torrentId = _torrentClient.addMagnetLink(
             _magnetLink,
             directory(),
             [this](TorrentClient::TorrentProgress p) {
                 updateTorrentProgress(p);
             }
         );
-    } catch (const TorrentError&) {
-        LERROR("Failed to synchronize '" << name() <<
-            "'.\nOpenSpace needs to be linked with libtorrent.");
+    } catch (const TorrentError& e) {
+        LERRORC(name(), e.message);
         if (!isResolved()) {
             reject();
         }
@@ -152,7 +148,7 @@ void TorrentSynchronization::start() {
 
 void TorrentSynchronization::cancel() {
     if (_enabled) {
-        _torrentClient->removeTorrent(_torrentId);
+        _torrentClient.removeTorrent(_torrentId);
         _enabled = false;
         reset();
     }
@@ -169,9 +165,11 @@ bool TorrentSynchronization::hasSyncFile() {
 }
 
 void TorrentSynchronization::createSyncFile() {
-    std::string dir = directory();
-    std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
+    std::string directoryName = directory();
+    std::string filepath = directoryName + ".ossync";
+
+    FileSys.createDirectory(directoryName, ghoul::filesystem::Directory::Recursive::Yes);
+
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();
@@ -197,7 +195,7 @@ void TorrentSynchronization::updateTorrentProgress(
 {
     std::lock_guard<std::mutex> g(_progressMutex);
     _progress = progress;
-    if (progress.finished && state() == State::Syncing) {
+    if (progress.finished && (state() == State::Syncing)) {
         createSyncFile();
         resolve();
     }
