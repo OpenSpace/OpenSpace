@@ -6,44 +6,45 @@ import { traverseTreeWithURI, jsonToLuaTable } from '../../utils/propertyTreeHel
 import { startListening, stopListening } from '../../api/Actions';
 
 class Markers extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      screenSpaceTest: [],
-    };
-  }
-
   componentDidUpdate() {
-    if (this.props.ScreenSpaceProperties.length > 0) {
-      this.props.ScreenSpaceProperties.forEach((property, i) => {
-        const screenSpacePos = jsonToLuaTable(property.Value).split(',');
-        if (property.listeners === 0) {
-          this.props.StartListening(property.Description.Identifier);
-          this.state.screenSpaceTest.push(screenSpacePos);
+    const { nodes, screenSpaceProperties, clipSpaceProperties } = this.props;
+
+    if (nodes.length > 0) {
+      nodes.forEach((node, i) => {
+        if (screenSpaceProperties[i].listeners === 0) {
+          this.props.StartListening(screenSpaceProperties[i].Description.Identifier);
         }
-        if ((this.state.screenSpaceTest[i][0] !== screenSpacePos[0] ||
-          this.state.screenSpaceTest[i][1] !== screenSpacePos[1])) {
-          this.state.screenSpaceTest[i] = screenSpacePos;
+        if (clipSpaceProperties[i].listeners === 0) {
+          this.props.StartListening(clipSpaceProperties[i].Description.Identifier);
         }
       });
     }
   }
 
   componentWillUnmount() {
-    this.props.ScreenSpaceProperties.forEach((property) => {
-      this.props.StopListening(property.Description.Identifier);
+    const { nodes, screenSpaceProperties, clipSpaceProperties } = this.props;
+    nodes.forEach((node, i) => {
+      this.props.StopListening(screenSpaceProperties[i].Description.Identifier);
+      this.props.StopListening(clipSpaceProperties[i].Description.Identifier);
     });
   }
 
   createInfoMarkers() {
-    const { ScreenSpaceProperties } = this.props;
-    const markerInfo = ScreenSpaceProperties.map((property, i) => {
-      if (this.state.screenSpaceTest[i][0] !== '-1') {
-        const name = property.Description.Identifier.split('.')[1];
+    const { nodes, screenSpaceProperties, clipSpaceProperties } = this.props;
+
+    const markerInfo = nodes.map((node, i) => {
+      const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
+      const clipSpaceCoord = jsonToLuaTable(clipSpaceProperties[i].Value).split(',');
+
+      if (screenSpacePos[0] !== '-1') {
+        // TODO Check for a good function for the size of the icons based on the
+        // clipsSpaceCoord.z (10000000000 / clipSpaceCoord[3]) * 0.1;
+        const size = 2;
         return (<MarkerInfo
-          key={property.Description.Identifier}
-          name={name}
-          position={this.state.screenSpaceTest[i]}
+          key={screenSpaceProperties[i].Description.Identifier}
+          name={node.name}
+          position={screenSpacePos}
+          size={size}
         />);
       }
     });
@@ -53,7 +54,7 @@ class Markers extends Component {
   render() {
     return (
       <div className={'Markers'}>
-        {this.state.screenSpaceTest.length > 0 && this.createInfoMarkers()}
+        {this.props.screenSpaceProperties.length > 0 && this.createInfoMarkers()}
       </div>
     );
   }
@@ -62,28 +63,30 @@ class Markers extends Component {
 const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let nodes = [];
-  const ScreenSpaceProperties = [];
-  const ClipSpaceProperties = [];
+  const screenSpaceProperties = [];
+  const clipSpaceProperties = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners.filter(element => element.name === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
+
     nodes = nodes.filter(node => node.tag.some(tag => tag.includes('Touch.Interesting')))
       .map(node => Object.assign(node, { key: node.name }));
 
     nodes.forEach((node) => {
-      ScreenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ScreenSpacePosition`));
+      screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ScreenSpacePosition`));
     });
 
     nodes.forEach((node) => {
-      ClipSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ClipSpaceCoordinates`));
+      clipSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ClipSpaceCoordinates`));
     });
   }
   return {
-    ScreenSpaceProperties,
-    ClipSpaceProperties,
+    nodes,
+    screenSpaceProperties,
+    clipSpaceProperties,
   };
 };
 
@@ -102,16 +105,23 @@ Markers = connect(
 )(Markers);
 
 Markers.propTypes = {
-  ScreenSpaceProperties: PropTypes.arrayOf(PropTypes.shape({
+  screenSpaceProperties: PropTypes.arrayOf(PropTypes.shape({
     Description: PropTypes.string,
     Value: PropTypes.string,
   })),
+  clipSpaceProperties: PropTypes.arrayOf(PropTypes.shape({
+    Description: PropTypes.string,
+    Value: PropTypes.string,
+  })),
+  nodes: PropTypes.arrayOf(PropTypes.shape({})),
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,
 };
 
 Markers.defaultProps = {
-  ScreenSpaceProperties: [],
+  nodes: [],
+  screenSpaceProperties: [],
+  clipSpaceProperties: [],
   Description: [],
   Value: '',
   StopListening: null,
