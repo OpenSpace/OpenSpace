@@ -32,7 +32,9 @@ local object = {
         ScaleFactor = 360,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Brown Dwarfs"
+    GUI = {
+        Path = "/Milky Way/Brown Dwarfs"
+    }
 }
 
 

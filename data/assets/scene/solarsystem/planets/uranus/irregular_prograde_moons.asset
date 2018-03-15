@@ -20,7 +20,9 @@ local irregularMoons = {
         Spice = "MARGARET",
         Radii = { 20000, 20000, 20000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Irregular Prograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1694.8,
         Kernels = kernels112

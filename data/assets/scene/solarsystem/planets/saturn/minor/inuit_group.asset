@@ -20,7 +20,9 @@ local inuitGroup = {
         Spice = "KIVIUQ",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 448.16,
         Kernels = kernels368
@@ -34,7 +36,9 @@ local inuitGroup = {
         Spice = "IJIRAQ",
         Radii = { 12000, 12000, 12000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 451.77,
         Kernels = kernels368
@@ -48,7 +52,9 @@ local inuitGroup = {
         Spice = "PAALIAQ",
         Radii = { 22000, 22000, 22000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 692.98,
         Kernels = kernels368
@@ -62,7 +68,9 @@ local inuitGroup = {
         Spice = "SIARNAQ",
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 884.88,
         Kernels = kernels368
@@ -76,7 +84,9 @@ local inuitGroup = {
         Spice = "TARQEQ",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 894.86,
         Kernels = kernels368

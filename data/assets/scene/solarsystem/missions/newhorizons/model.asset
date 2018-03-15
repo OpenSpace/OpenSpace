@@ -29,8 +29,10 @@ local NewHorizons = {
         }, 
         ColorTexture = textures .. "/NHTexture.jpg"
     },
-    Name = "New Horizons",
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "New Horizons",
+        Path = "/Solar System/Missions/New Horizons"
+    }
 }
 
 

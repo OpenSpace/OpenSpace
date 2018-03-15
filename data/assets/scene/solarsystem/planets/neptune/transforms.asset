@@ -14,8 +14,10 @@ local NeptuneBarycenter = {
             Observer = "SUN"
         }
     },
-    Name = "Neptune Barycenter",
-    GuiPath = "/Solar System/Planets/Neptune"
+    GUI = {
+        Name = "Neptune Barycenter",
+        Path = "/Solar System/Planets/Neptune"
+    },
 }
 
 

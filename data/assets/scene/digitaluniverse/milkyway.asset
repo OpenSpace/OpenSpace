@@ -34,8 +34,10 @@ local sphere = {
         Orientation = "Inside/Outside",
         FadeOutThreshould = 0.25
     },
-    Name = "Milky Way",
-    GuiPath = "/Milky Way/Milky Way"
+    GUI = {
+        Name = "Milky Way",
+        Path = "/Milky Way/Milky Way"
+    }
 }
 
 local plane = {
@@ -57,8 +59,10 @@ local plane = {
         PlaneMinSize = 5.0,
         Unit = "pc"
     },
-    Name = "Milky Way Galaxy Image",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Milky Way Galaxy Image",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

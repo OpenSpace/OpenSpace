@@ -31,8 +31,10 @@ local object = {
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/denver_colorbv.cmap"
     },
-    Name = "Stars (Denver)",
-    GuiPath = "/Milky Way/Stars"
+    GUI = {
+        Name = "Stars (Denver)",
+        Path = "/Milky Way/Stars"
+    }
 }
 
 

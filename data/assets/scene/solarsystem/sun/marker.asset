@@ -17,8 +17,10 @@ local SunMarker = {
         Texture = textures .. "/marker.png",
         BlendMode = "Additive"
     },
-    Name = "Sun Marker",
-    GuiPath = "/Solar System/Sun"
+    GUI = {
+        Name = "Sun Marker",
+        Path = "/Solar System/Sun"
+    },
 }
 
 

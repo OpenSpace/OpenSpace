@@ -33,8 +33,10 @@ local object = {
         TextMinSize = 2.0,
         Unit = "pc"
     },
-    Name = "HII Regions",
-    GuiPath = "/Milky Way/HII"
+    GUI = {
+        Name = "HII Regions",
+        Path = "/Milky Way/HII"
+    }
 }
 
 

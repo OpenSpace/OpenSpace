@@ -15,7 +15,9 @@ local RenderablePlaneImageOnline = {
         Billboard = true,
         URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
     },
-    GuiPath = "/Examples"
+    GUI = {
+        Path = "/Examples"
+    }
 }
 
 

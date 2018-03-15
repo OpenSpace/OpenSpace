@@ -236,7 +236,9 @@ local Earth = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 

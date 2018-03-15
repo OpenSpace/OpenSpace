@@ -20,7 +20,9 @@ local gallicGroup = {
         Spice = "ALBIORIX",
         Radii = { 32000, 32000, 32000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 774.58,
         Kernels = kernels368
@@ -34,7 +36,9 @@ local gallicGroup = {
         Spice = "BEBHIONN",
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 838.77,
         Kernels = kernels368
@@ -48,7 +52,9 @@ local gallicGroup = {
         Spice = "ERRIAPUS",
         Radii = { 10000, 10000, 10000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 844.89,
         Kernels = kernels368
@@ -62,7 +68,9 @@ local gallicGroup = {
         Spice = "TARVOS",
         Radii = { 15000, 15000, 15000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 944.23,
         Kernels = kernels368

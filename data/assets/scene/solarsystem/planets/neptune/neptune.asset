@@ -37,7 +37,9 @@ local Neptune = {
         }
     },
     Tag = { "planet_solarSystem", "planet_giants" },
-    GuiPath = "/Solar System/Planets/Neptune"
+    GUI = {
+        Path = "/Solar System/Planets/Neptune"
+    }
 }
 
 

@@ -15,8 +15,10 @@ local BennuBarycenter = {
             Observer = "SUN"
         }
     },
-    Name = "Bennu Barycenter",
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "Bennu Barycenter",
+        Path = "/Solar System/Missions/OSIRIS REx"
+    }
 }
 
 

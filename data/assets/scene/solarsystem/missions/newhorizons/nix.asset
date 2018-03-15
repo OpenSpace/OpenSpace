@@ -32,7 +32,9 @@ local Nix = {
         },
         ColorTexture = textures .. "/gray.jpg",
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local NixText = {
@@ -46,8 +48,10 @@ local NixText = {
         Texture = textures .. "/Nix-Text.png",
         BlendMode = "Additive"
     },
-    Name = "Nix Text",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Nix Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local NixTrail = {
@@ -64,8 +68,10 @@ local NixTrail = {
         Period = 24.85463,
         Resolution = 1000
     },
-    Name = "Nix Trail",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Nix Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

@@ -55,8 +55,10 @@ local Atmosphere = {
             }
         }
     },
-    Name = "Mars Atmosphere",
-    GuiPath = "/Solar System/Planets/Mars"
+    GUI = {
+        Name = "Mars Atmosphere",
+        Path = "/Solar System/Planets/Mars"
+    },
 }
 
 

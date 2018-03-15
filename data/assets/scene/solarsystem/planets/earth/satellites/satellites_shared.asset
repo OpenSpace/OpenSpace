@@ -70,7 +70,9 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 }
             },
             Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
-            GuiPath = "/Solar System/Planets/Earth/Satellites"
+            GUI = {
+                Path = "/Solar System/Planets/Earth/Satellites"
+            }
         }
     end
 
@@ -92,7 +94,9 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 Resolution = 160
             },
             Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
-            GuiPath = "/Solar System/Planets/Earth/Satellites"
+            GUI = {
+                Path = "/Solar System/Planets/Earth/Satellites"
+            }
         }
     end
 

@@ -20,8 +20,10 @@ local object = {
         Orientation = "Inside/Outside",
         FadeOutThreshould = 0.01
     },
-    Name = "Milky Way (ESO)",
-    GuiPath = "/Milky Way/Milky Way"
+    GUI = {
+        Name = "Milky Way (ESO)",
+        Path = "/Milky Way/Milky Way"
+    }
 }
 
 

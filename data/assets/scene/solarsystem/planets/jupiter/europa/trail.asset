@@ -21,8 +21,10 @@ local EuropaTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    Name = "Europa Trail",
-    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+    GUI = {
+        Name = "Europa Trail",
+        Path = "/Solar System/Planets/Jupiter/Moons"
+    }
 }
 
 

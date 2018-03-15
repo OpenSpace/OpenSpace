@@ -23,8 +23,10 @@ local ecliptic = {
                        -0.09647644,  0.8622859,  0.4971472   , 0.0,
                         0.0       ,  0.0      ,  0.0         , 1.0 }
     },
-    Name = "Ecliptic Sphere",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "Ecliptic Sphere",
+        Path = "/Other/Grids"
+    }
 }
 
 local eclipticLabels = {
@@ -47,8 +49,10 @@ local eclipticLabels = {
             0.0,          0.0,        0.0,          1.0
         }
     },
-    Name = "Ecliptic Sphere Labels",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "Ecliptic Sphere Labels",
+        Path = "/Other/Grids"
+    }
 }
 
 local equatorial = {
@@ -65,8 +69,10 @@ local equatorial = {
                        -0.483835  ,  0.7469823,  0.4559838, 0.0,
                         0.0       ,  0.0      ,  0.0      , 1.0 },
     },
-    Name = "Equatorial Sphere",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "Equatorial Sphere",
+        Path = "/Other/Grids"
+    }
 }
 
 local equatorialLabels = {
@@ -89,8 +95,10 @@ local equatorialLabels = {
             0.0,          0.0,        0.0,          1.0
         }
     },
-    Name = "Equatorial Sphere Labels",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "Equatorial Sphere Labels",
+        Path = "/Other/Grids"
+    }
 }
 
 local galactic = {
@@ -103,8 +111,10 @@ local galactic = {
         Radius = 9.46377307652E18;
         GridColor = { 0.0, 0.6, 0.6, 0.6}
     },
-    Name = "Galactic Sphere",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "Galactic Sphere",
+        Path = "/Other/Grids"
+    }
 }
 
 local galacticLabels = {
@@ -121,8 +131,10 @@ local galacticLabels = {
         TextMinSize = 5.0,
         Unit = "pc"
     },
-    Name = "Galactic Sphere Labels",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "Galactic Sphere Labels",
+        Path = "/Other/Grids"
+    }
 }
 
 local plane100kly = {
@@ -141,8 +153,10 @@ local plane100kly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
-    Name = "100kly Grid",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "100kly Grid",
+        Path = "/Other/Grids"
+    }
 }
 
 local plane1Mly = {
@@ -161,8 +175,10 @@ local plane1Mly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
-    Name = "1Mly Grid",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "1Mly Grid",
+        Path = "/Other/Grids"
+    }
 }
 
 local plane10Mly = {
@@ -181,8 +197,10 @@ local plane10Mly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
-    Name = "10Mly Grid",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "10Mly Grid",
+        Path = "/Other/Grids"
+    }
 }
 
 local plane100Mly = {
@@ -201,8 +219,10 @@ local plane100Mly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
-    Name = "100Mly Grid",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "100Mly Grid",
+        Path = "/Other/Grids"
+    }
 }
 
 local plane20Gly = {
@@ -221,8 +241,10 @@ local plane20Gly = {
         TextMinSize = 7.0,
         Unit = "Mpc"
     },
-    Name = "20Gly Grid",
-    GuiPath = "/Other/Grids"
+    GUI = {
+        Name = "20Gly Grid",
+        Path = "/Other/Grids"
+    }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {

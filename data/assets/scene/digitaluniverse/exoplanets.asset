@@ -34,7 +34,9 @@ local object = {
         TextMinSize = 10.0,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Exoplanets"
+    GUI = {
+        Path = "/Milky Way/Exoplanets"
+    }
 }
 
 

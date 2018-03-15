@@ -18,8 +18,10 @@ local UranusTrail = {
         Resolution = 1000
     },
     Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
-    Name = "Uranus Trail",
-    GuiPath = "/Solar System/Planets/Uranus"
+    GUI = {
+        Name = "Uranus Trail",
+        Path = "/Solar System/Planets/Uranus"
+    }
 }
 
 

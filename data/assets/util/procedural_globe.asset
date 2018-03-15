@@ -19,7 +19,9 @@ local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spi
             Layers = {},
             Tag = tags
         },
-        GuiPath = guiPath
+        GUI = {
+            Path = guiPath
+        }
     },
     {
         Identifier = identifier .. "Trail",
@@ -35,15 +37,17 @@ local createGlobeWithoutName = function(identifier, parent, parentSpiceName, spi
             Period = orbitPeriod,
             Resolution = 1000
         },
-        GuiPath = guiPath
+        GUI = {
+            Path = guiPath
+        }
     }
 end
 
 local createGlobeWithName = function(identifier, name, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
     g, t = createGlobeWithoutName(identifier, parent, parentSpiceName, spiceName, radii, tags, guiPath, trailColor, orbitPeriod, kernels)
 
-    g.Name = name
-    t.Name = name .. " Trail"
+    g.GUI.Name = name
+    t.GUI.Name = name .. " Trail"
 
     return g, t
 end
@@ -68,13 +72,13 @@ local createGlobes = function(t)
         if v.Name then
             globe, trail = createGlobeWithName(
                 v.Identifier,
-                v.Name,
+                v.GUI.Name,
                 v.Parent.Identifier,
                 v.Parent.Spice,
                 v.Spice,
                 v.Radii,
                 v.Tags,
-                v.GuiPath,
+                v.GUI.Path,
                 v.TrailColor,
                 v.OrbitPeriod,
                 v.Kernels
@@ -87,7 +91,7 @@ local createGlobes = function(t)
                 v.Spice,
                 v.Radii,
                 v.Tags,
-                v.GuiPath,
+                v.GUI.Path,
                 v.TrailColor,
                 v.OrbitPeriod,
                 v.Kernels

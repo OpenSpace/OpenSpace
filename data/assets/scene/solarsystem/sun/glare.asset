@@ -23,8 +23,10 @@ local SunGlare = {
             Observer = "SSB"
         }
     },
-    Name = "Sun Glare",
-    GuiPath = "/Solar System/Sun"
+    GUI = {
+        Name = "Sun Glare",
+        Path = "/Solar System/Sun"
+    },
 }
 
 

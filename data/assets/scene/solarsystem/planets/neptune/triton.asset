@@ -14,7 +14,9 @@ local Triton = {
     Spice = "TRITON",
     Radii = { 2709000, 2706000, 2705000 },
     Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
-    GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+    GUI = {
+        Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+    },
     TrailColor = { 0.2, 0.5, 0.75 },
     OrbitPeriod = 5.877,
     Kernels = kernels081

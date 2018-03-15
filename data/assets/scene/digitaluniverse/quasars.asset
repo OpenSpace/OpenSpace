@@ -32,7 +32,9 @@ local object = {
         BillboardMaxSize = 30.0,
         BillboardMinSize = 0.0,
     },
-    GuiPath = "/Universe/Quasars"
+    GUI = {
+        Path = "/Universe/Quasars"
+    }
 }
 
 

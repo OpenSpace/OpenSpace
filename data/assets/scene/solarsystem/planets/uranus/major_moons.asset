@@ -20,7 +20,9 @@ local majorMoons = {
         Spice = "MIRANDA",
         Radii = { 471600, 468000, 466000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.413479,
         Kernels = kernels111
@@ -34,7 +36,9 @@ local majorMoons = {
         Spice = "ARIEL",
         Radii = { 1162000, 1156000, 1155000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 2.520379,
         Kernels = kernels111
@@ -48,7 +52,9 @@ local majorMoons = {
         Spice = "UMBRIEL",
         Radii = { 1169400, 1169400, 1169400 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 4.144177,
         Kernels = kernels111
@@ -62,7 +68,9 @@ local majorMoons = {
         Spice = "TITANIA",
         Radii = { 1576800, 1576800, 1576800 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 8.705872,
         Kernels = kernels111
@@ -76,7 +84,9 @@ local majorMoons = {
         Spice = "OBERON",
         Radii = { 1522800, 1522800, 1522800 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 13.463239,
         Kernels = kernels111

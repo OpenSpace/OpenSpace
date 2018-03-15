@@ -208,8 +208,10 @@ local OsirisRex = {
         },
         ColorTexture = textures .. "/osirisTex.png"
     },
-    Name = "OSIRIS REx",
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OSIRIS REx",
+        Path = "/Solar System/Missions/OSIRIS REx"
+    }
 }
 
 local PolyCam = {
@@ -235,7 +237,10 @@ local PolyCam = {
         }, 
         ColorTexture = textures .. "/osirisTex.png"
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OCAMS POLYCAM",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 local Rexis = {
@@ -261,7 +266,10 @@ local Rexis = {
             DestinationFrame = "ORX_SPACECRAFT"
         },
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "REXIS",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 local PolyCamFov = {
@@ -279,7 +287,10 @@ local PolyCamFov = {
         },
         PotentialTargets = { BENNU_BODY }
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "POLYCAM FOV",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 local RexisFov = {
@@ -300,7 +311,10 @@ local RexisFov = {
             [BENNU_BODY] = "IAU_BENNU"
         }
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "REXIS FOV",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 

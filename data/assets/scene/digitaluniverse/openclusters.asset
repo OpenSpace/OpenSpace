@@ -33,8 +33,10 @@ local object = {
         TextMinSize = 4.5,
         Unit = "pc"
     },
-    Name = "Open Star Clusters",
-    GuiPath = "/Milky Way/Open Clusters"
+    GUI = {
+        Name = "Open Star Clusters",
+        Path = "/Milky Way/Open Clusters"
+    }
 }
 
 

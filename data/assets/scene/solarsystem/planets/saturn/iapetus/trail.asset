@@ -20,8 +20,10 @@ local IapetusTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    Name = "Iapetus Trail",
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Name = "Iapetus Trail",
+        Path = "/Solar System/Planets/Saturn/Moons"
+    },
 }
 
 

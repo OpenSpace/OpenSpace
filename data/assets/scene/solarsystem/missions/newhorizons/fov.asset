@@ -32,7 +32,10 @@ local Lorri = {
             Position = LorriOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "LORRI",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphLeisa = {
@@ -59,7 +62,10 @@ local RalphLeisa = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH LEISA",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicPan1 = {
@@ -86,7 +92,10 @@ local RalphMvicPan1 = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC PAN 1",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicPan2 = {
@@ -113,7 +122,10 @@ local RalphMvicPan2 = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC PAN 2",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicRed = {
@@ -140,7 +152,10 @@ local RalphMvicRed = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC RED",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicBlue = {
@@ -167,7 +182,10 @@ local RalphMvicBlue = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC BLUE",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicFt = {
@@ -194,7 +212,10 @@ local RalphMvicFt = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC FT",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicMethane = {
@@ -221,7 +242,10 @@ local RalphMvicMethane = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC METHANE",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicNir = {
@@ -248,7 +272,10 @@ local RalphMvicNir = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC NIR",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local AliceAirglow = {
@@ -276,7 +303,10 @@ local AliceAirglow = {
             Position = AliceOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "ALICE AIRGLOW",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local AliceSoc = {
@@ -303,7 +333,10 @@ local AliceSoc = {
             Position = AliceOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "ALICE SOC",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local Rex = {
@@ -333,7 +366,10 @@ local Rex = {
             Position = RexOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "REX",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 

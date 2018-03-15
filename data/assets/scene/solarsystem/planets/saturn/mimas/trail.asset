@@ -20,8 +20,10 @@ local MimasTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    Name = "Mimas Trail",
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Name = "Mimas Trail",
+        Path = "/Solar System/Planets/Saturn/Moons"
+    },
 }
 
 

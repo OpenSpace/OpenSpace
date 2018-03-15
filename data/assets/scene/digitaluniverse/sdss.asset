@@ -38,8 +38,10 @@ local object = {
         TextMinSize = 10.0,
         TextMaxSize = 50.0
     },
-    Name = "Sloan Digital Sky Survey",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Sloan Digital Sky Survey",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

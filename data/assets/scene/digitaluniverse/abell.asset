@@ -38,8 +38,10 @@ local object = {
             0.0,              0.0,            0.0,           1.0
         }
     },
-    Name = "Abell Galaxy Clusters",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Abell Galaxy Clusters",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

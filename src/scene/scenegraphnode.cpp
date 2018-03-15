@@ -56,9 +56,8 @@
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";
-    constexpr const char* KeyGuiPath = "GuiPath";
-
-    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyName = "GUI.Name";
+    constexpr const char* KeyGuiPath = "GUI.Path";
 
     constexpr const char* keyTransformTranslation = "Transform.Translation";
     constexpr const char* keyTransformRotation = "Transform.Rotation";

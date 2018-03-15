@@ -33,8 +33,10 @@ local object = {
         TextMinSize = 4.5,
         Unit = "pc"
     },
-    Name = "Planetary Nebulae",
-    GuiPath = "/Milky Way/Planetary Nebulae"
+    GUI = {
+        Name = "Planetary Nebulae",
+        Path = "/Milky Way/Planetary Nebulae"
+    }
 }
 
 

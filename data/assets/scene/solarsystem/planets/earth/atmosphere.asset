@@ -11,23 +11,23 @@ local Atmosphere = {
     Renderable = {
         Type = "RenderableAtmosphere",
         Atmosphere = {
-          -- Atmosphere radius in Km
-          AtmosphereRadius = 6447.0,
-          PlanetRadius    = 6377.0,
-          PlanetAverageGroundReflectance = 0.1,
-          GroundRadianceEmittion = 0.6,
-          Rayleigh = {
-            Coefficients = {
-              -- Wavelengths are given in 10^-9m
-              Wavelengths = { 680, 550, 440 },
-              -- Reflection coefficients are given in km^-1
-              Scattering = { 5.8E-3, 13.5E-3, 33.1E-3 },
-              -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
+            -- Atmosphere radius in Km
+            AtmosphereRadius = 6447.0,
+            PlanetRadius    = 6377.0,
+            PlanetAverageGroundReflectance = 0.1,
+            GroundRadianceEmittion = 0.6,
+            Rayleigh = {
+              Coefficients = {
+                -- Wavelengths are given in 10^-9m
+                Wavelengths = { 680, 550, 440 },
+                -- Reflection coefficients are given in km^-1
+                Scattering = { 5.8E-3, 13.5E-3, 33.1E-3 },
+                -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
+              },
+              -- Thichkness of atmosphere if its density were uniform, in Km
+              H_R = 8.0
             },
-            -- Thichkness of atmosphere if its density were uniform, in Km
-            H_R = 8.0
-          },
-          --[[
+            --[[
               Ozone = {
               Coefficients = {
                 -- Extinction coefficients 
@@ -93,8 +93,10 @@ local Atmosphere = {
             --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
          }
     },
-    Name = "Earth Atmosphere",
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth Atmosphere",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 

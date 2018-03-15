@@ -33,7 +33,9 @@ local Styx = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local StyxText = {
@@ -53,8 +55,10 @@ local StyxText = {
         Texture = textures .. "/Styx-Text.png",
         BlendMode = "Additive"
     },
-    Name = "Styx Text",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Styx Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local StyxTrail = {
@@ -71,8 +75,10 @@ local StyxTrail = {
         Period = 20.16155,
         Resolution = 1000
     },
-    Name = "Styx Trail",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Styx Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

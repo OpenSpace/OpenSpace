@@ -37,7 +37,9 @@ local Uranus = {
         }
     },
     Tag = { "planet_solarSystem", "planet_giants" },
-    GuiPath = "/Solar System/Planets/Uranus"
+    GUI = {
+        Path = "/Solar System/Planets/Uranus"
+    } 
 }
 
 

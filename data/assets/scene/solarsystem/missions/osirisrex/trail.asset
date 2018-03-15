@@ -23,8 +23,10 @@ local OsirisRexTrailEarth = {
         EndTime = "2016 SEP 9 00:05:00",
         SampleInterval = 60
     },
-    Name = "OSIRIS REx Trail Earth",
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OSIRIS REx Trail Earth",
+        Path = "/Solar System/Missions/OSIRIS REx"
+    }
 }
 
 local OsirisRexTrailSolarSystem = {
@@ -42,8 +44,10 @@ local OsirisRexTrailSolarSystem = {
         EndTime = "2023 SEP 24 12:00:00",
         SampleInterval = 3600
     },
-    Name = "OSIRIS REx Trail Solar System",
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OSIRIS REx Trail Solar System",
+        Path = "/Solar System/Missions/OSIRIS REx"
+    }
 }
 
 local OsirisRexTrailBennu = {
@@ -61,8 +65,10 @@ local OsirisRexTrailBennu = {
         EndTime = "2023 SEP 24 12:00:00",
         SampleInterval = 3600
     },
-    Name = "OSIRIS REx Trail Bennu",
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OSIRIS REx Trail Bennu",
+        Path = "/Solar System/Missions/OSIRIS REx"
+    }
 }
 
 

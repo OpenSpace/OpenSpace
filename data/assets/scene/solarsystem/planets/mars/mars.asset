@@ -165,7 +165,9 @@ local Mars = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Mars"
+    GUI = {
+        Path = "/Solar System/Planets/Mars"
+    },
 }
 
 

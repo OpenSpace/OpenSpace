@@ -36,7 +36,9 @@ local Deimos = {
         }
     },
     Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
-    GuiPath = "/Solar System/Planets/Mars"
+    GUI = {
+        Path = "/Solar System/Planets/Mars"
+    },
 }
 
 local DeimosTrail = {
@@ -54,8 +56,10 @@ local DeimosTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
-    Name = "Deimos Trail",
-    GuiPath = "/Solar System/Planets/Mars"
+    GUI = {
+        Name = "Deimos Trail",
+        Path = "/Solar System/Planets/Mars"
+    },
 }
 
 

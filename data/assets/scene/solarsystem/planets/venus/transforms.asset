@@ -14,8 +14,10 @@ local VenusBarycenter = {
             Observer = "SUN"
         }
     },
-    Name = "Venus Barycenter",
-    GuiPath = "/Solar System/Planets/Venus"
+    GUI = {
+        Name = "Venus Barycenter",
+        Path = "/Solar System/Planets/Venus"
+    },
 }
 
 

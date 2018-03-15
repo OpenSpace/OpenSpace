@@ -55,7 +55,9 @@ local Mercury = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Mercury"
+    GUI = {
+        Path = "/Solar System/Planets/Mercury"
+    },
 }
 
 

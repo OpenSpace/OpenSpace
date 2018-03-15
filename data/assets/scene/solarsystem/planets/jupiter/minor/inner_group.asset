@@ -20,7 +20,9 @@ local innerMoons = {
         Spice = "METIS",
         Radii = { 60000, 40000, 34000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.117912037,
         Kernels = kernels341
@@ -34,7 +36,9 @@ local innerMoons = {
         Spice = "ADRASTEA",
         Radii = { 20000, 16000, 14000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.2982638889,
         Kernels = kernels341
@@ -48,7 +52,9 @@ local innerMoons = {
         Spice = "AMALTHEA",
         Radii = { 250000, 146000, 128000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.4981828704,
         Kernels = kernels341
@@ -62,7 +68,9 @@ local innerMoons = {
         Spice = "THEBE",
         Radii = { 116000, 98000, 84000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Inner Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.6745023148,
         Kernels = kernels341

@@ -52,8 +52,10 @@ local Voyager2 = {
             DestinationFrame = "GALACTIC"
         }
     },
-    Name = "Voyager 2",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local Voyager2Main = {
@@ -68,8 +70,10 @@ local Voyager2Main = {
         ColorTexture = models .. "/voyager-main.jpg",
         ModelTransform = RotationMatrix
     },
-    Name = "Voyager 2 Main",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Main",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local Voyager2Antenna = {
@@ -84,8 +88,10 @@ local Voyager2Antenna = {
         ColorTexture = models .. "/voyager-antenna.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Voyager 2 Antanna",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Antanna",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
     -- The trails are organized as follows.  The cruise phases can be resolved in relatively
@@ -107,8 +113,10 @@ local VoyagerTrailCruiseEarthJupiter = {
         EndTime = "1979 JUL 06",
         SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
     },
-    Name = "Voyager 2 Trail Cruise Earth-Jupiter",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Earth-Jupiter",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterJupiter = {
@@ -128,8 +136,10 @@ local VoyagerTrailEncounterJupiter = {
         EndTime = "1979 JUL 15",
         SampleInterval = 100
     },
-    Name = "Voyager 2 Trail Encounter Jupiter",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Jupiter",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailCruiseJupiterSaturn = {
@@ -149,8 +159,10 @@ local VoyagerTrailCruiseJupiterSaturn = {
         EndTime = "1981 AUG 23",
         SampleInterval = 770 * 2  -- 770 is the number of days between the Start and End time
     },
-    Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterSaturn = {
@@ -170,8 +182,10 @@ local VoyagerTrailEncounterSaturn = {
         EndTime = "1981 AUG 30",
         SampleInterval = 100
     },
-    Name = "Voyager 2 Trail Encounter Saturn",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Saturn",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailSaturnUranus = {
@@ -191,8 +205,10 @@ local VoyagerTrailSaturnUranus = {
         EndTime = "1986 JAN 22",
         SampleInterval = 1971  * 2  -- 1971 is the number of days between the Start and End time
     },
-    Name = "Voyager 2 Trail Cruise Saturn-Uranus",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Saturn-Uranus",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterUranus = {
@@ -212,8 +228,10 @@ local VoyagerTrailEncounterUranus = {
         EndTime = "1986 JAN 27",
         SampleInterval = 100
     },
-    Name = "Voyager 2 Trail Encounter Uranus",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Uranus",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailCruiseUranusNeptune = {
@@ -233,8 +251,10 @@ local VoyagerTrailCruiseUranusNeptune = {
         EndTime = "1989 AUG 24",
         SampleInterval = 1305  * 2  -- 1305 is the number of days between the Start and End time
     },
-    Name = "Voyager 2 Trail Cruise Uranus-Neptune",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Uranus-Neptune",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterNeptune = {
@@ -254,8 +274,10 @@ local VoyagerTrailEncounterNeptune = {
         EndTime = "1989 AUG 26",
         SampleInterval = 100
     },
-    Name = "Voyager 2 Trail Encounter Neptune",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Neptune",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailCruiseNeptuneInf = {
@@ -275,8 +297,10 @@ local VoyagerTrailCruiseNeptuneInf = {
         EndTime = "2021 JAN 01",
         SampleInterval = 11451 * 2  -- 11451 is the number of days between the Start and End time
     },
-    Name = "Voyager 2 Trail Cruise Neptune-Inf",
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Neptune-Inf",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 

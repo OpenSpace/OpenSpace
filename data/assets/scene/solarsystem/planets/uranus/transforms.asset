@@ -14,8 +14,10 @@ local UranusBarycenter = {
             Observer = "SUN"
         }
     },
-    Name = "Uranus Barycenter",
-    GuiPath = "/Solar System/Planets/Uranus"
+    GUI = {
+        Name = "Uranus Barycenter",
+        Path = "/Solar System/Planets/Uranus"
+    }
 }
 
 

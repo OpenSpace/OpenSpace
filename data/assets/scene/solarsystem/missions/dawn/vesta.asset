@@ -108,7 +108,9 @@ local Vesta = {
             PotentialTargets = { "VESTA" }
         }
     },
-    GuiPath = "/Solar System/Asteroid Belt/Vesta"
+    GUI = {
+        Path = "/Solar System/Asteroid Belt/Vesta"
+    }
 }
 
 local VestaTrail = {
@@ -127,8 +129,10 @@ local VestaTrail = {
         Period = 1325.0,
         Resolution = 3600 * 24
     },
-    Name = "Vesta Trail",
-    GuiPath = "/Solar System/Asteroid Belt/Vesta"
+    GUI = {
+        Name = "Vesta Trail",
+        Path = "/Solar System/Asteroid Belt/Vesta"
+    }
 }
 
 

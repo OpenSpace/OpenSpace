@@ -642,7 +642,9 @@ local Dawn = {
         },
         ColorTexture = textures .. "/gray.png"
     },
-    GuiPath = "/Solar System/Missions/Dawn"
+    GUI = {
+        Path = "/Solar System/Missions/Dawn"
+    }
 }
 
 -- Dawn Solar Array module 1
@@ -665,8 +667,10 @@ local DawnSolarArray1 = {
         },
         ColorTexture = textures .. "/gray.png"
     },
-    Name = "Dawn Solar 1",
-    GuiPath = "/Solar System/Missions/Dawn"
+    GUI = {
+        Name = "Dawn Solar 1",
+        Path = "/Solar System/Missions/Dawn"
+    }
 }
 
 -- Dawn Solar Array module 2
@@ -689,8 +693,10 @@ local DawnSolarArray2 = {
         },
         ColorTexture = textures .. "/gray.png"
     },
-    Name = "Dawn Solar 2",
-    GuiPath = "/Solar System/Missions/Dawn"
+    GUI = {
+        Name = "Dawn Solar 2",
+        Path = "/Solar System/Missions/Dawn"
+    }
 }
 
 local DawnTrail = {
@@ -713,8 +719,10 @@ local DawnTrail = {
         EnableFade = false,
         Rendering = "Lines+Points"
     },
-    Name = "Dawn Trail",
-    GuiPath = "/Solar System/Missions/Dawn"
+    GUI = {
+        Name = "Dawn Trail",
+        Path = "/Solar System/Missions/Dawn"
+    }
 }
 
 -- DawnFov 1
@@ -733,8 +741,10 @@ local DawnFramingCamera1 = {
         },
         PotentialTargets = { "VESTA", "CERES" }
     },
-    Name = "Dawn Framing Camera 1",
-    GuiPath = "/Solar System/Missions/Dawn"
+    GUI = {
+        Name = "Dawn Framing Camera 1",
+        Path = "/Solar System/Missions/Dawn"
+    }
 }
 
 local DawnFramingCamera2 = {
@@ -752,8 +762,10 @@ local DawnFramingCamera2 = {
         },
         PotentialTargets = { "VESTA", "CERES" }
     },
-    Name = "Dawn Framing Camera 2",
-    GuiPath = "/Solar System/Missions/Dawn"
+    GUI = {
+        Name = "Dawn Framing Camera 2",
+        Path = "/Solar System/Missions/Dawn"
+    }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {

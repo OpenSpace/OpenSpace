@@ -37,7 +37,9 @@ local Jupiter = {
         }
     },
     Tag = { "planet_solarSystem", "planet_giants" },
-    GuiPath = "/Solar System/Planets/Jupiter"
+    GUI = {
+        Path = "/Solar System/Planets/Jupiter"
+    }
 }
 
 

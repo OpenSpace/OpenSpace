@@ -20,7 +20,9 @@ local Sun = {
         ColorTexture = textures .. "/sun.jpg",
         PerformShading = false
     },
-    GuiPath = "/Solar System/Sun"
+    GUI = {
+        Path = "/Solar System/Sun"
+    },
 }
 
 

@@ -50,7 +50,9 @@ local Ceres = {
             }
         }
     },
-    GuiPath = "/Solar System/Dwarf Planets/Ceres"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Ceres"
+    }
 }
 
 

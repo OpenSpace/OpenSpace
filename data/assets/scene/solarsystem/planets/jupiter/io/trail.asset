@@ -21,8 +21,10 @@ local IoTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    Name = "Io Trail",
-    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+    GUI = {
+        Name = "Io Trail",
+        Path = "/Solar System/Planets/Jupiter/Moons"
+    }
 }
 
 

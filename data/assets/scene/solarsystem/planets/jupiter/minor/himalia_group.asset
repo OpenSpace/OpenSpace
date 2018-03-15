@@ -20,7 +20,9 @@ local himaliaGroup = {
         Spice = "LEDA",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 240.82,
         Kernels = kernels341
@@ -34,7 +36,9 @@ local himaliaGroup = {
         Spice = "HIMALIA",
         Radii = { 170000, 170000, 170000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 250.23,
         Kernels = kernels341
@@ -48,7 +52,9 @@ local himaliaGroup = {
         Spice = "LYSITHEA",
         Radii = { 36000, 36000, 36000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 259.89,
         Kernels = kernels341
@@ -62,7 +68,9 @@ local himaliaGroup = {
         Spice = "ELARA",
         Radii = { 86000, 86000, 86000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 257.62,
         Kernels = kernels341
@@ -77,7 +85,9 @@ local himaliaGroup = {
         Spice = "553",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 287.93,
         Kernels = kernels341

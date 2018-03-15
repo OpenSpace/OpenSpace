@@ -73,7 +73,9 @@ local Moon = {
             }
         }
     },
-    GuiPath = "/Solar System/Planets/Earth/Moon"
+    GUI = {
+        Path = "/Solar System/Planets/Earth/Moon"
+    }
 }
 
 

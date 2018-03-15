@@ -34,8 +34,10 @@ local object = {
             Scale = 10e17
         }
     },
-    Name = "Constellation Bounds",
-    GuiPath = "/Milky Way/Constellations"
+    GUI = {
+        Name = "Constellation Bounds",
+        Path = "/Milky Way/Constellations"
+    }
 }
 
 

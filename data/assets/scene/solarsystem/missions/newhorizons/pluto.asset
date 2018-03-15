@@ -178,7 +178,9 @@ local Pluto = {
             }
         }
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoBarycenterLabel = {
@@ -191,8 +193,10 @@ local PlutoBarycenterLabel = {
         Texture = encounterTextures .. "/barycenter.png",
         BlendMode = "Additive"
     },
-    Name = "Pluto Barycenter Label",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Barycenter Label",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoText = {
@@ -212,8 +216,10 @@ local PlutoText = {
         Texture = encounterTextures .. "/Pluto-Text.png",
         BlendMode = "Additive"
     },
-    Name = "Pluto Text",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoShadow = {
@@ -228,8 +234,10 @@ local PlutoShadow = {
         BodyFrame = "IAU_PLUTO",
         Aberration = "NONE",
     },
-    Name = "Pluto Shadow",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Shadow",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoTrailBarycentric = {
@@ -246,8 +254,10 @@ local PlutoTrailBarycentric = {
         Period = 6.38723,
         Resolution = 1000
     },
-    Name = "Pluto Barycenteric Trail",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Barycenteric Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoTrail = {
@@ -267,8 +277,10 @@ local PlutoTrail = {
         Period = 160 * 365.242,
         Resolution = 1000
     },
-    Name = "Pluto Trail",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

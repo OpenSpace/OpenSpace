@@ -14,8 +14,10 @@ local EarthBarycenter = {
             Observer = "SUN"
         }
     },
-    Name = "Earth Barycenter",
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth Barycenter",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 local EarthInertial = {
@@ -29,8 +31,10 @@ local EarthInertial = {
             DestinationFrame = "GALACTIC",
         }
     },
-    Name = "Earth Inertial",
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth Inertial",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 local EarthIAU = {
@@ -43,8 +47,10 @@ local EarthIAU = {
             DestinationFrame = "GALACTIC",
         }
     },
-    Name = "Earth IAU",
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth IAU",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 

@@ -20,8 +20,10 @@ local DioneTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    Name = "Dione Trail",
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Name = "Dione Trail",
+        Path = "/Solar System/Planets/Saturn/Moons"
+    },
 }
 
 

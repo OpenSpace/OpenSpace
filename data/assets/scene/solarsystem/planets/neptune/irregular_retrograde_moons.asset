@@ -22,7 +22,9 @@ local irregularRetrogradeMoons = {
         Spice = "NEREID",
         Radii = { 340000, 340000, 340000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 360.13,
         Kernels = kernels081
@@ -36,7 +38,9 @@ local irregularRetrogradeMoons = {
         Spice = "SAO",
         Radii = { 44000, 44000, 44000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 2912.72,
         Kernels = kernels086
@@ -50,7 +54,9 @@ local irregularRetrogradeMoons = {
         Spice = "LAOMEDEIA",
         Radii = { 42000, 42000, 42000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Retrograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 3171.33,
         Kernels = kernels086

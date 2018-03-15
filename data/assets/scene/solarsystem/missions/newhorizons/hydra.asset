@@ -34,7 +34,9 @@ local Hydra = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local HydraText = {
@@ -54,8 +56,10 @@ local HydraText = {
         Texture = textures .. "/Hydra-Text.png",
         BlendMode = "Additive"
     },
-    Name = "Hydra Text",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Hydra Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local HydraTrail = {
@@ -72,8 +76,10 @@ local HydraTrail = {
         Period = 38.20177,
         Resolution = 1000
     },
-    Name = "Hydra Trail",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Hydra Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

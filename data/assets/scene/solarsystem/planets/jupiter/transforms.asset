@@ -14,8 +14,10 @@ local JupiterBarycenter = {
             Observer = "SUN"
         }
     },
-    Name = "Jupiter Barycenter",
-    GuiPath = "/Solar System/Planets/Jupiter"
+    GUI = {
+        Name = "Jupiter Barycenter",
+        Path = "/Solar System/Planets/Jupiter"
+    },
 }
 
 

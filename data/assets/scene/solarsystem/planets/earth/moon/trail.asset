@@ -18,8 +18,10 @@ local MoonTrail = {
         Period =  27,
         Resolution = 1000
     },
-    Name = "Moon Trail",
-    GuiPath = "/Solar System/Planets/Earth/Moon"
+    GUI = {
+        Name = "Moon Trail",
+        Path = "/Solar System/Planets/Earth/Moon"
+    }
 }
 
 

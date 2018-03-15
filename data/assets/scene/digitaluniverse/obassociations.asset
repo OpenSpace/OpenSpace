@@ -33,8 +33,10 @@ local object = {
         TextMinSize = 5.76,
         Unit = "pc"
     },
-    Name = "OB Associations",
-    GuiPath = "/Milky Way/OB Associations"
+    GUI = {
+        Name = "OB Associations",
+        Path = "/Milky Way/OB Associations"
+    }
 }
 
 

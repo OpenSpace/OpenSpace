@@ -33,7 +33,9 @@ local object = {
         TextMinSize = 4.5,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Pulsars"
+    GUI = {
+        Path = "/Milky Way/Pulsars"
+    }
 }
 
 

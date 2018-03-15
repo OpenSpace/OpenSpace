@@ -15,8 +15,10 @@ local PlutoBarycenter = {
             Kernels = kernels.PlutoKernels
         },
     },
-    Name = "Pluto Barycenter",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Barycenter",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local NewHorizonsPosition = {
@@ -35,8 +37,10 @@ local NewHorizonsPosition = {
             DestinationFrame = "GALACTIC"
         }
     },
-    Name = "New Horizons Position",
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "New Horizons Position",
+        Path = "/Solar System/Missions/New Horizons"
+    }
 }
 
 

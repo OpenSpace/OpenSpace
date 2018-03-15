@@ -97,7 +97,9 @@ local Rosetta = {
             DestinationFrame = "GALACTIC"
         }
     },
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaModel = {
@@ -110,8 +112,10 @@ local RosettaModel = {
             Scale = 0.01
         }
     },
-    Name = "Rosetta Model",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaBlackFoil = {
@@ -127,8 +131,10 @@ local RosettaBlackFoil = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Black Foil",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Black Foil",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaBlackParts = {
@@ -144,8 +150,10 @@ local RosettaBlackParts = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Black Parts",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Black Parts",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaDish = {
@@ -161,8 +169,10 @@ local RosettaDish = {
         ColorTexture = textures .. "/dish_AO.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Dish",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Dish",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaParts = {
@@ -178,8 +188,10 @@ local RosettaParts = {
         ColorTexture = textures .. "/parts2_AO.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Parts",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Parts",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaSilverFoil = {
@@ -195,8 +207,10 @@ local RosettaSilverFoil = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Silver Foil",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Silver Foil",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaVents = {
@@ -212,8 +226,10 @@ local RosettaVents = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Vents",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Vents",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaWingA = {
@@ -229,8 +245,10 @@ local RosettaWingA = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Wing A",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Wing A",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaWingB = {
@@ -246,8 +264,10 @@ local RosettaWingB = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Wing B",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Wing B",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaYellowFoil = {
@@ -263,8 +283,10 @@ local RosettaYellowFoil = {
         ColorTexture = textures .. "/foil_gold_ramp.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Rosetta Model Part Yellow Foil",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Model Part Yellow Foil",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local Philae = {
@@ -290,8 +312,10 @@ local Philae = {
             Scale = 0.01
         }
     },
-    Name = "Philae Model",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Philae Model",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local PhilaeFoil = {
@@ -307,8 +331,10 @@ local PhilaeFoil = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Philae Model Part Foil",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Philae Model Part Foil",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local PhilaeLids = {
@@ -324,8 +350,10 @@ local PhilaeLids = {
         ColorTexture = textures .. "/parts2_AO.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Philae Model Part Lids",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Philae Model Part Lids",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local PhilaeParts = {
@@ -341,8 +369,10 @@ local PhilaeParts = {
         ColorTexture = textures .. "/foil_silver_ramp.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Philae Model Part Parts",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Philae Model Part Parts",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local PhilaeSolarPanels = {
@@ -358,14 +388,18 @@ local PhilaeSolarPanels = {
         ColorTexture = textures .. "/tex_01.png",
         ModelTransform = RotationMatrix
     },
-    Name = "Philae Model Parts Solar Panels",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Philae Model Parts Solar Panels",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local NavCam = {
     Identifier = "NAVCAM",
     Parent = Rosetta.Identifier,
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Path = "/Solar System/Missions/Rosetta/Instruments"
+    }
 }
 
 local NavCamFov = {
@@ -386,8 +420,10 @@ local NavCamFov = {
             ["CHURYUMOV-GERASIMENKO"] = "67P/C-G_CK"
         }
     },
-    Name = "NAVCAM FOV",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "NAVCAM FOV",
+        Path = "/Solar System/Missions/Rosetta/Instruments"
+    }
 }
 
 local ImagePlane = {
@@ -402,8 +438,10 @@ local ImagePlane = {
         Moving = false,
         Texture = textures .. "/defaultProj.png"
     },
-    Name = "Rosetta Image Plane",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Image Plane",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local RosettaCometTrail = {
@@ -421,8 +459,10 @@ local RosettaCometTrail = {
         EndTime = "2016 SEP 30 12:00:00",
         SampleInterval = 3600
     },
-    Name = "Rosetta Comet Trail",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Rosetta Comet Trail",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 local PhilaeTrail = {
@@ -440,8 +480,10 @@ local PhilaeTrail = {
         EndTime = "2014 NOV 12 17:00:00",
         SampleInterval = 2
     },
-    Name = "Philae Trail",
-    GuiPath = "/Solar System/Missions/Rosetta"
+    GUI = {
+        Name = "Philae Trail",
+        Path = "/Solar System/Missions/Rosetta"
+    }
 }
 
 

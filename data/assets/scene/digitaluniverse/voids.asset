@@ -22,7 +22,9 @@ local object = {
         TextMinSize = 8.0,
         Unit = "Mpc"
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

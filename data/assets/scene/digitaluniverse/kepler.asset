@@ -28,8 +28,10 @@ local object = {
         Texture = textures .. "/halo.png",
         Unit = "pc"
     },
-    Name = "Kepler Planetary Candidates",
-    GuiPath = "/Milky Way/Exoplanets"
+    GUI = {
+        Name = "Kepler Planetary Candidates",
+        Path = "/Milky Way/Exoplanets"
+    }
 }
 
 

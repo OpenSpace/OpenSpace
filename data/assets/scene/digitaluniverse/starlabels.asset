@@ -24,8 +24,10 @@ local object = {
         TextMaxSize = 50.0,
         Unit = "pc"
     },
-    Name = "Stars Labels",
-    GuiPath = "/Milky Way/Stars"
+    GUI = {
+        Name = "Stars Labels",
+        Path = "/Milky Way/Stars"
+    }
 }
 
 

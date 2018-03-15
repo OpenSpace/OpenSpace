@@ -22,7 +22,9 @@ local irregularProgradeMoons = {
         Spice = "HALIMEDE",
         Radii = { 62000, 62000, 62000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1879.08,
         Kernels = kernels086
@@ -36,7 +38,9 @@ local irregularProgradeMoons = {
         Spice = "PSAMATHE",
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 9074.3,
         Kernels = kernels086
@@ -50,7 +54,9 @@ local irregularProgradeMoons = {
         Spice = "NESO",
         Radii = { 60000, 60000, 60000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        },
         TrailColor = trailColor,
         OrbitPeriod = 9740.73,
         Kernels = kernels086

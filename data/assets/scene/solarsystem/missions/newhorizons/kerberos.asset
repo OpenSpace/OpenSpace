@@ -38,7 +38,9 @@ local Kerberos = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local KerberosText = {
@@ -57,8 +59,10 @@ local KerberosText = {
         Billboard = true,
         Texture = textures .. "/Kerberos-Text.png"
     },
-    Name = "Kerberos Text",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Kerberos Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local KerberosTrail = {
@@ -75,8 +79,10 @@ local KerberosTrail = {
         Period = 32.16756,
         Resolution = 1000
     },
-    Name = "Kerberos Trail",
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Kerberos Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

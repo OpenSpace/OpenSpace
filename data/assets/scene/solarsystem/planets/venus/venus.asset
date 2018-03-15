@@ -42,7 +42,9 @@ local Venus = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Venus"
+    GUI = {
+        Path = "/Solar System/Planets/Venus"
+    },
 }
 
 

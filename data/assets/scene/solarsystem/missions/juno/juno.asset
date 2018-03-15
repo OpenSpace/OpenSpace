@@ -161,7 +161,9 @@ local Juno = {
         ColorTexture =  textures .. "/gray.png",
         ModelTransform = RotationMatrix
     },
-    GuiName = "/Solar System/Missions/Juno"
+    GUI = {
+        Path = "/Solar System/Missions/Juno"
+    }
 }
 
 local JunoTrail = {
@@ -180,8 +182,10 @@ local JunoTrail = {
         EndTime = "2016 DEC 13",
         SampleInterval = 2
     },
-    Name = "Juno Trail",
-    GuiName = "/Solar System/Missions/Juno"
+    GUI = {
+        Name = "Juno Trail",
+        Path = "/Solar System/Missions/Juno"
+    }
 }
 
 

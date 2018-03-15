@@ -46,8 +46,10 @@ local tullyPoints = {
         BillboardMaxSize = 50.0,
         BillboardMinSize = 0.0,
     },
-    Name = "Tully Galaxies",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Tully Galaxies",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 local tullyImages = {
@@ -73,8 +75,10 @@ local tullyImages = {
         FadeInDistances = {0.05, 0.1},
         PlaneMinSize = 5.0
     },
-    Name = "Tully Galaxies Images",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Tully Galaxies Images",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

@@ -20,7 +20,9 @@ local Labels = {
         }, 
         ColorTexture =  textures .. "/labels.png"
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Path = "/Solar System/Missions/New Horizons"
+    }
 }
 
 

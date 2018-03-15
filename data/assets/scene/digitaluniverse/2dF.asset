@@ -31,8 +31,10 @@ local object = {
         Unit = "Mpc",
         ScaleFactor = 508.0
     },
-    Name = "2dF Galaxies",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "2dF Galaxies",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

@@ -32,8 +32,10 @@ local object = {
         TextMinSize = 8.0,
         Unit = "Mpc"
     },
-    Name = "Galaxy Superclusters",
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Galaxy Superclusters",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

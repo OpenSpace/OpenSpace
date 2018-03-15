@@ -14,7 +14,9 @@ local Spout = {
         Origin = "Center",
         Billboard = true
     },
-    GuiPath = "/Examples"
+    GUI = {
+        Path = "/Examples"
+    }
 }
 
 
