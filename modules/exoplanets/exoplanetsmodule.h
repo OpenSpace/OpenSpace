@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace openspace {
 
@@ -35,11 +36,12 @@ public:
 
     ExoplanetsModule();
 
+    scripting::LuaLibrary luaLibrary() const override;
 
-    std::vector<documentation::Documentation> documentations() const override;
+    //std::vector<documentation::Documentation> documentations() const override;
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    //void internalInitialize(const ghoul::Dictionary&) override;
 };
 
 } // namespace openspace

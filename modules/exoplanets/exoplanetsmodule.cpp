@@ -25,27 +25,79 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/openspaceengine.h>
+
 //#include <openspace/rendering/renderable.h>
 //#include <openspace/util/factorymanager.h>
 
-//#include <ghoul/misc/assert.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
-void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
+int addNode(lua_State* L) {
+
+    // get name of star and add a node at the position of the star.
+    // position is found in the star-files
+    // after the node has been added one should be able to select it as a focus point.
+
+    //start
+
+    const int StringLocation = -1; //first argument
+    const std::string starname = luaL_checkstring(L, StringLocation);
+
+    //printf(starname.c_str());
+
+    // adding the parent node of the exoplanet system
+    const std::string luaTableParent = "{ Name = '" + starname +"', Parent = 'SolarSystemBarycenter', Transform = { Translation = { Type = 'StaticTranslation', Position = {4662120063743.592773, 1263245003503.724854, -955413856565.788086} } }}"; // positionen must be gathered from star.speck
+    const std::string scriptParent = "openspace.addSceneGraphNode("+ luaTableParent +");";
+    OsEng.scriptEngine().queueScript(
+       scriptParent,
+       openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    ); 
+
+    // adding a renderable in the place of the stars
+    const std::string luaTableStarGlare = "{ Name = '" + starname + "Plane', Parent = '" + starname +"', Renderable = { Type = 'RenderablePlaneImageLocal', Size = 1.3*10^10.5, Billboard = true, Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/glare.png', BlendMode = 'Additive' }  }";
+    const std::string scriptGlare= "openspace.addSceneGraphNode("+ luaTableStarGlare +");";
+    OsEng.scriptEngine().queueScript(
+       scriptGlare,
+       openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+
+}
+
+scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
+
+    scripting::LuaLibrary res;
+    res.name = "exoplanets";
+    res.functions = {
+        {
+            "addNode",
+            &addNode,
+            {},
+            "string",
+            "Adds print message."
+        }
+
+    };
+
+    return res;
+}
+
+//void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     //auto fRenderable = FactoryManager::ref().factory<Renderable>();
     //ghoul_assert(fRenderable, "No renderable factory existed");
 
     //fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
-}
+//}
 
-std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
-    return {
+//std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
+    //return {
         //RenderableDebugPlane::Documentation()
-    };
-}
+    //};
+//}
 
 
 } // namespace openspace
