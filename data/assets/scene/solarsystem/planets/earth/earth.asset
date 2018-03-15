@@ -149,7 +149,7 @@ local Earth = {
                     Fallback = {
                         Name = "Earth Night",
                         FilePath = texturesPath .. "/earth_night.jpg",
-                        Enabled = true,                        
+                        Enabled = true,
                     }
                 },
                 {
