@@ -273,6 +273,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset, unsig
 bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
+        LWARNING(fmt::format("Couldn't open file: {}", filename));
         return false;
     }
 

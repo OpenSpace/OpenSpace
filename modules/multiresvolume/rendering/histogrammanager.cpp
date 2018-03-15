@@ -139,7 +139,8 @@ std::vector<float> HistogramManager::readValues(unsigned int brickIndex) const {
 bool HistogramManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-    return false;
+        LWARNING(fmt::format("Couldn't open file: {}", filename));
+        return false;
     }
 
     int numHistograms;

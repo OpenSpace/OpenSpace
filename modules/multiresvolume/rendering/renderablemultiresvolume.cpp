@@ -564,51 +564,68 @@ bool RenderableMultiresVolume::initializeSelector() {
     switch (_selector) {
     case Selector::TF:      selector = _tfBrickSelector.get();          manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
     case Selector::TIME:    selector = _timeBrickSelector.get();        manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
-    case Selector::LOCAL:   selector = _localTfBrickSelector.get();     manager = _localErrorHistogramManager;                                      break;
+    case Selector::LOCAL:   selector = _localTfBrickSelector.get();     manager = _localErrorHistogramManager;   scenePath = _errorHistogramsPath;  break;
     case Selector::SIMPLE:  selector = _simpleTfBrickSelector.get();    manager = _histogramManager;                                                break;
     case Selector::SHEN:    selector = _shenBrickSelector.get();        return initializeShenSelector();
     default:                LERROR(fmt::format("No selector {}", _selector));        return false;
     }
 
-    if (manager) {
-        LINFO(fmt::format("Histogram Manager: {}", manager->getName()));
-        std::stringstream cacheName;
-        ghoul::filesystem::File f = _filename;
-        cacheName << f.baseName() << "_" << nHistograms << "_" << manager->getName();
-        std::string cacheFilename;
-        cacheFilename = FileSys.cacheManager()->cachedFilename(
-            cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
-        LINFO(fmt::format("Trying to open cache: {}", cacheFilename));
-        std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-        if (cacheFile.is_open()) {
-            // Read histograms from cache.
-            cacheFile.close();
-            LINFO(fmt::format("Loading histograms from cache: {}", cacheFilename));
-            success &= manager->loadFromFile(cacheFilename);
-        }
-        else {
-            if (scenePath != "") {
-                // Read histograms from scene data.
-                LINFO(fmt::format("Loading histograms from scene data: {}", scenePath));
-                success &= manager->loadFromFile(scenePath);
-            }
-            else {
-                // Build histograms from tsp file.
-                LINFO(fmt::format("No cache to load. Generating from TSP file and caching in: {}", cacheFilename));
-                success &= manager->buildHistograms(nHistograms);
-            }
-            if (success) {
-                LINFO(fmt::format("Writing cache to {}", cacheFilename));
-                manager->saveToFile(cacheFilename);
-            }
-        }
-        success &= selector && selector->initialize();
+    if (!manager) {
+        LERROR("Couldn't properly initialize HistogramManager");
+        return false;
     }
 
+    LINFO(fmt::format("Histogram Manager: {}", manager->getName()));
+
+    // Generate cache file name
+    std::stringstream cacheName;
+    ghoul::filesystem::File f = _filename;
+    std::string cacheFilename;
+
+
+    cacheName << f.baseName() << "_" << nHistograms << "_" << manager->getName();
+    cacheFilename = FileSys.cacheManager()->cachedFilename(
+        cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
 
 
 
+    // Try to load from scene
+    std::string histogramFile = scenePath;
+    if (!histogramFile.empty()) {
+        // Read histograms from scene data.
+        LINFO(fmt::format("Loading histograms from scene data: {}", histogramFile));
+        success = manager->loadFromFile(histogramFile);
+        if (!success) {
+            LWARNING(fmt::format("Couldn't load histograms from scene: {}", histogramFile));
+            histogramFile = "";
+        }
+    }
 
+    // If can't, load from cache
+    if (histogramFile.empty()) {
+        histogramFile = cacheFilename;
+        LINFO(fmt::format("Trying to open cache: {}", histogramFile));
+        success = manager->loadFromFile(histogramFile);
+        if (!success) {
+            LINFO(fmt::format("Couldn't load histograms from cache: {}", histogramFile));
+            histogramFile = "";
+        }
+    }
+    
+    //If can't, regenerate from file
+    if (histogramFile.empty()) {
+        // Build histograms from tsp file.
+        LINFO(fmt::format("Generating from TSP file and caching in: {}", cacheFilename));
+        success = manager->buildHistograms(nHistograms);
+    }
+
+    if (success) {
+        // Caching histograms
+        LINFO(fmt::format("Writing cache to {}", cacheFilename));
+        manager->saveToFile(cacheFilename);
+    }
+
+    success &= selector && selector->initialize();
     return success;
 }
 
