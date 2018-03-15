@@ -93,6 +93,7 @@ local CuriosityKernels = {
     kernels .. "/SPK/msl_surf_rover_tlm.bsp"
 }
 
+
 asset.export("kernels", kernels)
 asset.export("CuriosityKernels", CuriosityKernels)
 

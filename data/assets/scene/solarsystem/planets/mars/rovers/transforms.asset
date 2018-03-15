@@ -18,7 +18,42 @@ local CuriosityPosition = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
+-- MastCam
+
+--bottom
+local RSM_AZ_Orientation = {
+    Name = "RSM_AZ_Orientation",
+    Parent = "CuriosityPosition",
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "NH_SPACECRAFT",
+            DestinationFrame = "GALACTIC"
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+--top
+local RSM_EL_Orientation = {
+    Name = "RSM_EL_Orientation",
+    Parent = "CuriosityPosition",
+    Transform = {
+    Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RMS_EL", -- 
+            DestinationFrame = "GALACTIC",
+            Kernel = kernels.CuriosityKernels
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
-    CuriosityPosition
+    CuriosityPosition,
+    RSM_AZ_Orientation,
+    RSM_EL_Orientation
 })
 

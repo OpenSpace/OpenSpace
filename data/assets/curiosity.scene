@@ -14,8 +14,10 @@ local MarsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
 
 asset.onInitialize(function ()
-    openspace.time.setTime(openspace.time.currentWallTime())
-
+    -- openspace.time.setTime(openspace.time.currentWallTime())
+    
+    -- Time: Curiosity selfie 
+    openspace.time.setTime("2018-01-23T12:28:28")
     openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
@@ -38,8 +40,8 @@ asset.onInitialize(function ()
     )
  
     openspace.navigation.setCameraState({
-        --Focus = CuriosityModelAsset.CuriosityModel.Name,
-        Focus = MarsAsset.Mars.Name,
+        Focus = CuriosityModelAsset.Curiosity.Name,
+        -- Focus = MarsAsset.Mars.Name,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })

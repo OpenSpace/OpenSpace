@@ -42,30 +42,37 @@
 #include <modules/marsrover/scale/staticscale.h>
 #include <ghoul/filesystem/filesystem>
 
+#include <../data/assets/solarsystem/planets/mars/rovers/kernels.asset>
+
 namespace openspace {
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule("Marsrover") {}    //changed by kristin: original was MarsRoverModule::Name instead of "Marsrover"
+    MarsroverModule::MarsroverModule() : OpenSpaceModule("Marsrover") {}    //changed by kristin: original was MarsRoverModule::Name instead of "Marsrover"
 
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
+    void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
 
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "Renderable factory was not created");
+        auto fRenderable = FactoryManager::ref().factory<Renderable>();
+        ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-
-}
-
-std::vector<documentation::Documentation> MarsroverModule::documentations() const {
-    return {
-        RenderableMarsrover::Documentation(),
-    };
-}
+        fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
 
 
-std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
-    return {
-        ScreenSpaceDashboard::luaLibrary()
-    };
-}
+
+        LERROR("hekadjf;asldkf;asdkf;asdkfsd;kflskdjflsdjf;sljfd")
+        LERROR(CuriosityKernels.MSL_RA_WRIST.ID)
+
+    }
+
+    std::vector<documentation::Documentation> MarsroverModule::documentations() const {
+        return {
+            RenderableMarsrover::Documentation(),
+        };
+    }
+
+
+    std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
+        return {
+            ScreenSpaceDashboard::luaLibrary()
+        };
+    }
 
 } // namespace openspace
