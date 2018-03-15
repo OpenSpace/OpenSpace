@@ -148,6 +148,12 @@ namespace {
         "read from the specified FITS file. No need to define if data already "
         "has been processed."
     };
+
+    static const openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
+        "NumRenderedStars",
+        "Rendered Stars",
+        "The number of rendered stars in the current frame."
+    };
 }  // namespace
 
 namespace openspace {
@@ -261,6 +267,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _firstRow(FirstRowInfo, 1, 1, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 50000, 1, 2539913)
     , _columnNamesList(ColumnNamesInfo)
+    , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2539913)
     , _program(nullptr)
     , _nValuesPerStar(0)
     , _numLevelsInOctree(8) // TODO: Make editable?
@@ -407,6 +414,10 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow.");
         }
     }
+
+    // Add a read-only property for the number of rendered stars per frame.
+    _nRenderedStars.setReadOnly(true);
+    addProperty(_nRenderedStars);
 }
 
 RenderableGaiaStars::~RenderableGaiaStars() {}
@@ -515,8 +526,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
     const size_t nValues = _slicedData.size() / nStars;
-    
-    //LINFO("nStars: " + std::to_string(nStars));
+    _nRenderedStars.set(nStars);
 
     GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 

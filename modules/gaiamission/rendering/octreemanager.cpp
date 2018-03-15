@@ -244,7 +244,7 @@ std::vector<float> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNo
     glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
     int totalPixels = nodeSize.x * nodeSize.y;
 
-    // If node contains more stars than the diagonal size then return that amount. 
+    // If node contains more stars than enclosed pixels then return that amount. 
     /*if (node->numStars > totalPixels) {
         auto first = node->data.begin();
         auto last = node->data.begin() + totalPixels;
@@ -255,12 +255,6 @@ std::vector<float> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNo
     // Return node data if node is a leaf.
     // Or return cached data in inner node if its size is smaller than set pixels.
     if (node->isLeaf || length(nodeSize) < MIN_SIZE_IN_PIXELS) {
-        if (node->isLeaf) {
-            //LINFO("isLeaf");
-        }
-        else {
-            //LINFO("SizeInPx: " + std::to_string(nodeSize));
-        }
         return node->data;
     }
 

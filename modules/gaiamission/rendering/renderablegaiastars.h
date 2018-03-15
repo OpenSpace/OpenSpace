@@ -100,6 +100,7 @@ private:
     std::vector<std::string> _columnNames;
     properties::BoolProperty _filePreprocessed;
     properties::OptionProperty _columnOption;
+    properties::IntProperty _nRenderedStars;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness, 

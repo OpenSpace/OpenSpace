@@ -60,6 +60,7 @@ private:
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
     const size_t MAX_STARS_PER_NODE = 1000; 
+    // Size in pixels counted diagonally. Roughly a 7x7 square or 8x4.5 with 16/9 ratio.
     const float MIN_SIZE_IN_PIXELS = 10.0;
 
     size_t getChildIndex(float posX, float posY, float posZ,
