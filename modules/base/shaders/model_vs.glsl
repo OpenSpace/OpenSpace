@@ -34,7 +34,6 @@ out vec2 vs_st;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
-out vec3 vs_normalObjSpace; 
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;

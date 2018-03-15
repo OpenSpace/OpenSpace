@@ -1,0 +1,4 @@
+asset.request('./science/spaceearth')
+asset.request('./science/geodetic')
+asset.request('./science/engineering')
+asset.request('./science/education')
