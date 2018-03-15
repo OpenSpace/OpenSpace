@@ -159,21 +159,11 @@ local Earth = {
                     Name = "Earth at Night 2012",
                     FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
                     Enabled = true,
-                    Settings = {
-                        Opacity = 1.0,
-                        Gamma = 1.5,
-                        Multiplier = 15.0
-                    },
                     Fallback = {
                         Identifier = "Earth_Night",
                         Name = "Earth Night",
                         FilePath = texturesPath .. "/earth_night.jpg",
-                        Enabled = true,
-                        Settings = {
-                            Opacity = 1.0,
-                            Gamma = 1.5,
-                            Multiplier = 15.0
-                        },
+                        Enabled = true,                        
                     }
                 },
                 {

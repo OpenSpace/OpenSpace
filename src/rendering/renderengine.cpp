@@ -471,7 +471,11 @@ void RenderEngine::deinitializeGL() {
 }
 
 void RenderEngine::updateScene() {
-    if (!_scene) return;
+    if (!_scene) {
+        return;
+    }
+
+    _scene->updateInterpolations();
 
     const Time& currentTime = OsEng.timeManager().time();
     _scene->update({

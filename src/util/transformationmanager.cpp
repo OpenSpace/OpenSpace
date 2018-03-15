@@ -32,7 +32,10 @@ TransformationManager::TransformationManager(){
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = std::make_shared<ccmc::Kameleon>();
 #else
-    LWARNING("Kameleon module needed for transformations with dynamic frames");
+    LWARNINGC(
+        "TransformationManager",
+        "Kameleon module needed for transformations with dynamic frames"
+    );
 #endif
     _kameleonFrames = {
         "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
@@ -120,7 +123,10 @@ glm::dmat3 TransformationManager::frameTransformationMatrix(
         return kameleonTransformation*spiceTransformation;
     }
 #else
-    LERROR("Can not transform dynamic frames without kameleon module enabled");
+    LERRORC(
+        "TransformationManager",
+        "Can not transform dynamic frames without kameleon module enabled"
+    );
 #endif
     return glm::dmat3(1.0);
 }

@@ -72,7 +72,6 @@ asset.onInitialize(function ()
         "Earth", "Mars", "Moon"
     })
 
-
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",

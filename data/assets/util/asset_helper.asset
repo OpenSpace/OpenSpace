@@ -70,22 +70,22 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     end)
 
     for i, node in ipairs(nodes) do
-        asset.export(node.Identifier, node)
+        sceneAsset.export(node.Identifier, node)
     end
 end
 
-local requireAll = function (asset, directory)
+local requireAll = function (sceneAsset, directory)
     function string.ends(String,End)
        return End=='' or string.sub(String,-string.len(End))==End
     end
 
     local result = {}
 
-    local files = openspace.walkDirectoryFiles(asset.localResource('') .. directory, true)
+    local files = openspace.walkDirectoryFiles(sceneAsset.localResource('') .. directory, true)
     for _, file in pairs(files) do
         if file:ends('.asset') then
             openspace.printDebug("Requiring: " .. file:sub(file:find(directory), -7))
-            local exports = asset.require(file:sub(1, -7))
+            local exports = sceneAsset.require(file:sub(1, -7))
             table.insert(result, exports)
         end
     end
@@ -93,16 +93,16 @@ local requireAll = function (asset, directory)
     return result
 end
 
-local requestAll = function (asset, directory)
+local requestAll = function (sceneAsset, directory)
     function string.ends(String,End)
        return End=='' or string.sub(String,-string.len(End))==End
     end
 
-    local files = openspace.walkDirectoryFiles(asset.localResource('') .. directory, true)
+    local files = openspace.walkDirectoryFiles(sceneAsset.localResource('') .. directory, true)
     for _, file in pairs(files) do
         if file:ends('.asset') then
             openspace.printDebug("Requesting: " .. file:sub(file:find(directory), -7))
-            asset.request(file:sub(file:find(directory), -7))
+            sceneAsset.request(file:sub(file:find(directory), -7))
         end
     end
 end

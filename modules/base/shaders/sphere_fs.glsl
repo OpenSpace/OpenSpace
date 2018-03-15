@@ -31,7 +31,7 @@ in vec4 vs_gPosition;
 
 uniform float time;
 uniform sampler2D texture1;
-uniform float alpha;
+uniform float opacity;
 
 
 Fragment getFragment() {
@@ -42,7 +42,7 @@ Fragment getFragment() {
     texCoord.t = 1 - texCoord.y;
 
     Fragment frag;
-    frag.color = texture(texture1, texCoord) * vec4(1.0, 1.0, 1.0, alpha);
+    frag.color = texture(texture1, texCoord) * vec4(1.0, 1.0, 1.0, opacity);
     frag.depth = pscDepth(position);
 
     // G-Buffer
