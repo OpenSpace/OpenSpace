@@ -23,7 +23,7 @@ local EnceladusTrail = {
     GUI = {
         Name = "Enceladus Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 

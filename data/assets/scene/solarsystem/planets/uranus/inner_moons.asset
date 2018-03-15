@@ -21,7 +21,7 @@ local innerMoons = {
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.335034,
@@ -37,7 +37,7 @@ local innerMoons = {
         Radii = { 43000, 43000, 43000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.376400,
@@ -53,7 +53,7 @@ local innerMoons = {
         Radii = { 51000, 51000, 51000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.434579,
@@ -69,7 +69,7 @@ local innerMoons = {
         Radii = { 80000, 80000, 80000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.463570,
@@ -85,7 +85,7 @@ local innerMoons = {
         Radii = { 64000, 64000, 64000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.473650,
@@ -101,7 +101,7 @@ local innerMoons = {
         Radii = { 94000, 94000, 94000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.493065,
@@ -117,7 +117,7 @@ local innerMoons = {
         Radii = { 135000, 135000, 135000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.513196,
@@ -133,7 +133,7 @@ local innerMoons = {
         Radii = { 72000, 72000, 72000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.558460,
@@ -149,7 +149,7 @@ local innerMoons = {
         Radii = { 18000, 18000, 18000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.618,
@@ -165,7 +165,7 @@ local innerMoons = {
         Radii = { 90000, 90000, 90000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.623527,
@@ -181,7 +181,7 @@ local innerMoons = {
         Radii = { 30000, 30000, 30000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.638,
@@ -197,7 +197,7 @@ local innerMoons = {
         Radii = { 162000, 162000, 162000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.761833,
@@ -213,7 +213,7 @@ local innerMoons = {
         Radii = { 25000, 25000, 25000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Uranus/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.923,

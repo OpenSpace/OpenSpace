@@ -28,7 +28,7 @@ local SunIAU = {
     GUI = {
         Name = "SUN IAU",
         Path = "/Solar System/Sun"
-    },
+    }
 }
 
 

@@ -21,7 +21,7 @@ local themistoGroup = {
         Radii = { 8000, 8000, 8000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Themisto Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Themisto Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 129.87,

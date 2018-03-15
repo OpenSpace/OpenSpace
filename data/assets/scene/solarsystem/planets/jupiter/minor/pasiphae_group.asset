@@ -21,7 +21,7 @@ local pasiphaeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 538.78,
@@ -38,7 +38,7 @@ local pasiphaeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2003 J 18",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 587.38,
@@ -54,7 +54,7 @@ local pasiphaeGroup = {
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 601.40,
@@ -70,7 +70,7 @@ local pasiphaeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 602.62,
@@ -87,7 +87,7 @@ local pasiphaeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2016 J 1",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 603.83,
@@ -104,7 +104,7 @@ local pasiphaeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2003 J 15",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 699.68,
@@ -120,7 +120,7 @@ local pasiphaeGroup = {
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 714.66,
@@ -136,7 +136,7 @@ local pasiphaeGroup = {
         Radii = { 9000, 9000, 9000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 727.11,
@@ -152,7 +152,7 @@ local pasiphaeGroup = {
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 723.36,
@@ -168,7 +168,7 @@ local pasiphaeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 776.02,
@@ -184,7 +184,7 @@ local pasiphaeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 731.10,
@@ -201,7 +201,7 @@ local pasiphaeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2011 J 2",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 731.32,
@@ -218,7 +218,7 @@ local pasiphaeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2017 J 1",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 734.15,
@@ -235,7 +235,7 @@ local pasiphaeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2003 J 4",
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 739.29,
@@ -251,7 +251,7 @@ local pasiphaeGroup = {
         Radii = { 60000, 60000, 60000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 739.80,
@@ -267,7 +267,7 @@ local pasiphaeGroup = {
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 745.50,
@@ -283,7 +283,7 @@ local pasiphaeGroup = {
         Radii = { 38000, 38000, 38000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 739.33,
@@ -299,7 +299,7 @@ local pasiphaeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 771.60,
@@ -315,7 +315,7 @@ local pasiphaeGroup = {
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 772.17,
@@ -332,7 +332,7 @@ local pasiphaeGroup = {
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Pasiphae Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 792.44,

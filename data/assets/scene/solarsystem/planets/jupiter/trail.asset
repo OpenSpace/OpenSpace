@@ -22,7 +22,7 @@ local JupiterTrail = {
     GUI = {
         Name = "Jupiter Trail",
         Path = "/Solar System/Planets/Jupiter"
-    },
+    }
 }
 
 

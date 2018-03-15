@@ -23,7 +23,7 @@ local DioneTrail = {
     GUI = {
         Name = "Dione Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 

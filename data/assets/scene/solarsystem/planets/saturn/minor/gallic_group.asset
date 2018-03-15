@@ -21,7 +21,7 @@ local gallicGroup = {
         Radii = { 32000, 32000, 32000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 774.58,
@@ -37,7 +37,7 @@ local gallicGroup = {
         Radii = { 6000, 6000, 6000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 838.77,
@@ -53,7 +53,7 @@ local gallicGroup = {
         Radii = { 10000, 10000, 10000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 844.89,
@@ -69,7 +69,7 @@ local gallicGroup = {
         Radii = { 15000, 15000, 15000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Gallic Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 944.23,

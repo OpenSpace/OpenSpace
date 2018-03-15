@@ -23,7 +23,7 @@ local TitanTrail = {
     GUI = {
         Name = "Titan Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 

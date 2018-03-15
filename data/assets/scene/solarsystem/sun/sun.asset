@@ -22,7 +22,7 @@ local Sun = {
     },
     GUI = {
         Path = "/Solar System/Sun"
-    },
+    }
 }
 
 

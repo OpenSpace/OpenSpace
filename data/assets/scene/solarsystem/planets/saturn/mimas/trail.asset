@@ -23,7 +23,7 @@ local MimasTrail = {
     GUI = {
         Name = "Mimas Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 

@@ -21,7 +21,7 @@ local inuitGroup = {
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 448.16,
@@ -37,7 +37,7 @@ local inuitGroup = {
         Radii = { 12000, 12000, 12000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 451.77,
@@ -53,7 +53,7 @@ local inuitGroup = {
         Radii = { 22000, 22000, 22000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 692.98,
@@ -69,7 +69,7 @@ local inuitGroup = {
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 884.88,
@@ -85,7 +85,7 @@ local inuitGroup = {
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Inuit Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 894.86,

@@ -23,7 +23,7 @@ local innerMoons = {
         Radii = { 96000, 60000, 52000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.294,
@@ -39,7 +39,7 @@ local innerMoons = {
         Radii = { 108000, 100000, 52000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.311,
@@ -55,7 +55,7 @@ local innerMoons = {
         Radii = { 180000, 148000, 128000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.335,
@@ -71,7 +71,7 @@ local innerMoons = {
         Radii = { 204000, 184000, 144000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.429,
@@ -87,7 +87,7 @@ local innerMoons = {
         Radii = { 216000, 204000, 168000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.555,
@@ -104,7 +104,7 @@ local innerMoons = {
         Tags = tags,
         GUI = {
             Name = "S/2004 N 1",
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.936,
@@ -120,7 +120,7 @@ local innerMoons = {
         Radii = { 436000, 416000, 402000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.122,

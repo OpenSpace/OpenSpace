@@ -21,7 +21,7 @@ local SaturnTrail = {
     GUI = {
         Name = "Saturn Trail",
         Path = "/Solar System/Planets/Saturn"
-    },
+    }
 }
 
 

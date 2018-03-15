@@ -23,7 +23,7 @@ local HyperionTrail = {
     GUI = {
         Name = "Hyperion Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 

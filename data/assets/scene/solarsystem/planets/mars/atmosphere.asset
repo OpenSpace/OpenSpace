@@ -58,7 +58,7 @@ local Atmosphere = {
     GUI = {
         Name = "Mars Atmosphere",
         Path = "/Solar System/Planets/Mars"
-    },
+    }
 }
 
 

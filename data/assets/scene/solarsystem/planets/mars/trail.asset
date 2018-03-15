@@ -22,7 +22,7 @@ local MarsTrail = {
     GUI = {
         Name = "Mars Trail",
         Path = "/Solar System/Planets/Mars"
-    },
+    }
 }
 
 

@@ -38,7 +38,7 @@ local Phobos = {
     Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
     GUI = {
         Path = "/Solar System/Planets/Mars"
-    },
+    }
 }
 
 local PhobosTrail = {
@@ -59,7 +59,7 @@ local PhobosTrail = {
     GUI = {
         Name = "Phobos Trail",
         Path = "/Solar System/Planets/Mars"
-    },
+    }
 }
 
 

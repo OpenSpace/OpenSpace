@@ -21,7 +21,7 @@ local carpoGroup = {
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Carpo Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 458.62,

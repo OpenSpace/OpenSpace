@@ -20,7 +20,7 @@ local SunMarker = {
     GUI = {
         Name = "Sun Marker",
         Path = "/Solar System/Sun"
-    },
+    }
 }
 
 

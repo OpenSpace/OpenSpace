@@ -22,7 +22,7 @@ local anankeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2010 J 2",
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 588.36,
@@ -38,7 +38,7 @@ local anankeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 597.61,
@@ -54,7 +54,7 @@ local anankeGroup = {
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 598.09,
@@ -70,7 +70,7 @@ local anankeGroup = {
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 609.43,
@@ -87,7 +87,7 @@ local anankeGroup = {
         Tags = tags,
         GUI = {
             Name = "S/2003 J 16",
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 610.36,
@@ -103,7 +103,7 @@ local anankeGroup = {
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 613.90,
@@ -119,7 +119,7 @@ local anankeGroup = {
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 624.54,
@@ -135,7 +135,7 @@ local anankeGroup = {
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 627.48,
@@ -151,7 +151,7 @@ local anankeGroup = {
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 629.81,
@@ -167,7 +167,7 @@ local anankeGroup = {
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 639.80,
@@ -183,7 +183,7 @@ local anankeGroup = {
         Radii = { 28000, 28000, 28000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 640.38,

@@ -22,7 +22,7 @@ local MercuryTrail = {
     GUI = {
         Name = "Mercury Trail",
         Path = "/Solar System/Planets/Mercury"
-    },
+    }
 }
 
 

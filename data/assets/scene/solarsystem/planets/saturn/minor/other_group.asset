@@ -22,7 +22,7 @@ local otherGroup = {
         Radii = { 41000, 35000, 19000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.60169,
@@ -38,7 +38,7 @@ local otherGroup = {
         Radii = { 136000, 79000, 59000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.61299,
@@ -54,7 +54,7 @@ local otherGroup = {
         Radii = { 104000, 81000, 64000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.62850,
@@ -70,7 +70,7 @@ local otherGroup = {
         Radii = { 130000, 114000, 106000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.69433,
@@ -86,7 +86,7 @@ local otherGroup = {
         Radii = { 203000, 185000, 153000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.69466,
@@ -102,7 +102,7 @@ local otherGroup = {
         Radii = { 500, 500, 500 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 0.80812,
@@ -118,7 +118,7 @@ local otherGroup = {
         Radii = { 3200, 3200, 3200 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.00957,
@@ -134,7 +134,7 @@ local otherGroup = {
         Radii = { 1800, 1800, 1800 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.05089,
@@ -150,7 +150,7 @@ local otherGroup = {
         Radii = { 6000, 6000, 4000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.370218,
@@ -166,7 +166,7 @@ local otherGroup = {
         Radii = { 33000, 24000, 20000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.887802,
@@ -182,7 +182,7 @@ local otherGroup = {
         Radii = { 30000, 23000, 14000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1.887802,
@@ -198,7 +198,7 @@ local otherGroup = {
         Radii = { 43000, 38000, 26000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 2.736915,
@@ -214,7 +214,7 @@ local otherGroup = {
         Radii = { 3000, 2000, 1000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Saturn/Moons/Other Group",
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
         },
         TrailColor = trailColor,
         OrbitPeriod = 2.736915,

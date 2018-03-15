@@ -22,7 +22,7 @@ local VenusTrail = {
     GUI = {
         Name = "Venus Trail",
         Path = "/Solar System/Planets/Venus"
-    },
+    }
 }
 
 

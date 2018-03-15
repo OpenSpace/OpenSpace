@@ -23,7 +23,7 @@ local IapetusTrail = {
     GUI = {
         Name = "Iapetus Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 

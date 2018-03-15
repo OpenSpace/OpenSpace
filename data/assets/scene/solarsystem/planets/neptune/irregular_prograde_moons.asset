@@ -23,7 +23,7 @@ local irregularProgradeMoons = {
         Radii = { 62000, 62000, 62000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 1879.08,
@@ -39,7 +39,7 @@ local irregularProgradeMoons = {
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 9074.3,
@@ -55,7 +55,7 @@ local irregularProgradeMoons = {
         Radii = { 60000, 60000, 60000 },
         Tags = tags,
         GUI = {
-            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
         },
         TrailColor = trailColor,
         OrbitPeriod = 9740.73,

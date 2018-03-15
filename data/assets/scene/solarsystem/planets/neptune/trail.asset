@@ -33,7 +33,7 @@ local NeptuneTrail = {
     GUI = {
         Name = "Neptune Trail",
         Path = "/Solar System/Planets/Neptune"
-    },
+    }
 }
 
 

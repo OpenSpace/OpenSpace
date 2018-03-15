@@ -23,7 +23,7 @@ local RheaTrail = {
     GUI = {
         Name = "Rhea Trail",
         Path = "/Solar System/Planets/Saturn/Moons"
-    },
+    }
 }
 
 
