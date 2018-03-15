@@ -43,7 +43,10 @@ namespace {
 namespace openspace::globebrowsing {
 
 LayerGroup::LayerGroup(layergroupid::GroupID id)
-    : properties::PropertyOwner({ std::move(layergroupid::LAYER_GROUP_NAMES[id]) })
+    : properties::PropertyOwner({
+        layergroupid::LAYER_GROUP_IDENTIFIERS[id],
+        layergroupid::LAYER_GROUP_NAMES[id]
+    })
     , _groupId(id)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {

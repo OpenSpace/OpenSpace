@@ -37,10 +37,9 @@ local Keybindings = {
         Key = "g",
         Command = propertyHelper.invert('Scene.MilkyWay.renderable.Enabled') ..
                   propertyHelper.invert('Scene.Stars.renderable.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.PerformShading') ..
-                  propertyHelper.invert('Scene.Mars.RenderableGlobe.PerformShading') ..
-                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Atmosphere') ..
+                  propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.NightLayers.Earth_at_Night_2012.Enabled') ..
+                  propertyHelper.invert('Scene.EarthAtmosphere.renderable.Enabled') ..
+                  propertyHelper.invert('Scene.MarsAtmosphere.renderable.Enabled') ..
                   propertyHelper.invert('Scene.Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
                   propertyHelper.invert('Scene.Moon.RenderableGlobe.Enabled') ..
                   propertyHelper.invert('Scene.Sun.renderable.Enabled'),

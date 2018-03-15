@@ -166,7 +166,7 @@ void LayerShaderManager::recompileShaderProgram(
     for (size_t i = 0; i < textureTypes.size(); i++) {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
-        std::string groupName = layergroupid::LAYER_GROUP_NAMES[i];
+        std::string groupName = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
         shaderDictionary.setValue(
             "lastLayerIndex" + groupName,
             glm::max(textureTypes[i].lastLayerIdx, 0)
@@ -219,7 +219,7 @@ void LayerShaderManager::recompileShaderProgram(
 
     ghoul::Dictionary layerGroupNames;
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        layerGroupNames.setValue(std::to_string(i), layergroupid::LAYER_GROUP_NAMES[i]);
+        layerGroupNames.setValue(std::to_string(i), layergroupid::LAYER_GROUP_IDENTIFIERS[i]);
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
 
