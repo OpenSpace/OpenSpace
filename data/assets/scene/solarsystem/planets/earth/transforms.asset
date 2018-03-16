@@ -5,8 +5,8 @@ asset.require("spice/base")
 
 
 local EarthBarycenter = {
-    Name = "EarthBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "EarthBarycenter",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -14,13 +14,16 @@ local EarthBarycenter = {
             Observer = "SUN"
         }
     },
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth Barycenter",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 local EarthInertial = {
     -- The default reference frame for Earth-orbiting satellites
-    Name = "EarthInertial",
-    Parent = EarthBarycenter.Name,
+    Identifier = "EarthInertial",
+    Parent = EarthBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -28,12 +31,15 @@ local EarthInertial = {
             DestinationFrame = "GALACTIC",
         }
     },
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth Inertial",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 local EarthIAU = {
-    Name = "EarthIAU",
-    Parent = EarthBarycenter.Name,
+    Identifier = "EarthIAU",
+    Parent = EarthBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -41,7 +47,10 @@ local EarthIAU = {
             DestinationFrame = "GALACTIC",
         }
     },
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Name = "Earth IAU",
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 

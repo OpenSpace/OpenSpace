@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "HII Regions",
+    Identifier = "HIIRegions",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -33,7 +33,10 @@ local object = {
         TextMinSize = 2.0,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/HII"
+    GUI = {
+        Name = "HII Regions",
+        Path = "/Milky Way/HII"
+    }
 }
 
 

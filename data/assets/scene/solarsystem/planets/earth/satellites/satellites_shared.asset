@@ -45,8 +45,8 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
 
     function getSat(title, file, lineNum, textureFile, group)
         return {
-            Name = title,
-            Parent = transforms.EarthInertial.Name,
+            Identifier = title,
+            Parent = transforms.EarthInertial.Identifier,
             Renderable = {
                 Type = "RenderablePlaneImageLocal",
                 Enabled = false,
@@ -60,7 +60,7 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 Translation = {
                     Type = "TLETranslation",
                     Body = title,
-                    Observer = transforms.EarthInertial.Name,
+                    Observer = transforms.EarthInertial.Identifier,
                     File = file,
                     LineNumber = lineNum
                 },
@@ -70,20 +70,22 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 }
             },
             Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_marker" },
-            GuiPath = "/Solar System/Planets/Earth/Satellites"
+            GUI = {
+                Path = "/Solar System/Planets/Earth/Satellites"
+            }
         }
     end
 
     function getSatTrail(title, file, lineNum, per, color, group)
         return {
-            Name = title .. "_trail",
-            Parent = transforms.EarthInertial.Name,
+            Identifier = title .. "_trail",
+            Parent = transforms.EarthInertial.Identifier,
             Renderable = {
                 Type = "RenderableTrailOrbit",
                 Translation = {
                     Type = "TLETranslation",
                     Body = title,
-                    Observer = transforms.EarthInertial.Name,
+                    Observer = transforms.EarthInertial.Identifier,
                     File = file,
                     LineNumber = lineNum
                 },
@@ -92,7 +94,9 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
                 Resolution = 160
             },
             Tag = { "earth_satellite_" .. group, "earth_satellite_" .. group .. "_trail"},
-            GuiPath = "/Solar System/Planets/Earth/Satellites"
+            GUI = {
+                Path = "/Solar System/Planets/Earth/Satellites"
+            }
         }
     end
 
@@ -149,11 +153,11 @@ local addSatelliteGroupObjects = function(group, tleFolder, shouldAddDuplicates)
             -- Register satellite object and trail
             local sat_var = getSat(satName, path, n, texture, group.Title)
             openspace.addSceneGraphNode(sat_var)
-            table.insert(obj, sat_var.Name)
+            table.insert(obj, sat_var.Identifier)
 
             local satTrail_var = getSatTrail(satName, path, n, per, group.TrailColor, group.Title)
             openspace.addSceneGraphNode(satTrail_var)
-            table.insert(obj, satTrail_var.Name)
+            table.insert(obj, satTrail_var.Identifier)
         end
     end
 

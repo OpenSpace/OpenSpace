@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local constellationsExtragalactic = {
-    Name = "Constellations (Extragalactic)",
+    Identifier = "ConstellationsExtragalactic",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -26,11 +26,14 @@ local constellationsExtragalactic = {
         MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
         Unit = "Mpc"
     },
-    GuiPath = "/Milky Way/Constellations"
+    GUI = {
+        Name = "Constellations (Extragalactic)",
+        Path = "/Milky Way/Constellations"
+    }
 }
 
 local constellations = {
-    Name = "Constellations",
+    Identifier = "Constellations",
     Renderable = {
         Type = "RenderableDUMeshes",
         Enabled = false,
@@ -46,7 +49,9 @@ local constellations = {
         MeshColor = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Constellations"
+    GUI = {
+        Path = "/Milky Way/Constellations"
+    }
 }
 
 

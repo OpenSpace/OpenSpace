@@ -56,7 +56,8 @@
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";
-    constexpr const char* KeyGuiPath = "GuiPath";
+    constexpr const char* KeyName = "GUI.Name";
+    constexpr const char* KeyGuiPath = "GUI.Path";
 
     constexpr const char* keyTransformTranslation = "Transform.Translation";
     constexpr const char* keyTransformRotation = "Transform.Rotation";
@@ -64,13 +65,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-// Constants used outside of this file
-const std::string SceneGraphNode::RootNodeName = "Root";
-const std::string SceneGraphNode::KeyName = "Name";
-const std::string SceneGraphNode::KeyParentName = "Parent";
-const std::string SceneGraphNode::KeyDependencies = "Dependencies";
-const std::string SceneGraphNode::KeyTag = "Tag";
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -83,8 +77,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
 
-    std::string name = dictionary.value<std::string>(KeyName);
-    result->setName(name);
+    std::string identifier = dictionary.value<std::string>(KeyIdentifier);
+    result->setIdentifier(std::move(identifier));
+
+    if (dictionary.hasKey(KeyName)) {
+        result->setGuiName(dictionary.value<std::string>(KeyName));
+    }
 
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
@@ -94,13 +92,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         );
         if (result->_transform.translation == nullptr) {
             LERROR(fmt::format(
-                "Failed to create ephemeris for SceneGraphNode '{}'", result->name()
+                "Failed to create ephemeris for SceneGraphNode '{}'", result->identifier()
             ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.translation.get());
         LDEBUG(fmt::format(
-            "Successfully created ephemeris for '{}'", result->name()
+            "Successfully created ephemeris for '{}'", result->identifier()
         ));
     }
 
@@ -110,12 +108,14 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
             LERROR(fmt::format(
-                "Failed to create rotation for SceneGraphNode '{}'", result->name()
+                "Failed to create rotation for SceneGraphNode '{}'", result->identifier()
             ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.rotation.get());
-        LDEBUG(fmt::format("Successfully created rotation for '{}'", result->name()));
+        LDEBUG(fmt::format(
+            "Successfully created rotation for '{}'", result->identifier()
+        ));
     }
 
     if (dictionary.hasKey(keyTransformScale)) {
@@ -124,12 +124,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
             LERROR(fmt::format(
-                "Failed to create scale for SceneGraphNode '{}'", result->name()
+                "Failed to create scale for SceneGraphNode '{}'", result->identifier()
             ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.scale.get());
-        LDEBUG(fmt::format("Successfully created scale for '{}'", result->name()));
+        LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
     }
 
     // We initialize the renderable last as it probably has the most dependencies
@@ -137,17 +137,20 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        renderableDictionary.setValue(KeyName, name);
+        renderableDictionary.setValue(KeyIdentifier, identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
             LERROR(fmt::format(
-                "Failed to create renderable for SceneGraphNode '{}'", result->name()
+                "Failed to create renderable for SceneGraphNode '{}'",
+                result->identifier()
             ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG(fmt::format("Successfully created renderable for '{}'", result->name()));
+        LDEBUG(fmt::format(
+            "Successfully created renderable for '{}'", result->identifier()
+        ));
     }
 
     if (dictionary.hasKey(KeyTag)) {
@@ -173,7 +176,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
     }
 
-    LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->name()));
+    LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
     return result;
 }
 
@@ -194,7 +197,7 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
-    LDEBUG(fmt::format("Initialize: {}", name()));
+    LDEBUG(fmt::format("Initialize: {}", identifier()));
     if (_renderable) {
         _renderable->initialize();
     }
@@ -219,7 +222,7 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
-    LDEBUG(fmt::format("Deinitialize: {}", name()));
+    LDEBUG(fmt::format("Deinitialize: {}", identifier()));
 
     setScene(nullptr);
 
@@ -696,21 +699,21 @@ bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScal
 }
 */
 
-SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
-{
-    if (this->name() == name)
+SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
+    if (this->identifier() == identifier) {
         return this;
+    }
     else
         for (std::unique_ptr<SceneGraphNode>& it : _children) {
-            SceneGraphNode* tmp = it->childNode(name);
-            if (tmp)
+            SceneGraphNode* tmp = it->childNode(identifier);
+            if (tmp) {
                 return tmp;
+            }
         }
     return nullptr;
 }
 
-void SceneGraphNode::updateCamera(Camera* camera) const{
-
+void SceneGraphNode::updateCamera(Camera* camera) const {
     psc origin(worldPosition());
     //int i = 0;
     // the camera position

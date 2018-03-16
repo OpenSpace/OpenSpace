@@ -35,13 +35,20 @@ documentation::Documentation SceneGraphNode::Documentation() {
         "core_scene_node",
         {
         {
-            "Name",
+            "Identifier",
             new StringVerifier,
             Optional::No,
-            "The name of this scenegraph node. This name must be unique among all scene "
-            "graph nodes that are loaded in a specific scene. If a duplicate is detected "
-            "the loading of the node will fail, as will all childing that depend on the "
-            "node."
+            "The identifier of this scenegraph node. This name must be unique among all "
+            "scene graph nodes that are loaded in a specific scene. If a duplicate is "
+            "detected the loading of the node will fail, as will all childing that "
+            "depend on the node. The identifier must not contain any whitespaces or '.'."
+        },
+        {
+            "Name",
+            new StringVerifier,
+            Optional::Yes,
+            "An optional user-facing name for this SceneGraphNode, which does not have "
+            "to be unique, though it is recommended, and can contain any characters."
         },
         {
             "Parent",

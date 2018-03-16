@@ -112,11 +112,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
 {
-    ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "Name was not passed to RenderableModel"
-    );
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -128,9 +123,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
 
     if (dictionary.hasKey(KeyGeometry)) {
-        std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
         ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-        dict.setValue(SceneGraphNode::KeyName, name);
         _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
     }
 
