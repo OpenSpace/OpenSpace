@@ -248,25 +248,11 @@ local OneMin_Cover = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
-local RA = {
-    Name = "ra",
-    Parent = CuriosityRA.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
+
 
 local RA_root = {
     Name = "ra_root",
-    Parent = CuriosityRA.Name,
+    Parent = transforms.RA_Orientation.Name, --CuriosityRA.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -282,7 +268,7 @@ local RA_root = {
 
 local RA_Arm1 = {
     Name = "ra_arm1",
-    Parent = CuriosityRA.Name,
+    Parent = transforms.RA_SHOULDER_AZ_Orientation.Name, --RA_root.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -298,7 +284,7 @@ local RA_Arm1 = {
 
 local RA_Arm2 = {
     Name = "ra_arm2",
-    Parent = CuriosityRA.Name,
+    Parent = transforms.RA_SHOULDER_EL_Orientation.Name, --RA_Arm1.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -314,13 +300,29 @@ local RA_Arm2 = {
 
 local RA_Arm3 = {
     Name = "ra_arm3",
-    Parent = CuriosityRA.Name,
+    Parent = RA_Arm2.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_arm_3.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    Tag = {"planet_solarsystem", "planet_terrestrial"},
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+local RA = {
+    Name = "ra",
+    Parent = CuriosityRA.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RA.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },

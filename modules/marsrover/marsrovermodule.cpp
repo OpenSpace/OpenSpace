@@ -42,7 +42,7 @@
 #include <modules/marsrover/scale/staticscale.h>
 
 
-#include <../data/assets/solarsystem/planets/mars/rovers/kernels.asset>
+//#include <../data/assets/scene/solarsystem/planets/mars/rovers/kernels.asset>
 
 namespace openspace {
 
@@ -54,11 +54,6 @@ namespace openspace {
         ghoul_assert(fRenderable, "Renderable factory was not created");
 
         fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-
-
-
-        LERROR("hekadjf;asldkf;asdkf;asdkfsd;kflskdjflsdjf;sljfd")
-        LERROR(CuriosityKernels.MSL_RA_WRIST.ID)
 
     }
 

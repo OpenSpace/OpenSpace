@@ -10,9 +10,14 @@ local CuriosityPosition = {
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "MARS SCIENCE LABORATORY",
+            Target = "MSL",
             Observer = "MARS BARYCENTER",
             Kernels = kernels.CuriosityKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER",
+            DestinationFrame = "GALACTIC"
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
@@ -39,7 +44,7 @@ local RSM_EL_Orientation = {
     Name = "RSM_EL_Orientation",
     Parent = "CuriosityPosition",
     Transform = {
-    Rotation = {
+        Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "MSL_RMS_EL", -- 
             DestinationFrame = "GALACTIC",
@@ -49,11 +54,58 @@ local RSM_EL_Orientation = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
+-- Robot Arm
+local RA_Orientation = {
+    Name = "RA_Orientation",
+    Parent = CuriosityPosition.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER", 
+            DestinationFrame = "MSL_RA_BASE",
+            Kernel = kernels.CuriosityKernels 
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+local RA_SHOULDER_AZ_Orientation = {
+    Name = "RA_SHOULDER_AZ_Orientation",
+    Parent = RA_Orientation.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RA_BASE", 
+            DestinationFrame = "MSL_RA_SHOULDER_AZ",
+            Kernel = kernels.CuriosityKernels  
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+local RA_SHOULDER_EL_Orientation = {
+    Name = "RA_SHOULDER_EL_Orientation",
+    Parent = RA_SHOULDER_AZ_Orientation.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RA_SHOULDER_AZ", 
+            DestinationFrame = "MSL_RA_SHOULDER_EL" ,
+            Kernel = kernels.CuriosityKernels 
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     CuriosityPosition,
     RSM_AZ_Orientation,
-    RSM_EL_Orientation
+    RSM_EL_Orientation,
+    RA_Orientation,
+    RA_SHOULDER_AZ_Orientation,
+    RA_SHOULDER_EL_Orientation
 })
 
