@@ -19,37 +19,33 @@ local registerSpiceKernels = function (spiceAsset, kernels)
     end)
 end
 
-local registerSceneGraphNodes = function (sceneAsset, nodes, override)
-    override = override or false
-    if not override then
+local registrationFunctions = function (sceneAsset, nodes, overrideWarning)
+    overrideWarning = overrideWarning or false
+    if not overrideWarning then
         if tableLength(nodes) == 0 then
             openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
             return
         end
     end
 
-
-    sceneAsset.onInitialize(function ()
+    local initFunc = function()
         for i, node in ipairs(nodes) do
             openspace.addSceneGraphNode(node)
         end
-    end)
-    sceneAsset.onDeinitialize(function ()
+    end
+
+    local deinitFunc = function()
         for i = #nodes, 1, -1 do
             node = nodes[i]
             openspace.removeSceneGraphNode(node.Identifier)
         end
-    end)
+    end
+
+    return initFunc, deinitFunc
 end
 
-local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
-    override = override or false
-    if not override then
-        if tableLength(nodes) == 0 then
-            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
-            return
-        end
-    end
+local registerSceneGraphNodes = function (sceneAsset, nodes, overrideWarning)
+    -- assert((not sceneAsset.onInitialize) and (not sceneAsset.onDeinitialize), "onInitialize or onDeinitialize methods were already specified for this asset. Consider calling 'openspace.addSceneGraphNode' for the nodes directly in it and adding 'onDeinitialize' to call openspace.removeSceenGraphNode'.")
 
     for i, node in ipairs(nodes) do
         if not node.Identifier then
@@ -57,19 +53,17 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
         end
     end
 
-    sceneAsset.onInitialize(function ()
-        for i, node in ipairs(nodes) do
-            openspace.addSceneGraphNode(node)
-        end
-    end)
-    sceneAsset.onDeinitialize(function ()
-        for i = #nodes, 1, -1 do
-            node = nodes[i]
-            openspace.removeSceneGraphNode(node.Identifier)
-        end
-    end)
+    local init, deinit = registrationFunctions(sceneAsset, nodes, overrideWarning)
+
+    sceneAsset.onInitialize(init)
+    sceneAsset.onDeinitialize(deinit)
+end
+
+local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, overrideWarning)
+    registerSceneGraphNodes(sceneAsset, nodes, overrideWarning)
 
     for i, node in ipairs(nodes) do
+        assert(node.Identifier, "No identifier specified")
         sceneAsset.export(node.Identifier, node)
     end
 end
@@ -107,6 +101,7 @@ local requestAll = function (sceneAsset, directory)
     end
 end
 
+asset.export("registrationFunctions", registrationFunctions)
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerSpiceKernels", registerSpiceKernels)

@@ -281,9 +281,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     , _pJumpToStartBtn(TimeJumpButtonInfo)
 {
     _dictionary = std::make_unique<ghoul::Dictionary>(dictionary);
-}
 
-void RenderableFieldlinesSequence::initializeGL() {
     // EXTRACT MANDATORY INFORMATION FROM DICTIONARY
     SourceFileType sourceFileType = SourceFileType::Invalid;
     if (!extractMandatoryInfoFromDictionary(sourceFileType)) {
@@ -347,6 +345,10 @@ void RenderableFieldlinesSequence::initializeGL() {
     setModelDependentConstants();
 
     setupProperties();
+}
+
+void RenderableFieldlinesSequence::initializeGL() {
+
 
     // Setup shader program
     _shaderProgram = OsEng.renderEngine().buildRenderProgram(
