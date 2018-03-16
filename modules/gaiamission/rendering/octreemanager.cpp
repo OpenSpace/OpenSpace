@@ -98,7 +98,7 @@ void OctreeManager::printStarsPerNode() const {
     LINFO(fmt::format("Depth of tree: {}", std::to_string(_totalDepth)));
 }
 
-// Builds full render data structure by traversing the Octree. 
+// Builds render data structure by traversing the Octree and checking for intersection with frustum. 
 std::vector<float> OctreeManager::traverseData(const glm::mat4 mvp,
     const glm::vec2 screenSize) {
 
@@ -110,6 +110,19 @@ std::vector<float> OctreeManager::traverseData(const glm::mat4 mvp,
     }
 
     return renderData;
+}
+
+// Builds full render data structure by traversing all leaves in the Octree. 
+std::vector<float> OctreeManager::getAllData() {
+
+    auto fullData = std::vector<float>();
+
+    for (size_t i = 0; i < 8; ++i) {
+        auto tmpData = getNodeData(_root->Children[i]);
+        fullData.insert(fullData.end(), tmpData.begin(), tmpData.end());
+    }
+
+    return fullData;
 }
 
 // Returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
@@ -264,6 +277,23 @@ std::vector<float> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNo
         fetchedData.insert(fetchedData.end(), tmpData.begin(), tmpData.end());
     }
     return fetchedData;
+}
+
+// Get data in all leaves regardless if visible or not.
+std::vector<float> OctreeManager::getNodeData(std::shared_ptr<OctreeNode> node) {
+    
+    // Return node data if node is a leaf.
+    if (node->isLeaf) {
+        return node->data;
+    }
+
+    // If we're not in a leaf, get data from all children recursively.
+    auto nodeData = std::vector<float>();
+    for (size_t i = 0; i < 8; ++i) {
+        auto tmpData = getNodeData(node->Children[i]);
+        nodeData.insert(nodeData.end(), tmpData.begin(), tmpData.end());
+    }
+    return nodeData;
 }
 
 }

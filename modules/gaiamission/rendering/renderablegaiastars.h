@@ -71,8 +71,9 @@ private:
         Color = 2
     };
     
+    std::vector<float> sliceStarValues(ColumnOption option, std::vector<float> starValues);
     void createDataSlice(ColumnOption option);
-    bool readFitsFile();
+    bool readFitsFile(ColumnOption option);
     float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
     properties::StringProperty _fitsFilePath;
@@ -108,11 +109,12 @@ private:
         closeUpBoostDist) _uniformCache;
 
     std::shared_ptr<OctreeManager> _octreeManager;
-    size_t _numLevelsInOctree;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
+    std::vector<float> _updateData;
     size_t _nValuesPerStar;
+    size_t _nValuesInSlice;
 
     GLuint _vao;
     GLuint _vbo;

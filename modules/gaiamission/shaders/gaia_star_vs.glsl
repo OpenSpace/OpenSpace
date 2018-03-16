@@ -29,6 +29,7 @@ const int COLUMNOPTION_STATIC = 0;
 const int COLUMNOPTION_MOTION = 1; 
 const int COLUMNOPTION_COLOR = 2;
 const float EPS = 1e-5;
+const float Parsec = 3.0856776e16;
 
 in vec3 in_position;
 in vec3 in_velocity;
@@ -48,7 +49,8 @@ void main() {
     vs_velocity = in_velocity;
     vs_brightness = in_brightness;
     
-    vec4 modelPosition = vec4(in_position, 1.0);
+    // Convert kiloParsec to meter.
+    vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
     if ( columnOption != COLUMNOPTION_STATIC ) {
         modelPosition.xyz += time * in_velocity;

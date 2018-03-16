@@ -54,6 +54,7 @@ public:
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
     std::vector<float> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize);
+    std::vector<float> getAllData();
 
 private:
     const size_t MAX_DIST = 5; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
@@ -71,6 +72,7 @@ private:
         std::string prefix) const;
     std::vector<float> checkNodeIntersection(std::shared_ptr<OctreeNode> node,
         const glm::mat4 mvp, const glm::vec2 screenSize);
+    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node);
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
