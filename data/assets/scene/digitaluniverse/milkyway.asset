@@ -24,7 +24,7 @@ local planeSpeck = asset.syncedResource({
 })
 
 local sphere = {
-    Name = "MilkyWay",
+    Identifier = "MilkyWay",
     Renderable = {
         Type = "RenderableSphere",
         Size = 9.2E20,
@@ -34,11 +34,14 @@ local sphere = {
         Orientation = "Inside/Outside",
         FadeOutThreshould = 0.25
     },
-    GuiPath = "/Milky Way/Milky Way"
+    GUI = {
+        Name = "Milky Way",
+        Path = "/Milky Way/Milky Way"
+    }
 }
 
 local plane = {
-    Name = "Milky Way Galaxy Image",
+    Identifier = "MilkyWayGalaxyImage",
     Parent = "Root",
     Renderable = {
         Type = "RenderablePlanesCloud",
@@ -56,7 +59,10 @@ local plane = {
         PlaneMinSize = 5.0,
         Unit = "pc"
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Milky Way Galaxy Image",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

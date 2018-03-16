@@ -188,6 +188,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
+
     if (_windowWrapper) {
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
@@ -703,6 +705,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 resourceSyncs.insert(s);
                 _loadingScreen->updateItem(
                     s->name(),
+                    s->name(),
                     LoadingScreen::ItemStatus::Started,
                     s->progress()
                 );
@@ -723,6 +726,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 loading = true;
                 _loadingScreen->updateItem(
                     (*it)->name(),
+                    (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
                     (*it)->progress()
                 );
@@ -730,6 +734,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             } else {
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
+                    (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
                     1.0f

@@ -12,8 +12,8 @@ local textures = asset.syncedResource({
 })
 
 local Styx = {
-    Name = "Styx",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Styx",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -33,12 +33,14 @@ local Styx = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local StyxText = {
-    Name = "StyxText",
-    Parent = Styx.Name,
+    Identifier = "StyxText",
+    Parent = Styx.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -53,12 +55,15 @@ local StyxText = {
         Texture = textures .. "/Styx-Text.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Styx Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local StyxTrail = {
-    Name = "StyxTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "StyxTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -70,7 +75,10 @@ local StyxTrail = {
         Period = 20.16155,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Styx Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

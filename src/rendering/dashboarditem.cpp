@@ -51,8 +51,8 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     return factory->create(dashboardType, dictionary);
 }
 
-DashboardItem::DashboardItem(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
+DashboardItem::DashboardItem(std::string identifier, std::string guiName)
+    : properties::PropertyOwner({ std::move(identifier), std::move(guiName) })
     , _isEnabled(EnabledInfo, true)
 {
     addProperty(_isEnabled);

@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Jupiter = {
-    Name = "Jupiter",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Jupiter",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -29,7 +29,7 @@ local Jupiter = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Jupiter Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/jupiter.jpg",
                     Enabled = true
                 }
@@ -37,7 +37,9 @@ local Jupiter = {
         }
     },
     Tag = { "planet_solarSystem", "planet_giants" },
-    GuiPath = "/Solar System/Planets/Jupiter"
+    GUI = {
+        Path = "/Solar System/Planets/Jupiter"
+    }
 }
 
 

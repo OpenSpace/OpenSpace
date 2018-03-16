@@ -5,7 +5,7 @@ local Keybindings = {
     {
         Key = "F2",
         Command =
-[[local b = openspace.getPropertyValue('Modules.ImGUI.Main.Scene Properties.Enabled');
+[[local b = openspace.getPropertyValue('Modules.ImGUI.Main.SceneProperties.Enabled');
 local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');
 openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);
 if b and c then
@@ -13,11 +13,11 @@ if b and c then
     -- and then closed again. So the main properties window is enabled, but also all
     -- windows are hidden
     openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', false);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.Scene Properties.Enabled', true);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.Space/Time.Enabled', true);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SceneProperties.Enabled', true);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SpaceTime.Enabled', true);
 else
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.Scene Properties.Enabled', not b);
-    openspace.setPropertyValueSingle('Modules.ImGUI.Main.Space/Time.Enabled', not b);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SceneProperties.Enabled', not b);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SpaceTime.Enabled', not b);
     openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);
 end]],
         Documentation = "Shows or hides the properties window",

@@ -161,8 +161,9 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree)
-    : GuiComponent(std::move(name))
+GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string guiName,
+                                           UseTreeLayout useTree)
+    : GuiComponent(std::move(identifier), std::move(guiName))
     , _useTreeLayout(UseTreeInfo, useTree)
     , _treeOrdering(OrderingInfo)
 {
@@ -188,7 +189,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     }
 
     int nThisProperty = nVisibleProperties(owner->properties(), _visibility);
-    ImGui::PushID(owner->name().c_str());
+    ImGui::PushID(owner->identifier().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {
         std::vector<properties::Property*> properties = subOwner->propertiesRecursive();
@@ -200,7 +201,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
             renderPropertyOwner(subOwner);
         }
         else {
-            bool opened = ImGui::TreeNode(subOwner->name().c_str());
+            bool opened = ImGui::TreeNode(subOwner->guiName().c_str());
             renderTooltip(subOwner);
             if (opened) {
                 renderPropertyOwner(subOwner);
@@ -251,7 +252,7 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, Size, 0.75f);
+    ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
@@ -264,7 +265,7 @@ void GuiPropertyComponent::render() {
             owners.begin(),
             owners.end(),
             [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
-                return lhs->name() < rhs->name();
+                return lhs->guiName() < rhs->guiName();
             }
         );
 
@@ -357,11 +358,11 @@ void GuiPropertyComponent::render() {
             auto header = [&]() -> bool {
                 if (owners.size() > 1) {
                     // Create a header in case we have multiple owners
-                    return ImGui::CollapsingHeader(pOwner->name().c_str());
+                    return ImGui::CollapsingHeader(pOwner->guiName().c_str());
                 }
-                else if (!pOwner->name().empty()) {
+                else if (!pOwner->identifier().empty()) {
                     // If the owner has a name, print it first
-                    ImGui::Text("%s", pOwner->name().c_str());
+                    ImGui::Text("%s", pOwner->guiName().c_str());
                     ImGui::Spacing();
                     return true;
                 }
@@ -462,7 +463,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
             if (owner) {
                 it->second(
                     prop,
-                    owner->name(),
+                    owner->identifier(),
                     IsRegularProperty(_hasOnlyRegularProperties),
                     ShowToolTip(_showHelpTooltip),
                     _tooltipDelay

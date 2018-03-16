@@ -1196,7 +1196,7 @@ void ParallelConnection::sendCameraKeyframe() {
         kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
     }
 
-    kf._focusNode = focusNode->name();
+    kf._focusNode = focusNode->identifier();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.windowWrapper().applicationTime();

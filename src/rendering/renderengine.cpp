@@ -256,6 +256,7 @@ RenderEngine::RenderEngine()
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
     , _frameNumber(0)
+    , _screenSpaceOwner({ "ScreenSpace" })
 {
     _doPerformanceMeasurements.onChange([this](){
         if (_doPerformanceMeasurements) {
@@ -974,6 +975,9 @@ std::shared_ptr<performance::PerformanceManager> RenderEngine::performanceManage
 void RenderEngine::addScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s) {
     s->initialize();
     s->initializeGL();
+
+    _screenSpaceOwner.addPropertySubOwner(s.get());
+
     _screenSpaceRenderables.push_back(std::move(s));
 }
 
@@ -986,6 +990,8 @@ void RenderEngine::removeScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRender
 
     if (it != _screenSpaceRenderables.end()) {
         s->deinitialize();
+        _screenSpaceOwner.removePropertySubOwner(s.get());
+
         _screenSpaceRenderables.erase(it);
     }
 }
@@ -998,13 +1004,13 @@ void RenderEngine::removeScreenSpaceRenderable(const std::string& name) {
 }
 
 std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(
-                                                                  const std::string& name)
+                                                            const std::string& identifier)
 {
     auto it = std::find_if(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
-        [name](const std::shared_ptr<ScreenSpaceRenderable>& s) {
-            return s->name() == name;
+        [&identifier](const std::shared_ptr<ScreenSpaceRenderable>& s) {
+            return s->identifier() == identifier;
         }
     );
 
@@ -1252,6 +1258,10 @@ std::vector<Syncable*> RenderEngine::getSyncables() {
     } else {
         return {};
     }
+}
+
+properties::PropertyOwner& RenderEngine::screenSpaceOwner() {
+    return _screenSpaceOwner;
 }
 
 } // namespace openspace

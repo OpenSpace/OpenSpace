@@ -14,8 +14,8 @@ local textures = asset.syncedResource({
 })
 
 local Ganymede = {
-    Name = "Ganymede",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Ganymede",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -37,7 +37,7 @@ local Ganymede = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Ganymede Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/ganymede.jpg",
                     Enabled = true
                 }
@@ -45,7 +45,9 @@ local Ganymede = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
-    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Jupiter/Moons"
+    }
 }
 
 

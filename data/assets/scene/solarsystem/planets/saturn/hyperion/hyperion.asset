@@ -13,8 +13,8 @@ asset.request('./trail')
 -- })
 
 local Hyperion = {
-    Name = "Hyperion",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Hyperion",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -43,7 +43,9 @@ local Hyperion = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Saturn/Moons"
+    }
 }
 
 
