@@ -255,27 +255,27 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             glm::dmat4 dInverseProjection = glm::inverse(
                 glm::dmat4(renderData.camera.projectionMatrix()));
 
-            glm::dmat4 dInverseCameraRotationToSgctEyeTransform = glm::mat4_cast(
+            glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = glm::mat4_cast(
                 static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
             ) * glm::inverse(renderData.camera.viewScaleMatrix()) * dSgctEye2OSEye;
             
             
-            glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = 
-                dInverseCameraRotationToSgctEyeTransform * dInverseProjection;
+            glm::dmat4 dInverseProjectionToTmpRotTransformMatrix = 
+                dInverseSGCTEyeToTmpRotTransformMatrix * dInverseProjection;
             
-            double *mSource = (double*)glm::value_ptr(dInverseSGCTEyeToTmpRotTransformMatrix);
+            double *mSource = (double*)glm::value_ptr(dInverseProjectionToTmpRotTransformMatrix);
             mSource[12] += renderData.camera.positionVec3().x;
             mSource[13] += renderData.camera.positionVec3().y;
             mSource[14] += renderData.camera.positionVec3().z;
             mSource[15] = 1.0;
 
             glm::dmat4 inverseWholeMatrixPipeline = inverseModelMatrix *
-                dInverseSGCTEyeToTmpRotTransformMatrix;
+                dInverseProjectionToTmpRotTransformMatrix;
             program.setUniform(_uniformCache2.dInverseSgctProjectionToModelTransformMatrix,
                 inverseWholeMatrixPipeline);
 
             program.setUniform(_uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix, 
-                dInverseCameraRotationToSgctEyeTransform);
+                dInverseSGCTEyeToTmpRotTransformMatrix);
 
             program.setUniform(_uniformCache2.dObjpos, glm::dvec4(renderData.position.dvec3(), 1.0));
             program.setUniform(_uniformCache2.dCampos, renderData.camera.eyePositionVec3());
