@@ -241,7 +241,7 @@ TouchInteraction::TouchInteraction()
     )
     , _friction(
         FrictionInfo,
-        glm::vec4(0.01f, 0.025f, 0.02f, 0.02f),
+        glm::vec4(0.025f, 0.025f, 0.02f, 0.02f),
         glm::vec4(0.f),
         glm::vec4(0.2f)
     )
@@ -1233,7 +1233,7 @@ void TouchInteraction::decelerate(double dt) {
     // time slack over from last frame
     int times = static_cast<int>((dt + _timeSlack) / frequency);
     // Save the new time slack for the next frame
-    _timeSlack = fmod((dt + _timeSlack), frequency);
+    _timeSlack = fmod((dt + _timeSlack), frequency) * frequency;
 
     // Decelerate zoom velocity quicker if we're close enough to use direct-manipulation
     if (!_directTouchMode && _currentRadius > _nodeRadiusThreshold &&
@@ -1306,7 +1306,7 @@ void TouchInteraction::resetToDefault() {
     _interpretPan.set(0.015f);
     _slerpTime.set(3.0f);
     _guiButton.set(glm::ivec2(32, 64));
-    _friction.set(glm::vec4(0.01, 0.025, 0.02, 0.02));
+    _friction.set(glm::vec4(0.025, 0.025, 0.02, 0.02));
 }
 
 void TouchInteraction::tap() {
