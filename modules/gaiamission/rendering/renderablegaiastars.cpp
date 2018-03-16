@@ -423,7 +423,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 RenderableGaiaStars::~RenderableGaiaStars() {}
 
 bool RenderableGaiaStars::isReady() const {
-    return (_program != nullptr) && (!_fullData.empty());
+    return (_program != nullptr) && (_octreeManager != nullptr);
 }
 
 void RenderableGaiaStars::initializeGL() {
@@ -508,17 +508,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-    /*glBufferSubData(
+    // Use buffer orphaning to update a subset of total data.
+    glBufferData(GL_ARRAY_BUFFER, _maxStarsSize * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
+    glBufferSubData(
         GL_ARRAY_BUFFER,
         updateOffset,
         updateSize * sizeof(GLfloat),
         &_updateData[0]
-    );*/
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        updateSize * sizeof(GLfloat),
-        &_updateData[0],
-        GL_DYNAMIC_DRAW
     );
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -556,11 +552,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
 
     // Draw call.
-    glEnable(GL_PROGRAM_POINT_SIZE);
+    //glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, nStars);
     glBindVertexArray(0);
-    glDisable(GL_PROGRAM_POINT_SIZE);
+    //glDisable(GL_PROGRAM_POINT_SIZE);
     _program->deactivate();
 
     glDepthMask(true);
@@ -867,21 +863,17 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
             }
 
             // Slice star data and insert star into octree.
-            // Do this earlier so I don't read values to just throw them away!? 
+            // TODO: Do this earlier so I don't read values to just throw them away!? 
             auto slicedValues = sliceStarValues(option, values); 
+            _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
 
             // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
             _octreeManager->insert(slicedValues);
-            //_fullData.insert(_fullData.end(), values.begin(), values.end());
-            _nValuesInSlice = slicedValues.size(); // Onödigt att göra varje gång...
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
+        _maxStarsSize = (nStars - nNullArr) * _nValuesInSlice;
         //_octreeManager->printStarsPerNode();
-
-        // Insert dummy data so isReady() accepts it.
-        float dummy = 0.0;
-        _fullData.insert(_fullData.end(), dummy);
     }
    
     return true;

@@ -112,9 +112,9 @@ private:
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
-    std::vector<float> _updateData;
     size_t _nValuesPerStar;
     size_t _nValuesInSlice;
+    size_t _maxStarsSize;
 
     GLuint _vao;
     GLuint _vbo;
