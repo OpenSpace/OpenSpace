@@ -89,11 +89,9 @@ uniform dmat4 dModelTransformMatrix;
 uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
 uniform dmat4 dInverseSgctProjectionToModelTransformMatrix;
 
-uniform dvec4 dObjpos;
 uniform dvec3 dCampos;
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
-uniform dvec3 ellipsoidRadii;
 
 /*******************************************************************************
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
@@ -262,7 +260,6 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // JCC: Applying the inverse of the model transformation on the object postion in World 
     // space results in imprecision. 
     planetPositionObjectCoords = dvec4(0.0, 0.0, 0.0, 1.0);
-    //planetPositionObjectCoords = dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
     // Camera Position in Object Space
     cameraPositionInObject = dCamPosObj;  
@@ -593,19 +590,6 @@ void main() {
             double maxLength   = 0.0;     
 
             bool  intersectATM = false;
-
-            // Instead of ray-ellipsoid intersection lets transform the ray to a sphere:
-            //dRay transfRay;
-            //transfRay.origin    = ray.origin;
-            //transfRay.direction = ray.direction;
-
-            // transfRay.origin.z *= 1000.0/ellipsoidRadii.x;
-            // transfRay.direction.z *= 1000.0/ellipsoidRadii.x;        
-            // transfRay.origin.x *= 1000.0/ellipsoidRadii.y;
-            // transfRay.direction.x *= 1000.0/ellipsoidRadii.y;    
-            // transfRay.origin.y *= 1000.0/ellipsoidRadii.z;
-            // transfRay.direction.y *= 1000.0/ellipsoidRadii.z;
-            // transfRay.direction.xyz = normalize(transfRay.direction.xyz);
 
             intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  
                                                   Rt - (ATM_EPSILON * 0.001), insideATM, offset, maxLength );

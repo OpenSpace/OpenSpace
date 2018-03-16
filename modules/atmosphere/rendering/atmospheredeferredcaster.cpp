@@ -213,50 +213,25 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.cullAtmosphere, 0);
             program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
             program.setUniform(_uniformCache.Rt, _atmosphereRadius);
-            program.setUniform(
-                _uniformCache.AverageGroundReflectance,
-                _planetAverageGroundReflectance
-            );
             program.setUniform(_uniformCache.groundRadianceEmittion, _planetGroundRadianceEmittion);
             program.setUniform(_uniformCache.HR, _rayleighHeightScale);
             program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
             program.setUniform(_uniformCache.HM, _mieHeightScale);
-            program.setUniform(_uniformCache.betaMieScattering, _mieScatteringCoeff);
             program.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
             program.setUniform(_uniformCache.mieG, _miePhaseConstant);
             program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
             program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
             program.setUniform(_uniformCache.HO, _ozoneHeightScale);
             program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
-
-            program.setUniform(_uniformCache.TRANSMITTANCE_W, _transmittance_table_width);
-            program.setUniform(_uniformCache.TRANSMITTANCE_H, _transmittance_table_height);
-            program.setUniform(_uniformCache.SKY_W, _irradiance_table_width);
-            program.setUniform(_uniformCache.SKY_H, _irradiance_table_height);
-            program.setUniform(_uniformCache.OTHER_TEXTURES_W, _delta_e_table_width);
-            program.setUniform(_uniformCache.OTHER_TEXTURES_H, _delta_e_table_height);
             program.setUniform(_uniformCache.SAMPLES_R, _r_samples);
             program.setUniform(_uniformCache.SAMPLES_MU, _mu_samples);
             program.setUniform(_uniformCache.SAMPLES_MU_S, _mu_s_samples);
             program.setUniform(_uniformCache.SAMPLES_NU, _nu_samples);
 
-            program.setUniform(_uniformCache2.ModelTransformMatrix, _modelTransform);
-
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
             program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
-
-            /*
-            // The following scale comes from PSC transformations.
-            float fScaleFactor = renderData.camera.scaling().x *
-                                 pow(10.f, renderData.camera.scaling().y);
-            glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(fScaleFactor));
-            program.setUniform(
-                "dInverseScaleTransformMatrix",
-                glm::inverse(dfScaleCamTransf)
-            );
-            */
             
             // Eye Space in OS to Eye Space in SGCT
             glm::dmat4 dSgctEye2OSEye = glm::inverse(
@@ -288,7 +263,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix, 
                 dInverseCameraRotationToSgctEyeTransform);
 
-            program.setUniform(_uniformCache2.dObjpos, glm::dvec4(renderData.position.dvec3(), 1.0));
             program.setUniform(_uniformCache2.dCampos, renderData.camera.positionVec3());
 
             glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
@@ -319,8 +293,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             // Sun Position in Object Space
             program.setUniform(_uniformCache2.sunDirectionObj, glm::normalize(glm::dvec3(sunPosObj)));
-
-            program.setUniform(_uniformCache2.ellipsoidRadii, _ellipsoidRadii);
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {
@@ -461,38 +433,27 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache.cullAtmosphere = program.uniformLocation("cullAtmosphere");
     _uniformCache.Rg = program.uniformLocation("Rg"); 
     _uniformCache.Rt = program.uniformLocation("Rt");
-    _uniformCache.AverageGroundReflectance = program.uniformLocation("AverageGroundReflectance");
     _uniformCache.groundRadianceEmittion = program.uniformLocation("groundRadianceEmittion");
     _uniformCache.HR = program.uniformLocation("HR"); 
     _uniformCache.betaRayleigh = program.uniformLocation("betaRayleigh"); 
     _uniformCache.HM = program.uniformLocation("HM");  
-    _uniformCache.betaMieScattering = program.uniformLocation("betaMieScattering");
     _uniformCache.betaMieExtinction = program.uniformLocation("betaMieExtinction"); 
     _uniformCache.mieG = program.uniformLocation("mieG"); 
     _uniformCache.sunRadiance = program.uniformLocation("sunRadiance"); 
     _uniformCache.ozoneLayerEnabled = program.uniformLocation("ozoneLayerEnabled");
     _uniformCache.HO = program.uniformLocation("HO"); 
     _uniformCache.betaOzoneExtinction = program.uniformLocation("betaOzoneExtinction"); 
-    _uniformCache.TRANSMITTANCE_W = program.uniformLocation("TRANSMITTANCE_W"); 
-    _uniformCache.TRANSMITTANCE_H = program.uniformLocation("TRANSMITTANCE_H");
-    _uniformCache.SKY_W = program.uniformLocation("SKY_W"); 
-    _uniformCache.SKY_H = program.uniformLocation("SKY_H"); 
-    _uniformCache.OTHER_TEXTURES_W = program.uniformLocation("OTHER_TEXTURES_W"); 
-    _uniformCache.OTHER_TEXTURES_H = program.uniformLocation("OTHER_TEXTURES_H"); 
     _uniformCache.SAMPLES_R = program.uniformLocation("SAMPLES_R");
     _uniformCache.SAMPLES_MU = program.uniformLocation("SAMPLES_MU"); 
     _uniformCache.SAMPLES_MU_S = program.uniformLocation("SAMPLES_MU_S"); 
     _uniformCache.SAMPLES_NU = program.uniformLocation("SAMPLES_NU");
-    _uniformCache2.ModelTransformMatrix = program.uniformLocation("ModelTransformMatrix");
     _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation("dInverseModelTransformMatrix");
     _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
     _uniformCache2.dInverseSgctProjectionToModelTransformMatrix = program.uniformLocation("dInverseSgctProjectionToModelTransformMatrix");
     _uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix = program.uniformLocation("dInverseSGCTEyeToTmpRotTransformMatrix");
-    _uniformCache2.dObjpos = program.uniformLocation("dObjpos");
     _uniformCache2.dCampos = program.uniformLocation("dCampos");
     _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
     _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
-    _uniformCache2.ellipsoidRadii = program.uniformLocation("ellipsoidRadii");
     _uniformCache2.hardShadows = program.uniformLocation("hardShadows");
     _uniformCache2.transmittanceTexture = program.uniformLocation("transmittanceTexture");
     _uniformCache2.irradianceTexture = program.uniformLocation("irradianceTexture");
