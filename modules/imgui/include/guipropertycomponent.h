@@ -67,7 +67,7 @@ protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    properties::Property::Visibility _visibility;
+    properties::Property::Visibility _visibility = properties::Property::Visibility::User;
 
     SourceFunction _function;
     /// This is set to \c true if all properties contained in this GUIPropertyComponent
