@@ -342,6 +342,11 @@ void RenderEngine::initialize() {
     LINFO(fmt::format("Setting renderer from string: {}", renderingMethod));
     setRendererFromString(renderingMethod);
 
+#ifdef GHOUL_USE_STB_IMAGE
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderSTB>()
+    );    
+#endif // GHOUL_USE_STB_IMAGE
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderDevIL>()
@@ -360,11 +365,6 @@ void RenderEngine::initialize() {
         std::make_unique<ghoul::io::TextureWriterSOIL>()
     );
 #endif // GHOUL_USE_SOIL
-#ifdef GHOUL_USE_STB_IMAGE
-    ghoul::io::TextureReader::ref().addReader(
-        std::make_unique<ghoul::io::TextureReaderSTB>()
-    );
-#endif // GHOUL_USE_STB_IMAGE
 
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
