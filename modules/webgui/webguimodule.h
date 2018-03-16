@@ -36,7 +36,7 @@ class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
-    void internalInitialize();
+    void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
     std::shared_ptr<BrowserInstance> _guiInstance;

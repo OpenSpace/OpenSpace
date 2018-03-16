@@ -48,20 +48,22 @@ public:
     static constexpr const char* Name = "WebBrowser";
     WebBrowserModule();
     ~WebBrowserModule();
-    void internalInitialize();
 
     int addBrowser(std::shared_ptr<BrowserInstance>);
     void removeBrowser(std::shared_ptr<BrowserInstance>);
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
 
+protected:
+    void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalDeinitialize() override;
+
 private:
-    void deinitialize();
     std::string findHelperExecutable();
 
     std::vector<std::shared_ptr<BrowserInstance>> _browsers;
     EventHandler _eventHandler;
-	std::unique_ptr<CefHost> _cefHost;
+    std::unique_ptr<CefHost> _cefHost;
 };
 
 } // namespace openspace

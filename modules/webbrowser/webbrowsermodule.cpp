@@ -49,7 +49,7 @@ WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
 
 WebBrowserModule::~WebBrowserModule() {}
 
-void WebBrowserModule::deinitialize() {
+void WebBrowserModule::internalDeinitialize() {
     _eventHandler.detachBrowser();
 
     bool forceBrowserShutdown = true;
@@ -98,7 +98,7 @@ std::string WebBrowserModule::findHelperExecutable() {
     }
 }
 
-void WebBrowserModule::internalInitialize() {
+void WebBrowserModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _eventHandler.initialize();
 
     // register ScreenSpaceBrowser

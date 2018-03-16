@@ -37,7 +37,7 @@ WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
             ConfigurationManager::KeyWebGuiUrl);
 }
 
-void WebGuiModule::internalInitialize() {
+void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Initialize,
             [this]() {
