@@ -224,7 +224,7 @@ TouchInteraction::TouchInteraction()
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
     , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
-    , _zoomSensitivity(ZoomSensitivityInfo, 1.01f, 1.0f, 1.1f)
+    , _zoomSensitivity(ZoomSensitivityInfo, 1.025f, 1.0f, 1.1f)
     , _zoomSensitivityDistanceThreshold(ZoomSensitivityDistanceThresholdInfo, 0.05, 0.01, 0.25)
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
@@ -1173,6 +1173,14 @@ void TouchInteraction::step(double dt) {
         _camera->setPositionVec3(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
 
+#ifdef TOUCH_DEBUG_PROPERTIES
+        //Show velocity status every N frames
+        /*if (++stepVelUpdate >= 60) {
+            stepVelUpdate = 0;
+            LINFO("DistToFocusNode " << length(centerToCamera) << " stepZoomVelUpdate " << _vel.zoom);
+        }*/
+#endif
+
         _tap = false;
         _doubleTap = false;
         if (_reset) {
@@ -1300,7 +1308,7 @@ void TouchInteraction::resetToDefault() {
     _rollAngleThreshold.set(0.025f);
     _orbitSpeedThreshold.set(0.005f);
     _spinSensitivity.set(1.0f);
-    _zoomSensitivity.set(1.04f);
+    _zoomSensitivity.set(1.025f);
     _inputStillThreshold.set(0.0005f);
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
@@ -1332,6 +1340,7 @@ void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
 }
 
+#ifdef TOUCH_DEBUG_PROPERTIES
 TouchInteraction::DebugProperties::DebugProperties()
     : properties::PropertyOwner({ "TouchDebugProperties" })
     , interactionMode(
@@ -1366,5 +1375,6 @@ TouchInteraction::DebugProperties::DebugProperties()
     addProperty(minDiff);
     addProperty(rollOn);
 }
+#endif
 
 } // openspace namespace

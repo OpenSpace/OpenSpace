@@ -37,7 +37,7 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#define TOUCH_DEBUG_PROPERTIES
+//#define TOUCH_DEBUG_PROPERTIES
 
 namespace openspace {
 
@@ -198,6 +198,7 @@ private:
 
     int pinchConsecCt = 0;
     double pinchConsecZoomFactor = 0;
+    //int stepVelUpdate = 0;
 #endif
 
     // Class variables
