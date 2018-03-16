@@ -224,7 +224,7 @@ TouchInteraction::TouchInteraction()
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
     , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
-    , _zoomSensitivity(ZoomSensitivityInfo, 1.04f, 1.0f, 1.1f)
+    , _zoomSensitivity(ZoomSensitivityInfo, 1.01f, 1.0f, 1.1f)
     , _zoomSensitivityDistanceThreshold(ZoomSensitivityDistanceThresholdInfo, 0.05, 0.01, 0.25)
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
@@ -399,7 +399,9 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     _vel.zoom = 0.0;
     _vel.roll = 0.0;
     _vel.pan = glm::dvec2(0.0, 0.0);
-
+#ifdef TOUCH_DEBUG_PROPERTIES
+    LINFO("DirectControl");
+#endif
     // Returns the screen point s(xi,par) dependent the transform M(par) and object
     // point xi
     auto distToMinimize = [](double* par, int x, void* fdata, LMstat* lmstat) {
@@ -934,6 +936,13 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
         {PICK, "Pick"}
     };
     _debugProperties.interpretedInteraction = interactionNames.at(action);
+
+    if (pinchConsecCt > 0 && action != PINCH) {
+        if( pinchConsecCt > 3 )
+            LINFO("PINCH_gesture_ended_with " << pinchConsecZoomFactor << " drag_distance_and " << pinchConsecCt << " counts.");
+        pinchConsecCt = 0;
+        pinchConsecZoomFactor = 0.0;
+    }
 #endif
 
     switch (action) {
@@ -969,12 +978,18 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 }
             ) / lastProcessed.size();
 
-            double currDistanceToFocusNode = glm::distance(_camera->positionVec3(),
-                                                           _camera->focusPositionVec3());
-            double distanceFromFocusSurface = currDistanceToFocusNode - _focusNode->boundingSphere();
-            double zoomFactor = 1.0;
-            if ((currDistanceToFocusNode / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
-                zoomFactor = (distance - lastDistance) * pow(distanceFromFocusSurface, (float)_zoomSensitivity);
+            glm::dvec3 camPos = _camera->positionVec3();
+            glm::dvec3 centerPos = _focusNode->worldPosition();
+            glm::dvec3 currDistanceToFocusNode = camPos - centerPos;
+
+            double distanceFromFocusSurface = length(currDistanceToFocusNode) - _focusNode->boundingSphere();
+            double zoomFactor = (distance - lastDistance);
+#ifdef TOUCH_DEBUG_PROPERTIES
+            pinchConsecCt++;
+            pinchConsecZoomFactor += zoomFactor;
+#endif
+            if ((length(currDistanceToFocusNode) / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
+                zoomFactor *= pow(distanceFromFocusSurface, (float)_zoomSensitivity);
             }
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
@@ -1053,6 +1068,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 _vel.zoom = _sensitivity.zoom *
                             std::max(_touchScreenSize.value() * 0.1, 1.0) *
                             _tapZoomFactor * dist;
+
             }
             break;
         }
@@ -1134,17 +1150,20 @@ void TouchInteraction::step(double dt) {
         }
         { // Zooming
             centerToBoundingSphere = -directionToCenter * boundingSphere;
-            dvec3 centerToCamera = camPos - centerPos;
+            centerToCamera = camPos - centerPos;
             double planetBoundaryRadius = length(centerToBoundingSphere);
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
             if (length(_vel.zoom*dt) < distToSurface &&
-	        length(centerToCamera + directionToCenter*_vel.zoom*dt) >
-		    planetBoundaryRadius)
+                 length(centerToCamera + directionToCenter*_vel.zoom*dt)
+                 > planetBoundaryRadius)
             {
                 camPos += directionToCenter * _vel.zoom * dt;
             }
             else {
+#ifdef TOUCH_DEBUG_PROPERTIES
+                LINFO("Zero the zoom velocity close to surface.");
+#endif
                 _vel.zoom = 0.0;
             }
         }
@@ -1234,7 +1253,6 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
-
     if (_directTouchMode && _selected.size() > 0 && _lmSuccess) {
         double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {

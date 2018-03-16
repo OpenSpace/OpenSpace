@@ -195,6 +195,9 @@ private:
         properties::FloatProperty minDiff;
         properties::FloatProperty rollOn;
     } _debugProperties;
+
+    int pinchConsecCt = 0;
+    double pinchConsecZoomFactor = 0;
 #endif
 
     // Class variables
