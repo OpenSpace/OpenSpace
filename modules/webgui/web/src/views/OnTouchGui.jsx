@@ -25,10 +25,8 @@ class OnTouchGui extends Component {
           </Overlay>
         )}
 
-        <section className={styles.Grid__Left}>
-          <TouchBar />
-        </section>
-        <section className={styles.Grid__Right} />
+        <TouchBar />
+
       </div>
     );
   }

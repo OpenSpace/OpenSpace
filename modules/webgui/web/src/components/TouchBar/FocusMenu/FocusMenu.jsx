@@ -7,6 +7,7 @@ import { OriginKey } from '../../../api/keys';
 import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
 import styles from './FocusMenu.scss';
+import OverViewButton from './OverViewButton';
 
 // Tag needed for touch nodes
 const REQUIRED_TAG = 'Touch.Interesting';
@@ -58,6 +59,7 @@ class FocusMenu extends Component {
   render() {
     return (
       <div className={styles.FocusMenu}>
+        {this.props.nodes.length > 0 && <OverViewButton />}
         {this.props.nodes.length > 0 && this.createFocusButtons()}
       </div>
     );

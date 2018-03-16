@@ -75,7 +75,7 @@ asset.onInitialize(function ()
 
     openspace.markInterestingNodes(
         "Touch.Interesting",
-        { "Earth", "Mars", "Moon" }
+        { "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune" }
     )
 
     openspace.addVirtualProperty(

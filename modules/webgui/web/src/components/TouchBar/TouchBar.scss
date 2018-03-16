@@ -1,5 +1,18 @@
 .TouchBar {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    flex-direction: row;
+}
+
+.Grid__Left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.Grid__Right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  width: 100%;
 }

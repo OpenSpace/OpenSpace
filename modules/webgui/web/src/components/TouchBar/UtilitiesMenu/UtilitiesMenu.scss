@@ -1,0 +1,9 @@
+@import "../../../styles/all";
+
+.UtilitiesMenu {
+  display: flex;
+  height: 100%;
+  background: $ui-background;
+  color: white;
+  border-right: 3px solid $ui-background-hover;
+}

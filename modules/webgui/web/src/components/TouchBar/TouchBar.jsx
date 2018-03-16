@@ -1,11 +1,17 @@
 import React from 'react';
 import FocusMenu from './FocusMenu/FocusMenu';
+import UtilitiesMenu from './UtilitiesMenu/UtilitiesMenu';
 import Markers from './Markers';
 import styles from './TouchBar.scss';
 
 const TouchBar = () => (
   <div className={styles.TouchBar}>
-    <FocusMenu />
+    <section className={styles.Grid__Left}>
+      <UtilitiesMenu />
+    </section>
+    <section className={styles.Grid__Right}>
+      <FocusMenu />
+    </section>
     <Markers />
   </div>
 );
