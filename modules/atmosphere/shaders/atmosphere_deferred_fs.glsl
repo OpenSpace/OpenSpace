@@ -246,9 +246,7 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // ======================================
     // ======= Avoiding Some Matrices =======
 
-    // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
-    // Using the interpolated coords:
-    // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
+    // Compute positions and directions in world space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, interpolatedNDCPos.z, 1.0) / gl_FragCoord.w; 
@@ -294,6 +292,9 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
                        out vec3 attenuation, const vec3 fragPosObj,
                        const double maxLength, const double pixelDepth,
                        const vec4 spaceColor, const float sunIntensity) {
+
+    const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
+
     vec3 radiance;
     
     r  = length(x);
@@ -325,7 +326,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
     float mu0    = dot(x0, v) * invr0;
 
     bool groundHit = false;
-    if ((pixelDepth > 0.0) && (pixelDepth < maxLength)) {    
+    if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
         t = float(pixelDepth);  
         groundHit = true;
         
@@ -358,7 +359,6 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
 
     // In order to avoid imprecision problems near horizon,
     // we interpolate between two points: above and below horizon
-    const float INTERPOLATION_EPS = 0.004f; // precision const from Brunetton
     if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
         // We want an interpolation value close to 1/2, so the
         // contribution of each radiance value is almost the same
