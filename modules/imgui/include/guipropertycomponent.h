@@ -77,6 +77,7 @@ protected:
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;
+    properties::BoolProperty _ignoreHiddenHint;
 };
 
 } // namespace openspace::gui

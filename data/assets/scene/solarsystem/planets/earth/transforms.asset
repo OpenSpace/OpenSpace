@@ -16,7 +16,8 @@ local EarthBarycenter = {
     },
     GUI = {
         Name = "Earth Barycenter",
-        Path = "/Solar System/Planets/Earth"
+        Path = "/Solar System/Planets/Earth",
+        Hidden = true
     }
 }
 
@@ -33,7 +34,8 @@ local EarthInertial = {
     },
     GUI = {
         Name = "Earth Inertial",
-        Path = "/Solar System/Planets/Earth"
+        Path = "/Solar System/Planets/Earth",
+        Hidden = true
     }
 }
 
@@ -49,7 +51,8 @@ local EarthIAU = {
     },
     GUI = {
         Name = "Earth IAU",
-        Path = "/Solar System/Planets/Earth"
+        Path = "/Solar System/Planets/Earth",
+        Hidden = true
     }
 }
 

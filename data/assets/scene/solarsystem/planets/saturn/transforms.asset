@@ -16,7 +16,8 @@ local SaturnBarycenter = {
     },
     GUI = {
         Name = "Saturn Barycenter",
-        Path = "/Solar System/Planets/Saturn"
+        Path = "/Solar System/Planets/Saturn",
+        Hidden = true
     }
 }
 

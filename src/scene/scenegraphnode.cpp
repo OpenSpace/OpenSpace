@@ -56,8 +56,9 @@
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";
-    constexpr const char* KeyName = "GUI.Name";
+    constexpr const char* KeyGuiName = "GUI.Name";
     constexpr const char* KeyGuiPath = "GUI.Path";
+    constexpr const char* KeyGuiHidden = "GUI.Hidden";
 
     constexpr const char* keyTransformTranslation = "Transform.Translation";
     constexpr const char* keyTransformRotation = "Transform.Rotation";
@@ -80,8 +81,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     std::string identifier = dictionary.value<std::string>(KeyIdentifier);
     result->setIdentifier(std::move(identifier));
 
-    if (dictionary.hasKey(KeyName)) {
-        result->setGuiName(dictionary.value<std::string>(KeyName));
+    if (dictionary.hasKey(KeyGuiName)) {
+        result->setGuiName(dictionary.value<std::string>(KeyGuiName));
+    }
+
+    if (dictionary.hasKey(KeyGuiHidden)) {
+        result->_guiHintHidden = dictionary.value<bool>(KeyGuiHidden);
     }
 
     if (dictionary.hasKey(keyTransformTranslation)) {
@@ -571,6 +576,10 @@ double SceneGraphNode::worldScale() const {
 
 const std::string& SceneGraphNode::guiPath() const {
     return _guiPath;
+}
+
+bool SceneGraphNode::hasGuiHintHidden() const {
+    return _guiHintHidden;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
