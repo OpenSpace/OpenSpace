@@ -1,0 +1,80 @@
+@import "../../../styles/all";
+
+$arrow-size: 4px;
+$background: $ui-background-solid;
+
+.tooltip {
+  background: $background;
+  border-radius: $arrow-size;
+  color: $text-color-focus;
+  font-size: 0.8 * $font-size;
+  line-height: 1.4;
+  max-width: 150px;
+  padding: $arrow-size (2 * $arrow-size) (1.5 * $arrow-size);
+  position: absolute;
+  white-space: normal;
+  z-index: 10;
+}
+
+// placement
+.top {
+  bottom: unquote("calc(100% + #{$arrow-size})");
+  transform: translateX(-50%);
+}
+
+.bottom {
+  top: unquote("calc(100% + #{$arrow-size})");
+  transform: translateX(-50%);
+}
+
+.right {
+  left: unquote("calc(100% + #{$arrow-size})");
+  transform: translateY(-50%);
+}
+
+.left {
+  right: unquote("calc(100% + #{$arrow-size})");
+  transform: translateY(-50%);
+}
+
+.fixed {
+  position: fixed !important;
+}
+
+// arrow style
+.tooltip::after {
+  border-color: transparent;
+  border-style: solid;
+  border-width: $arrow-size;
+  content: " ";
+  height: 0;
+  margin-left: -$arrow-size;
+  pointer-events: none;
+  position: absolute;
+  width: 0;
+}
+
+// arrow placement style
+.top::after {
+  top: 100%;
+  left: 50%;
+  border-top-color: $background;
+}
+
+.right::after {
+  top: 50%;
+  right: 100%;
+  border-right-color: $background;
+}
+
+.left::after {
+  top: 50%;
+  left: 100%;
+  border-left-color: $background;
+}
+
+.bottom::after {
+  bottom: 100%;
+  left: 50%;
+  border-bottom-color: $background;
+}

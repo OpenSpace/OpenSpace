@@ -51,7 +51,7 @@ TimeTopic::~TimeTopic() {
 }
 
 bool TimeTopic::isDone() {
-    return !_requestedResourceIsSubscribable || !_connection->active;
+    return !_requestedResourceIsSubscribable;
 }
 
 void TimeTopic::handleJson(json j) {
@@ -60,11 +60,12 @@ void TimeTopic::handleJson(json j) {
 
     if (requestedKey == CurrentTimeKey) {
         _requestedResourceIsSubscribable = true;
-        _connection->addRefreshCall([this]() { return currentTime(); }, _topicId);
+        // TODO: send time now that refresh calls are removed.
+        //_connection->addRefreshCall([this]() { return currentTime(); }, _topicId);
     }
     else if (requestedKey == DeltaTimeKey) {
         _requestedResourceIsSubscribable = true;
-        _connection->addRefreshCall([this]() { return deltaTime(); }, _topicId);
+        //_connection->addRefreshCall([this]() { return deltaTime(); }, _topicId);
     }
     else {
         LWARNING("Cannot get " + requestedKey);

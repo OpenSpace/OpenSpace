@@ -92,6 +92,10 @@ public:
     /// onChange callback
     using OnChangeHandle = uint32_t;
 
+    /// An OnChangeHandle is returned by the onChange method to uniquely identify an
+    /// onDelete callback
+    using OnDeleteHandle = uint32_t;
+
     /// This OnChangeHandle can be used to remove all onChange callbacks from this
     /// Property
     static OnChangeHandle OnChangeHandleAll;
@@ -113,7 +117,7 @@ public:
      * The destructor taking care of deallocating all unused memory. This method will not
      * remove the Property from the PropertyOwner.
      */
-    virtual ~Property() = default;
+    virtual ~Property();
 
     /**
      * This method returns the class name of the Property. The method is used by the
@@ -230,6 +234,14 @@ public:
     OnChangeHandle onChange(std::function<void()> callback);
 
     /**
+    * This method registers a <code>callback</code> function that will be called when
+    * the property is destructed.
+    * \pre The callback must not be empty
+    * \return An OnDeleteHandle that can be used in subsequent calls to remove a callback
+    */
+    OnDeleteHandle onDelete(std::function<void()> callback);
+
+    /**
      * This method deregisters a callback that was previously registered with the onChange
      * method. If OnChangeHandleAll is passed to this function, all registered callbacks
      * are removed.
@@ -239,6 +251,16 @@ public:
      * \pre handle must refer to a callback that has not been removed previously
      */
     void removeOnChange(OnChangeHandle handle);
+
+    /**
+    * This method deregisters a callback that was previously registered with the onDelete
+    * method.
+    * \param handle An OnDeleteHandle that was returned from a previous call to onDelete
+    * by this property.
+    * \pre handle must refer to a callback that has been previously registred
+    * \pre handle must refer to a callback that has not been removed previously
+    */
+    void removeOnDelete(OnDeleteHandle handle);
 
     /**
      * This method returns the unique identifier of this Property.
@@ -428,9 +450,9 @@ protected:
 
     /**
      * This method must be called by all subclasses whenever the encapsulated value has
-     * changed and a potential listener has to be informed.
+     * changed and potential listeners need to be informed.
      */
-    void notifyListener();
+    void notifyChangeListeners();
 
     /// The PropetyOwner this Property belongs to, or <code>nullptr</code>
     PropertyOwner* _owner;
@@ -450,7 +472,12 @@ protected:
     /// The callback function sthat will be invoked whenever the value changes
     std::vector<std::pair<OnChangeHandle, std::function<void()>>> _onChangeCallbacks;
 
+    /// The callback function sthat will be invoked whenever the value changes
+    std::vector<std::pair<OnDeleteHandle, std::function<void()>>> _onDeleteCallbacks;
+
 private:
+    void notifyDeleteListeners();
+
     OnChangeHandle _currentHandleValue;
 
 #ifdef _DEBUG

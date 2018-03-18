@@ -73,6 +73,8 @@ void ParallelServer::handleNewPeers() {
         std::unique_ptr<ghoul::io::TcpSocket> socket =
             _socketServer.awaitPendingTcpSocket();
 
+        socket->startStreams();
+
         size_t id = _nextConnectionId++;
         std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
             id,

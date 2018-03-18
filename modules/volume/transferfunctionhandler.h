@@ -24,6 +24,7 @@
 
 #ifndef __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONHANDLER___H__
 #define __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONHANDLER___H__
+
 #include <functional>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/glm.h>
@@ -41,43 +42,45 @@
 #include <memory>
 
 namespace openspace {
-    namespace volume {
-        class Envelope;
+namespace volume {
+
+class Envelope;
         
-        class TransferFunctionHandler : public properties::PropertyOwner{
-        public:
-            TransferFunctionHandler(const properties::StringProperty& prop);
+class TransferFunctionHandler : public properties::PropertyOwner{
+public:
+    TransferFunctionHandler(const properties::StringProperty& prop);
             
-            void initialize();
+    void initialize();
             
-            void setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram);
+    void setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram);
 
-            void setTexture();
-            void loadStoredEnvelopes();
-            void saveEnvelopes();
-            void setFilepath(const std::string& path);
-            void setUnit(const std::string& unit);
-            void setMinAndMaxValue(const float& min, const float& max);
+    void setTexture();
+    void loadStoredEnvelopes();
+    void saveEnvelopes();
+    void setFilepath(const std::string& path);
+    void setUnit(const std::string& unit);
+    void setMinAndMaxValue(const float& min, const float& max);
 
-            ghoul::opengl::Texture& getTexture();
-            void uploadTexture();
-            bool hasTexture();
+    ghoul::opengl::Texture& getTexture();
+    void uploadTexture();
+    bool hasTexture();
 
-            std::shared_ptr<openspace::TransferFunction> getTransferFunction();
+    std::shared_ptr<openspace::TransferFunction> getTransferFunction();
 
-        private:
-            bool useTxtTexture = true;
-            properties::StringProperty _transferFunctionPath;
-            properties::StringProperty _dataUnit;
-            properties::StringProperty _minValue;
-            properties::StringProperty _maxValue;
-            properties::TriggerProperty _saveTransferFunction;
-            std::string _filePath;
-            properties::TransferFunctionProperty _transferFunctionProperty;
-            properties::BinaryProperty _histogramProperty;
-            std::shared_ptr<openspace::TransferFunction> _transferFunction;
-            std::shared_ptr<ghoul::opengl::Texture> _texture = nullptr;
-        };
-    }//namespace volume
+private:
+    bool useTxtTexture = true;
+    properties::StringProperty _transferFunctionPath;
+    properties::StringProperty _dataUnit;
+    properties::StringProperty _minValue;
+    properties::StringProperty _maxValue;
+    properties::TriggerProperty _saveTransferFunction;
+    std::string _filePath;
+    properties::TransferFunctionProperty _transferFunctionProperty;
+    properties::BinaryProperty _histogramProperty;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    std::shared_ptr<ghoul::opengl::Texture> _texture = nullptr;
+};
+
+}//namespace volume
 }//namespace openspace
 #endif __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONHANDLER___H__

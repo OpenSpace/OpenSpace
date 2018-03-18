@@ -76,6 +76,10 @@ Property::Property(PropertyInfo info)
     setVisibility(info.visibility);
 }
 
+Property::~Property() {
+    notifyDeleteListeners();
+}
+
 const std::string& Property::identifier() const {
     return _identifier;
 }
@@ -209,6 +213,13 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     return handle;
 }
 
+Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
+    ghoul_assert(callback, "The callback must not be empty");
+    OnDeleteHandle handle = _currentHandleValue++;
+    _onDeleteCallbacks.emplace_back(handle, std::move(callback));
+    return handle;
+}
+
 void Property::removeOnChange(OnChangeHandle handle) {
     if (handle == OnChangeHandleAll) {
         _onChangeCallbacks.clear();
@@ -231,6 +242,23 @@ void Property::removeOnChange(OnChangeHandle handle) {
     }
 }
 
+void Property::removeOnDelete(OnDeleteHandle handle) {
+    auto it = std::find_if(
+        _onDeleteCallbacks.begin(),
+        _onDeleteCallbacks.end(),
+        [handle](const std::pair<OnDeleteHandle, std::function<void()>>& p) {
+            return p.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _onDeleteCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _onDeleteCallbacks.erase(it);
+}
+
 PropertyOwner* Property::owner() const {
     return _owner;
 }
@@ -239,8 +267,14 @@ void Property::setPropertyOwner(PropertyOwner* owner) {
     _owner = owner;
 }
 
-void Property::notifyListener() {
+void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
+        p.second();
+    }
+}
+
+void Property::notifyDeleteListeners() {
+    for (const std::pair<OnDeleteHandle, std::function<void()>>& p : _onDeleteCallbacks) {
         p.second();
     }
 }

@@ -211,7 +211,7 @@ public:
 
     /// Whitelist of client addresses that won't need autorization
     static constexpr const char* KeyServerClientAddressWhitelist =
-                                                        "KeyServerClientAddressWhitelist";
+                                                                 "ClientAddressWhitelist";
 
     static constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 

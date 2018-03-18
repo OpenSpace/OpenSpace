@@ -57,17 +57,21 @@ public:
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 private:
+    struct ConnectionData {
+        std::shared_ptr<Connection> connection;
+        bool markedForRemoval = false;
+    };
+
     void handleConnection(std::shared_ptr<Connection> connection);
     void cleanUpFinishedThreads();
     void consumeMessages();
-    void triggerRefresh();
     void disconnectAll();
     void preSync();
 
     std::mutex _messageQueueMutex;
     std::deque<Message> _messageQueue;
 
-    std::vector<std::shared_ptr<Connection>> _connections;
+    std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
 };
 
