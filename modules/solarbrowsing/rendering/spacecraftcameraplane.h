@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,36 +21,38 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#ifndef __OPENSPACE_MODULE_BASE___SPACECRAFTCAMERAPLANE___H__
-#define __OPENSPACE_MODULE_BASE___SPACECRAFTCAMERAPLANE___H__
+
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTCAMERAPLANE___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTCAMERAPLANE___H__
 
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/texture.h>
+
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
 class TransferFunction;
-class SpacecraftCameraPlane {
 
+class SpacecraftCameraPlane {
 public:
-    SpacecraftCameraPlane(/*glm::vec2 centerPixel, float scaleFactor,*/ double moveDistance);
+    SpacecraftCameraPlane(double moveDistance);
 
     void render(const RenderData& data, ghoul::opengl::Texture& imageryTexture,
-                TransferFunction* lut, const glm::dvec3& sunPositionWorld,
-                const float& planeOpacity, const float& contrastValue,
-                const float& gammaValue, const bool& enableBorder,
-                const bool& enableFrustum, const glm::vec2& currentCenterPixel,
-                const float& currentScale, const float& multipleImageryOffset, const bool& isCoronaGraph);
+        TransferFunction* lut, const glm::dvec3& sunPositionWorld, float planeOpacity,
+        float contrastValue, float gammaValue, bool enableBorder, bool enableFrustum,
+        const glm::vec2& currentCenterPixel, float currentScale,
+        float multipleImageryOffset, bool isCoronaGraph);
+
     void update();
-    void createPlaneAndFrustum(const double& moveDistance);
+    void createPlaneAndFrustum(double moveDistance);
     // TODO(mnoven) : Pre process image, no need to set uniforms
     //void setUniforms();
     bool isReady();
     bool destroy();
 
-    const glm::vec3& normal() const { return _normal; };
-    const glm::dvec3& worldPosition() const { return _position; }
-    const glm::dmat4& worldRotation() const { return _rotation; }
+    const glm::vec3& normal() const;
+    const glm::dvec3& worldPosition() const;
+    const glm::dmat4& worldRotation() const;
 
     //glm::dvec3 _planePosSpacecraftRefFrame;
     //glm::dmat4 _sunToSpacecraftTransform;
@@ -82,4 +84,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTCAMERAPLANE___H__

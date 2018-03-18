@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <modules/solarbrowsing/util/timedependentstatesequence.h>
+#include <modules/solarbrowsing/util/structs.h>
 
 #include <ext/json/json.hpp>
 
@@ -39,38 +40,32 @@
 namespace ghoul {
   namespace opengl { class Texture; }
   namespace filesystem { class File; }
-}
+} // namespace ghoul
 
 namespace openspace {
 
 class TransferFunction;
 
-// Assume everything in arcsec to minimize metadata
-struct ImageMetadata {
-    std::string filename;
-    int fullResolution;
-    float scale;
-    glm::vec2 centerPixel;
-    bool isCoronaGraph;
-};
-
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
-    friend class ghoul::Singleton<SpacecraftImageryManager>;
-
 public:
-    SpacecraftImageryManager();
-    void loadTransferFunctions(
-          const std::string& path,
+    using ImageMetadataStateSequence = TimedependentStateSequence<ImageMetadata>;
+
+    void loadTransferFunctions(const std::string& path,
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
-    void loadImageMetadata(
-      const std::string& path,
-      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
+    void loadImageMetadata(const std::string& path,
+      std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap);
+
 private:
-    ImageMetadata parseMetadata(const ghoul::filesystem::File& file, const std::string& instrumantName);
+    ImageMetadata parseMetadata(const ghoul::filesystem::File& file,
+        const std::string& instrumentName);
+
     std::string ISO8601(std::string& datetime);
+
     bool loadMetadataFromDisk(const std::string& rootPath,
-                        std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
-    void saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
+        std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap);
+
+    void saveMetadataToDisk(const std::string& rootPath,
+        std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap);
 };
 
 } //namespace openspace

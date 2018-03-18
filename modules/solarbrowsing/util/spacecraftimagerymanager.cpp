@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,30 +23,24 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-#include <ghoul/opengl/texture.h>
+
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
-#include <string>
-#include <chrono>
-
-typedef std::chrono::high_resolution_clock Clock;
-
-#include <fstream>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 #include <ext/json/json.hpp>
-
-using namespace ghoul::opengl;
+#include <chrono>
+#include <fstream>
+#include <string>
 
 namespace {
-    const std::string _loggerCat = "SpacecraftImageryManager";
-    const double SUN_RADIUS = 1391600000.0 * 0.50;
-}
+    constexpr const char* _loggerCat = "SpacecraftImageryManager";
+    constexpr const double SUN_RADIUS = 1391600000.0 * 0.5;
+} // namespace
 
 namespace openspace {
-
-SpacecraftImageryManager::SpacecraftImageryManager() {}
 
 // MUST do this conversion before passing in the spice manager again - WTF.
 std::string SpacecraftImageryManager::ISO8601(std::string& datetime) {
@@ -71,51 +65,52 @@ std::string SpacecraftImageryManager::ISO8601(std::string& datetime) {
     return datetime;
 }
 
-void SpacecraftImageryManager::loadTransferFunctions(
-    const std::string& path,
+void SpacecraftImageryManager::loadTransferFunctions(const std::string& path,
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap)
 {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+    ghoul::filesystem::Directory sequenceDir(
+        path,
+        ghoul::filesystem::Directory::RawPath::Yes
+    );
 
     if (!FileSys.directoryExists(sequenceDir)) {
         LERROR(fmt::format("Could not load directory '{}'", sequenceDir.path()));
     }
 
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
+    std::vector<std::string> sequencePaths = sequenceDir.read(
+        ghoul::filesystem::Directory::Recursive::Yes,
+        ghoul::filesystem::Directory::Sort::Yes
+    );
 
-    for (auto seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "txt") {
-                    std::string key = currentFile.baseName();
-                    _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
-                }
-            }
+    for (const std::string& seqPath : sequencePaths) {
+        ghoul::filesystem::File currentFile(seqPath);
+        if (currentFile.fileExtension() == "txt") {
+            std::string key = currentFile.baseName();
+            _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
         }
     }
 }
 
 bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
-                        std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap) {
+           std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
+{
 
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(rootPath, RawPath::Yes);
+    ghoul::filesystem::Directory sequenceDir(
+        rootPath,
+        ghoul::filesystem::Directory::RawPath::Yes
+    );
     if (!FileSys.directoryExists(sequenceDir)) {
         LERROR(fmt::format("Could not load directory '{}'", sequenceDir.path()));
     }
 
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
     bool metadataLoaded = false;
 
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::No);
+    std::vector<std::string> sequencePaths = sequenceDir.read(
+        ghoul::filesystem::Directory::Recursive::No,
+        ghoul::filesystem::Directory::Sort::No
+    );
 
-    for (auto& seqPath : sequencePaths) {
+    for (const std::string& seqPath : sequencePaths) {
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);
@@ -158,7 +153,10 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
                         myfile >> im.isCoronaGraph;
                         std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
                         TimedependentState<ImageMetadata> timeState(
-                                      std::move(data), timeObserved, im.filename);
+                            std::move(data),
+                            timeObserved,
+                            im.filename
+                        );
                         _imageMetadataMap[instrument].addState(std::move(timeState));
                     }
                     myfile.close();
@@ -169,17 +167,23 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
     return metadataLoaded;
 }
 
-void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath, std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap) {
-    for (auto& instrument : _imageMetadataMap) {
+void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath,
+           std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
+{
+    using K = std::string;
+    using V = ImageMetadataStateSequence;
+    for (const std::pair<K, V>& instrument : _imageMetadataMap) {
         std::ofstream ofs(rootPath + instrument.first + "_cached" + ".txt");
         if (!ofs.is_open()) {
             LERROR("Failed to open file");
         }
-        auto &sequence = instrument.second;
-        ofs << sequence.getNumStates() << "\n";
-        for (const auto& metadata : sequence.getStates()) {
-                ofs << SpiceManager::ref().dateFromEphemerisTime(metadata.timeObserved()) << "\n";
-                auto im = metadata.contents();
+        const ImageMetadataStateSequence& sequence = instrument.second;
+        ofs << sequence.numStates() << "\n";
+        for (const TimedependentState<ImageMetadata>& metadata : sequence.states()) {
+                ofs << SpiceManager::ref().dateFromEphemerisTime(
+                    metadata.timeObserved()
+                ) << "\n";
+                const std::shared_ptr<ImageMetadata>& im = metadata.contents();
 
                 size_t filenamePos = im->filename.find("imagedata");
                 std::string fname = im->filename.substr(filenamePos);
@@ -197,7 +201,9 @@ void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath, s
 // TODO(mnoven): Should NOT require JSON files to collect real metadata, when OpenJPEG supports reading XML metadata
 // (https://github.com/uclouvain/openjpeg/issues/929), this should be implemented here.
 
-ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file, const std::string& instrumentName) {
+ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file,
+                                                      const std::string& instrumentName)
+{
     ImageMetadata im;
     const std::string filename = std::string(file.fullBaseName() + ".json");
 
@@ -240,7 +246,7 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     if (spacecraftType == "SOHO") {
         const std::string sScale = data["PLATESCL"];
         const float plateScale = stof(sScale);
-        im.scale = 1.0 / (plateScale / 2.0);
+        im.scale = 1.f / (plateScale / 2.f);
         im.isCoronaGraph = true;
     } else {
         float sunRadiusPixels = 0.f;
@@ -260,7 +266,8 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
             const float sunRadiusArcsec = stof(sSunRadiusArcsec);
             sunRadiusPixels = sunRadiusArcsec / cdelt1;
             im.isCoronaGraph = false;
-        } else { // STEREO has RSUN specified in arcsecs - need to divide by factor
+        } else {
+            // STEREO has RSUN specified in arcsecs - need to divide by factor
             std::string sCdelt1 = data["CDELT1"];
             const float cdelt1 = stof(sCdelt1);
             std::string sSunRadiusArcsec = data["RSUN"];
@@ -300,9 +307,8 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     return im;
 }
 
-void SpacecraftImageryManager::loadImageMetadata(
-      const std::string& path,
-      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap)
+void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
+      std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
 {
     LDEBUG("Begin loading spacecraft imagery metadata");
 
@@ -311,16 +317,15 @@ void SpacecraftImageryManager::loadImageMetadata(
         return;
     }
 
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+    ghoul::filesystem::Directory sequenceDir(
+        path,
+        ghoul::filesystem::Directory::RawPath::Yes
+    );
 
     if (!FileSys.directoryExists(sequenceDir)) {
         LERROR(fmt::format("Could not load directory '{}'", sequenceDir.path()));
     }
 
-    unsigned int count = 0;
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
 
     LDEBUG("Loading sequence directory");
     std::vector<std::string> sequencePaths = sequenceDir.read(
@@ -343,50 +348,45 @@ void SpacecraftImageryManager::loadImageMetadata(
     
 
     LDEBUG("Reading meta data");
+    unsigned int count = 0;
     for (const std::string& seqPath : sequencePaths) {
-        //if (size_t position = seqPath.find_last_of(".") + 1) {
-        //    if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                //std::string extension = currentFile.fileExtension();
-                //if (extension == "jp2" || extension == "j2k") {
-                    std::string fileName = currentFile.filename();
-                    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-                    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+        ghoul::filesystem::File currentFile(seqPath);
+        std::string fileName = currentFile.filename();
+        size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
+        std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
 
-                    // Name
-                    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-                    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+        // Name
+        size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
+        std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
 
-                    // Instrument
-                    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-                    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
-                    size_t dot = instrumentName.rfind(".");
-                    instrumentName = instrumentName.substr(0, dot);
+        // Instrument
+        size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
+        std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
+        size_t dot = instrumentName.rfind(".");
+        instrumentName = instrumentName.substr(0, dot);
 
-                    count++;
-                    // Time
-                    std::vector<std::string> tokens;
-                    std::stringstream ss;
-                    ss.str(currentFile.filename());
-                    std:: string item;
-                    while (std::getline(ss, item, '_')) {
-                        tokens.push_back(item);
-                    }
-                    if (tokens.size() == 8) {
-                        std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                            tokens[2] + "T" + tokens[4] + ":" +
-                            tokens[5] + ":" + tokens[6] + "." + tokens[7];
+        // Time
+        std::vector<std::string> tokens;
+        std::stringstream ss;
+        ss.str(currentFile.filename());
+        std::string item;
+        while (std::getline(ss, item, '_')) {
+            tokens.push_back(item);
+        }
+        if (tokens.size() == 8) {
+            std::string time = tokens[0] + "-" + tokens[1] + "-" +
+                tokens[2] + "T" + tokens[4] + ":" +
+                tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
-                        const ImageMetadata im = parseMetadata(currentFile, instrumentName);
-                        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
-                        TimedependentState<ImageMetadata> timeState(
-                            std::move(data),
-                            OsEng.timeManager().time().convertTime(time), seqPath);
-                        _imageMetadataMap[instrumentName].addState(std::move(timeState));
-                    }
-                //}
-            //}
-        //}
+            const ImageMetadata im = parseMetadata(currentFile, instrumentName);
+            std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+            TimedependentState<ImageMetadata> timeState(
+                std::move(data),
+                OsEng.timeManager().time().convertTime(time), seqPath
+            );
+            _imageMetadataMap[instrumentName].addState(std::move(timeState));
+        }
+        ++count;
     }
 
     saveMetadataToDisk(path, _imageMetadataMap);

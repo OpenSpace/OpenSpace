@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,34 +23,54 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
-#include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/openspaceengine.h>
-#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 
-#include <memory>
+#include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
+#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/transferfunction.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/programobject.h>
 #include <fstream>
 #include <limits>
-
-using namespace ghoul::opengl;
+#include <memory>
 
 namespace {
-    static const std::string _loggerCat = "RendearbleSpacecraftCameraSphere";
-    const char* keyRadius = "Radius";
+    constexpr const char* _loggerCat = "RendearbleSpacecraftCameraSphere";
+    constexpr const char* keyRadius = "Radius";
     // This number MUST match the constant specified in the shader, otherwise UB / MN
-    const int MAX_SPACECRAFT_OBSERVATORY = 7;
-}
+    constexpr const int MaxSpacecraftObservatories = 7;
+} // namespace
 
 namespace openspace {
+
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(
-      const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _shader(nullptr)
-    , _sphere(nullptr)
+    , _sphere(glm::vec2(6.96701f, 8.f), 100)
 {}
+
+void RenderableSolarImageryProjection::initialize() {
+    // @TODO(abock): Figure out why this is necessary
+    const std::vector<SceneGraphNode*>& allNodes =
+        OsEng.renderEngine().scene()->allSceneGraphNodes();
+    for (SceneGraphNode* node : allNodes) {
+        RenderableSolarImagery* renderable = dynamic_cast<RenderableSolarImagery*>(
+            node->renderable()
+            );
+        if (renderable) {
+            SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(
+                _nodeName
+            );
+            thisNode->addDependency(*node);
+        }
+
+    }
+    _solarImageryDependencies =
+        OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
+}
 
 void RenderableSolarImageryProjection::initializeGL() {
     if (!_shader) {
@@ -59,15 +79,11 @@ void RenderableSolarImageryProjection::initializeGL() {
             absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_vs.glsl"),
             absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl")
             );
-        if (!_shader) {
-            return;
-        }
     }
 
     // Create a fake sun, slightly bigger than the original one :)
     PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f));
-    _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
-    _sphere->initialize();
+    _sphere.initialize();
 }
 
 void RenderableSolarImageryProjection::deinitializeGL() {
@@ -78,28 +94,8 @@ void RenderableSolarImageryProjection::deinitializeGL() {
     }
 }
 
-void RenderableSolarImageryProjection::initialize() {
-    const std::vector<SceneGraphNode*>& allNodes
-          = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    for (const auto node : allNodes) {
-        auto renderable = dynamic_cast<RenderableSolarImagery*>(node->renderable());
-        if (renderable) {
-            //_renderableSolarImageries.push_back(renderable);
-            auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
-            thisNode->addDependency(*node);
-        }
-
-    }
-    _solarImageryDependencies
-         = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
-}
-
-void RenderableSolarImageryProjection::deinitialize() {
-    return;
-}
-
 bool RenderableSolarImageryProjection::isReady() const {
-    return _shader && _sphere;
+    return _shader != nullptr;
 }
 
 void RenderableSolarImageryProjection::update(const UpdateData& data) {
@@ -125,12 +121,13 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     const int numPlanes = _solarImageryDependencies.size();
     int solarImageryCount = 0;
 
-    ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];
-    ghoul::opengl::TextureUnit tfUnits[MAX_SPACECRAFT_OBSERVATORY];
+    ghoul::opengl::TextureUnit txUnits[MaxSpacecraftObservatories];
+    ghoul::opengl::TextureUnit tfUnits[MaxSpacecraftObservatories];
 
     for (int i = 0; i < numPlanes; ++i) {
-        auto* solarImagery = static_cast<RenderableSolarImagery*>(
-              _solarImageryDependencies[i]->renderable());
+        RenderableSolarImagery* solarImagery = static_cast<RenderableSolarImagery*>(
+            _solarImageryDependencies[i]->renderable()
+        );
 
         bool isCoronaGraph = solarImagery->isCoronaGraph();
         bool enabled = solarImagery->isEnabled();
@@ -156,7 +153,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
         tfUnits[i].activate();
 
-        auto lut = solarImagery->getTransferFunction();
+        TransferFunction* lut = solarImagery->getTransferFunction();
         if (lut && solarImagery->isEnabled()) {
             lut->bind();
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
@@ -169,7 +166,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     }
 
     // Set the rest of the texture units for well defined behaviour
-    for (int i = solarImageryCount; i < MAX_SPACECRAFT_OBSERVATORY; ++i) {
+    for (int i = solarImageryCount; i < MaxSpacecraftObservatories; ++i) {
         txUnits[i].activate();
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
         tfUnits[i].activate();
@@ -177,8 +174,8 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     }
 
     _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);
-    _sphere->render();;
+    _sphere.render();
     _shader->deactivate();
 }
 
-}
+} // namespace openspace

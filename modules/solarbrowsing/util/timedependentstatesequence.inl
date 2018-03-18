@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,45 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/spicemanager.h>
+
 namespace openspace {
 
-template<typename T>
-TimedependentStateSequence<T>::TimedependentStateSequence() {
-    _currentActiveStateIndex = -1;
+template <typename T>
+TimedependentStateSequence<T>::TimedependentStateSequence(
+                                                std::vector<TimedependentState<T>> states)
+    : _states(std::move(states))
+    , _currentActiveStateIndex(-1)
+{}
+
+template <typename T>
+void TimedependentStateSequence<T>::addState(TimedependentState<T> state) {
+    _states.push_back(std::move(state));
 }
 
-template<typename T>
-TimedependentStateSequence<T>::TimedependentStateSequence(const std::vector<TimedependentState<T>>& states) {
-    _states = states;
-    _currentActiveStateIndex = -1;
-};
-
-template<typename T>
-void TimedependentStateSequence<T>::addState(const TimedependentState<T>& state) {
-    _states.push_back(state);
-}
-
-template<typename T>
+template <typename T>
 bool TimedependentStateSequence<T>::hasStateChanged(const double& osTime) {
     const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
     size_t activeStateIndex = lowerBound - _states.begin();
-    bool changed = activeStateIndex != _currentActiveStateIndex;
+    bool hasChanged = activeStateIndex != _currentActiveStateIndex;
     _currentActiveStateIndex = activeStateIndex;
-    return changed;
+    return hasChanged;
 }
 
-template<typename T>
-void TimedependentStateSequence<T>::displayStateTimes() {
-    for (auto& state : _states) {
+template <typename T>
+int TimedependentStateSequence<T>::numStates() const {
+    return static_cast<int>(_states.size());
+}
+
+template <typename T>
+const std::vector<TimedependentState<T>>& TimedependentStateSequence<T>::states() const {
+    return _states;
+}
+
+template <typename T>
+void TimedependentStateSequence<T>::displayStateTimes() const {
+    for (const TimedependentState<T>& state : _states) {
         const double& time = state.timeObserved();
         const std::string& dateString = SpiceManager::ref().dateFromEphemerisTime(time);
-        // TODO: loggerCat
-        std::cerr << "State " << state.id() << " Time Observed: " << dateString << "\n";
+        LINFOC(
+            "TimedependentStateSequence",
+            fmt::format("State '{}' | Time Observed: {}", state.id(), dateString)
+        );
     }
 }
 
-template<typename T>
-TimedependentState<T>& TimedependentStateSequence<T>::getState(double osTime) {
+template <typename T>
+const TimedependentState<T>& TimedependentStateSequence<T>::state(double osTime) const {
     const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
     size_t activeStateIndex = lowerBound - _states.begin();
     if (activeStateIndex == _states.size()) {

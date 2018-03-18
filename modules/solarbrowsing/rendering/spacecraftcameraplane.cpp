@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,22 +23,24 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
-#include <ghoul/opengl/textureunit.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/transferfunction.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+
 
 namespace {
-  const double SUN_RADIUS = (1391600000.0 * 0.50);
-  const char* _loggerCat = "SpacecraftCameraPlane";
-}
+    constexpr const double SUN_RADIUS = (1391600000.0 * 0.5);
+    constexpr const char* _loggerCat = "SpacecraftCameraPlane";
+} // namespace
 
 namespace openspace {
 
-SpacecraftCameraPlane::SpacecraftCameraPlane(double moveDistance)
-{
+SpacecraftCameraPlane::SpacecraftCameraPlane(double moveDistance) {
     initialize();
     createPlaneAndFrustum(moveDistance);
 }
@@ -61,6 +63,50 @@ bool SpacecraftCameraPlane::destroy() {
     return true;
 }
 
+bool SpacecraftCameraPlane::initialize() {
+    // Initialize plane buffer
+    glGenVertexArrays(1, &_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    // Initialize frustum buffer
+    glGenVertexArrays(1, &_frustum);
+    glGenBuffers(1, &_frustumPositionBuffer);
+    if (!_planeShader) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
+            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
+            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
+        );
+        if (!_planeShader) {
+            return false;
+        }
+    }
+
+    if (!_frustumShader) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _frustumShader = renderEngine.buildRenderProgram("SpacecraftFrustumProgram",
+            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
+            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
+        );
+        if (!_frustumShader) {
+            return false;
+        }
+    }
+}
+
+
+
+const glm::vec3& SpacecraftCameraPlane::normal() const {
+    return _normal;
+};
+
+const glm::dvec3& SpacecraftCameraPlane::worldPosition() const {
+    return _position;
+}
+
+const glm::dmat4& SpacecraftCameraPlane::worldRotation() const {
+    return _rotation;
+}
+
 void SpacecraftCameraPlane::update() {
     if (_planeShader->isDirty()) {
         _planeShader->rebuildFromFile();
@@ -75,7 +121,7 @@ bool SpacecraftCameraPlane::isReady() {
     return _planeShader && _frustumShader;
 }
 
-void SpacecraftCameraPlane::createPlaneAndFrustum(const double& moveDistance) {
+void SpacecraftCameraPlane::createPlaneAndFrustum(double moveDistance) {
     //const double a = 1;
     //const double b = 0;
     //const double c = 0.31622776601; // sqrt(0.1)
@@ -85,36 +131,6 @@ void SpacecraftCameraPlane::createPlaneAndFrustum(const double& moveDistance) {
     _size = _gaussianMoveFactor * SUN_RADIUS; /// _scaleFactor;
     createPlane();
     createFrustum();
-}
-
-bool SpacecraftCameraPlane::initialize() {
-  // Initialize plane buffer
-  glGenVertexArrays(1, &_quad);
-  glGenBuffers(1, &_vertexPositionBuffer);
-  // Initialize frustum buffer
-  glGenVertexArrays(1, &_frustum);
-  glGenBuffers(1, &_frustumPositionBuffer);
-  if (!_planeShader) {
-      RenderEngine& renderEngine = OsEng.renderEngine();
-      _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
-          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
-          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
-          );
-      if (!_planeShader) {
-          return false;
-      }
-  }
-
-  if (!_frustumShader) {
-      RenderEngine& renderEngine = OsEng.renderEngine();
-      _frustumShader = renderEngine.buildRenderProgram("SpacecraftFrustumProgram",
-          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
-          absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
-          );
-      if (!_frustumShader) {
-          return false;
-      }
-  }
 }
 
 void SpacecraftCameraPlane::createPlane() {
@@ -133,11 +149,23 @@ void SpacecraftCameraPlane::createPlane() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
-                          reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
-                          reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 }
 
 void SpacecraftCameraPlane::createFrustum() {
@@ -174,12 +202,15 @@ void SpacecraftCameraPlane::createFrustum() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
 }
 
-void SpacecraftCameraPlane::render(
-      const RenderData& data, ghoul::opengl::Texture& imageryTexture,
-      TransferFunction* lut, const glm::dvec3& sunPositionWorld,
-      const float& planeOpacity, const float& contrastValue, const float& gammaValue,
-      const bool& enableBorder, const bool& enableFrustum,
-      const glm::vec2& currentCenterPixel, const float& currentScale, const float& multipleImageryOffset, const bool& isCoronaGraph)
+void SpacecraftCameraPlane::render(const RenderData& data,
+                                   ghoul::opengl::Texture& imageryTexture,
+                                   TransferFunction* lut,
+                                   const glm::dvec3& sunPositionWorld, float planeOpacity,
+                                   float contrastValue, float gammaValue,
+                                   bool enableBorder, bool enableFrustum,
+                                   const glm::vec2& currentCenterPixel,
+                                   float currentScale, float multipleImageryOffset,
+                                   bool isCoronaGraph)
 {
     glEnable(GL_CULL_FACE);
 
@@ -226,8 +257,10 @@ void SpacecraftCameraPlane::render(
     _planeShader->setUniform("planeOpacity", planeOpacity);
     _planeShader->setUniform("gammaValue", gammaValue);
     _planeShader->setUniform("contrastValue", contrastValue);
-    _planeShader->setUniform("modelViewProjectionTransform",
-                             projectionMatrix * glm::mat4(modelViewTransform));
+    _planeShader->setUniform(
+        "modelViewProjectionTransform",
+        projectionMatrix * glm::mat4(modelViewTransform)
+    );
 
     //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
     ghoul::opengl::TextureUnit tfUnit;
@@ -270,4 +303,5 @@ void SpacecraftCameraPlane::render(
 
     glDisable(GL_CULL_FACE);
 }
-}
+
+} // namespace openspace

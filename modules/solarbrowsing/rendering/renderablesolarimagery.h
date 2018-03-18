@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,53 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
-
-#define SOLAR_BUFFER_SIZE 10
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERY___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERY___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+
+#include <modules/solarbrowsing/util/decodejob.h>
+#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
+#include <modules/solarbrowsing/util/streambuffer.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/stringproperty.h>
-
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-#include <openspace/rendering/transferfunction.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <memory>
 #include <unordered_set>
-#include <modules/solarbrowsing/util/streambuffer.h>
-#include <modules/solarbrowsing/util/pixelbufferobject.h>
-#include <modules/solarbrowsing/util/decodejob.h>
-#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 
-namespace ghoul { namespace opengl { class Texture; }}
+
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-class RenderableSolarImagery : public Renderable {
+class PixelBufferObject;
+class SpacecraftCameraPlane;
+class TransferFunction;
 
+class RenderableSolarImagery : public Renderable {
 public:
+    static constexpr const int SolarBufferSize = 10;
+
     RenderableSolarImagery(const ghoul::Dictionary& dictionary);
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
     void loadTexture();
     void performImageTimestep(const double& osTime);
     void updateTexture();
     void clearBuffer();
 
-    TransferFunction* getTransferFunction() { return _lut; }
-    const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture() { return _texture; }
-    const SpacecraftCameraPlane& getCameraPlane() { return *_spacecraftCameraPlane; }
-    float getContrastValue() { return _contrastValue; }
-    float getGammaValue() { return _gammaValue; }
-    float getImageResolutionFactor() { return _imageSize; }
-    glm::vec2 getCenterPixel() { return _currentCenterPixel; }
-    float getScale() { return _currentScale; }
-    bool isCoronaGraph() { return _isCoronaGraph; }
+    TransferFunction* getTransferFunction();
+    const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture();
+    const SpacecraftCameraPlane& getCameraPlane();
+    float getContrastValue();
+    float getGammaValue();
+    float getImageResolutionFactor();
+    glm::vec2 getCenterPixel();
+    float getScale();
+    bool isCoronaGraph();
 
 private:
     properties::OptionProperty _activeInstruments;
@@ -88,7 +94,7 @@ private:
 
     TransferFunction* _lut;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::array<std::unique_ptr<PixelBufferObject>, SOLAR_BUFFER_SIZE> _pbos;
+    std::array<std::unique_ptr<PixelBufferObject>, SolarBufferSize> _pbos;
 
     // TODO: Remove these?
     //bool _updatingCurrentActiveChannel = false;
@@ -122,10 +128,10 @@ private:
     StreamBuffer<SolarImageData> _streamBuffer;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
-    std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>> _imageMetadataMap;
+    std::unordered_map<std::string, SpacecraftImageryManager::ImageMetadataStateSequence> _imageMetadataMap;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
 
-    DecodeData getDecodeDataFromOsTime(const int& osTime);
+    DecodeData getDecodeDataFromOsTime(int osTime);
     void uploadImageDataToPBO();
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     void fillBuffer(const double& dt);
@@ -136,16 +142,8 @@ private:
 
     std::string ISO8601(std::string& datetime);
     void decode(unsigned char* buffer, const std::string& fileame);
-
-    void initialize() override;
-    void deinitialize() override;
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERY___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERYPROJECTION___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERYPROJECTION___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERYPROJECTION___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERYPROJECTION___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+
 #include <openspace/util/powerscaledsphere.h>
-#include <openspace/scene/scene.h>
-#include <ghoul/opengl/textureunit.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
-namespace ghoul { namespace opengl { class Texture; }}
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
+
+class SceneGraphNode;
 
 class RenderableSolarImageryProjection : public Renderable {
 public:
     RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
-    void deinitialize() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -63,8 +56,9 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    PowerScaledSphere _sphere;
+
 private:
     void loadTexture();
 
@@ -74,4 +68,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERYPROJECTION___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERYPROJECTION___H__

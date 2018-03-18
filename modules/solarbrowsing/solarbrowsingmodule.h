@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #ifndef __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
- #define __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -31,6 +31,8 @@ namespace openspace {
 
 class SolarBrowsingModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "ImGUI";
+
     SolarBrowsingModule();
 
 protected:
@@ -39,4 +41,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__

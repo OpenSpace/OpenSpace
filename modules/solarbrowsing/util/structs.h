@@ -22,42 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOLARBROWSING___TIMEDEPENDENTSTATESEQUENCE___H__
-#define __OPENSPACE_MODULE_SOLARBROWSING___TIMEDEPENDENTSTATESEQUENCE___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 
-#include <modules/solarbrowsing/util/timedependentstate.h>
+#include <ghoul/glm.h>
+#include <memory>
+#include <string>
 
+//namespace openspace::solarbrowsing {
 namespace openspace {
 
-/**
-* The purpose of this class is to be able to map the openspace time to a state,
-* it hold a vector with a sequence of states that should be sorted by by time
-* and performs lookup in logarithmic time. It also has helper functions that helps
-* determine if the state has changed or not.
-*/
-
-template <typename T>
-class TimedependentStateSequence {
-public:
-    TimedependentStateSequence() = default;
-    TimedependentStateSequence(std::vector<TimedependentState<T>> states);
-
-    void addState(TimedependentState<T> state);
-    void displayStateTimes() const;
-    // @TODO(abock): Needs a new name since it modifies _currentActiveStateIndex
-    bool hasStateChanged(const double& osTime);
-    int numStates() const;
-    const std::vector<TimedependentState<T>>& states() const;
-
-    const TimedependentState<T>& state(double osTime) const;
-
-private:
-    std::vector<TimedependentState<T>> _states;
-    size_t _currentActiveStateIndex = size_t(-1);
+ // Assume everything in arcsec to minimize metadata
+struct ImageMetadata {
+    std::string filename;
+    int fullResolution;
+    float scale;
+    glm::vec2 centerPixel;
+    bool isCoronaGraph;
 };
 
-} // namespace openspace
+struct SolarImageData {
+    unsigned char* data;
+    std::shared_ptr<ImageMetadata> im;
+    double timeObserved;
+};
 
-#include "timedependentstatesequence.inl"
+struct DecodeData {
+    std::shared_ptr<ImageMetadata> im;
+    unsigned int resolutionLevel;
+    double timeObserved;
+    bool verboseMode;
+};
 
-#endif // __OPENSPACE_MODULE_SOLARBROWSING___TIMEDEPENDENTSTATESEQUENCE___H__
+}
+
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__

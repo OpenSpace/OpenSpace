@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,24 +24,20 @@
 
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/engine/openspaceengine.h>
-
-#include <ghoul/misc/assert.h>
-
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-SolarBrowsingModule::SolarBrowsingModule()
-    : OpenSpaceModule("SolarBrowsing")
-{
+SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
-        [](){
+        []() {
             SpacecraftImageryManager::initialize();
         }
     );
@@ -51,8 +47,12 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
-    fRenderable->registerClass<RenderableSolarImageryProjection>("RenderableSolarImageryProjection");
+    fRenderable->registerClass<RenderableSolarImagery>(
+        "RenderableSolarImagery"
+    );
+    fRenderable->registerClass<RenderableSolarImageryProjection>(
+        "RenderableSolarImageryProjection"
+    );
 }
 
 } // namespace openspace
