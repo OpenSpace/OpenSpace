@@ -245,6 +245,8 @@ public:
     /// The key used to specify whether screenshots should contain the current date
     static constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
 
+    static constexpr const char* KeyWebHelperLocation = "WebHelperLocation";
+    static constexpr const char* KeyCefWebGuiUrl = "CefWebGuiUrl";
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

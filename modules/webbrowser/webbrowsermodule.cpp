@@ -49,7 +49,7 @@ WebBrowserModule::WebBrowserModule() : OpenSpaceModule(WebBrowserModule::Name) {
 
 WebBrowserModule::~WebBrowserModule() {}
 
-void WebBrowserModule::deinitialize() {
+void WebBrowserModule::internalDeinitialize() {
     _eventHandler.detachBrowser();
 
     bool forceBrowserShutdown = true;
@@ -68,14 +68,14 @@ std::string WebBrowserModule::findHelperExecutable() {
         auto execLocation = absPath(OsEng.configurationManager().value<std::string>(
             ConfigurationManager::KeyWebHelperLocation) + SUBPROCESS_ENDING);
         if (!FileSys.fileExists(execLocation)) {
-            LERROR("Could not find web helper executable at location: " + execLocation);
+            LERROR(fmt::format("Could not find web helper executable at location: {}" , execLocation));
         }
         return execLocation;
     }
     else {
         std::string subprocessName = SUBPROCESS_NAME;
         subprocessName += SUBPROCESS_ENDING;
-        LWARNING("Assuming web helper name is " + subprocessName);
+        LWARNING(fmt::format("Assuming web helper name is {}", subprocessName));
         auto subLength = (int)subprocessName.length();
 
         Directory binDir("${BASE}/bin/openspace", Directory::AbsolutePath::No);
@@ -98,7 +98,7 @@ std::string WebBrowserModule::findHelperExecutable() {
     }
 }
 
-void WebBrowserModule::internalInitialize() {
+void WebBrowserModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _eventHandler.initialize();
 
     // register ScreenSpaceBrowser

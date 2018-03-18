@@ -28,7 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 #include <include/openspace/engine/configurationmanager.h>
 #include "modules/webbrowser/include/browserinstance.h"
-#include "modules/webgui/include/guirenderhandler.h"
+#include "modules/cefwebgui/include/guirenderhandler.h"
 
 namespace openspace {
 

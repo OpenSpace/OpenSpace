@@ -29,7 +29,7 @@
 #include <include/openspace/engine/openspaceengine.h>
 #include <include/openspace/rendering/renderengine.h>
 #include <include/openspace/engine/wrapper/windowwrapper.h>
-#include <ghoul/opengl/opengl>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <fmt/format.h>
 #include <include/cef_app.h>
 #include "modules/webbrowser/include/webrenderhandler.h"

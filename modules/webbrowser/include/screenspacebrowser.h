@@ -66,6 +66,7 @@ private:
     properties::Vec2Property _dimensions;
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
     std::shared_ptr<BrowserInstance> _browserInstance;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     bool _urlIsDirty;
     bool _dimensionsAreDirty;
