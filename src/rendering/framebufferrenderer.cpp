@@ -1129,7 +1129,7 @@ namespace openspace {
             glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
             GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
             glDrawBuffers(1, dBuffer);
-            glClear(GL_COLOR_BUFFER_BIT);
+            //glClear(GL_COLOR_BUFFER_BIT);
 
             bool firstPaint = true;
 

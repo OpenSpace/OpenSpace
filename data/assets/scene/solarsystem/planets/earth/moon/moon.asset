@@ -33,6 +33,7 @@ local Moon = {
                 -- Utah based servers
                 {
                     Identifier = "ClemUvvis",
+                    Name = "Clem Uvvis",
                     FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
                 },
                 {
@@ -55,6 +56,7 @@ local Moon = {
                 -- Utah based servers
                 {
                     Identifier = "LolaDem",
+                    Name = "WAC [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
                     Enabled = true,
                     TilePixelSize = 64,

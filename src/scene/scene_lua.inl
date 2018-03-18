@@ -56,7 +56,7 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
     return tagMatchOwner;
 }
 
-void applyRegularExpression(lua_State* L, std::regex regex,
+void applyRegularExpression(lua_State* L, const std::string& regex,
                             std::vector<properties::Property*> properties,
                             double interpolationDuration,
                             const std::string& groupName,
@@ -68,11 +68,15 @@ void applyRegularExpression(lua_State* L, std::regex regex,
 
     const int type = lua_type(L, -1);
 
+    // Stores whether we found at least one matching property. If this is false at the end
+    // of the loop, the property name regex was probably misspelled.
+    bool foundMatching = false;
+    std::regex r(regex);
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
         std::string id = prop->fullyQualifiedIdentifier();
 
-        if (std::regex_match(id, regex)) {
+        if (std::regex_match(id, r)) {
             // If the fully qualified id matches the regular expression, we queue the
             // value change if the types agree
             if (isGroupMode) {
@@ -99,6 +103,8 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                     )
                 );
             } else {
+                foundMatching = true;
+
                 if (interpolationDuration == 0.0) {
                     OsEng.renderEngine().scene()->removeInterpolation(prop);
                     prop->setLuaValue(L);
@@ -113,6 +119,17 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                 }
             }
         }
+    }
+
+    if (!foundMatching) {
+        LERRORC(
+            "property_setValue",
+            fmt::format(
+                "{}: No property matched the requested URI '{}'",
+                errorLocation(L),
+                regex
+            )
+        );
     }
 }
 
@@ -270,7 +287,7 @@ int property_setValue(lua_State* L) {
         try {
             applyRegularExpression(
                 L,
-                std::regex(uriOrRegex),
+                uriOrRegex,
                 allProperties(),
                 interpolationDuration,
                 groupName,
@@ -291,7 +308,7 @@ int property_setValue(lua_State* L) {
         try {
             applyRegularExpression(
                 L,
-                std::regex(uriOrRegex),
+                uriOrRegex,
                 allProperties(),
                 interpolationDuration,
                 "",

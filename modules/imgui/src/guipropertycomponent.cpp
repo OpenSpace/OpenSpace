@@ -53,6 +53,14 @@ namespace {
         "elements not listed."
     };
 
+    static const openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
+        "IgnoreHidden",
+        "Ignore Hidden Hint",
+        "If this value is 'true', all 'Hidden' hints passed into the SceneGraphNodes are "
+        "ignored and thus all SceneGraphNodes are displayed. If this value is 'false', "
+        "the hidden hints are followed."
+    };
+
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
         openspace::properties::Property::Visibility visibility)
     {
@@ -166,9 +174,11 @@ GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string g
     : GuiComponent(std::move(identifier), std::move(guiName))
     , _useTreeLayout(UseTreeInfo, useTree)
     , _treeOrdering(OrderingInfo)
+    , _ignoreHiddenHint(IgnoreHiddenInfo)
 {
     addProperty(_useTreeLayout);
     addProperty(_treeOrdering);
+    addProperty(_ignoreHiddenHint);
 }
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
@@ -378,6 +388,25 @@ void GuiPropertyComponent::render() {
         };
 
         if (!_useTreeLayout || noGuiGroups) {
+            if (!_ignoreHiddenHint) {
+                // Remove all of the nodes that we want hidden first
+                owners.erase(
+                    std::remove_if(
+                        owners.begin(),
+                        owners.end(),
+                        [](properties::PropertyOwner* p) {
+                    SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
+                    if (s && s->hasGuiHintHidden()) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                    ),
+                    owners.end()
+                    );
+            }
             std::for_each(owners.begin(), owners.end(), renderProp);
         }
         else { // _useTreeLayout && gui groups exist
@@ -386,6 +415,9 @@ void GuiPropertyComponent::render() {
             for (properties::PropertyOwner* pOwner : owners) {
                 // We checked above that pOwner is a SceneGraphNode
                 SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
+                if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
+                    continue;
+                }
 
                 if (nOwner->guiPath().empty()) {
                     // We know that we are done now since we stable_sort:ed them above
