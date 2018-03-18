@@ -84,18 +84,23 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         "ScreenSpaceImageLocal"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceImageLocal");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceImageLocal");
         }
         else {
-            setName("ScreenSpaceImageLocal " + std::to_string(id));
+            setIdentifier("ScreenSpaceImageLocal" + std::to_string(iIdentifier));
         }
         ++id;
+    }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceImageLocal " + std::to_string(iIdentifier));
     }
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });

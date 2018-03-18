@@ -28,6 +28,7 @@
 #include <openspace/properties/propertydelegate.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/easing.h>
 
 #include <functional>
 #include <string>
@@ -407,6 +408,14 @@ public:
      */
     virtual std::string jsonValue() const;
 
+    /// Interpolation methods
+    virtual void setInterpolationTarget(ghoul::any value);
+    virtual void setLuaInterpolationTarget(lua_State* state);
+    virtual void setStringInterpolationTarget(std::string value);
+    
+    virtual void interpolateValue(float t,
+        ghoul::EasingFunc<float> easingFunction = nullptr);
+
     /**
      * Creates the information that is general to every Property and adds the
      * <code>Identifier</code>, <code>Name</code>, <code>Type</code>, and
@@ -440,6 +449,7 @@ public:
     virtual std::string generateAdditionalJsonDescription() const;
 
 protected:
+
     static const char* IdentifierKey;
     static const char* NameKey;
     static const char* TypeKey;

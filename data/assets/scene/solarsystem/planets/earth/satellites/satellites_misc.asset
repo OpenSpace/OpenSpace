@@ -1,0 +1,4 @@
+asset.request('./misc/military')
+asset.request('./misc/radar')
+asset.request('./misc/cubesats')
+asset.request('./misc/other')

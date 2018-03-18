@@ -88,7 +88,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     std::string identifier = _identifier;
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
-        std::string ownerId = currentOwner->name();
+        std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
             identifier = ownerId + "." + identifier;
         }
@@ -316,5 +316,10 @@ std::string Property::generateMetaDataJsonDescription() const {
 std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
+
+void Property::setInterpolationTarget(ghoul::any) {}
+void Property::setLuaInterpolationTarget(lua_State*) {}
+void Property::setStringInterpolationTarget(std::string) {}
+void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

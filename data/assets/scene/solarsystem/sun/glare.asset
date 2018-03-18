@@ -6,8 +6,8 @@ asset.require("spice/base")
 
 
 local SunGlare = {
-    Name = "SunGlare",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "SunGlare",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageLocal",
         Size = 1.3*10^10.5,
@@ -23,7 +23,10 @@ local SunGlare = {
             Observer = "SSB"
         }
     },
-    GuiPath = "/Solar System/Sun"
+    GUI = {
+        Name = "Sun Glare",
+        Path = "/Solar System/Sun"
+    }
 }
 
 

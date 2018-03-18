@@ -42,7 +42,7 @@ public:
         ghoul::Dictionary dictionary
     );
 
-    DashboardItem(std::string name);
+    DashboardItem(std::string identifier, std::string guiName = "");
 
     bool isEnabled() const;
     virtual void render(glm::vec2& penPosition) = 0;

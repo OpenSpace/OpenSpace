@@ -31,7 +31,7 @@
 namespace openspace::gui {
 
 GuiFilePathComponent::GuiFilePathComponent()
-    : GuiComponent("File Path")
+    : GuiComponent("FilePath", "File Path")
 {}
 
 void GuiFilePathComponent::render() {

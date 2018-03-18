@@ -229,6 +229,8 @@ public:
     HttpFileDownload(HttpFileDownload&& d) = default;
     virtual ~HttpFileDownload() = default;
 
+    const std::string& destination() const;
+
 protected:
     bool initDownload() override;
     bool deinitDownload() override;

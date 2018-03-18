@@ -36,8 +36,8 @@ local images = asset.syncedResource({
 local plutoRadius = 1.173E6
 
 local Pluto = {
-    Name = "Pluto",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Pluto",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -178,12 +178,14 @@ local Pluto = {
             }
         }
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoBarycenterLabel = {
-    Name = "PlutoBarycenterLabel",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "PlutoBarycenterLabel",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageLocal",
         Billboard = true,
@@ -191,12 +193,15 @@ local PlutoBarycenterLabel = {
         Texture = encounterTextures .. "/barycenter.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Barycenter Label",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoText = {
-    Name = "PlutoText",
-    Parent = Pluto.Name,
+    Identifier = "PlutoText",
+    Parent = Pluto.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -211,12 +216,15 @@ local PlutoText = {
         Texture = encounterTextures .. "/Pluto-Text.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoShadow = {
-    Name = "PlutoShadow",
-    Parent = Pluto.Name,
+    Identifier = "PlutoShadow",
+    Parent = Pluto.Identifier,
     Renderable = {
         Type = "RenderableShadowCylinder",
         TerminatorType = "PENUMBRAL", 
@@ -226,12 +234,15 @@ local PlutoShadow = {
         BodyFrame = "IAU_PLUTO",
         Aberration = "NONE",
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Shadow",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoTrailBarycentric = {
-    Name = "PlutoBarycentricTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "PlutoBarycentricTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -243,12 +254,15 @@ local PlutoTrailBarycentric = {
         Period = 6.38723,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Barycenteric Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local PlutoTrail = {
-    Name = "PlutoTrail",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "PlutoTrail",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Enabled = false,
@@ -263,7 +277,10 @@ local PlutoTrail = {
         Period = 160 * 365.242,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Pluto Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 
