@@ -1,0 +1,8 @@
+NR-ENC-X_4_2K_24_185_CBR_WB_000.tif-15-compare_dec-ref-out2base
+NR-ENC-X_5_2K_24_235_CBR_STEM24_000.tif-16-compare_dec-ref-out2base
+NR-ENC-X_6_2K_24_FULL_CBR_CIRCLE_000.tif-17-compare_dec-ref-out2base
+NR-ENC-X_4_2K_24_185_CBR_WB_000.tif-18-compare_dec-ref-out2base
+NR-ENC-X_5_2K_24_235_CBR_STEM24_000.tif-19-compare_dec-ref-out2base
+NR-ENC-X_6_2K_24_FULL_CBR_CIRCLE_000.tif-20-compare_dec-ref-out2base
+NR-ENC-ElephantDream_4K.tif-21-compare_dec-ref-out2base
+NR-ENC-issue141.rawl-23-compare_dec-ref-out2base
