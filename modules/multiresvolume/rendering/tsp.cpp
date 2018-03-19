@@ -182,7 +182,8 @@ bool TSP::readHeader() {
         _header.zNumBricks_
     ));
 
-    paddedBrickDim_ = _header.xBrickDim_ + 2 * paddingWidth_;
+    // paddedBrickDim_ = _header.xBrickDim_ + 2 * paddingWidth_;
+    paddedBrickDim_ = _header.xBrickDim_;
     // TODO support dimensions of different size
     numOTLevels_ = static_cast<unsigned int>(log((int)_header.xNumBricks_) / log(2) + 1);
     numOTNodes_ = static_cast<unsigned int>((pow(8, numOTLevels_) - 1) / 7);

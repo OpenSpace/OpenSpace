@@ -87,7 +87,8 @@ bool BrickManager::readHeader() {
 
     brickDim_ = _header.xBrickDim_;
     numBricks_ = _header.xNumBricks_;
-    paddedBrickDim_ = brickDim_ + paddingWidth_ * 2;
+    //paddedBrickDim_ = brickDim_ + paddingWidth_ * 2;
+    paddedBrickDim_ = brickDim_;
     atlasDim_ = paddedBrickDim_*numBricks_;
 
     LDEBUG(fmt::format("Padded brick dim: {}", paddedBrickDim_));

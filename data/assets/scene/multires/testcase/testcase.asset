@@ -1,4 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
 local TestCase = {
@@ -13,9 +14,9 @@ local TestCase = {
         Scaling = {1, 1, 1},
         ScalingExponent = 1,
         Source = "${ASSETS}/scene/multires/testcase/tsp/testcase.tsp",
-        ErrorHistogramsSource = "${ASSETS}/scene/multires/testcase/tsp/testcase.errorHistograms",
         TransferFunction = "${ASSETS}/scene/multires/testcase/transferfunctions/testcase.txt",
-        BrickSelector = "tf"
+        BrickSelector = "local",
+        AtlasType = "All"
     },
     GuiPath = "/Solar System/TestCase"
 }
