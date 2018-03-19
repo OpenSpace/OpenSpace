@@ -74,8 +74,6 @@ private:
     std::vector<std::function<void()>> _renderFunctions;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    int _id;
 };
 
 } //namespace openspace

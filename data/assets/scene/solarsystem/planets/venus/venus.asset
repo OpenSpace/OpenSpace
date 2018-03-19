@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Venus = {
-    Name = "Venus",
-    Parent = transforms.VenusBarycenter.Name,
+    Identifier = "Venus",
+    Parent = transforms.VenusBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -34,7 +34,7 @@ local Venus = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Venus Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/venus.jpg",
                     Enabled = true
                 }
@@ -42,7 +42,9 @@ local Venus = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Venus"
+    GUI = {
+        Path = "/Solar System/Planets/Venus"
+    }
 }
 
 

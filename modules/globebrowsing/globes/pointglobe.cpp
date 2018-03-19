@@ -51,7 +51,7 @@ namespace {
 namespace openspace::globebrowsing {
 
 PointGlobe::PointGlobe(const RenderableGlobe& owner)
-    : Renderable({ { "Name", owner.name() } })
+    : Renderable({ { "Identifier", owner.identifier() },  { "Name", owner.guiName() } })
     , _owner(owner)
     , _intensityClamp(IntensityClampInfo, 1.f, 0.f, 1.f)
     , _lightIntensity(LightIntensityInfo, 1.f, 0.f, 50.f)

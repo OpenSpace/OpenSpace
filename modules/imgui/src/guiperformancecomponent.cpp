@@ -82,7 +82,7 @@ namespace {
 namespace openspace::gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
-    : GuiComponent("PerformanceComponent")
+    : GuiComponent("PerformanceComponent", "Performance Component")
     , _sortingSelection(SortingSelectionInfo, -1, -1, 6)
     , _sceneGraphIsEnabled(SceneGraphEnabledInfo, false)
     , _functionsIsEnabled(FunctionsEnabledInfo, false)

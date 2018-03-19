@@ -1111,7 +1111,7 @@ bool RenderableBillboardsCloud::loadSpeckData() {
 
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             ghoul::filesystem::File(_file),
-            "RenderableDUMeshes|" + name(),
+            "RenderableDUMeshes|" + identifier(),
             ghoul::filesystem::CacheManager::Persistent::Yes
         );
 

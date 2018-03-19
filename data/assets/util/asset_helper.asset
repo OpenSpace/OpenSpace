@@ -37,7 +37,7 @@ local registerSceneGraphNodes = function (sceneAsset, nodes, override)
     sceneAsset.onDeinitialize(function ()
         for i = #nodes, 1, -1 do
             node = nodes[i]
-            openspace.removeSceneGraphNode(node.Name)
+            openspace.removeSceneGraphNode(node.Identifier)
         end
     end)
 end
@@ -50,7 +50,12 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
             return
         end
     end
-    
+
+    for i, node in ipairs(nodes) do
+        if not node.Identifier then
+            openspace.printError("Could not load asset as Identifier was missing")
+        end
+    end
 
     sceneAsset.onInitialize(function ()
         for i, node in ipairs(nodes) do
@@ -60,12 +65,12 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     sceneAsset.onDeinitialize(function ()
         for i = #nodes, 1, -1 do
             node = nodes[i]
-            openspace.removeSceneGraphNode(node.Name)
+            openspace.removeSceneGraphNode(node.Identifier)
         end
     end)
 
     for i, node in ipairs(nodes) do
-        sceneAsset.export(node.Name, node)
+        sceneAsset.export(node.Identifier, node)
     end
 end
 

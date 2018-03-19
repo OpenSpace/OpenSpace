@@ -129,16 +129,15 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
 
-    UniformCache(cullAtmosphere, Rg, Rt, AverageGroundReflectance,
-        groundRadianceEmittion, HR, betaRayleigh, HM, betaMieScattering,
+    UniformCache(cullAtmosphere, Rg, Rt,
+        groundRadianceEmittion, HR, betaRayleigh, HM,
         betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled,
-        HO, betaOzoneExtinction, TRANSMITTANCE_W, TRANSMITTANCE_H,
-        SKY_W, SKY_H, OTHER_TEXTURES_W, OTHER_TEXTURES_H, SAMPLES_R,
+        HO, betaOzoneExtinction, SAMPLES_R,
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
-    UniformCache(ModelTransformMatrix, dInverseModelTransformMatrix, dModelTransformMatrix,
+    UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
         dInverseSgctProjectionToModelTransformMatrix,
         dInverseSGCTEyeToTmpRotTransformMatrix,
-        dObjpos, dCampos, dCamPosObj, sunDirectionObj, ellipsoidRadii,
+        dCampos, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;
 

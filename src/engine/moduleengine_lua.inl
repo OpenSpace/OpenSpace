@@ -47,7 +47,7 @@ int isLoaded(lua_State* L) {
         modules.begin(),
         modules.end(),
         [moduleName](OpenSpaceModule* module) {
-            return module->name() == moduleName;
+            return module->identifier() == moduleName;
         }
     );
 

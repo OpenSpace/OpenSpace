@@ -6,8 +6,8 @@ local kernels = asset.require('../jup310').Kernels
 
 
 local GanymedeTrail = {
-    Name = "GanymedeTrail",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "GanymedeTrail",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -21,7 +21,10 @@ local GanymedeTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter" },
-    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+    GUI = {
+        Name = "Ganymede Trail",
+        Path = "/Solar System/Planets/Jupiter/Moons"
+    }
 }
 
 

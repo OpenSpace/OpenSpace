@@ -193,8 +193,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         "RenderablePlanet"
     );
 
-    const std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
-
     ghoul::Dictionary geomDict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
 
     if (dictionary.hasKey(KeyRadius)) {
@@ -299,7 +297,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         "No Radius value specified for Shadow Source Name '{}' from "
                         "'{}' planet. Disabling shadows for this planet",
                         sourceName,
-                        name
+                        identifier()
                     ));
                     disableShadows = true;
                     break;
@@ -328,7 +326,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                             "No Radius value expecified for Shadow Caster Name '{}' from "
                             "'{}' planet. Disabling shadows for this planet.",
                             casterName,
-                            name
+                            identifier()
                         ));
                         disableShadows = true;
                         break;

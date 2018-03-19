@@ -593,8 +593,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     std::vector<SceneGraphNode*> selectableNodes;
     for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes())
         for (std::string name : selectables)
-            if (node->name() == name)
+            if (node->identifier() == name) {
                 selectableNodes.push_back(node);
+            }
 
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
@@ -678,7 +679,10 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     // If the user touched the planet directly, this is definitely the one
                     // they are interested in  =>  minimum distance
                     if (dist <= 0.0) {
-                        LINFOC(node->name(), "Picking candidate based on direct touch");
+                        LINFOC(
+                            node->identifier(),
+                            "Picking candidate based on direct touch"
+                        );
                         pickingInfo.push_back({
                             node,
                             -std::numeric_limits<double>::max(),
@@ -687,7 +691,10 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     }
                     else {
                         // The node was considered due to minimum picking distance radius
-                        LINFOC(node->name(), "Picking candidate based on proximity");
+                        LINFOC(
+                            node->identifier(),
+                            "Picking candidate based on proximity"
+                        );
                         pickingInfo.push_back({
                             node,
                             ndcDist,
@@ -713,7 +720,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     // If an item has been picked, it's in the first position of the vector now
     if (!pickingInfo.empty()) {
         _pickingSelected = pickingInfo.begin()->node;
-        LINFOC("Picking", "Picked node: " + _pickingSelected->name());
+        LINFOC("Picking", "Picked node: " + _pickingSelected->identifier());
     }
 
     _selected = std::move(newSelected);

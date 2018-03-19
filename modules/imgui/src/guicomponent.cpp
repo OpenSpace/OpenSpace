@@ -40,8 +40,8 @@ namespace {
 
 namespace openspace::gui {
 
-GuiComponent::GuiComponent(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
+GuiComponent::GuiComponent(std::string identifier, std::string guiName)
+    : properties::PropertyOwner({ std::move(identifier), std::move(guiName) })
     , _isEnabled(EnabledInfo, false)
     , _isCollapsed(CollapsedInfo, false)
 {
