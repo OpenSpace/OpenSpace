@@ -89,8 +89,6 @@ uniform dmat4 dModelTransformMatrix;
 uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
 uniform dmat4 dInverseSgctProjectionToModelTransformMatrix;
 
-uniform dvec3 dSGCTEyePosWorld;
-uniform dvec4 dSGCTEyePosObj;
 uniform dvec3 dCamRigPos;
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
@@ -248,7 +246,7 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // ======================================
     // ======= Avoiding Some Matrices =======
 
-    // Compute positions and directions in world space.
+    // Compute positions and directions in object space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
     dvec4 clipCoords = dvec4((interpolatedNDCPos.xy + samplePos)/ gl_FragCoord.w, 0.0, 1.0); 
@@ -261,14 +259,15 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // space results in imprecision. 
     planetPositionObjectCoords = dvec4(0.0, 0.0, 0.0, 1.0);
 
-    // Camera Position in Object Space
-    cameraPositionInObject = dSGCTEyePosObj;//dCamPosObj;  
+    // Camera Position in Object Space (in meters)
+    cameraPositionInObject = dCamPosObj;  
     
     // ============================
     // ====== Building Ray ========
     // Ray in object space (in KM)
     ray.origin    = cameraPositionInObject * dvec4(0.001, 0.001, 0.001, 1.0);
-    ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
+    //ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
+    ray.direction = dvec4(normalize((objectCoords.xyz * dvec3(0.001))- ray.origin.xyz), 0.0);
 }
 
 /* 
@@ -588,8 +587,8 @@ void main() {
                                          cameraPositionInObject);
           
             bool  insideATM    = false;
-            double offset      = 0.0;
-            double maxLength   = 0.0;     
+            double offset      = 0.0;   // in Km
+            double maxLength   = 0.0;   // in Km  
 
             bool  intersectATM = false;
 
@@ -607,7 +606,7 @@ void main() {
                 vec4 normal   = texelFetch(mainNormalTexture, fragCoords, i);
                 // Data in the mainPositionTexture are written in view space (view plus camera rig)
                 vec4 position = texelFetch(mainPositionTexture, fragCoords, i);
-               
+
                 // OS Eye to World coords                
                 dvec4 tmpRInvPos       = dInverseSGCTEyeToTmpRotTransformMatrix * position;
                 dvec4 fragWorldCoords  = dvec4(dvec3(tmpRInvPos) + dCamRigPos, 1.0);

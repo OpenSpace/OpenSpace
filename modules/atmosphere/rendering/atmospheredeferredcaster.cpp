@@ -256,14 +256,18 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             // SGCT Projection to World Space
             glm::dmat4 dInverseSgctProjectionToWorldTransformMatrix(dInverseProjectionToTmpRotTransformMatrix);
             double *mSource = (double*)glm::value_ptr(dInverseSgctProjectionToWorldTransformMatrix);
+            
             mSource[12] += renderData.camera.eyePositionVec3().x;
             mSource[13] += renderData.camera.eyePositionVec3().y;
             mSource[14] += renderData.camera.eyePositionVec3().z;
-            /*mSource[12] += renderData.camera.positionVec3().x;
+            /*
+            mSource[12] += renderData.camera.positionVec3().x;
             mSource[13] += renderData.camera.positionVec3().y;
-            mSource[14] += renderData.camera.positionVec3().z;*/
+            mSource[14] += renderData.camera.positionVec3().z;
+            */
             mSource[15] = 1.0;
             
+
             // SGCT Projection to Object Space
             glm::dmat4 inverseWholeMatrixPipeline = inverseModelMatrix *
                 dInverseSgctProjectionToWorldTransformMatrix;
@@ -271,11 +275,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 inverseWholeMatrixPipeline);
 
             program.setUniform(_uniformCache2.dCamRigPos, renderData.camera.positionVec3());
-            program.setUniform("dSGCTEyePosWorld", renderData.camera.eyePositionVec3());
-            program.setUniform("dSGCTEyePosObj", inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0));
             
-            //glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
-            glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
+            glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
+            //glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
             program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
 
             double lt;
