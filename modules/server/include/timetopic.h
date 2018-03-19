@@ -37,11 +37,12 @@ public:
     void handleJson(nlohmann::json json);
     bool isDone();
 private: 
-    bool _requestedResourceIsSubscribable;
-    int _onChangeHandle;
-
     nlohmann::json currentTime();
     nlohmann::json deltaTime();
+
+    int _timeCallbackHandle;
+    int _deltaTimeCallbackHandle;
+    std::chrono::system_clock::time_point _lastUpdateTime;
 };
 
 }

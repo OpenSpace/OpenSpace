@@ -44,7 +44,7 @@ SettingsPane.defaultProps = {
 
 const mapStateToProps = (state) => {
   const sceneType = 'Scene';
-  const properties = state.propertyTree.subowners.filter(element => element.name !== sceneType);
+  const properties = state.propertyTree.subowners.filter(element => element.identifier !== sceneType);
   return {
     properties,
   };

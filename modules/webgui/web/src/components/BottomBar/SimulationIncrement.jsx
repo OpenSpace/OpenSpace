@@ -114,9 +114,8 @@ class SimulationIncrement extends Component {
     }
   }
 
-  deltaTimeUpdated({ deltaTime }) {
-    console.log(deltaTime);
-    this.setState({ deltaTime });
+  deltaTimeUpdated({deltaTime}) {
+    this.setState({deltaTime});
   }
 
   render() {

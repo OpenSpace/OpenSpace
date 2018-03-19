@@ -8,7 +8,7 @@ const updateActionURI = (action, splittedURI) => {
     payload: {
       ...action.payload,
       URI: splittedURI.URI,
-      name: splittedURI.name,
+      identifier: splittedURI.identifier,
       isLastNode: splittedURI.isLastNode,
     },
   };
@@ -41,7 +41,7 @@ const changePropertyOwnerState = (state, action) => {
       };
     case actionTypes.updatePropertyTreeNode:
       return {
-        name: action.payload.node.name,
+        identifier: action.payload.node.identifier,
         properties: properties(undefined, action),
         subowners: action.payload.node.subowners.map((subowner) => {
           const newAction = {
@@ -116,14 +116,14 @@ const properties = (state = [], action) => { // state refers to an array of prop
     case actionTypes.startListeningToNode:
     case actionTypes.stopListeningToNode:
       return state.map((element) => {
-        if (element.id === action.payload.name) {
+        if (element.id === action.payload.identifier) {
           return property(element, action);
         }
         return element;
       });
     case actionTypes.removeNode: {
       return state.map((element) => {
-        if (!(element.id === action.payload.name)) {
+        if (!(element.id === action.payload.identifier)) {
           return element;
         }
       });
@@ -137,7 +137,7 @@ export const propertyOwner = (state = {}, action) => { // state refers to a sing
   switch (action.type) {
     case actionTypes.insertNode:
       return {
-        name: action.payload.node.name,
+        identifier: action.payload.node.identifier,
         properties: properties(undefined, action),
         subowners: action.payload.node.subowners.map((subowner) => {
           return propertyOwner(undefined, updateActionNode(action, subowner));
@@ -158,7 +158,7 @@ export const propertyOwner = (state = {}, action) => { // state refers to a sing
       return {
         ...state,
         subowners: state.subowners.map((element) => {
-          if (element.name === splittedURI.name) {
+          if (element.identifier === splittedURI.identifier) {
             return propertyOwner(element, newAction);
           }
           return element;
@@ -173,7 +173,7 @@ export const propertyOwner = (state = {}, action) => { // state refers to a sing
       return {
         ...state,
         subowners: state.subowners.map((element) => {
-          if (element.name === splittedURI.name) {
+          if (element.identifier === splittedURI.identifier) {
             if (!splittedURI.isLastNode) {
               return propertyOwner(element, newAction);
             }
@@ -208,7 +208,7 @@ export const propertyOwner = (state = {}, action) => { // state refers to a sing
       return {
         ...state,
         subowners: state.subowners.map((element) => {
-          if (element.name === splittedURI.name) {
+          if (element.identifier === splittedURI.identifier) {
             return propertyOwner(element, newAction);
           }
           return element;

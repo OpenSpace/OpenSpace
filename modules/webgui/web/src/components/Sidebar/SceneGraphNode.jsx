@@ -15,21 +15,21 @@ class SceneGraphNode extends Component {
   }
 
   focusOnThis() {
-    const { name } = this.props;
-    DataManager.setValue(OriginKey, '"' + name + '"');
+    const { identifier } = this.props;
+    DataManager.setValue(OriginKey, '"' + identifier + '"');
   }
 
   render() {
-    const { name, subowners } = this.props;
+    const { identifier, subowners } = this.props;
 
     return (
-      <ToggleContent title={name}>
+      <ToggleContent title={identifier}>
         <Button onClick={this.focusOnThis}>
           <Icon icon="gps_fixed" /> Focus
         </Button>
         { subowners.map(sub => (
           <PropertyOwner
-            key={sub.name}
+            key={sub.identifier}
             {...sub}
           />
         )) }
@@ -39,10 +39,10 @@ class SceneGraphNode extends Component {
 }
 
 SceneGraphNode.propTypes = {
-  name: PropTypes.string.isRequired,
+  identifier: PropTypes.string.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   subowners: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string,
+    identifier: PropTypes.string,
     description: PropTypes.string,
     properties: PropTypes.arrayOf(PropTypes.object),
   })),

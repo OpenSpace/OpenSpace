@@ -1,16 +1,16 @@
 export const splitURI = (URI) => {
-  const indexForName = URI.indexOf('.');
-  const name = URI.substring(0, indexForName != -1 ?
-    indexForName : URI.length);
-  URI = URI.substring(indexForName + 1, URI.length);
+  const indexForIdentifier = URI.indexOf('.');
+  const identifier = URI.substring(0, indexForIdentifier != -1 ?
+    indexForIdentifier : URI.length);
+  URI = URI.substring(indexForIdentifier + 1, URI.length);
 
-  return { name, URI, isLastOwner: URI.indexOf('.') === -1, isLastNode: URI.length === 0 };
+  return { identifier, URI, isLastOwner: URI.indexOf('.') === -1, isLastNode: URI.length === 0 };
 };
 
 export const getIdOfProperty = (URI) => {
-  const indexForName = URI.lastIndexOf('.');
-  return URI.substring(indexForName != -1 ?
-    indexForName + 1 : 0, URI.length);
+  const indexForIdentifier = URI.lastIndexOf('.');
+  return URI.substring(indexForIdentifier != -1 ?
+    indexForIdentifier + 1 : 0, URI.length);
 };
 
 export const changePropertyOwnerState = (state, action) => {
@@ -24,7 +24,7 @@ export const changePropertyOwnerState = (state, action) => {
       };
     case 'SCENEGRAPH_UPDATE_PROPERTY':
       return {
-        name: action.payload.node.name,
+        identifier: action.payload.node.identifier,
         properties: properties(undefined, action),
         subowners: action.payload.node.subowners.map((subowner) => {
           const newAction = {
@@ -93,7 +93,7 @@ const traverseTree = (node, URI) => {
   }
 
   node.subowners.forEach((element) => {
-    if (element.name === splittedURI.name) {
+    if (element.identifier === splittedURI.identifier) {
       tmpValue = traverseTree(element, splittedURI.URI);
       return tmpValue;
     }
@@ -106,7 +106,7 @@ const findUpdatedProperty = (state, URI) => {
   const splittedURI = splitURI(URI);
   let returnNode;
   state.forEach((element) => {
-    if (element.name === splittedURI.name) {
+    if (element.identifier === splittedURI.identifier) {
       returnNode = traverseTree(element, splittedURI.URI);
     }
   });

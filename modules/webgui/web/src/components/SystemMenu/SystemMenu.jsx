@@ -5,7 +5,10 @@ import Icon from '../common/Icon/Icon';
 import Button from '../common/Input/Button/Button';
 import styles from './SystemMenu.scss';
 import Popover from '../common/Popover/Popover';
-import { ShutdownScript, ToggleConsoleScript } from '../../api/keys';
+import {
+  ShutdownScript,
+  ToggleConsoleScript,
+  ToggleNativeGuiScript } from '../../api/keys';
 
 class SystemMenu extends Component {
   static quit() {
@@ -14,6 +17,10 @@ class SystemMenu extends Component {
 
   static console() {
     DataManager.runScript(ToggleConsoleScript);
+  }
+
+  static nativeGui() {
+    DataManager.runScript(ToggleNativeGuiScript);
   }
 
   constructor(props) {
@@ -34,6 +41,9 @@ class SystemMenu extends Component {
             <nav className={styles.links} onClick={this.toggleMenu}>
               <button onClick={SystemMenu.console}>
                 Toggle console <span className={styles.shortcut}>~</span>
+              </button>
+              <button onClick={SystemMenu.nativeGui}>
+                Toggle native GUI <span className={styles.shortcut}>F3</span>
               </button>
 
               <hr className={Popover.styles.delimiter} />

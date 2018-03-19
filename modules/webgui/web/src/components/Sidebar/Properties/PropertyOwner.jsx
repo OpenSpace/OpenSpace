@@ -25,10 +25,10 @@ const types = {
   defaultProperty: Property,
 };
 
-const PropertyOwner = ({ name, properties, subowners }) => (
-  <ToggleContent title={name}>
+const PropertyOwner = ({ identifier, properties, subowners }) => (
+  <ToggleContent title={identifier}>
     { subowners.map(subowner => (
-      <PropertyOwner {...subowner} key={subowner.name} />
+      <PropertyOwner {...subowner} key={subowner.identifier} />
     )) }
     { properties.map((prop) => {
       const { Description } = prop;
@@ -41,10 +41,10 @@ const PropertyOwner = ({ name, properties, subowners }) => (
 );
 
 PropertyOwner.propTypes = {
-  name: PropTypes.string.isRequired,
+  identifier: PropTypes.string.isRequired,
   properties: PropTypes.arrayOf(PropTypes.object),
   subowners: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string,
+    identifier: PropTypes.string,
     subowners: PropTypes.array,
     properties: PropTypes.array,
   })),

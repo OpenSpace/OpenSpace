@@ -17,8 +17,12 @@ export const TimeKey = 'special:currentTime';
 // script to toggle shutdown
 export const ShutdownScript = 'openspace.toggleShutdown()';
 // toggle console
-export const ToggleConsoleScript = 'openspace.setPropertyValue("Global Properties.ImGUI.Main.Enabled", ' +
-                                   'not openspace.getPropertyValue("Global Properties.ImGUI.Main.Enabled"))';
+export const ToggleConsoleScript = 'openspace.setPropertyValueSingle("LuaConsole.IsVisible", ' +
+                                   'not openspace.getPropertyValue("LuaConsole.IsVisible"))';
+export const ToggleNativeGuiScript = 'local b = openspace.getPropertyValue("Modules.ImGUI.Main.Enabled");' + 
+                                     'openspace.setPropertyValueSingle("Modules.ImGUI.Main.Enabled", not b);' +
+                                     'openspace.setPropertyValueSingle("Modules.ImGUI.Main.IsHidden", b);';
+
 // key for getting current simulation time
 export const CurrenTimeKey = 'currentTime';
 // key for getting the delta time
