@@ -31,13 +31,15 @@ const std::string _loggerCat = "CefWebGui";
 
 namespace openspace {
 
-CefWebGuiModule::CefWebGuiModule() : OpenSpaceModule(CefWebGuiModule::Name) {
-    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler());
-    _guiLocation = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyCefWebGuiUrl);
-}
+CefWebGuiModule::CefWebGuiModule()
+    : OpenSpaceModule(CefWebGuiModule::Name)
+{}
 
 void CefWebGuiModule::internalInitialize(const ghoul::Dictionary&) {
+    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler());
+    _guiLocation = OsEng.configurationManager().value<std::string>(
+        ConfigurationManager::KeyCefWebGuiUrl);
+
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Initialize,
             [this]() {
