@@ -3,7 +3,7 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 asset.require("spice/base")
 
 local TestCase = {
-    Name = "TestCase",
+    Identifier = "TestCase",
     Parent = "SolarSystemBarycenter",
     Renderable = {
         Type = "RenderableMultiresVolume",
@@ -18,7 +18,9 @@ local TestCase = {
         BrickSelector = "local",
         AtlasType = "All"
     },
-    GuiPath = "/Solar System/TestCase"
+    GUI = {
+        Path = "/Solar System/TestCase"
+    }
 }
 
 

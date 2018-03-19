@@ -22,7 +22,7 @@ asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()
 
     openspace.navigation.setCameraState({
-        Focus = testCase.TestCase.Name,
+        Focus = testCase.TestCase.Identifier,
         Position = { 0, 0, 50 },
         Rotation = { 0, 0, 0, 1 },
     })
