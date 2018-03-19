@@ -233,38 +233,48 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
-            // Eye Space in OS to Eye Space in SGCT
+            // Eye Space in SGCT to Eye Space in OS
             glm::dmat4 dSgctEye2OSEye = glm::inverse(
-                glm::dmat4(renderData.camera.viewMatrix()));
-            
-            // Eye Space in SGCT to Projection (Clip) Space in SGCT
-            glm::dmat4 dInverseProjection = glm::inverse(
-                glm::dmat4(renderData.camera.projectionMatrix()));
+                glm::dmat4(renderData.camera.viewMatrix()));            
 
             glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = glm::mat4_cast(
                 static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
             ) * glm::inverse(renderData.camera.viewScaleMatrix()) * dSgctEye2OSEye;
+
+            // Eye Space in SGCT to OS Camera Before Rotation
+            program.setUniform(_uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix,
+                dInverseSGCTEyeToTmpRotTransformMatrix);           
             
-            
+            // SGCT Projection to SGCT Eye Space
+            glm::dmat4 dInverseProjection = glm::inverse(
+                glm::dmat4(renderData.camera.projectionMatrix()));
+
+            // SGCT Projection to OS Camera Before Rotation
             glm::dmat4 dInverseProjectionToTmpRotTransformMatrix = 
                 dInverseSGCTEyeToTmpRotTransformMatrix * dInverseProjection;
             
-            double *mSource = (double*)glm::value_ptr(dInverseProjectionToTmpRotTransformMatrix);
-            mSource[12] += renderData.camera.positionVec3().x;
+            // SGCT Projection to World Space
+            glm::dmat4 dInverseSgctProjectionToWorldTransformMatrix(dInverseProjectionToTmpRotTransformMatrix);
+            double *mSource = (double*)glm::value_ptr(dInverseSgctProjectionToWorldTransformMatrix);
+            mSource[12] += renderData.camera.eyePositionVec3().x;
+            mSource[13] += renderData.camera.eyePositionVec3().y;
+            mSource[14] += renderData.camera.eyePositionVec3().z;
+            /*mSource[12] += renderData.camera.positionVec3().x;
             mSource[13] += renderData.camera.positionVec3().y;
-            mSource[14] += renderData.camera.positionVec3().z;
+            mSource[14] += renderData.camera.positionVec3().z;*/
             mSource[15] = 1.0;
-
+            
+            // SGCT Projection to Object Space
             glm::dmat4 inverseWholeMatrixPipeline = inverseModelMatrix *
-                dInverseProjectionToTmpRotTransformMatrix;
+                dInverseSgctProjectionToWorldTransformMatrix;
             program.setUniform(_uniformCache2.dInverseSgctProjectionToModelTransformMatrix,
                 inverseWholeMatrixPipeline);
 
-            program.setUniform(_uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix, 
-                dInverseSGCTEyeToTmpRotTransformMatrix);
-
-            program.setUniform(_uniformCache2.dCampos, renderData.camera.eyePositionVec3());
-
+            program.setUniform(_uniformCache2.dCamRigPos, renderData.camera.positionVec3());
+            program.setUniform("dSGCTEyePosWorld", renderData.camera.eyePositionVec3());
+            program.setUniform("dSGCTEyePosObj", inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0));
+            
+            //glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
             glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
             program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
 
@@ -451,7 +461,7 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
     _uniformCache2.dInverseSgctProjectionToModelTransformMatrix = program.uniformLocation("dInverseSgctProjectionToModelTransformMatrix");
     _uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix = program.uniformLocation("dInverseSGCTEyeToTmpRotTransformMatrix");
-    _uniformCache2.dCampos = program.uniformLocation("dCampos");
+    _uniformCache2.dCamRigPos = program.uniformLocation("dCamRigPos");
     _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
     _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
     _uniformCache2.hardShadows = program.uniformLocation("hardShadows");

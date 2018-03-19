@@ -137,7 +137,7 @@ private:
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
         dInverseSgctProjectionToModelTransformMatrix,
         dInverseSGCTEyeToTmpRotTransformMatrix,
-        dCampos, dCamPosObj, sunDirectionObj,
+        dCamRigPos, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;
 

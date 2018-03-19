@@ -89,7 +89,9 @@ uniform dmat4 dModelTransformMatrix;
 uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
 uniform dmat4 dInverseSgctProjectionToModelTransformMatrix;
 
-uniform dvec3 dCampos;
+uniform dvec3 dSGCTEyePosWorld;
+uniform dvec4 dSGCTEyePosObj;
+uniform dvec3 dCamRigPos;
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
 
@@ -186,12 +188,12 @@ struct dRay {
  *               intersection of the ray with atmosphere when the eye position
  *               is inside atmosphere.
  */
-bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const float atmRadius,
-                             out bool inside, out float offset, out float maxLength ) {
-    vec3  l  = vec3(planetPosition) - vec3(ray.origin.xyz);
-    float s  = dot(l, vec3(ray.direction.xyz));
-    float l2 = dot(l, l);
-    float r2 = atmRadius * atmRadius; // avoiding surface acne
+bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const double atmRadius,
+                             out bool inside, out double offset, out double maxLength ) {
+    dvec3  l  = planetPosition - ray.origin.xyz;
+    double s  = dot(l, ray.direction.xyz);
+    double l2 = dot(l, l);
+    double r2 = atmRadius * atmRadius; // avoiding surface acne
 
     // Ray origin (eye position) is behind sphere
     if ((s < 0.0) && (l2 > r2)) {
@@ -201,7 +203,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const f
         return false;
     }
 
-    float m2 = l2 - s*s;
+    double m2 = l2 - s*s;
 
     // Ray misses atmospere
     if (m2 > r2) {
@@ -214,7 +216,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const f
     // We already now the ray hits the atmosphere
 
     // If q = 0.0f, there is only one intersection
-    float q = sqrt(r2 - m2);
+    double q = sqrt(r2 - m2);
 
     // If l2 < r2, the ray origin is inside the sphere
     if (l2 > r2) {
@@ -249,7 +251,7 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Compute positions and directions in world space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
-    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, interpolatedNDCPos.z, 1.0) / gl_FragCoord.w; 
+    dvec4 clipCoords = dvec4((interpolatedNDCPos.xy + samplePos)/ gl_FragCoord.w, 0.0, 1.0); 
 
     // Clip to Object Coords
     dvec4 objectCoords = dInverseSgctProjectionToModelTransformMatrix * clipCoords;
@@ -260,7 +262,7 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     planetPositionObjectCoords = dvec4(0.0, 0.0, 0.0, 1.0);
 
     // Camera Position in Object Space
-    cameraPositionInObject = dCamPosObj;  
+    cameraPositionInObject = dSGCTEyePosObj;//dCamPosObj;  
     
     // ============================
     // ====== Building Ray ========
@@ -608,7 +610,7 @@ void main() {
                
                 // OS Eye to World coords                
                 dvec4 tmpRInvPos       = dInverseSGCTEyeToTmpRotTransformMatrix * position;
-                dvec4 fragWorldCoords  = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
+                dvec4 fragWorldCoords  = dvec4(dvec3(tmpRInvPos) + dCamRigPos, 1.0);
                 
                 // World to Object (Normal and Position in meters)
                 dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;

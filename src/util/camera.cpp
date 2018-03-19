@@ -125,7 +125,8 @@ namespace openspace {
         glm::dvec4 eyeInEyeSpace(0.0, 0.0, 0.0, 1.0);
 
         glm::dmat4 invViewMatrix = glm::inverse(sgctInternal.viewMatrix());
-        glm::dmat4 invRotationMatrix = glm::inverse(viewRotationMatrix());
+        glm::dmat4 invRotationMatrix = 
+            glm::mat4_cast(static_cast<glm::dquat>(_rotation));
         glm::dmat4 invTranslationMatrix =
             glm::translate(Mat4(1.0), static_cast<Vec3>(_position));
 
