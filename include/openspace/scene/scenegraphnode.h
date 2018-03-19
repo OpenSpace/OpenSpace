@@ -137,6 +137,7 @@ public:
     Renderable* renderable();
 
     const std::string& guiPath() const;
+    bool hasGuiHintHidden() const;
 
     static documentation::Documentation Documentation();
 
@@ -151,6 +152,10 @@ private:
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
     Scene* _scene;
+
+    // If this value is 'true' GUIs are asked to hide this node from collections, as it
+    // might be a node that is not very interesting (for example barycenters)
+    bool _guiHintHidden = false;
 
     PerformanceRecord _performanceRecord;
 
