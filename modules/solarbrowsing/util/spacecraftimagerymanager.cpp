@@ -340,7 +340,7 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
             sequencePaths.end(),
             [](const std::string& path) {
                 const std::string& ext = ghoul::filesystem::File(path).fileExtension();
-                return (ext == "jp2") || (ext == "j2k");
+                return (ext != "jp2") && (ext != "j2k");
             }
         ),
         sequencePaths.end()
@@ -373,7 +373,7 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
         while (std::getline(ss, item, '_')) {
             tokens.push_back(item);
         }
-        if (tokens.size() == 8) {
+        if (tokens.size() >= 8) {
             std::string time = tokens[0] + "-" + tokens[1] + "-" +
                 tokens[2] + "T" + tokens[4] + ":" +
                 tokens[5] + ":" + tokens[6] + "." + tokens[7];
@@ -393,6 +393,7 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
 
     LDEBUG("Finish loading imagery metadata");
     LDEBUG(fmt::format("{} images loaded", count));
+    LDEBUG(fmt::format("{} values in metamap", _imageMetadataMap.size()));
 }
 
 } //namespace openspace

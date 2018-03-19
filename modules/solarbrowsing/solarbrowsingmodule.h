@@ -31,7 +31,7 @@ namespace openspace {
 
 class SolarBrowsingModule : public OpenSpaceModule {
 public:
-    constexpr static const char* Name = "ImGUI";
+    constexpr static const char* Name = "SolarBrowsing";
 
     SolarBrowsingModule();
 
