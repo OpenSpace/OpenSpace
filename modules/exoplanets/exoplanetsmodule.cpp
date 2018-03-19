@@ -41,7 +41,7 @@ ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 std::vector<float> readSpeckFile(std::string starname) {
     std::ifstream file("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/stars.speck");
 	  if (!file.good()) {
-		    std::cout << "Failed to open Speck file '{}'";
+		    std::cout << "Failed to open Speck file";
 	  }
 
 	   int _nValuesPerStar = 0;
@@ -84,25 +84,24 @@ std::vector<float> readSpeckFile(std::string starname) {
 	}
 
 	_nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
+    std::vector<float> coords;
 
 	do {
-		std::vector<float> values(_nValuesPerStar);
+        std::vector<float> temp(_nValuesPerStar);
 
 		std::getline(file, line);
 		std::stringstream str(line);
 
 		for (int i = 0; i < _nValuesPerStar; ++i) {
-			str >> values[i];
+			str >> temp[i];
 		}
 
 		std::string next;
 		std::getline(str, next);
 		std::stringstream namestr(next);
 
-		// 1. ignore first #
-		// 2. push all names in the rest of the stream to a array
 		std::string value;
-		std::vector<std::string> names;
+        std::vector<std::string> names;
 
 		while (namestr >> value) {
 			if (value == "#" || value == "|")
@@ -113,45 +112,61 @@ std::vector<float> readSpeckFile(std::string starname) {
 		}
 
 		for (size_t i = 0; i < names.size(); ++i) {
-			if (!names[i].empty() && names[i].compare(starname) == 0) {
-				return values;
+			if (names[i].compare(starname) == 0) {
+                for (int i = 0; i < 3; i++) {
+                    coords.push_back(temp[i]);
+                }
+                return coords;
 			}
 		}
 
 	} while (!file.eof());
 
+    return coords;
 }
 
 int addNode(lua_State* L) {
 
-    // get name of star and add a node at the position of the star.
-    // position is found in the star-files
-    // after the node has been added one should be able to select it as a focus point.
-
-    //start
-
-    const int StringLocation = -1; //first argument
+    const int StringLocation = -1;
     const std::string starname = luaL_checkstring(L, StringLocation);
 
     std::vector<float> values = readSpeckFile(starname);
-    printf(std::to_string(values[0]).c_str());
 
-    // adding the parent node of the exoplanet system
-    //const std::string luaTableParent = "{ Name = '" + starname +"', Parent = 'SolarSystemBarycenter', Transform = { Translation = { Type = 'StaticTranslation', Position = {" + std::to_string(values[0]) + ", " + std::to_string(values[1]) + ", " + std::to_string(values[2]) + "} } }}"; // positionen must be gathered from star.speck
-    const std::string luaTableParent = "{ Name = '" + starname + "', Parent = 'SolarSystemBarycenter', Transform = { Translation = { Type = 'StaticTranslation', Position = { -6.5825, -1.6713, 25.2259} } }}";
-    const std::string scriptParent = "openspace.addSceneGraphNode("+ luaTableParent +");";
-    OsEng.scriptEngine().queueScript(
-       scriptParent,
-       openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    if (!values.empty())
+    {
+        double parsecinmeter = 3.08567758*10e16;
 
-    // adding a renderable in the place of the stars
-    const std::string luaTableStarGlare = "{ Name = '" + starname + "Plane', Parent = '" + starname +"', Renderable = { Type = 'RenderablePlaneImageLocal', Size = 1.3*10^10.5, Billboard = true, Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/glare.png', BlendMode = 'Additive' }  }";
-    const std::string scriptGlare= "openspace.addSceneGraphNode("+ luaTableStarGlare +");";
-    OsEng.scriptEngine().queueScript(
-       scriptGlare,
-       openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    );
+        const std::string luaTableParent = "{"
+            "Name = '" + starname + "',"
+            "Parent = 'SolarSystemBarycenter',"
+            "Transform = {"
+                "Translation = {"
+                    "Type = 'StaticTranslation',"
+                    "Position = {" + std::to_string(values[0] * parsecinmeter) + ", " + std::to_string(values[1] * parsecinmeter) + ", " + std::to_string(values[2] * parsecinmeter) + "}"
+                "}"
+            "}"
+        "}";
+        const std::string luaTableStarGlare = "{"
+            "Name = '" + starname + "Plane',"
+            "Parent = '" + starname + "',"
+            "Renderable = {"
+                "Type = 'RenderablePlaneImageLocal',"
+                "Size = 1.3*10^10.5,"
+                "Billboard = true,"
+                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/glare.png',"
+                "BlendMode = 'Additive'"
+            "}"
+        "}";
+        const std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + ");";
+        OsEng.scriptEngine().queueScript(
+            scriptParent,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+    else
+    {
+        printf("No star with that name.");
+    }
 
 }
 
