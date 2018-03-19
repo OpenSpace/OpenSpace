@@ -1,0 +1,24 @@
+local assetHelper = asset.require("util/asset_helper")
+asset.require("spice/base")
+
+local TestCase = {
+    Name = "TestCase",
+    Parent = "SolarSystemBarycenter",
+    Renderable = {
+        Type = "RenderableMultiresVolume",
+        TspType = "sand",
+        ReferenceFrame = "HEEQ",
+        Translation = {0, 0, 0},
+        Rotation = {0, 0, 0},
+        Scaling = {1, 1, 1},
+        ScalingExponent = 1,
+        Source = "${ASSETS}/scene/multires/testcase/tsp/testcase.tsp",
+        ErrorHistogramsSource = "${ASSETS}/scene/multires/testcase/tsp/testcase.errorHistograms",
+        TransferFunction = "${ASSETS}/scene/multires/testcase/transferfunctions/testcase.txt",
+        BrickSelector = "tf"
+    },
+    GuiPath = "/Solar System/TestCase"
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { TestCase })
