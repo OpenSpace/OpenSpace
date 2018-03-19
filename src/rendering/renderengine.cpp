@@ -53,9 +53,14 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
+#ifdef GHOUL_USE_STB_IMAGE
+#include <ghoul/io/texture/texturereaderstb.h>
+#endif // GHOUL_USE_STB_IMAGE
+
 #ifdef GHOUL_USE_DEVIL
 #include <ghoul/io/texture/texturereaderdevil.h>
 #endif //GHOUL_USE_DEVIL
+
 #ifdef GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #endif // GHOUL_USE_FREEIMAGE
