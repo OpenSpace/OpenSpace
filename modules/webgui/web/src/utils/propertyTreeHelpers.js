@@ -1,16 +1,16 @@
 export const splitURI = (URI) => {
-  const indexForName = URI.indexOf('.');
-  const name = URI.substring(0, indexForName !== -1 ?
-    indexForName : URI.length);
-  const newURI = URI.substring(indexForName + 1, URI.length);
+  const indexForIdentifier = URI.indexOf('.');
+  const identifier = URI.substring(0, indexForIdentifier !== -1 ?
+    indexForIdentifier : URI.length);
+  const newURI = URI.substring(indexForIdentifier + 1, URI.length);
 
-  return { name, URI: newURI, isLastOwner: newURI.indexOf('.') === -1, isLastNode: URI.indexOf('.') === -1 };
+  return { identifier, URI: newURI, isLastOwner: newURI.indexOf('.') === -1, isLastNode: URI.indexOf('.') === -1 };
 };
 
 export const getIdOfProperty = (URI) => {
-  const indexForName = URI.lastIndexOf('.');
-  return URI.substring(indexForName !== -1 ?
-    indexForName + 1 : 0, URI.length);
+  const indexForIdentifier = URI.lastIndexOf('.');
+  return URI.substring(indexForIdentifier !== -1 ?
+    indexForIdentifier + 1 : 0, URI.length);
 };
 
 // Function to return a deep copy of an object
@@ -38,7 +38,7 @@ export const traverseTreeWithURI = (node, URI) => {
     return tmpValue;
   }
   node.subowners.forEach((element) => {
-    if (element.name === splittedURI.name) {
+    if (element.identifier === splittedURI.identifier) {
       if (splittedURI.isLastNode) { tmpValue = element; } else {
         tmpValue = traverseTreeWithURI(element, splittedURI.URI);
       }
@@ -72,7 +72,7 @@ export const findAllNodesWithTag = (state, tag) => {
       if(data !== undefined) {
         const returnValue = {
           data,
-          name: element.name
+          identifier: element.identifier
         }
         nodes.push(returnValue);
       }

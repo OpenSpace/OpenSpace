@@ -27,7 +27,7 @@
 
 
 namespace {
-const char* KeyName = "Name";
+const char* KeyIdentifier = "Indentifier";
 const char* KeyUrl = "URL";
 const std::string _loggerCat = "ScreenSpaceBrowser";
 } // namespace
@@ -44,11 +44,11 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
                      glm::vec2(0.0f),
                      glm::vec2(3000.0f))
 {
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
+    if (dictionary.hasKey(KeyIdentifier)) {
+        setIdentifier(dictionary.value<std::string>(KeyIdentifier));
     } else {
         static int id = 0;
-        setName("ScreenSpaceBrowser " + std::to_string(id));
+        setIdentifier("ScreenSpaceBrowser " + std::to_string(id));
         ++id;
     }
 
@@ -83,7 +83,10 @@ bool ScreenSpaceBrowser::initialize() {
     createPlane();
     // Load a special version of the regular ScreenRenderable shaders. This mirrors the
     // image along the Y axis since the image produced by CEF was flipped.
-    createShaders("${MODULE_WEBBROWSER}/shaders/");
+    //createShaders("${MODULE_WEBBROWSER}/shaders/");
+
+    createShaders();
+
     _browserInstance->loadUrl(_url);
 
     return isReady();

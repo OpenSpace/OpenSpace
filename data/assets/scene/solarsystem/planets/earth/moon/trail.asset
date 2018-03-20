@@ -5,8 +5,8 @@ asset.require('spice/base')
 
 
 local MoonTrail = {
-    Name = "MoonTrail",
-    Parent = transforms.EarthBarycenter.Name,
+    Identifier = "MoonTrail",
+    Parent = transforms.EarthBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -18,7 +18,10 @@ local MoonTrail = {
         Period =  27,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Planets/Earth/Moon"
+    GUI = {
+        Name = "Moon Trail",
+        Path = "/Solar System/Planets/Earth/Moon"
+    }
 }
 
 

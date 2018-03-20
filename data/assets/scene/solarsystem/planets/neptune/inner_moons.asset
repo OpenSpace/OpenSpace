@@ -7,106 +7,121 @@ local kernels088 = asset.require('./nep088').Kernels
 
 
 
-local parentName = transforms.NeptuneBarycenter.Name
+local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_inner" }
 local trailColor = { 0.2, 0.5, 0.75 }
 
 local innerMoons = {
     {
-        Name = "Naiad",
+        Identifier = "Naiad",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "NAIAD",
         Radii = { 96000, 60000, 52000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.294,
         Kernels = kernels088
     },
     {
-        Name = "Thalassa",
+        Identifier = "Thalassa",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "THALASSA",
         Radii = { 108000, 100000, 52000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.311,
         Kernels = kernels088
     },
     {
-        Name = "Despina",
+        Identifier = "Despina",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "DESPINA",
         Radii = { 180000, 148000, 128000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.335,
         Kernels = kernels088
     },
     {
-        Name = "Galatea",
+        Identifier = "Galatea",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "GALATEA",
         Radii = { 204000, 184000, 144000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.429,
         Kernels = kernels088
     },
     {
-        Name = "Larissa",
+        Identifier = "Larissa",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LARISSA",
         Radii = { 216000, 204000, 168000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.555,
         Kernels = kernels088
     },
     {
-        Name = "S/2004 N 1",
+        Identifier = "S2004N1",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "814",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Name = "S/2004 N 1",
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.936,
         Kernels = kernels088
     },
     {
-        Name = "Proteus",
+        Identifier = "Proteus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PROTEUS",
         Radii = { 436000, 416000, 402000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Inner Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Inner Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.122,
         Kernels = kernels081

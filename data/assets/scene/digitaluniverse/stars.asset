@@ -24,14 +24,16 @@ local colorLUT = asset.syncedResource({
 })
 
 local object = {
-    Name = "Stars",
+    Identifier = "Stars",
     Renderable = {
         Type = "RenderableStars",
         File = speck .. "/stars.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap"
     },
-    GuiPath = "/Milky Way/Stars"
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
 }
 
 

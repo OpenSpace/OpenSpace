@@ -399,11 +399,11 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 #ifdef _MSC_VER
         strcpy_s(
             layout->sceneGraphEntries[i].name,
-            node->name().length() + 1,
-            node->name().c_str()
+            node->identifier().length() + 1,
+            node->identifier().c_str()
         );
 #else
-        strcpy(layout->sceneGraphEntries[i].name, node->name().c_str());
+        strcpy(layout->sceneGraphEntries[i].name, node->identifier().c_str());
 #endif
 
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();

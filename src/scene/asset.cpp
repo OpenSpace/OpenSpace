@@ -122,9 +122,7 @@ void Asset::setState(Asset::State state) {
     }
 }
 
-void Asset::requiredAssetChangedState(std::shared_ptr<Asset> child,
-    Asset::State childState)
-{
+void Asset::requiredAssetChangedState(std::shared_ptr<Asset>, Asset::State childState) {
     if (!isLoaded()) {
         // Prohibit state change to SyncResolved if additional requirements
         // may still be added.
@@ -175,8 +173,8 @@ void Asset::addSynchronization(std::shared_ptr<ResourceSynchronization> synchron
     SynchronizationWatcher::WatchHandle watch =
         _synchronizationWatcher->watchSynchronization(
             synchronization,
-            [this](ResourceSynchronization::State state) {
-                syncStateChanged(state);
+            [this, synchronization](ResourceSynchronization::State state) {
+                syncStateChanged(synchronization, state);
             }
         );
     _syncWatches.push_back(watch);
@@ -189,12 +187,19 @@ void Asset::clearSynchronizations() {
     _syncWatches.clear();
 }
 
-void Asset::syncStateChanged(ResourceSynchronization::State state) {
+void Asset::syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
+                             ResourceSynchronization::State state)
+{
+
     if (state == ResourceSynchronization::State::Resolved) {
         if (!isSynchronized() && isSyncResolveReady()) {
             setState(State::SyncResolved);
         }
     } else if (state == ResourceSynchronization::State::Rejected) {
+        LERROR(fmt::format(
+            "Failed to synchronize resource '{}'' in asset '{}'", sync->name(), id()
+        ));
+
         setState(State::SyncRejected);
     }
 }

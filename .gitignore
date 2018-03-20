@@ -27,6 +27,12 @@ install_manifest.txt
 .project
 shaders/ABuffer/constants.hglsl
 ScriptLog.txt
+*.idea/
+.vs/
+.build-vs/
+*.dir
+cmake-build-*
+x64/
 customization.lua
 COMMIT.md
 screenshots

@@ -81,7 +81,7 @@ json GetPropertyTopic::getAllProperties() {
         { "value", {
             OsEng.renderEngine(),
             OsEng.console(),
-            OsEng.parallelConnection(),
+            OsEng.parallelPeer(),
             OsEng.windowWrapper(),
             OsEng.navigationHandler(),
             OsEng.virtualPropertyManager(),

@@ -76,7 +76,7 @@ end
 
 openspace.setDefaultGuiSorting = function()
     openspace.setPropertyValueSingle(
-        'Modules.ImGUI.Main.Scene Properties.Ordering',
+        'Modules.ImGUI.Main.SceneProperties.Ordering',
         {
             "Solar System", "Milky Way", "Universe", "Other"
         }

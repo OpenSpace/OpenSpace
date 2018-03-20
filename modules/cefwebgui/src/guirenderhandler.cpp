@@ -24,7 +24,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <ghoul/filesystem/filesystem.h>
-#include "modules/webgui/include/guirenderhandler.h"
+#include "modules/cefwebgui/include/guirenderhandler.h"
 
 namespace {
     std::string _loggerCat = "WebGUI:RenderHandler";
@@ -46,8 +46,8 @@ void GUIRenderHandler::initializeGL() {
     LDEBUG("Initializing CEF GL environment...");
     _programObject = ghoul::opengl::ProgramObject::Build(
             "WebGUICEFProgram",
-            absPath("${MODULE_WEBGUI}/shaders/gui_vs.glsl"),
-            absPath("${MODULE_WEBGUI}/shaders/gui_fs.glsl")
+            absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
+            absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl")
     );
     float data[] = {-1.0f, -1.0f, -1.0f,
                      1.0f,  1.0f, -1.0f,

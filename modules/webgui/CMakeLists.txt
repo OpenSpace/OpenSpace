@@ -28,13 +28,11 @@ set(WEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/web CACHE INTERNAL "WEBGUI_MO
 
 set(OPENSPACE_HEADER_FILES
     webguimodule.h
-    include/guirenderhandler.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
     webguimodule.cpp
-    src/guirenderhandler.cpp
     )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 

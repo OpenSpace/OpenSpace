@@ -35,7 +35,7 @@ namespace openspace::properties {
 
 void to_json(json &j, const Property &p) {
     j = {
-        { "Description", json::parse(p.generateBaseDescription()) },
+        { "Description", json::parse(p.generateBaseJsonDescription()) },
         { "Value", p.jsonValue() }
     };
     j["Description"]["description"] = p.description();
@@ -47,7 +47,7 @@ void to_json(json &j, const Property* pP) {
 
 void to_json(json &j, const PropertyOwner &p) {
     j = {
-        { "name", p.name() },
+        { "identifier", p.identifier() },
         { "description", p.description() },
         { "properties", p.properties() },
         { "subowners", p.propertySubOwners() },
@@ -65,7 +65,7 @@ namespace openspace {
 
 void to_json(json &j, const SceneGraphNode &n) {
     j = {
-        { "name", n.name() },
+        { "identifier", n.identifier() },
         { "worldPosition", n.worldPosition() },
         { "position", n.position() },
         { "tags", n.tags() },
@@ -84,7 +84,7 @@ void to_json(json &j, const SceneGraphNode &n) {
     auto parent = n.parent();
     if (parent != nullptr) {
         j["parent"] = {
-            { "name", parent->name() }
+            { "identifier", parent->identifier() }
         };
     }
 }

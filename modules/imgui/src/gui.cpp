@@ -219,7 +219,6 @@ static void RenderDrawLists(ImDrawData* drawData) {
     glDisable(GL_SCISSOR_TEST);
 }
 
-
 void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(absPath(texturePath))) {
         LWARNING(fmt::format("Could not find image '{}'", texturePath));
@@ -280,15 +279,19 @@ void CaptionText(const char* text) {
 
 GUI::GUI()
     : GuiComponent("Main")
-    , _globalProperty("Global Properties")
+    , _globalProperty("Global", "Global Properties")
     , _sceneProperty(
-        "Scene Properties",
+        "SceneProperties", "Scene Properties",
         GuiPropertyComponent::UseTreeLayout::Yes
     )
-    , _screenSpaceProperty("ScreenSpace Properties")
-    , _moduleProperty("Module Properties")
-    , _virtualProperty("Virtual Properties")
-    , _featuredProperties("Featured Properties", GuiPropertyComponent::UseTreeLayout::No)
+    , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
+    , _moduleProperty("ModuleProperties", "Module Properties")
+    , _virtualProperty("VirtualProperties", "Virtual Properties")
+    , _featuredProperties(
+        "FeaturedProperties",
+        "Featured Properties",
+        GuiPropertyComponent::UseTreeLayout::No
+    )
     , _showInternals(false)
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
@@ -926,6 +929,7 @@ void GUI::render() {
         addImageBufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
+
     if (addImageOnline) {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
@@ -948,6 +952,7 @@ void GUI::render() {
         );
     }
 
+#ifdef SHOW_IMGUI_HELPERS
     ImGui::Checkbox("ImGUI Internals", &_showInternals);
     if (_showInternals) {
         ImGui::Begin("Style Editor");
@@ -962,6 +967,7 @@ void GUI::render() {
         ImGui::ShowMetricsWindow();
         ImGui::End();
     }
+#endif // SHOW_IMGUI_HELPERS
 
     ImGui::End();
 }

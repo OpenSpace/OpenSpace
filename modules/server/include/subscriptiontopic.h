@@ -43,10 +43,8 @@ private:
     bool _requestedResourceIsSubscribable;
     bool _isSubscribedTo;
     int _onChangeHandle;
+    int _onDeleteHandle;
     properties::Property* _prop;
-
-    void handleSpecialCase(std::string key);
-    void startSubscription(const std::string& key);
 };
 
 }

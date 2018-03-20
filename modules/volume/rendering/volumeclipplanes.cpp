@@ -40,7 +40,7 @@ VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary cutPlaneDictionary;
         dictionary.getValue(key, cutPlaneDictionary);
         auto clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
-        clipPlane->setName(key);
+        clipPlane->setIdentifier(key);
         _clipPlanes.push_back(clipPlane);
     }
     _nClipPlanes = static_cast<int>(keys.size());

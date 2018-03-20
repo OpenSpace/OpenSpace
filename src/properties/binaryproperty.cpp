@@ -28,24 +28,32 @@
 
 namespace openspace::properties {
 
-    REGISTER_TEMPLATEPROPERTY_SOURCE(BinaryProperty, VectorProperty, 10.f,
-        [](lua_State* state, bool& success) -> VectorProperty {
-        VectorProperty result;
+REGISTER_TEMPLATEPROPERTY_SOURCE(
+    BinaryProperty,
+    std::vector<char>,
+    std::vector<char>(0),
+    [](lua_State* state, bool& success) -> std::vector<char> {
+        // TODO: Convert from lua
+        std::vector<char> result;
         success = true;
         return result;
     },
-        [](lua_State* state, VectorProperty) -> bool {
+    [](lua_State* state, std::vector<char>) -> bool {
+        // TODO: Convert to lua
         return true;
     },
-        [](std::string value, bool& success) -> VectorProperty {
-        VectorProperty result;
+    [](std::string value, bool& success) -> std::vector<char> {
+        // TODO: From json conversion
+        std::vector<char> result;
         success = true;
         return result;
     },
-        [](std::string& outValue, VectorProperty inValue) -> bool {
-        outValue = inValue.getString();
+    [](std::string& outValue, std::vector<char> inValue) -> bool {
+        // TODO: To json conversion 
+        outValue = "";
         return true;
     },
-        LUA_TTABLE
-        );
+    LUA_TTABLE
+)
+
 } // namespace openspace::properties

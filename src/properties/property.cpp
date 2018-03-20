@@ -76,6 +76,10 @@ Property::Property(PropertyInfo info)
     setVisibility(info.visibility);
 }
 
+Property::~Property() {
+    notifyDeleteListeners();
+}
+
 const std::string& Property::identifier() const {
     return _identifier;
 }
@@ -84,7 +88,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     std::string identifier = _identifier;
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
-        std::string ownerId = currentOwner->name();
+        std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
             identifier = ownerId + "." + identifier;
         }
@@ -187,7 +191,7 @@ const ghoul::Dictionary& Property::metaData() const {
 
 std::string Property::toJson() const {
     std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseDescription() + ", ";
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription() + ", ";
     result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
     result += "}";
     return result;
@@ -206,6 +210,13 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
     OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
+    return handle;
+}
+
+Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
+    ghoul_assert(callback, "The callback must not be empty");
+    OnDeleteHandle handle = _currentHandleValue++;
+    _onDeleteCallbacks.emplace_back(handle, std::move(callback));
     return handle;
 }
 
@@ -231,6 +242,23 @@ void Property::removeOnChange(OnChangeHandle handle) {
     }
 }
 
+void Property::removeOnDelete(OnDeleteHandle handle) {
+    auto it = std::find_if(
+        _onDeleteCallbacks.begin(),
+        _onDeleteCallbacks.end(),
+        [handle](const std::pair<OnDeleteHandle, std::function<void()>>& p) {
+            return p.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _onDeleteCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _onDeleteCallbacks.erase(it);
+}
+
 PropertyOwner* Property::owner() const {
     return _owner;
 }
@@ -239,23 +267,29 @@ void Property::setPropertyOwner(PropertyOwner* owner) {
     _owner = owner;
 }
 
-void Property::notifyListener() {
+void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
         p.second();
     }
 }
 
-std::string Property::generateBaseDescription() const {
+void Property::notifyDeleteListeners() {
+    for (const std::pair<OnDeleteHandle, std::function<void()>>& p : _onDeleteCallbacks) {
+        p.second();
+    }
+}
+
+std::string Property::generateBaseJsonDescription() const {
     return 
         "{ \"" + std::string(TypeKey) + "\": \"" + className() + "\", " +
         "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", " +
         "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", " +
-        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataDescription() + ", " +
-        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalDescription() +
+        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataJsonDescription() + ", " +
+        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalJsonDescription() +
         " }";
 }
 
-std::string Property::generateMetaDataDescription() const {
+std::string Property::generateMetaDataJsonDescription() const {
     static const std::map<Visibility, std::string> VisibilityConverter = {
         { Visibility::All, "All" },
         { Visibility::Developer, "Developer" },
@@ -279,8 +313,13 @@ std::string Property::generateMetaDataDescription() const {
     return result;
 }
 
-std::string Property::generateAdditionalDescription() const {
+std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
+
+void Property::setInterpolationTarget(ghoul::any) {}
+void Property::setLuaInterpolationTarget(lua_State*) {}
+void Property::setStringInterpolationTarget(std::string) {}
+void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

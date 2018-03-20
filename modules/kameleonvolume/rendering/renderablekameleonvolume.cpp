@@ -153,7 +153,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)
     , _raycaster(nullptr)
-    , _transferFunction(nullptr)
+    , _transferFunctionHandler(nullptr)
 {
 
     glm::vec3 dimensions;
@@ -229,7 +229,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
-    _clipPlanes->setName("clipPlanes");
+    _clipPlanes->setIdentifier("clipPlanes");
+    _clipPlanes->setGuiName("Clip Planes");
 
     bool cache;
     if (dictionary.getValue(KeyCache, cache)) {

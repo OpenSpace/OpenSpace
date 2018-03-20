@@ -53,7 +53,10 @@ const int ThrottleMessageWaitInMs = 100;
 namespace openspace {
 
 Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address)
-        : socket(s), active(true), _isAuthorized(false), _address(address) {
+    : _socket(s)
+    , _isAuthorized(false)
+    , _address(address)
+{
     _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
@@ -81,10 +84,20 @@ void Connection::handleMessage(std::string message) {
             handleJson(j);
         }
         catch (...) {
-            LERROR("JSON handling error from: " + message);
+            LERROR(fmt::format("JSON handling error from: {}", message));
         }
     } catch (...) {
-        LERROR("Could not parse JSON: " + message);
+        if (!isAuthorized()) {
+            LERROR("");
+            _socket->disconnect();
+            LERROR(fmt::format(
+                "Could not parse JSON: '{}'. Connection is unauthorized. Disconnecting.",
+                message
+            ));
+            return;
+        } else {
+            LERROR(fmt::format("Could not parse JSON: '{}'", message));
+        }
     }
 }
 
@@ -143,7 +156,7 @@ void Connection::handleJson(nlohmann::json j) {
 }
 
 void Connection::sendMessage(const std::string &message) {
-    socket->putMessage(message);
+    _socket->putMessage(message);
 }
 
 void Connection::sendJson(const nlohmann::json &j) {
@@ -155,59 +168,16 @@ bool Connection::isAuthorized() {
     return !_requireAuthorization || isWhitelisted() || _isAuthorized;
 }
 
-void Connection::refresh() {
-    for (auto &entry : _refreshCalls) {
-        // check if value has changed since last call, if it has -- send and update!
-        nlohmann::json newValue = entry.method();
-        if (newValue != entry.value) {
-            entry.value = newValue;
-            placeInMessageQueue(newValue, entry.topicId);
-        }
-    }
-
-    flushQueue();
+void Connection::setThread(std::thread&& thread) {
+    _thread = std::move(thread);
 }
 
-void Connection::addRefreshCall(std::function<nlohmann::json()> func, const TopicId topicId) {
-    sendJson(func());
-    _refreshCalls.push_back({std::move(func), topicId, nlohmann::json::object()});
+std::thread& Connection::thread() {
+    return _thread;
 }
 
-void Connection::placeInMessageQueue(const nlohmann::json &j, const TopicId topic) {
-    placeInMessageQueue(j.dump(), topic);
-}
-
-void Connection::placeInMessageQueue(const std::string &message, const TopicId topic) {
-    // add or replace message - only one message per topic is allowed
-    auto queueIt = _messageQueue.find(topic);
-    if (queueIt == _messageQueue.end()) {
-        _messageQueue.emplace(topic, message);
-    }
-    else {
-        queueIt->second = message;
-    }
-}
-
-void Connection::flushQueue() {
-    const std::chrono::milliseconds requiredWait(ThrottleMessageWaitInMs);
-    const auto now = std::chrono::system_clock::now();
-    std::vector<TopicId> toRemove;
-
-    for (auto &entry : _messageQueue) {
-        auto sentIt = _sentMessages.find(entry.first);
-
-        if (sentIt == _sentMessages.end() || (now - sentIt->second) > requiredWait) {
-            sendMessage(std::string(entry.second));
-            
-            // store this message as sent and remove it from queue
-            _sentMessages[entry.first] = now;
-            toRemove.push_back(entry.first);
-        }
-    }
-
-    for (auto &topic : toRemove) {
-        _messageQueue.erase(topic);
-    }
+std::shared_ptr<ghoul::io::Socket> Connection::socket() {
+    return _socket;
 }
 
 void Connection::setAuthorized(const bool status) {
@@ -217,17 +187,14 @@ void Connection::setAuthorized(const bool status) {
 bool Connection::isWhitelisted() {
     const bool hasWhitelist = OsEng.configurationManager().hasKeyAndValue<std::string>(
         ConfigurationManager::KeyServerClientAddressWhitelist);
-    if (hasWhitelist) {
-        // get whitelist from config
-        auto whitelist = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyServerClientAddressWhitelist);
-        // search and compare
-        auto search = whitelist.find(_address);
-        return search != std::string::npos;
+
+    if (!hasWhitelist) {
+        return false;
     }
 
-    // no whitelist found!
-    return false;
+    const auto whitelist = OsEng.configurationManager().value<std::string>(
+        ConfigurationManager::KeyServerClientAddressWhitelist);
+    return whitelist.find(_address) != std::string::npos;
 }
 
 } // namespace openspace

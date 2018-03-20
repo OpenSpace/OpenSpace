@@ -27,8 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 #include <include/openspace/engine/configurationmanager.h>
-#include "modules/webbrowser/include/browserinstance.h"
-#include "modules/webgui/include/guirenderhandler.h"
 
 namespace openspace {
 
@@ -36,11 +34,6 @@ class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
-
-private:
-    std::shared_ptr<BrowserInstance> _guiInstance;
-    std::string _guiLocation;
 };
 
 }

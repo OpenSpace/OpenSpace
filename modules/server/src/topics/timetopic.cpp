@@ -26,6 +26,7 @@
 #include <openspace/properties/property.h>
 #include "modules/server/include/connection.h"
 #include "modules/server/include/timetopic.h"
+#include <chrono>
 
 namespace {
 const char* _loggerCat = "TimeTopic";
@@ -33,6 +34,7 @@ const char* PropertyKey = "property";
 const char* CurrentTimeKey = "currentTime";
 const char* DeltaTimeKey = "deltaTime";
 const int UNSET_ONCHANGE_HANDLE = -1;
+const std::chrono::milliseconds TimeUpdateInterval(100);
 }
 
 using nlohmann::json;
@@ -40,31 +42,53 @@ using nlohmann::json;
 namespace openspace {
 
 TimeTopic::TimeTopic()
-        : Topic()
-        , _requestedResourceIsSubscribable(false)
-        , _onChangeHandle(-1) {
-    LDEBUG("Starting new subscription");
+    : Topic()
+    , _timeCallbackHandle(UNSET_ONCHANGE_HANDLE)
+    , _deltaTimeCallbackHandle(UNSET_ONCHANGE_HANDLE)
+    , _lastUpdateTime(std::chrono::system_clock::now())
+{
+    LDEBUG("Starting new time subscription");
 }
 
 TimeTopic::~TimeTopic() {
-    // TODO: remove post draw call
+    if (_timeCallbackHandle != UNSET_ONCHANGE_HANDLE) {
+        OsEng.timeManager().removeTimeChangeCallback(_timeCallbackHandle);
+    }
+    if (_deltaTimeCallbackHandle != UNSET_ONCHANGE_HANDLE) {
+        OsEng.timeManager().removeDeltaTimeChangeCallback(_deltaTimeCallbackHandle);
+    }
 }
 
 bool TimeTopic::isDone() {
-    return !_requestedResourceIsSubscribable || !_connection->active;
+    return false;
 }
 
 void TimeTopic::handleJson(json j) {
+
     std::string requestedKey = j.at(PropertyKey).get<std::string>();
     LDEBUG("Subscribing to " + requestedKey);
 
     if (requestedKey == CurrentTimeKey) {
-        _requestedResourceIsSubscribable = true;
-        _connection->addRefreshCall([this]() { return currentTime(); }, _topicId);
+        _timeCallbackHandle = OsEng.timeManager().addTimeChangeCallback([this]() {
+            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            if (now - _lastUpdateTime > TimeUpdateInterval) {
+                _connection->sendJson(currentTime());
+                _lastUpdateTime = now;
+            }
+        });
+        _connection->sendJson(currentTime());
     }
     else if (requestedKey == DeltaTimeKey) {
-        _requestedResourceIsSubscribable = true;
-        _connection->addRefreshCall([this]() { return deltaTime(); }, _topicId);
+        _deltaTimeCallbackHandle = OsEng.timeManager().addDeltaTimeChangeCallback(
+            [this]() {
+                _connection->sendJson(deltaTime());
+                if (_timeCallbackHandle != UNSET_ONCHANGE_HANDLE) {
+                    _connection->sendJson(currentTime());
+                    _lastUpdateTime = std::chrono::system_clock::now();;
+                }
+            }
+        );
+        _connection->sendJson(deltaTime());
     }
     else {
         LWARNING("Cannot get " + requestedKey);

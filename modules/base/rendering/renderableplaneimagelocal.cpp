@@ -96,7 +96,6 @@ void RenderablePlaneImageLocal::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-
 void RenderablePlaneImageLocal::bindTexture() {
     _texture->bind();
 }

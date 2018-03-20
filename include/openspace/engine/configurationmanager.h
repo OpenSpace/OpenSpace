@@ -87,6 +87,13 @@ public:
     /// The key that stores the factory documentation values
     static constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
 
+    /// The key that decides whether or not we should require incoming web socket connections
+    /// to authorize or not
+    static constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
+    
+    /// The key that stores the location of the tasks files
+    static constexpr const char* KeyConfigTasksRoot = "TasksRoot";
+
     /// The key that stores the location of the asset file that is initially loaded
     static constexpr const char* KeyConfigAsset = "Asset";
 
@@ -200,6 +207,13 @@ public:
     /// The part of the key storing whether the OpenGL state should be checked each call
     static constexpr const char* KeyCheckOpenGLState = "CheckOpenGLState";
 
+    /// The part of the key storing whether the OpenGL state should be checked each call
+    static constexpr const char* KeyServerPasskey = "ServerPasskey";
+
+    /// Whitelist of client addresses that won't need autorization
+    static constexpr const char* KeyServerClientAddressWhitelist =
+                                                                 "ClientAddressWhitelist";
+
     /// The part of the key storing whether each OpenGL call should be logged
     static constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
@@ -234,18 +248,9 @@ public:
     static constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
 
     /// Keys used for webbrowser and webgui
-    static constexpr const char* KeyServerPasskey = "ServerPasskey";
-
-    static constexpr const char* KeyWebGuiUrl = "WebGuiUrl";
-
     static constexpr const char* KeyWebHelperLocation = "WebHelperLocation";
 
-    static constexpr const char* KeyServerClientAddressWhitelist = "ClientWhitelist";
-
-    static constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
-
-
-
+    static constexpr const char* KeyCefWebGuiUrl = "CefWebGuiUrl";
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

@@ -64,7 +64,7 @@ class FilterList extends Component {
             { entries.map(entry => (
               <EntryComponent
                 {...entry}
-                key={entry.name}
+                key={entry.identifier}
                 onClick={this.props.onSelect}
                 active={this.props.active}
               />)) }

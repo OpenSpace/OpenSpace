@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/webbrowser/webbrowsermodule.h>
 #include "webguimodule.h"
 
 namespace {
@@ -31,48 +30,6 @@ const std::string _loggerCat = "WebGui";
 
 namespace openspace {
 
-WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
-    _guiInstance = std::make_shared<BrowserInstance>(new GUIRenderHandler());
-    _guiLocation = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebGuiUrl);
-}
+WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {}
 
-void WebGuiModule::internalInitialize(const ghoul::Dictionary& configuration) {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Initialize,
-            [this]() {
-                LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _guiLocation));
-                _guiInstance->loadUrl(_guiLocation);
-                auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-                if (webBrowserModule != nullptr) {
-                    webBrowserModule->attachEventHandler(_guiInstance);
-                    webBrowserModule->addBrowser(_guiInstance);
-                }
-            }
-    );
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                WindowWrapper& wrapper = OsEng.windowWrapper();
-                if (wrapper.isMaster()) {
-                    if (wrapper.windowHasResized()) {
-                        _guiInstance->reshape(wrapper.currentWindowSize());
-                    }
-
-                    _guiInstance->draw();
-                }
-            });
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this](){
-                _guiInstance->close(true);
-                auto webBrowserModule = OsEng.moduleEngine().module<WebBrowserModule>();
-                if (webBrowserModule != nullptr) {
-                    webBrowserModule->removeBrowser(_guiInstance);
-                }
-                _guiInstance.reset();
-            });
-}
-
-}
-
+} // namespace openspace

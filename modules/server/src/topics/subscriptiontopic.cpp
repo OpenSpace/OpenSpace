@@ -35,7 +35,7 @@ const char* EventKey = "event";
 const char* StartSubscription = "start_subscription";
 const char* StopSubscription = "stop_subscription";
 
-const int UNSET_ONCHANGE_HANDLE = -1;
+const int UnsetCallbackHandle = -1;
 }
 
 using nlohmann::json;
@@ -45,16 +45,20 @@ namespace openspace {
     SubscriptionTopic::SubscriptionTopic()
         : Topic()
         , _requestedResourceIsSubscribable(false)
-        , _onChangeHandle(-1) {}
+        , _onChangeHandle(UnsetCallbackHandle)
+        , _onDeleteHandle(UnsetCallbackHandle) {}
 
 SubscriptionTopic::~SubscriptionTopic() {
-    if (_onChangeHandle != UNSET_ONCHANGE_HANDLE) {
+    if (_onChangeHandle != UnsetCallbackHandle) {
         _prop->removeOnChange(_onChangeHandle);
+    }
+    if (!_onDeleteHandle) {
+        _prop->removeOnDelete(_onDeleteHandle);
     }
 }
 
 bool SubscriptionTopic::isDone() {
-    return !_requestedResourceIsSubscribable || !_connection->active || !_isSubscribedTo;
+    return !_requestedResourceIsSubscribable || !_isSubscribedTo;
 }
 
 void SubscriptionTopic::handleJson(json j) {
@@ -73,6 +77,11 @@ void SubscriptionTopic::handleJson(json j) {
                 _connection->sendJson(wrappedPayload(_prop));
             };
             _onChangeHandle = _prop->onChange(onChange);
+            _prop->onDelete([this]() {
+                _onChangeHandle = UnsetCallbackHandle;
+                _onDeleteHandle = UnsetCallbackHandle;
+                _isSubscribedTo = false;
+            });
 
             // immediately send the value
             onChange();

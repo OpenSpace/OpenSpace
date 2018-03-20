@@ -37,4 +37,4 @@ struct Fragment {
     bool forceFboRendering;
 };
 
-#endif    
+#endif

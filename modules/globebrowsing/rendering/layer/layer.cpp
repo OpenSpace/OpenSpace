@@ -34,6 +34,7 @@ namespace openspace::globebrowsing {
 namespace {
     constexpr const char* _loggerCat = "Layer";
 
+    constexpr const char* keyIdentifier = "Identifier";
     constexpr const char* keyName = "Name";
     constexpr const char* keyDescription = "Description";
     constexpr const char* keyEnabled = "Enabled";
@@ -90,7 +91,8 @@ namespace {
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
              LayerGroup& parent)
     : properties::PropertyOwner({
-        layerDict.value<std::string>(keyName),
+        layerDict.value<std::string>(keyIdentifier),
+        layerDict.hasKey(keyName) ? layerDict.value<std::string>(keyName) : "",
         layerDict.hasKey(keyDescription) ?
             layerDict.value<std::string>(keyDescription) :
             ""
@@ -180,7 +182,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
             }
         }
         catch (...) {
-            _parent.deleteLayer(name());
+            _parent.deleteLayer(identifier());
             throw;
         }
     });

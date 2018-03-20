@@ -103,21 +103,18 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    OsEng.parallelConnection().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent()->subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            if (OsEng.parallelConnection().status() ==
-                ParallelConnection::Status::ClientWithHost)
-            {
-                _useKeyFrameInteraction = true;
-            }
+            _useKeyFrameInteraction = (OsEng.parallelPeer().status() ==
+                ParallelConnection::Status::ClientWithHost);
         }
     );
 }
 
 void NavigationHandler::deinitialize() {
-    OsEng.parallelConnection().connectionEvent()->unsubscribe("NavigationHandler");
+    OsEng.parallelPeer().connectionEvent()->unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
@@ -241,7 +238,7 @@ ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
     ghoul::Dictionary cameraDict;
     cameraDict.setValue(KeyPosition, cameraPosition);
     cameraDict.setValue(KeyRotation, cameraRotation);
-    cameraDict.setValue(KeyFocus, focusNode()->name());
+    cameraDict.setValue(KeyFocus, focusNode()->identifier());
 
     return cameraDict;
 }
@@ -262,7 +259,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dquat q = _camera->rotationQuaternion();
 
         ofs << "return {" << std::endl;
-        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->name() << "\""
+        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->identifier() << "\""
             << "," << std::endl;
         ofs << "    " << KeyPosition << " = {"
             << std::to_string(p.x) << ", "

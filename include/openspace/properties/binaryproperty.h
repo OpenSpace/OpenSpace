@@ -25,71 +25,12 @@
 #ifndef __OPENSPACE_CORE___BINARYPROPERTY___H__
 #define __OPENSPACE_CORE___BINARYPROPERTY___H__
 
-#include <ext/json/json.hpp>
 #include <openspace/properties/templateproperty.h>
-
-
-#include <algorithm>
-#include <cctype>
-#include <cassert>
-#include <cstring>
+#include <vector>
 
 namespace openspace::properties {
-    using json = nlohmann::json;
 
-    class VectorProperty {
-    public:
-        VectorProperty() {
-        }
-        VectorProperty(float val) {
-            data.push_back(val);
-        }
-
-        VectorProperty(std::vector<float> val) {
-            data = val;
-        }
-
-        VectorProperty(const VectorProperty& vec) : VectorProperty(vec.getValues()) { }
-
-        VectorProperty(const VectorProperty&& vec) { 
-            data = std::move(vec.data);
-        }
-
-        VectorProperty& operator=(const VectorProperty& other)
-        {
-            data = other.data;
-            return *this;
-        }
-        VectorProperty& operator=(VectorProperty&& other)
-        {
-            data = std::move(other.data);
-            return *this;
-        }
-
-        void setValues(std::vector<float> values) {
-            data = values;
-        }
-
-        std::vector<float> getValues() const {
-            return data;
-        }
-
-        bool operator!=(const VectorProperty& vec) {
-            if (data != vec.data)
-                return true;
-            return false;
-        }
-
-        std::string getString() {
-            json j(data);
-            return j.dump();
-        }
-
-    private:
-        std::vector<float> data;
-    };
-
-    REGISTER_TEMPLATEPROPERTY_HEADER(BinaryProperty, VectorProperty);
+REGISTER_TEMPLATEPROPERTY_HEADER(BinaryProperty, std::vector<char>)
 
 } // namespace openspace::properties
 

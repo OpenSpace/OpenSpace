@@ -25,8 +25,8 @@ local models = asset.syncedResource({
 })
 
 local Vesta = {
-    Name = "Vesta",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "Vesta",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -108,12 +108,14 @@ local Vesta = {
             PotentialTargets = { "VESTA" }
         }
     },
-    GuiPath = "/Solar System/Asteroid Belt/Vesta"
+    GUI = {
+        Path = "/Solar System/Asteroid Belt/Vesta"
+    }
 }
 
 local VestaTrail = {
-    Name = "VestaTrail",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "VestaTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -127,7 +129,10 @@ local VestaTrail = {
         Period = 1325.0,
         Resolution = 3600 * 24
     },
-    GuiPath = "/Solar System/Asteroid Belt/Vesta"
+    GUI = {
+        Name = "Vesta Trail",
+        Path = "/Solar System/Asteroid Belt/Vesta"
+    }
 }
 
 

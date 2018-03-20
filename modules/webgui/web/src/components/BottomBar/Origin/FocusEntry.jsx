@@ -13,24 +13,24 @@ class FocusEntry extends Component {
   }
 
   select() {
-    const { name } = this.props;
+    const { identifier } = this.props;
     if (this.props.onClick) {
-      this.props.onClick(name);
+      this.props.onClick(identifier);
     } else {
-      DataManager.setValue(ORIGIN_KEY, jsonToLuaString(name));
+      DataManager.setValue(ORIGIN_KEY, jsonToLuaString(identifier));
     }
   }
 
   get isActive() {
-    return this.props.name === this.props.active;
+    return this.props.identifier === this.props.active;
   }
 
   render() {
-    const { name } = this.props;
+    const { identifier } = this.props;
     return (
       <li className={`${styles.entry} ${this.isActive && styles.active}`} onClick={this.select}>
         <span className={styles.title}>
-          { name }
+          { identifier }
         </span>
       </li>
     );
@@ -38,7 +38,7 @@ class FocusEntry extends Component {
 }
 
 FocusEntry.propTypes = {
-  name: PropTypes.string.isRequired,
+  identifier: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   active: PropTypes.string,
 };

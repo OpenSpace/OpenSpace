@@ -222,19 +222,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
                 "authorized with the server. Space separated"
         },
         {
-            ConfigurationManager::KeyWebHelperLocation,
-            new StringVerifier,
-            Optional::Yes,
-            "The location of the CEF Web helper executable. No extension should be added. "
-            "If not provided, it will search for the executable name in the bin folder."
-        },
-        {
-            ConfigurationManager::KeyWebGuiUrl,
-            new StringVerifier,
-            Optional::No,
-            "The web URL for the GUI."
-        },
-        {
             ConfigurationManager::KeySceneLicenseDocumentation,
             new StringVerifier,
             Optional::Yes,
@@ -381,7 +368,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether the OpenGL debug callbacks are performed "
-                    "synchronously. If set to <True> the callbacks are in the same trhead "
+                    "synchronously. If set to <True> the callbacks are in the same thread "
                     "as the context and in the scope of the OpenGL function that "
                     "triggered the message. The default value is <True>."
                 },

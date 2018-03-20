@@ -103,15 +103,13 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let nodes = [];
   if (Object.keys(state.propertyTree).length !== 0) {
-    const rootNodes = state.propertyTree.subowners.filter(element => element.name === sceneType);
+    const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
-    console.log(nodes)
     nodes = nodes.filter(node => node.tag.some(tag => tag.includes(REQUIRED_TAG)))
-      .map(node => Object.assign(node, { key: node.name }));
+      .map(node => Object.assign(node, { key: node.identifier }));
   }
-  console.log(nodes)
   return {
     nodes,
   };

@@ -153,7 +153,7 @@ bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
     return true;
 }
 
-std::string SelectionProperty::generateAdditionalDescription() const {
+std::string SelectionProperty::generateAdditionalJsonDescription() const {
     std::string result = "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];

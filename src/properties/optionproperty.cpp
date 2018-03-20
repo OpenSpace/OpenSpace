@@ -124,7 +124,7 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
-std::string OptionProperty::generateAdditionalDescription() const {
+std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
     std::string result =
         "{ \"" + OptionsKey + "\": [";

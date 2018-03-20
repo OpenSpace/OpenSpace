@@ -38,7 +38,7 @@ ScenePane.defaultProps = {
 
 const mapStateToProps = (state) => {
   const sceneType = 'Scene';
-  const rootNodes = state.propertyTree.subowners.filter(element => element.name === sceneType);
+  const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
   let nodes = [];
   rootNodes.forEach((node) => {
     nodes = [...nodes, ...node.subowners];

@@ -10,8 +10,8 @@ asset.request('./trail')
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local Moon = {
-    Name = "Moon",
-    Parent = transforms.EarthBarycenter.Name,
+    Identifier = "Moon",
+    Parent = transforms.EarthBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -32,24 +32,31 @@ local Moon = {
             ColorLayers = {
                 -- Utah based servers
                 {
-                    Name = "ClemUvvis",
+                    Identifier = "ClemUvvis",
+                    Name = "Clem Uvvis",
                     FilePath = mapServiceConfigs .. "/Utah/ClemUvvis.wms"
                 },
                 {
-                    Name = "Kaguya",
+                    Identifier = "Kaguya",
                     FilePath = mapServiceConfigs .. "/Utah/Kaguya.wms"
                 },
                 {
+                    Identifier = "WAC_Utah",
                     Name = "WAC Utah",
                     FilePath = mapServiceConfigs .. "/Utah/Wac.wms",
                     Enabled = true
                 },
                 -- LMMP based servers
+                {
+                    Identifier = "OnMoon",
+                    FilePath = mapServiceConfigs .. "/OnMoonColor.wms"
+                }
             },
             HeightLayers = {
                 -- Utah based servers
                 {
-                    Name = "LolaDem",
+                    Identifier = "LolaDem",
+                    Name = "WAC [Utah]",
                     FilePath = mapServiceConfigs .. "/Utah/LolaDem.wms",
                     Enabled = true,
                     TilePixelSize = 64,
@@ -68,7 +75,9 @@ local Moon = {
             }
         }
     },
-    GuiPath = "/Solar System/Planets/Earth/Moon"
+    GUI = {
+        Path = "/Solar System/Planets/Earth/Moon"
+    }
 }
 
 
