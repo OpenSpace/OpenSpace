@@ -43,6 +43,8 @@
 #include <fstream>
 #include <stdint.h>
 
+#define USING_STELLAR_TEST_GRID
+
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
 
@@ -357,6 +359,8 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _uniformCache.screenSize,
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
+
+    _program->setUniform("eyePosition", glm::vec3(data.camera.eyePositionVec3()));
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();

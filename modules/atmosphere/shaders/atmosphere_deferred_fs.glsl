@@ -249,8 +249,8 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Compute positions and directions in object space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
-    dvec4 clipCoords = dvec4((interpolatedNDCPos.xy + samplePos)/ gl_FragCoord.w, 0.0, 1.0); 
-
+    dvec4 clipCoords = dvec4((interpolatedNDCPos.xy + samplePos) / gl_FragCoord.w, 0.0, 1.0); 
+    
     // Clip to Object Coords
     dvec4 objectCoords = dInverseSgctProjectionToModelTransformMatrix * clipCoords;
     

@@ -36,6 +36,7 @@ uniform sampler1D colorTexture;
 uniform float magnitudeExponent;
 uniform float sharpness;
 uniform int colorOption;
+uniform vec3 eyePosition;
 
 in vec4 vs_position;
 in vec4 ge_gPosition;
@@ -44,6 +45,7 @@ in vec3 ge_velocity;
 in float ge_speed;
 in vec2 texCoord;
 in float ge_observationDistance;
+in vec4 ge_worldPosition;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -74,8 +76,18 @@ Fragment getFragment() {
     fullColor.a = pow(fullColor.a, sharpness);
 
     float d = magnitudeExponent - log(ge_observationDistance) / log(10.0);
-    fullColor.a *= clamp(d, 0.0, 1.0);
+    //fullColor.a *= clamp(d, 0.0, 1.0);
 
+    float absoluteMagnitude = ge_brightness.z;
+    float luminosity = ge_brightness.y;
+    float distanceToStar = length(ge_worldPosition.xyz - eyePosition) / 1E26;// / 3.0856776E16;
+    //float distanceToStar = distance(ge_worldPosition.xyz, eyePosition);
+    float apparentBrightness = (luminosity * 3.828) / (4 * 3.14159265359 * distanceToStar * distanceToStar);
+    //fullColor.xyz *= apparentBrightness/1E13;
+    
+    float apparentMag = 5.0 * (log(distanceToStar) - 1.0) + absoluteMagnitude;
+    //fullColor.xyz /= log(apparentMag);
+    
     Fragment frag;
     frag.color = fullColor;
     frag.depth = safeLength(vs_position);
