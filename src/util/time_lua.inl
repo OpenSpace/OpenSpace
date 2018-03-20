@@ -46,7 +46,6 @@ int time_setDeltaTime(lua_State* L) {
     if (isNumber) {
         double value = lua_tonumber(L, -1);
         lua_pop(L, 1);
-
         OsEng.timeManager().time().setDeltaTime(value);
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;

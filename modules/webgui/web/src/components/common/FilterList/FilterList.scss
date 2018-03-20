@@ -1,0 +1,10 @@
+@import "../../../styles/all";
+
+.filterList {
+  height: 100%;
+  width: 100%;
+
+  :global(.scroll-content) {
+    height: unquote("calc(100% - #{$input-total-height})");
+  }
+}

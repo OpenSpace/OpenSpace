@@ -1,0 +1,82 @@
+@import "../../../../styles/all";
+
+.Editor {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  padding: $button-padding;
+  text-shadow: 0 1px 10px rgba(#000, 0.5);
+
+  &:hover,
+  &:focus {
+    background: $ui-background-hover;
+    outline: none;
+    text-shadow: none;
+  }
+
+  &.Active {
+    background: $ui-background;
+  }
+}
+
+.Title {
+  display: flex;
+  flex-direction: column;
+}
+
+.Name {
+  font-size: 1.2rem;
+  height: 21px;
+  line-height: 1;
+}
+
+.Wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.Window {
+  max-width: none !important;
+  bottom: unquote("calc(100% + #{$popover-arrow-size})");
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.Canvas {
+  left: 0;
+  top: 0;
+}
+
+.ColorPicker {
+  height: 230px;
+}
+
+.FlexContainer {
+  height: 700;
+  width: 1200;
+  margin-top: 20px;
+  margin-left: 20px;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.FlexColumn {
+  margin-left: 20px;
+  display: flex;
+  flex-flow: column wrap;
+}
+
+.ButtonContainer {
+  margin-left: 20px;
+  height: 230px;
+  display: flex;
+  flex-flow: column wrap;
+}
+
+.iconImage {
+  height: 20px;
+  margin-right: ($base-padding / 2);
+}

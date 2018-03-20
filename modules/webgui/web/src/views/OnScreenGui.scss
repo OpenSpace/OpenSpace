@@ -1,0 +1,23 @@
+@import "../styles/all";
+
+.app {
+  color: white;
+  display: flex;
+  font-family: $font-family;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+}
+
+.Grid__Left {
+  width: 300px;
+}
+
+.Grid__Left,
+.Grid__Right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}

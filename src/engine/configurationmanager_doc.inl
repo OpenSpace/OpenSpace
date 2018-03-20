@@ -202,6 +202,26 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "location will be silently overritten."
         },
         {
+            ConfigurationManager::KeyRequireSocketAuthentication,
+            new BoolVerifier,
+            Optional::Yes,
+            "If socket connections should be authenticated or not before they are allowed to "
+            "get or set information. Defaults to `true`."
+        },
+        {
+            ConfigurationManager::KeyServerPasskey,
+                new StringVerifier,
+                Optional::Yes,
+                "Passkey to limit server access. Used to authorize incoming connections."
+        },
+        {
+            ConfigurationManager::KeyServerClientAddressWhitelist,
+                new StringVerifier,
+                Optional::Yes,
+                "String containing white listed client IP addresses that won't need to be"
+                "authorized with the server. Space separated"
+        },
+        {
             ConfigurationManager::KeySceneLicenseDocumentation,
             new StringVerifier,
             Optional::Yes,
@@ -348,7 +368,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether the OpenGL debug callbacks are performed "
-                    "synchronously. If set to <True> the callbacks are in the same thead "
+                    "synchronously. If set to <True> the callbacks are in the same thread "
                     "as the context and in the scope of the OpenGL function that "
                     "triggered the message. The default value is <True>."
                 },

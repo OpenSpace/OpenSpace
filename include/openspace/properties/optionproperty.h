@@ -143,7 +143,7 @@ public:
 
 private:
     static const std::string OptionsKey;
-    std::string generateAdditionalDescription() const override;
+    std::string generateAdditionalJsonDescription() const override;
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;

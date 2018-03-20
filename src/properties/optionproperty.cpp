@@ -124,18 +124,18 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
-std::string OptionProperty::generateAdditionalDescription() const {
+std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result;
-    result += OptionsKey + " = {";
+    std::string result =
+        "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
-        result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+        result += "{\"" + std::to_string(o.value) + "\": \"" + o.description + "\"}";
         if (i != _options.size() - 1)
             result += ",";
     }
 
-    result += "}";
+    result += "] }";
     return result;
 }
 
