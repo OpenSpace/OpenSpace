@@ -32,4 +32,5 @@ namespace openspace {
 
 WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {}
 
-} // namespace openspace
+}
+

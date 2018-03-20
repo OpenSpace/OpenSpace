@@ -26,7 +26,6 @@ install_manifest.txt
 .cproject
 .project
 shaders/ABuffer/constants.hglsl
-ScriptLog.txt
 *.idea/
 .vs/
 .build-vs/

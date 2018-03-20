@@ -967,7 +967,7 @@ void GUI::render() {
         ImGui::ShowMetricsWindow();
         ImGui::End();
     }
-#endif // SHOW_IMGUI_HELPERS
+#endif
 
     ImGui::End();
 }

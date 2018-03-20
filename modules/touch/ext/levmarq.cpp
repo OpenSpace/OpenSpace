@@ -23,10 +23,14 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 #include <stdio.h>
 #include <math.h>
+#include <chrono>
 #include <modules/touch/ext/levmarq.h>
+#include <ghoul/logging/logmanager.h>
 
-#define TOL 1e-30 // smallest value allowed in cholesky_decomp()
-
+namespace {
+    std::chrono::milliseconds TimeLimit(200);
+    double TOL = 1e-30; // smallest value allowed in cholesky_decomp()
+}
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
@@ -120,8 +124,19 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
     lmstat->pos.clear();
     err = error_func(par, ny, dysq, func, fdata, lmstat);
 
+    std::chrono::system_clock::time_point start =
+        std::chrono::system_clock::now();
+
     // main iteration
     for (it = 0; it < nit; it++) {
+        std::chrono::system_clock::time_point now =
+            std::chrono::system_clock::now();
+
+        if (now - start > TimeLimit) {
+            LDEBUGC("Touch Levmarq", "Bail out due to time limit!");
+            return false;
+        }
+
         // calculate the approximation to the Hessian and the "derivative" d
         for (i = 0; i < npar; i++) {
             d[i] = 0;
