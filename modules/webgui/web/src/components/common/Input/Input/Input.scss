@@ -1,0 +1,134 @@
+@import "../../../../styles/all";
+
+// rename some vars to make this less cluttered than it already is
+$label-size: $input-label-size;
+$label-margin: $input-label-margin;
+$loading-border-width: $input-loading-border-width;
+$padding-horizontal: $input-padding-horizontal;
+$padding-vertical: $input-padding-vertical;
+
+// calculate good padding for input field
+$padding-top: $label-size + (2 * $label-margin);
+$padding-bottom: $padding-vertical - $padding-top;
+$padding-bottom-loading: $padding-vertical - $padding-top - $loading-border-width;
+
+// different states
+$padding: $padding-top $padding-horizontal $padding-bottom;
+$padding-empty: ($padding-vertical / 2) $padding-horizontal;
+$padding-loading: $padding-top $padding-horizontal $padding-bottom-loading;
+
+.group {
+  position: relative;
+}
+
+.input {
+  background: transparent;
+  border: none;
+  box-sizing: border-box;
+  color: $text-color-focus;
+  font-size: $input-font-size;
+  height: $input-total-height;
+  line-height: $input-font-size;
+  padding: $padding-empty;
+
+  &:disabled {
+    color: lighten(black, 40%);
+    cursor: not-allowed;
+  }
+}
+
+.input:hover {
+  background: $ui-background-active;
+
+   ~ .label {
+     color: $text-color-focus;
+   }
+}
+
+.input:focus {
+  background: $ui-background-hover;
+  color: $text-color-focus;
+  outline: 0;
+
+  ~ .label {
+    color: $green;
+  }
+}
+
+.input.hasinput {
+  padding: $padding;
+}
+
+.input.loading {
+  animation: loading-input-animation $loading-animation-duration $loading-easing infinite;
+  padding: $padding-loading;
+}
+
+.wide {
+  width: 100%;
+}
+
+.label {
+  color: $text-color-blur;
+  display: none;
+  font-size: $label-size;
+  left: $padding-horizontal;
+  line-height: 1;
+  position: absolute;
+  top: $label-margin;
+  transition: color $animation-duration $animation-easing;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.label.hasinput {
+  animation: label-animation $animation-duration $animation-easing;
+  display: inline-block;
+  user-select: none;
+}
+
+.clearbutton {
+  color: $text-color-blur;
+  cursor: pointer;
+  display: none;
+  font-size: 18px;
+  opacity: 0;
+  position: absolute;
+  right: $padding-horizontal;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity $animation-duration $animation-easing;
+
+  &:focus,
+  &:hover {
+    color: $text-color-focus;
+  }
+}
+
+.clearbutton.hasinput {
+  opacity: 1;
+  display: inline-block;
+}
+
+
+@keyframes label-animation {
+  0% {
+    opacity: 0;
+    transform: translateY($label-size);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes loading-input-animation {
+  0% {
+    border-bottom: $loading-border-width solid $blue;
+  }
+  50% {
+    border-bottom: $loading-border-width solid $green;
+  }
+  100% {
+    border-bottom: $loading-border-width solid $blue;
+  }
+}

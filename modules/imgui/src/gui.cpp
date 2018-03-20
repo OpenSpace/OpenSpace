@@ -219,7 +219,6 @@ static void RenderDrawLists(ImDrawData* drawData) {
     glDisable(GL_SCISSOR_TEST);
 }
 
-
 void addScreenSpaceRenderableLocal(std::string texturePath) {
     if (!FileSys.fileExists(absPath(texturePath))) {
         LWARNING(fmt::format("Could not find image '{}'", texturePath));
@@ -930,6 +929,7 @@ void GUI::render() {
         addImageBufferSize,
         ImGuiInputTextFlags_EnterReturnsTrue
     );
+
     if (addImageOnline) {
         addScreenSpaceRenderableOnline(std::string(addImageOnlineBuffer));
     }
@@ -952,6 +952,7 @@ void GUI::render() {
         );
     }
 
+#ifdef SHOW_IMGUI_HELPERS
     ImGui::Checkbox("ImGUI Internals", &_showInternals);
     if (_showInternals) {
         ImGui::Begin("Style Editor");
@@ -966,6 +967,7 @@ void GUI::render() {
         ImGui::ShowMetricsWindow();
         ImGui::End();
     }
+#endif
 
     ImGui::End();
 }

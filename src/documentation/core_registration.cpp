@@ -69,7 +69,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(MissionManager::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(OpenSpaceEngine::luaLibrary());
-    engine.addLibrary(ParallelConnection::luaLibrary());
+    engine.addLibrary(ParallelPeer::luaLibrary());
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(SpiceManager::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());

@@ -32,7 +32,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 
 #include <fstream>
@@ -646,8 +646,8 @@ void ScriptEngine::presync(bool isMaster) {
         _receivedScripts.push_back(_currentSyncedScript);
         _queuedScripts.pop_back();
 
-        if (OsEng.parallelConnection().isHost() && remoteScripting) {
-            OsEng.parallelConnection().sendScript(_currentSyncedScript);
+        if (OsEng.parallelPeer().isHost() && remoteScripting) {
+            OsEng.parallelPeer().sendScript(_currentSyncedScript);
         }
     }
     _mutex.unlock();

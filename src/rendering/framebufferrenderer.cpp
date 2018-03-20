@@ -561,7 +561,6 @@ namespace openspace {
             catch (ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
-
         }
         _dirtyDeferredcastData = false;
     }
@@ -712,6 +711,7 @@ namespace openspace {
                 "OnePixel MSAA",
                 absPath("${SHADERS}/framebuffer/pixelSizeMSAA.vert"),
                 absPath("${SHADERS}/framebuffer/pixelSizeMSAA.frag")
+
             );
         }
         catch (const ghoul::RuntimeError& e) {
@@ -1253,9 +1253,7 @@ namespace openspace {
     void FramebufferRenderer::updateRendererData() {
         ghoul::Dictionary dict;
         dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
-
         _rendererData = dict;
-
         OsEng.renderEngine().setRendererData(dict);
     }
 
