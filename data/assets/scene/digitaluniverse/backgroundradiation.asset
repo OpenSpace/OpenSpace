@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local wmap = {
-    Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
+    Identifier = "WMAP",
     Renderable = {
         Type = "RenderableSphere",
         Enabled = false,
@@ -29,11 +29,14 @@ local wmap = {
         FadeInThreshould = 8E26
 
     },
-    GuiPath = "/Universe/Cosmic Microwave Background"
+    GUI = {
+        Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
+        Path = "/Universe/Cosmic Microwave Background"
+    }
 }
 
 local cbe = {
-    Name = "Cosmic Background Explorer",
+    Identifier = "CBE",
     Renderable = {
         Type = "RenderableSphere",
         Enabled = false,
@@ -44,11 +47,14 @@ local cbe = {
         Orientation = "Inside/Outside",
         FadeInThreshould = 8E26
     },
-    GuiPath = "/Universe/Cosmic Microwave Background"
+    GUI = {
+        Name = "Cosmic Background Explorer",
+        Path = "/Universe/Cosmic Microwave Background"
+    }
 }
 
 local planck = {
-    Name = "Planck",
+    Identifier = "Planck",
     Renderable = {
         Type = "RenderableSphere",
         Enabled = false,
@@ -59,7 +65,9 @@ local planck = {
         Orientation = "Inside/Outside",
         FadeInThreshould = 8E26
     },
-    GuiPath = "/Universe/Cosmic Microwave Background"
+    GUI = {
+        Path = "/Universe/Cosmic Microwave Background"
+    }
 }
 
 

@@ -62,6 +62,8 @@ public:
 
     virtual std::string className() const override;
 
+    std::string jsonValue() const override;
+
     using TemplateProperty<T>::operator=;
 
 
@@ -79,7 +81,14 @@ protected:
     static const std::string SteppingValueKey;
     static const std::string ExponentValueKey;
 
-    std::string generateAdditionalDescription() const override;
+    std::string generateAdditionalJsonDescription() const override;
+
+    /**
+     * convert a lua formatted value to a JSON formatted value
+     * @param luaValue
+     * @return a json formatted string representation of the given lua value
+     */
+    std::string luaToJson(std::string luaValue) const;
 
     T _minimumValue;
     T _maximumValue;

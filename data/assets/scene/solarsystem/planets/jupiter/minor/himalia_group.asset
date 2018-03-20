@@ -5,79 +5,89 @@ local kernels341 = asset.require('../jup341').Kernels
 
 
 
-local parentName = transforms.JupiterBarycenter.Name
+local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_himalia" }
 local trailColor = { 0.4, 0.3, 0.01 }
 
 local himaliaGroup = {
     {
-        Name = "Leda",
+        Identifier = "Leda",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LEDA",
         Radii = { 16000, 16000, 16000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 240.82,
         Kernels = kernels341
     },
     {
-        Name = "Himalia",
+        Identifier = "Himalia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HIMALIA",
         Radii = { 170000, 170000, 170000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 250.23,
         Kernels = kernels341
     },
     {
-        Name = "Lysithea",
+        Identifier = "Lysithea",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "LYSITHEA",
         Radii = { 36000, 36000, 36000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 259.89,
         Kernels = kernels341
     },
     {
-        Name = "Elara",
+        Identifier = "Elara",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ELARA",
         Radii = { 86000, 86000, 86000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 257.62,
         Kernels = kernels341
     },
     {
-        Name = "Dia",
+        Identifier = "Dia",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
-        -- Spice = "DIA", -- The name is not correctly registered in the Spice kernel
+        -- Spice = "DIA", -- The Identifier is not correctly registered in the Spice kernel
         Spice = "553",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Himalia Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Himalia Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 287.93,
         Kernels = kernels341

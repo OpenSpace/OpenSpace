@@ -1,0 +1,28 @@
+@import "../../../styles/all";
+@import "../Popover/Popover";
+
+.window {
+  background: $background;
+  border-radius: $popover-corner-radius;
+  box-shadow: $box-shadow;
+  color: $text-color-focus;
+  max-width: 300px;
+
+  &.small {
+    max-width: 150px;
+  }
+
+  > :last-child {
+    padding-bottom: $popover-corner-radius;
+  }
+}
+
+.window > header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filler {
+  width: 100%;
+  height: 100%;
+}

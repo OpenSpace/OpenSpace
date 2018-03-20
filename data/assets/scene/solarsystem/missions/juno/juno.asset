@@ -136,8 +136,8 @@ local RotationMatrix = {
 }
 
 local Juno = {
-    Name = "Juno",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Juno",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -161,12 +161,14 @@ local Juno = {
         ColorTexture =  textures .. "/gray.png",
         ModelTransform = RotationMatrix
     },
-    GuiName = "/Solar System/Missions/Juno"
+    GUI = {
+        Path = "/Solar System/Missions/Juno"
+    }
 }
 
 local JunoTrail = {
-    Name = "JunoTrail",
-    Parent = "JupiterBarycenter",
+    Identifier = "JunoTrail",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -180,7 +182,10 @@ local JunoTrail = {
         EndTime = "2016 DEC 13",
         SampleInterval = 2
     },
-    GuiName = "/Solar System/Missions/Juno"
+    GUI = {
+        Name = "Juno Trail",
+        Path = "/Solar System/Missions/Juno"
+    }
 }
 
 
