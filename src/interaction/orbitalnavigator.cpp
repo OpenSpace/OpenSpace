@@ -29,6 +29,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -144,7 +145,7 @@ OrbitalNavigator::OrbitalNavigator()
     // f(t) = d/dt ( ln(1 / f_orig(t)) ) where f_orig is the transfer function that would
     // be used if the interpolation was sinply linear between a start value and an end
     // value instead of current value and end value (0) as we use it when inerpoláting.
-    // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear_previousFocusNodePosition
+    // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a 
     // interpolation from 1 to 0.
 
     auto smoothStepDerivedTranferFunction = [](double t) {
@@ -195,6 +196,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
 
         // Follow focus nodes movement
         glm::dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
+
         _previousFocusNodePosition = centerPos;
         length(focusNodeDiff);
         glm::dvec3 camPosToCenterPosDiff = camPos - centerPos;
@@ -217,13 +219,15 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
         double focusLimit = planetRadius * 4;
 
         // Zoom in on the focusNode and move towards it, but when the camera arrives to
-        // the focus node make it possible for the user to manually zoom even closer
+        // the focus node make it possible for the user to manually zoom in even closer
+        // or to zoom further out 
         if (_flyTo) {
-            camPos =
-                distFromCameraToFocus > (focusLimit) ?
-                zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit) : camPos;
+            if (distFromCameraToFocus > (focusLimit))
+                camPos = zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit);
+            else 
+                _flyTo = false; 
         }
-        
+
         // Decompose camera rotation so that we can handle global and local rotation
         // individually. Then we combine them again when finished.
         CameraRotationDecomposition camRot = decomposeCameraRotation(
@@ -310,6 +314,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
 
 void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
+    _flyTo = true;
 
     if (_focusNode != nullptr) {
         _previousFocusNodePosition = _focusNode->worldPosition();
