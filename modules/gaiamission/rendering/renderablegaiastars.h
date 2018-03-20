@@ -114,7 +114,11 @@ private:
     std::vector<float> _fullData;
     size_t _nValuesPerStar;
     size_t _nValuesInSlice;
-    size_t _maxStarsSize;
+    size_t _maxStarsSize; // In DR1 - Redundant?
+    const size_t _memoryBudgetInValues = 805306368; // 3GB in bytes / sizeof(GLfloat) *4B*
+    size_t _streamingBudget;
+    size_t _chunkSize;
+
 
     GLuint _vao;
     GLuint _vbo;

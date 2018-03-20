@@ -43,6 +43,7 @@ OctreeManager::OctreeManager()
     , _totalDepth(0)
     , _numLeafNodes(0)
     , _numInnerNodes(0)
+    , _biggestChunkIndexInUse(0)
 {   }
 
 OctreeManager::~OctreeManager() {   }
@@ -55,13 +56,14 @@ void OctreeManager::initOctree() {
     _culler = std::make_unique<OctreeCuller>(
         globebrowsing::AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35))
     );
+    _freeSpotsInVBO = std::stack<int>();
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
         _root->Children[i] = std::make_unique<OctreeNode>();
-        //_root->Children[i]->Parent = _root;
         _root->Children[i]->data = std::vector<float>();
         _root->Children[i]->isLeaf = true;
+        _root->Children[i]->vboIndex = -1;
         _root->Children[i]->numStars = 0;
         _root->Children[i]->halfDimension = MAX_DIST / 2.f;
         _root->Children[i]->originX = (i % 2 == 0) ? _root->Children[i]->halfDimension
@@ -73,6 +75,15 @@ void OctreeManager::initOctree() {
     }
 
     return;
+}
+
+// Initialize a stack that keeps track of all free spot in VBO stream.
+void OctreeManager::initVBOIndexStack(int maxIndex) {
+    // Build stack back-to-front.
+    for (int idx = maxIndex; idx >= 0; --idx) {
+        _freeSpotsInVBO.push(idx);
+    }
+    LINFO("StackSize: " + std::to_string(_freeSpotsInVBO.size()) );
 }
 
 // Inserts star values in correct position in Octree.
@@ -98,15 +109,19 @@ void OctreeManager::printStarsPerNode() const {
     LINFO(fmt::format("Depth of tree: {}", std::to_string(_totalDepth)));
 }
 
-// Builds render data structure by traversing the Octree and checking for intersection with frustum. 
-std::vector<float> OctreeManager::traverseData(const glm::mat4 mvp,
-    const glm::vec2 screenSize) {
+// Builds render data structure by traversing the Octree and checking for intersection 
+// with view frustum. Every vector in map contains data for one node.  
+std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
+    const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars) {
 
-    auto renderData = std::vector<float>();
+    auto renderData = std::unordered_map<int, std::vector<float>>();
 
     for (size_t i = 0; i < 8; ++i) {
-        auto tmpData = checkNodeIntersection(_root->Children[i], mvp, screenSize);
-        renderData.insert(renderData.end(), tmpData.begin(), tmpData.end());
+        auto tmpData = checkNodeIntersection(_root->Children[i], mvp, screenSize, deltaStars);
+        renderData.insert(tmpData.begin(), tmpData.end());
+        /*LINFO("Renderdata.size(): " + std::to_string(renderData.size()) + 
+            " tmpData.size(): " + std::to_string(tmpData.size()) + 
+            " deltaTraverse: " + std::to_string(deltaStars));*/
     }
 
     return renderData;
@@ -123,6 +138,26 @@ std::vector<float> OctreeManager::getAllData() {
     }
 
     return fullData;
+}
+
+// Return number of leaf nodes in Octree.
+size_t OctreeManager::numLeafNodes() const {
+    return _numLeafNodes;
+}
+
+// Return the set constant of max stars per node in Octree.
+size_t OctreeManager::maxStarsPerNode() const {
+    return MAX_STARS_PER_NODE;
+}
+
+// Return the largest index that the stack has given out thus far. 
+size_t OctreeManager::biggestChunkIndexInUse() const {
+    return _biggestChunkIndexInUse;
+}
+
+// Return the total number of nodes in Octree. 
+size_t OctreeManager::totalNodes() const {
+    return _numLeafNodes + _numInnerNodes;
 }
 
 // Returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
@@ -161,9 +196,9 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             _numLeafNodes++;
             node->Children[i] = std::make_unique<OctreeNode>();
             node->Children[i]->isLeaf = true;
+            node->Children[i]->vboIndex = -1;
             node->Children[i]->numStars = 0;
             node->Children[i]->data = std::vector<float>();
-            node->Children[i]->Parent = node;
             node->Children[i]->halfDimension = node->halfDimension / 2.f;
 
             // Calculate new origin.
@@ -216,7 +251,8 @@ std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,
     std::string prefix) const {
 
     if (node->isLeaf) {
-        return prefix + "} : " + std::to_string(node->numStars) + "\n";
+        return prefix + "} : [" + std::to_string(node->vboIndex) + "] : "
+            + std::to_string(node->numStars) + "\n";
     }
     else {
         auto str = std::string();
@@ -230,10 +266,11 @@ std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,
 
 // Private help function for traverseData(). Recursively checks which nodes intersects with
 // the view frustum (interpreted as an AABB) and decides if data should be optimized away.
-std::vector<float> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNode> node
-    , const glm::mat4 mvp, const glm::vec2 screenSize) {
+std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
+    std::shared_ptr<OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize,
+    int& deltaStars) {
 
-    auto fetchedData = std::vector<float>();
+    auto fetchedData = std::unordered_map<int, std::vector<float>>();
 
     // Calculate the corners of the node. 
     std::vector<glm::dvec4> corners(8);
@@ -250,15 +287,19 @@ std::vector<float> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNo
 
     // Check if node is visible from camera. If not then return early.
     if (!(_culler->isVisible(corners, mvp))) {
-        //LINFO("Not Visible!");
+        // Check if this node or any of its children existed in cache previously. 
+        // If so, then remove them from cache and add those indices to stack.
+        removeNodeFromCache(node, deltaStars);
         return fetchedData;
     }
 
     glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
-    int totalPixels = nodeSize.x * nodeSize.y;
+    //int totalPixels = static_cast<int>(nodeSize.x * nodeSize.y);
 
     // If node contains more stars than enclosed pixels then return that amount. 
     /*if (node->numStars > totalPixels) {
+        // Store node in cache. 
+
         auto first = node->data.begin();
         auto last = node->data.begin() + totalPixels;
         fetchedData.insert(fetchedData.end(), first, last);
@@ -268,16 +309,84 @@ std::vector<float> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNo
     // Return node data if node is a leaf.
     // Or return cached data in inner node if its size is smaller than set pixels.
     if (node->isLeaf || length(nodeSize) < MIN_SIZE_IN_PIXELS) {
-        return node->data;
+
+        // Check if node already is in cache, then skip it, otherwise store it.
+        if (node->vboIndex == -1) {
+            //LINFO("Adds index: " + std::to_string(node->vboIndex));
+            // Get correct insert index from stack.
+            node->vboIndex = _freeSpotsInVBO.top();
+            _freeSpotsInVBO.pop();
+
+            // Keep track of how many chunks are in use (ceiling).
+            if (_freeSpotsInVBO.top() > _biggestChunkIndexInUse) {
+                _biggestChunkIndexInUse = _freeSpotsInVBO.top();
+            }
+
+            // Insert data and adjust stars added in this frame. 
+            fetchedData[node->vboIndex] = node->data;
+            deltaStars += static_cast<int>(node->data.size());
+            /*LINFO("vboIndex: " + std::to_string(node->vboIndex) + " Next top: " +
+            std::to_string(_freeSpotsInVBO.top()) + " Cache size: " +
+            std::to_string(_renderingCache.size()));*/
+            
+        }
+        // If we choose an inner node, then we need to remove indices 
+        // from potential children in cache!
+        if (!(node->isLeaf)) {
+            for (int i = 0; i < 8; ++i) {
+                removeNodeFromCache(node->Children[i], deltaStars);
+            }
+        }
+        return fetchedData;
     }
 
-    // If we're in a big, visible inner node then recursively check children.
+    // We're in a big, visible inner node -> remove it from cache if it existed.
+    // But not its children -> set recursive check to false.
+    removeNodeFromCache(node, deltaStars, false);
+
+    // Recursively check if children should be rendered.
     for (size_t i = 0; i < 8; ++i) {
-        auto tmpData = checkNodeIntersection(node->Children[i], mvp, screenSize);
-        fetchedData.insert(fetchedData.end(), tmpData.begin(), tmpData.end());
+        auto tmpData = checkNodeIntersection(node->Children[i], mvp, screenSize, deltaStars);
+        fetchedData.insert(tmpData.begin(), tmpData.end());
     }
     return fetchedData;
 }
+
+// Checks if specified node existed in cache, and removes it if that's the case. 
+// If node is an inner node then all children will be checked recursively as well.
+void OctreeManager::removeNodeFromCache(std::shared_ptr<OctreeNode> node, int& deltaStars, 
+    bool recursive) {
+    
+    // Check if this node was rendered == had a specified index.
+    if (node->vboIndex != -1) {
+        //LINFO("Removes index: " + std::to_string(node->vboIndex));
+
+        // Reclaim that index.
+        _freeSpotsInVBO.push(node->vboIndex);
+
+        // Decrease maximum streaming size if possible.
+        if (_freeSpotsInVBO.top() == _biggestChunkIndexInUse - 1) {
+            _biggestChunkIndexInUse = _freeSpotsInVBO.top();
+        }
+
+        // Reset index and adjust stars removed this frame. 
+        node->vboIndex = -1;
+        deltaStars -= static_cast<int>(node->data.size());
+    }
+
+    // Check children recursively if we're in an inner node. 
+    if (!(node->isLeaf) && recursive) {
+        for (int i = 0; i < 8; ++i) {
+            removeNodeFromCache(node->Children[i], deltaStars);
+        }
+    }
+}
+
+// Insert specified node into cache.
+/*void OctreeManager::insertNodeInCache(std::shared_ptr<OctreeNode> node, int& deltaStars) {
+    
+    
+}*/
 
 // Get data in all leaves regardless if visible or not.
 std::vector<float> OctreeManager::getNodeData(std::shared_ptr<OctreeNode> node) {

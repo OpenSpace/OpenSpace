@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_GAIAMISSION___OCTREEMANAGER___H__
 
 #include <vector>
+#include <stack>
+#include <unordered_map>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -37,7 +39,6 @@ class OctreeManager {
 public:
     struct OctreeNode {
         std::shared_ptr<OctreeNode> Children[8];
-        std::shared_ptr<OctreeNode> Parent; // Remove?
         std::vector<float> data;
         float originX;
         float originY;
@@ -45,16 +46,24 @@ public:
         float halfDimension;
         size_t numStars;
         bool isLeaf;
+        int vboIndex;
     };
 
     OctreeManager();
     ~OctreeManager();
 
     void initOctree();
+    void initVBOIndexStack(int maxIndex);
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
-    std::vector<float> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize);
+    std::unordered_map<int, std::vector<float>> traverseData(const glm::mat4 mvp,
+        const glm::vec2 screenSize, int& deltaStars);
     std::vector<float> getAllData();
+
+    size_t numLeafNodes() const;
+    size_t maxStarsPerNode() const;
+    size_t biggestChunkIndexInUse() const;
+    size_t totalNodes() const;
 
 private:
     const size_t MAX_DIST = 5; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
@@ -70,18 +79,23 @@ private:
         std::vector<float> starValues, int depth = 1);
     std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
         std::string prefix) const;
-    std::vector<float> checkNodeIntersection(std::shared_ptr<OctreeNode> node,
-        const glm::mat4 mvp, const glm::vec2 screenSize);
+    std::unordered_map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<
+        OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars);
+    void removeNodeFromCache(std::shared_ptr<OctreeNode> node, int& deltaStars,
+        bool recursive = true);
+    //void insertNodeInCache(std::shared_ptr<OctreeNode> node, int& deltaStars);
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node);
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
+    std::stack<int> _freeSpotsInVBO;
 
     size_t _totalNodes;
     size_t _numNodesPerFile;
     size_t _totalDepth;
     size_t _numLeafNodes;
     size_t _numInnerNodes;
+    size_t _biggestChunkIndexInUse;
 
 }; // class OctreeManager
 

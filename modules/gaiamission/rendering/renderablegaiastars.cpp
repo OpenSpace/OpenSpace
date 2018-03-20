@@ -491,31 +491,45 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::mat4 modelViewProjMat = projection * view * model;
     glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
 
-    // TODO (adaal): Ha koll på vad jag har i cache innan jag söker igenom trädet!
-    // Maybe should move traversal to seperate thred!?
 
-    // Traverse Octree and build _updateData in correct order!
-    // Uses Camera to decide which nodes to render! 
-    auto _updateData = _octreeManager->traverseData(modelViewProjMat, screenSize);
+    // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide.
+    int deltaStars = 0;
+    auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars);
+    deltaStars /= static_cast<int>(_nValuesInSlice);
 
-    const GLsizei nStars = static_cast<GLsizei>(_updateData.size() / _nValuesInSlice);
-    _nRenderedStars.set(nStars);
-    
-    GLint updateOffset = 0;
-    int updateSize = static_cast<int>(_updateData.size());
+    // Update VBO with new nodes. 
+    // This will overwrite old data that's not visible anymore as well.
+    GLsizei maxStarsToRender = _octreeManager->maxStarsPerNode() *
+        _octreeManager->biggestChunkIndexInUse();
 
-    // Update data according to cache and traversal.
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
     // Use buffer orphaning to update a subset of total data.
-    glBufferData(GL_ARRAY_BUFFER, _maxStarsSize * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
-    glBufferSubData(
+    glBufferData(
         GL_ARRAY_BUFFER,
-        updateOffset,
-        updateSize * sizeof(GLfloat),
-        &_updateData[0]
+        _streamingBudget * sizeof(GLfloat),
+        nullptr,
+        GL_STREAM_DRAW
     );
+
+    // Update buffer data with one insert per chunk/node. The key in map holds the offset index.
+    for (auto & [offset, subData] : updateData) {
+        // This leaves artifacts with old stars being rendered twice.
+        //int updateSize = subData.size();  
+
+        // Append zeroes to data so we overwrite possible earlier values.
+        subData.resize(_chunkSize, 0.f);
+        glBufferSubData(
+            GL_ARRAY_BUFFER,
+            offset * _chunkSize * sizeof(GLfloat),
+            _chunkSize * sizeof(GLfloat),
+            subData.data()
+        );
+    }
+
+    int nStars = static_cast<int>(_nRenderedStars) + deltaStars;
+    _nRenderedStars.set(nStars);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -554,7 +568,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Draw call.
     //glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, nStars);
+    glDrawArrays(GL_POINTS, 0, maxStarsToRender);
     glBindVertexArray(0);
     //glDisable(GL_PROGRAM_POINT_SIZE);
     _program->deactivate();
@@ -589,6 +603,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Bind the VBO to our vertex array layout. 
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+        // Initialize buffer memory to zeros. Not really needed because it will be overwritten
+        // by glBufferSubData when a chunk uses the specified slot. 
+        std::vector<float> dummyData(_streamingBudget, 0.f);
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            _streamingBudget * sizeof(GLfloat),
+            dummyData.data(),
+            GL_STREAM_DRAW
+        );
         
         GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * _nValuesInSlice);
 
@@ -787,8 +812,8 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         int nStars = _lastRow - _firstRow + 1;
 
         FitsFileReader fitsInFile(false);
-        std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_file, _columnNames,
-            _firstRow, _lastRow);
+        std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_file, 
+            _columnNames, _firstRow, _lastRow);
 
         if (!table) {
             LERROR(fmt::format("Failed to open Fits file '{}'", _file));
@@ -803,11 +828,12 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         std::vector<float> posXcol = tableContent[_columnNames[0]];
         std::vector<float> posYcol = tableContent[_columnNames[1]];
         std::vector<float> posZcol = tableContent[_columnNames[2]];
-        std::vector<float> velXcol = tableContent[_columnNames[3]];
-        std::vector<float> velYcol = tableContent[_columnNames[4]];
-        std::vector<float> velZcol = tableContent[_columnNames[5]];
-        std::vector<float> magCol = tableContent[_columnNames[6]];
-        std::vector<float> parallax = tableContent[_columnNames[7]];
+        //std::vector<float> velXcol = tableContent[_columnNames[3]];
+        //std::vector<float> velYcol = tableContent[_columnNames[4]];
+        //std::vector<float> velZcol = tableContent[_columnNames[5]];
+        //std::vector<float> magCol = tableContent[_columnNames[6]];
+        //std::vector<float> parallax = tableContent[_columnNames[7]];
+
         //std::vector<float> parallax_err = tableContent[_columnNames[8]];
         //std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
         //std::vector<float> pr_mot_ra_err = tableContent[_columnNames[10]];
@@ -834,11 +860,12 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
             }
 
             // Read the rest of the default values.
-            values[idx++] = velXcol[i];
-            values[idx++] = velYcol[i];
-            values[idx++] = velZcol[i];
-            values[idx++] = magCol[i];
-            values[idx++] = parallax[i];
+            //values[idx++] = velXcol[i];
+            //values[idx++] = velYcol[i];
+            //values[idx++] = velZcol[i];
+            //values[idx++] = magCol[i];
+            //values[idx++] = parallax[i];
+
             //values[idx++] = parallax_err[i];
             //values[idx++] = pr_mot_ra[i];
             //values[idx++] = pr_mot_ra_err[i];
@@ -872,7 +899,19 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
+
         _maxStarsSize = (nStars - nNullArr) * _nValuesInSlice;
+        _chunkSize = _octreeManager->maxStarsPerNode() * _nValuesInSlice;
+        _streamingBudget = _octreeManager->totalNodes() * _chunkSize;
+        _streamingBudget = std::min(_streamingBudget, _memoryBudgetInValues);
+        int maxNodesInStream = static_cast<int>(_streamingBudget / _chunkSize);
+
+        LINFO("Chunk size: " + std::to_string(_chunkSize) + 
+            " Streaming budget: " + std::to_string(_streamingBudget) + 
+            " Max Nodes in stream: " + std::to_string(maxNodesInStream));
+
+        _octreeManager->initVBOIndexStack(maxNodesInStream);
+
         //_octreeManager->printStarsPerNode();
     }
    
