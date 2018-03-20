@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___LUACONSOLE___H__
 #define __OPENSPACE_CORE___LUACONSOLE___H__
 
+#include <openspace/network/parallelpeer.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>

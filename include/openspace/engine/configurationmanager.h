@@ -86,6 +86,9 @@ public:
 
     /// The key that stores the factory documentation values
     static constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
+    /// The key that decides whether or not we should require incoming web socket connections
+    /// to authorize or not
+    static constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
 
     /// The key that stores the location of the asset file that is initially loaded
     static constexpr const char* KeyConfigAsset = "Asset";
@@ -200,7 +203,13 @@ public:
     /// The part of the key storing whether the OpenGL state should be checked each call
     static constexpr const char* KeyCheckOpenGLState = "CheckOpenGLState";
 
-    /// The part of the key storing whether each OpenGL call should be logged
+    /// The part of the key storing whether the OpenGL state should be checked each call
+    static constexpr const char* KeyServerPasskey = "ServerPasskey";
+
+    /// Whitelist of client addresses that won't need autorization
+    static constexpr const char* KeyServerClientAddressWhitelist =
+                                                                 "ClientAddressWhitelist";
+
     static constexpr const char* KeyLogEachOpenGLCall = "LogEachOpenGLCall";
 
     /// This key determines whether the scene graph nodes should initialized multithreaded
@@ -233,6 +242,8 @@ public:
     /// The key used to specify whether screenshots should contain the current date
     static constexpr const char* KeyScreenshotUseDate = "ScreenshotUseDate";
 
+    static constexpr const char* KeyWebHelperLocation = "WebHelperLocation";
+    static constexpr const char* KeyCefWebGuiUrl = "CefWebGuiUrl";
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

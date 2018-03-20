@@ -466,7 +466,7 @@ void FramebufferRenderer::updateRaycastData() {
             _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " exit",
                 vsPath,
-                ExitFragmentShaderPath,
+                absPath(ExitFragmentShaderPath),
                 dict
             );
         } catch (ghoul::RuntimeError e) {
@@ -474,7 +474,7 @@ void FramebufferRenderer::updateRaycastData() {
         }
         try {
             ghoul::Dictionary outsideDict = dict;
-            outsideDict.setValue("getEntryPath", GetEntryOutsidePath);
+            outsideDict.setValue("getEntryPath", absPath(GetEntryOutsidePath));
             _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " raycast",
                 absPath(vsPath),
@@ -486,7 +486,7 @@ void FramebufferRenderer::updateRaycastData() {
         }
         try {
             ghoul::Dictionary insideDict = dict;
-            insideDict.setValue("getEntryPath", GetEntryInsidePath);
+            insideDict.setValue("getEntryPath", absPath(GetEntryInsidePath));
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " inside raycast",
                 absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
@@ -533,7 +533,7 @@ void FramebufferRenderer::updateDeferredcastData() {
 
         try {
             ghoul::Dictionary deferredDict = dict;
-            //deferredDict.setValue("getEntryPath", GetEntryOutsidePath);
+            //deferredDict.setValue("getEntryPath", absPath(GetEntryOutsidePath));
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
                 absPath(vsPath),
@@ -1288,7 +1288,7 @@ std::vector<double> FramebufferRenderer::mSSAPattern() const {
 
 void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
-    dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
+    dict.setValue("fragmentRendererPath", absPath(RenderFragmentShaderPath));
 
     _rendererData = dict;
 

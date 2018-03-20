@@ -1,0 +1,30 @@
+@import "../../../../styles/all";
+
+.input {
+  background: $ui-background-selected;
+  border: 0;
+  box-sizing: content-box;
+  color: $text-color-focus;
+  display: inline;
+  line-height: 1;
+  margin: 0;
+  min-width: 10px;
+  padding: 0;
+
+  [type="number"]::-webkit-outer-spin-button,
+  [type="number"]::-webkit-inner-spin-button {
+    display: none;
+  }
+
+  input {
+    background: transparent;
+    color: $text-color-focus;
+    border: none;
+
+    &:focus,
+    &:hover {
+      outline: 0;
+      background: $ui-background-hover;
+    }
+  }
+}

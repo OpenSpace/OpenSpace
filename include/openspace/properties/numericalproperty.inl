@@ -386,13 +386,32 @@ void NumericalProperty<T>::setExponent(float exponent) {
 }
 
 template <typename T>
-std::string NumericalProperty<T>::generateAdditionalDescription() const {
-    std::string result;
-    result += MinimumValueKey  + " = " + std::to_string(_minimumValue) + ",";
-    result += MaximumValueKey  + " = " + std::to_string(_maximumValue) + ",";
-    result += SteppingValueKey + " = " + std::to_string(_stepping) + ",";
-    result += ExponentValueKey + " = " + std::to_string(_exponent);
+std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
+    std::string result = "{ ";
+    result += "\"" + MinimumValueKey + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
+    result += "\"" + MaximumValueKey + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
+    result += "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping)) + ",";
+    result += "\"" + ExponentValueKey + "\": " + luaToJson(std::to_string(_exponent));
+    result += " }";
     return result;
+}
+
+template <typename T>
+std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
+    if(luaValue[0] == '{') {
+        luaValue.replace(0, 1, "[");
+    }
+    if (luaValue[luaValue.size() - 1] == '}') {
+        luaValue.replace(luaValue.size() - 1, 1, "]");
+    }
+    return luaValue;
+}
+
+template <typename T>
+std::string NumericalProperty<T>::jsonValue() const {
+    std::string value;
+    getStringValue(value);
+    return luaToJson(value);
 }
 
 template <typename T>

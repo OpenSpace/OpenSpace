@@ -69,7 +69,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.windowWrapper()),
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
-                        &(OsEng.parallelConnection()),
+                        &(OsEng.parallelPeer()),
                         &(OsEng.console()),
                         &(OsEng.dashboard())
                     };
