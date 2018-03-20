@@ -35,13 +35,13 @@ documentation::Documentation SceneGraphNode::Documentation() {
         "core_scene_node",
         {
         {
-            "Name",
+            "Identifier",
             new StringVerifier,
             Optional::No,
-            "The name of this scenegraph node. This name must be unique among all scene "
-            "graph nodes that are loaded in a specific scene. If a duplicate is detected "
-            "the loading of the node will fail, as will all childing that depend on the "
-            "node."
+            "The identifier of this scenegraph node. This name must be unique among all "
+            "scene graph nodes that are loaded in a specific scene. If a duplicate is "
+            "detected the loading of the node will fail, as will all childing that "
+            "depend on the node. The identifier must not contain any whitespaces or '.'."
         },
         {
             "Parent",
@@ -99,13 +99,39 @@ documentation::Documentation SceneGraphNode::Documentation() {
             "corresponding to a 'Translation', a 'Rotation', and a 'Scale'."
         },
         {
-            "GuiPath",
-            new StringVerifier,
+            "GUI",
+            new TableVerifier({
+                {
+                    "Name",
+                    new StringVerifier,
+                    Optional::Yes,
+                    "An optional user-facing name for this SceneGraphNode, which does "
+                    "not have to be unique, though it is recommended, and can contain "
+                    "any characters."
+                },
+                {
+                    "Path",
+                    new StringVerifier,
+                    Optional::Yes,
+                    "If this value is specified, this '/' separated URI specifies the "
+                    "location of this scenegraph node in a GUI representation, for "
+                    "instance '/SolarSystem/Earth/Moon'."
+                },
+                {
+                    "Hidden",
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "If this value is specified, GUI applications are incouraged to "
+                    "ignore this scenegraph node. This is most useful to trim collective "
+                    "lists of nodes and not display, for example, barycenters."
+                }
+            }),
             Optional::Yes,
-            "If this value is specified, this '/' separated URI specifies the location "
-            "of this scenegraph node in a GUI representation, for instance "
-            "'/SolarSystem/Earth/Moon'."
-        }
+            "Additional information that is passed to GUI applications. These are all "
+            "hints and do not have any impact on the actual function of the scenegraph "
+            "node."
+        },
+
         }
     };
 }

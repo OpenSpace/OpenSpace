@@ -70,6 +70,7 @@ public:
     Histogram equalize();
     float equalize (float);
     float entropy();
+    std::vector<char> getBinaryData() const;
 
     float highestBinValue(bool equalized, int overBins=0);
     float binWidth();

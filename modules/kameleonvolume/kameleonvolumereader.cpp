@@ -326,6 +326,10 @@ std::string KameleonVolumeReader::simulationEnd() const {
     return _model->getGlobalAttribute("end_time").getAttributeString();
 }
 
+std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const {
+    return _model->getNativeUnit(variable);
+}
+
 std::string KameleonVolumeReader::time() const {
     double start =
         ccmc::Time(simulationStart()).getEpoch();

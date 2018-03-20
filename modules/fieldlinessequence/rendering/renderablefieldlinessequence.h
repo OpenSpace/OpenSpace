@@ -62,7 +62,7 @@ private:
     };
 
     // ------------------------------------ STRINGS ------------------------------------//
-    std::string       _name;                               // Name of the Node!
+    std::string       _identifier;                               // Name of the Node!
 
     // ------------------------------------- FLAGS -------------------------------------//
     // Used for 'runtime-states'. True when loading a new state from disk on another

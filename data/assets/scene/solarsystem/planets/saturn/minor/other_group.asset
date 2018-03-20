@@ -6,190 +6,216 @@ local kernels375 = asset.require('../sat375').Kernels
 
 
 
-local parentName = transforms.SaturnBarycenter.Name
+local parentIdentifier = transforms.SaturnBarycenter.Identifier
 local parentSpice = "SATURN BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_other" }
 local trailColor = { 0.5, 0.3, 0.3 }
 
 local otherGroup = {
     {
-        Name = "Atlas",
+        Identifier = "Atlas",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ATLAS",
         Radii = { 41000, 35000, 19000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.60169,
         Kernels = kernels393
     },
     {
-        Name = "Prometheus",
+        Identifier = "Prometheus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PROMETHEUS",
         Radii = { 136000, 79000, 59000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.61299,
         Kernels = kernels393
     },
     {
-        Name = "Pandora",
+        Identifier = "Pandora",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PANDORA",
         Radii = { 104000, 81000, 64000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.62850,
         Kernels = kernels393
     },
     {
-        Name = "Epimetheus",
+        Identifier = "Epimetheus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "EPIMETHEUS",
         Radii = { 130000, 114000, 106000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.69433,
         Kernels = kernels393
     },
     {
-        Name = "Janus",
+        Identifier = "Janus",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "JANUS",
         Radii = { 203000, 185000, 153000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.69466,
         Kernels = kernels393
     },
     {
-        Name = "Aegaeon",
+        Identifier = "Aegaeon",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "AEGAEON",
         Radii = { 500, 500, 500 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 0.80812,
         Kernels = kernels393
     },
     {
-        Name = "Methone",
+        Identifier = "Methone",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "METHONE",
         Radii = { 3200, 3200, 3200 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.00957,
         Kernels = kernels393
     },
     {
-        Name = "Anthe",
+        Identifier = "Anthe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ANTHE",
         Radii = { 1800, 1800, 1800 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.05089,
         Kernels = kernels393
     },
     {
-        Name = "Pallene",
+        Identifier = "Pallene",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PALLENE",
         Radii = { 6000, 6000, 4000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.370218,
         Kernels = kernels393
     },
     {
-        Name = "Telesto",
+        Identifier = "Telesto",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "TELESTO",
         Radii = { 33000, 24000, 20000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.887802,
         Kernels = kernels375
     },
     {
-        Name = "Calypso",
+        Identifier = "Calypso",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "CALYPSO",
         Radii = { 30000, 23000, 14000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.887802,
         Kernels = kernels375
     },
     {
-        Name = "Helene",
+        Identifier = "Helene",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HELENE",
         Radii = { 43000, 38000, 26000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 2.736915,
         Kernels = kernels375
     },
     {
-        Name = "Polydeuces",
+        Identifier = "Polydeuces",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "POLYDEUCES",
         Radii = { 3000, 2000, 1000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Saturn/Moons/Other Group",
+        GUI = {
+            Path = "/Solar System/Planets/Saturn/Moons/Other Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 2.736915,
         Kernels = kernels393

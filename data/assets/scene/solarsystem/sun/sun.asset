@@ -6,8 +6,8 @@ asset.require("spice/base")
 
 
 local Sun = {
-    Name = "Sun",
-    Parent = transforms.SunIAU.Name,
+    Identifier = "Sun",
+    Parent = transforms.SunIAU.Identifier,
     Renderable = {
         Type = "RenderablePlanet",
         Frame = "IAU_SUN",
@@ -20,7 +20,9 @@ local Sun = {
         ColorTexture = textures .. "/sun.jpg",
         PerformShading = false
     },
-    GuiPath = "/Solar System/Sun"
+    GUI = {
+        Path = "/Solar System/Sun"
+    }
 }
 
 

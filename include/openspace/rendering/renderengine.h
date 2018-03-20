@@ -167,6 +167,8 @@ public:
 
     std::vector<Syncable*> getSyncables();
 
+    properties::PropertyOwner& screenSpaceOwner();
+
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method) const;
@@ -216,6 +218,7 @@ private:
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
+    properties::PropertyOwner _screenSpaceOwner;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;

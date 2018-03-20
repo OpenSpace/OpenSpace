@@ -84,7 +84,8 @@ public:
         Failed
     };
 
-    void updateItem(const std::string& itemName, ItemStatus newStatus, float progress);
+    void updateItem(const std::string& itemIdentifier, const std::string& itemName,
+        ItemStatus newStatus, float progress);
 
 private:
     bool _showMessage;
@@ -122,6 +123,7 @@ private:
     std::mutex _messageMutex;
 
     struct Item {
+        std::string identifier;
         std::string name;
         ItemStatus status;
         float progress;

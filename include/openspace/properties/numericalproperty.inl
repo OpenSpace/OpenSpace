@@ -386,13 +386,90 @@ void NumericalProperty<T>::setExponent(float exponent) {
 }
 
 template <typename T>
-std::string NumericalProperty<T>::generateAdditionalDescription() const {
-    std::string result;
-    result += MinimumValueKey  + " = " + std::to_string(_minimumValue) + ",";
-    result += MaximumValueKey  + " = " + std::to_string(_maximumValue) + ",";
-    result += SteppingValueKey + " = " + std::to_string(_stepping) + ",";
-    result += ExponentValueKey + " = " + std::to_string(_exponent);
+std::string NumericalProperty<T>::generateAdditionalJsonDescription() const {
+    std::string result = "{ ";
+    result += "\"" + MinimumValueKey + "\": " + luaToJson(std::to_string(_minimumValue)) + ",";
+    result += "\"" + MaximumValueKey + "\": " + luaToJson(std::to_string(_maximumValue)) + ",";
+    result += "\"" + SteppingValueKey + "\": " + luaToJson(std::to_string(_stepping)) + ",";
+    result += "\"" + ExponentValueKey + "\": " + luaToJson(std::to_string(_exponent));
+    result += " }";
     return result;
+}
+
+template <typename T>
+std::string NumericalProperty<T>::luaToJson(std::string luaValue) const {
+    if(luaValue[0] == '{') {
+        luaValue.replace(0, 1, "[");
+    }
+    if (luaValue[luaValue.size() - 1] == '}') {
+        luaValue.replace(luaValue.size() - 1, 1, "]");
+    }
+    return luaValue;
+}
+
+template <typename T>
+std::string NumericalProperty<T>::jsonValue() const {
+    std::string value;
+    getStringValue(value);
+    return luaToJson(value);
+}
+
+template <typename T>
+void NumericalProperty<T>::setInterpolationTarget(ghoul::any value) {
+    try {
+        T v = ghoul::any_cast<T>(std::move(value));
+
+        _interpolationStart = TemplateProperty<T>::_value;
+        _interpolationEnd = std::move(v);
+    }
+    catch (ghoul::bad_any_cast&) {
+        LERRORC(
+            "TemplateProperty",
+            fmt::format(
+                "Illegal cast from '{}' to '{}'",
+                value.type().name(),
+                typeid(T).name()
+            )
+        );
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
+        state,
+        success
+    );
+    if (success) {
+        _interpolationStart = TemplateProperty<T>::_value;
+        _interpolationEnd = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::setStringInterpolationTarget(std::string value) {
+    bool success = false;
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
+        value,
+        success
+    );
+    if (success) {
+        _interpolationStart = TemplateProperty<T>::_value;
+        _interpolationEnd = std::move(thisValue);
+    }
+}
+
+template <typename T>
+void NumericalProperty<T>::interpolateValue(float t,
+                                            ghoul::EasingFunc<float> easingFunction)
+{
+    if (easingFunction) {
+        t = easingFunction(t);
+    }
+    TemplateProperty<T>::setValue(static_cast<T>(
+        glm::mix(_interpolationStart, _interpolationEnd, t)
+    ));
 }
 
 } // namespace openspace::properties

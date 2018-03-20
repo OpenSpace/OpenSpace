@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Enceladus = {
-    Name = "Enceladus",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Enceladus",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Enceladus = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Enceladus Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/enceladus.jpg",
                     Enabled = true
                 }
@@ -43,7 +43,9 @@ local Enceladus = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Saturn/Moons"
+    }
 }
 
 

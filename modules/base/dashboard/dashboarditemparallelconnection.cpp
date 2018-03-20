@@ -86,7 +86,7 @@ documentation::Documentation DashboardItemParallelConnection::Documentation() {
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
                                                              ghoul::Dictionary dictionary)
-    : DashboardItem("Parallel Connection")
+    : DashboardItem("ParallelConnection", "Parallel Connection")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
@@ -118,9 +118,9 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
 }
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
-    ParallelConnection::Status status = OsEng.parallelConnection().status();
-    size_t nConnections = OsEng.parallelConnection().nConnections();
-    const std::string& hostName = OsEng.parallelConnection().hostName();
+    ParallelConnection::Status status = OsEng.parallelPeer().status();
+    size_t nConnections = OsEng.parallelPeer().nConnections();
+    const std::string& hostName = OsEng.parallelPeer().hostName();
 
     std::string connectionInfo = "";
     int nClients = static_cast<int>(nConnections);
@@ -169,9 +169,9 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemParallelConnection::size() const {
-    ParallelConnection::Status status = OsEng.parallelConnection().status();
-    size_t nConnections = OsEng.parallelConnection().nConnections();
-    const std::string& hostName = OsEng.parallelConnection().hostName();
+    ParallelConnection::Status status = OsEng.parallelPeer().status();
+    size_t nConnections = OsEng.parallelPeer().nConnections();
+    const std::string& hostName = OsEng.parallelPeer().hostName();
 
     std::string connectionInfo = "";
     int nClients = static_cast<int>(nConnections);
