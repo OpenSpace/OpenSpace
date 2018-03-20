@@ -47,6 +47,7 @@ void main() {
 
     // Transform the positions to the reference frame of the spacecraft to get tex coords
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
+        vUv[i] = vec3(0.0, 0.0, 0.0);
         if (isCoronaGraph[i] || !isEnabled[i])  {
             continue;
         };

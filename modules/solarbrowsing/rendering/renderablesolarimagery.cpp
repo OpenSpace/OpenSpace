@@ -39,6 +39,9 @@
 
 namespace {
     constexpr const char* _loggerCat = "RenderableSolarImagery";
+    constexpr const char* KeyStartInstrument = "StartInstrument";
+
+
     constexpr const unsigned int MaxImageResolution = 4096;
 
     static const openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
@@ -134,10 +137,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _activeInstruments.addOption(guiNameCount++, el.first);
     }
 
-    _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
-        _activeInstruments
-    );
-
+    if (dictionary.hasKey(KeyStartInstrument)) {
+        _currentActiveInstrument = dictionary.value<std::string>(KeyStartInstrument);
+    }
+    else {
+        _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
+            _activeInstruments
+        );
+    }
     // Some sanity checks
     if (_imageMetadataMap.empty()) {
         LERROR("Images map is empty! Check your path");
@@ -158,7 +165,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
 void RenderableSolarImagery::listen() {
     _enableFrustum.onChange([this]() {
-        _enableBorder = _enableFrustum;
+        _enableBorder.setValue(_enableFrustum.value());
     });
 
     _activeInstruments.onChange([this]() {

@@ -39,7 +39,10 @@
 
 namespace {
     constexpr const char* _loggerCat = "RendearbleSpacecraftCameraSphere";
+
     constexpr const char* keyRadius = "Radius";
+    constexpr const char* KeyDependentNodes = "DependentNodes";
+
     // This number MUST match the constant specified in the shader, otherwise UB / MN
     constexpr const int MaxSpacecraftObservatories = 7;
 } // namespace
@@ -54,26 +57,38 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     if (!dictionary.getValue(SceneGraphNode::KeyIdentifier, _nodeName)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
     }
+
+
+    ghoul::Dictionary nodes = dictionary.value<ghoul::Dictionary>(KeyDependentNodes);
+    for (int i = 1; i <= nodes.size(); ++i) {
+        std::string n = nodes.value<std::string>(std::to_string(i));
+        _dependentNodes.push_back(std::move(n));
+    }
 }
 
 void RenderableSolarImageryProjection::initialize() {
-    // @TODO(abock): Figure out why this is necessary
-    const std::vector<SceneGraphNode*>& allNodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
-    for (SceneGraphNode* node : allNodes) {
-        RenderableSolarImagery* renderable = dynamic_cast<RenderableSolarImagery*>(
-            node->renderable()
-            );
-        if (renderable) {
-            SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(
-                _nodeName
-            );
-            thisNode->addDependency(*node);
-        }
+    SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(
+        _nodeName
+    );
 
+    for (const std::string& n : _dependentNodes) {
+        SceneGraphNode* depNode = OsEng.renderEngine().scene()->sceneGraphNode(n);
+        if (!depNode) {
+            LWARNING(fmt::format(
+                "Specified dependent node '{}' did not exist", n
+            ));
+            continue;
+        }
+        Renderable* depR = depNode->renderable();
+        RenderableSolarImagery* siR = dynamic_cast<RenderableSolarImagery*>(depR);
+        if (!siR) {
+            LWARNING(fmt::format(
+                "Specified dependent node '{}' that was not a RenderableSolarImagery", n
+            ));
+            continue;
+        }
+        _solarImageryDependencies.push_back(depNode);
     }
-    _solarImageryDependencies =
-        OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 }
 
 void RenderableSolarImageryProjection::initializeGL() {
