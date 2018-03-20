@@ -89,9 +89,6 @@ public:
     /// The key that decides whether or not we should require incoming web socket connections
     /// to authorize or not
     static constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
-    
-    /// The key that stores the location of the tasks files
-    static constexpr const char* KeyConfigTasksRoot = "TasksRoot";
 
     /// The key that stores the location of the asset file that is initially loaded
     static constexpr const char* KeyConfigAsset = "Asset";
