@@ -22,7 +22,7 @@ local stars = asset.syncedResource({
 })
 
 local GaiaMission = {
-    Name = "GaiaMission",
+    Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
         File = stars .. "/TIGS_v9.0.fits", -- Original: TIGS_v9.0.fits
@@ -56,6 +56,10 @@ local GaiaMission = {
             --"Tycho_V_Mag_Err",
         }
     },
-    GuiPath = "/GaiaMission"
+    GUI = {
+        Name = "Gaia Mission",
+        Path = "/GaiaMission"
+    }
+    
 }
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaMission })

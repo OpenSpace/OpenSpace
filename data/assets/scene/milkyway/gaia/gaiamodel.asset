@@ -18,8 +18,8 @@ local models = asset.syncedResource({
 
 
 local GaiaModel = {
-    Name = "GaiaModel",
-    Parent = transforms.GaiaPosition.Name,
+    Identifier = "GaiaModel",
+    Parent = transforms.GaiaPosition.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "GAIA",
@@ -29,7 +29,10 @@ local GaiaModel = {
         }, 
         ColorTexture = textures .. "/gaia-baked.png"
     },
-    GuiPath = "/GaiaMission/Gaia_Model"
+    GUI = {
+        Name = "Gaia Model",
+        Path = "/GaiaMission/GaiaModel"
+    }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaModel })

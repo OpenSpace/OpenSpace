@@ -3,8 +3,8 @@ local earthTransforms = asset.require('scene/solarsystem/planets/earth/transform
 
 
 local GaiaPosition = {
-    Name = "GaiaPosition",
-    Parent = earthTransforms.EarthBarycenter.Name,
+    Identifier = "GaiaPosition",
+    Parent = earthTransforms.EarthBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -18,7 +18,10 @@ local GaiaPosition = {
         },
 
     },
-    GuiPath = "/GaiaMission/Gaia_Model"
+    GUI = {
+        Name = "Gaia Model Position",
+        Path = "/GaiaMission/GaiaModel"
+    }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaPosition })
