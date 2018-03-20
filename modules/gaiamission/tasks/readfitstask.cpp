@@ -81,6 +81,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     std::vector<float> fullData;
     int nStars = _lastRow - _firstRow + 1;
     progressCallback(0.0f);
+    srand(1234567890);
 
     FitsFileReader fitsInFile(false);
     std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_inFilePath, 
@@ -104,6 +105,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     std::vector<float> velZcol = tableContent[_columnNames[5]];
     std::vector<float> magCol = tableContent[_columnNames[6]];
     std::vector<float> parallax = tableContent[_columnNames[7]];
+    
     //std::vector<float> parallax_err = tableContent[_columnNames[8]];
     //std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
     //std::vector<float> pr_mot_ra_err = tableContent[_columnNames[10]];
@@ -113,15 +115,16 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     //std::vector<float> tycho_b_err = tableContent[_columnNames[14]];
     //std::vector<float> tycho_v = tableContent[_columnNames[15]];
     //std::vector<float> tycho_v_err = tableContent[_columnNames[16]];
+    int multiplier = 1;
 
-    for (int i = 0; i < nStars; ++i) {
+    for (int i = 0; i < nStars * multiplier; ++i) {
         std::vector<float> values(nValuesPerStar);
         size_t idx = 0;
 
         // Read positions.
-        values[idx++] = posXcol[i];
-        values[idx++] = posYcol[i];
-        values[idx++] = posZcol[i];
+        values[idx++] = posXcol[i%nStars];
+        values[idx++] = posYcol[i%nStars];
+        values[idx++] = posZcol[i%nStars];
 
         // Return early if star doesn't have a measured position.
         if (values[0] == -999 && values[1] == -999 && values[2] == -999) {
@@ -130,11 +133,12 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
         }
 
         // Read the rest of the default values.
-        values[idx++] = velXcol[i];
-        values[idx++] = velYcol[i];
-        values[idx++] = velZcol[i];
-        values[idx++] = magCol[i];
-        values[idx++] = parallax[i];
+        values[idx++] = velXcol[i%nStars];
+        values[idx++] = velYcol[i%nStars];
+        values[idx++] = velZcol[i%nStars];
+        values[idx++] = magCol[i%nStars];
+        values[idx++] = parallax[i%nStars];
+        
         //values[idx++] = parallax_err[i];
         //values[idx++] = pr_mot_ra[i];
         //values[idx++] = pr_mot_ra_err[i];
@@ -156,12 +160,15 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
             if (values[j] == -999) {
                 values[j] = 0.f;
             }
+            else if (multiplier > 1) {
+                values[j] *= static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+            }
         }
 
         fullData.insert(fullData.end(), values.begin(), values.end());
     }
 
-    LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
+    LINFO(std::to_string(nNullArr / multiplier) + " out of " + std::to_string(nStars) +
         " read stars were nullArrays");
     
     progressCallback(0.9f);
@@ -170,6 +177,8 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     if (fileStream.good()) {
 
         int32_t nValues = static_cast<int32_t>(fullData.size());
+        LINFO("nValues: " + std::to_string(nValues));
+
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file.");
         }
@@ -177,7 +186,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
         fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
 
         size_t nBytes = nValues * sizeof(fullData[0]);
-        fileStream.write(reinterpret_cast<const char*>(&fullData[0]), nBytes);
+        fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 
         fileStream.close();
     }
