@@ -271,7 +271,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             int success = rename(tempName.c_str(), originalName.c_str());
             if (success != 0) {
                 LERRORC(
-                    "URLSynchronization",
+                    "HTTPSynchronization",
                     fmt::format(
                         "Error renaming file {} to {}", tempName, originalName
                     )
