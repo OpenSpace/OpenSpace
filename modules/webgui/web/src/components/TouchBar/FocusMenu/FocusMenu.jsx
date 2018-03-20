@@ -23,6 +23,7 @@ class FocusMenu extends Component {
   }
 
   componentDidUpdate(nextProps, nextState) {
+    console.log(this.props);
     // If a button is clicked change property value
     if (this.state.listening && nextState.origin !== this.state.origin) {
       this.props.ChangePropertyValue(this.props.originNode.Description, this.state.origin);
@@ -48,8 +49,8 @@ class FocusMenu extends Component {
     const focusPicker = nodes
       .map(node =>
         (<FocusButton
-          key={node.name}
-          name={node.name}
+          key={node.identifier}
+          identifier={node.identifier}
           active={this.state.origin}
           onChangeOrigin={origin => this.setState({ origin })}
         />));
@@ -72,12 +73,12 @@ const mapStateToProps = (state) => {
   let nodes = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
-    const rootNodes = state.propertyTree.subowners.filter(element => element.name === sceneType);
+    const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
     nodes = nodes.filter(node => node.tag.some(tag => tag.includes(REQUIRED_TAG)))
-      .map(node => Object.assign(node, { key: node.name }));
+      .map(node => Object.assign(node, { key: node.identifier }));
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
   }
   return {
@@ -105,7 +106,7 @@ FocusMenu = connect(
 
 FocusMenu.propTypes = {
   nodes: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string,
+    identifier: PropTypes.string,
     Description: PropTypes.string,
     properties: PropTypes.arrayOf(PropTypes.object),
     subowners: PropTypes.arrayOf(PropTypes.object),

@@ -11,18 +11,18 @@ class FocusButton extends Component {
   }
 
   get isActive() {
-    return this.props.name === this.props.active;
+    return this.props.identifier === this.props.active;
   }
 
   select() {
-    this.props.onChangeOrigin(this.props.name);
+    this.props.onChangeOrigin(this.props.identifier);
   }
 
   render() {
     return (
       <div className={`${styles.FocusButton} ${this.isActive && styles.active}`} onClick={this.select} role="button" tabIndex="0">
         <Icon icon="language" className={styles.Icon} />
-        <SmallLabel>{this.props.name}</SmallLabel>
+        <SmallLabel>{this.props.identifier}</SmallLabel>
       </div>
     );
   }
@@ -30,7 +30,7 @@ class FocusButton extends Component {
 
 FocusButton.propTypes = {
   active: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  identifier: PropTypes.string.isRequired,
   onChangeOrigin: PropTypes.func.isRequired,
 };
 

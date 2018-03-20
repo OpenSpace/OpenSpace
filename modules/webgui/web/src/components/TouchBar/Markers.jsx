@@ -42,7 +42,7 @@ class Markers extends Component {
         const size = 2;
         return (<MarkerInfo
           key={screenSpaceProperties[i].Description.Identifier}
-          name={node.name}
+          identifier={node.identifier}
           position={screenSpacePos}
           size={size}
         />);
@@ -67,20 +67,20 @@ const mapStateToProps = (state) => {
   const clipSpaceProperties = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
-    const rootNodes = state.propertyTree.subowners.filter(element => element.name === sceneType);
+    const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
 
     nodes = nodes.filter(node => node.tag.some(tag => tag.includes('Touch.Interesting')))
-      .map(node => Object.assign(node, { key: node.name }));
+      .map(node => Object.assign(node, { key: node.identifier }));
 
     nodes.forEach((node) => {
-      screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ScreenSpacePosition`));
+      screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ScreenSpacePosition`));
     });
 
     nodes.forEach((node) => {
-      clipSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.name}.RenderableGlobe.ClipSpaceCoordinates`));
+      clipSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ClipSpaceCoordinates`));
     });
   }
   return {

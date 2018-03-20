@@ -25,14 +25,14 @@ const MarkerInfo = (props) => {
   return (
     <div style={styles.MarkerInfo}>
       <Icon icon="info_outline" style={styles.Icon} />
-      <p style={styles.Text}>{props.name}</p>
+      <p style={styles.Text}>{props.identifier}</p>
     </div>
   );
 };
 
 MarkerInfo.propTypes = {
   position: PropTypes.arrayOf(PropTypes.string).isRequired,
-  name: PropTypes.string.isRequired,
+  identifier: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
 };
 
