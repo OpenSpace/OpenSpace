@@ -151,9 +151,9 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset, un
 
         glm::vec3 parentOffset = glm::vec3(octreeChildIndex % 2, (octreeChildIndex / 2) % 2, octreeChildIndex / 4) * float(brickDim) / 2.f;
 
-        for (int z = 0; z < brickDim; z++) {
-            for (int y = 0; y < brickDim; y++) {
-                for (int x = 0; x < brickDim; x++) {
+        for (size_t z = 0; z < brickDim; z++) {
+            for (size_t y = 0; y < brickDim; y++) {
+                for (size_t x = 0; x < brickDim; x++) {
                     glm::vec3 childSamplePoint = glm::vec3(x, y, z) + glm::vec3(padding);
                     glm::vec3 parentSamplePoint = parentOffset + (glm::vec3(x, y, z) + glm::vec3(0.5)) * 0.5f;
                     float childValue = childValues[linearCoords(childSamplePoint)];
@@ -234,9 +234,9 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset, unsig
         unsigned int brickDim = _tsp->brickDim();
         unsigned int padding = (paddedBrickDim - brickDim) / 2;
 
-        for (int z = 0; z < brickDim; z++) {
-            for (int y = 0; y < brickDim; y++) {
-                for (int x = 0; x < brickDim; x++) {
+        for (size_t z = 0; z < brickDim; z++) {
+            for (size_t y = 0; y < brickDim; y++) {
+                for (size_t x = 0; x < brickDim; x++) {
                     glm::vec3 samplePoint = glm::vec3(x, y, z) + glm::vec3(padding);
                     unsigned int linearSamplePoint = linearCoords(samplePoint);
                     float childValue = childValues[linearSamplePoint];
@@ -287,7 +287,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
     file.read(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
 
     _spatialHistograms = std::vector<Histogram>(_numInnerNodes);
-    for (int i = 0; i < _numInnerNodes; ++i) {
+    for (size_t i = 0; i < _numInnerNodes; ++i) {
         int offset = i*_numBins;
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
@@ -296,7 +296,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
 
     file.read(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
     _temporalHistograms = std::vector<Histogram>(_numInnerNodes);
-    for (int i = 0; i < _numInnerNodes; ++i) {
+    for (size_t i = 0; i < _numInnerNodes; ++i) {
         int offset = i*_numBins;
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
@@ -324,13 +324,13 @@ bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (int i = 0; i < _numInnerNodes; ++i) {
+    for (size_t i = 0; i < _numInnerNodes; ++i) {
         int offset = i*_numBins;
         memcpy(&histogramData[offset], _spatialHistograms[i].data(), sizeof(float) * _numBins);
     }
     file.write(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
 
-    for (int i = 0; i < _numInnerNodes; ++i) {
+    for (size_t i = 0; i < _numInnerNodes; ++i) {
         int offset = i*_numBins;
         memcpy(&histogramData[offset], _temporalHistograms[i].data(), sizeof(float) * _numBins);
     }

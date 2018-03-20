@@ -75,6 +75,12 @@ namespace {
     constexpr const char* KeyTransferFunction = "TransferFunction";
     constexpr const char* KeyTspType = "TspType";
     constexpr const char* KeyAtlasType = "AtlasType";
+    constexpr const char* KeyHistogramBins = "HistogramBins";
+    constexpr const char* KeyScalingExponent = "ScalingExponent";
+    constexpr const char* KeyScaling = "Scaling";
+    constexpr const char* KeyTranslation = "Translation";
+    constexpr const char* KeyRotation = "Rotation";
+    constexpr const char* KeyStepSizeCoefficient = "StepSizeCoefficient";
 
     constexpr const char* KeyVolumeName = "VolumeName";
     constexpr const char* KeyBrickSelector = "BrickSelector";
@@ -89,7 +95,7 @@ namespace {
     bool registeredGlslHelpers = false;
 
     static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
-        "StepSizeCoefficient",
+        KeyStepSizeCoefficient,
         "Stepsize Coefficient",
         "" // @TODO Missing documentation
     };
@@ -143,25 +149,25 @@ namespace {
     };
 
     static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
-        "ScalingExponent",
+        KeyScalingExponent,
         "Scaling Exponent",
         "" // @TODO Missing documentation
     };
 
     static const openspace::properties::Property::PropertyInfo ScalingInfo = {
-        "Scaling",
-        "Scaling",
+        KeyScaling,
+        KeyScaling,
         "" // @TODO Missing documentation
     };
 
     static const openspace::properties::Property::PropertyInfo TranslationInfo = {
-        "Translation",
-        "Translation",
+        KeyTranslation,
+        KeyTranslation,
         "" // @TODO Missing documentation
     };
 
     static const openspace::properties::Property::PropertyInfo RotationInfo = {
-        "Rotation",
+        KeyRotation,
         "Euler rotation",
         "" // @TODO Missing documentation
     };
@@ -179,7 +185,7 @@ namespace {
     };
 
     static const openspace::properties::Property::PropertyInfo HistogramBinsInfo = {
-        "histogramBins",
+        KeyHistogramBins,
         "Histogram Bins",
         "" // @TODO Missing documentation
     };
@@ -250,6 +256,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _toleranceSpatial(ToleranceSpatialInfo, 1.f, 0.f, 2.f)
     , _toleranceTemporal(ToleranceTemporalInfo, 1.f, 0.f, 2.f)
     , _tspType(RenderableMultiresVolume::TSP_DEFAULT)
+    , _nBins(50)
 {
     std::string name;
 
@@ -281,22 +288,26 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         std::transform(_atlasType.begin(), _atlasType.end(), _atlasType.begin(), ::tolower);
     }
 
-    float scalingExponent, stepSizeCoefficient;
+    float scalingExponent, stepSizeCoefficient, bins = static_cast<float>(_nBins);
     glm::vec3 scaling, translation, rotation;
 
-    if (dictionary.getValue("ScalingExponent", scalingExponent)) {
+    if (dictionary.getValue(KeyHistogramBins, bins)) {
+        _nBins = static_cast<unsigned int>(bins);
+    }
+
+    if (dictionary.getValue(KeyScalingExponent, scalingExponent)) {
         _scalingExponent = static_cast<int>(scalingExponent);
     }
-    if (dictionary.getValue("Scaling", scaling)) {
+    if (dictionary.getValue(KeyScaling, scaling)) {
         _scaling = scaling;
     }
-    if (dictionary.getValue("Translation", translation)) {
+    if (dictionary.getValue(KeyTranslation, translation)) {
         _translation = translation;
     }
-    if (dictionary.getValue("Rotation", rotation)) {
+    if (dictionary.getValue(KeyRotation, rotation)) {
         _rotation = rotation;
     }
-    if (dictionary.getValue("StepSizeCoefficient", stepSizeCoefficient)) {
+    if (dictionary.getValue(KeyStepSizeCoefficient, stepSizeCoefficient)) {
         _stepSizeCoefficient = stepSizeCoefficient;
     }
 
@@ -465,7 +476,7 @@ void RenderableMultiresVolume::initializeGL() {
     unsigned int maxInitialBudget = 2048;
     int initialBudget = std::min(maxInitialBudget, maxNumBricks);
 
-    unsigned int histoBins = 50,
+    unsigned int histoBins = _nBins,
         histoBinsMin = 2,
         histoBinsMax = maxInitialBudget,
         histoBinsStep = 1;

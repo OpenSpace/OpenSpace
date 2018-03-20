@@ -131,6 +131,7 @@ private:
     unsigned int _nDiskReads;
     unsigned int _nUsedBricks;
     unsigned int _nStreamedBricks;
+    unsigned int _nBins;
 
     int _timestep;
 
