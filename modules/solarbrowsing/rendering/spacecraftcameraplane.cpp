@@ -93,8 +93,6 @@ bool SpacecraftCameraPlane::initialize() {
     }
 }
 
-
-
 const glm::vec3& SpacecraftCameraPlane::normal() const {
     return _normal;
 };

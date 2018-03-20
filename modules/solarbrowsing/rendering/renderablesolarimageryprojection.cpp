@@ -19,7 +19,7 @@
  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-     * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
@@ -50,7 +50,11 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _sphere(glm::vec2(6.96701f, 8.f), 100)
-{}
+{
+    if (!dictionary.getValue(SceneGraphNode::KeyIdentifier, _nodeName)) {
+        throw ghoul::RuntimeError("Nodename has to be specified");
+    }
+}
 
 void RenderableSolarImageryProjection::initialize() {
     // @TODO(abock): Figure out why this is necessary
