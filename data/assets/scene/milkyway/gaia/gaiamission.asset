@@ -25,8 +25,8 @@ local GaiaMission = {
     Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = stars .. "/TIGS_v9.0.fits", -- Original: TIGS_v9.0.fits
-        FilePreprocessed = false, -- If 'true' use: Sorted_DR1.bin, else use original
+        File = stars .. "/Sorted_DR1.bin", -- Original: TIGS_v9.0.fits
+        FilePreprocessed = true, -- If 'true' use: Sorted_DR1.bin, else use original
         ColumnOption = "Static",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
@@ -40,11 +40,11 @@ local GaiaMission = {
             "Position_X",
             "Position_Y",
             "Position_Z",
-            --"Velocity_X",
-            --"Velocity_Y",
-            --"Velocity_Z",
-            --"Gaia_G_Mag",
-            --"Gaia_Parallax",
+            "Velocity_X",
+            "Velocity_Y",
+            "Velocity_Z",
+            "Gaia_G_Mag",
+            "Gaia_Parallax",
             --"Gaia_Parallax_Err",
             --"Gaia_Proper_Motion_RA",
             --"Gaia_Proper_Motion_RA_Err",

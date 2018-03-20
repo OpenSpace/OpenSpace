@@ -72,7 +72,6 @@ private:
     };
     
     std::vector<float> sliceStarValues(ColumnOption option, std::vector<float> starValues);
-    void createDataSlice(ColumnOption option);
     bool readFitsFile(ColumnOption option);
     float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
@@ -110,11 +109,9 @@ private:
 
     std::shared_ptr<OctreeManager> _octreeManager;
 
-    std::vector<float> _slicedData;
     std::vector<float> _fullData;
     size_t _nValuesPerStar;
     size_t _nValuesInSlice;
-    size_t _maxStarsSize; // In DR1 - Redundant?
     const size_t _memoryBudgetInValues = 805306368; // 3GB in bytes / sizeof(GLfloat) *4B*
     size_t _streamingBudget;
     size_t _chunkSize;

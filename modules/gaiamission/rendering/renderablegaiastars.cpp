@@ -791,13 +791,17 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
             fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
                 nValues * sizeof(_fullData[0]));
 
-            // TODO: Slice data and insert it in Octree. [rewrite for fullData]
-            //auto slicedValues = sliceStarValues(option, values);
-            //_octreeManager->insert(slicedValues);
-            //_nValuesInSlice = slicedData.size();
+            // Slice star data and insert star into octree.
+            for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
+                auto first = _fullData.begin() + i;
+                auto last = _fullData.begin() + i + _nValuesPerStar;
+                std::vector<float> values(first, last);
 
-            bool success = fileStream.good();
-            return success;
+                auto slicedValues = sliceStarValues(option, values);
+                _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
+                _octreeManager->insert(slicedValues);
+            }
+
         }
         else {
             LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
@@ -825,11 +829,11 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         std::vector<float> posXcol = tableContent[_columnNames[0]];
         std::vector<float> posYcol = tableContent[_columnNames[1]];
         std::vector<float> posZcol = tableContent[_columnNames[2]];
-        //std::vector<float> velXcol = tableContent[_columnNames[3]];
-        //std::vector<float> velYcol = tableContent[_columnNames[4]];
-        //std::vector<float> velZcol = tableContent[_columnNames[5]];
-        //std::vector<float> magCol = tableContent[_columnNames[6]];
-        //std::vector<float> parallax = tableContent[_columnNames[7]];
+        std::vector<float> velXcol = tableContent[_columnNames[3]];
+        std::vector<float> velYcol = tableContent[_columnNames[4]];
+        std::vector<float> velZcol = tableContent[_columnNames[5]];
+        std::vector<float> magCol = tableContent[_columnNames[6]];
+        std::vector<float> parallax = tableContent[_columnNames[7]];
 
         //std::vector<float> parallax_err = tableContent[_columnNames[8]];
         //std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
@@ -857,11 +861,11 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
             }
 
             // Read the rest of the default values.
-            //values[idx++] = velXcol[i];
-            //values[idx++] = velYcol[i];
-            //values[idx++] = velZcol[i];
-            //values[idx++] = magCol[i];
-            //values[idx++] = parallax[i];
+            values[idx++] = velXcol[i];
+            values[idx++] = velYcol[i];
+            values[idx++] = velZcol[i];
+            values[idx++] = magCol[i];
+            values[idx++] = parallax[i];
 
             //values[idx++] = parallax_err[i];
             //values[idx++] = pr_mot_ra[i];
@@ -897,95 +901,23 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");
 
-        _maxStarsSize = (nStars - nNullArr) * _nValuesInSlice;
-        _chunkSize = _octreeManager->maxStarsPerNode() * _nValuesInSlice;
-        _streamingBudget = _octreeManager->totalNodes() * _chunkSize;
-        _streamingBudget = std::min(_streamingBudget, _memoryBudgetInValues);
-        int maxNodesInStream = static_cast<int>(_streamingBudget / _chunkSize);
-
-        LINFO("Chunk size: " + std::to_string(_chunkSize) + 
-            " Streaming budget: " + std::to_string(_streamingBudget) + 
-            " Max Nodes in stream: " + std::to_string(maxNodesInStream));
-
-        _octreeManager->initVBOIndexStack(maxNodesInStream);
-
-        //_octreeManager->printStarsPerNode();
     }
+
+    // Init rendering info and VBO stack in Octree. 
+    _chunkSize = _octreeManager->maxStarsPerNode() * _nValuesInSlice;
+    _streamingBudget = _octreeManager->totalNodes() * _chunkSize;
+    _streamingBudget = std::min(_streamingBudget, _memoryBudgetInValues);
+    int maxNodesInStream = static_cast<int>(_streamingBudget / _chunkSize);
+
+    LINFO("Chunk size: " + std::to_string(_chunkSize) +
+        " Streaming budget: " + std::to_string(_streamingBudget) +
+        " Max Nodes in stream: " + std::to_string(maxNodesInStream));
+
+    _octreeManager->initVBOIndexStack(maxNodesInStream);
+
+    //_octreeManager->printStarsPerNode();
    
     return true;
-}
-
-// Uses _fullData with all stars and outputs _slicedData to be rendered. 
-// Does all conversions (i.e. shaders need to be changed). Not used right now.
-void RenderableGaiaStars::createDataSlice(ColumnOption option) {
-    _slicedData.clear();
-
-    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        float parallax = _fullData[i + 7];
-
-        // Convert kiloparsecs -> meter
-        glm::vec3 position = glm::vec3(_fullData[i + 0], _fullData[i + 1], _fullData[i + 2]);
-        position *= 1000 * static_cast<float>(distanceconstants::Parsec);
-
-        // Convert milliarcseconds/year to m/s
-        glm::vec3 velocity = glm::vec3(
-            convertMasPerYearToMeterPerSecond(_fullData[i + 3], parallax),
-            convertMasPerYearToMeterPerSecond(_fullData[i + 4], parallax),
-            convertMasPerYearToMeterPerSecond(_fullData[i + 5], parallax));
-
-        switch (option) {
-        case ColumnOption::Static: {
-            union {
-                StaticVBOLayout value;
-                std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
-            } layout;
-
-            layout.value.position = { {
-                    position[0], position[1], position[2]
-                } };
-
-            _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
-
-            break;
-        }
-            
-        case ColumnOption::Motion: {
-            union {
-                MotionVBOLayout value;
-                std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;
-            } layout;
-
-            layout.value.position = { {
-                    position[0], position[1], position[2]
-                } };
-            layout.value.velocity = { {
-                    velocity[0], velocity[1], velocity[2]
-                } };
-
-            _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
-            break;
-        }
-            
-        case ColumnOption::Color: {
-            union {
-                ColorVBOLayout value;
-                std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
-            } layout;
-
-            layout.value.position = { {
-                    position[0], position[1], position[2]
-                } };
-            layout.value.velocity = { {
-                    velocity[0], velocity[1], velocity[2]
-                } };
-
-            layout.value.magnitude = _fullData[i + 6];
-
-            _slicedData.insert(_slicedData.end(), layout.data.begin(), layout.data.end());
-            break;
-        }
-        }
-    }
 }
 
 // Slices every star seperately, before they are inserted into Octree. 

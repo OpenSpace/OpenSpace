@@ -118,10 +118,18 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
         std::vector<float> values(nValuesPerStar);
         size_t idx = 0;
 
-        // Read default values.
+        // Read positions.
         values[idx++] = posXcol[i];
         values[idx++] = posYcol[i];
         values[idx++] = posZcol[i];
+
+        // Return early if star doesn't have a measured position.
+        if (values[0] == -999 && values[1] == -999 && values[2] == -999) {
+            nNullArr++;
+            continue;
+        }
+
+        // Read the rest of the default values.
         values[idx++] = velXcol[i];
         values[idx++] = velYcol[i];
         values[idx++] = velZcol[i];
@@ -143,22 +151,14 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
             values[idx++] = vecData[i];
         }
 
-        bool nullArray = true;
         for (size_t j = 0; j < nValuesPerStar; ++j) {
             // The astronomers in Vienna use -999 as default value. Change it to 0.
-            if (values[j] != -999) {
-                nullArray = false;
-            }
-            else {
-                values[j] = 0;
+            if (values[j] == -999) {
+                values[j] = 0.f;
             }
         }
-        if (!nullArray) {
-            fullData.insert(fullData.end(), values.begin(), values.end());
-        }
-        else {
-            nNullArr++;
-        }
+
+        fullData.insert(fullData.end(), values.begin(), values.end());
     }
 
     LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
