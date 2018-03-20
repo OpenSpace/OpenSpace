@@ -289,7 +289,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     if (!(_culler->isVisible(corners, mvp))) {
         // Check if this node or any of its children existed in cache previously. 
         // If so, then remove them from cache and add those indices to stack.
-        removeNodeFromCache(node, deltaStars);
+        fetchedData = removeNodeFromCache(node, deltaStars);
         return fetchedData;
     }
 
@@ -334,7 +334,8 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
         // from potential children in cache!
         if (!(node->isLeaf)) {
             for (int i = 0; i < 8; ++i) {
-                removeNodeFromCache(node->Children[i], deltaStars);
+                auto tmpData = removeNodeFromCache(node->Children[i], deltaStars);
+                fetchedData.insert(tmpData.begin(), tmpData.end());
             }
         }
         return fetchedData;
@@ -342,7 +343,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
     // We're in a big, visible inner node -> remove it from cache if it existed.
     // But not its children -> set recursive check to false.
-    removeNodeFromCache(node, deltaStars, false);
+    fetchedData = removeNodeFromCache(node, deltaStars, false);
 
     // Recursively check if children should be rendered.
     for (size_t i = 0; i < 8; ++i) {
@@ -354,15 +355,20 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
 // Checks if specified node existed in cache, and removes it if that's the case. 
 // If node is an inner node then all children will be checked recursively as well.
-void OctreeManager::removeNodeFromCache(std::shared_ptr<OctreeNode> node, int& deltaStars, 
-    bool recursive) {
+std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
+    std::shared_ptr<OctreeNode> node, int& deltaStars, bool recursive) {
     
+    auto keysToRemove = std::unordered_map<int, std::vector<float>>();
+
     // Check if this node was rendered == had a specified index.
     if (node->vboIndex != -1) {
         //LINFO("Removes index: " + std::to_string(node->vboIndex));
 
         // Reclaim that index.
         _freeSpotsInVBO.push(node->vboIndex);
+
+        // Insert dummy node at offset index that should be removed from render.
+        keysToRemove[node->vboIndex] = std::vector<float>();
 
         // Decrease maximum streaming size if possible.
         if (_freeSpotsInVBO.top() == _biggestChunkIndexInUse - 1) {
@@ -377,9 +383,11 @@ void OctreeManager::removeNodeFromCache(std::shared_ptr<OctreeNode> node, int& d
     // Check children recursively if we're in an inner node. 
     if (!(node->isLeaf) && recursive) {
         for (int i = 0; i < 8; ++i) {
-            removeNodeFromCache(node->Children[i], deltaStars);
+            auto tmpData = removeNodeFromCache(node->Children[i], deltaStars);
+            keysToRemove.insert(tmpData.begin(), tmpData.end());
         }
     }
+    return keysToRemove;
 }
 
 // Insert specified node into cache.

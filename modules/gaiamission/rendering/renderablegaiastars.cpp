@@ -513,12 +513,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         GL_STREAM_DRAW
     );
 
-    // Update buffer data with one insert per chunk/node. The key in map holds the offset index.
+    // Update buffer with one insert per chunk/node. The key in map holds the offset index.
     for (auto & [offset, subData] : updateData) {
-        // This leaves artifacts with old stars being rendered twice.
-        //int updateSize = subData.size();  
-
-        // Append zeroes to data so we overwrite possible earlier values.
+        // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
         subData.resize(_chunkSize, 0.f);
         glBufferSubData(
             GL_ARRAY_BUFFER,

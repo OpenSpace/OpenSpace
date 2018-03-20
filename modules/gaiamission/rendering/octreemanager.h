@@ -81,8 +81,8 @@ private:
         std::string prefix) const;
     std::unordered_map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<
         OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars);
-    void removeNodeFromCache(std::shared_ptr<OctreeNode> node, int& deltaStars,
-        bool recursive = true);
+    std::unordered_map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<
+        OctreeNode> node, int& deltaStars, bool recursive = true);
     //void insertNodeInCache(std::shared_ptr<OctreeNode> node, int& deltaStars);
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node);
 
