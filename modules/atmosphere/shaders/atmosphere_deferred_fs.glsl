@@ -86,8 +86,8 @@ uniform sampler2DMS mainColorTexture;
 
 uniform dmat4 dInverseModelTransformMatrix; 
 uniform dmat4 dModelTransformMatrix;
-uniform dmat4 dInverseSGCTEyeToTmpRotTransformMatrix;
-uniform dmat4 dInverseSgctProjectionToModelTransformMatrix;
+uniform dmat4 dFragmentToWorldMatrix;
+uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
 uniform dvec3 dCamRigPos;
 uniform dvec4 dCamPosObj;
@@ -249,10 +249,10 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Compute positions and directions in object space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
-    dvec4 clipCoords = dvec4((interpolatedNDCPos.xy + samplePos) / gl_FragCoord.w, 0.0, 1.0); 
-    
+    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
+
     // Clip to Object Coords
-    dvec4 objectCoords = dInverseSgctProjectionToModelTransformMatrix * clipCoords;
+    dvec4 objectCoords = dSgctProjectionToModelTransformMatrix * clipCoords;
     
     // Planet Position in Object Space
     // JCC: Applying the inverse of the model transformation on the object postion in World 
@@ -533,8 +533,10 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
 }
 
 void main() {
-    ivec2 fragCoords = ivec2(gl_FragCoord);    
+    ivec2 fragCoords = ivec2(gl_FragCoord);
+
     if (cullAtmosphere == 0) {
+
         vec4 atmosphereFinalColor = vec4(0.0f);
         int nSamples = 1;
         // First we determine if the pixel is complex (different fragments on it)
@@ -608,11 +610,11 @@ void main() {
                 vec4 position = texelFetch(mainPositionTexture, fragCoords, i);
 
                 // OS Eye to World coords                
-                dvec4 tmpRInvPos       = dInverseSGCTEyeToTmpRotTransformMatrix * position;
-                dvec4 fragWorldCoords  = dvec4(dvec3(tmpRInvPos) + dCamRigPos, 1.0);
-                
+                dvec4 fragWorldCoords = dFragmentToWorldMatrix * position;
+
                 // World to Object (Normal and Position in meters)
                 dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
+
                 
                 // Distance of the pixel in the gBuffer to the observer
                 // JCC (12/12/2017): AMD distance function is buggy.
