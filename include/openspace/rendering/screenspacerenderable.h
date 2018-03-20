@@ -55,6 +55,9 @@ public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
+    static constexpr const char* KeyName = "Name";
+    static constexpr const char* KeyIdentifier = "Identifier";
+
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() = default;
 

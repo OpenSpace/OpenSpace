@@ -1,0 +1,72 @@
+@import "../../styles/all";
+
+.SystemMenu {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 30px;
+}
+
+.button {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+.popover {
+  bottom: unquote("calc(#{$bottom-bar-height} + #{$popover-arrow-size})");
+  font-size: 0.9 * $font-size;
+  left: 0;
+  position: absolute;
+  width: 180px;
+}
+
+.links {
+  > :first-child {
+    border-top-left-radius: $popover-corner-radius;
+    border-top-right-radius: $popover-corner-radius;
+  }
+
+  > :last-child {
+    border-bottom-left-radius: $popover-corner-radius;
+    border-bottom-right-radius: $popover-corner-radius;
+  }
+}
+
+.links {
+  .shortcut {
+    font-size: 0.8em;
+    color: $text-color-blur;
+  }
+
+  a, button {
+    padding: ($base-padding / 2) $base-padding;
+    color: $text-color-focus;
+    display: block;
+    text-decoration: none;
+
+    &:hover {
+      background: $blue;
+    }
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    text-align: left;
+    width: 100%;
+  }
+}
+
+.linkIcon {
+  margin-right: 5px;
+  position: relative;
+  top: 2px;
+}

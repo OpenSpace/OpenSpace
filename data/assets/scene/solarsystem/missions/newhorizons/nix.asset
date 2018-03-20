@@ -12,8 +12,8 @@ local textures = asset.syncedResource({
 })
 
 local Nix = {
-    Name = "Nix",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Nix",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -24,6 +24,7 @@ local Nix = {
     },
     Renderable = {
         Type = "RenderablePlanet",
+        Body = "NIX",
         Geometry = {
             Type = "SimpleSphere",
             Radius = 0.45E5,
@@ -31,12 +32,14 @@ local Nix = {
         },
         ColorTexture = textures .. "/gray.jpg",
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local NixText = {
-    Name = "NixText",
-    Parent = Nix.Name,
+    Identifier = "NixText",
+    Parent = Nix.Identifier,
     Renderable = {
         Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
@@ -45,12 +48,15 @@ local NixText = {
         Texture = textures .. "/Nix-Text.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Nix Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local NixTrail = {
-    Name = "NixTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "NixTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -62,7 +68,10 @@ local NixTrail = {
         Period = 24.85463,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Nix Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

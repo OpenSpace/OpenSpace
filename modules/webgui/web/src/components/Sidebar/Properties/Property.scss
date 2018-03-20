@@ -1,0 +1,10 @@
+@import "../../../styles/all";
+
+.matrixProperty,
+.vectorProperty {
+  margin-bottom: 3px;
+
+  &:hover label {
+    color: $green;
+  }
+}

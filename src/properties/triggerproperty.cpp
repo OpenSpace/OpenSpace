@@ -35,12 +35,23 @@ std::string TriggerProperty::className() const {
 }
 
 bool TriggerProperty::setLuaValue(lua_State*) {
-    notifyListener();
+    notifyChangeListeners();
     return true;
 }
 
 void TriggerProperty::set(ghoul::any) {
-    notifyListener();
+    notifyChangeListeners();
+}
+
+std::string TriggerProperty::toJson() const {
+    std::string result = "{";
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription();
+    result += "}";
+    return result;
+}
+
+std::string TriggerProperty::jsonValue() const {
+    return "";
 }
 
 } // namespace openspace::properties

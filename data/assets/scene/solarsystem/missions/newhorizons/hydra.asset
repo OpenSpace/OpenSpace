@@ -12,8 +12,8 @@ local textures = asset.syncedResource({
 })
 
 local Hydra = {
-    Name = "Hydra",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Hydra",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -34,12 +34,14 @@ local Hydra = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local HydraText = {
-    Name = "HydraText",
-    Parent = Hydra.Name,
+    Identifier = "HydraText",
+    Parent = Hydra.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -54,12 +56,15 @@ local HydraText = {
         Texture = textures .. "/Hydra-Text.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Hydra Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local HydraTrail = {
-    Name = "HydraTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "HydraTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -71,7 +76,10 @@ local HydraTrail = {
         Period = 38.20177,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Hydra Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

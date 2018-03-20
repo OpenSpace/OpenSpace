@@ -39,7 +39,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 
 #include <openspace/performance/performancemeasurement.h>
 
@@ -157,7 +157,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _networkEngine(new NetworkEngine)
-    , _parallelConnection(new ParallelConnection)
+    , _parallelPeer(new ParallelPeer)
     , _renderEngine(new RenderEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -188,10 +188,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
 
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
+
     if (_windowWrapper) {
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
-    _rootPropertyOwner->addPropertySubOwner(_parallelConnection.get());
+    _rootPropertyOwner->addPropertySubOwner(_parallelPeer.get());
     _rootPropertyOwner->addPropertySubOwner(_console.get());
     _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
@@ -451,10 +453,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    if (_engine->parallelConnection().status() !=
+    if (_engine->parallelPeer().status() !=
         ParallelConnection::Status::Disconnected)
     {
-        _engine->parallelConnection().signalDisconnect();
+        _engine->parallelPeer().disconnect();
     }
 
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
@@ -703,6 +705,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 resourceSyncs.insert(s);
                 _loadingScreen->updateItem(
                     s->name(),
+                    s->name(),
                     LoadingScreen::ItemStatus::Started,
                     s->progress()
                 );
@@ -723,6 +726,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 loading = true;
                 _loadingScreen->updateItem(
                     (*it)->name(),
+                    (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
                     (*it)->progress()
                 );
@@ -730,6 +734,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             } else {
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
+                    (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
                     1.0f
@@ -1281,7 +1286,7 @@ void OpenSpaceEngine::preSynchronization() {
             _navigationHandler->updateCamera(dt);
             _renderEngine->camera()->invalidateCache();
         }
-        _parallelConnection->preSynchronization();
+        _parallelPeer->preSynchronization();
     }
 
     for (const auto& func : _moduleCallbacks.preSync) {
@@ -1691,9 +1696,9 @@ ModuleEngine& OpenSpaceEngine::moduleEngine() {
     return *_moduleEngine;
 }
 
-ParallelConnection& OpenSpaceEngine::parallelConnection() {
-    ghoul_assert(_parallelConnection, "ParallelConnection must not be nullptr");
-    return *_parallelConnection;
+ParallelPeer& OpenSpaceEngine::parallelPeer() {
+    ghoul_assert(_parallelPeer, "ParallelPeer must not be nullptr");
+    return *_parallelPeer;
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine() {

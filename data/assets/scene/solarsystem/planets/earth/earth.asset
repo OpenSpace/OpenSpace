@@ -10,8 +10,8 @@ local earthEllipsoid = { 6378137.0, 6378137.0, 6378137.0 }
 local mapServiceConfigsPath = asset.localResource("map_service_configs")
 
 local Earth = {
-    Name = "Earth",
-    Parent = transforms.EarthIAU.Name,
+    Identifier = "Earth",
+    Parent = transforms.EarthIAU.Identifier,
     Renderable = {
         Type = "RenderableGlobe",
         Radii = earthEllipsoid,
@@ -20,12 +20,14 @@ local Earth = {
         Layers = {
             ColorLayers = {
                 {
+                    Identifier = "ESRI_VIIRS_Combo",
                     Name = "ESRI VIIRS Combo",
                     Type = "ByLevelTileLayer",
                     LevelTileProviders = {
                         {
                             MaxLevel = 4,
                             TileProvider = {
+                                Identifier = "Temporal_VIIRS_SNPP",
                                 Name = "Temporal VIIRS SNPP",
                                 Type = "TemporalTileLayer",
                                 FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
@@ -42,6 +44,7 @@ local Earth = {
                         {
                             MaxLevel = 22,
                             TileProvider = {
+                                Identifier = "ESRI_World_Imagery",
                                 Name = "ESRI World Imagery",
                                 FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms",
                                 PadTiles = false
@@ -51,20 +54,24 @@ local Earth = {
                     Enabled = true,
                     PadTiles = false,
                     Fallback = {
+                        Identifier = "Blue_Marble",
                         Name = "Blue Marble",
                         FilePath = texturesPath .. "/earth_bluemarble.jpg",
                         Enabled = true
                     }
                 },
                 {
+                    Identifier = "ESRI_World_Imagery",
                     Name = "ESRI World Imagery",
                     FilePath = mapServiceConfigsPath .. "/ESRI/World_Imagery.wms"
                 },
                 {
+                    Identifier = "ESRI_Imagery_World_2D",
                     Name = "ESRI Imagery World 2D",
                     FilePath = mapServiceConfigsPath .. "/ESRI/ESRI_Imagery_World_2D.wms"
                 },
                 {
+                    Identifier = "VIIRS_SNPP_Temporal",
                     Name = "VIIRS SNPP (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
@@ -77,6 +84,7 @@ local Earth = {
                     )
                 },
                 {
+                    Identifier = "Aqua_Modis_Temporal",
                     Name = "Aqua Modis (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
@@ -89,6 +97,7 @@ local Earth = {
                     )
                 },
                 {
+                    Identifier = "Terra_Modis_Temporal",
                     Name = "Terra Modis (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
@@ -101,11 +110,12 @@ local Earth = {
                     )
                 },
                 {
-                    Name = "BMNG",
+                    Identifier = "BMNG",
                     FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms"
                 },
                 {
-                    Name = "AMSR2_GCOM_W1_Sea_Ice_Concentration (Temporal)",
+                    Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
+                    Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "AMSR2_Sea_Ice_Concentration_12km",
@@ -117,7 +127,8 @@ local Earth = {
                     )
                 },
                 {
-                    Name = "MODIS_Terra_Chlorophyll_A (Temporal)",
+                    Identifier = "MODIS_Terra_Chlorophyll_A_Temporal",
+                    Name = "MODIS Terra Chlorophyll A (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "MODIS_Terra_Chlorophyll_A",
@@ -129,7 +140,8 @@ local Earth = {
                     )
                 },
                 {
-                    Name = "GHRSST_L4_G1SST_Sea_Surface_Temperature (Temporal)",
+                    Identifier = "GHRSST_L4_G1SST_Sea_Surface_Temperature_Temporal",
+                    Name = "GHRSST L4 G1SST Sea Surface Temperature (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                         "GHRSST_L4_G1SST_Sea_Surface_Temperature",
@@ -143,16 +155,19 @@ local Earth = {
             },
             NightLayers = {
                 {
+                    Identifier = "Earth_at_Night_2012",
                     Name = "Earth at Night 2012",
                     FilePath = mapServiceConfigsPath .. "/GIBS/night/VIIRS_CityLights_2012.wms",
                     Enabled = true,
                     Fallback = {
+                        Identifier = "Earth_Night",
                         Name = "Earth Night",
                         FilePath = texturesPath .. "/earth_night.jpg",
-                        Enabled = true,                        
+                        Enabled = true,
                     }
                 },
                 {
+                    Identifier = "Earth_at_Night_Temporal",
                     Name = "Earth at Night (Temporal)",
                     Type = "TemporalTileLayer",
                     FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
@@ -167,33 +182,38 @@ local Earth = {
             },
             WaterMasks = {
                 {
-                    Name = "MODIS_Water_Mask",
+                    Identifier = "MODIS_Water_Mask",
+                    Name = "MODIS Water Mask",
                     FilePath = mapServiceConfigsPath .. "/GIBS/water/MODIS_Water_Mask.wms",
                     Enabled = true
                 },
                 {
-                    Name = "GEBCO",
+                    Identifier = "GEBCO",
                     FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms"
                 }
             },
             Overlays = {
                 {
-                    Name = "Coastlines",
+                    Identifier = "Coastlines",
                     FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Coastlines.wms"
                 },
                 {
-                    Name = "Reference_Features",
+                    Identifier = "Reference_Features",
+                    Name = "Reference Features",
                     FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Features.wms"
                 },
                 {
-                    Name = "Reference_Labels",
+                    Identifier = "Reference_Labels",
+                    Name = "Reference Labels",
                     FilePath = mapServiceConfigsPath .. "/GIBS/overlays/Reference_Labels.wms"
                 },
                 {
+                    Identifier = "Tile_Indices",
                     Name = "Tile Indices",
                     Type = "TileIndexTileLayer"
                 },
                 {
+                    Identifier = "Size_Reference",
                     Name = "Size Reference",
                     Type = "SizeReferenceTileLayer",
                     Radii = earthEllipsoid
@@ -201,6 +221,7 @@ local Earth = {
             },
             HeightLayers = {
                 {
+                    Identifier = "Terrain_tileset",
                     Name = "Terrain tileset",
                     FilePath = mapServiceConfigsPath .. "/ESRI/Terrain.wms",
                     Enabled = true,
@@ -215,7 +236,9 @@ local Earth = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Earth"
+    GUI = {
+        Path = "/Solar System/Planets/Earth"
+    }
 }
 
 

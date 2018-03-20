@@ -1,0 +1,36 @@
+@import "../../styles/all";
+
+.about {
+  animation: $slide-up-animation;
+  max-width: 500px;
+  width: 100%;
+}
+
+.about section + section {
+  margin-left: 20px;
+}
+
+.about img {
+  width: 150px;
+}
+
+.about h1 {
+  font-size: 40px;
+  line-height: 1;
+  margin: 24px 0;
+}
+
+.about a {
+  box-shadow: inset 0 -3.3px 0 $blue;
+  color: inherit;
+  text-decoration: none;
+  transition: $background-transition;
+
+  &:hover {
+    background: $blue;
+  }
+}
+
+.about p + p {
+  margin-top: $font-size;
+}

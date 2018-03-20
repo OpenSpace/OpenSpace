@@ -49,6 +49,10 @@ namespace {
 
     constexpr const char* KeyMinValue = "MinValue";
     constexpr const char* KeyMaxValue = "MaxValue";
+
+    constexpr const char* KeyVisUnit = "VisUnit";
+    constexpr const char* _loggerCat = "KameleonVolumeToRawTask";
+
 } // namespace
 
 namespace openspace {
@@ -100,7 +104,6 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
             reader.maxValue(variables[2]));
     }
 
-
     std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
@@ -128,6 +131,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
     outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
     outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
+
     outputMetadata.setValue<float>(
         KeyMinValue,
         static_cast<float>(reader.minValue(_variable))
@@ -135,6 +139,10 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue<float>(
         KeyMaxValue,
         static_cast<float>(reader.maxValue(_variable))
+    );
+    outputMetadata.setValue<std::string>(
+        KeyVisUnit,
+        static_cast<std::string>(reader.getVisUnit(_variable))
     );
 
     ghoul::DictionaryLuaFormatter formatter;
@@ -201,7 +209,13 @@ documentation::Documentation KameleonVolumeToRawTask::documentation() {
                 new DoubleVector3Verifier,
                 Optional::Yes,
                 "A vector representing the lower bound of the domain, "
-                "in the native kameleon grid units",
+                "in the native kameleon grid units"
+            },
+            {
+                KeyVisUnit,
+                new StringAnnotationVerifier("A valid kameleon unit"),
+                Optional::Yes,
+                "The unit of the data",
             }
         }
     };

@@ -106,7 +106,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 
     LINFO(fmt::format("Creating dump file: {}", dumpFile));
 
-    HANDLE hDumpFile = CreateFile(
+    HANDLE hDumpFile = CreateFileA(
         dumpFile.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
