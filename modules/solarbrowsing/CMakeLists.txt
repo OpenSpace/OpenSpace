@@ -67,20 +67,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module("SolarBrowsing" solarbrowsing_module ${HEADER_FILES} ${SOURCE_FILES})
 
-target_include_directories(
-    openspace-module-solarbrowsing PUBLIC
-    # Openjpeg stuff
-    ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
-    ${OPENJPEG_BINARY_DIR}/src/bin/common
-    ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/jp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/common
-    ${Z_INCLUDE_DIRNAME}
-    ${PNG_INCLUDE_DIRNAME}
-    ${TIFF_INCLUDE_DIRNAME}
-    ${CMAKE_SOURCE_DIR}/include
-    ${TIFF_INCLUDE_DIRNAME}
-)
 
 #target_link_libraries(${MODULE_NAME} openjp2)
 #set(KDU_LIB_PATH /home/noven/workspace/Kakadu/)
@@ -97,3 +83,21 @@ target_include_directories(
 include_external_library(openspace-module-solarbrowsing openjp2 ${OPENJPEG_ROOT_DIR})
 #target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(openspace-module-solarbrowsing SYSTEM PUBLIC ${HEADER_FILES})
+
+target_include_directories(
+    openspace-module-solarbrowsing PUBLIC
+    # Openjpeg stuff
+    ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
+    ${OPENJPEG_BINARY_DIR}/src/bin/common
+    ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
+    ${OPENJPEG_ROOT_DIR}/src/bin/jp2
+    ${OPENJPEG_ROOT_DIR}/src/bin/common
+    ${Z_INCLUDE_DIRNAME}
+    ${PNG_INCLUDE_DIRNAME}
+    ${TIFF_INCLUDE_DIRNAME}
+    ${CMAKE_SOURCE_DIR}/include
+    ${TIFF_INCLUDE_DIRNAME}
+)
+
+# Force static linking to prevent __imp* linker errors
+target_compile_definitions(openspace-module-solarbrowsing PUBLIC "OPJ_STATIC")
