@@ -54,6 +54,7 @@ class BrickSelector;
 class TfBrickSelector;
 class SimpleTfBrickSelector;
 class LocalTfBrickSelector;
+class LeafBrickSelector;
 class ShenBrickSelector;
 class TimeBrickSelector;
 class HistogramManager;
@@ -68,13 +69,14 @@ public:
 
     enum class TspType  {DEFAULT, SAND, SHEN};
     enum class AtlasType {DEFAULT, ALL};
-    enum Selector {TF, SIMPLE, LOCAL, SHEN, TIME};
+    enum Selector {TF, SIMPLE, LOCAL, SHEN, TIME, LEAF};
 
     static const char* TYPE_SIMPLE;
     static const char* TYPE_TIME;
     static const char* TYPE_TF;
     static const char* TYPE_LOCAL;
     static const char* TYPE_SHEN;
+    static const char* TYPE_LEAF;
 
     static const char* TSP_DEFAULT;
     static const char* TSP_SAND;
@@ -164,6 +166,7 @@ private:
     std::shared_ptr<LocalTfBrickSelector>   _localTfBrickSelector;
     std::shared_ptr<ShenBrickSelector>      _shenBrickSelector;
     std::shared_ptr<TimeBrickSelector>      _timeBrickSelector;
+    std::shared_ptr<LeafBrickSelector>      _leafBrickSelector;
 
     Selector _selector;
 

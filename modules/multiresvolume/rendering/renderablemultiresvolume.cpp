@@ -51,6 +51,7 @@
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
 #include <modules/multiresvolume/rendering/shenbrickselector.h>
 #include <modules/multiresvolume/rendering/timebrickselector.h>
+#include <modules/multiresvolume/rendering/leafbrickselector.h>
 
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
@@ -199,6 +200,7 @@ namespace openspace {
     const char* RenderableMultiresVolume::TYPE_TF     = "tf";
     const char* RenderableMultiresVolume::TYPE_LOCAL  = "local";
     const char* RenderableMultiresVolume::TYPE_SHEN   = "shen";
+    const char* RenderableMultiresVolume::TYPE_LEAF = "leaf";
 
     const char* RenderableMultiresVolume::TSP_DEFAULT = "default";
     const char* RenderableMultiresVolume::TSP_SAND    = "sand";
@@ -212,7 +214,8 @@ namespace openspace {
         { RenderableMultiresVolume::TYPE_TF     , RenderableMultiresVolume::Selector::TF},
         { RenderableMultiresVolume::TYPE_LOCAL  , RenderableMultiresVolume::Selector::LOCAL},
         { RenderableMultiresVolume::TYPE_SHEN  , RenderableMultiresVolume::Selector::SHEN },
-        { RenderableMultiresVolume::TYPE_TIME   , RenderableMultiresVolume::Selector::TIME}
+        { RenderableMultiresVolume::TYPE_TIME   , RenderableMultiresVolume::Selector::TIME},
+        { RenderableMultiresVolume::TYPE_LEAF   , RenderableMultiresVolume::Selector::LEAF }
     };
 
     const std::unordered_map<const char *, RenderableMultiresVolume::TspType> RenderableMultiresVolume::TspTypes = {
@@ -235,6 +238,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _localTfBrickSelector(nullptr)
     , _timeBrickSelector(nullptr)
     , _shenBrickSelector(nullptr)
+    , _leafBrickSelector(nullptr)
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
@@ -464,6 +468,16 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 return initializeSelector();
             }
             break;
+        case Selector::LEAF:
+            if (!_leafBrickSelector) {
+                std::shared_ptr<LeafBrickSelector> lbs;
+                _leafBrickSelector = lbs = std::make_shared<LeafBrickSelector>(_tsp);
+                _transferFunction->setCallback([lbs](const TransferFunction&) {
+                    lbs->initialize();
+                });
+                return initializeSelector();
+            }
+            break;
     }
     return true;
 }
@@ -578,6 +592,7 @@ bool RenderableMultiresVolume::initializeSelector() {
     case Selector::LOCAL:   selector = _localTfBrickSelector.get();     manager = _localErrorHistogramManager;   scenePath = _errorHistogramsPath;  break;
     case Selector::SIMPLE:  selector = _simpleTfBrickSelector.get();    manager = _histogramManager;                                                break;
     case Selector::SHEN:    selector = _shenBrickSelector.get();        return initializeShenSelector();
+    case Selector::LEAF:    selector = _leafBrickSelector.get();        return true;
     default:                LERROR(fmt::format("No selector {}", _selector));        return false;
     }
 
@@ -705,6 +720,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         case Selector::LOCAL:   s = _localTfBrickSelector.get();    break;
         case Selector::SHEN:    s = _shenBrickSelector.get();       break;
         case Selector::TIME:    s = _timeBrickSelector.get();       break;
+        case Selector::LEAF:    s = _leafBrickSelector.get();       break;
         default:                LERROR(fmt::format("No selector {}", _selector)); return;
         }
 
@@ -730,6 +746,13 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
             _nUsedBricks = _atlasManager->getNumUsedBricks();
             _nStreamedBricks = _atlasManager->getNumStreamedBricks();
         }
+        
+        /*LDEBUG(fmt::format("{}, {}, {}", 
+            _atlasManager->getNumUsedBricks(),
+            _atlasManager->getNumStreamedBricks(),
+            _atlasManager->getNumDiskReads()
+        ));
+        */
     }
 
     if (_raycaster) {
@@ -763,6 +786,7 @@ RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
     if (s == TYPE_LOCAL)    return SelectorValues.at(TYPE_LOCAL);
     if (s == TYPE_SHEN)     return SelectorValues.at(TYPE_SHEN);
     if (s == TYPE_TIME)     return SelectorValues.at(TYPE_TIME);
+    if (s == TYPE_LEAF)     return SelectorValues.at(TYPE_LEAF);
 
     return Selector::SIMPLE;
 }

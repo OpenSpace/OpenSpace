@@ -115,6 +115,8 @@ public:
     bool isBstLeaf(unsigned int _brickIndex);
     bool isOctreeLeaf(unsigned int _brickIndex);
 
+    std::list<unsigned int> getLeaves(unsigned int timestep);
+    
     bool _spatialErrorReady;
     bool _temporalErrorReady;
     bool _readCached;
@@ -162,6 +164,7 @@ protected:
     unsigned int numBSTNodes_;
     unsigned int numOTLevels_;
     unsigned int numOTNodes_;
+    unsigned int offsetBSTLeaves_;
 
     const unsigned int paddingWidth_ = 1;
 

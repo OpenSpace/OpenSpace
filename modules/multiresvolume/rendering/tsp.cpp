@@ -189,6 +189,7 @@ bool TSP::readHeader() {
     numOTNodes_ = static_cast<unsigned int>((pow(8, numOTLevels_) - 1) / 7);
     numBSTLevels_ = static_cast<unsigned int>(log((int)_header.numTimesteps_) / log(2) + 1);
     numBSTNodes_ = static_cast<unsigned int>(_header.numTimesteps_ * 2 - 1);
+    offsetBSTLeaves_ = numOTNodes_ * (numBSTLevels_ - 1);
     numTotalNodes_ = numOTNodes_ * numBSTNodes_;
 
     LDEBUG(fmt::format("Num OT levels: {}", numOTLevels_));
@@ -691,6 +692,12 @@ bool TSP::isOctreeLeaf(unsigned int _brickIndex) {
     const unsigned int otNode = _brickIndex % numOTNodes_;
     const auto depth = static_cast<unsigned int>(log(7 * otNode + 1) / log(8));
     return depth == numOTLevels_ - 1;
+}
+
+std::list<unsigned int> TSP::getLeaves(unsigned int timestep)
+{
+    // Get the covered Octree leaves of timestep
+    return CoveredLeafBricks(offsetBSTLeaves_ + (numOTNodes_ * timestep));
 }
 
 float TSP::getMaxError(NodeType type) {
