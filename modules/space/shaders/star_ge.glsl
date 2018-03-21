@@ -73,7 +73,7 @@ void main() {
     ge_worldPosition = vs_worldPosition[0];
 
     vec4 projectedPoint = gl_in[0].gl_Position;
-    vec2 starSize = vec2(billboardSize) / screenSize * projectedPoint.w;
+    vec2 starSize = vec2(billboardSize) * projectedPoint.w / screenSize ;
     
     float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
     float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
@@ -99,11 +99,11 @@ void main() {
     //vec2 starSize = vec2(modifiedSpriteSize * 5E7) / screenSize * projectedPoint.w;
 
     // Working like Partiview
-    float pSize = 100.0;
+    float pSize = 100000000.0;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
-    starSize *= apparentBrightness * 1E6;
+    starSize *= apparentBrightness;
     //starSize = vec2(apparentBrightness); 
 
     // if (starSize.x > 1000.0) {
@@ -112,16 +112,16 @@ void main() {
     //     starSize *= 0.1;
     // }
 
-    vec4 finalSizeBL = projectedPoint + vec4(starSize * (corners[1] - 0.5), 0.0, 0.0);
-    vec4 finalSizeTR = projectedPoint + vec4(starSize * (corners[2] - 0.5), 0.0, 0.0);
-    // if (length(finalSizeTR.xyz - finalSizeBL.xyz) > 40.0)
+    vec4 finalSizeBL = vec4(starSize * (corners[1] - 0.5), 0.0, 0.0);
+    vec4 finalSizeTR = vec4(starSize * (corners[2] - 0.5), 0.0, 0.0);
+    // if (length(finalSizeTR.xyz - finalSizeBL.xyz) > 30.0)
     // {
     //     vec2 tmpStarSize = starSize;
     //     while (length(finalSizeTR.xyz - finalSizeBL.xyz) > 30.0)
     //     {
-    //         tmpStarSize *= 0.9;
-    //         finalSizeBL = projectedPoint + vec4(tmpStarSize * (corners[1] - 0.5), 0.0, 0.0);
-    //         finalSizeTR = projectedPoint + vec4(tmpStarSize * (corners[2] - 0.5), 0.0, 0.0);
+    //         tmpStarSize *= 0.99;
+    //         finalSizeBL = vec4(tmpStarSize * (corners[1] - 0.5), 0.0, 0.0);
+    //         finalSizeTR = vec4(tmpStarSize * (corners[2] - 0.5), 0.0, 0.0);
     //     }        
     //     starSize = tmpStarSize;
     // }
