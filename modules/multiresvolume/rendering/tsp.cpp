@@ -612,7 +612,7 @@ bool TSP::readCache() {
 
     _readCached = true;
 
-    return true;
+    return !file.is_open();
 }
 
 bool TSP::writeCache() {
@@ -637,11 +637,11 @@ bool TSP::writeCache() {
     file.write(reinterpret_cast<char*>(&minTemporalError_), sizeof(float));
     file.write(reinterpret_cast<char*>(&maxTemporalError_), sizeof(float));
     file.write(reinterpret_cast<char*>(&medianTemporalError_), sizeof(float));
-    file.write(reinterpret_cast<char*>(&data_[0]), data_.size()*sizeof(float));
+    file.write(reinterpret_cast<char*>(&data_[0]), data_.size()*sizeof(int));
 
     file.close();
 
-    return true;
+    return !file.is_open();
 }
 
 float TSP::getSpatialError(unsigned int _brickIndex) {
@@ -653,26 +653,28 @@ float TSP::getTemporalError(unsigned int _brickIndex) {
 }
 
 unsigned int TSP::getFirstOctreeChild(unsigned int _brickIndex) {
-    unsigned int otNode = _brickIndex % numOTNodes_;
-    unsigned int bstOffset = _brickIndex - otNode;
+    const unsigned int otNode = _brickIndex % numOTNodes_;
+    const unsigned int bstOffset = _brickIndex - otNode;
 
-    unsigned int depth = log(7 * otNode + 1) / log(8);
-    unsigned int firstInLevel = (pow(8, depth) - 1) / 7;
-    unsigned int levelOffset = otNode - firstInLevel;
-    unsigned int firstInChildLevel = (pow(8, depth + 1) - 1) / 7;
-    unsigned int childIndex = firstInChildLevel + 8*levelOffset;
+    const auto depth = static_cast<unsigned int>(log(7 * otNode + 1) / log(8));
+    const auto firstInLevel = static_cast<unsigned int>((pow(8, depth) - 1) / 7);
+    const auto levelOffset = static_cast<unsigned int>(otNode - firstInLevel);
+    const auto firstInChildLevel = static_cast<unsigned int>((pow(8, depth + 1) - 1) / 7);
+    const auto childIndex = static_cast<unsigned int>(firstInChildLevel + 8*levelOffset);
 
     return bstOffset + childIndex;
 }
 
 unsigned int TSP::getBstLeft(unsigned int _brickIndex) {
-    unsigned int bstNode = _brickIndex / numOTNodes_;
-    unsigned int otOffset = _brickIndex % numOTNodes_;
-    unsigned int depth = log(bstNode + 1) / log(2);
-    unsigned int firstInLevel = pow(2, depth) - 1;
-    unsigned int levelOffset = bstNode - firstInLevel;
-    unsigned int firstInChildLevel = pow(2, depth + 1) - 1;
-    unsigned int childIndex = firstInChildLevel + 2*levelOffset;
+    const unsigned int bstNode = _brickIndex / numOTNodes_;
+    const unsigned int otOffset = _brickIndex % numOTNodes_;
+    
+    const auto depth = static_cast<unsigned int>(log(bstNode + 1) / log(2));
+    const auto firstInLevel = static_cast<unsigned int>(pow(2, depth) - 1);
+    const auto levelOffset = static_cast<unsigned int>(bstNode - firstInLevel);
+    const auto firstInChildLevel = static_cast<unsigned int>(pow(2, depth + 1) - 1);
+    const auto childIndex = static_cast<unsigned int>(firstInChildLevel + 2*levelOffset);
+    
     return otOffset + childIndex * numOTNodes_;
 }
 
@@ -686,8 +688,8 @@ bool TSP::isBstLeaf(unsigned int _brickIndex) {
 }
 
 bool TSP::isOctreeLeaf(unsigned int _brickIndex) {
-    unsigned int otNode = _brickIndex % numOTNodes_;
-    unsigned int depth = log(7 * otNode + 1) / log(8);
+    const unsigned int otNode = _brickIndex % numOTNodes_;
+    const auto depth = static_cast<unsigned int>(log(7 * otNode + 1) / log(8));
     return depth == numOTLevels_ - 1;
 }
 
