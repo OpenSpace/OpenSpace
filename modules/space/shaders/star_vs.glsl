@@ -31,30 +31,25 @@ in vec3 in_brightness;
 in vec3 in_velocity;
 in float in_speed;
 
-out vec4 psc_position;
 out vec3 vs_brightness;
 out vec3 vs_velocity;
 out float vs_speed;
 out vec4 vs_gPosition;
+out vec4 vs_worldPosition;
 
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-
 void main() {
-    vec4 p = in_position;
-    psc_position  = p;
     vs_brightness = in_brightness;
     vs_velocity = in_velocity;
     vs_speed = in_speed;
 
-    vec4 tmp = p;
-    vec4 position = pscTransform(tmp, mat4(1.0));
-    
-    // G-Buffer
-    vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
-    
-    position = view * position;
-    
-    gl_Position = position;
+    vec3 modelPosition = in_position.xyz;
+    vs_worldPosition = model * vec4(modelPosition, 1.0);
+    vec4 viewPosition = view * vs_worldPosition;
+
+    vs_gPosition = viewPosition;
+    gl_Position = projection * vs_gPosition;
 }
