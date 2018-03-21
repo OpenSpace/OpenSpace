@@ -312,6 +312,7 @@ GUI::GUI()
 #endif // GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_asset);
+    addPropertySubOwner(_keybindings);
     _spaceTime.setEnabled(true);
     addPropertySubOwner(_spaceTime);
     addPropertySubOwner(_mission);
@@ -334,6 +335,8 @@ GUI::GUI()
             _virtualProperty.setShowHelpTooltip(_showHelpText);
             _spaceTime.setShowHelpTooltip(_showHelpText);
             _mission.setShowHelpTooltip(_showHelpText);
+            _asset.setShowHelpTooltip(_showHelpText);
+            _keybindings.setShowHelpTooltip(_showHelpText);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
             _iswa.setShowHelpTooltip(_showHelpText);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -360,6 +363,8 @@ GUI::GUI()
             _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
             _spaceTime.setShowHelpTooltipDelay(_helpTextDelay);
             _mission.setShowHelpTooltipDelay(_helpTextDelay);
+            _asset.setShowHelpTooltipDelay(_helpTextDelay);
+            _keybindings.setShowHelpTooltipDelay(_helpTextDelay);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
             _iswa.setShowHelpTooltipDelay(_helpTextDelay);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
@@ -499,6 +504,7 @@ void GUI::initialize() {
     _virtualProperty.initialize();
     _filePath.initialize();
     _asset.initialize();
+    _keybindings.initialize();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initialize();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -533,6 +539,7 @@ void GUI::deinitialize() {
     _virtualProperty.deinitialize();
     _filePath.deinitialize();
     _asset.deinitialize();
+    _keybindings.deinitialize();
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.deinitialize();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -636,6 +643,7 @@ void GUI::initializeGL() {
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.initializeGL();
     _asset.initializeGL();
+    _keybindings.initializeGL();
     _parallel.initializeGL();
     _mission.initializeGL();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -674,6 +682,7 @@ void GUI::deinitializeGL() {
 #endif // GLOBEBROWSING_USE_GDAL
     _filePath.deinitializeGL();
     _asset.deinitializeGL();
+    _keybindings.deinitializeGL();
     _sceneProperty.deinitializeGL();
 }
 
@@ -749,6 +758,9 @@ void GUI::endFrame() {
         }
         if (_asset.isEnabled()) {
             _asset.render();
+        }
+        if (_keybindings.isEnabled()) {
+            _keybindings.render();
         }
 
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -890,6 +902,10 @@ void GUI::render() {
     bool asset = _asset.isEnabled();
     ImGui::Checkbox("Assets", &asset);
     _asset.setEnabled(asset);
+
+    bool keybindings = _keybindings.isEnabled();
+    ImGui::Checkbox("Keybindings", &keybindings);
+    _keybindings.setEnabled(keybindings);
 
 #ifdef GLOBEBROWSING_USE_GDAL
     bool globeBrowsing = _globeBrowsing.isEnabled();
