@@ -78,7 +78,7 @@ NavigationHandler::NavigationHandler()
         if (_origin.value().empty()) {
             return;
         }
-
+        
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
             LWARNING(fmt::format(
@@ -129,7 +129,7 @@ void NavigationHandler::setCamera(Camera* camera) {
 
 void NavigationHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
-    _orbitalNavigator->startInterpolateCameraDirection(*_camera);
+    _orbitalNavigator->startInterpolateCameraDirection(*_camera);    
 }
 
 const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
