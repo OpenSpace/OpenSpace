@@ -29,11 +29,14 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
+    constexpr const char* _loggerCat = "OrbitalNavigator";
+
     static const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
         "RollFriction",
         "Roll Friction",
@@ -84,6 +87,19 @@ namespace {
         "Minimum allowed distance",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo velocityZoomControl = {
+        "velocityZoomControl",
+        "Velocity zoom control",
+        "Controls the velocity of the camera motion when zooming in to the focus node. "
+        "The higher the value the faster the camera will move towards the focus."
+    };
+
+    static const openspace::properties::Property::PropertyInfo flyToNode = {
+        "flyToNode",
+        "Fly to focus node",
+        "Determines whether to fly to the focus node or just focus on it."
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -107,6 +123,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
+    , _velocitySensitivity(velocityZoomControl, 0.05f, 0.001f, 0.1f)
+    , _flyTo(flyToNode, true)
 {
     auto smoothStep =
         [](double t) {
@@ -127,7 +145,7 @@ OrbitalNavigator::OrbitalNavigator()
     // f(t) = d/dt ( ln(1 / f_orig(t)) ) where f_orig is the transfer function that would
     // be used if the interpolation was sinply linear between a start value and an end
     // value instead of current value and end value (0) as we use it when inerpoláting.
-    // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
+    // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a 
     // interpolation from 1 to 0.
 
     auto smoothStepDerivedTranferFunction = [](double t) {
@@ -158,6 +176,8 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
+    addProperty(_velocitySensitivity);
+    addProperty(_flyTo);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -176,11 +196,37 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
 
         // Follow focus nodes movement
         glm::dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
+
         _previousFocusNodePosition = centerPos;
+        length(focusNodeDiff);
+        glm::dvec3 camPosToCenterPosDiff = camPos - centerPos;
         camPos += focusNodeDiff;
 
         // Calculate a position handle based on the camera position in world space
         SurfacePositionHandle posHandle = calculateSurfacePositionHandle(camPos);
+
+        // Distance from the camera to the focus node
+        double distFromCameraToFocus = glm::distance(camPos, centerPos);
+
+        // Get the radius of a focusNode, to be used in the case of zooming                           
+        glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+            posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+        glm::dvec3 centerToActualSurface = glm::dmat3(_focusNode->modelTransform()) * centerToActualSurfaceModelSpace;
+        double planetRadius = length(centerToActualSurface);
+
+        // The distance from the focus node's center to the camera when zoomed in,
+        // i.e. the distance limit when focus is set optimally
+        double focusLimit = planetRadius * 4;
+
+        // Zoom in on the focusNode and move towards it, but when the camera arrives to
+        // the focus node make it possible for the user to manually zoom in even closer
+        // or to zoom further out 
+        if (_flyTo) {
+            if (distFromCameraToFocus > (focusLimit))
+                camPos = zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit);
+            else 
+                _flyTo = false; 
+        }
 
         // Decompose camera rotation so that we can handle global and local rotation
         // individually. Then we combine them again when finished.
@@ -258,7 +304,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
             camPos,
             centerPos,
             posHandle
-        );
+        ); 
 
         // Update the camera state
         camera.setPositionVec3(camPos);
@@ -268,6 +314,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
 
 void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
+    _flyTo = true;
 
     if (_focusNode != nullptr) {
         _previousFocusNodePosition = _focusNode->worldPosition();
@@ -277,17 +324,15 @@ void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
 
 void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
     glm::dvec3 camPos = camera.positionVec3();
-    glm::dvec3 camDir = glm::normalize(
-        camera.rotationQuaternion() * glm::dvec3(0.0, 0.0, -1.0)
-    );
+    glm::dvec3 camDir = glm::normalize(camera.rotationQuaternion() * glm::dvec3(0.0, 0.0, -1.0));
     glm::dvec3 centerPos = _focusNode->worldPosition();
-    glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);
+    glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);  
 
     double angle = glm::angle(camDir, directionToCenter);
 
     // Minimum is two second. Otherwise proportional to angle
     _rotateToFocusNodeInterpolator.setInterpolationTime(static_cast<float>(
-        glm::max(angle * 2.0, 2.0)
+        glm::max(angle * 2.0, 2.0) 
     ));
     _rotateToFocusNodeInterpolator.start();
 }
@@ -402,6 +447,7 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Vector logic
     glm::dvec3 posDiff = cameraPosition - objectPosition;
+
     // glm::dvec3 centerToReferenceSurface = glm::dmat3(modelTransform) *
         // positionHandle.centerToReferenceSurface;
     glm::dvec3 centerToActualSurfaceModelSpace = positionHandle.centerToReferenceSurface +
@@ -441,6 +487,20 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
 
     // Add difference to position
     return cameraPosition + rotationDiffVec3;
+}       
+
+glm::dvec3 OrbitalNavigator::zoomToFocusNode(const glm::dvec3& camPos,
+                                             const double distFromCameraToFocus,
+                                             const glm::dvec3 camPosToCenterPosDiff,
+                                             const double focusLimit) const
+{
+    // Calculate and truncate the factor which determines the velocity of the 
+    // camera movement towards the focus node
+    double velocityFactor = (1 - focusLimit/distFromCameraToFocus) * _velocitySensitivity;
+    velocityFactor = (double)((int)(velocityFactor * 1000)) / 1000;
+
+    // Return the updated camera position
+    return camPos - velocityFactor * camPosToCenterPosDiff;
 }
 
 glm::dvec3 OrbitalNavigator::followFocusNodeRotation(
@@ -453,6 +513,7 @@ glm::dvec3 OrbitalNavigator::followFocusNodeRotation(
         posDiff
         * focusNodeRotationDiff
         - (posDiff);
+
     return cameraPosition + rotationDiffVec3AroundCenter;
 }
 
@@ -545,7 +606,7 @@ glm::dvec3 OrbitalNavigator::pushToSurface(
         glm::length(actualSurfaceToCamera) *
         glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
-    return cameraPosition + referenceSurfaceOutDirection *
+    return cameraPosition + referenceSurfaceOutDirection * 
         glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
 }
 
