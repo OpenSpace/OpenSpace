@@ -24,6 +24,7 @@
 
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/moduleengine.h>
@@ -335,7 +336,9 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _time.initSession();
     }
 
-    if (!guiMode(list)) {
+    bool hasWebContent = webContent(list);
+
+    if (!guiMode(list) || !hasWebContent) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
             _debugProperties.interactionMode = "Direct";
@@ -356,6 +359,18 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _directTouchMode =
             (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size());
     }
+}
+
+bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
+    WindowWrapper& wrapper = OsEng.windowWrapper();
+    glm::ivec2 res = wrapper.currentWindowSize();
+    glm::dvec2 pos = glm::vec2(
+        list.at(0).getScreenX(res.x),
+        list.at(0).getScreenY(res.y)
+    );
+
+    WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
+    return module.getEventHandler().touchEventCallback(pos.x, pos.y);
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)

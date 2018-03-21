@@ -129,4 +129,7 @@ void WebBrowserModule::attachEventHandler(std::shared_ptr<BrowserInstance> brows
     _eventHandler.setBrowserInstance(browserInstance);
 }
 
+EventHandler WebBrowserModule::getEventHandler() {
+    return _eventHandler;
+}
 }

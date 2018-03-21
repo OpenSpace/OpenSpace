@@ -53,6 +53,7 @@ public:
     void removeBrowser(std::shared_ptr<BrowserInstance>);
 
     void attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance);
+    EventHandler getEventHandler();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;

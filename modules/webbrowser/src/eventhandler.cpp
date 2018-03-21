@@ -77,6 +77,18 @@ void EventHandler::initialize() {
 
 }
 
+bool EventHandler::touchEventCallback(double x, double y) {
+    if (_browserInstance) {
+        _mousePosition.x = (int)x;
+        _mousePosition.y = (int)y;
+
+        int clickCount = BrowserInstance::SINGLE_CLICK;
+
+        return _browserInstance->sendTouchTapEvent(mouseEvent(), MBT_LEFT, clickCount);
+    }
+
+}
+
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (button != MouseButton::Left) return false;
 
