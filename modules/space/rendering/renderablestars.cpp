@@ -42,6 +42,9 @@
 #include <array>
 #include <fstream>
 #include <stdint.h>
+#include <limits>
+
+//#define USING_STELLAR_TEST_GRID
 
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
@@ -358,6 +361,8 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
 
+    _program->setUniform("eyePosition", glm::vec3(data.camera.eyePositionVec3()));
+
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
     _pointSpreadFunctionTexture->bind();
@@ -649,7 +654,7 @@ bool RenderableStars::readSpeckFile() {
             file.seekg(position);
             break;
         }
-
+        
         if (line.substr(0, 7) == "datavar") {
             // datavar lines are structured as follows:
             // datavar # description
@@ -667,6 +672,9 @@ bool RenderableStars::readSpeckFile() {
 
     _nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
 
+    float minLumValue = std::numeric_limits<float>::max();
+    float maxLumValue = std::numeric_limits<float>::min();
+
     do {
         std::vector<float> values(_nValuesPerStar);
 
@@ -683,10 +691,17 @@ bool RenderableStars::readSpeckFile() {
                 break;
             }
         }
+        minLumValue = values[4] < minLumValue ? values[4] : minLumValue;
+        maxLumValue = values[4] > maxLumValue ? values[4] : maxLumValue;
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }
     } while (!file.eof());
+
+    // Normalize Luminosity:
+    for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
+        _fullData[i + 4] = (_fullData[i + 4] - minLumValue) / (maxLumValue - minLumValue);
+    }
 
     return true;
 }
@@ -768,8 +783,8 @@ void RenderableStars::createDataSlice(ColorOption option) {
                 } };
 
 #ifdef USING_STELLAR_TEST_GRID
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 3];
+                layout.value.bvColor = 0.650;// _fullData[i + 3];
+                layout.value.luminance = _fullData[i + 4];
                 layout.value.absoluteMagnitude = _fullData[i + 3];
 #else
                 layout.value.bvColor = _fullData[i + 3];

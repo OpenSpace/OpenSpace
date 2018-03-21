@@ -36,6 +36,7 @@ uniform sampler1D colorTexture;
 uniform float magnitudeExponent;
 uniform float sharpness;
 uniform int colorOption;
+uniform vec3 eyePosition;
 
 in vec4 vs_position;
 in vec4 ge_gPosition;
@@ -44,6 +45,7 @@ in vec3 ge_velocity;
 in float ge_speed;
 in vec2 texCoord;
 in float ge_observationDistance;
+in vec4 ge_worldPosition;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
