@@ -75,27 +75,37 @@ void main() {
     vec4 projectedPoint = gl_in[0].gl_Position;
     vec2 starSize = vec2(billboardSize) / screenSize * projectedPoint.w;
     
-    float absoluteMagnitude = ge_brightness.z;
-    //starSize *= (absoluteMagnitude + 9.0)/5.0;
+    float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
+    float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
+
     float luminosity = ge_brightness.y;
-    //starSize *= luminosity;
-    float distanceToStar = length(ge_worldPosition.xyz - eyePosition) / 3.0856776E16;
-    //float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
-    //float distanceToStar = distance(ge_worldPosition.xyz, eyePosition) / 3.0856776E16;
-    //float apparentBrightness = (luminosity * 3.828E26) / (4 * 3.14159265359 * distanceToStar * distanceToStar);
-    //starSize *= vec2(pow(10.0, apparentBrightness));
-
-    float apparentMag = 5.0 * (log(distanceToStar) - 1.0) + absoluteMagnitude;
-    //starSize *= pow(2.512, apparentMag-26.72) * 1000.0;
-    starSize *= (apparentMag+40.0)/10.0;
-    //float stellarMag = pow(10.0, 0.4*(-apparentMag - 19));
-    //starSize *= 1E-22/stellarMag;
-    //starSize *= log(apparentMag)/4.0;
-
-    // float modifiedSpriteSize =
-    //     exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
-    // starSize = vec2(modifiedSpriteSize/100000000000.0);
+    //starSize *= luminosity * 100;
     
+    float absoluteMagnitude = ge_brightness.z;
+    //starSize *= (absoluteMagnitude + 9.0)/4.0;
+    //vec2 starSize = vec2((absoluteMagnitude + 9.0)*4.0) / screenSize * projectedPoint.w;
+    
+    float apparentMag = 5.0 * (log(distanceToStarInParsecs) - 1.0) + absoluteMagnitude;
+    //starSize *= (apparentMag + 40.0)/30.0;
+    //vec2 starSize = vec2(apparentMag + 40.0) / screenSize * projectedPoint.w;
+
+    float apparentBrightnessSphere = (luminosity) / (4 * 3.14159265359 * distanceToStarInParsecs * distanceToStarInParsecs);
+    //starSize = vec2(apparentBrightnessSphere * 100.0);
+
+    float modifiedSpriteSize =
+         exp((-30.623 - absoluteMagnitude) * 0.462);// * scaleFactor * 2000;
+    //starSize = vec2(modifiedSpriteSize * 1E10);
+    //vec2 starSize = vec2(billboardSize) / screenSize * modifiedSpriteSize * projectedPoint.w;
+    //vec2 starSize = vec2(modifiedSpriteSize * 5E7) / screenSize * projectedPoint.w;
+
+    // Working like Partiview
+    float pSize = 100.0;
+    float slum = 1.0;
+    float samplingFactor = 1.0;
+    float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / distanceToStarInParsecs;
+    //starSize *= apparentBrightness * 1E4;
+    //starSize = vec2(apparentBrightness); 
+
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projectedPoint + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
