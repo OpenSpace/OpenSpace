@@ -73,7 +73,7 @@ void main() {
     ge_worldPosition = vs_worldPosition[0];
 
     vec4 projectedPoint = gl_in[0].gl_Position;
-    vec2 starSize = vec2(billboardSize) * projectedPoint.w / screenSize ;
+    vec2 starSize = vec2(billboardSize) / screenSize * projectedPoint.w;
     
     float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
     float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
@@ -89,22 +89,30 @@ void main() {
     //starSize *= (apparentMag + 40.0)/30.0;
     //vec2 starSize = vec2(apparentMag + 40.0) / screenSize * projectedPoint.w;
 
+    float baseMag = -30.623;
+    float deltaAppMag = pow(2.512, baseMag - apparentMag);
+    //starSize *= deltaAppMag * 1e16;
+
     float apparentBrightnessSphere = (luminosity) / (4 * 3.14159265359 * distanceToStarInParsecs * distanceToStarInParsecs);
     //starSize = vec2(apparentBrightnessSphere * 1000000.0);
 
-    float modifiedSpriteSize =
-         exp((-30.623 - absoluteMagnitude) * 0.462);// * scaleFactor * 2000;
+    // float modifiedSpriteSize =
+    //      exp((-30.623 - absoluteMagnitude) * 0.462);// * scaleFactor * 2000;
     //starSize = vec2(modifiedSpriteSize * 1E10);
     //vec2 starSize = vec2(billboardSize) / screenSize * modifiedSpriteSize * projectedPoint.w;
     //vec2 starSize = vec2(modifiedSpriteSize * 5E7) / screenSize * projectedPoint.w;
 
     // Working like Partiview
-    float pSize = 100000000.0;
+    float pSize = 2E7;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
+    // if (distanceToStarInParsecs < 140.0)
+    //     starSize *= apparentBrightness/6.0;
+    // else
+    //     starSize *= apparentBrightness;
     starSize *= apparentBrightness;
-    //starSize = vec2(apparentBrightness); 
+    //vec2 starSize = vec2(apparentBrightness) / screenSize * projectedPoint.w;
 
     // if (starSize.x > 1000.0) {
     //     starSize *= 0.1;
@@ -112,21 +120,18 @@ void main() {
     //     starSize *= 0.1;
     // }
 
-    vec4 finalSizeBL = vec4(starSize * (corners[1] - 0.5), 0.0, 0.0);
-    vec4 finalSizeTR = vec4(starSize * (corners[2] - 0.5), 0.0, 0.0);
-    // if (length(finalSizeTR.xyz - finalSizeBL.xyz) > 30.0)
+    // vec2 tmpStarSize = starSize;
+    // float finalSizeX = (length(vec2(tmpStarSize * (corners[2] - 0.5)) - vec2(tmpStarSize * (corners[0] - 0.5))));
+    // float finalSizeY = (length(vec2(tmpStarSize * (corners[0] - 0.5)) - vec2(tmpStarSize * (corners[1] - 0.5))));
+    // while (finalSizeX > 30000.0 ||
+    //         finalSizeY > 30000.0)
     // {
-    //     vec2 tmpStarSize = starSize;
-    //     while (length(finalSizeTR.xyz - finalSizeBL.xyz) > 30.0)
-    //     {
-    //         tmpStarSize *= 0.99;
-    //         finalSizeBL = vec4(tmpStarSize * (corners[1] - 0.5), 0.0, 0.0);
-    //         finalSizeTR = vec4(tmpStarSize * (corners[2] - 0.5), 0.0, 0.0);
-    //     }        
-    //     starSize = tmpStarSize;
-    // }
-
-
+    //     tmpStarSize *= 0.99;
+    //     finalSizeX = (length(vec2(tmpStarSize * (corners[2] - 0.5)) - vec2(tmpStarSize * (corners[0] - 0.5))));
+    //     finalSizeY = (length(vec2(tmpStarSize * (corners[0] - 0.5)) - vec2(tmpStarSize * (corners[1] - 0.5))));
+    // }        
+    // starSize = tmpStarSize;
+    
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projectedPoint + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);

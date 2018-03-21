@@ -80,14 +80,28 @@ Fragment getFragment() {
 
     float absoluteMagnitude = ge_brightness.z;
     float luminosity = ge_brightness.y;
-    float distanceToStar = length(ge_worldPosition.xyz - eyePosition) / 1E26;// / 3.0856776E16;
-    //float distanceToStar = distance(ge_worldPosition.xyz, eyePosition);
-    float apparentBrightness = (luminosity * 3.828) / (4 * 3.14159265359 * distanceToStar * distanceToStar);
-    //fullColor.xyz *= apparentBrightness/1E13;
     
-    float apparentMag = 5.0 * (log(distanceToStar) - 1.0) + absoluteMagnitude;
-    //fullColor.xyz /= log(apparentMag);
+     
+    float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
+    float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
+
+    //starSize *= (absoluteMagnitude + 9.0)/4.0;
     
+    float apparentMag = 5.0 * (log(distanceToStarInParsecs) - 1.0) + absoluteMagnitude;
+    //starSize *= (apparentMag + 40.0)/30.0;
+    //fullColor.a *= (apparentMag + 40.0)/80.0;
+
+    float baseMag = -1.46;
+    float deltaAppMag = pow(2.512, baseMag - apparentMag);
+    //fullColor.a  *= deltaAppMag * 1e4;
+
+    // Working like Partiview
+    float pSize = 1E7;
+    float slum = 1.0;
+    float samplingFactor = 1.0;
+    float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
+    //fullColor.a *= apparentBrightness/4;
+
     Fragment frag;
     frag.color = fullColor;
     frag.depth = safeLength(vs_position);
