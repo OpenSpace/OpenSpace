@@ -33,6 +33,7 @@
 #include <ext/json/json.hpp>
 #include <chrono>
 #include <fstream>
+#include <future>
 #include <string>
 
 namespace {
@@ -348,8 +349,16 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
     
 
     LDEBUG("Reading meta data");
-    unsigned int count = 0;
-    for (const std::string& seqPath : sequencePaths) {
+    //unsigned int count = 0;
+    std::atomic_uint count = 0;
+
+
+    std::mutex spiceAndPushMutex;
+
+    std::vector<std::future<void>> futures;
+    futures.reserve(sequencePaths.size());
+
+    auto exec = [&](const std::string& seqPath) {
         ghoul::filesystem::File currentFile(seqPath);
         std::string fileName = currentFile.filename();
         size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
@@ -380,14 +389,123 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
 
             const ImageMetadata im = parseMetadata(currentFile, instrumentName);
             std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+            spiceAndPushMutex.lock();
             TimedependentState<ImageMetadata> timeState(
                 std::move(data),
                 OsEng.timeManager().time().convertTime(time), seqPath
             );
             _imageMetadataMap[instrumentName].addState(std::move(timeState));
+            spiceAndPushMutex.unlock();
         }
         ++count;
+    };
+
+    for (const std::string& seqPath : sequencePaths) {
+        futures.push_back(
+            std::async(
+                std::launch::async,
+                exec,
+                seqPath
+            )
+        );
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    for (std::future<void>& f : futures) {
+        while (!f.valid()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        f.wait();
+    }
+
+    //std::for_each(
+    //    std::execution::par_unseq,
+    //    sequencePaths.begin(),
+    //    sequencePaths.end(),
+    //    [&](const std::string& seqPath) {
+    //        ghoul::filesystem::File currentFile(seqPath);
+    //        std::string fileName = currentFile.filename();
+    //        size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
+    //        std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+
+    //        // Name
+    //        size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
+    //        std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+
+    //        // Instrument
+    //        size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
+    //        std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
+    //        size_t dot = instrumentName.rfind(".");
+    //        instrumentName = instrumentName.substr(0, dot);
+
+    //        // Time
+    //        std::vector<std::string> tokens;
+    //        std::stringstream ss;
+    //        ss.str(currentFile.filename());
+    //        std::string item;
+    //        while (std::getline(ss, item, '_')) {
+    //            tokens.push_back(item);
+    //        }
+    //        if (tokens.size() >= 8) {
+    //            std::string time = tokens[0] + "-" + tokens[1] + "-" +
+    //                tokens[2] + "T" + tokens[4] + ":" +
+    //                tokens[5] + ":" + tokens[6] + "." + tokens[7];
+
+    //            const ImageMetadata im = parseMetadata(currentFile, instrumentName);
+    //            std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+    //            spiceAndPushMutex.lock();
+    //            TimedependentState<ImageMetadata> timeState(
+    //                std::move(data),
+    //                OsEng.timeManager().time().convertTime(time), seqPath
+    //            );
+    //            _imageMetadataMap[instrumentName].addState(std::move(timeState));
+    //            spiceAndPushMutex.unlock();
+    //        }
+    //        ++count;
+    //    }
+    //);
+
+
+    //for (const std::string& seqPath : sequencePaths) {
+    //    ghoul::filesystem::File currentFile(seqPath);
+    //    std::string fileName = currentFile.filename();
+    //    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
+    //    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+
+    //    // Name
+    //    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
+    //    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+
+    //    // Instrument
+    //    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
+    //    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
+    //    size_t dot = instrumentName.rfind(".");
+    //    instrumentName = instrumentName.substr(0, dot);
+
+    //    // Time
+    //    std::vector<std::string> tokens;
+    //    std::stringstream ss;
+    //    ss.str(currentFile.filename());
+    //    std::string item;
+    //    while (std::getline(ss, item, '_')) {
+    //        tokens.push_back(item);
+    //    }
+    //    if (tokens.size() >= 8) {
+    //        std::string time = tokens[0] + "-" + tokens[1] + "-" +
+    //            tokens[2] + "T" + tokens[4] + ":" +
+    //            tokens[5] + ":" + tokens[6] + "." + tokens[7];
+
+    //        const ImageMetadata im = parseMetadata(currentFile, instrumentName);
+    //        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+    //        TimedependentState<ImageMetadata> timeState(
+    //            std::move(data),
+    //            OsEng.timeManager().time().convertTime(time), seqPath
+    //        );
+    //        _imageMetadataMap[instrumentName].addState(std::move(timeState));
+    //    }
+    //    ++count;
+    //}
 
     saveMetadataToDisk(path, _imageMetadataMap);
 
