@@ -76,31 +76,7 @@ Fragment getFragment() {
     fullColor.a = pow(fullColor.a, sharpness);
 
     float d = magnitudeExponent - log(ge_observationDistance) / log(10.0);
-    //fullColor.a *= clamp(d, 0.0, 1.0);
-
-    float absoluteMagnitude = ge_brightness.z;
-    float luminosity = ge_brightness.y;
-    
-     
-    float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
-    float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
-
-    //starSize *= (absoluteMagnitude + 9.0)/4.0;
-    
-    float apparentMag = 5.0 * (log(distanceToStarInParsecs) - 1.0) + absoluteMagnitude;
-    //starSize *= (apparentMag + 40.0)/30.0;
-    //fullColor.a *= (apparentMag + 40.0)/80.0;
-
-    float baseMag = -1.46;
-    float deltaAppMag = pow(2.512, baseMag - apparentMag);
-    //fullColor.a  *= deltaAppMag * 1e4;
-
-    // Working like Partiview
-    float pSize = 1E7;
-    float slum = 1.0;
-    float samplingFactor = 1.0;
-    float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
-    //fullColor.a *= apparentBrightness/4;
+    fullColor.a *= clamp(d, 0.0, 1.0);
 
     Fragment frag;
     frag.color = fullColor;

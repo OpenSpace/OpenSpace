@@ -73,64 +73,48 @@ void main() {
     ge_worldPosition = vs_worldPosition[0];
 
     vec4 projectedPoint = gl_in[0].gl_Position;
-    vec2 starSize = vec2(billboardSize) / screenSize * projectedPoint.w;
     
-    float distanceToStar = length(ge_worldPosition.xyz - eyePosition);
     float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
 
     float luminosity = ge_brightness.y;
-    //starSize *= luminosity * 100;
-    
-    float absoluteMagnitude = ge_brightness.z;
-    //starSize *= (absoluteMagnitude + 9.0)/4.0;
-    //vec2 starSize = vec2((absoluteMagnitude + 9.0)*4.0) / screenSize * projectedPoint.w;
-    
-    float apparentMag = 5.0 * (log(distanceToStarInParsecs) - 1.0) + absoluteMagnitude;
-    //starSize *= (apparentMag + 40.0)/30.0;
-    //vec2 starSize = vec2(apparentMag + 40.0) / screenSize * projectedPoint.w;
-
-    float baseMag = -30.623;
-    float deltaAppMag = pow(2.512, baseMag - apparentMag);
-    //starSize *= deltaAppMag * 1e16;
-
-    float apparentBrightnessSphere = (luminosity) / (4 * 3.14159265359 * distanceToStarInParsecs * distanceToStarInParsecs);
-    //starSize = vec2(apparentBrightnessSphere * 1000000.0);
-
-    // float modifiedSpriteSize =
-    //      exp((-30.623 - absoluteMagnitude) * 0.462);// * scaleFactor * 2000;
-    //starSize = vec2(modifiedSpriteSize * 1E10);
-    //vec2 starSize = vec2(billboardSize) / screenSize * modifiedSpriteSize * projectedPoint.w;
-    //vec2 starSize = vec2(modifiedSpriteSize * 5E7) / screenSize * projectedPoint.w;
-
+      
     // Working like Partiview
-    float pSize = 2E7;
+    float pSize = 3.0E5;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
-    // if (distanceToStarInParsecs < 140.0)
-    //     starSize *= apparentBrightness/6.0;
-    // else
-    //     starSize *= apparentBrightness;
-    starSize *= apparentBrightness;
-    //vec2 starSize = vec2(apparentBrightness) / screenSize * projectedPoint.w;
+    
+    vec2 multiplier = vec2(apparentBrightness * projectedPoint.w);
+   
+    // Max Star Sizes:
+    // Fragment Coords:
+    vec2 bottomLeft = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[1])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
+    vec2 topRight   = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[2])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
 
-    // if (starSize.x > 1000.0) {
-    //     starSize *= 0.1;
-    // } else if (starSize.y > 1000.0) {
-    //     starSize *= 0.1;
-    // }
+    float height = abs(topRight.y - bottomLeft.y);
+    float width  = abs(topRight.x - bottomLeft.x);    
+    float var    = (height + width);
 
-    // vec2 tmpStarSize = starSize;
-    // float finalSizeX = (length(vec2(tmpStarSize * (corners[2] - 0.5)) - vec2(tmpStarSize * (corners[0] - 0.5))));
-    // float finalSizeY = (length(vec2(tmpStarSize * (corners[0] - 0.5)) - vec2(tmpStarSize * (corners[1] - 0.5))));
-    // while (finalSizeX > 30000.0 ||
-    //         finalSizeY > 30000.0)
-    // {
-    //     tmpStarSize *= 0.99;
-    //     finalSizeX = (length(vec2(tmpStarSize * (corners[2] - 0.5)) - vec2(tmpStarSize * (corners[0] - 0.5))));
-    //     finalSizeY = (length(vec2(tmpStarSize * (corners[0] - 0.5)) - vec2(tmpStarSize * (corners[1] - 0.5))));
-    // }        
-    // starSize = tmpStarSize;
+    float maxBillboardSize = billboardSize;
+    float minBillboardSize = 1.0;
+
+    if ((height > maxBillboardSize) ||
+        (width > maxBillboardSize)) {
+    //if (height > maxBillboardSize) {        
+        float correctionScale = height > maxBillboardSize ? maxBillboardSize / (topRight.y - bottomLeft.y) :
+                                                            maxBillboardSize / (topRight.x - bottomLeft.x);
+        multiplier *= correctionScale;
+    } else {            
+        if (width < 2.0f * minBillboardSize) {
+            float maxVar = 2.0f * minBillboardSize;
+            float minVar = minBillboardSize;
+            float ta = ( (var - minVar)/(maxVar - minVar) );
+            if (ta == 0.0f)
+                return;
+        }        
+    } 
+
+    vec2 starSize = multiplier;
     
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
