@@ -222,7 +222,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
         // the focus node make it possible for the user to manually zoom in even closer
         // or to zoom further out 
         if (_flyTo) {
-            if (distFromCameraToFocus > (focusLimit))
+            if (distFromCameraToFocus > (focusLimit + planetRadius/10.0))
                 camPos = zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit);
             else 
                 _flyTo = false; 
