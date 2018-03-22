@@ -97,6 +97,7 @@ private:
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
     double _currentCameraToSurfaceDistance;
+    bool _directlySetStereoDistance = false;
 
     Interpolator<double> _rotateToFocusNodeInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
