@@ -324,10 +324,15 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
             double targetCameraToSurfaceDistance = glm::length(
                 cameraToSurfaceVector(camPos, centerPos, posHandle)
             );
-            _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
-                deltaTime,
-                _currentCameraToSurfaceDistance,
-                targetCameraToSurfaceDistance);
+            if (_directlySetStereoDistance) {
+                _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
+                _directlySetStereoDistance = false;
+            } else {
+                _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
+                    deltaTime,
+                    _currentCameraToSurfaceDistance,
+                    targetCameraToSurfaceDistance);
+            }
 
             camera.setScaling(
                 _stereoscopicDepthOfFocusSurface /
@@ -357,11 +362,15 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(
 }
 
 void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
+    if (!_focusNode) {
+        _directlySetStereoDistance = true;
+    }
+
     _focusNode = focusNode;
 
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
+    if (focusNode != nullptr) {
+        _previousFocusNodePosition = focusNode->worldPosition();
+        _previousFocusNodeRotation = glm::quat_cast(focusNode->worldRotationMatrix());
     }
 }
 
