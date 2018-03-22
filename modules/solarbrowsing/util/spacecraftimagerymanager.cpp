@@ -29,6 +29,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/texture.h>
 #include <ext/json/json.hpp>
 #include <chrono>
@@ -174,7 +175,7 @@ void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath,
     using K = std::string;
     using V = ImageMetadataStateSequence;
     for (const std::pair<K, V>& instrument : _imageMetadataMap) {
-        std::ofstream ofs(rootPath + instrument.first + "_cached" + ".txt");
+        std::ofstream ofs(rootPath + "/" + instrument.first + "_cached" + ".txt");
         if (!ofs.is_open()) {
             LERROR("Failed to open file");
         }
@@ -218,6 +219,10 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     using json = nlohmann::json;
 
     std::ifstream i(filename);
+    if (i.fail()) {
+        LERROR(fmt::format("Error opening file '{}'", filename));
+    }
+
     json j;
     i >> j;
     const json data = j["meta"]["fits"];
@@ -311,10 +316,13 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
 void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
       std::unordered_map<std::string, ImageMetadataStateSequence>& _imageMetadataMap)
 {
+    std::unordered_map<std::string, ImageMetadataStateSequence> result;
+
     LDEBUG("Begin loading spacecraft imagery metadata");
 
     // Pre-processed data
-    if (loadMetadataFromDisk(path, _imageMetadataMap)) {
+    if (loadMetadataFromDisk(path, result)) {
+        _imageMetadataMap.insert(result.begin(), result.end());
         return;
     }
 
@@ -358,6 +366,7 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
     std::vector<std::future<void>> futures;
     futures.reserve(sequencePaths.size());
 
+    std::cout << '\n';
     auto exec = [&](const std::string& seqPath) {
         ghoul::filesystem::File currentFile(seqPath);
         std::string fileName = currentFile.filename();
@@ -394,30 +403,23 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
                 std::move(data),
                 OsEng.timeManager().time().convertTime(time), seqPath
             );
-            _imageMetadataMap[instrumentName].addState(std::move(timeState));
+            result[instrumentName].addState(std::move(timeState));
             spiceAndPushMutex.unlock();
         }
         ++count;
-    };
 
-    for (const std::string& seqPath : sequencePaths) {
-        futures.push_back(
-            std::async(
-                std::launch::async,
-                exec,
-                seqPath
-            )
-        );
-    }
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    for (std::future<void>& f : futures) {
-        while (!f.valid()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        if (count % 10000 == 0) {
+            std::cout << count << " / " << sequencePaths.size() << '\n';
         }
-        f.wait();
+    };
+    std::cout << '\n';
+
+    //ghoul::ThreadPool pool(1);
+    for (const std::string& seqPath : sequencePaths) {
+        exec(seqPath);
+    //    pool.queue(exec, seqPath);
     }
+    //pool.stop();
 
     //std::for_each(
     //    std::execution::par_unseq,
@@ -507,9 +509,12 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
     //    ++count;
     //}
 
-    saveMetadataToDisk(path, _imageMetadataMap);
+    saveMetadataToDisk(path, result);
+    _imageMetadataMap.insert(result.begin(), result.end());
 
     LDEBUG("Finish loading imagery metadata");
+    LDEBUG("Saving imagery metadata");
+
     LDEBUG(fmt::format("{} images loaded", count));
     LDEBUG(fmt::format("{} values in metamap", _imageMetadataMap.size()));
 }
