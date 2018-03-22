@@ -151,13 +151,45 @@ int addNode(lua_State* L) {
             "Parent = '" + starname + "',"
             "Renderable = {"
                 "Type = 'RenderablePlaneImageLocal',"
-                "Size = 1.3*10^10.5,"
+                "Size = 0.68 * 6.95700*10e8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
                 "Billboard = true,"
                 "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/glare.png',"
                 "BlendMode = 'Additive'"
             "}"
         "}";
-        const std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + ");";
+        const std::string luaTablePlanet = "{"
+            "Name = '" + starname + "Planet',"
+            "Parent = '" + starname + "',"
+            "Renderable = {"
+                "Type = 'RenderableGlobe',"
+                "Radii = 0.1*7.1492*10e7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
+                "SegmentsPerPatch = 64,"
+                "Layers = {"
+                    "ColorLayers = {"
+                        "{"
+                            "Name = 'Exoplanet Texture',"
+                            "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
+                            "Enabled = true"
+                        "}"
+                    "}"
+                "}"
+            "},"
+            "Transform = {"
+                "Translation = {"
+                    "Type = 'KeplerTranslation',"
+                     "Eccentricity = 0.05," //ECC
+                     "SemiMajorAxis = 0.177758 * 149597871," // 149 597 871km = 1 AU. A
+                     "Inclination = 88.91," //I
+                     "AscendingNode  = 35.5," //BIGOM
+                     "ArgumentOfPeriapsis  = 356.2," //OM
+                     "MeanAnomaly = 0.0,"
+                     "Epoch = '2010 07 14 19:34:21.8'," //TT. JD to YYYY MM DD hh:mm:ss
+                     "Period = 32.03 * 86400" //PER. 86 400sec = 1 day. 
+                 "}"
+            "},"
+        "}";
+
+        const std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + "); openspace.addSceneGraphNode(" + luaTablePlanet + ");";
         OsEng.scriptEngine().queueScript(
             scriptParent,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
@@ -168,6 +200,20 @@ int addNode(lua_State* L) {
         printf("No star with that name.");
     }
 
+    return 0;
+}
+
+int removeNode(lua_State* L) {
+    const int StringLocation = -1;
+    const std::string starname = luaL_checkstring(L, StringLocation);
+
+    const std::string scriptParent = "openspace.removeSceneGraphNode('" + starname + "Planet'); openspace.removeSceneGraphNode('" + starname + "Plane'); openspace.removeSceneGraphNode('" + starname + "');";
+    OsEng.scriptEngine().queueScript(
+        scriptParent,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    return 0;
 }
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
@@ -181,6 +227,13 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             {},
             "string",
             "Adds two nodes to the scenegraph, one position node and one node to represenet the star."
+        },
+        {
+            "removeNode",
+            &removeNode,
+            {},
+            "string",
+            "Removes the node with the name given in teh arguments."
         }
 
     };
