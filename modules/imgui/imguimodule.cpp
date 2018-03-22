@@ -171,6 +171,9 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Draw2D,
         [&]() {
+            // TODO emiax: Make sure this is only called for one of the eyes, in the case
+            // of side-by-side / top-bottom stereo.
+
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
             if (wrapper.isMaster() && showGui) {
