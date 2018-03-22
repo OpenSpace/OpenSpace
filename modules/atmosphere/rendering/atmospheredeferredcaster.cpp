@@ -1,62 +1,62 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2018                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
 
- /***************************************************************************************
- * Modified part of the code (4D texture mechanism) from Eric Bruneton is used in the
- * following code.
- ****************************************************************************************/
+/***************************************************************************************
+* Modified part of the code (4D texture mechanism) from Eric Bruneton is used in the
+* following code.
+****************************************************************************************/
 
- /**
- * Precomputed Atmospheric Scattering
- * Copyright (c) 2008 INRIA
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holders nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
+/**
+* Precomputed Atmospheric Scattering
+* Copyright (c) 2008 INRIA
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+* 1. Redistributions of source code must retain the above copyright
+*    notice, this list of conditions and the following disclaimer.
+* 2. Redistributions in binary form must reproduce the above copyright
+*    notice, this list of conditions and the following disclaimer in the
+*    documentation and/or other materials provided with the distribution.
+* 3. Neither the name of the copyright holders nor the names of its
+*    contributors may be used to endorse or promote products derived from
+*    this software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+* THE POSSIBILITY OF SUCH DAMAGE.
 
- */
+*/
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
@@ -90,16 +90,16 @@
 
 
 namespace {
-    const char* _loggerCat             = "AtmosphereDeferredcaster";
-    const char* GlslDeferredcastPath   =
-        "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-    const char* GlslDeferredcastFSPath =
-        "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-    const char* GlslDeferredcastVsPath =
-        "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
+const char* _loggerCat = "AtmosphereDeferredcaster";
+const char* GlslDeferredcastPath =
+"${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
+const char* GlslDeferredcastFSPath =
+"${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
+const char* GlslDeferredcastVsPath =
+"${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 
-    const float ATM_EPS = 2.0;
-    const double KM_TO_M = 1000.0;
+const float ATM_EPS = 2.0;
+const double KM_TO_M = 1000.0;
 } // namespace
 
 namespace openspace {
@@ -162,16 +162,20 @@ void AtmosphereDeferredcaster::initialize() {
     }
 }
 
+void AtmosphereDeferredcaster::update(const UpdateData&) {};
+
+void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramObject&) {}
+
 void AtmosphereDeferredcaster::deinitialize() {
-    _transmittanceProgramObject        = nullptr;
-    _irradianceProgramObject           = nullptr;
-    _irradianceSupTermsProgramObject   = nullptr;
-    _inScatteringProgramObject         = nullptr;
+    _transmittanceProgramObject = nullptr;
+    _irradianceProgramObject = nullptr;
+    _irradianceSupTermsProgramObject = nullptr;
+    _inScatteringProgramObject = nullptr;
     _inScatteringSupTermsProgramObject = nullptr;
-    _deltaEProgramObject               = nullptr;
-    _deltaSProgramObject               = nullptr;
-    _deltaSSupTermsProgramObject       = nullptr;
-    _deltaJProgramObject               = nullptr;
+    _deltaEProgramObject = nullptr;
+    _deltaSProgramObject = nullptr;
+    _deltaSSupTermsProgramObject = nullptr;
+    _deltaJProgramObject = nullptr;
 
     glDeleteTextures(1, &_transmittanceTableTexture);
     glDeleteTextures(1, &_irradianceTableTexture);
@@ -184,8 +188,8 @@ void AtmosphereDeferredcaster::deinitialize() {
 }
 
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
-                                          const DeferredcastData&,
-                                          ghoul::opengl::ProgramObject& program)
+    const DeferredcastData&,
+    ghoul::opengl::ProgramObject& program)
 {
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(
@@ -207,66 +211,89 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             (_atmosphereRadius + ATM_EPS)*KM_TO_M)
             )
         {
-            program.setUniform(_uniformCache.cullAtmosphere, 1);
+            program.setUniform("cullAtmosphere", 1);
         }
         else {
-            program.setUniform(_uniformCache.cullAtmosphere, 0);
-            program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
-            program.setUniform(_uniformCache.Rt, _atmosphereRadius);
-            program.setUniform(_uniformCache.groundRadianceEmittion, _planetGroundRadianceEmittion);
-            program.setUniform(_uniformCache.HR, _rayleighHeightScale);
-            program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
-            program.setUniform(_uniformCache.HM, _mieHeightScale);
-            program.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
-            program.setUniform(_uniformCache.mieG, _miePhaseConstant);
-            program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
-            program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
-            program.setUniform(_uniformCache.HO, _ozoneHeightScale);
-            program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
-            program.setUniform(_uniformCache.SAMPLES_R, _r_samples);
-            program.setUniform(_uniformCache.SAMPLES_MU, _mu_samples);
-            program.setUniform(_uniformCache.SAMPLES_MU_S, _mu_s_samples);
-            program.setUniform(_uniformCache.SAMPLES_NU, _nu_samples);
+            program.setUniform("cullAtmosphere", 0);
+            program.setUniform("Rg", _atmospherePlanetRadius);
+            program.setUniform("Rt", _atmosphereRadius);
+            program.setUniform(
+                "AverageGroundReflectance",
+                _planetAverageGroundReflectance
+            );
+            program.setUniform("groundRadianceEmittion", _planetGroundRadianceEmittion);
+            program.setUniform("HR", _rayleighHeightScale);
+            program.setUniform("betaRayleigh", _rayleighScatteringCoeff);
+            program.setUniform("HM", _mieHeightScale);
+            program.setUniform("betaMieScattering", _mieScatteringCoeff);
+            program.setUniform("betaMieExtinction", _mieExtinctionCoeff);
+            program.setUniform("mieG", _miePhaseConstant);
+            program.setUniform("sunRadiance", _sunRadianceIntensity);
+            program.setUniform("ozoneLayerEnabled", _ozoneEnabled);
+            program.setUniform("HO", _ozoneHeightScale);
+            program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
+
+            program.setUniform("TRANSMITTANCE_W", _transmittance_table_width);
+            program.setUniform("TRANSMITTANCE_H", _transmittance_table_height);
+            program.setUniform("SKY_W", _irradiance_table_width);
+            program.setUniform("SKY_H", _irradiance_table_height);
+            program.setUniform("OTHER_TEXTURES_W", _delta_e_table_width);
+            program.setUniform("OTHER_TEXTURES_H", _delta_e_table_height);
+            program.setUniform("SAMPLES_R", _r_samples);
+            program.setUniform("SAMPLES_MU", _mu_samples);
+            program.setUniform("SAMPLES_MU_S", _mu_s_samples);
+            program.setUniform("SAMPLES_NU", _nu_samples);
+
+            program.setUniform("ModelTransformMatrix", _modelTransform);
 
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
-            program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
-            program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
+            program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
+            program.setUniform("dModelTransformMatrix", _modelTransform);
+
+            // The following scale comes from PSC transformations.
+            glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(1.0));
+            program.setUniform(
+                "dInverseScaleTransformMatrix",
+                glm::inverse(dfScaleCamTransf)
+            );
+
+            program.setUniform(
+                "dCamScaleTransform",
+                renderData.camera.viewScaleMatrix()
+            );
+
+            // World to Eye Space in OS
+            program.setUniform(
+                "dInverseCamScaleTransform",
+                glm::inverse(renderData.camera.viewScaleMatrix())
+            );
+
+            program.setUniform(
+                "dInverseCamRotTransform",
+                glm::mat4_cast(
+                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
+                )
+            );
 
             // Eye Space in OS to Eye Space in SGCT
-            glm::dmat4 dSgctEye2OSEye = glm::inverse(
-                glm::dmat4(renderData.camera.viewMatrix()));
-            
+            glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
+            glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);
+            program.setUniform("dSgctEyeToOSEyeTranform", dSgctEye2OSEye);
+
             // Eye Space in SGCT to Projection (Clip) Space in SGCT
-            glm::dmat4 dInverseProjection = glm::inverse(
-                glm::dmat4(renderData.camera.projectionMatrix()));
+            glm::dmat4 dSgctEye2Clip = glm::dmat4(renderData.camera.projectionMatrix());
+            glm::dmat4 dInverseProjection = glm::inverse(dSgctEye2Clip);
 
-            glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = glm::mat4_cast(
-                static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-            ) * glm::inverse(renderData.camera.viewScaleMatrix()) * dSgctEye2OSEye;
-            
-            
-            glm::dmat4 dInverseProjectionToTmpRotTransformMatrix = 
-                dInverseSGCTEyeToTmpRotTransformMatrix * dInverseProjection;
-            
-            double *mSource = (double*)glm::value_ptr(dInverseProjectionToTmpRotTransformMatrix);
-            mSource[12] += renderData.camera.positionVec3().x;
-            mSource[13] += renderData.camera.positionVec3().y;
-            mSource[14] += renderData.camera.positionVec3().z;
-            mSource[15] = 1.0;
+            program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
 
-            glm::dmat4 inverseWholeMatrixPipeline = inverseModelMatrix *
-                dInverseProjectionToTmpRotTransformMatrix;
-            program.setUniform(_uniformCache2.dInverseSgctProjectionToModelTransformMatrix,
-                inverseWholeMatrixPipeline);
+            program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
 
-            program.setUniform(_uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix, 
-                dInverseSGCTEyeToTmpRotTransformMatrix);
+            glm::dvec3 campos = renderData.camera.eyePositionVec3();
+            program.setUniform("dCampos", campos);
 
-            program.setUniform(_uniformCache2.dCampos, renderData.camera.eyePositionVec3());
-
-            glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
-            program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
+            glm::dvec3 camRigPos = renderData.camera.positionVec3();
+            program.setUniform("dCamRigPos", camRigPos);
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
@@ -292,7 +319,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
 
             // Sun Position in Object Space
-            program.setUniform(_uniformCache2.sunDirectionObj, glm::normalize(glm::dvec3(sunPosObj)));
+            program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
+
+            program.setUniform("ellipsoidRadii", _ellipsoidRadii);
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {
@@ -320,8 +349,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     );
                     casterPos *= KM_TO_M; // converting to meters
 
-                    // First we determine if the caster is shadowing the current planet
-                    // (all calculations in World Coordinates):
+                                          // First we determine if the caster is shadowing the current planet
+                                          // (all calculations in World Coordinates):
                     glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
                     glm::dvec3 sourceCasterVec = casterPos - sourcePos;
                     double sc_length = glm::length(sourceCasterVec);
@@ -343,7 +372,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     shadowData.isShadowing = false;
 
                     if (((d_test - rp_test) < (_atmospherePlanetRadius * KM_TO_M)) &&
-                    //if (((d_test - rp_test) < (_atmosphereRadius * KM_TO_M)) &&
+                        //if (((d_test - rp_test) < (_atmosphereRadius * KM_TO_M)) &&
                         (casterDistSun < planetDistSun)) {
                         // The current caster is shadowing the current planet
                         shadowData.isShadowing = true;
@@ -352,7 +381,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                         shadowData.sourceCasterVec = glm::normalize(sourceCasterVec);
                         shadowData.xp = xp_test;
                         shadowData.xu = shadowData.rc * sc_length /
-                                        (shadowData.rs - shadowData.rc);
+                            (shadowData.rs - shadowData.rc);
                         shadowData.casterPositionVec = casterPos;
                     }
                     shadowDataArray.push_back(shadowData);
@@ -386,26 +415,26 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     }
                     counter++;
                 }
-                program.setUniform(_uniformCache2.hardShadows, _hardShadowsEnabled);
+                program.setUniform("hardShadows", _hardShadowsEnabled);
             }
         }
     }
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-    program.setUniform(_uniformCache2.transmittanceTexture, _transmittanceTableTextureUnit);
+    program.setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
 
     _irradianceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
-    program.setUniform(_uniformCache2.irradianceTexture, _irradianceTableTextureUnit);
+    program.setUniform("irradianceTexture", _irradianceTableTextureUnit);
 
     _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    program.setUniform(_uniformCache2.inscatterTexture, _inScatteringTableTextureUnit);
+    program.setUniform("inscatterTexture", _inScatteringTableTextureUnit);
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&,
-                                           const DeferredcastData&,
-                                           ghoul::opengl::ProgramObject&)
+    const DeferredcastData&,
+    ghoul::opengl::ProgramObject&)
 {
     // Deactivate the texture units
     _transmittanceTableTextureUnit.deactivate();
@@ -429,41 +458,6 @@ std::string AtmosphereDeferredcaster::helperPath() const {
     return ""; // no helper file
 }
 
-void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramObject& program) {
-    _uniformCache.cullAtmosphere = program.uniformLocation("cullAtmosphere");
-    _uniformCache.Rg = program.uniformLocation("Rg"); 
-    _uniformCache.Rt = program.uniformLocation("Rt");
-    _uniformCache.groundRadianceEmittion = program.uniformLocation("groundRadianceEmittion");
-    _uniformCache.HR = program.uniformLocation("HR"); 
-    _uniformCache.betaRayleigh = program.uniformLocation("betaRayleigh"); 
-    _uniformCache.HM = program.uniformLocation("HM");  
-    _uniformCache.betaMieExtinction = program.uniformLocation("betaMieExtinction"); 
-    _uniformCache.mieG = program.uniformLocation("mieG"); 
-    _uniformCache.sunRadiance = program.uniformLocation("sunRadiance"); 
-    _uniformCache.ozoneLayerEnabled = program.uniformLocation("ozoneLayerEnabled");
-    _uniformCache.HO = program.uniformLocation("HO"); 
-    _uniformCache.betaOzoneExtinction = program.uniformLocation("betaOzoneExtinction"); 
-    _uniformCache.SAMPLES_R = program.uniformLocation("SAMPLES_R");
-    _uniformCache.SAMPLES_MU = program.uniformLocation("SAMPLES_MU"); 
-    _uniformCache.SAMPLES_MU_S = program.uniformLocation("SAMPLES_MU_S"); 
-    _uniformCache.SAMPLES_NU = program.uniformLocation("SAMPLES_NU");
-    _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation("dInverseModelTransformMatrix");
-    _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
-    _uniformCache2.dInverseSgctProjectionToModelTransformMatrix = program.uniformLocation("dInverseSgctProjectionToModelTransformMatrix");
-    _uniformCache2.dInverseSGCTEyeToTmpRotTransformMatrix = program.uniformLocation("dInverseSGCTEyeToTmpRotTransformMatrix");
-    _uniformCache2.dCampos = program.uniformLocation("dCampos");
-    _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
-    _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
-    _uniformCache2.hardShadows = program.uniformLocation("hardShadows");
-    _uniformCache2.transmittanceTexture = program.uniformLocation("transmittanceTexture");
-    _uniformCache2.irradianceTexture = program.uniformLocation("irradianceTexture");
-    _uniformCache2.inscatterTexture = program.uniformLocation("inscatterTexture");
-}
-
-void AtmosphereDeferredcaster::update(const UpdateData&) {
-
-}
-
 void AtmosphereDeferredcaster::setModelTransform(const glm::dmat4& transform) {
     _modelTransform = transform;
 }
@@ -481,13 +475,13 @@ void AtmosphereDeferredcaster::setPlanetRadius(float planetRadius) {
 }
 
 void AtmosphereDeferredcaster::setPlanetAverageGroundReflectance(
-                                                                float averageGReflectance)
+    float averageGReflectance)
 {
     _planetAverageGroundReflectance = averageGReflectance;
 }
 
 void AtmosphereDeferredcaster::setPlanetGroundRadianceEmittion(
-                                                             float groundRadianceEmittion)
+    float groundRadianceEmittion)
 {
     _planetGroundRadianceEmittion = groundRadianceEmittion;
 }
@@ -518,19 +512,19 @@ void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
 }
 
 void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(
-                                                           const glm::vec3& rayScattCoeff)
+    const glm::vec3& rayScattCoeff)
 {
     _rayleighScatteringCoeff = rayScattCoeff;
 }
 
 void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(
-                                                           const glm::vec3& ozoneExtCoeff)
+    const glm::vec3& ozoneExtCoeff)
 {
     _ozoneExtinctionCoeff = ozoneExtCoeff;
 }
 
 void AtmosphereDeferredcaster::setMieScatteringCoefficients(
-                                                           const glm::vec3& mieScattCoeff)
+    const glm::vec3& mieScattCoeff)
 {
     _mieScatteringCoeff = mieScattCoeff;
 }
@@ -549,7 +543,7 @@ void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
 }
 
 void AtmosphereDeferredcaster::setShadowConfigArray(
-                                const std::vector<ShadowConfiguration>& shadowConfigArray)
+    const std::vector<ShadowConfiguration>& shadowConfigArray)
 {
     _shadowConfArray = shadowConfigArray;
 }
@@ -559,7 +553,7 @@ void AtmosphereDeferredcaster::enableSunFollowing(bool enable) {
 }
 
 void AtmosphereDeferredcaster::setPrecalculationTextureScale(
-                                                        float preCalculatedTexturesScale)
+    float preCalculatedTexturesScale)
 {
     _calculationTextureScale = preCalculatedTexturesScale;
     _transmittance_table_width *= static_cast<unsigned int>(_calculationTextureScale);
@@ -825,8 +819,8 @@ void AtmosphereDeferredcaster::deleteUnusedComputationTextures() {
 }
 
 void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
-                                                   GLenum drawBuffers[1],
-                                                   GLsizei vertexSize)
+    GLenum drawBuffers[1],
+    GLsizei vertexSize)
 {
     ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit irradianceTableTextureUnit;
@@ -1051,9 +1045,9 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         }
         std::stringstream sst;
         if (_saveCalculationTextures) {
-                sst << "deltaJ_texture-scattering_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
-                    _mu_s_samples * _nu_samples, _mu_samples);
+            sst << "deltaJ_texture-scattering_order-" << scatteringOrder << ".ppm";
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaJProgramObject->deactivate();
 
@@ -1100,10 +1094,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "deltaE_texture-scattering_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
-                    _delta_e_table_width, _delta_e_table_height);
+            sst.str(std::string());
+            sst << "deltaE_texture-scattering_order-" << scatteringOrder << ".ppm";
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceSupTermsProgramObject->deactivate();
 
@@ -1135,14 +1129,14 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "deltaS_texture-scattering_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(
-                    GL_COLOR_ATTACHMENT0,
-                    sst.str(),
-                    _mu_s_samples * _nu_samples,
-                    _mu_samples
-                );
+            sst.str(std::string());
+            sst << "deltaS_texture-scattering_order-" << scatteringOrder << ".ppm";
+            saveTextureToPPMFile(
+                GL_COLOR_ATTACHMENT0,
+                sst.str(),
+                _mu_s_samples * _nu_samples,
+                _mu_samples
+            );
         }
         _inScatteringSupTermsProgramObject->deactivate();
 
@@ -1169,10 +1163,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(_irradianceFinalProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "irradianceTable_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
-                    _delta_e_table_width, _delta_e_table_height);
+            sst.str(std::string());
+            sst << "irradianceTable_order-" << scatteringOrder << ".ppm";
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceFinalProgramObject->deactivate();
 
@@ -1198,10 +1192,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "inscatteringTable_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
-                    _mu_s_samples * _nu_samples, _mu_samples);
+            sst.str(std::string());
+            sst << "inscatteringTable_order-" << scatteringOrder << ".ppm";
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaSSupTermsProgramObject->deactivate();
 
@@ -1304,7 +1298,7 @@ void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloa
 }
 
 void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
-                                std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg)
+    std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg)
 {
     shaderProg->setUniform("Rg", _atmospherePlanetRadius);
     shaderProg->setUniform("Rt", _atmosphereRadius);
@@ -1339,7 +1333,7 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
 }
 
 void AtmosphereDeferredcaster::checkFrameBufferState(
-                                                    const std::string& codePosition) const
+    const std::string& codePosition) const
 {
     if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framework not built. " + codePosition);
@@ -1360,8 +1354,8 @@ void AtmosphereDeferredcaster::checkFrameBufferState(
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
             LERROR("Returned if GL_READ_BUFFER is not GL_NONE and the value of "
-            "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment "
-            "point named by GL_READ_BUFFER.");
+                "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE is GL_NONE for the color attachment "
+                "point named by GL_READ_BUFFER.");
             break;
         case GL_FRAMEBUFFER_UNSUPPORTED:
             LERROR("Returned if the combination of internal formats of the attached "
@@ -1399,25 +1393,25 @@ void AtmosphereDeferredcaster::renderQuadForCalc(GLuint vao, GLsizei numberOfVer
 }
 
 void AtmosphereDeferredcaster::step3DTexture(
-                                std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
-                                int layer, bool doCalc)
+    std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
+    int layer, bool doCalc)
 {
     // See OpenGL redbook 8th Edition page 556 for Layered Rendering
     if (doCalc) {
-        float earth2  = _atmospherePlanetRadius * _atmospherePlanetRadius;
-        float atm2    = _atmosphereRadius * _atmosphereRadius;
-        float diff    = atm2 - earth2;
-        float ri      = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
-        float ri_2    = ri * ri;
+        float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
+        float atm2 = _atmosphereRadius * _atmosphereRadius;
+        float diff = atm2 - earth2;
+        float ri = static_cast<float>(layer) / static_cast<float>(_r_samples - 1);
+        float ri_2 = ri * ri;
         float epsilon =
             (layer == 0) ?
             0.01f :
             (layer == (static_cast<int>(_r_samples) - 1)) ? -0.001f : 0.0f;
-        float r       = sqrtf(earth2 + ri_2 * diff) + epsilon;
-        float dminG   = r - _atmospherePlanetRadius;
-        float dminT   = _atmosphereRadius - r;
-        float dh      = sqrtf(r * r - earth2);
-        float dH      = dh + sqrtf(diff);
+        float r = sqrtf(earth2 + ri_2 * diff) + epsilon;
+        float dminG = r - _atmospherePlanetRadius;
+        float dminT = _atmosphereRadius - r;
+        float dh = sqrtf(r * r - earth2);
+        float dH = dh + sqrtf(diff);
 
         shaderProg->setUniform("r", r);
         shaderProg->setUniform("dhdH", dminT, dH, dminG, dh);
@@ -1427,8 +1421,8 @@ void AtmosphereDeferredcaster::step3DTexture(
 }
 
 void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachment,
-                                                    const std::string& fileName,
-                                                    int width, int height) const
+    const std::string& fileName,
+    int width, int height) const
 {
     std::fstream ppmFile;
 
@@ -1464,8 +1458,8 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachme
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 ppmFile << static_cast<unsigned int>(pixels[k]) << " "
-                        << static_cast<unsigned int>(pixels[k + 1]) << " "
-                        << static_cast<unsigned int>(pixels[k + 2]) << " ";
+                    << static_cast<unsigned int>(pixels[k + 1]) << " "
+                    << static_cast<unsigned int>(pixels[k + 2]) << " ";
                 k += 3;
             }
             ppmFile << std::endl;
@@ -1477,8 +1471,8 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachme
 }
 
 bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
-                                                     const glm::dvec3& position,
-                                                     double radius) const
+    const glm::dvec3& position,
+    double radius) const
 {
 
     // Frustum Planes
@@ -1495,36 +1489,36 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
     glm::dvec3 farNormal = col4 - col3;
 
     // Plane Distances
-    double leftDistance   = MVMatrix[15] + MVMatrix[12];
-    double rightDistance  = MVMatrix[15] - MVMatrix[12];
+    double leftDistance = MVMatrix[15] + MVMatrix[12];
+    double rightDistance = MVMatrix[15] - MVMatrix[12];
     double bottomDistance = MVMatrix[15] + MVMatrix[13];
-    double topDistance    = MVMatrix[15] - MVMatrix[13];
-    double nearDistance   = MVMatrix[15] + MVMatrix[14];
-    double farDistance    = MVMatrix[15] - MVMatrix[14];
+    double topDistance = MVMatrix[15] - MVMatrix[13];
+    double nearDistance = MVMatrix[15] + MVMatrix[14];
+    double farDistance = MVMatrix[15] - MVMatrix[14];
 
     // Normalize Planes
     double invMag = 1.0 / glm::length(leftNormal);
-    leftNormal   *= invMag;
+    leftNormal *= invMag;
     leftDistance *= invMag;
 
     invMag = 1.0 / glm::length(rightNormal);
-    rightNormal   *= invMag;
+    rightNormal *= invMag;
     rightDistance *= invMag;
 
     invMag = 1.0 / glm::length(bottomNormal);
-    bottomNormal   *= invMag;
+    bottomNormal *= invMag;
     bottomDistance *= invMag;
 
     invMag = 1.0 / glm::length(topNormal);
-    topNormal   *= invMag;
+    topNormal *= invMag;
     topDistance *= invMag;
 
     invMag = 1.0 / glm::length(nearNormal);
-    nearNormal   *= invMag;
+    nearNormal *= invMag;
     nearDistance *= invMag;
 
     invMag = 1.0 / glm::length(farNormal);
-    farNormal   *= invMag;
+    farNormal *= invMag;
     farDistance *= invMag;
 
     if ((glm::dot(leftNormal, position) + leftDistance) < -radius) {
@@ -1544,7 +1538,7 @@ bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
     }
     // The far plane testing is disabled because the atm has no depth.
     /*else if ((glm::dot(farNormal, position) + farDistance) < -radius) {
-        return false;
+    return false;
     }*/
 
     return true;

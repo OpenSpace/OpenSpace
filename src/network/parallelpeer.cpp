@@ -287,6 +287,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& messageContent) 
         pose.focusNode = kf._focusNode;
         pose.position = kf._position;
         pose.rotation = kf._rotation;
+        pose.scale = kf._scale;
         pose.followFocusNodeRotation = kf._followNodeRotation;
 
         OsEng.navigationHandler().keyframeNavigator().addKeyframe(kf._timestamp, pose);
@@ -539,6 +540,7 @@ void ParallelPeer::sendCameraKeyframe() {
     }
 
     kf._focusNode = focusNode->identifier();
+    kf._scale = OsEng.navigationHandler().camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.windowWrapper().applicationTime();

@@ -32,6 +32,7 @@ in vec3 vs_brightness[];
 in vec3 vs_velocity[];
 in vec4 vs_gPosition[];
 in float vs_speed[];
+in vec4 vs_worldPosition[];
 
 layout(triangle_strip, max_vertices = 4) out;
 
@@ -42,11 +43,13 @@ out vec3 ge_velocity;
 out float ge_speed;
 out vec2 texCoord;
 out float ge_observationDistance;
+out vec4 ge_worldPosition;
 
 uniform float viewScaling;
 uniform float scaleFactor;
 uniform float billboardSize;
 uniform vec2 screenSize;
+uniform vec3 eyePosition;
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
@@ -56,15 +59,63 @@ const vec2 corners[4] = vec2[4](
 );
 
 void main() {
+
+    if ((vs_worldPosition[0].x == 0.0) &&
+        (vs_worldPosition[0].y == 0.0) &&
+        (vs_worldPosition[0].z == 0.0))
+    {
+        return;
+    }
+
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
     ge_speed = vs_speed[0];
-
-    float absoluteMagnitude = vs_brightness[0].z;
+    ge_worldPosition = vs_worldPosition[0];
 
     vec4 projectedPoint = gl_in[0].gl_Position;
-    vec2 starSize = vec2(billboardSize) / screenSize * projectedPoint.w;
+    
+    float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
 
+    float luminosity = ge_brightness.y;
+      
+    // Working like Partiview
+    float pSize = 3.0E5;
+    float slum = 1.0;
+    float samplingFactor = 1.0;
+    float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
+    
+    vec2 multiplier = vec2(apparentBrightness * projectedPoint.w);
+   
+    // Max Star Sizes:
+    // Fragment Coords:
+    vec2 bottomLeft = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[1])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
+    vec2 topRight   = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[2])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
+
+    float height = abs(topRight.y - bottomLeft.y);
+    float width  = abs(topRight.x - bottomLeft.x);    
+    float var    = (height + width);
+
+    float maxBillboardSize = billboardSize;
+    float minBillboardSize = 1.0;
+
+    if ((height > maxBillboardSize) ||
+        (width > maxBillboardSize)) {
+    //if (height > maxBillboardSize) {        
+        float correctionScale = height > maxBillboardSize ? maxBillboardSize / (topRight.y - bottomLeft.y) :
+                                                            maxBillboardSize / (topRight.x - bottomLeft.x);
+        multiplier *= correctionScale;
+    } else {            
+        if (width < 2.0f * minBillboardSize) {
+            float maxVar = 2.0f * minBillboardSize;
+            float minVar = minBillboardSize;
+            float ta = ( (var - minVar)/(maxVar - minVar) );
+            if (ta == 0.0f)
+                return;
+        }        
+    } 
+
+    vec2 starSize = multiplier;
+    
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
         gl_Position = projectedPoint + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
