@@ -80,7 +80,7 @@ void main() {
     float luminosity = ge_brightness.y;
       
     // Working like Partiview
-    float pSize = pow(10, magnitudeExponent/2.0);//2E4;
+    float pSize = pow(10, magnitudeExponent);//2E4;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
