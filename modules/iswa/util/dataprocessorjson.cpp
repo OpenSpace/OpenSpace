@@ -85,7 +85,7 @@ void DataProcessorJson::addDataValues(std::string data,
             json row = variables[options[i].description];
 //            int rowsize = row.size();
 
-            for(int y=0; y<row.size(); y++){
+            for(size_t y = 0; y < row.size(); ++y) {
                 json col = row.at(y);
                 int colsize = static_cast<int>(col.size());
 

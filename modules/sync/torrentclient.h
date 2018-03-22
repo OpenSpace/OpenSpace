@@ -97,7 +97,7 @@ public:
         TorrentProgressCallback cb);
 
     void removeTorrent(TorrentId id);
-    
+
 private:
     struct Torrent {
         TorrentId id;

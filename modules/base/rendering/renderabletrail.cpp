@@ -169,6 +169,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
     )
 {
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
@@ -226,6 +229,7 @@ void RenderableTrail::initializeGL() {
         absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
     );
 
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.color = _programObject->uniformLocation("color");
@@ -255,6 +259,7 @@ bool RenderableTrail::isReady() const {
 
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
+    _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *

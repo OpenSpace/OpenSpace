@@ -48,7 +48,7 @@ namespace {
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value."
     };
-    
+
     static const openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
@@ -94,19 +94,25 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
         "ScreenSpaceSpout"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceSpout");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceSpout");
         }
         else {
-            setName("ScreenSpaceSpout  " + std::to_string(id));
+            setIdentifier("ScreenSpaceSpout" + std::to_string(iIdentifier));
         }
         ++id;
     }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceSpout " + std::to_string(iIdentifier));
+    }
+
     _isSpoutDirty = true;
 
     if (dictionary.hasKey(NameInfo.identifier)) {
@@ -115,7 +121,7 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     }
 
     _spoutName.onChange([this]() {
-        _isSpoutDirty = true; 
+        _isSpoutDirty = true;
         _isErrorMessageDisplayed = false;
 
         _receiver->SetActiveSender(_spoutName.value().c_str());
@@ -214,7 +220,7 @@ void ScreenSpaceSpout::update() {
 
     unsigned int width;
     unsigned int height;
-    
+
     bool receiveSuccess = _receiver->ReceiveTexture(
         _currentSenderName,
         width,

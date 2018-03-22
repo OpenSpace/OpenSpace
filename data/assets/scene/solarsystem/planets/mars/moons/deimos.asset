@@ -12,8 +12,8 @@ local kernels = asset.require('../mar097').Kernels
 
 
 local Deimos = {
-    Name = "Deimos",
-    Parent = transforms.MarsBarycenter.Name,
+    Identifier = "Deimos",
+    Parent = transforms.MarsBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -36,12 +36,14 @@ local Deimos = {
         }
     },
     Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
-    GuiPath = "/Solar System/Planets/Mars"
+    GUI = {
+        Path = "/Solar System/Planets/Mars"
+    }
 }
 
 local DeimosTrail = {
-    Name = "DeimosTrail",
-    Parent = transforms.MarsBarycenter.Name,
+    Identifier = "DeimosTrail",
+    Parent = transforms.MarsBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -54,7 +56,10 @@ local DeimosTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_mars" },
-    GuiPath = "/Solar System/Planets/Mars"
+    GUI = {
+        Name = "Deimos Trail",
+        Path = "/Solar System/Planets/Mars"
+    }
 }
 
 

@@ -5,8 +5,8 @@ asset.require("spice/base")
 
 
 local NeptuneTrail = {
-    Name = "NeptuneTrail",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "NeptuneTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -30,7 +30,10 @@ local NeptuneTrail = {
         Resolution = 1000
     },
     Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
-    GuiPath = "/Solar System/Planets/Neptune"
+    GUI = {
+        Name = "Neptune Trail",
+        Path = "/Solar System/Planets/Neptune"
+    }
 }
 
 

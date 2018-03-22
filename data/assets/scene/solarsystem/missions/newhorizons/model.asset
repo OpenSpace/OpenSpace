@@ -18,8 +18,8 @@ local models = asset.syncedResource({
 })
 
 local NewHorizons = {
-    Name = "NewHorizons",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NewHorizons",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "NEW HORIZONS",
@@ -29,7 +29,10 @@ local NewHorizons = {
         }, 
         ColorTexture = textures .. "/NHTexture.jpg"
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "New Horizons",
+        Path = "/Solar System/Missions/New Horizons"
+    }
 }
 
 

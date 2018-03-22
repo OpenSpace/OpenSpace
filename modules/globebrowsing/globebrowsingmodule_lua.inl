@@ -155,7 +155,7 @@ int goToChunk(lua_State* L) {
 
 int goToGeo(lua_State* L) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::goToGeo");
-    
+
     using ghoul::lua::luaTypeToString;
 
     double latitude = lua_tonumber(L, 1);

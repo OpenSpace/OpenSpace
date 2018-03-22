@@ -1,0 +1,13 @@
+.Sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.active {
+  height: 100%;
+}
+
+.icon {
+  font-size: 18px;
+}

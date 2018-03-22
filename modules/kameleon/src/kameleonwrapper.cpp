@@ -45,7 +45,9 @@
 #pragma warning (pop)
 #endif // WIN32
 
+#ifdef WIN32
 #define _USE_MATH_DEFINES
+#endif // WIN32
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>

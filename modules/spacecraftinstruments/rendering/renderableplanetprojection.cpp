@@ -200,19 +200,18 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         "RenderablePlanetProjection"
     );
 
-    std::string name;
-    bool success = dict.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "");
-
     ghoul::Dictionary geometryDictionary;
-    success = dict.getValue(KeyGeometry, geometryDictionary);
+    bool success = dict.getValue(KeyGeometry, geometryDictionary);
     if (success) {
-        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        using planetgeometry::PlanetGeometry;
-        _geometry = PlanetGeometry::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(
+            geometryDictionary
+        );
     }
 
-    _projectionComponent.initialize(dict.value<ghoul::Dictionary>(KeyProjection));
+    _projectionComponent.initialize(
+        identifier(),
+        dict.value<ghoul::Dictionary>(KeyProjection)
+    );
 
     _colorTexturePaths.addOption(0, NoImageText);
     _colorTexturePaths.onChange([this](){
@@ -604,7 +603,10 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(
+        _mainUniformCache.modelTransform,
+        glm::mat4(modelTransform)
+    );
     _programObject->setUniform(_mainUniformCache
         .modelViewProjectionTransform,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)

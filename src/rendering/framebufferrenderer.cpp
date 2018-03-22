@@ -466,7 +466,7 @@ void FramebufferRenderer::updateRaycastData() {
             _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " exit",
                 vsPath,
-                ExitFragmentShaderPath,
+                absPath(ExitFragmentShaderPath),
                 dict
             );
         } catch (ghoul::RuntimeError e) {
@@ -474,7 +474,7 @@ void FramebufferRenderer::updateRaycastData() {
         }
         try {
             ghoul::Dictionary outsideDict = dict;
-            outsideDict.setValue("getEntryPath", GetEntryOutsidePath);
+            outsideDict.setValue("getEntryPath", absPath(GetEntryOutsidePath));
             _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " raycast",
                 absPath(vsPath),
@@ -486,7 +486,7 @@ void FramebufferRenderer::updateRaycastData() {
         }
         try {
             ghoul::Dictionary insideDict = dict;
-            insideDict.setValue("getEntryPath", GetEntryInsidePath);
+            insideDict.setValue("getEntryPath", absPath(GetEntryInsidePath));
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " inside raycast",
                 absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
@@ -533,12 +533,13 @@ void FramebufferRenderer::updateDeferredcastData() {
 
         try {
             ghoul::Dictionary deferredDict = dict;
-            //deferredDict.setValue("getEntryPath", GetEntryOutsidePath);
+            //deferredDict.setValue("getEntryPath", absPath(GetEntryOutsidePath));
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
                 absPath(vsPath),
                 absPath(deferredShaderPath),
                 deferredDict);
+            
             using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
             _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
                 IgnoreError::Yes
@@ -546,6 +547,8 @@ void FramebufferRenderer::updateDeferredcastData() {
             _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
                 IgnoreError::Yes
             );
+            
+            caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
         }
         catch (ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -1117,7 +1120,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, dBuffer);
-        glClear(GL_COLOR_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT);
 
         bool firstPaint = true;
 
@@ -1203,20 +1206,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
     }
 
-    if (!tasks.deferredcasterTasks.empty()) {
-        // JCC: Temporarily disabled. Need to test it on mac and linux before final
-        // merging.
-        /*glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
-        GLenum dBuffer[] = { GL_COLOR_ATTACHMENT0 };
-        glDrawBuffers(1, dBuffer);
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        */
-        //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    } else {
+    if (tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         _resolveProgram->activate();
 
@@ -1298,7 +1288,7 @@ std::vector<double> FramebufferRenderer::mSSAPattern() const {
 
 void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
-    dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
+    dict.setValue("fragmentRendererPath", absPath(RenderFragmentShaderPath));
 
     _rendererData = dict;
 

@@ -14,5 +14,5 @@ end)
 
 
 asset.onDeinitialize(function ()
-	openspace.scriptScheduler.clear()
+    openspace.scriptScheduler.clear()
 end)

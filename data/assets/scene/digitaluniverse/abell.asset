@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Abell Galaxy Clusters",
+    Identifier = "Abell",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -38,7 +38,10 @@ local object = {
             0.0,              0.0,            0.0,           1.0
         }
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Abell Galaxy Clusters",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 
