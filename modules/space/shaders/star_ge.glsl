@@ -50,6 +50,7 @@ uniform float scaleFactor;
 uniform float billboardSize;
 uniform vec2 screenSize;
 uniform vec3 eyePosition;
+uniform float magnitudeExponent;
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
@@ -79,12 +80,12 @@ void main() {
     float luminosity = ge_brightness.y;
       
     // Working like Partiview
-    float pSize = 3.0E5;
+    float pSize = pow(10, magnitudeExponent/2.0);//2E4;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
     
-    vec2 multiplier = vec2(apparentBrightness * projectedPoint.w);
+    vec2 multiplier = vec2(apparentBrightness/screenSize * projectedPoint.w);
    
     // Max Star Sizes:
     // Fragment Coords:
@@ -95,7 +96,7 @@ void main() {
     float width  = abs(topRight.x - bottomLeft.x);    
     float var    = (height + width);
 
-    float maxBillboardSize = billboardSize;
+    float maxBillboardSize = luminosity > 100.0 ? billboardSize + 40 : billboardSize;
     float minBillboardSize = 1.0;
 
     if ((height > maxBillboardSize) ||
