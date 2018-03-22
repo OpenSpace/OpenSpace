@@ -75,7 +75,7 @@ Fragment getFragment() {
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a = pow(fullColor.a, sharpness);
 
-    float d = magnitudeExponent - log(ge_observationDistance) / log(10.0);
+    float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
     fullColor.a *= clamp(d, 0.0, 1.0);
 
     Fragment frag;
