@@ -27,6 +27,7 @@
 in vec4 vs_positionScreenSpace;
 in vec4 vs_gPosition;
 in float fade;
+in float v_pointSize;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -45,19 +46,28 @@ Fragment getFragment() {
     frag.depth = vs_positionScreenSpace.w;
     frag.blend = BLEND_MODE_ADDITIVE;
 
+    vec4 depthCorrection = vec4(0.0, 0.0, 100.0, 0.0);
+
     if (renderPhase == RenderPhasePoints) {
         // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
         // smoothstep to gradually decrease the alpha on the edges of the point
         vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-        frag.color.a *= 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
-    }
+        //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));        
+        float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
+        float transparencyCorrection = frag.color.a * circleClipping;
+        if (transparencyCorrection < 0.9) {
+            discard;
+        }
 
+        frag.color.a = transparencyCorrection;
+    }    
     // G-Buffer
     // JCC: We need to fix the precision here.
     frag.gPosition = vs_gPosition + vec4(0.0, 0.0, 100.0, 0.0);
+    
     // There is no normal here
     // TODO: Add the correct normal if necessary (JCC)
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
     return frag;
 }
