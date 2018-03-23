@@ -395,20 +395,21 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             auto tmpDict = dictionary.value<ghoul::Dictionary>
                 (ColumnNamesInfo.identifier);
 
-            auto tmpKeys = tmpDict.keys();
-            for (auto key : tmpKeys) {
-                _columnNames.push_back(tmpDict.value<std::string>(key));
+            auto stringKeys = tmpDict.keys();
+            auto intKeys = std::set<int>();
+
+            // Ugly fix for ASCII sorting when there are more columns read than 10.
+            for (auto key : stringKeys) {
+                intKeys.insert(std::stoi(key));
+            }
+
+            for (auto key : intKeys) {
+                _columnNames.push_back(tmpDict.value<std::string>(std::to_string(key)));
             }
 
             // Copy values to the StringListproperty to be shown in the Property list.
             _columnNamesList = _columnNames;
         }
-        // There's not any point in exposing this property atm --adaal
-        // _columnNamesList.onChange([&] { 
-        //     _dataIsDirty = true; 
-        //     _columnNames = _columnNamesList;
-        // });
-        // addProperty(_columnNamesList);
 
         if (_firstRow > _lastRow) {
             throw ghoul::RuntimeError("User defined FirstRow is bigger than LastRow.");
@@ -823,7 +824,7 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
 
         _nValuesPerStar = _columnNames.size();
         int nNullArr = 0;
-        size_t defaultCols = 8;
+        size_t defaultCols = 17; // Default: 8, Full: 17
 
         std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
         std::vector<float> posXcol = tableContent[_columnNames[0]];
@@ -835,15 +836,15 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         std::vector<float> magCol = tableContent[_columnNames[6]];
         std::vector<float> parallax = tableContent[_columnNames[7]];
 
-        //std::vector<float> parallax_err = tableContent[_columnNames[8]];
-        //std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
-        //std::vector<float> pr_mot_ra_err = tableContent[_columnNames[10]];
-        //std::vector<float> pr_mot_dec = tableContent[_columnNames[11]];
-        //std::vector<float> pr_mot_dec_err = tableContent[_columnNames[12]];
-        //std::vector<float> tycho_b = tableContent[_columnNames[13]];
-        //std::vector<float> tycho_b_err = tableContent[_columnNames[14]];
-        //std::vector<float> tycho_v = tableContent[_columnNames[15]];
-        //std::vector<float> tycho_v_err = tableContent[_columnNames[16]];
+        std::vector<float> parallax_err = tableContent[_columnNames[8]];
+        std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
+        std::vector<float> pr_mot_ra_err = tableContent[_columnNames[10]];
+        std::vector<float> pr_mot_dec = tableContent[_columnNames[11]];
+        std::vector<float> pr_mot_dec_err = tableContent[_columnNames[12]];
+        std::vector<float> tycho_b = tableContent[_columnNames[13]];
+        std::vector<float> tycho_b_err = tableContent[_columnNames[14]];
+        std::vector<float> tycho_v = tableContent[_columnNames[15]];
+        std::vector<float> tycho_v_err = tableContent[_columnNames[16]];
 
         for (int i = 0; i < nStars; ++i) {
             std::vector<float> values(_nValuesPerStar);
@@ -867,15 +868,15 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
             values[idx++] = magCol[i];
             values[idx++] = parallax[i];
 
-            //values[idx++] = parallax_err[i];
-            //values[idx++] = pr_mot_ra[i];
-            //values[idx++] = pr_mot_ra_err[i];
-            //values[idx++] = pr_mot_dec[i];
-            //values[idx++] = pr_mot_dec_err[i];
-            //values[idx++] = tycho_b[i];
-            //values[idx++] = tycho_b_err[i];
-            //values[idx++] = tycho_v[i];
-            //values[idx++] = tycho_v_err[i];
+            values[idx++] = parallax_err[i];
+            values[idx++] = pr_mot_ra[i];
+            values[idx++] = pr_mot_ra_err[i];
+            values[idx++] = pr_mot_dec[i];
+            values[idx++] = pr_mot_dec_err[i];
+            values[idx++] = tycho_b[i];
+            values[idx++] = tycho_b_err[i];
+            values[idx++] = tycho_v[i];
+            values[idx++] = tycho_v_err[i];
 
             // Read extra columns, if any. This will slow down the sorting tremendously!
             for (size_t col = defaultCols; col < _nValuesPerStar; ++col) {

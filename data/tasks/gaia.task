@@ -2,7 +2,7 @@ return {
     {
         Type = "ReadFitsTask",
         InFilePath = "C:/Users/openspace/Documents/adaal265/data/TIGS_v9.0.fits",
-        OutFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/Sorted_DR1.bin",
+        OutFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/Sorted_DR1_17col.bin",
         FirstRow = 1,
         LastRow = 2539913, -- Max: 2539913
         ColumnNames = {
@@ -14,15 +14,15 @@ return {
             "Velocity_Z",
             "Gaia_G_Mag",
             "Gaia_Parallax",
-            --"Gaia_Parallax_Err",
-            --"Gaia_Proper_Motion_RA",
-            --"Gaia_Proper_Motion_RA_Err",
-            --"Gaia_Proper_Motion_Dec",
-            --"Gaia_Proper_Motion_Dec_Err",
-            --"Tycho_B_Mag",
-            --"Tycho_B_Mag_Err",
-            --"Tycho_V_Mag",
-            --"Tycho_V_Mag_Err",
+            "Gaia_Parallax_Err",
+            "Gaia_Proper_Motion_RA",
+            "Gaia_Proper_Motion_RA_Err",
+            "Gaia_Proper_Motion_Dec",
+            "Gaia_Proper_Motion_Dec_Err",
+            "Tycho_B_Mag",
+            "Tycho_B_Mag_Err",
+            "Tycho_V_Mag",
+            "Tycho_V_Mag_Err"
         }
     }
 }
