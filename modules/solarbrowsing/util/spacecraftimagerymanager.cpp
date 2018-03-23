@@ -144,7 +144,7 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
 
                         std::string relPath;
                         myfile >> relPath;
-                        im.filename = rootPath + relPath;
+                        im.filename = rootPath + "/" + relPath;
 
                         myfile >> im.fullResolution;
                         myfile >> im.scale;
