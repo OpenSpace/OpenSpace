@@ -30,8 +30,8 @@ local object = {
         File = speck .. "/stars.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 3.8,
-        BillboardSize = 30,
+        MagnitudeExponent = 10.5,
+        BillboardSize = 47.5,
         Sharpness = 1.3
     },
     GUI = {

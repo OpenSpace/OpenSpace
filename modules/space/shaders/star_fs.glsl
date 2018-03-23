@@ -75,18 +75,19 @@ Fragment getFragment() {
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a = pow(fullColor.a, sharpness);
 
-    float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
-    fullColor.a *= clamp(d, 0.0, 1.0);
+    //float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
+    //fullColor.a *= clamp(d, 0.0, 1.0);
 
+    if (fullColor.a == 0) {
+        discard;
+    }
+    
     Fragment frag;
     frag.color = fullColor;
     frag.depth = safeLength(vs_position);
     frag.gPosition  = ge_gPosition;
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     
-    if (fullColor.a == 0) {
-        discard;
-    }
 
     return frag;
 }

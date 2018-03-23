@@ -51,5 +51,5 @@ void main() {
     vec4 viewPosition = view * vs_worldPosition;
 
     vs_gPosition = viewPosition;
-    gl_Position = projection * vs_gPosition;
+    gl_Position = projection * viewPosition;
 }

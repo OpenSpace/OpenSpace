@@ -49,7 +49,7 @@ uniform float viewScaling;
 uniform float scaleFactor;
 uniform float billboardSize;
 uniform vec2 screenSize;
-uniform vec3 eyePosition;
+uniform dvec3 eyePosition;
 uniform float magnitudeExponent;
 
 const vec2 corners[4] = vec2[4]( 
@@ -58,6 +58,8 @@ const vec2 corners[4] = vec2[4](
     vec2(1.0, 1.0), 
     vec2(1.0, 0.0) 
 );
+
+const double PARSEC =  3.0856776E16;
 
 void main() {
 
@@ -75,12 +77,14 @@ void main() {
 
     vec4 projectedPoint = gl_in[0].gl_Position;
     
-    float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
-
+    dvec3 starPositionInParsecs = dvec3(ge_worldPosition.xyz) / PARSEC;
+    dvec3 eyePositionInParsecs  = eyePosition / PARSEC;
+    float distanceToStarInParsecs = float(length(starPositionInParsecs - eyePositionInParsecs));
     float luminosity = ge_brightness.y;
       
     // Working like Partiview
-    float pSize = pow(10, magnitudeExponent);//2E4;
+    //float pSize = pow(10, magnitudeExponent);//2E4;
+    float pSize = luminosity * exp(magnitudeExponent + 15.0);//2E4;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);

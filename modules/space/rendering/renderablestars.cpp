@@ -310,6 +310,7 @@ void RenderableStars::initializeGL() {
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+    _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
 
     bool success = loadData();
     if (!success) {
@@ -362,6 +363,8 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
     );
     
+    _program->setUniform(_uniformCache.eyePosition, data.camera.eyePositionVec3());
+
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
     _pointSpreadFunctionTexture->bind();
