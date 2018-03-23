@@ -30,6 +30,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -358,11 +359,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.billboardSize, _billboardSize);
     _program->setUniform(
         _uniformCache.screenSize,
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
     );
-
-    _program->setUniform("eyePosition", glm::vec3(data.camera.eyePositionVec3()));
-
+    
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
     _pointSpreadFunctionTexture->bind();
