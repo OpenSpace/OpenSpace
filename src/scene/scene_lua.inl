@@ -73,6 +73,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
     bool foundMatching = false;
     std::regex r(regex);
     for (properties::Property* prop : properties) {
+        bool isLastIteration = (prop == properties.back());
         // Check the regular expression for all properties
         std::string id = prop->fullyQualifiedIdentifier();
 
@@ -107,10 +108,10 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
 
                 if (interpolationDuration == 0.0) {
                     OsEng.renderEngine().scene()->removeInterpolation(prop);
-                    prop->setLuaValue(L);
+                    prop->setLuaValue(L, !isLastIteration);
                 }
                 else {
-                    prop->setLuaInterpolationTarget(L);
+                    prop->setLuaInterpolationTarget(L, !isLastIteration);
                     OsEng.renderEngine().scene()->addInterpolation(
                         prop,
                         static_cast<float>(interpolationDuration),
@@ -184,10 +185,10 @@ int setPropertyCall_single(properties::Property& prop, const std::string& uri,
     else {
         if (duration == 0.0) {
             OsEng.renderEngine().scene()->removeInterpolation(&prop);
-            prop.setLuaValue(L);
+            prop.setLuaValue(L, false);
         }
         else {
-            prop.setLuaInterpolationTarget(L);
+            prop.setLuaInterpolationTarget(L, false);
             OsEng.renderEngine().scene()->addInterpolation(
                 &prop,
                 static_cast<float>(duration),

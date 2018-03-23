@@ -107,7 +107,7 @@ bool Property::getLuaValue(lua_State*) const {
 
 void Property::set(ghoul::any) {}
 
-bool Property::setLuaValue(lua_State*) {
+bool Property::setLuaValue(lua_State*, bool) {
     return false;
 }
 
@@ -318,7 +318,7 @@ std::string Property::generateAdditionalJsonDescription() const {
 }
 
 void Property::setInterpolationTarget(ghoul::any) {}
-void Property::setLuaInterpolationTarget(lua_State*) {}
+void Property::setLuaInterpolationTarget(lua_State*, bool) {}
 void Property::setStringInterpolationTarget(std::string) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 

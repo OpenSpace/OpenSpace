@@ -32,7 +32,7 @@
 
 namespace {
 
-glm::vec3 fromLuaConversion(lua_State* state, bool& success) {
+glm::vec3 fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     glm::vec3 result;
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::vec3>::value; ++i) {
@@ -51,7 +51,7 @@ glm::vec3 fromLuaConversion(lua_State* state, bool& success) {
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, leaveOnStack ? 1 : 2);
     success = true;
     return result;
 }

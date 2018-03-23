@@ -73,7 +73,7 @@ std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className() {
 template <>
 template <>
 std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
-                                                          lua_State* state, bool& success)
+                                       lua_State* state, bool leaveOnStack, bool& success)
 {
     static const int KEY = -2;
     static const int VAL = -1;
@@ -100,7 +100,9 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaVa
         lua_pop(state, 1);
     }
 
+    lua_pop(state, leaveOnStack ? 1 : 2);
     success = true;
+
     return result;
 }
 

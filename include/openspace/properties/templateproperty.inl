@@ -50,6 +50,7 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue(lua_State* state,        \
+                                                                bool leaveOnStack,       \
                                                                 bool& success);          \
                                                                                          \
     template <>                                                                          \
@@ -107,9 +108,10 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
+                                                                      bool leaveOnStack, \
                                                                       bool& successful)  \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(l, successful);                                \
+        return FROM_LUA_LAMBDA_EXPRESSION(l, leaveOnStack, successful);                  \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -229,10 +231,11 @@ bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
 }
 
 template <typename T>
-bool TemplateProperty<T>::setLuaValue(lua_State* state) {
+bool TemplateProperty<T>::setLuaValue(lua_State* state, bool leaveOnStack) {
     bool success = false;
     T thisValue = PropertyDelegate<TemplateProperty<T>>::template fromLuaValue<T>(
         state,
+        leaveOnStack,
         success
     );
     if (success) {

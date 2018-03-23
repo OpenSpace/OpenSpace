@@ -113,9 +113,10 @@ public:
      * parameter <code>T</code> as argument. If the decoding is successful, the new value
      * is set, otherwise it remains unchanged.
      * \param state The Lua state from which the value will be decoded
+     * \param leaveOnStack If true, the value will be left on the lua stack
      * \return <code>true</code> if the decoding succeeded; <code>false</code> otherwise
      */
-    bool setLuaValue(lua_State* state) override;
+    bool setLuaValue(lua_State* state, bool leaveOnStack = false) override;
 
     /// \see Property::typeLua
     int typeLua() const override;

@@ -31,7 +31,9 @@
 
 namespace {
 
-std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
+std::vector<std::string> fromLuaConversion(
+                                       lua_State* state, bool leaveOnStack, bool& success)
+{
     if (!lua_istable(state, -1)) {
         success = false;
         return {};
@@ -49,6 +51,9 @@ std::vector<std::string> fromLuaConversion(lua_State* state, bool& success) {
         }
         lua_pop(state, 1);
     }
+
+    lua_pop(state, leaveOnStack ? 1 : 2);
+
     success = true;
     return result;
 }

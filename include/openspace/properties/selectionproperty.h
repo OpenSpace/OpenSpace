@@ -64,7 +64,7 @@ std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className();
 template <>
 template <>
 std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(
-    lua_State* state, bool& success);
+    lua_State* state, bool leaveOnStack, bool& success);
 
 template <>
 template <>
