@@ -31,10 +31,12 @@
 
 namespace {
 
-bool fromLuaConversion(lua_State* state, bool& success) {
+bool fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     success = (lua_isboolean(state, -1) == 1);
     if (success) {
-        return lua_toboolean(state, -1) == 1;
+        bool b = lua_toboolean(state, -1) == 1;
+        lua_pop(state, leaveOnStack ? 0 : 1);
+        return b;
     }
     else {
         return false;

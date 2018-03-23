@@ -111,6 +111,8 @@ public:
      * implementation will lead to a compile-time error if the class method is not
      * specialized.
      * \param state The Lua state from which the value is retrieved
+     * \param leaveOnStack If true, the values will be left on the lua stack.
+     * If false, the value will be popped.
      * \param success Will be <code>true</code> if the conversion succeeded;
      * <code>false</code> otherwise
      * \return The value that was created by converting the top value from the stack
@@ -118,7 +120,7 @@ public:
      * <code>T = TemplateProperty<std::string></code>, then <code>U = std::string</code>
      */
     template <typename U>
-    static U fromLuaValue(lua_State* state, bool& success);
+    static U fromLuaValue(lua_State* state, bool leaveOnStack, bool& success);
 
     /**
      * This method converts the passed <code>value</code>, encodes it and places it on the

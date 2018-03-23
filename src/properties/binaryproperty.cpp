@@ -32,7 +32,7 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(
     BinaryProperty,
     std::vector<char>,
     std::vector<char>(0),
-    [](lua_State* state, bool& success) -> std::vector<char> {
+    [](lua_State* state, bool leaveOnStack, bool& success) -> std::vector<char> {
         // TODO: Convert from lua
         std::vector<char> result;
         success = true;

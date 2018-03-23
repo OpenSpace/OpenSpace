@@ -31,11 +31,11 @@
 
 namespace {
 
-signed char fromLuaConversion(lua_State* state, bool& success) {
+signed char fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         signed char val = static_cast<signed char>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
+        lua_pop(state, leaveOnStack ? 0 : 1);
         return val;
     }
     else {

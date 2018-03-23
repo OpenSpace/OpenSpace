@@ -176,7 +176,7 @@ public:
      * \return <code>true</code> if the decoding and setting of the value succeeded,
      * <code>false</code> otherwise
      */
-    virtual bool setLuaValue(lua_State* state);
+    virtual bool setLuaValue(lua_State* state, bool leaveOnStack = false);
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
@@ -410,7 +410,7 @@ public:
 
     /// Interpolation methods
     virtual void setInterpolationTarget(ghoul::any value);
-    virtual void setLuaInterpolationTarget(lua_State* state);
+    virtual void setLuaInterpolationTarget(lua_State* state, bool leaveOnStack = false);
     virtual void setStringInterpolationTarget(std::string value);
     
     virtual void interpolateValue(float t,
