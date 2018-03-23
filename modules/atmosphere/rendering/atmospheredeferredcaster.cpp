@@ -1,62 +1,61 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2018                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2018                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
-/***************************************************************************************
-* Modified part of the code (4D texture mechanism) from Eric Bruneton is used in the
-* following code.
-****************************************************************************************/
+ /***************************************************************************************
+ * Modified part of the code (4D texture mechanism) from Eric Bruneton is used in the
+ * following code.
+ ****************************************************************************************/
 
-/**
-* Precomputed Atmospheric Scattering
-* Copyright (c) 2008 INRIA
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions
-* are met:
-* 1. Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-* 2. Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the distribution.
-* 3. Neither the name of the copyright holders nor the names of its
-*    contributors may be used to endorse or promote products derived from
-*    this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-* THE POSSIBILITY OF SUCH DAMAGE.
-
-*/
+ /**
+ * Precomputed Atmospheric Scattering
+ * Copyright (c) 2008 INRIA
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
@@ -90,16 +89,16 @@
 
 
 namespace {
-const char* _loggerCat = "AtmosphereDeferredcaster";
-const char* GlslDeferredcastPath =
-"${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-const char* GlslDeferredcastFSPath =
-"${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-const char* GlslDeferredcastVsPath =
-"${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
+    const char* _loggerCat = "AtmosphereDeferredcaster";
+    const char* GlslDeferredcastPath =
+        "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
+    const char* GlslDeferredcastFSPath =
+        "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
+    const char* GlslDeferredcastVsPath =
+        "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 
-const float ATM_EPS = 2.0;
-const double KM_TO_M = 1000.0;
+    const float ATM_EPS = 2.0;
+    const double KM_TO_M = 1000.0;
 } // namespace
 
 namespace openspace {
@@ -349,8 +348,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     );
                     casterPos *= KM_TO_M; // converting to meters
 
-                                          // First we determine if the caster is shadowing the current planet
-                                          // (all calculations in World Coordinates):
+                    // First we determine if the caster is shadowing the current planet
+                    // (all calculations in World Coordinates):
                     glm::dvec3 planetCasterVec = casterPos - renderData.position.dvec3();
                     glm::dvec3 sourceCasterVec = casterPos - sourcePos;
                     double sc_length = glm::length(sourceCasterVec);
@@ -372,7 +371,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                     shadowData.isShadowing = false;
 
                     if (((d_test - rp_test) < (_atmospherePlanetRadius * KM_TO_M)) &&
-                        //if (((d_test - rp_test) < (_atmosphereRadius * KM_TO_M)) &&
                         (casterDistSun < planetDistSun)) {
                         // The current caster is shadowing the current planet
                         shadowData.isShadowing = true;
@@ -433,8 +431,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData&,
-    const DeferredcastData&,
-    ghoul::opengl::ProgramObject&)
+                                           const DeferredcastData&,
+                                           ghoul::opengl::ProgramObject&)
 {
     // Deactivate the texture units
     _transmittanceTableTextureUnit.deactivate();
@@ -512,7 +510,7 @@ void AtmosphereDeferredcaster::setSunRadianceIntensity(float sunRadiance) {
 }
 
 void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(
-    const glm::vec3& rayScattCoeff)
+                                                           const glm::vec3& rayScattCoeff)
 {
     _rayleighScatteringCoeff = rayScattCoeff;
 }
@@ -524,7 +522,7 @@ void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(
 }
 
 void AtmosphereDeferredcaster::setMieScatteringCoefficients(
-    const glm::vec3& mieScattCoeff)
+                                                           const glm::vec3& mieScattCoeff)
 {
     _mieScatteringCoeff = mieScattCoeff;
 }
@@ -543,7 +541,7 @@ void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
 }
 
 void AtmosphereDeferredcaster::setShadowConfigArray(
-    const std::vector<ShadowConfiguration>& shadowConfigArray)
+                                const std::vector<ShadowConfiguration>& shadowConfigArray)
 {
     _shadowConfArray = shadowConfigArray;
 }
@@ -819,8 +817,8 @@ void AtmosphereDeferredcaster::deleteUnusedComputationTextures() {
 }
 
 void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
-    GLenum drawBuffers[1],
-    GLsizei vertexSize)
+                                                   GLenum drawBuffers[1],
+                                                   GLsizei vertexSize)
 {
     ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit irradianceTableTextureUnit;
@@ -1298,7 +1296,7 @@ void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloa
 }
 
 void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
-    std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg)
+                                std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg)
 {
     shaderProg->setUniform("Rg", _atmospherePlanetRadius);
     shaderProg->setUniform("Rt", _atmosphereRadius);
@@ -1333,7 +1331,7 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
 }
 
 void AtmosphereDeferredcaster::checkFrameBufferState(
-    const std::string& codePosition) const
+                                                    const std::string& codePosition) const
 {
     if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framework not built. " + codePosition);
@@ -1393,8 +1391,8 @@ void AtmosphereDeferredcaster::renderQuadForCalc(GLuint vao, GLsizei numberOfVer
 }
 
 void AtmosphereDeferredcaster::step3DTexture(
-    std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
-    int layer, bool doCalc)
+                                std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
+                                int layer, bool doCalc)
 {
     // See OpenGL redbook 8th Edition page 556 for Layered Rendering
     if (doCalc) {
@@ -1421,8 +1419,9 @@ void AtmosphereDeferredcaster::step3DTexture(
 }
 
 void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachment,
-    const std::string& fileName,
-    int width, int height) const
+                                                    const std::string& fileName,
+                                                    int width,
+                                                    int height) const
 {
     std::fstream ppmFile;
 
@@ -1471,8 +1470,8 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(GLenum color_buffer_attachme
 }
 
 bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
-    const glm::dvec3& position,
-    double radius) const
+                                                     const glm::dvec3& position,
+                                                     double radius) const
 {
 
     // Frustum Planes
