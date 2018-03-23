@@ -33,13 +33,13 @@ const int COLUMNOPTION_COLOR = 2;
 
 layout(points) in;
 in vec3 vs_velocity[];
-in float vs_brightness[];
+in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out vec4 vs_position;
 out vec3 ge_velocity;
-out float ge_brightness;
+out vec2 ge_brightness;
 out vec4 ge_gPosition;               
 out vec2 texCoord;
 out float ge_observationDistance;
@@ -49,7 +49,8 @@ uniform float closeUpBoostDist;
 uniform float billboardSize;
 uniform vec2 screenSize;
 uniform int columnOption;
-uniform float magnitudeExponent;
+uniform float cutOffThreshold;
+uniform float magnitudeBoost;
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
@@ -68,17 +69,25 @@ void main() {
     // Make closer stars look a bit bigger.
     float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
     float closeUpBoost = closeUpBoostDist / observedDistance;
+    float initStarSize = billboardSize;
 
-    // Take magnitude into account if that option is chosen.
+    // Use magnitude for size boost as well.
     if ( columnOption == COLUMNOPTION_COLOR ) {
-        float absoluteMagnitude = vs_brightness[0];
-        closeUpBoost *= absoluteMagnitude / 5.0;
+        // DR1 magnitudes are [4, 20], but could be [-15, 20] according to this chart:
+        // https://qph.fs.quoracdn.net/main-qimg-317a18e3b228efc7d7f67a1632a55961
+        // Negative magnitude => Giants
+        // Big positive magnitude => Dwarfs
+        float absoluteMagnitude = vs_brightness[0].x;
+        float normalizedMagnitude = (absoluteMagnitude - 20) / -1; // (-15 - 20);
+        
+        // TODO: A linear scale is prabably not the best!
+        initStarSize += normalizedMagnitude * (magnitudeBoost / 100);
     }
 
     vs_position = gl_in[0].gl_Position;
-    vec2 starSize = vec2(billboardSize + closeUpBoost) / screenSize * vs_position.w;
+    vec2 starSize = vec2(initStarSize + closeUpBoost) / screenSize * vs_position.w;
 
-    float distThreshold = magnitudeExponent - log(observedDistance) / log(4.0);
+    float distThreshold = cutOffThreshold - log(observedDistance) / log(4.0);
 
     // Discard geometry if star has no position (but wasn't a nullArray).
     // Or if observed distance is above threshold set by magnitudeExponent.

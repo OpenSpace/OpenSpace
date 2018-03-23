@@ -89,7 +89,9 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
     bool _colorTextureIsDirty;
 
-    properties::FloatProperty _magnitudeExponent;
+    properties::FloatProperty _luminosityMultiplier;
+    properties::FloatProperty _magnitudeBoost;
+    properties::FloatProperty _cutOffThreshold;
     properties::FloatProperty _sharpness;
     properties::FloatProperty _billboardSize;
     properties::FloatProperty _closeUpBoostDist;
@@ -103,9 +105,9 @@ private:
     properties::IntProperty _nRenderedStars;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(model, view, viewScaling, projection, magnitudeExponent, sharpness, 
-        billboardSize, screenSize, psfTexture, time, colorTexture, columnOption, 
-        closeUpBoostDist) _uniformCache;
+    UniformCache(model, view, viewScaling, projection, columnOption, luminosityMultiplier,
+        magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
+        screenSize, psfTexture, time, colorTexture) _uniformCache;
 
     std::shared_ptr<OctreeManager> _octreeManager;
 

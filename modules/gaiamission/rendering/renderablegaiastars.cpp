@@ -63,6 +63,7 @@ namespace {
         std::array<float, 3> position; // (x,y,z)
         std::array<float, 3> velocity; // (x,y,z)
         float magnitude;
+        float bvColor;
     };
 
     static const openspace::properties::Property::PropertyInfo FitsFileInfo = {
@@ -93,12 +94,25 @@ namespace {
         "stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
-        "MagnitudeExponent",
-        "MagnitudeExponent",
-        "Adjust star magnitude by 10^MagnitudeExponent. "
-        "Stars closer than this distance are given full opacity. "
-        "Farther away, stars dim proportionally to the logarithm of their distance."
+    static const openspace::properties::Property::PropertyInfo LuminosityMultiplierInfo = {
+        "LuminosityMultiplier",
+        "Luminosity Multiplier",
+        "Factor by which to multiply the luminosity with. [Works only in Color mode!]"
+    };
+
+    static const openspace::properties::Property::PropertyInfo MagnitudeBoostInfo = {
+        "MagnitudeBoost",
+        "Magnitude Boost",
+        "Sets what percent of the star magnitude that will be used as boost to star size. "
+        "[Works only in Color mode!]"
+    };
+
+    static const openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
+        "CutOffThreshold",
+        "Cut Off Threshold",
+        "Set threshold for when to cut off star rendering. "
+        "Stars closer than this threshold are given full opacity. "
+        "Farther away, stars dim proportionally to the 4-logarithm of their distance."
     };
 
     static const openspace::properties::Property::PropertyInfo SharpnessInfo = {
@@ -196,10 +210,22 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 PsfTextureInfo.description
             },
             {
-                MagnitudeExponentInfo.identifier,
+                LuminosityMultiplierInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                MagnitudeExponentInfo.description
+                LuminosityMultiplierInfo.description
+            },
+            {
+                MagnitudeBoostInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                MagnitudeBoostInfo.description
+            },
+            {
+                CutOffThresholdInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                CutOffThresholdInfo.description
             },
             {
                 SharpnessInfo.identifier,
@@ -260,7 +286,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _magnitudeExponent(MagnitudeExponentInfo, 19.f, 0.f, 50.f)
+    , _luminosityMultiplier(LuminosityMultiplierInfo, 100.f, 1.f, 1000.f)
+    , _magnitudeBoost(MagnitudeBoostInfo, 25.f, 0.f, 100.f)
+    , _cutOffThreshold(CutOffThresholdInfo, 38.f, 0.f, 50.f)
     , _sharpness(SharpnessInfo, 1.f, 0.f, 5.f)
     , _billboardSize(BillboardSizeInfo, 15.f, 1.f, 100.f)
     , _closeUpBoostDist(CloseUpBoostDistInfo, 10.f, 1.f, 1000.f)
@@ -341,12 +369,26 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     );
     addProperty(_colorTexturePath);
     
-    if (dictionary.hasKey(MagnitudeExponentInfo.identifier)) {
-        _magnitudeExponent = static_cast<float>(
-            dictionary.value<double>(MagnitudeExponentInfo.identifier)
+    if (dictionary.hasKey(LuminosityMultiplierInfo.identifier)) {
+        _luminosityMultiplier = static_cast<float>(
+            dictionary.value<double>(LuminosityMultiplierInfo.identifier)
             );
     }
-    addProperty(_magnitudeExponent);
+    addProperty(_luminosityMultiplier);
+
+    if (dictionary.hasKey(MagnitudeBoostInfo.identifier)) {
+        _magnitudeBoost = static_cast<float>(
+            dictionary.value<double>(MagnitudeBoostInfo.identifier)
+            );
+    }
+    addProperty(_magnitudeBoost);
+
+    if (dictionary.hasKey(CutOffThresholdInfo.identifier)) {
+        _cutOffThreshold = static_cast<float>(
+            dictionary.value<double>(CutOffThresholdInfo.identifier)
+            );
+    }
+    addProperty(_cutOffThreshold);
 
     if (dictionary.hasKey(SharpnessInfo.identifier)) {
         _sharpness = static_cast<float>(
@@ -446,7 +488,9 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.projection = _program->uniformLocation("projection");
     _uniformCache.columnOption = _program->uniformLocation("columnOption");
-    _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
+    _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
+    _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+    _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
     _uniformCache.sharpness = _program->uniformLocation("sharpness");
     _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
     _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
@@ -542,7 +586,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.viewScaling, viewScaling);
     _program->setUniform(_uniformCache.projection, projection);
     _program->setUniform(_uniformCache.columnOption, _columnOption);
-    _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
+    _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
+    _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
+    _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
     _program->setUniform(_uniformCache.sharpness, _sharpness);
     _program->setUniform(_uniformCache.billboardSize, _billboardSize);
     _program->setUniform(_uniformCache.closeUpBoostDist, 
@@ -685,7 +731,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             );
             glVertexAttribPointer(
                 brightnessDataAttrib,
-                1,
+                2,
                 GL_FLOAT,
                 GL_FALSE,
                 stride,
@@ -761,7 +807,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
         _uniformCache.projection = _program->uniformLocation("projection");
         _uniformCache.columnOption = _program->uniformLocation("columnOption");
-        _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
+        _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
+        _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+        _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
@@ -984,6 +1032,9 @@ std::vector<float> RenderableGaiaStars::sliceStarValues(ColumnOption option,
                 velocity[0], velocity[1], velocity[2]
             } };
         layout.value.magnitude = starValues[6];
+
+        // B-V color is Blue minus Visible filter magnitudes
+        layout.value.bvColor = starValues[13] - starValues[15];
 
         tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
         break;

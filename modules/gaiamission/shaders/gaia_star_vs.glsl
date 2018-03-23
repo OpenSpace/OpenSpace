@@ -33,10 +33,10 @@ const float Parsec = 3.0856776e16;
 
 in vec3 in_position;
 in vec3 in_velocity;
-in float in_brightness;
+in vec2 in_brightness;
 
 out vec3 vs_velocity;
-out float vs_brightness;
+out vec2 vs_brightness;
 out vec4 vs_gPosition;
 
 uniform mat4 model;

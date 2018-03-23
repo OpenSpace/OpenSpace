@@ -32,18 +32,19 @@ const int COLUMNOPTION_COLOR = 2;
 
 in vec4 vs_position;
 in vec3 ge_velocity;
-in float ge_brightness;
+in vec2 ge_brightness;
 in vec4 ge_gPosition;
 in vec2 texCoord;
 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
+uniform float luminosityMultiplier;
 uniform float sharpness;
 uniform int columnOption;
 
-vec4 mag2rgb(float magnitude) {
-    // DR1 mag is [4, 20]
-    float st = (magnitude - 4) / (20 - 4);
+vec4 bv2rgb(float bv) {
+    // BV is [-0.4,2.0]
+    float st = (bv + 0.4) / (2.0 + 0.4);
     return texture(colorTexture, st);
 }
 
@@ -51,8 +52,21 @@ Fragment getFragment() {
 
     vec4 color = vec4(1.0);
 
+    // Calculate the color and luminosity.
     if ( columnOption == COLUMNOPTION_COLOR ) {
-        color = mag2rgb(ge_brightness);
+        color = bv2rgb(ge_brightness.y);
+        float absoluteMagnitude = ge_brightness[0].x;
+
+        // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
+        // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
+
+        float luminosity = pow(10, 1.89 - 0.4 * absoluteMagnitude);
+
+        // If luminosity is really really small then set it to a static low number.
+        if (luminosity < 0.001) {
+            luminosity = 0.001;
+        }
+        color *= luminosity * luminosityMultiplier;
     }
 
     vec4 textureColor = texture(psfTexture, texCoord);
