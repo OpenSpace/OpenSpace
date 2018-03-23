@@ -56,6 +56,7 @@ public:
     glm::ivec2 currentSubwindowSize() const override;
     glm::ivec2 currentWindowResolution() const override;
     glm::ivec2 currentDrawBufferResolution() const override;
+    glm::ivec2 getCurrentViewportSize() const override;
     glm::vec2 dpiScaling() const override;
     int currentNumberOfAaSamples() const override;
 

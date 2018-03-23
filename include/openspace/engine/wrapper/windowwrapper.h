@@ -161,6 +161,13 @@ public:
     virtual glm::ivec2 currentDrawBufferResolution() const;
 
     /**
+    * Returns the resolution of the currently viewport resolution in pixel 
+    * coordinates.
+    * \return The resolution of the currently viewport in pixel coordinates
+    */
+    virtual glm::ivec2 getCurrentViewportSize() const;
+
+    /**
      * Returns the DPI scaling factor for the current window. This is normally 1 on all
      * regular monitors and 2 on Retina screens.
      * \return The DPI scaling factor for the current window

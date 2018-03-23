@@ -170,6 +170,17 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
     throw WindowWrapperException("No viewport available");
 }
 
+glm::ivec2 SGCTWindowWrapper::getCurrentViewportSize() const {
+    sgct_core::Viewport* viewport =
+        sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+    if (viewport != nullptr) {
+        int xx = 0, yy = 0;
+        sgct::Engine::instance()->getCurrentViewportSize(xx, yy);
+        return glm::ivec2(xx, yy);
+    }
+    throw WindowWrapperException("No viewport available");
+}
+
 glm::vec2 SGCTWindowWrapper::dpiScaling() const {
     return glm::vec2(
         sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
