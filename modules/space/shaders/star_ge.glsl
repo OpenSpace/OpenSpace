@@ -81,16 +81,17 @@ void main() {
     dvec3 eyePositionInParsecs  = eyePosition / PARSEC;
     float distanceToStarInParsecs = float(length(starPositionInParsecs - eyePositionInParsecs));
     float luminosity = ge_brightness.y;
-      
+    //float absMag = ge_brightness.x;
+    //float appMag = absMag + 5 * (log(distanceToStarInParsecs)-1.0);
+    
     // Working like Partiview
-    //float pSize = pow(10, magnitudeExponent);//2E4;
-    float pSize = luminosity * exp(magnitudeExponent + 15.0);//2E4;
+     float pSize = pow(10, magnitudeExponent);;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
     
     vec2 multiplier = vec2(apparentBrightness/screenSize * projectedPoint.w);
-   
+    
     // Max Star Sizes:
     // Fragment Coords:
     vec2 bottomLeft = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[1])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
