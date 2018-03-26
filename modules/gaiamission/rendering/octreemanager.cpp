@@ -57,13 +57,14 @@ void OctreeManager::initOctree() {
         globebrowsing::AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35))
     );
     _freeSpotsInVBO = std::stack<int>();
+    _removedKeysInPrevCall = std::set<int>();
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
         _root->Children[i] = std::make_unique<OctreeNode>();
         _root->Children[i]->data = std::vector<float>();
         _root->Children[i]->isLeaf = true;
-        _root->Children[i]->vboIndex = -1;
+        _root->Children[i]->vboIndex = DEFAULT_INDEX;
         _root->Children[i]->numStars = 0;
         _root->Children[i]->halfDimension = MAX_DIST / 2.f;
         _root->Children[i]->originX = (i % 2 == 0) ? _root->Children[i]->halfDimension
@@ -115,9 +116,25 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
     const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars) {
 
     auto renderData = std::unordered_map<int, std::vector<float>>();
+    
+    // Reclaim indices from previous render call. 
+    for (auto removedKey =_removedKeysInPrevCall.rbegin(); 
+        removedKey != _removedKeysInPrevCall.rend(); ++removedKey) {
+
+        // Uses a reverse loop to try to decrease the biggest chunk.
+        if (*removedKey == _biggestChunkIndexInUse - 1) {
+            _biggestChunkIndexInUse = *removedKey;
+            //LINFO("Decreased size to: " + std::to_string(_biggestChunkIndexInUse));
+        }
+        _freeSpotsInVBO.push(*removedKey);
+    }
+    // Clear cache of removed keys before next render call.
+    _removedKeysInPrevCall.clear();
 
     for (size_t i = 0; i < 8; ++i) {
         auto tmpData = checkNodeIntersection(_root->Children[i], mvp, screenSize, deltaStars);
+        // Observe that if there exists identical keys in renderData then those values in 
+        // tmpData will be ignored! Thus we store the removed keys until next render call!
         renderData.insert(tmpData.begin(), tmpData.end());
         /*LINFO("Renderdata.size(): " + std::to_string(renderData.size()) + 
             " tmpData.size(): " + std::to_string(tmpData.size()) + 
@@ -196,7 +213,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             _numLeafNodes++;
             node->Children[i] = std::make_unique<OctreeNode>();
             node->Children[i]->isLeaf = true;
-            node->Children[i]->vboIndex = -1;
+            node->Children[i]->vboIndex = DEFAULT_INDEX;
             node->Children[i]->numStars = 0;
             node->Children[i]->data = std::vector<float>();
             node->Children[i]->halfDimension = node->halfDimension / 2.f;
@@ -294,7 +311,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     }
 
     glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
-    //int totalPixels = static_cast<int>(nodeSize.x * nodeSize.y);
+    int totalPixels = static_cast<int>(nodeSize.x * nodeSize.y);
 
     // If node contains more stars than enclosed pixels then return that amount. 
     /*if (node->numStars > totalPixels) {
@@ -311,7 +328,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     if (node->isLeaf || length(nodeSize) < MIN_SIZE_IN_PIXELS) {
 
         // Check if node already is in cache, then skip it, otherwise store it.
-        if (node->vboIndex == -1) {
+        if (node->vboIndex == DEFAULT_INDEX) {
             //LINFO("Adds index: " + std::to_string(node->vboIndex));
             // Get correct insert index from stack.
             node->vboIndex = _freeSpotsInVBO.top();
@@ -328,14 +345,14 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             /*LINFO("vboIndex: " + std::to_string(node->vboIndex) + " Next top: " +
             std::to_string(_freeSpotsInVBO.top()) + " Cache size: " +
             std::to_string(_renderingCache.size()));*/
-            
-        }
-        // If we choose an inner node, then we need to remove indices 
-        // from potential children in cache!
-        if (!(node->isLeaf)) {
-            for (int i = 0; i < 8; ++i) {
-                auto tmpData = removeNodeFromCache(node->Children[i], deltaStars);
-                fetchedData.insert(tmpData.begin(), tmpData.end());
+
+            // If we choose an inner node, then we need to remove indices 
+            // from potential children in cache!
+            if (!(node->isLeaf)) {
+                for (int i = 0; i < 8; ++i) {
+                    auto tmpData = removeNodeFromCache(node->Children[i], deltaStars);
+                    fetchedData.insert(tmpData.begin(), tmpData.end());
+                }
             }
         }
         return fetchedData;
@@ -347,6 +364,8 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
     // Recursively check if children should be rendered.
     for (size_t i = 0; i < 8; ++i) {
+        // Observe that if there exists identical keys in fetchedData then those values in 
+        // tmpData will be ignored! Thus we store the removed keys until next render call!
         auto tmpData = checkNodeIntersection(node->Children[i], mvp, screenSize, deltaStars);
         fetchedData.insert(tmpData.begin(), tmpData.end());
     }
@@ -361,22 +380,17 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
     auto keysToRemove = std::unordered_map<int, std::vector<float>>();
 
     // Check if this node was rendered == had a specified index.
-    if (node->vboIndex != -1) {
+    if (node->vboIndex != DEFAULT_INDEX) {
         //LINFO("Removes index: " + std::to_string(node->vboIndex));
 
-        // Reclaim that index.
-        _freeSpotsInVBO.push(node->vboIndex);
+        // Reclaim that index. However we need to wait until next render call to use it again!
+        _removedKeysInPrevCall.insert(node->vboIndex);
 
         // Insert dummy node at offset index that should be removed from render.
         keysToRemove[node->vboIndex] = std::vector<float>();
 
-        // Decrease maximum streaming size if possible.
-        if (_freeSpotsInVBO.top() == _biggestChunkIndexInUse - 1) {
-            _biggestChunkIndexInUse = _freeSpotsInVBO.top();
-        }
-
         // Reset index and adjust stars removed this frame. 
-        node->vboIndex = -1;
+        node->vboIndex = DEFAULT_INDEX;
         deltaStars -= static_cast<int>(node->data.size());
     }
 

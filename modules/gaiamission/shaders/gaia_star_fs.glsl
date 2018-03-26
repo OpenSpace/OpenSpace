@@ -43,7 +43,7 @@ uniform float sharpness;
 uniform int columnOption;
 
 vec4 bv2rgb(float bv) {
-    // BV is [-0.4,2.0]
+    // BV is [-0.4, 2.0]
     float st = (bv + 0.4) / (2.0 + 0.4);
     return texture(colorTexture, st);
 }

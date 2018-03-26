@@ -72,6 +72,7 @@ private:
     const size_t MAX_STARS_PER_NODE = 1000; 
     // Size in pixels counted diagonally. Roughly a 7x7 square or 8x4.5 with 16/9 ratio.
     const float MIN_SIZE_IN_PIXELS = 10.0;
+    const int DEFAULT_INDEX = -1;
 
     size_t getChildIndex(float posX, float posY, float posZ,
         float origX = 0.0, float origY = 0.0, float origZ = 0.0);
@@ -89,6 +90,7 @@ private:
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
     std::stack<int> _freeSpotsInVBO;
+    std::set<int> _removedKeysInPrevCall;
 
     size_t _totalNodes;
     size_t _numNodesPerFile;
