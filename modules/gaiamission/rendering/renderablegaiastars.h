@@ -71,13 +71,18 @@ private:
         Color = 2
     };
     
-    std::vector<float> sliceStarValues(ColumnOption option, std::vector<float> starValues);
     bool readFitsFile(ColumnOption option);
+    std::vector<float> sliceStarValues(ColumnOption option, std::vector<float> starValues);
+    std::vector<float> sliceSpeckStars(ColumnOption option, std::vector<float> starValues);
     float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
     properties::StringProperty _fitsFilePath;
     std::unique_ptr<ghoul::filesystem::File> _fitsFile;
     bool _dataIsDirty;
+
+    properties::StringProperty _fileTypeOrigin;
+    const std::string fitsOrigin = "fits";
+    const std::string speckOrigin = "speck";
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;

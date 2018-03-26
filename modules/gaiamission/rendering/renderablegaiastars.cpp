@@ -72,6 +72,12 @@ namespace {
         "The path to the FITS or BIN file with data for the stars to be rendered."
     }; 
 
+    static const openspace::properties::Property::PropertyInfo FileTypeOriginInfo = {
+        "FileTypeOrigin",
+        "File Type Origin",
+        "Specifies if preprocessed file is generated from a speck or a fits file."
+    };
+
     static const openspace::properties::Property::PropertyInfo FilePreprocessedInfo = {
         "FilePreprocessed",
         "File Preprocessed",
@@ -190,6 +196,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 FitsFileInfo.description
             },
             {
+                FileTypeOriginInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                FileTypeOriginInfo.description
+            },
+            {
                 FilePreprocessedInfo.identifier,
                 new BoolVerifier,
                 Optional::No,
@@ -276,6 +288,7 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _fitsFilePath(FitsFileInfo)
+    , _fileTypeOrigin(FileTypeOriginInfo)
     , _fitsFile(nullptr)
     , _dataIsDirty(true)
     , _filePreprocessed(FilePreprocessedInfo, false)
@@ -322,6 +335,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         [&](const File&) { _dataIsDirty = true; }
     );
     addProperty(_fitsFilePath);
+
+    _fileTypeOrigin = dictionary.value<std::string>(FileTypeOriginInfo.identifier);
 
     _columnOption.addOptions({
         { ColumnOption::Static, "Static" },
@@ -501,7 +516,7 @@ void RenderableGaiaStars::initializeGL() {
     
     bool success = readFitsFile(ColumnOption(static_cast<int>(_columnOption)));
     if (!success) {
-        throw ghoul::RuntimeError("Error loading FITS data");
+        throw ghoul::RuntimeError("Error loading file data");
     }
 }
 
@@ -626,7 +641,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         LDEBUG("Regenerating data");
         const int option = _columnOption;
 
-        // Reload fits file (as long as it's not the first initialization)!
+        // Reload data file (as long as it's not the first initialization)!
         if (_vao != 0) { 
             // This will reconstruct the Octree as well!
             bool success = readFitsFile(ColumnOption(option));
@@ -846,7 +861,18 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
                 auto last = _fullData.begin() + i + _nValuesPerStar;
                 std::vector<float> values(first, last);
 
-                auto slicedValues = sliceStarValues(option, values);
+                // Data needs to be sliced differently depending on file origin.
+                auto slicedValues = std::vector<float>();
+                if (fitsOrigin.compare(_fileTypeOrigin)) {
+                    slicedValues = sliceStarValues(option, values);
+                }
+                else if (speckOrigin.compare(_fileTypeOrigin)) {
+                    slicedValues = sliceSpeckStars(option, values);
+                }
+                else {
+                    LERROR("User did not specify correct origin of preprocessed file.");
+                }
+                
                 _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
                 _octreeManager->insert(slicedValues);
             }
@@ -1035,6 +1061,80 @@ std::vector<float> RenderableGaiaStars::sliceStarValues(ColumnOption option,
 
         // B-V color is Blue minus Visible filter magnitudes
         layout.value.bvColor = starValues[13] - starValues[15];
+
+        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
+        break;
+    }
+    }
+    return tmpData;
+}
+
+// Slices every star seperately, from SPECK file, before they are inserted into Octree. 
+// Conversion of position is done in vertex shader to simplify calculations in Octree.
+std::vector<float> RenderableGaiaStars::sliceSpeckStars(ColumnOption option,
+    std::vector<float> starValues) {
+
+    auto tmpData = std::vector<float>();
+
+    // Conversion kiloparsecs -> meter is done in vertex shader.
+    glm::vec3 position = glm::vec3(starValues[0], starValues[1], starValues[2]);
+    //position *= 1000 * static_cast<float>(distanceconstants::Parsec);
+
+    // TODO: Unclear which columns are velocity (and what unit in that case)!'
+    // Right now we're using [U,V,W] from speck file. 
+    glm::vec3 velocity = glm::vec3(starValues[9], starValues[10], starValues[11]);
+
+    switch (option) {
+    case ColumnOption::Static: {
+        union {
+            StaticVBOLayout value;
+            std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
+        } layout;
+
+        layout.value.position = { {
+                position[0], position[1], position[2]
+            } };
+
+        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
+        break;
+    }
+
+    case ColumnOption::Motion: {
+        union {
+            MotionVBOLayout value;
+            std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;
+        } layout;
+
+        layout.value.position = { {
+                position[0], position[1], position[2]
+            } };
+        layout.value.velocity = { {
+                velocity[0], velocity[1], velocity[2]
+            } };
+
+        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
+        break;
+    }
+
+    case ColumnOption::Color: {
+        union {
+            ColorVBOLayout value;
+            std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
+        } layout;
+
+        layout.value.position = { {
+                position[0], position[1], position[2]
+            } };
+        layout.value.velocity = { {
+                velocity[0], velocity[1], velocity[2]
+            } };
+        layout.value.magnitude = starValues[5];
+        // Luminosity is in starValues[4].
+        // However, we're already doing those computations in the shader from magnitude.
+
+        // B-V color is Blue minus Visible filter magnitudes.
+        // Already computed in speck file. 
+        layout.value.bvColor = starValues[3];
 
         tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
         break;
