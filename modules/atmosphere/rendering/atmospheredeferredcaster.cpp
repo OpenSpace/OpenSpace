@@ -250,6 +250,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
             program.setUniform("dModelTransformMatrix", _modelTransform);
 
+            glm::vec3 camPosModelCoords = inverseModelMatrix *
+                glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
+
+            program.setUniform("camPosModelCoords", camPosModelCoords);
 
             glm::dmat4 eyeToModel =
                 inverseModelMatrix *
@@ -323,7 +327,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             glm::dmat4 eyeToWorldTransform =
                 glm::inverse(renderData.camera.combinedViewMatrix());
-            program.setUniform("eyeToWorld", glm::mat4(eyeToWorldTransform));
+            program.setUniform("eyeToWorld", eyeToWorldTransform);
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(

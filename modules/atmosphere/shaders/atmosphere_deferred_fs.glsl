@@ -90,9 +90,11 @@ uniform dmat4 dModelTransformMatrix;
 //uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
 
 uniform mat4 eyeToModel;
-uniform mat4 eyeToWorld;
+uniform dmat4 eyeToWorld;
 uniform mat4 clipToModel;
 uniform mat4 tempTransform;
+
+uniform vec3 camPosModelCoords;
 
 uniform dvec3 dCamRigPos;
 uniform dvec3 dCampos;
@@ -246,9 +248,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
  * This method avoids matrices multiplications
  * wherever is possible.
  */
-void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray, 
-                                  out dvec4 planetPositionObjectCoords, 
-                                  out dvec4 cameraPositionInObject) {
+void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray) {
     // ======================================
     // ======= Avoiding Some Matrices =======
 
@@ -257,28 +257,18 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
                             msaaSamplePatter[mssaSample+1]);
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 1.0, 1.0);
 
+    // Clip to World
     dvec4 offsetWorldCoords = tempTransform * clipCoords;
     dvec4 worldCoords = dvec4(dvec3(offsetWorldCoords) + dCampos, 1.0);
     
     // World to Object
     dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
-    //objectCoords = dmat4(eyeToModel) * sgctEyeCoords;
-    //objectCoords = dmat4(clipToModel) * clipCoords;
 
-    // Planet Position in Object Space
-    // JCC: Applying the inverse of the model transformation on the object postion in World 
-    // space results in imprecision. 
-    planetPositionObjectCoords = dvec4(0.0, 0.0, 0.0, 1.0);
-    //planetPositionObjectCoords = dInverseModelTransformMatrix * dvec4(dObjpos.xyz, 1.0);
-
-    // Camera Position in Object Space
-    cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
-      
     // ============================
     // ====== Building Ray ========
     // Ray in object space (in KM)
-    ray.origin    = cameraPositionInObject * dvec4(0.001, 0.001, 0.001, 1.0);
-    ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
+    ray.origin    = vec4(camPosModelCoords, 1.0) * dvec4(0.001, 0.001, 0.001, 1.0);
+    ray.direction = dvec4(normalize(objectCoords.xyz - camPosModelCoords.xyz), 0.0);
 }
 
 /* 
@@ -584,12 +574,11 @@ void main() {
         
         // Ray in object space
         dRay ray;
-        dvec4 planetPositionObjectCoords = dvec4(0.0);
-        dvec4 cameraPositionInObject     = dvec4(0.0);        
+        dvec4 planetPositionObjectCoords = dvec4(0.0, 0.0, 0.0, 1.0);
+        dvec4 cameraPositionInObject     = dvec4(camPosModelCoords, 1.0);
         
         // Get the ray from camera to atm in object space
-        dCalculateRayRenderableGlobe(i, ray, planetPositionObjectCoords, 
-                                     cameraPositionInObject);
+        dCalculateRayRenderableGlobe(i, ray);
       
         bool  insideATM    = false;
         double offset      = 0.0;
