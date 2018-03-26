@@ -22,38 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/gaiamissionmodule.h>
+#ifndef __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
+#define __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-#include <modules/gaiamission/rendering/renderablegaiastars.h>
-#include <modules/gaiamission/tasks/readfitstask.h>
-#include <modules/gaiamission/tasks/readspecktask.h>
+#include <openspace/util/task.h>
 
 namespace openspace {
 
-GaiaMissionModule::GaiaMissionModule() : OpenSpaceModule(Name) {}
+namespace documentation { struct Documentation; }
 
-void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
+class ReadSpeckTask : public Task {
+public:
+    ReadSpeckTask(const ghoul::Dictionary& dictionary);
+    virtual ~ReadSpeckTask();
+    
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static documentation::Documentation Documentation();
 
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
-    fTask->registerClass<ReadFitsTask>("ReadFitsTask");
-    fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
-}
-
-std::vector<documentation::Documentation> GaiaMissionModule::documentations() const {
-    return {
-        RenderableGaiaStars::Documentation(),
-        ReadFitsTask::Documentation(),
-        ReadSpeckTask::Documentation(),
-    };
-}
+private:
+    std::string _inFilePath;
+    std::string _outFilePath;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__

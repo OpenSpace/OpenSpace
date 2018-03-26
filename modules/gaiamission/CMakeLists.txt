@@ -30,6 +30,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -39,6 +40,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
