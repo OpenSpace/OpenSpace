@@ -23,7 +23,6 @@ class FocusMenu extends Component {
   }
 
   componentDidUpdate(nextProps, nextState) {
-    console.log(this.props);
     // If a button is clicked change property value
     if (this.state.listening && nextState.origin !== this.state.origin) {
       this.props.ChangePropertyValue(this.props.originNode.Description, this.state.origin);

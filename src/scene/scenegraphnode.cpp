@@ -530,17 +530,17 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
 
         properties::PropertyOwner* renderableGlobe = this->propertySubOwner("RenderableGlobe");
 
-        // Get the previous screenSpacePos
-        properties::Property* ScreenSpacePosition = renderableGlobe->property("ScreenSpacePosition");
-        properties::IVec2Property* p1 = static_cast<properties::IVec2Property*>(ScreenSpacePosition);
-        properties::IVec2Property::ValueType screenSpaceValue = *p1;
-        glm::ivec2 prevScreenSpacePos = glm::ivec2(screenSpaceValue[0], screenSpaceValue[1]);
-
         // Get the previous clipSpaceCoords
-        properties::Property* clipSpaceCoordinates = renderableGlobe->property("ClipSpaceCoordinates");
-        properties::DVec4Property* p2 = static_cast<properties::DVec4Property*>(clipSpaceCoordinates);
-        properties::DVec4Property::ValueType clipSpaceValue = *p2;
-        glm::dvec4 prevClipSpaceCoord = glm::dvec4(clipSpaceValue[0], clipSpaceValue[1], clipSpaceValue[2], clipSpaceValue[3]);
+        // properties::Property* clipSpaceCoordinates = renderableGlobe->property("ClipSpaceCoordinates");
+        // properties::DVec4Property* p2 = static_cast<properties::DVec4Property*>(clipSpaceCoordinates);
+        // properties::DVec4Property::ValueType clipSpaceValue = *p2;
+        // glm::dvec4 prevClipSpaceCoord = glm::dvec4(clipSpaceValue[0], clipSpaceValue[1], clipSpaceValue[2], clipSpaceValue[3]);
+
+        // Get the previous screenVisibility
+        properties::Property* screenVisibility = renderableGlobe->property("ScreenVisibility");
+        properties::BoolProperty* pScreenVisibility = static_cast<properties::BoolProperty*>(screenVisibility);
+        properties::BoolProperty::ValueType screenVisibilityValue = *pScreenVisibility;
+        bool prevScreenVisibility = bool(screenVisibilityValue);
 
         // Calculate ndc
         Camera cam = newData.camera;
@@ -549,25 +549,50 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
         glm::dvec3 ndc = clipSpace / clipSpace.w;
 
          // If the object is not in the screen, we dont want to consider it at all
-        if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0) {
+        if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0 && clipSpace.z > 0) {
+            if (!prevScreenVisibility) {
+                screenVisibility->set(true);
+            }
+
             WindowWrapper& wrapper = OsEng.windowWrapper();
             glm::ivec2 res = wrapper.currentWindowSize();
             glm::ivec2 screenPos = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
 
-            int depthThreshold = 80000000000, zoomThreshold = 1000000, moveThreshold = 2;
+            // Get the radius of node
+            SurfacePositionHandle posHandle = calculateSurfacePositionHandle(cam.positionVec3());
+            glm::dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface + posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+            glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) * centerToActualSurfaceModelSpace;
+            double planetRadius = length(centerToActualSurface);
 
-            if (clipSpace.z < depthThreshold && abs(prevClipSpaceCoord.z - clipSpace.z) > zoomThreshold) {
-                clipSpaceCoordinates->set(clipSpace);
+            // Distance from the camera to the node
+            double distanceFromCameraToFocus = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
+
+            // Get the previous Distance from camera to node
+            properties::Property* distanceFromCameraToNode = renderableGlobe->property("DistanceFromCameraToNode");
+            properties::IntProperty* pDistanceFromCameraToNode = static_cast<properties::IntProperty*>(distanceFromCameraToNode);
+            properties::IntProperty::ValueType distanceFromCameraToNodeValue = *pDistanceFromCameraToNode;
+            int prevDistanceFromCameraToNodeValue = int(distanceFromCameraToNodeValue);
+
+            double zoomThreshold = 0.5;
+            if (abs(prevDistanceFromCameraToNodeValue - distanceFromCameraToFocus) > (zoomThreshold * distanceFromCameraToFocus)) {
+                distanceFromCameraToNode->set(distanceFromCameraToFocus);
             }
 
+            // Get the previous screenSpacePos
+            properties::Property* screenSpacePosition = renderableGlobe->property("ScreenSpacePosition");
+            properties::IVec2Property* pScreenSpacePosition = static_cast<properties::IVec2Property*>(screenSpacePosition);
+            properties::IVec2Property::ValueType screenSpaceValue = *pScreenSpacePosition;
+            glm::ivec2 prevScreenSpacePos = glm::ivec2(screenSpaceValue[0], screenSpaceValue[1]);
+
+            int moveThreshold = 1;
             if (abs(screenPos.x - prevScreenSpacePos.x) > moveThreshold || abs(screenPos.y - prevScreenSpacePos.y) > moveThreshold) {
-                ScreenSpacePosition->set(screenPos);
+                screenSpacePosition->set(screenPos);
             }
         }
         // If not on the screen, we want to reset it or don't update it
         else {
-            if (prevScreenSpacePos.x != -1 && prevScreenSpacePos.y != -1) {
-                ScreenSpacePosition->set(glm::ivec2(-1,-1));
+            if(prevScreenVisibility) {
+                screenVisibility->set(false);
             }
         }
     }

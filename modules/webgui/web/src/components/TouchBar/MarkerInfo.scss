@@ -1,0 +1,18 @@
+@import "../../styles/all";
+
+.MarkerInfo {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    text-align: center;
+    color: white;
+}
+ 
+.icon {
+    display: none;
+    &.active {
+        display: block;
+        animation: $fade-in-animation;
+        animation-duration: 300ms;
+    }
+}

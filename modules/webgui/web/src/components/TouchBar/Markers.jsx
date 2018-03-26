@@ -7,44 +7,58 @@ import { startListening, stopListening } from '../../api/Actions';
 
 class Markers extends Component {
   componentDidUpdate() {
-    const { nodes, screenSpaceProperties, clipSpaceProperties } = this.props;
+    const {
+      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+    } = this.props;
 
     if (nodes.length > 0) {
       nodes.forEach((node, i) => {
         if (screenSpaceProperties[i].listeners === 0) {
           this.props.StartListening(screenSpaceProperties[i].Description.Identifier);
         }
-        if (clipSpaceProperties[i].listeners === 0) {
-          this.props.StartListening(clipSpaceProperties[i].Description.Identifier);
+        if (screenVisibilityProperties[i].listeners === 0) {
+          this.props.StartListening(screenVisibilityProperties[i].Description.Identifier);
+        }
+        if (distFromCamToNodeProperties[i].listeners === 0) {
+          this.props.StartListening(distFromCamToNodeProperties[i].Description.Identifier);
         }
       });
     }
   }
 
   componentWillUnmount() {
-    const { nodes, screenSpaceProperties, clipSpaceProperties } = this.props;
+    const {
+      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+    } = this.props;
+
     nodes.forEach((node, i) => {
       this.props.StopListening(screenSpaceProperties[i].Description.Identifier);
-      this.props.StopListening(clipSpaceProperties[i].Description.Identifier);
+      this.props.StopListening(screenVisibilityProperties[i].Description.Identifier);
+      this.props.StopListening(distFromCamToNodeProperties[i].Description.Identifier);
     });
   }
 
   createInfoMarkers() {
-    const { nodes, screenSpaceProperties, clipSpaceProperties } = this.props;
+    const {
+      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+    } = this.props;
 
     const markerInfo = nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
-      const clipSpaceCoord = jsonToLuaTable(clipSpaceProperties[i].Value).split(',');
 
-      if (screenSpacePos[0] !== '-1') {
-        // TODO Check for a good function for the size of the icons based on the
-        // clipsSpaceCoord.z (10000000000 / clipSpaceCoord[3]) * 0.1;
-        const size = 2;
+      if (screenVisibilityProperties[i].Value === 'true') {
+        // TODO Remove the magic numbers
+        let size = (100000000000 / distFromCamToNodeProperties[i].Value);
+        const showInfo = size > 100;
+        if (size >= 3) size = 3;
+        if (size <= 1.5) size = 1.5;
+
         return (<MarkerInfo
           key={screenSpaceProperties[i].Description.Identifier}
           identifier={node.identifier}
           position={screenSpacePos}
           size={size}
+          showInfo={showInfo}
         />);
       }
     });
@@ -64,10 +78,12 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let nodes = [];
   const screenSpaceProperties = [];
-  const clipSpaceProperties = [];
+  const screenVisibilityProperties = [];
+  const distFromCamToNodeProperties = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
-    const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
+    const rootNodes = state.propertyTree.subowners
+      .filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
@@ -77,16 +93,15 @@ const mapStateToProps = (state) => {
 
     nodes.forEach((node) => {
       screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ScreenSpacePosition`));
-    });
-
-    nodes.forEach((node) => {
-      clipSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ClipSpaceCoordinates`));
+      screenVisibilityProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ScreenVisibility`));
+      distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.DistanceFromCameraToNode`));
     });
   }
   return {
     nodes,
     screenSpaceProperties,
-    clipSpaceProperties,
+    screenVisibilityProperties,
+    distFromCamToNodeProperties,
   };
 };
 
@@ -109,7 +124,11 @@ Markers.propTypes = {
     Description: PropTypes.string,
     Value: PropTypes.string,
   })),
-  clipSpaceProperties: PropTypes.arrayOf(PropTypes.shape({
+  distFromCamToNodeProperties: PropTypes.arrayOf(PropTypes.shape({
+    Description: PropTypes.string,
+    Value: PropTypes.string,
+  })),
+  screenVisibilityProperties: PropTypes.arrayOf(PropTypes.shape({
     Description: PropTypes.string,
     Value: PropTypes.string,
   })),
@@ -121,7 +140,8 @@ Markers.propTypes = {
 Markers.defaultProps = {
   nodes: [],
   screenSpaceProperties: [],
-  clipSpaceProperties: [],
+  distFromCamToNodeProperties: [],
+  screenVisibilityProperties: [],
   Description: [],
   Value: '',
   StopListening: null,
