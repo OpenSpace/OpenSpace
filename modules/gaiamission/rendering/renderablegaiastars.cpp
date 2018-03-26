@@ -288,7 +288,7 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _fitsFilePath(FitsFileInfo)
-    , _fileTypeOrigin(FileTypeOriginInfo)
+    , _fileTypeOrigin("")
     , _fitsFile(nullptr)
     , _dataIsDirty(true)
     , _filePreprocessed(FilePreprocessedInfo, false)
@@ -840,7 +840,7 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
     _fullData.clear();
     _octreeManager->initOctree();
 
-    LINFO("Loading FITS file: " + _file);
+    LINFO("Loading data file: " + _file);
 
     // Read from binary if file has been preprocessed, else read from FITS file.
     if (_filePreprocessed) {
@@ -863,10 +863,10 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
 
                 // Data needs to be sliced differently depending on file origin.
                 auto slicedValues = std::vector<float>();
-                if (fitsOrigin.compare(_fileTypeOrigin)) {
+                if (fitsOrigin == _fileTypeOrigin) {
                     slicedValues = sliceStarValues(option, values);
                 }
-                else if (speckOrigin.compare(_fileTypeOrigin)) {
+                else if (speckOrigin == _fileTypeOrigin) {
                     slicedValues = sliceSpeckStars(option, values);
                 }
                 else {

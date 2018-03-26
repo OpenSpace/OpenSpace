@@ -80,7 +80,7 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _fitsFile;
     bool _dataIsDirty;
 
-    properties::StringProperty _fileTypeOrigin;
+    std::string _fileTypeOrigin;
     const std::string fitsOrigin = "fits";
     const std::string speckOrigin = "speck";
 
