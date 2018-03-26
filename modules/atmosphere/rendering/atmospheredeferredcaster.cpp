@@ -187,8 +187,8 @@ void AtmosphereDeferredcaster::deinitialize() {
 }
 
 void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
-    const DeferredcastData&,
-    ghoul::opengl::ProgramObject& program)
+                                          const DeferredcastData&,
+                                          ghoul::opengl::ProgramObject& program)
 {
     // Atmosphere Frustum Culling
     glm::dvec3 tPlanetPosWorld = glm::dvec3(
@@ -250,6 +250,22 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
             program.setUniform("dModelTransformMatrix", _modelTransform);
 
+
+            glm::dmat4 eyeToModel =
+                inverseModelMatrix *
+                glm::inverse(renderData.camera.combinedViewMatrix());
+
+            program.setUniform("eyeToModel",
+                glm::mat4(eyeToModel));
+
+            glm::dmat4 clipToModel =
+                eyeToModel *
+                glm::inverse(glm::dmat4(renderData.camera.projectionMatrix()));
+
+            program.setUniform("clipToModel",
+                glm::mat4(clipToModel));
+
+
             // The following scale comes from PSC transformations.
             glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(1.0));
             program.setUniform(
@@ -293,6 +309,21 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             glm::dvec3 camRigPos = renderData.camera.positionVec3();
             program.setUniform("dCamRigPos", camRigPos);
+
+
+            glm::dmat4 tempTransform =
+                glm::mat4_cast(
+                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
+                ) *
+                glm::inverse(renderData.camera.viewScaleMatrix()) *
+                dSgctEye2OSEye *
+                dInverseProjection;
+
+            program.setUniform("tempTransform", glm::mat4(tempTransform));
+
+            glm::dmat4 eyeToWorldTransform =
+                glm::inverse(renderData.camera.combinedViewMatrix());
+            program.setUniform("eyeToWorld", glm::mat4(eyeToWorldTransform));
 
             double lt;
             glm::dvec3 sunPosWorld = SpiceManager::ref().targetPosition(
