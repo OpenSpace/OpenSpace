@@ -243,17 +243,13 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("SAMPLES_MU_S", _mu_s_samples);
             program.setUniform("SAMPLES_NU", _nu_samples);
 
-            program.setUniform("ModelTransformMatrix", _modelTransform);
-
             // Object Space
-            glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
-            program.setUniform("dInverseModelTransformMatrix", inverseModelMatrix);
             program.setUniform("dModelTransformMatrix", _modelTransform);
 
-            glm::vec3 camPosModelCoords = inverseModelMatrix *
+            glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
+            glm::vec3 eyePosModelCoords = inverseModelMatrix *
                 glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
-
-            program.setUniform("camPosModelCoords", camPosModelCoords);
+            program.setUniform("eyePosModelCoords", eyePosModelCoords);
 
             glm::dmat4 eyeToModel =
                 inverseModelMatrix *
@@ -262,68 +258,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("eyeToModel",
                 glm::mat4(eyeToModel));
 
-            glm::dmat4 clipToModel =
-                eyeToModel *
-                glm::inverse(glm::dmat4(renderData.camera.projectionMatrix()));
-
-            program.setUniform("clipToModel",
-                glm::mat4(clipToModel));
-
-
-            // The following scale comes from PSC transformations.
-            glm::dmat4 dfScaleCamTransf = glm::scale(glm::dvec3(1.0));
-            program.setUniform(
-                "dInverseScaleTransformMatrix",
-                glm::inverse(dfScaleCamTransf)
-            );
-
-            program.setUniform(
-                "dCamScaleTransform",
-                renderData.camera.viewScaleMatrix()
-            );
-
-            // World to Eye Space in OS
-            program.setUniform(
-                "dInverseCamScaleTransform",
-                glm::inverse(renderData.camera.viewScaleMatrix())
-            );
-
-            program.setUniform(
-                "dInverseCamRotTransform",
-                glm::mat4_cast(
-                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-                )
-            );
-
-            // Eye Space in OS to Eye Space in SGCT
-            glm::dmat4 dOsEye2SGCTEye = glm::dmat4(renderData.camera.viewMatrix());
-            glm::dmat4 dSgctEye2OSEye = glm::inverse(dOsEye2SGCTEye);
-            program.setUniform("dSgctEyeToOSEyeTranform", dSgctEye2OSEye);
-
-            // Eye Space in SGCT to Projection (Clip) Space in SGCT
-            glm::dmat4 dSgctEye2Clip = glm::dmat4(renderData.camera.projectionMatrix());
-            glm::dmat4 dInverseProjection = glm::inverse(dSgctEye2Clip);
-
-            program.setUniform("dInverseSgctProjectionMatrix", dInverseProjection);
-
-            program.setUniform("dObjpos", glm::dvec4(renderData.position.dvec3(), 1.0));
-
-            glm::dvec3 campos = renderData.camera.eyePositionVec3();
-            program.setUniform("dCampos", campos);
-
-            glm::dvec3 camRigPos = renderData.camera.positionVec3();
-            program.setUniform("dCamRigPos", camRigPos);
-
-
-            glm::dmat4 tempTransform =
-                glm::mat4_cast(
-                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-                ) *
-                glm::inverse(renderData.camera.viewScaleMatrix()) *
-                dSgctEye2OSEye *
-                dInverseProjection;
-
-            program.setUniform("tempTransform", glm::mat4(tempTransform));
+            glm::mat4 invProjection =
+                glm::inverse(renderData.camera.projectionMatrix());
+            program.setUniform("inverseProjection", invProjection);
 
             glm::dmat4 eyeToWorldTransform =
                 glm::inverse(renderData.camera.combinedViewMatrix());

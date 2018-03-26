@@ -85,19 +85,15 @@ uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
 
 // Model Transform Matrix Used for Globe Rendering
-uniform dmat4 dInverseModelTransformMatrix; 
+
 uniform dmat4 dModelTransformMatrix;
-//uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
+uniform dmat4 eyeToWorld;
 
 uniform mat4 eyeToModel;
-uniform dmat4 eyeToWorld;
-uniform mat4 clipToModel;
-uniform mat4 tempTransform;
+uniform mat4 inverseProjection;
 
-uniform vec3 camPosModelCoords;
+uniform vec3 eyePosModelCoords;
 
-uniform dvec3 dCamRigPos;
-uniform dvec3 dCampos;
 uniform dvec3 sunDirectionObj;
 uniform dvec3 ellipsoidRadii;
 
@@ -249,26 +245,21 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
  * wherever is possible.
  */
 void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray) {
-    // ======================================
-    // ======= Avoiding Some Matrices =======
-
     // Compute positions and directions in world space.
-    dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
-                            msaaSamplePatter[mssaSample+1]);
-    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 1.0, 1.0);
+    vec2 samplePos  = vec2(msaaSamplePatter[mssaSample],
+                           msaaSamplePatter[mssaSample+1]);
 
-    // Clip to World
-    dvec4 offsetWorldCoords = tempTransform * clipCoords;
-    dvec4 worldCoords = dvec4(dvec3(offsetWorldCoords) + dCampos, 1.0);
-    
-    // World to Object
-    dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
+    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
+    vec4 eyeSpaceCoords = inverseProjection * vec4(clipCoords);
+    eyeSpaceCoords.w = 1.0;
+
+    dvec4 objectCoords = eyeToModel * eyeSpaceCoords;
 
     // ============================
     // ====== Building Ray ========
     // Ray in object space (in KM)
-    ray.origin    = vec4(camPosModelCoords, 1.0) * dvec4(0.001, 0.001, 0.001, 1.0);
-    ray.direction = dvec4(normalize(objectCoords.xyz - camPosModelCoords.xyz), 0.0);
+    ray.origin    = dvec4(vec4(eyePosModelCoords, 1.0) * dvec4(0.001, 0.001, 0.001, 1.0));
+    ray.direction = dvec4(normalize(objectCoords.xyz - eyePosModelCoords.xyz), 0.0);
 }
 
 /* 
@@ -575,7 +566,7 @@ void main() {
         // Ray in object space
         dRay ray;
         dvec4 planetPositionObjectCoords = dvec4(0.0, 0.0, 0.0, 1.0);
-        dvec4 cameraPositionInObject     = dvec4(camPosModelCoords, 1.0);
+        dvec4 cameraPositionInObject     = dvec4(eyePosModelCoords, 1.0);
         
         // Get the ray from camera to atm in object space
         dCalculateRayRenderableGlobe(i, ray);
