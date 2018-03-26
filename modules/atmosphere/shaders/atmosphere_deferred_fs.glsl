@@ -585,8 +585,8 @@ void main() {
             // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
             // in the depth buffer is less than the distance to the atmosphere then the atmosphere
             // is occluded
-            // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
-            // when using their positions later, one must convert them to the planet's coords
+            // Fragments positions into G-Buffer are written in eye space.
+            // When using their positions later, one must convert them to the planet's coords
             
             dvec4 fragObjectCoords = dvec4(eyeToModel * position);
             dvec4 fragWorldCoords = dvec4(eyeToWorld * position);
