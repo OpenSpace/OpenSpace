@@ -139,9 +139,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
         // Observe that if there exists identical keys in renderData then those values in 
         // tmpData will be ignored! Thus we store the removed keys until next render call!
         renderData.insert(tmpData.begin(), tmpData.end());
-        /*LINFO("Renderdata.size(): " + std::to_string(renderData.size()) + 
-            " tmpData.size(): " + std::to_string(tmpData.size()) + 
-            " deltaTraverse: " + std::to_string(deltaStars));*/
     }
 
     return renderData;
@@ -149,14 +146,12 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
 
 // Builds full render data structure by traversing all leaves in the Octree. 
 std::vector<float> OctreeManager::getAllData() {
-
     auto fullData = std::vector<float>();
 
     for (size_t i = 0; i < 8; ++i) {
         auto tmpData = getNodeData(_root->Children[i]);
         fullData.insert(fullData.end(), tmpData.begin(), tmpData.end());
     }
-
     return fullData;
 }
 
@@ -185,11 +180,9 @@ size_t OctreeManager::getChildIndex(float posX, float posY, float posZ, float or
     float origY, float origZ) {
 
     size_t index = 0;
-
     if (posX < origX) index += 1;
     if (posY < origY) index += 2;
     if (posZ < origZ) index += 4;
-
     return index;
 }
 
@@ -340,7 +333,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     int& deltaStars) {
 
     auto fetchedData = std::unordered_map<int, std::vector<float>>();
-
     glm::vec3 debugPos;
 
     // Calculate the corners of the node. 
@@ -369,7 +361,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     if (!(node->isLeaf)) {
         glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
         if (node->halfDimension < (5 / pow(2, 6)) && node->numStars < 1100) {
-            //LINFO("NodeSize: " + std::to_string(nodeSize) + " ScreenSize: " + std::to_string(screenSize));
+            //LINFO("NodeSize: " + std::to_string(nodeSize) + " Node: " + std::to_string(debugPos));
         }
         float totalPixels = nodeSize.x * nodeSize.y;
         auto first = node->data.begin();
@@ -453,25 +445,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             // Insert data and adjust stars added in this frame.
             fetchedData[node->vboIndex] = node->data;
             deltaStars += static_cast<int>(node->data.size());
-
-            // TODO: This doesn't work well because the nodes isn't refreshed when zooming out
-            // since the node is already in cache... Better to always send full leaf when we've
-            // actually reached one!
-            /*// But don't return all stars if the node is very small!
-            if (node->numStars > totalPixels) {
-                // TODO: To always take the first stars will probably not yield a good result.
-                std::vector<float> subData(
-                    node->data.begin(), 
-                    node->data.begin() + totalPixels * _valuesPerStar
-                );
-                fetchedData[node->vboIndex] = subData;
-                deltaStars += static_cast<int>(subData.size());
-            }
-            else {
-                // Insert full data. 
-                fetchedData[node->vboIndex] = node->data;
-                deltaStars += static_cast<int>(node->data.size());
-            }*/
         }
         return fetchedData;
     }

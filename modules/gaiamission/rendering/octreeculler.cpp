@@ -45,28 +45,15 @@ bool OctreeCuller::isVisible(std::vector<glm::dvec4> corners, const glm::mat4 mv
     
     // Create a bounding box in screen space from node boundaries.
     _nodeBounds = globebrowsing::AABB3();
-    std::vector<float> zDistance(8, 0.f);
 
     for (size_t i = 0; i < 8; ++i) {
         glm::dvec4 cornerClippingSpace = mvp * corners[i];
-        zDistance[i] = cornerClippingSpace.z;
 
         glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
         );
         _nodeBounds.expand(ndc);
     }
-
-    // Check if the entire node is further away than our set maxDist.
-    // Works, but maybe not the best idea...
-    /*bool tooFarAway = true;
-    for (size_t i = 0; i < 8; ++i) {
-        if (zDistance[i] < MAX_DIST) {
-            tooFarAway = false;
-            break;
-        }
-    }
-    if (tooFarAway) return false;*/
 
     return _viewFrustum.intersects(_nodeBounds);
 }
