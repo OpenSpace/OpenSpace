@@ -64,6 +64,23 @@ namespace {
     constexpr const char* keyTransformTranslation = "Transform.Translation";
     constexpr const char* keyTransformRotation = "Transform.Rotation";
     constexpr const char* keyTransformScale = "Transform.Scale";
+
+    static const openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo2 = {
+        "ScreenSpacePosition",
+        "ScreenSpacePosition",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo ScreenVisibilityInfo2 = {
+        "ScreenVisibility",
+        "ScreenVisibility",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo2 = {
+        "DistanceFromCamToNode",
+        "DistanceFromCamToNode",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace {
@@ -198,7 +215,14 @@ SceneGraphNode::SceneGraphNode()
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
-{}
+    , _screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo2, glm::ivec2(-1,-1)))
+    ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo2, false))
+    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo2, -1.0))
+{
+    addProperty(_screenSpacePosition);
+    addProperty(_screenVisibility);
+    addProperty(_distFromCamToNode);
+}
 
 SceneGraphNode::~SceneGraphNode() {}
 
@@ -528,20 +552,6 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
 
     if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
 
-        properties::PropertyOwner* renderableGlobe = this->propertySubOwner("RenderableGlobe");
-
-        // Get the previous clipSpaceCoords
-        // properties::Property* clipSpaceCoordinates = renderableGlobe->property("ClipSpaceCoordinates");
-        // properties::DVec4Property* p2 = static_cast<properties::DVec4Property*>(clipSpaceCoordinates);
-        // properties::DVec4Property::ValueType clipSpaceValue = *p2;
-        // glm::dvec4 prevClipSpaceCoord = glm::dvec4(clipSpaceValue[0], clipSpaceValue[1], clipSpaceValue[2], clipSpaceValue[3]);
-
-        // Get the previous screenVisibility
-        properties::Property* screenVisibility = renderableGlobe->property("ScreenVisibility");
-        properties::BoolProperty* pScreenVisibility = static_cast<properties::BoolProperty*>(screenVisibility);
-        properties::BoolProperty::ValueType screenVisibilityValue = *pScreenVisibility;
-        bool prevScreenVisibility = bool(screenVisibilityValue);
-
         // Calculate ndc
         Camera cam = newData.camera;
         glm::dvec3 worldPos = this->_worldPositionCached;
@@ -550,13 +560,13 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
 
          // If the object is not in the screen, we dont want to consider it at all
         if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0 && clipSpace.z > 0) {
-            if (!prevScreenVisibility) {
-                screenVisibility->set(true);
+            if (!_screenVisibility) {
+                _screenVisibility = true;
             }
 
             WindowWrapper& wrapper = OsEng.windowWrapper();
             glm::ivec2 res = wrapper.currentWindowSize();
-            glm::ivec2 screenPos = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
+            glm::ivec2 screenSpacePosition = glm::ivec2((ndc.x + 1) * res.x / 2, (ndc.y + 1) * res.y / 2);
 
             // Get the radius of node
             SurfacePositionHandle posHandle = calculateSurfacePositionHandle(cam.positionVec3());
@@ -565,34 +575,23 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
             double planetRadius = length(centerToActualSurface);
 
             // Distance from the camera to the node
-            double distanceFromCameraToFocus = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
-
-            // Get the previous Distance from camera to node
-            properties::Property* distanceFromCameraToNode = renderableGlobe->property("DistanceFromCameraToNode");
-            properties::IntProperty* pDistanceFromCameraToNode = static_cast<properties::IntProperty*>(distanceFromCameraToNode);
-            properties::IntProperty::ValueType distanceFromCameraToNodeValue = *pDistanceFromCameraToNode;
-            int prevDistanceFromCameraToNodeValue = int(distanceFromCameraToNodeValue);
+            double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
 
             double zoomThreshold = 0.5;
-            if (abs(prevDistanceFromCameraToNodeValue - distanceFromCameraToFocus) > (zoomThreshold * distanceFromCameraToFocus)) {
-                distanceFromCameraToNode->set(distanceFromCameraToFocus);
+            if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
+                _distFromCamToNode = distFromCamToNode;
             }
 
-            // Get the previous screenSpacePos
-            properties::Property* screenSpacePosition = renderableGlobe->property("ScreenSpacePosition");
-            properties::IVec2Property* pScreenSpacePosition = static_cast<properties::IVec2Property*>(screenSpacePosition);
-            properties::IVec2Property::ValueType screenSpaceValue = *pScreenSpacePosition;
-            glm::ivec2 prevScreenSpacePos = glm::ivec2(screenSpaceValue[0], screenSpaceValue[1]);
-
             int moveThreshold = 1;
-            if (abs(screenPos.x - prevScreenSpacePos.x) > moveThreshold || abs(screenPos.y - prevScreenSpacePos.y) > moveThreshold) {
-                screenSpacePosition->set(screenPos);
+            if (abs(screenSpacePosition.x - static_cast<glm::ivec2>(_screenSpacePosition).x > moveThreshold
+                || abs(screenSpacePosition.y - static_cast<glm::ivec2>(_screenSpacePosition).y > moveThreshold))) {
+                _screenSpacePosition = screenSpacePosition;
             }
         }
         // If not on the screen, we want to reset it or don't update it
         else {
-            if(prevScreenVisibility) {
-                screenVisibility->set(false);
+            if(_screenVisibility) {
+                _screenVisibility = false;
             }
         }
     }
