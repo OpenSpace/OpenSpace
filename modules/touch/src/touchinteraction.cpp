@@ -1177,9 +1177,12 @@ void TouchInteraction::step(double dt) {
             double planetBoundaryRadius = length(centerToBoundingSphere);
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
+            double solarSystemView = 2.2e+13;
             if (length(_vel.zoom*dt) < distToSurface &&
                  length(centerToCamera + directionToCenter*_vel.zoom*dt)
-                 > planetBoundaryRadius)
+                 > planetBoundaryRadius &&
+                    length(centerToCamera + directionToCenter * _vel.zoom*dt)
+                    < solarSystemView)
             {
                 camPos += directionToCenter * _vel.zoom * dt;
             }
