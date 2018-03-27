@@ -53,8 +53,10 @@ void OctreeManager::initOctree() {
 
     LDEBUG("Initializing Octree");
     _root = std::make_unique<OctreeNode>();
+
+    // Initialize the culler. The NDC.z of the comparing corners are always -1 or 1.
     _culler = std::make_unique<OctreeCuller>(
-        globebrowsing::AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35))
+        globebrowsing::AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e2)) 
     );
     _freeSpotsInVBO = std::stack<int>();
     _removedKeysInPrevCall = std::set<int>();
@@ -65,6 +67,7 @@ void OctreeManager::initOctree() {
         _root->Children[i]->data = std::vector<float>();
         _root->Children[i]->isLeaf = true;
         _root->Children[i]->vboIndex = DEFAULT_INDEX;
+        _root->Children[i]->lodInUse = 0;
         _root->Children[i]->numStars = 0;
         _root->Children[i]->halfDimension = MAX_DIST / 2.f;
         _root->Children[i]->originX = (i % 2 == 0) ? _root->Children[i]->halfDimension
@@ -104,7 +107,7 @@ void OctreeManager::printStarsPerNode() const {
         auto prefix = "{" + std::to_string(i);
         accumulatedString += printStarsPerNode(_root->Children[i], prefix);
     }
-    LINFO(fmt::format("Number of stars per node: {}", accumulatedString));
+    LINFO(fmt::format("Number of stars per node: \n{}", accumulatedString));
     LINFO(fmt::format("Number of leaf nodes: {}", std::to_string(_numLeafNodes)));
     LINFO(fmt::format("Number of inner nodes: {}", std::to_string(_numInnerNodes)));
     LINFO(fmt::format("Depth of tree: {}", std::to_string(_totalDepth)));
@@ -206,7 +209,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     }
     else if (node->isLeaf) {
         // Too many stars in leaf node, subdivide into 8 new nodes.
-        size_t valuesPerStar = starValues.size();
+        _valuesPerStar = starValues.size();
 
         // Create children.
         for (size_t i = 0; i < 8; ++i) {
@@ -214,6 +217,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             node->Children[i] = std::make_unique<OctreeNode>();
             node->Children[i]->isLeaf = true;
             node->Children[i]->vboIndex = DEFAULT_INDEX;
+            node->Children[i]->lodInUse = 0;
             node->Children[i]->numStars = 0;
             node->Children[i]->data = std::vector<float>();
             node->Children[i]->halfDimension = node->halfDimension / 2.f;
@@ -232,8 +236,8 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
 
         // Distribute stars from parent node into children. 
         for (size_t n = 0; n < node->numStars; ++n) {
-            auto first = node->data.begin() + n * valuesPerStar;
-            auto last = node->data.begin() + n * valuesPerStar + valuesPerStar;
+            auto first = node->data.begin() + n * _valuesPerStar;
+            auto last = node->data.begin() + n * _valuesPerStar + _valuesPerStar;
             std::vector<float> tmpValues(first, last);
 
             size_t index = getChildIndex(tmpValues[0], tmpValues[1], tmpValues[2],
@@ -247,12 +251,8 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
         _numLeafNodes--;
         _numInnerNodes++;
 
-        // Store a cache of values for faster LOD traversals during render.
-        // TODO (adaal): This is where a study of different methods can take place
-        // e.g. use average/median of all points, origin of node or several points!? 
-        // Right now we only use the last star.
-        node->data.insert(node->data.end(), starValues.begin(), starValues.end());
-        node->numStars = 1;
+        // Store a LOD cache of values in inner node for faster traversals during render.
+        constructLodCache(node);
     }
 
     // Node is an inner node, keep recursion going.
@@ -260,19 +260,71 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     size_t index = getChildIndex(starValues[0], starValues[1], starValues[2],
         node->originX, node->originY, node->originZ);
 
+    // Determine if new star should be kept in our LOD cache.
+    insertStarInLodCache(node, starValues);
+
+    // Increase counter for inner node to keep track of total stars in all children as well.
+    node->numStars++;
     return insertInNode(node->Children[index], starValues, ++depth);
+}
+
+// Private help function for insertInNode(). Constructs our 3 base Levels Of Details.
+void OctreeManager::constructLodCache(std::shared_ptr<OctreeNode> node) {
+
+    // Level 0: First value should be origin. Only store positions to begin with.
+    std::vector<float> insertData(_valuesPerStar, 0.f);
+    insertData[0] = node->originX;
+    insertData[1] = node->originY;
+    insertData[2] = node->originZ;
+    node->data.insert(node->data.end(), insertData.begin(), insertData.end());
+
+    // Level 1: Childrens origins.
+    for (size_t i = 0; i < 8; ++i) {
+        insertData[0] = node->Children[i]->originX;
+        insertData[1] = node->Children[i]->originY;
+        insertData[2] = node->Children[i]->originZ;
+        node->data.insert(node->data.end(), insertData.begin(), insertData.end());
+    }
+
+    // Level 2: Take the first 50 values from each child.
+    for (size_t i = 0; i < 8; ++i) {
+        auto childStart = node->Children[i]->data.begin();
+        // Make sure we have 50 values!
+        if (node->Children[i]->numStars > 50) {
+            node->data.insert(node->data.end(), childStart, childStart + _valuesPerStar * 50);
+        }
+        else {
+            auto childEnd = node->Children[i]->data.end();
+            node->data.insert(node->data.end(), childStart, childEnd);
+        }
+    }
+    // Level 3 & 4 will be constructed later in insertStarInLod().
+}
+
+// Private help function for insertInNode(). Determines if star should be stored in LOD.
+void OctreeManager::insertStarInLodCache(std::shared_ptr<OctreeNode> node,
+    std::vector<float> starValues) {
+    // Level 0-2 already constructed when node was split. 
+    
+    // Level 3: 
+    _lod3Stars = 0;
+
+    // Level 4:
+    _lod4Stars = 0;
 }
 
 // Private help function for printStarsPerNode(). Recursively adds all nodes to the string.
 std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,
     std::string prefix) const {
 
+    // Print both inner and leaf nodes. 
+    auto str = prefix + "} : " + std::to_string(node->numStars);
+
     if (node->isLeaf) {
-        return prefix + "} : [" + std::to_string(node->vboIndex) + "] : "
-            + std::to_string(node->numStars) + "\n";
+        return str + " - [Leaf] \n";
     }
     else {
-        auto str = std::string();
+        str += " - [Parent] \n";
         for (int i = 0; i < 8; ++i) {
             auto pref = prefix + "->" + std::to_string(i);
             str += printStarsPerNode(node->Children[i], pref);
@@ -289,6 +341,8 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
     auto fetchedData = std::unordered_map<int, std::vector<float>>();
 
+    glm::vec3 debugPos;
+
     // Calculate the corners of the node. 
     std::vector<glm::dvec4> corners(8);
     for (int i = 0; i < 8; ++i) {
@@ -300,6 +354,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             : node->originZ - node->halfDimension;
         glm::dvec3 pos = glm::dvec3(x, y, z) * 1000.0 * distanceconstants::Parsec;
         corners[i] = glm::dvec4(pos, 1.0);
+        debugPos = glm::vec3(x, y, z);
     }
 
     // Check if node is visible from camera. If not then return early.
@@ -310,26 +365,82 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
         return fetchedData;
     }
 
-    glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
-    int totalPixels = static_cast<int>(nodeSize.x * nodeSize.y);
-
-    // If node contains more stars than enclosed pixels then return that amount. 
-    /*if (node->numStars > totalPixels) {
-        // Store node in cache. 
-
+    // Take care of inner nodes and LOD!
+    if (!(node->isLeaf)) {
+        glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
+        if (node->halfDimension < (5 / pow(2, 6)) && node->numStars < 1100) {
+            //LINFO("NodeSize: " + std::to_string(nodeSize) + " ScreenSize: " + std::to_string(screenSize));
+        }
+        float totalPixels = nodeSize.x * nodeSize.y;
         auto first = node->data.begin();
-        auto last = node->data.begin() + totalPixels;
-        fetchedData.insert(fetchedData.end(), first, last);
-        return fetchedData;
-    }*/
+        auto lodData = std::vector<float>();
 
+        // Check lowest level first - Level 0:
+        if (length(nodeSize) < MIN_DIAGONAL_LOD_0) {
+            lodData = std::vector<float>(first, first + LOD_0_STARS * _valuesPerStar);
+            //LINFO("LOD0 - Length: " + std::to_string(length(nodeSize)) + " Node: " + std::to_string(debugPos));
+        }
+        // Level 1:
+        else if (length(nodeSize) < MIN_DIAGONAL_LOD_1) {
+            lodData = std::vector<float>(first, first + LOD_1_STARS * _valuesPerStar);
+            //LINFO("LOD1 - Length: " + std::to_string(length(nodeSize)) + " Node: " + std::to_string(debugPos));
+        }
+        // Level 2:
+        else if (totalPixels < MIN_TOTAL_PIXELS_LOD_2) {
+            // TODO: What happens if there isn't enough stars in LOD cache? 
+            lodData = std::vector<float>(first, first + LOD_2_STARS * _valuesPerStar);
+            //LINFO("LOD2 - TotalPix: " + std::to_string(totalPixels) + " Node: " + std::to_string(debugPos));
+        }
+        // Level 3:
+        /*else if (false) {
+            lodData = std::vector<float>(first, first + _lod3Stars * _valuesPerStar);
+        }
+        // Level 4:
+        else if (false) {
+            lodData = std::vector<float>(first, first + _lod4Stars * _valuesPerStar);
+        }*/
+
+        // Return LOD data if we've triggered any check. 
+        if (!lodData.empty()) {
+            // Get correct insert index from stack if node didn't exist already. 
+            // Otherwise we will overwrite the old data. Key merging is not a problem here. 
+            if (node->vboIndex == DEFAULT_INDEX) {
+                node->vboIndex = _freeSpotsInVBO.top();
+                _freeSpotsInVBO.pop();
+
+                // Keep track of how many chunks are in use (ceiling).
+                if (_freeSpotsInVBO.top() > _biggestChunkIndexInUse) {
+                    _biggestChunkIndexInUse = _freeSpotsInVBO.top();
+                }
+
+                // We're in an inner node, remove indices from potential children in cache!
+                for (int i = 0; i < 8; ++i) {
+                    auto tmpData = removeNodeFromCache(node->Children[i], deltaStars);
+                    fetchedData.insert(tmpData.begin(), tmpData.end());
+                }
+
+                // Insert data and adjust stars added in this frame.
+                fetchedData[node->vboIndex] = lodData;
+                deltaStars += static_cast<int>(lodData.size());
+                node->lodInUse = lodData.size();
+            }
+            else {
+                // This node existed in cache before. Check if it was for the same level.
+                if (lodData.size() != node->lodInUse) {
+                    // Insert data and adjust stars added in this frame.
+                    fetchedData[node->vboIndex] = lodData;
+                    deltaStars += static_cast<int>(lodData.size()) 
+                        - static_cast<int>(node->lodInUse);
+                    node->lodInUse = lodData.size();
+                }
+            }
+            return fetchedData;
+        }
+    }
     // Return node data if node is a leaf.
-    // Or return cached data in inner node if its size is smaller than set pixels.
-    if (node->isLeaf || length(nodeSize) < MIN_SIZE_IN_PIXELS) {
-
-        // Check if node already is in cache, then skip it, otherwise store it.
+    else {
+        // If node already is in cache then skip it, otherwise store it.
         if (node->vboIndex == DEFAULT_INDEX) {
-            //LINFO("Adds index: " + std::to_string(node->vboIndex));
             // Get correct insert index from stack.
             node->vboIndex = _freeSpotsInVBO.top();
             _freeSpotsInVBO.pop();
@@ -339,21 +450,28 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
                 _biggestChunkIndexInUse = _freeSpotsInVBO.top();
             }
 
-            // Insert data and adjust stars added in this frame. 
+            // Insert data and adjust stars added in this frame.
             fetchedData[node->vboIndex] = node->data;
             deltaStars += static_cast<int>(node->data.size());
-            /*LINFO("vboIndex: " + std::to_string(node->vboIndex) + " Next top: " +
-            std::to_string(_freeSpotsInVBO.top()) + " Cache size: " +
-            std::to_string(_renderingCache.size()));*/
 
-            // If we choose an inner node, then we need to remove indices 
-            // from potential children in cache!
-            if (!(node->isLeaf)) {
-                for (int i = 0; i < 8; ++i) {
-                    auto tmpData = removeNodeFromCache(node->Children[i], deltaStars);
-                    fetchedData.insert(tmpData.begin(), tmpData.end());
-                }
+            // TODO: This doesn't work well because the nodes isn't refreshed when zooming out
+            // since the node is already in cache... Better to always send full leaf when we've
+            // actually reached one!
+            /*// But don't return all stars if the node is very small!
+            if (node->numStars > totalPixels) {
+                // TODO: To always take the first stars will probably not yield a good result.
+                std::vector<float> subData(
+                    node->data.begin(), 
+                    node->data.begin() + totalPixels * _valuesPerStar
+                );
+                fetchedData[node->vboIndex] = subData;
+                deltaStars += static_cast<int>(subData.size());
             }
+            else {
+                // Insert full data. 
+                fetchedData[node->vboIndex] = node->data;
+                deltaStars += static_cast<int>(node->data.size());
+            }*/
         }
         return fetchedData;
     }
@@ -381,7 +499,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
 
     // Check if this node was rendered == had a specified index.
     if (node->vboIndex != DEFAULT_INDEX) {
-        //LINFO("Removes index: " + std::to_string(node->vboIndex));
 
         // Reclaim that index. However we need to wait until next render call to use it again!
         _removedKeysInPrevCall.insert(node->vboIndex);
@@ -391,7 +508,14 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
 
         // Reset index and adjust stars removed this frame. 
         node->vboIndex = DEFAULT_INDEX;
-        deltaStars -= static_cast<int>(node->data.size());
+        if (node->lodInUse > 0) {
+            // If we're removing an inner node from cache then only decrease correct amount. 
+            deltaStars -= static_cast<int>(node->lodInUse);
+            node->lodInUse = 0;
+        }
+        else {
+            deltaStars -= static_cast<int>(node->data.size());
+        }
     }
 
     // Check children recursively if we're in an inner node. 
@@ -403,12 +527,6 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
     }
     return keysToRemove;
 }
-
-// Insert specified node into cache.
-/*void OctreeManager::insertNodeInCache(std::shared_ptr<OctreeNode> node, int& deltaStars) {
-    
-    
-}*/
 
 // Get data in all leaves regardless if visible or not.
 std::vector<float> OctreeManager::getNodeData(std::shared_ptr<OctreeNode> node) {

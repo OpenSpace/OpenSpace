@@ -47,6 +47,7 @@ public:
         size_t numStars;
         bool isLeaf;
         int vboIndex;
+        size_t lodInUse;
     };
 
     OctreeManager();
@@ -70,21 +71,30 @@ private:
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
     const size_t MAX_STARS_PER_NODE = 1000; 
-    // Size in pixels counted diagonally. Roughly a 7x7 square or 8x4.5 with 16/9 ratio.
-    const float MIN_SIZE_IN_PIXELS = 10.0;
     const int DEFAULT_INDEX = -1;
+
+    // Diagonal size in pixels. 10px is roughly a 7x7 or 8x4.5 with 16/9 ratio.
+    const float MIN_DIAGONAL_LOD_0 = 5.0; 
+    const float MIN_DIAGONAL_LOD_1 = 20.0;
+    const float MIN_TOTAL_PIXELS_LOD_2 = 600.0;
+    const size_t LOD_0_STARS = 1;
+    const size_t LOD_1_STARS = 9;
+    const size_t LOD_2_STARS = 409;
+    size_t _lod3Stars;
+    size_t _lod4Stars;
 
     size_t getChildIndex(float posX, float posY, float posZ,
         float origX = 0.0, float origY = 0.0, float origZ = 0.0);
     bool insertInNode(std::shared_ptr<OctreeNode> node,
         std::vector<float> starValues, int depth = 1);
+    void constructLodCache(std::shared_ptr<OctreeNode> node);
+    void insertStarInLodCache(std::shared_ptr<OctreeNode> node, std::vector<float> starValues);
     std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
         std::string prefix) const;
     std::unordered_map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<
         OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars);
     std::unordered_map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<
         OctreeNode> node, int& deltaStars, bool recursive = true);
-    //void insertNodeInCache(std::shared_ptr<OctreeNode> node, int& deltaStars);
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node);
 
     std::unique_ptr<OctreeNode> _root;
@@ -98,6 +108,7 @@ private:
     size_t _numLeafNodes;
     size_t _numInnerNodes;
     size_t _biggestChunkIndexInUse;
+    size_t _valuesPerStar;
 
 }; // class OctreeManager
 
