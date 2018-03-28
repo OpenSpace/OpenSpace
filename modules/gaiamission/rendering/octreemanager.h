@@ -72,16 +72,8 @@ private:
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
     const size_t MAX_STARS_PER_NODE = 1000; 
     const int DEFAULT_INDEX = -1;
-
-    // Diagonal size in pixels. 10px is roughly a 7x7 or 8x4.5 with 16/9 ratio.
-    const float MIN_DIAGONAL_LOD_0 = 5.0; 
-    const float MIN_DIAGONAL_LOD_1 = 20.0;
-    const float MIN_TOTAL_PIXELS_LOD_2 = 600.0;
-    const size_t LOD_0_STARS = 1;
-    const size_t LOD_1_STARS = 9;
-    const size_t LOD_2_STARS = 409;
-    size_t _lod3Stars;
-    size_t _lod4Stars;
+    const float MIN_TOTAL_PIXELS_LOD = 250.0; // Will be multiplied by depth.
+    const int FIRST_LOD_DEPTH = 3; // No layer beneath this will not store any LOD cache.
 
     size_t getChildIndex(float posX, float posY, float posZ,
         float origX = 0.0, float origY = 0.0, float origZ = 0.0);
