@@ -582,11 +582,7 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
                 _distFromCamToNode = distFromCamToNode;
             }
 
-            int moveThreshold = 1;
-            if (abs(screenSpacePosition.x - static_cast<glm::ivec2>(_screenSpacePosition).x > moveThreshold
-                || abs(screenSpacePosition.y - static_cast<glm::ivec2>(_screenSpacePosition).y > moveThreshold))) {
-                _screenSpacePosition = screenSpacePosition;
-            }
+            _screenSpacePosition = screenSpacePosition;
         }
         // If not on the screen, we want to reset it or don't update it
         else {
