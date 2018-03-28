@@ -63,6 +63,42 @@ local GaiaMission = {
         Name = "Gaia Mission",
         Path = "/GaiaMission"
     }
-    
 }
+
+-- Prepared asset from Vienna's DR1 file (2.1M stars) if user want to compare the datasets.
+local GaiaMissionFits = {
+    Identifier = "GaiaMissionFits",
+    Renderable = {
+        Type = "RenderableGaiaStars",
+        File = stars .. "/DR1_FITS_17col.bin",
+        FileTypeOrigin = "fits",
+        FilePreprocessed = true,
+        ColumnOption = "Static",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+    },
+    GUI = {
+        Name = "Gaia Mission Fits",
+        Path = "/GaiaMission"
+    }
+}
+
+-- Prepared asset from AMNH (DR1 subset + HIP) if user want to compare the datasets.
+local GaiaMissionSpeck = {
+    Identifier = "GaiaMissionSpeck",
+    Renderable = {
+        Type = "RenderableGaiaStars",
+        File = stars .. "/DR1_AMNH.bin",
+        FileTypeOrigin = "speck",
+        FilePreprocessed = true,
+        ColumnOption = "Static",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+    },
+    GUI = {
+        Name = "Gaia Mission Speck",
+        Path = "/GaiaMission"
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaMission })

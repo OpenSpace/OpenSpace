@@ -9,6 +9,8 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets/earth/earth')
 -- asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/milkyway')
+asset.request('scene/digitaluniverse/constellations')
+asset.request('scene/digitaluniverse/constellationbounds')
 
 asset.request('scene/milkyway/gaia/gaiamission')
 
