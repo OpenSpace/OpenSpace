@@ -19,12 +19,6 @@ header div {
   float: right;
 }
 
-@media (max-width: 1024px) {
-  header div {
-
-  }
-}
-
 label {
   margin-right: 10px;
 }
