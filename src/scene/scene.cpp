@@ -63,6 +63,14 @@ namespace {
     constexpr const char* KeyName = "Name";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
+    constexpr const char* StoryIdentifier = "Story.Basic";
+
+    static const openspace::properties::Property::PropertyInfo StoryIdentifierInfo = {
+        "StoryIdentifier",
+        "StoryIdentifier",
+        "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace {
@@ -71,9 +79,11 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
+    , _storyIdentifier(properties::StringProperty(StoryIdentifierInfo, StoryIdentifier))
 {
     _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
+    addProperty(_storyIdentifier);
 }
 
 Scene::~Scene() {
@@ -95,6 +105,10 @@ void Scene::setCamera(std::unique_ptr<Camera> camera) {
 
 Camera* Scene::camera() const {
     return _camera.get();
+}
+
+std::string Scene::storyIdentifier() {
+    return _storyIdentifier;
 }
 
 void Scene::registerNode(SceneGraphNode* node) {

@@ -65,19 +65,24 @@ namespace {
     constexpr const char* keyTransformRotation = "Transform.Rotation";
     constexpr const char* keyTransformScale = "Transform.Scale";
 
-    static const openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo2 = {
+    static const openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo ScreenVisibilityInfo2 = {
+    static const openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo2 = {
+    static const openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
+        "" // @TODO Missing documentation
+    };
+    static const openspace::properties::Property::PropertyInfo StoryIdentifierInfo = {
+        "StoryIdentifier",
+        "StoryIdentifier",
         "" // @TODO Missing documentation
     };
 
@@ -215,9 +220,9 @@ SceneGraphNode::SceneGraphNode()
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
-    , _screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo2, glm::ivec2(-1,-1)))
-    ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo2, false))
-    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo2, -1.0))
+    , _screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)))
+    ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
+    , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
 {
     addProperty(_screenSpacePosition);
     addProperty(_screenVisibility);
@@ -548,7 +553,10 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
 void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
    
     std::vector<std::string> tags = this->tags();
-    const std::string tag = "Touch.Interesting";
+
+    //LDEBUG(fmt::format("STORY IDENTIFIER {}", _scene->storyIdentifier()));
+
+    const std::string tag = _scene->storyIdentifier();
 
     if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
 
