@@ -101,7 +101,7 @@ documentation::Documentation DashboardItemMission::Documentation() {
 }
 
 DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
-    : DashboardItem("Mission")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
