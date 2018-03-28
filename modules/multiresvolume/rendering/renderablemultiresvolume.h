@@ -91,6 +91,7 @@ public:
 
 
     bool setSelectorType(Selector selector);
+    bool setAtlasType(AtlasType atlasType);
     bool initializeShenSelector();
     bool initializeSelector();
 
@@ -119,6 +120,7 @@ private:
     properties::IntProperty _histogramBins;
     properties::FloatProperty _stepSizeCoefficient;
     properties::StringProperty _selectorName;
+    properties::StringProperty  _atlasType;
     properties::BoolProperty _statsToFile;
     properties::StringProperty _statsToFileName;
     properties::FloatProperty _toleranceSpatial;
@@ -146,7 +148,6 @@ private:
     std::string _errorHistogramsPath;
 
     std::string _tspType;
-    std::string _atlasType;
 
     std::shared_ptr<TransferFunction> _transferFunction;
 

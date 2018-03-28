@@ -137,6 +137,12 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    static const openspace::properties::Property::PropertyInfo AtlasTypeInfo = {
+        KeyAtlasType,
+        "Atlas Type",
+        "" // @TODO Missing documentation
+    };
+
     static const openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
@@ -261,6 +267,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _toleranceTemporal(ToleranceTemporalInfo, 1.f, 0.f, 2.f)
     , _tspType(RenderableMultiresVolume::TSP_DEFAULT)
     , _nBins(50)
+    , _atlasType(AtlasTypeInfo, RenderableMultiresVolume::ATLAS_DEFAULT)
 {
     std::string name;
 
@@ -288,8 +295,12 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
         std::transform(_tspType.begin(), _tspType.end(), _tspType.begin(), ::tolower);
     }
 
-    if (dictionary.getValue(KeyAtlasType, _atlasType)) {
-        std::transform(_atlasType.begin(), _atlasType.end(), _atlasType.begin(), ::tolower);
+    std::string atlasType;
+    if (dictionary.getValue(KeyAtlasType, atlasType)) {
+        LWARNING(atlasType);
+        std::transform(atlasType.begin(), atlasType.end(), atlasType.begin(), ::tolower);
+        LWARNING(atlasType);
+        _atlasType = atlasType;
     }
 
     float scalingExponent, stepSizeCoefficient, bins = static_cast<float>(_nBins);
@@ -356,12 +367,14 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     case TspType::DEFAULT: _tsp = std::make_shared<TSP>(_filename);        break;
     default:               _tsp = std::make_shared<TSP>(_filename);        break;
     }
-
+/*
     switch (getAtlasType()) {
     case AtlasType::ALL:     _atlasManager = std::make_shared<AllAtlasManager>(_tsp.get()); break;
     case AtlasType::DEFAULT: _atlasManager = std::make_shared<AtlasManager>(_tsp.get());    break;
     default:                 _atlasManager = std::make_shared<AtlasManager>(_tsp.get());    break;
     }
+*/
+    // Get Selector from asset file if exists
     _selectorName = TYPE_TF;
     std::string brickSelectorType;
     if (dictionary.hasKey(KeyBrickSelector)) {
@@ -376,6 +389,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     addProperty(_selectorName);
     _selectorName.onChange([&] {
         setSelectorType(getSelector());
+    });
+
+    addProperty(_atlasType);
+    _atlasType.onChange([&] {
+        setAtlasType(getAtlasType());
     });
 
     addProperty(_stepSizeCoefficient);
@@ -482,6 +500,16 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
     return true;
 }
 
+bool RenderableMultiresVolume::setAtlasType(RenderableMultiresVolume::AtlasType type) {
+    switch (type) {
+    case AtlasType::ALL:     _atlasManager = std::make_unique<AllAtlasManager>(_tsp.get()); break;
+    case AtlasType::DEFAULT: _atlasManager = std::make_unique<AtlasManager>(_tsp.get());    break;
+    default:                 _atlasManager = std::make_unique<AtlasManager>(_tsp.get());    break;
+    }
+    
+    return _atlasManager->initialize();
+}
+
 void RenderableMultiresVolume::initializeGL() {
     bool success = _tsp && _tsp->load();
 
@@ -529,9 +557,10 @@ void RenderableMultiresVolume::initializeGL() {
     if (success) {
         _brickIndices.resize(maxNumBricks, 0);
         success &= setSelectorType(_selector);
+        success &= setAtlasType(getAtlasType());
     }
 
-    success &= _atlasManager && _atlasManager->initialize();
+    //success &= _atlasManager && _atlasManager->initialize();
 
     _transferFunction->update();
 
@@ -800,11 +829,14 @@ RenderableMultiresVolume::TspType RenderableMultiresVolume::getTspType() {
 }
 
 RenderableMultiresVolume::AtlasType RenderableMultiresVolume::getAtlasType() {
-    if (_atlasType == ATLAS_ALL)       return AtlasTypes.at(ATLAS_ALL);
-    if (_atlasType == ATLAS_DEFAULT)    return AtlasTypes.at(ATLAS_DEFAULT);
-
+    std::string val;
+    if ( _atlasType.getStringValue(val) ) {
+        val = val.substr(1, val.length() - 2);
+        if (val == ATLAS_ALL)       return AtlasTypes.at(ATLAS_ALL);
+        if (val == ATLAS_DEFAULT)   return AtlasTypes.at(ATLAS_DEFAULT);
+    }
+    LWARNING(fmt::format("Could not get atlas type {} -- setting default", val ) );
     return AtlasType::DEFAULT;
 }
-
 
 } // namespace openspace

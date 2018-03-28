@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -26,6 +26,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 #include <ghoul/opengl/texture.h>
 
 #include <iostream>
@@ -91,6 +92,7 @@ unsigned int AtlasManager::atlasMapBuffer() {
 }
 
 void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
+
     size_t nBrickIndices = brickIndices.size();
 
     _requiredBricks.clear();
@@ -155,6 +157,7 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    //LDEBUG(fmt::format("Buffer {} {} {}", mappedBuffer[0], mappedBuffer[2], mappedBuffer[215]));
 }
 
 void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer) {
@@ -216,6 +219,7 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
                     zValCoord*_atlasDim*_atlasDim;
 
                 out[idx] = in[from];
+                //LDEBUG(fmt::format("fillVolume: in {} {}, out {} {}, idx {}, from {}", *in, in[from], *out, out[idx], idx, from));
                 from++;
             }
         }
