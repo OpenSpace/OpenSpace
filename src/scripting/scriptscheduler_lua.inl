@@ -84,6 +84,7 @@ int loadScheduledScript(lua_State* L) {
         });
     }
 
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }

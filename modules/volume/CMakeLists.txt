@@ -25,6 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/envelope.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.h
@@ -33,6 +34,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.h
@@ -47,10 +51,14 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/envelope.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.cpp

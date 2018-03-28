@@ -31,8 +31,8 @@ TEST_F(Issue527, Regression) {
     openspace::properties::OptionProperty p({ "id", "gui", "desc"});
 
     p.addOptions({
-        {-1, "a" },
-        {-2, "b" }
+        { -1, "a" },
+        { -2, "b" }
     });
 
 

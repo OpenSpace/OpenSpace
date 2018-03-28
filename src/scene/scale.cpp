@@ -70,7 +70,7 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 
     auto factory = FactoryManager::ref().factory<Scale>();
     std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
-    result->setName("Scale");
+    result->setIdentifier("Scale");
     return result;
 }
 

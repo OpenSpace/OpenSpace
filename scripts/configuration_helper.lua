@@ -94,10 +94,10 @@ function sgct.config.cube(arg) end
 ########################################################################################## 
 ]]--
 
-function generateSingleViewportFOV(down, up, left, right)
+function generateSingleViewportFOV(down, up, left, right, tracked)
     return
 [[
-<Viewport>
+<Viewport ]]..tracked..[[>
     <Pos x="0.0" y="0.0" />
     <Size x="1.0" y="1.0" />
     <PlanarProjection>
@@ -110,10 +110,10 @@ end
 
 
 
-function generateSingleViewport(lowerLeft, upperLeft, upperRight)
+function generateSingleViewport(lowerLeft, upperLeft, upperRight, tracked)
     return
 [[
-<Viewport>
+<Viewport ]]..tracked..[[>
     <Pos x="0.0" y="0.0" />
     <Size x="1.0" y="1.0" />
     <Projectionplane>
@@ -127,7 +127,7 @@ end
 
 
 
-function generateFisheyeViewport(fov, quality, tilt, background, crop, offset)
+function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, trackedSpecifier)
     local b = [[
             <Background 
                 r="]]..background["r"]..[["
@@ -161,7 +161,7 @@ function generateFisheyeViewport(fov, quality, tilt, background, crop, offset)
     end
 
     return [[
-    <Viewport name="fisheye">
+    <Viewport name="fisheye" ]]..trackedSpecifier..[[>
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
         <FisheyeProjection fov="]]..fov..[[" quality="]]..quality..[[" tilt="]]..tilt..[[">
@@ -679,14 +679,20 @@ function sgct.config.single(arg)
             arg["fov"] = { down = 16.875, up = 16.875, left = 30.0, right = 30.0 }
         end
     end
-    
+
+    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
+        trackedSpecifier = "tracked=\"true\""
+    else
+        trackedSpecifier = "tracked=\"false\""
+    end
+
     arg["viewport"] = generateSingleViewportFOV(
         arg["fov"]["down"],
         arg["fov"]["up"], 
         arg["fov"]["left"],
-        arg["fov"]["right"]
+        arg["fov"]["right"],
+        trackedSpecifier
     )
-
     return sgct.makeConfig(generateSingleWindowConfig(arg))
 end
 
@@ -766,13 +772,20 @@ function sgct.config.fisheye(arg)
         arg["background"] = { r = 0.1, g = 0.1, b = 0.1, a = 1.0 }
     end
 
+    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
+        trackedSpecifier = "tracked=\"true\""
+    else
+        trackedSpecifier = "tracked=\"false\""
+    end
+
     arg["viewport"] = generateFisheyeViewport(
         arg["fov"],
         arg["quality"],
         arg["tilt"],
         arg["background"],
         arg["crop"],
-        arg["offset"]
+        arg["offset"],
+        trackedSpecifier
     )
 
     return sgct.makeConfig(generateSingleWindowConfig(arg))
@@ -781,7 +794,7 @@ end
 
 
 function sgct.config.cube(arg)
-    function getCubeWindow(location, res, size)
+    function getCubeWindow(location, res, size, trackedSpecifier)
         local pos
         local lowerLeft
         local upperLeft
@@ -826,14 +839,14 @@ function sgct.config.cube(arg)
         arg["windowSize"] = size
         arg["windowPos"] = pos
         arg["res"] = { res, res }
-        arg["viewport"] = generateSingleViewport(lowerLeft, upperLeft, upperRight)
+        arg["viewport"] = generateSingleViewport(lowerLeft, upperLeft, upperRight, trackedSpecifier)
 
         return generateWindow(arg)
     end
 
-    function getControlWindow(down, up, left, right)
+    function getControlWindow(down, up, left, right, trackedSpecifier)
         arg = {}
-        arg["viewport"] = generateSingleViewportFOV(down, up, left, right)
+        arg["viewport"] = generateSingleViewportFOV(down, up, left, right, trackedSpecifier)
         return generateWindow(arg)
     end
 
@@ -843,9 +856,19 @@ function sgct.config.cube(arg)
     
     arg["scene"] = generateScene(arg)
     arg["settings"] = generateSettings(arg)
-    arg["window"] = getControlWindow(16.875, 16.875, 30.0, 30.0) .. getCubeWindow('front', res, size) .. getCubeWindow('back', res, size) .. 
-        getCubeWindow('left', res, size) .. getCubeWindow('right', res, size) .. 
-        getCubeWindow('up', res, size) .. getCubeWindow('down', res, size)
+    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
+        trackedSpecifier = "tracked=\"true\""
+    else
+        trackedSpecifier = "tracked=\"false\""
+    end
+
+    arg["window"] = getControlWindow(16.875, 16.875, 30.0, 30.0, trackedSpecifier) ..
+        getCubeWindow('front', res, size, trackedSpecifier) ..
+        getCubeWindow('back', res, size, trackedSpecifier) ..
+        getCubeWindow('left', res, size, trackedSpecifier) ..
+        getCubeWindow('right', res, size, trackedSpecifier) ..
+        getCubeWindow('up', res, size, trackedSpecifier) ..
+        getCubeWindow('down', res, size, trackedSpecifier)
 
     arg["user"] = generateUser(arg)
     arg["capture"] = generateCapture(arg)

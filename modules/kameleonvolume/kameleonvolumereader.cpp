@@ -65,7 +65,6 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     if (status != ccmc::FileReader::OK) {
         LERROR(fmt::format("Failed to open file '{}' with Kameleon", _path));
         throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
-        return;
     }
 
     _model = _kameleon.model;
@@ -325,6 +324,10 @@ float KameleonVolumeReader::elapsedTime() const {
 
 std::string KameleonVolumeReader::simulationEnd() const {
     return _model->getGlobalAttribute("end_time").getAttributeString();
+}
+
+std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const {
+    return _model->getNativeUnit(variable);
 }
 
 std::string KameleonVolumeReader::time() const {

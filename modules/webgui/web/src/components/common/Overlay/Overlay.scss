@@ -1,0 +1,21 @@
+@import "../../../styles/all";
+
+.messageOverlay {
+  align-items: center;
+  animation: $fade-in-animation;
+  justify-content: center;
+  background: rgba(black, 0.8);
+  display: flex;
+  height: 100vh;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100vw;
+  z-index: 100;
+}
+
+.messageOverlay > * {
+  max-height: 100%;
+  max-width: 300px;
+  width: 100%;
+}

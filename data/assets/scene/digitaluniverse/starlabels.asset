@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Stars Labels",
+    Identifier = "StarsLabels",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -24,7 +24,10 @@ local object = {
         TextMaxSize = 50.0,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Stars"
+    GUI = {
+        Name = "Stars Labels",
+        Path = "/Milky Way/Stars"
+    }
 }
 
 

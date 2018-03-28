@@ -1,0 +1,23 @@
+@import "../../../../styles/all";
+
+$height: $font-size + $base-padding * 1.5;
+
+.wrapper {
+
+  &:hover {
+    background: $ui-background-hover;
+  }
+
+  &.wide {
+    align-items: center;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    height: $height;
+    padding: 0 $input-padding-horizontal;
+  }
+
+  &.left {
+    flex-direction: row;
+  }
+}
