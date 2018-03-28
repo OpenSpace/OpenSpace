@@ -328,7 +328,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
     auto fetchedData = std::unordered_map<int, std::vector<float>>();
     glm::vec3 debugPos;
-    int depth  = log2( MAX_DIST / node->halfDimension );
+    int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
 
     // Calculate the corners of the node. 
     std::vector<glm::dvec4> corners(8);

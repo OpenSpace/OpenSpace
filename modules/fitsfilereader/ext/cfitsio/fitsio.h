@@ -43,6 +43,13 @@ SERVICES PROVIDED HEREUNDER."
 /* library (on linux and Mac systems) is not backward compatible */
 /* with the previous release of CFITSIO */
 
+# pragma warning(disable:4018) // < signed/unsigned mismatch
+# pragma warning(disable:4100) // unreferenced formal parameter
+# pragma warning(disable:4101) // unreferenced local parameter
+# pragma warning(disable:4244) // conversion from _int64 to int
+# pragma warning(disable:4267) // possible loss of data when converting from size_t
+# pragma warning(disable:4311) // pointer truncation from char* to long
+# pragma warning(disable:4312) // pointer conversion from long to char*
 
 /* CFITS_API is defined below for use on Windows systems.  */
 /* It is used to identify the public functions which should be exported. */
