@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Planetary Nebulae",
+    Identifier = "PlanetaryNebulae",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -33,7 +33,10 @@ local object = {
         TextMinSize = 4.5,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Planetary Nebulae"
+    GUI = {
+        Name = "Planetary Nebulae",
+        Path = "/Milky Way/Planetary Nebulae"
+    }
 }
 
 

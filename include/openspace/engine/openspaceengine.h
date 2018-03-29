@@ -51,11 +51,10 @@ class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
-class ParallelConnection;
+class ParallelPeer;
 class RenderEngine;
 class Scene;
 class SyncEngine;
-class SettingsEngine;
 class TimeManager;
 class VirtualPropertyManager;
 class WindowWrapper;
@@ -72,8 +71,21 @@ namespace scripting {
     class ScriptScheduler;
 } // namespace scripting
 
+  // Structure that is responsible for the delayed shutdown of the application
+struct ShutdownInformation {
+    // Whether the application is currently in shutdown mode (i.e. counting down the
+    // timer and closing it at '0'
+    bool inShutdown;
+    // Total amount of time the application will wait before actually shutting down
+    float waitTime;
+    // Current state of the countdown; if it reaches '0', the application will
+    // close
+    float timer;
+};
+
 class OpenSpaceEngine {
 public:
+
     static void create(int argc, char** argv,
         std::unique_ptr<WindowWrapper> windowWrapper,
         std::vector<std::string>& sgctArguments,
@@ -116,14 +128,14 @@ public:
     ModuleEngine& moduleEngine();
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
-    ParallelConnection& parallelConnection();
+    ParallelPeer& parallelPeer();
     RenderEngine& renderEngine();
-    SettingsEngine& settingsEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::NavigationHandler& navigationHandler();
     interaction::KeyBindingManager& keyBindingManager();
+    properties::PropertyOwner& rootPropertyOwner();
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
@@ -200,9 +212,8 @@ private:
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
-    std::unique_ptr<ParallelConnection> _parallelConnection;
+    std::unique_ptr<ParallelPeer> _parallelPeer;
     std::unique_ptr<RenderEngine> _renderEngine;
-    std::unique_ptr<SettingsEngine> _settingsEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<WindowWrapper> _windowWrapper;
@@ -216,7 +227,8 @@ private:
     std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 
     // Others
-    std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+    std::unique_ptr<properties::PropertyOwner> _rootPropertyOwner;
+    std::unique_ptr<properties::PropertyOwner> _globalPropertyOwner;
 
     std::unique_ptr<LoadingScreen> _loadingScreen;
 
@@ -249,17 +261,7 @@ private:
         std::vector<std::function<bool (double, double)>> mouseScrollWheel;
     } _moduleCallbacks;
 
-    // Structure that is responsible for the delayed shutdown of the application
-    struct {
-        // Whether the application is currently in shutdown mode (i.e. counting down the
-        // timer and closing it at '0'
-        bool inShutdown;
-        // Total amount of time the application will wait before actually shutting down
-        float waitTime;
-        // Current state of the countdown; if it reaches '0', the application will
-        // close
-        float timer;
-    } _shutdown;
+    ShutdownInformation _shutdown;
 
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute

@@ -27,9 +27,9 @@
 #include <modules/imgui/include/gui.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
@@ -67,10 +67,9 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
                         &(OsEng.windowWrapper()),
-                        &(OsEng.settingsEngine()),
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
-                        &(OsEng.parallelConnection()),
+                        &(OsEng.parallelPeer()),
                         &(OsEng.console()),
                         &(OsEng.dashboard())
                     };
@@ -80,13 +79,19 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._screenSpaceProperty.setSource(
                 []() {
-                   const std::vector<ScreenSpaceRenderable*>& ssr =
-                       OsEng.renderEngine().screenSpaceRenderables();
-                   return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
+                    return OsEng.renderEngine().screenSpaceOwner().propertySubOwners();
                 }
             );
 
-            gui._property.setSource(
+            gui._moduleProperty.setSource(
+                []() {
+                    std::vector<properties::PropertyOwner*> v;
+                    v.push_back(&(OsEng.moduleEngine()));
+                    return v;
+                }
+            );
+
+            gui._sceneProperty.setSource(
                 []() {
                     const Scene* scene = OsEng.renderEngine().scene();
                     const std::vector<SceneGraphNode*>& nodes = scene ?
@@ -197,7 +202,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         [&](Key key, KeyModifier mod, KeyAction action) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._property.isEnabled())
+                gui._sceneProperty.isEnabled())
             {
                 return gui.keyCallback(key, mod, action);
             }
@@ -211,7 +216,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         [&](unsigned int codepoint, KeyModifier modifier) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._property.isEnabled())
+                gui._sceneProperty.isEnabled())
             {
                 return gui.charCallback(codepoint, modifier);
             }
@@ -225,7 +230,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         [&](MouseButton button, MouseAction action) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._property.isEnabled())
+                gui._sceneProperty.isEnabled())
             {
                 return gui.mouseButtonCallback(button, action);
             }
@@ -239,7 +244,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
         [&](double, double posY) -> bool {
             // A list of all the windows that can show up by themselves
             if (gui.isEnabled() || gui._performance.isEnabled() ||
-                gui._property.isEnabled())
+                gui._sceneProperty.isEnabled())
             {
                 return gui.mouseWheelCallback(posY);
             }

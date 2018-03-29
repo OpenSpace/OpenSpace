@@ -1,0 +1,18 @@
+@import "../../../../styles/all";
+
+.clock {
+  display: flex;
+}
+
+.textInput {
+  padding: $base-padding / 2 !important;
+}
+
+.element {
+  display: flex;
+  flex-direction: column;
+
+  + .element {
+    padding-left: $base-padding / 2;
+  }
+}

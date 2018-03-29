@@ -46,9 +46,10 @@ void SelectionProperty::addOption(Option option) {
         if (o.value == option.value) {
             LWARNINGC(
                 "SelectionProperty",
-                "The value of option {" << o.value << " -> " << o.description <<
-                "} was already registered when trying to add option {" << option.value <<
-                " -> " << option.description << "}"
+                fmt::format("The value of option {{ {} -> {} }} was already registered "
+                    "when trying to add option {{ {} -> {} }}",
+                    o.value, o.description, option.value, option.description
+                )
             );
             return;
         }
@@ -152,18 +153,19 @@ bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(
     return true;
 }
 
-std::string SelectionProperty::generateAdditionalDescription() const {
-    std::string result;
-    result += OptionsKey + " = {";
+std::string SelectionProperty::generateAdditionalJsonDescription() const {
+    std::string result = "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
-        result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+        result += "{";
+        result +=  "\"" + std::to_string(o.value) + "\": \"" + o.description + "\"";
+        result += "}";
         if (i != _options.size() - 1) {
             result += ",";
         }
     }
 
-    result += "}";
+    result += "] }";
     return result;
 }
 

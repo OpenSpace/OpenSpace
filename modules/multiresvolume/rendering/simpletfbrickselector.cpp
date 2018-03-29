@@ -307,7 +307,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
         }
 
         float dotProduct = 0;
-        for (int i = 0; i < tf->width(); i++) {
+        for (size_t i = 0; i < tf->width(); i++) {
             float x = static_cast<float>(i) / static_cast<float>(tfWidth);
             float sample = histogram->interpolate(x);
 

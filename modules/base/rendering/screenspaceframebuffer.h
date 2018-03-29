@@ -65,13 +65,15 @@ protected:
     properties::Vec4Property _size;
 
 private:
+    void bindTexture() override;
+
     static int id();
 
     std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
     std::vector<std::shared_ptr<std::function<void()>>> _renderFunctionsShared;
     std::vector<std::function<void()>> _renderFunctions;
 
-    int _id;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
 } //namespace openspace

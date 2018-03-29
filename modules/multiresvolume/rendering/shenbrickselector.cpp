@@ -24,10 +24,6 @@
 
 #include <modules/multiresvolume/rendering/shenbrickselector.h>
 
-namespace {
-    constexpr const char* _loggerCat = "ShenBrickSelector";
-} // namespace
-
 namespace openspace {
 
 ShenBrickSelector::ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance)

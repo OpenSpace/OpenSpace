@@ -42,12 +42,16 @@ namespace {
 
 namespace openspace {
 
+ModuleEngine::ModuleEngine()
+    : properties::PropertyOwner({"Modules"})
+{}
+
 void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
     for (OpenSpaceModule* m : AllModules()) {
-        const std::string name = m->name();
+        const std::string identifier = m->identifier();
         ghoul::Dictionary configuration;
-        if (moduleConfigurations.hasKey(name)) {
-            moduleConfigurations.getValue(name, configuration);
+        if (moduleConfigurations.hasKey(identifier)) {
+            moduleConfigurations.getValue(identifier, configuration);
         }
         registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
     }
@@ -55,8 +59,8 @@ void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
 
 void ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
-    for (auto& m : _modules) {
-        LDEBUG("Deinitializing module '" << m->name() << "'");
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
         m->deinitialize();
     }
     _modules.clear();
@@ -72,19 +76,20 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
         _modules.begin(),
         _modules.end(),
         [&m](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->name() == m->name();
+            return rhs->identifier() == m->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + m->name() + "' was registered before",
+            "Module name '" + m->identifier() + "' was registered before",
             "ModuleEngine"
         );
     }
 
-    LDEBUG("Registering module '" << m->name() << "'");
+    LDEBUG(fmt::format("Registering module '{}'", m->identifier()));
     m->initialize(this, configuration);
-    LDEBUG("Registered module '" << m->name() << "'");
+    addPropertySubOwner(m.get());
+    LDEBUG(fmt::format("Registered module '{}'", m->identifier()));
     _modules.push_back(std::move(m));
 }
 

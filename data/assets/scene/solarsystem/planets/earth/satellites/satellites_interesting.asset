@@ -1,0 +1,5 @@
+asset.request('./misc/brightest')
+asset.request('./communications/geostationary')
+asset.request('./navigation/gps')
+asset.request('./misc/spacestations')
+asset.request('./misc/tle-new')

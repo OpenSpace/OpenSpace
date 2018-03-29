@@ -1,3 +1,10 @@
+local tableLength = function(table)
+    local count = 0
+    for _ in pairs(table) do count = count + 1 end
+    return count
+end
+
+
 local registerSpiceKernels = function (spiceAsset, kernels)
     spiceAsset.onInitialize(function ()
         for i, kernel in ipairs(kernels) do
@@ -12,7 +19,16 @@ local registerSpiceKernels = function (spiceAsset, kernels)
     end)
 end
 
-local registerSceneGraphNodes = function (sceneAsset, nodes)
+local registerSceneGraphNodes = function (sceneAsset, nodes, override)
+    override = override or false
+    if not override then
+        if tableLength(nodes) == 0 then
+            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            return
+        end
+    end
+
+
     sceneAsset.onInitialize(function ()
         for i, node in ipairs(nodes) do
             openspace.addSceneGraphNode(node)
@@ -21,12 +37,26 @@ local registerSceneGraphNodes = function (sceneAsset, nodes)
     sceneAsset.onDeinitialize(function ()
         for i = #nodes, 1, -1 do
             node = nodes[i]
-            openspace.removeSceneGraphNode(node.Name)
+            openspace.removeSceneGraphNode(node.Identifier)
         end
     end)
 end
 
-local registerSceneGraphNodesAndExport = function (sceneAsset, nodes)
+local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
+    override = override or false
+    if not override then
+        if tableLength(nodes) == 0 then
+            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            return
+        end
+    end
+
+    for i, node in ipairs(nodes) do
+        if not node.Identifier then
+            openspace.printError("Could not load asset as Identifier was missing")
+        end
+    end
+
     sceneAsset.onInitialize(function ()
         for i, node in ipairs(nodes) do
             openspace.addSceneGraphNode(node)
@@ -35,27 +65,27 @@ local registerSceneGraphNodesAndExport = function (sceneAsset, nodes)
     sceneAsset.onDeinitialize(function ()
         for i = #nodes, 1, -1 do
             node = nodes[i]
-            openspace.removeSceneGraphNode(node.Name)
+            openspace.removeSceneGraphNode(node.Identifier)
         end
     end)
 
     for i, node in ipairs(nodes) do
-        asset.export(node.Name, node)
+        sceneAsset.export(node.Identifier, node)
     end
 end
 
-local requireAll = function (asset, directory)
+local requireAll = function (sceneAsset, directory)
     function string.ends(String,End)
        return End=='' or string.sub(String,-string.len(End))==End
     end
 
     local result = {}
 
-    local files = openspace.walkDirectoryFiles(asset.localResource('') .. directory, true)
+    local files = openspace.walkDirectoryFiles(sceneAsset.localResource('') .. directory, true)
     for _, file in pairs(files) do
         if file:ends('.asset') then
             openspace.printDebug("Requiring: " .. file:sub(file:find(directory), -7))
-            local exports = asset.require(file:sub(1, -7))
+            local exports = sceneAsset.require(file:sub(1, -7))
             table.insert(result, exports)
         end
     end
@@ -63,17 +93,16 @@ local requireAll = function (asset, directory)
     return result
 end
 
-local requestAll = function (asset, directory)
+local requestAll = function (sceneAsset, directory)
     function string.ends(String,End)
        return End=='' or string.sub(String,-string.len(End))==End
     end
 
-    -- directory = asset.localResource('') .. directory
-    local files = openspace.walkDirectoryFiles(asset.localResource('') .. directory, true)
+    local files = openspace.walkDirectoryFiles(sceneAsset.localResource('') .. directory, true)
     for _, file in pairs(files) do
         if file:ends('.asset') then
             openspace.printDebug("Requesting: " .. file:sub(file:find(directory), -7))
-            asset.request(file:sub(file:find(directory), -7))
+            sceneAsset.request(file:sub(file:find(directory), -7))
         end
     end
 end

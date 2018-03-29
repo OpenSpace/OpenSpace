@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Rhea = {
-    Name = "Rhea",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Rhea",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Rhea = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Rhea Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/rhea.jpg",
                     Enabled = true
                 }
@@ -43,7 +43,9 @@ local Rhea = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Saturn/Moons"
+    }
 }
 
 

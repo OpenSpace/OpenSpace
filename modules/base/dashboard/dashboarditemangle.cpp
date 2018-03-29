@@ -33,6 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -173,7 +174,7 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 }
 
 DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
-    : DashboardItem("Distance")
+    : DashboardItem("Angle")
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{
@@ -323,11 +324,11 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
         );
     });
     if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(DestinationTypeInfo.identifier);
-        if (value == "Node") {
+        std::string type = dictionary.value<std::string>(DestinationTypeInfo.identifier);
+        if (type == "Node") {
             _destination.type = Type::Node;
         }
-        else if (value == "Focus") {
+        else if (type == "Focus") {
             _destination.type = Type::Focus;
         }
         else {
@@ -380,7 +381,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 
     switch (comp.type) {
         case Type::Node:
-            return { comp.node->worldPosition(), comp.node->name() };
+            return { comp.node->worldPosition(), comp.node->guiName() };
         case Type::Focus:
             return {
                 OsEng.navigationHandler().focusNode()->worldPosition(),
@@ -391,7 +392,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
-};
+}
 
 void DashboardItemAngle::render(glm::vec2& penPosition) {
     std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);

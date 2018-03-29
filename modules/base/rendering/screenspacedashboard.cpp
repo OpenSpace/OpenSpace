@@ -61,10 +61,7 @@ namespace luascriptfunctions {
 * addDashboardItemToScreenSpace(string, table):
 */
 int addDashboardItemToScreenSpace(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2) {
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addDashboardItemToScreenSpace");
 
     std::string name = luaL_checkstring(L, -2);
     int type = lua_type(L, -1);
@@ -97,6 +94,8 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+
+        lua_settop(L, 0);
         return 0;
     }
 }
@@ -106,12 +105,9 @@ int addDashboardItemToScreenSpace(lua_State* L) {
 * removeDashboardItemsFromScreenSpace(string):
 */
 int removeDashboardItemsFromScreenSpace(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
-    std::string name = luaL_checkstring(L, -1);
+    std::string name = ghoul::lua::checkStringAndPop(L);
     std::shared_ptr<ScreenSpaceRenderable> ssr =
         OsEng.renderEngine().screenSpaceRenderable(name);
 
@@ -163,18 +159,23 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         "ScreenSpaceDashboard"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceDashboard");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceDashboard");
         }
         else {
-            setName("ScreenSpaceDashboard" + std::to_string(id));
+            setIdentifier("ScreenSpaceDashboard" + std::to_string(iIdentifier));
         }
         ++id;
+    }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceDashboard " + std::to_string(iIdentifier));
     }
 
     if (dictionary.hasKey(UseMainInfo.identifier)) {

@@ -32,6 +32,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -80,9 +81,9 @@ NavigationHandler::NavigationHandler()
 
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
-            LWARNING(
-                "Could not find a node in scenegraph called '" << _origin.value() << "'"
-            );
+            LWARNING(fmt::format(
+                "Could not find a node in scenegraph called '{}'", _origin.value()
+            ));
             return;
         }
         setFocusNode(node);
@@ -102,21 +103,18 @@ NavigationHandler::NavigationHandler()
 NavigationHandler::~NavigationHandler() {}
 
 void NavigationHandler::initialize() {
-    OsEng.parallelConnection().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent()->subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
-            if (OsEng.parallelConnection().status() ==
-                ParallelConnection::Status::ClientWithHost)
-            {
-                _useKeyFrameInteraction = true;
-            }
+            _useKeyFrameInteraction = (OsEng.parallelPeer().status() ==
+                ParallelConnection::Status::ClientWithHost);
         }
     );
 }
 
 void NavigationHandler::deinitialize() {
-    OsEng.parallelConnection().connectionEvent()->unsubscribe("NavigationHandler");
+    OsEng.parallelPeer().connectionEvent()->unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
@@ -240,7 +238,7 @@ ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
     ghoul::Dictionary cameraDict;
     cameraDict.setValue(KeyPosition, cameraPosition);
     cameraDict.setValue(KeyRotation, cameraRotation);
-    cameraDict.setValue(KeyFocus, focusNode()->name());
+    cameraDict.setValue(KeyFocus, focusNode()->identifier());
 
     return cameraDict;
 }
@@ -248,7 +246,7 @@ ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
 void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         std::string fullpath = absPath(filepath);
-        LINFO("Saving camera position: " << filepath);
+        LINFO(fmt::format("Saving camera position: {}", filepath));
 
         ghoul::Dictionary cameraDict = getCameraStateDictionary();
 
@@ -261,7 +259,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dquat q = _camera->rotationQuaternion();
 
         ofs << "return {" << std::endl;
-        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->name() << "\""
+        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->identifier() << "\""
             << "," << std::endl;
         ofs << "    " << KeyPosition << " = {"
             << std::to_string(p.x) << ", "
@@ -279,7 +277,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 }
 
 void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
-    LINFO("Reading camera state from file: " << filepath);
+    LINFO(fmt::format("Reading camera state from file: {}", filepath));
     if (!FileSys.fileExists(filepath))
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
 

@@ -27,21 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
-
-#include <modules/fieldlinessequence/util/fieldlinesstate.h>
-
 #include <atomic>
 
-namespace {
-    enum class SourceFileType;
-}
+namespace { enum class SourceFileType; }
 
 namespace openspace {
 
@@ -49,30 +45,29 @@ class RenderableFieldlinesSequence : public Renderable {
 public:
     RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
-    void deinitialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
 private:
     // ------------------------------------- ENUMS -------------------------------------//
     // Used to determine if lines should be colored UNIFORMLY or by an extraQuantity
-    enum ColorMethod : int {
+    enum class ColorMethod : int {
         Uniform = 0,
         ByQuantity
     };
 
     // ------------------------------------ STRINGS ------------------------------------//
-    std::string       _name;                               // Name of the Node!
+    std::string       _identifier;                               // Name of the Node!
 
     // ------------------------------------- FLAGS -------------------------------------//
     // Used for 'runtime-states'. True when loading a new state from disk on another
     // thread.
     std::atomic<bool> _isLoadingStateFromDisk    { false};
-    // If initialization proved successful
-    bool              _isReady                   = false;
     // False => states are stored in RAM (using 'in-RAM-states'), True => states are
     // loaded from disk during runtime (using 'runtime-states')
     bool              _loadingStatesDynamically  = false;
@@ -123,7 +118,7 @@ private:
     std::unique_ptr<FieldlinesState>              _newState;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
     // Transfer function used to color lines when _pColorMethod is set to BY_QUANTITY
-    std::shared_ptr<TransferFunction>             _transferFunction;
+    std::unique_ptr<TransferFunction>             _transferFunction;
 
     // ------------------------------------ VECTORS ----------------------------------- //
     // Paths to color tables. One for each 'extraQuantity'
@@ -225,9 +220,8 @@ private:
     bool prepareForOsflsStreaming();
 
     // ------------------------- FUNCTIONS USED DURING RUNTIME ------------------------ //
-    inline bool isWithinSequenceInterval(const double currentTime) const;
     void readNewState(const std::string& filePath);
-    void updateActiveTriggerTimeIndex(const double currentTime);
+    void updateActiveTriggerTimeIndex(double currentTime);
     void updateVertexPositionBuffer();
     void updateVertexColorBuffer();
     void updateVertexMaskingBuffer();

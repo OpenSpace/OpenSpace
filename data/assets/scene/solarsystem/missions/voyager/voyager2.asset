@@ -37,8 +37,8 @@ local RotationMatrix = {
 }
 
 local Voyager2 = {
-    Name = "Voyager 2",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -52,12 +52,15 @@ local Voyager2 = {
             DestinationFrame = "GALACTIC"
         }
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local Voyager2Main = {
-    Name = "Voyager 2 Main",
-    Parent = Voyager2.Name,
+    Identifier = "Voyager_2_Main",
+    Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Geometry = {
@@ -67,12 +70,15 @@ local Voyager2Main = {
         ColorTexture = models .. "/voyager-main.jpg",
         ModelTransform = RotationMatrix
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Main",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local Voyager2Antenna = {
-    Name = "Voyager 2 Antanna",
-    Parent = Voyager2.Name,
+    Identifier = "Voyager_2_Antanna",
+    Parent = Voyager2.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Geometry = {
@@ -82,15 +88,18 @@ local Voyager2Antenna = {
         ColorTexture = models .. "/voyager-antenna.png",
         ModelTransform = RotationMatrix
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Antanna",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
     -- The trails are organized as follows.  The cruise phases can be resolved in relatively
     -- low resolution since they are just straight lines
     -- The encounter phases should be much higher resolution or otherwise artifacts would appear
 local VoyagerTrailCruiseEarthJupiter = {
-    Name = "Voyager 2 Trail Cruise Earth-Jupiter",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Cruise_Earth_Jupiter",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -104,12 +113,15 @@ local VoyagerTrailCruiseEarthJupiter = {
         EndTime = "1979 JUL 06",
         SampleInterval = 669 * 2  -- 669 is the number of days between the Start and End time
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Earth-Jupiter",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterJupiter = {
-    Name = "Voyager 2 Trail Encounter Jupiter",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Encounter_Jupiter",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -124,12 +136,15 @@ local VoyagerTrailEncounterJupiter = {
         EndTime = "1979 JUL 15",
         SampleInterval = 100
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Jupiter",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailCruiseJupiterSaturn = {
-    Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Cruise_Jupiter_Saturn",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -144,12 +159,15 @@ local VoyagerTrailCruiseJupiterSaturn = {
         EndTime = "1981 AUG 23",
         SampleInterval = 770 * 2  -- 770 is the number of days between the Start and End time
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Jupiter-Saturn",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterSaturn = {
-    Name = "Voyager 2 Trail Encounter Saturn",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Encounter_Saturn",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -164,12 +182,15 @@ local VoyagerTrailEncounterSaturn = {
         EndTime = "1981 AUG 30",
         SampleInterval = 100
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Saturn",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailSaturnUranus = {
-    Name = "Voyager 2 Trail Cruise Saturn-Uranus",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Cruise_Saturn_Uranus",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -184,12 +205,15 @@ local VoyagerTrailSaturnUranus = {
         EndTime = "1986 JAN 22",
         SampleInterval = 1971  * 2  -- 1971 is the number of days between the Start and End time
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Saturn-Uranus",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterUranus = {
-    Name = "Voyager 2 Trail Encounter Uranus",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Encounter_Uranus",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -204,12 +228,15 @@ local VoyagerTrailEncounterUranus = {
         EndTime = "1986 JAN 27",
         SampleInterval = 100
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Uranus",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailCruiseUranusNeptune = {
-    Name = "Voyager 2 Trail Cruise Uranus-Neptune",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Cruise_Uranus_Neptune",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -224,12 +251,15 @@ local VoyagerTrailCruiseUranusNeptune = {
         EndTime = "1989 AUG 24",
         SampleInterval = 1305  * 2  -- 1305 is the number of days between the Start and End time
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Uranus-Neptune",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailEncounterNeptune = {
-    Name = "Voyager 2 Trail Encounter Neptune",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Encounter_Neptune",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -244,12 +274,15 @@ local VoyagerTrailEncounterNeptune = {
         EndTime = "1989 AUG 26",
         SampleInterval = 100
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Encounter Neptune",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
 
 local VoyagerTrailCruiseNeptuneInf = {
-    Name = "Voyager 2 Trail Cruise Neptune-Inf",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "Voyager_2_Trail_Cruise_Neptune_Inf",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -264,8 +297,13 @@ local VoyagerTrailCruiseNeptuneInf = {
         EndTime = "2021 JAN 01",
         SampleInterval = 11451 * 2  -- 11451 is the number of days between the Start and End time
     },
-    GuiPath = "/Solar System/Missions/Voyager 2"
+    GUI = {
+        Name = "Voyager 2 Trail Cruise Neptune-Inf",
+        Path = "/Solar System/Missions/Voyager 2"
+    }
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Voyager2,

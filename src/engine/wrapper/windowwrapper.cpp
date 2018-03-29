@@ -34,10 +34,7 @@
 namespace luascriptfunctions {
 
 int setSynchronization(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setSynchronization");
 
     bool b = lua_toboolean(L, -1) != 0;
     OsEng.windowWrapper().setSynchronization(b);

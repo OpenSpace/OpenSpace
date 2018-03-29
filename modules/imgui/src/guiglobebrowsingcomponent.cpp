@@ -39,11 +39,10 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 
-#include <ghoul/misc/onscopeexit.h>
-
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/defer.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <numeric>
 
@@ -54,7 +53,7 @@ namespace {
 namespace openspace::gui {
 
 GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
-    : GuiPropertyComponent("GlobeBrowsing")
+    : GuiPropertyComponent("GlobeBrowsing", "Globe Browsing")
 {}
 
 void GuiGlobeBrowsingComponent::render() {
@@ -70,8 +69,7 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::Begin("Globe Browsing", &e, WindowSize, 0.5f);
     _isEnabled = e;
     _isCollapsed = ImGui::IsWindowCollapsed();
-    OnExit([]() {ImGui::End(); }); // We escape early from this function in a few places
-
+    defer { ImGui::End(); };
 
     // Render the list of planets
     std::vector<SceneGraphNode*> nodes =
@@ -82,7 +80,8 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
-                return !(n->renderable() && n->renderable()->name() == "RenderableGlobe");
+                return !(n->renderable() &&
+                         n->renderable()->identifier() == "RenderableGlobe");
             }
         ),
         nodes.end()
@@ -90,11 +89,13 @@ void GuiGlobeBrowsingComponent::render() {
     std::sort(
         nodes.begin(),
         nodes.end(),
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); }
+        [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
+            return lhs->guiName() < rhs->guiName();
+        }
     );
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {
-        nodeNames += n->name() + '\0';
+        nodeNames += n->identifier() + '\0';
     }
 
     int iNode = -1;
@@ -106,7 +107,7 @@ void GuiGlobeBrowsingComponent::render() {
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = focus->name();
+            _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
         }
     }
@@ -115,7 +116,7 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.cbegin(),
             nodes.cend(),
             [this](SceneGraphNode* lhs) {
-                return lhs->name() == _currentNode;
+                return lhs->identifier() == _currentNode;
             }
         );
         iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
@@ -129,7 +130,7 @@ void GuiGlobeBrowsingComponent::render() {
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = focus->name();
+            _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
             nodeChanged = true;
         }
@@ -140,7 +141,7 @@ void GuiGlobeBrowsingComponent::render() {
         // or if there are no nodes
         return;
     }
-    _currentNode = nodes[iNode]->name();
+    _currentNode = nodes[iNode]->identifier();
 
     if (nodeChanged) {
         _currentServer = "";
@@ -244,7 +245,7 @@ void GuiGlobeBrowsingComponent::render() {
     if (cap.empty()) {
         LWARNINGC(
             "GlobeBrowsingGUI",
-            "Unknown server: '" << _currentServer << "'"
+            fmt::format("Unknown server: '{}'", _currentServer)
         );
     }
 

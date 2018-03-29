@@ -37,7 +37,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* _loggerCat = "Renderable";
     constexpr const char* keyStart = "StartTime";
     constexpr const char* keyEnd = "EndTime";
     constexpr const char* KeyType = "Type";
@@ -47,6 +46,12 @@ namespace {
         "Enabled",
         "Is Enabled",
         "This setting determines whether this object will be visible or not."
+    };
+
+    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+        "Opacity",
+        "Transparency",
+        "This value determines the transparency of this object."
     };
 } // namespace
 
@@ -59,21 +64,27 @@ documentation::Documentation Renderable::Documentation() {
         "Renderable",
         "renderable",
         {
-        {
-            KeyType,
-            new StringAnnotationVerifier("A valid Renderable created by a factory"),
-            Optional::No,
-            "This key specifies the type of Renderable that gets created. It has to be "
-            "one of the valid Renderables that are available for creation (see the "
-            "FactoryDocumentation for a list of possible Renderables), which depends on "
-            "the configration of the application"
-        },
-        {
-            EnabledInfo.identifier,
-            new BoolVerifier,
-            Optional::Yes,
-            EnabledInfo.description
-        }
+            {
+                KeyType,
+                new StringAnnotationVerifier("A valid Renderable created by a factory"),
+                Optional::No,
+                "This key specifies the type of Renderable that gets created. It has to "
+                "be one of the valid Renderables that are available for creation (see "
+                "the FactoryDocumentation for a list of possible Renderables), which "
+                "depends on the configration of the application"
+            },
+            {
+                EnabledInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                EnabledInfo.description
+            },
+            {
+                OpacityInfo.identifier,
+                new DoubleInRangeVerifier(0.0, 1.0),
+                Optional::Yes,
+                OpacityInfo.description
+            }
         }
     };
 }
@@ -81,13 +92,6 @@ documentation::Documentation Renderable::Documentation() {
 std::unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    // The name is passed down from the SceneGraphNode
-    ghoul_assert(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "The SceneGraphNode did not set the 'name' key"
-    );
-    std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
-
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
@@ -95,27 +99,18 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     auto factory = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
     std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "renderable" })
     , _enabled(EnabledInfo, true)
+    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _hasTimeInterval(false)
 {
-    ghoul_assert(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        std::string("SceneGraphNode must specify '") + SceneGraphNode::KeyName + "'"
-    );
-
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
 
@@ -136,12 +131,16 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (_startTime != "" && _endTime != "") {
+    if (!_startTime.empty() && !_endTime.empty()) {
         _hasTimeInterval = true;
     }
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
         _enabled = dictionary.value<bool>(EnabledInfo.identifier);
+    }
+
+    if (dictionary.hasKey(OpacityInfo.identifier)) {
+        _opacity = static_cast<float>(dictionary.value<double>(OpacityInfo.identifier));
     }
 
     addProperty(_enabled);
@@ -232,6 +231,17 @@ bool Renderable::isEnabled() const {
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
     _enabled.onChange([this, c{ std::move(callback) }]() {
         c(isEnabled());
+    });
+}
+
+void Renderable::registerUpdateRenderBinFromOpacity() {
+    _opacity.onChange([this](){
+        if (_opacity > 0.f && _opacity < 1.f) {
+            setRenderBin(Renderable::RenderBin::Transparent);
+        }
+        else {
+            setRenderBin(Renderable::RenderBin::Opaque);
+        }
     });
 }
 

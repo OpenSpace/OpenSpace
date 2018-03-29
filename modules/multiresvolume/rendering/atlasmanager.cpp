@@ -49,7 +49,7 @@ bool AtlasManager::initialize() {
     _nBricksPerDim = header.xNumBricks_;
     _nOtLeaves = _nBricksPerDim * _nBricksPerDim * _nBricksPerDim;
     _nOtNodes = _tsp->numOTNodes();
-    _nOtLevels = log(_nOtLeaves)/log(8) + 1;
+    _nOtLevels = static_cast<unsigned int>(log(_nOtLeaves)/log(8) + 1);
     _paddedBrickDim = _tsp->paddedBrickDim();
     _nBricksInMap = _nBricksPerDim * _nBricksPerDim * _nBricksPerDim;
     _atlasDim = _nBricksPerDim * _paddedBrickDim;
@@ -124,7 +124,11 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
         int lastBrick = firstBrick;
 
         auto itEnd = itStart;
-        for (itEnd++; itEnd != _requiredBricks.end() && *itEnd == lastBrick + 1; itEnd++) {
+        for (itEnd++;
+            itEnd != _requiredBricks.end() &&
+            *itEnd == static_cast<unsigned int>(lastBrick) + 1;
+            itEnd++)
+        {
             lastBrick = *itEnd;
         }
 
@@ -136,7 +140,7 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-    for (int i = 0; i < nBrickIndices; i++) {
+    for (size_t i = 0; i < nBrickIndices; i++) {
         _atlasMap[i] = _brickMap[brickIndices[i]];
     }
 
@@ -145,7 +149,9 @@ void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brick
     pboToAtlas(bufferIndex);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, _atlasMapBuffer);
-    GLint *to = (GLint*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
+    GLint *to = reinterpret_cast<GLint*>(
+        glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY)
+    );
     memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -169,7 +175,7 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* ma
         if (!_brickMap.count(brickIndex)) {
             unsigned int atlasCoords = _freeAtlasCoords.back();
             _freeAtlasCoords.pop_back();
-            int level = _nOtLevels - floor(log((7.0 * (float(brickIndex % _nOtNodes)) + 1.0))/log(8)) - 1;
+            int level = _nOtLevels - static_cast<int>(floor(log((7.0 * (float(brickIndex % _nOtNodes)) + 1.0))/log(8)) - 1);
             ghoul_assert(atlasCoords <= 0x0FFFFFFF, "@MISSING");
             unsigned int atlasData = (level << 28) + atlasCoords;
             _brickMap.insert(std::pair<unsigned int, unsigned int>(brickIndex, atlasData));
@@ -220,17 +226,18 @@ void AtlasManager::pboToAtlas(BUFFER_INDEX bufferIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
     glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
-    glTexSubImage3D(GL_TEXTURE_3D,  // target
-        0,                          // level
-        0,                          // xoffset
-        0,                          // yoffset
-        0,                          // zoffset
-        dim[0],                     // width
-        dim[1],                     // height
-        dim[2],                     // depth
-        GL_RED,                     // format
-        GL_FLOAT,                   // type
-        NULL                        // *pixels
+    glTexSubImage3D(
+        GL_TEXTURE_3D,                // target
+        0,                            // level
+        0,                            // xoffset
+        0,                            // yoffset
+        0,                            // zoffset
+        static_cast<GLsizei>(dim[0]), // width
+        static_cast<GLsizei>(dim[1]), // height
+        static_cast<GLsizei>(dim[2]), // depth
+        GL_RED,                       // format
+        GL_FLOAT,                     // type
+        NULL                          // *pixels
     );
     glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

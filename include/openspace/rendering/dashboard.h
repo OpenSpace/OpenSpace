@@ -27,10 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboarditem.h>
-
 #include <ghoul/glm.h>
-
 #include <memory>
 #include <vector>
 
@@ -59,6 +58,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    properties::BoolProperty _isEnabled;
+
     std::vector<std::unique_ptr<DashboardItem>> _items;
 };
 

@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONFIELDLINEHELPER___H__
 
 #include <ghoul/glm.h>
-
 #include <string>
 #include <vector>
 
@@ -36,11 +35,9 @@ class FieldlinesState;
 
 namespace fls {
 
-bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string cdfPath,
-                                 const std::vector<glm::vec3>& seedPoints,
-                                 const std::string tracingVar,
-                                 std::vector<std::string>& extraVars,
-                                 std::vector<std::string>& extraMagVars);
+bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfPath,
+    const std::vector<glm::vec3>& seedPoints, std::string tracingVar,
+    std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
 } // namespace fls
 } // namespace openspace

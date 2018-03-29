@@ -5,162 +5,186 @@ local kernels341 = asset.require('../jup341').Kernels
 
 
 
-local parentName = transforms.JupiterBarycenter.Name
+local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_ananke" }
 local trailColor = { 0.4, 0.3, 0.01 }
 
 local anankeGroup = {
     {
-        Name = "S/2010 J 2",
+        Identifier = "S2010J2",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "552",
         Radii = { 1000, 1000, 1000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Name = "S/2010 J 2",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 588.36,
         Kernels = kernels341
     },
     {
-        Name = "Thelxinoe",
+        Identifier = "Thelxinoe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "THELXINOE",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 597.61,
         Kernels = kernels341
     },
     {
-        Name = "Euanthe",
+        Identifier = "Euanthe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "EUANTHE",
         Radii = { 3000, 3000, 3000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 598.09,
         Kernels = kernels341
     },
     {
-        Name = "Iocaste",
+        Identifier = "Iocaste",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "IOCASTE",
         Radii = { 5000, 5000, 5000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 609.43,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 16",
+        Identifier = "S2003J16",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55068",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Name = "S/2003 J 16",
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 610.36,
         Kernels = kernels341
     },
     {
-        Name = "Praxidike",
+        Identifier = "Praxidike",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PRAXIDIKE",
         Radii = { 7000, 7000, 7000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 613.90,
         Kernels = kernels341
     },
     {
-        Name = "Harpalyke",
+        Identifier = "Harpalyke",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HARPALYKE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 624.54,
         Kernels = kernels341
     },
     {
-        Name = "Mneme",
+        Identifier = "Mneme",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "MNEME",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 627.48,
         Kernels = kernels341
     },
     {
-        Name = "Hermippe",
+        Identifier = "Hermippe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HERMIPPE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 629.81,
         Kernels = kernels341
     },
     {
-        Name = "Thyone",
+        Identifier = "Thyone",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "THYONE",
         Radii = { 4000, 4000, 4000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 639.80,
         Kernels = kernels341
     },
     {
-        Name = "Ananke",
+        Identifier = "Ananke",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ANANKE",
         Radii = { 28000, 28000, 28000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Ananke Group",
+        GUI = {
+            Path = "/Solar System/Planets/Jupiter/Moons/Ananke Group"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 640.38,
         Kernels = kernels341

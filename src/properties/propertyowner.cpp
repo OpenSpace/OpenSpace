@@ -25,23 +25,53 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/property.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-
+#include <ghoul/misc/invariants.h>
 #include <algorithm>
-
-namespace openspace::properties {
+#include <numeric>
 
 namespace {
     constexpr const char* _loggerCat = "PropertyOwner";
 } // namespace
 
+namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
-    : _name(std::move(info.name))
+    : DocumentationGenerator(
+        "Documented",
+        "propertyOwners",
+        {
+            {
+                "mainTemplate",
+                "${WEB}/properties/main.hbs"
+            },
+            {
+                "propertyOwnerTemplate",
+                "${WEB}/properties/propertyowner.hbs"
+            },
+            {
+                "propertyTemplate",
+                "${WEB}/properties/property.hbs"
+            }
+        },
+        "${WEB}/properties/script.js"
+    )
+    , _identifier(std::move(info.identifier))
+    , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
     , _owner(nullptr)
-{}
+{
+    ghoul_precondition(
+        _identifier.find_first_of("\t\n ") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+    ghoul_precondition(
+        _identifier.find_first_of(".") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+}
 
 PropertyOwner::~PropertyOwner() {
     _properties.clear();
@@ -105,14 +135,14 @@ std::vector<PropertyOwner*> PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
 
-PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
+PropertyOwner* PropertyOwner::propertySubOwner(const std::string& identifier) const {
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [&name](PropertyOwner* owner) { return owner->name() == name;  }
+        [&identifier](PropertyOwner* owner) { return owner->identifier() == identifier; }
     );
 
-    if (it == _subOwners.end() || (*it)->name() != name) {
+    if (it == _subOwners.end() || (*it)->identifier() != identifier) {
         return nullptr;
     }
     else {
@@ -120,12 +150,12 @@ PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
     }
 }
 
-bool PropertyOwner::hasPropertySubOwner(const std::string& name) const {
-    return propertySubOwner(name) != nullptr;
+bool PropertyOwner::hasPropertySubOwner(const std::string& identifier) const {
+    return propertySubOwner(identifier) != nullptr;
 }
 
-void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) {
-    _groupNames[std::move(groupID)] = std::move(name);
+void PropertyOwner::setPropertyGroupName(std::string groupID, std::string identifier) {
+    _groupNames[std::move(groupID)] = std::move(identifier);
 }
 
 std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
@@ -139,7 +169,7 @@ std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
 }
 
 void PropertyOwner::addProperty(Property* prop) {
-    ghoul_assert(prop != nullptr, "prop must not be nullptr");
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     if (prop->identifier().empty()) {
         LERROR("No property identifier specified");
@@ -154,15 +184,20 @@ void PropertyOwner::addProperty(Property* prop) {
 
     // If we found the property identifier, we need to bail out
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
-        LERROR("Property identifier '" << prop->identifier() <<
-            "' already present in PropertyOwner '" << name() << "'");
+        LERROR(fmt::format(
+            "Property identifier '{}' already present in PropertyOwner '{}'",
+            prop->identifier(),
+            identifier()
+        ));
         return;
     } else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
         const bool hasOwner = hasPropertySubOwner(prop->identifier());
         if (hasOwner) {
-            LERROR("Property identifier '" << prop->identifier() << "' already names a "
-                << "registed PropertyOwner");
+            LERROR(fmt::format(
+                "Property identifier '{}' already names a registered PropertyOwner",
+                prop->identifier()
+            ));
             return;
         }
         else {
@@ -177,27 +212,36 @@ void PropertyOwner::addProperty(Property& prop) {
 }
 
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
-    ghoul_assert(owner != nullptr, "owner must not be nullptr");
-    ghoul_assert(!owner->name().empty(), "PropertyOwner must have a name");
+    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
+    ghoul_precondition(
+        !owner->identifier().empty(),
+        "PropertyOwner must have an identifier"
+    );
 
     // See if we can find the name of the propertyowner to add using the lower bound
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
+        [identifier = owner->identifier()](PropertyOwner* o) {
+            return o->identifier() == identifier;
+        }
     );
 
     // If we found the propertyowner's name, we need to bail out
-    if (it != _subOwners.end() && (*it)->name() == owner->name()) {
-        LERROR("PropertyOwner '" << owner->name() <<
-            "' already present in PropertyOwner '" << name() << "'");
+    if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
+        LERROR(fmt::format(
+            "PropertyOwner '{}' already present in PropertyOwner '{}'",
+            owner->identifier(),
+            identifier()
+        ));
         return;
     } else {
         // We still need to check if the PropertyOwners name is used in a Property
-        const bool hasProp = hasProperty(owner->name());
+        const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
-            LERROR("PropertyOwner '" << owner->name() << "'s name already names a "
-                 << "Property");
+            LERROR(fmt::format(
+                "PropertyOwner '{}'s name already names a Property", owner->identifier()
+            ));
             return;
         }
         else {
@@ -212,7 +256,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& ow
 }
 
 void PropertyOwner::removeProperty(Property* prop) {
-    ghoul_assert(prop != nullptr, "prop must not be nullptr");
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     // See if we can find the identifier of the property to add in the properties list
     std::vector<Property*>::const_iterator it = std::find_if(
@@ -226,8 +270,9 @@ void PropertyOwner::removeProperty(Property* prop) {
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
     } else {
-        LERROR("Property with identifier '" << prop->identifier() <<
-            "' not found for removal.");
+        LERROR(fmt::format(
+            "Property with identifier '{}' not found for removal", prop->identifier()
+        ));
     }
 }
 
@@ -236,21 +281,24 @@ void PropertyOwner::removeProperty(Property& prop) {
 }
 
 void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner* owner) {
-    ghoul_assert(owner != nullptr, "owner must not be nullptr");
+    ghoul_precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the propertyowner to add
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),
-        [name = owner->name()](PropertyOwner* o) { return o->name() == name;  }
+        [identifier = owner->identifier()](PropertyOwner* o) {
+            return o->identifier() == identifier;
+        }
     );
 
     // If we found the propertyowner, we can delete it
-    if (it != _subOwners.end() && (*it)->name() == owner->name()) {
+    if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
         _subOwners.erase(it);
     } else {
-        LERROR("PropertyOwner with name '" << owner->name() <<
-            "' not found for removal.");
+        LERROR(fmt::format(
+            "PropertyOwner with name '{}' not found for removal", owner->identifier()
+        ));
     }
 }
 
@@ -258,12 +306,29 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner&
     removePropertySubOwner(&owner);
 }
 
-void PropertyOwner::setName(std::string name) {
-    _name = std::move(name);
+void PropertyOwner::setIdentifier(std::string identifier) {
+    ghoul_precondition(
+        _identifier.find_first_of("\t\n ") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+    ghoul_precondition(
+        _identifier.find_first_of(".") == std::string::npos,
+        "Identifier must contain any whitespaces"
+    );
+
+    _identifier = std::move(identifier);
 }
 
-std::string PropertyOwner::name() const {
-    return _name;
+std::string PropertyOwner::identifier() const {
+    return _identifier;
+}
+
+void PropertyOwner::setGuiName(std::string guiName) {
+    _guiName = std::move(guiName);
+}
+
+const std::string& PropertyOwner::guiName() const {
+    return _guiName.empty() ? _identifier : _guiName;
 }
 
 void PropertyOwner::setDescription(std::string description) {
@@ -287,6 +352,64 @@ void PropertyOwner::removeTag(const std::string& tag) {
         std::remove(_tags.begin(), _tags.end(), tag),
         _tags.end()
     );
+}
+
+std::string PropertyOwner::generateJson() const {
+    std::function<std::string(properties::PropertyOwner*)> createJson =
+        [&createJson](properties::PropertyOwner* owner) -> std::string
+    {
+        std::stringstream json;
+        json << "{";
+        json << "\"name\": \"" << owner->identifier() << "\",";
+
+        json << "\"properties\": [";
+        auto properties = owner->properties();
+        for (properties::Property* p : properties) {
+            json << "{";
+            json << "\"id\": \"" << p->identifier() << "\",";
+            json << "\"type\": \"" << p->className() << "\",";
+            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
+            json << "\"guiName\": \"" << p->guiName() << "\",";
+            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
+            json << "}";
+            if (p != properties.back()) {
+                json << ",";
+            }
+        }
+        json << "],";
+
+        json << "\"propertyOwners\": [";
+        auto propertyOwners = owner->propertySubOwners();
+        for (properties::PropertyOwner* o : propertyOwners) {
+            json << createJson(o);
+            if (o != propertyOwners.back()) {
+                json << ",";
+            }
+        }
+        json << "]";
+        json << "}";
+
+        return json.str();
+    };
+
+
+    std::stringstream json;
+    json << "[";
+    std::vector<PropertyOwner*> subOwners = propertySubOwners();
+    if (!subOwners.empty()) {
+        json << std::accumulate(
+            std::next(subOwners.begin()),
+            subOwners.end(),
+            createJson(*subOwners.begin()),
+            [createJson](std::string a, PropertyOwner* n) {
+            return a + "," + createJson(n);
+        }
+        );
+    }
+
+    json << "]";
+
+    return json.str();
 }
 
 } // namespace openspace::properties

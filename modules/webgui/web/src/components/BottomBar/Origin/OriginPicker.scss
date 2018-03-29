@@ -1,0 +1,20 @@
+@import "../../../styles/all";
+
+$icon-size: 48px;
+
+.Icon {
+  font-size: $icon-size;
+  margin-right: ($base-padding / 2);
+}
+
+.iconImage {
+  animation: $appear-animation;
+  height: $icon-size - 8px;
+  margin-right: ($base-padding / 2);
+}
+
+.list :global(.scroll-content) {
+  height: 100%;
+  margin-top: 1px;
+  max-height: 200px;
+}

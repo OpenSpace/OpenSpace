@@ -1,0 +1,61 @@
+@import "../../../../styles/all";
+
+$small-padding: ($vertical-padding / 2) ($base-padding / 2);
+
+.button {
+  background: $ui-background-selected;
+  color: $text-color-focus;
+  letter-spacing: 0.08em;
+  padding: $button-padding;
+}
+
+.block {
+  width: 100%;
+}
+
+.uppercase {
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.transparent {
+  background: transparent;
+}
+
+.nopadding {
+  padding: 0;
+}
+
+.small {
+  padding: $small-padding;
+}
+
+.smalltext {
+  font-size: 0.8em;
+}
+
+// Why redeclaring some styles here?!
+// Well, some properties from the classes above (small, for instance)
+// needs to overwrite others. Due to the last rule applies nature of
+// CSS, this is probably one of the cleaner solutions.
+.button {
+  border: 0;
+
+  &:not(:disabled) {
+    &:focus,
+    &:hover {
+      background: $ui-background-hover;
+      outline: 0;
+    }
+  }
+
+  &:active {
+    background: $ui-background-active;
+  }
+
+  &:disabled {
+    color: $text-color-blur;
+    cursor: not-allowed;
+  }
+}

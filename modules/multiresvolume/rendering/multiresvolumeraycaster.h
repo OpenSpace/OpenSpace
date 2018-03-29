@@ -77,11 +77,11 @@ public:
     void setModelTransform(glm::mat4 transform);
     //void setTime(double time);
     void setStepSizeCoefficient(float coefficient);
+
 private:
     BoxGeometry _boundingBox;
     glm::mat4 _modelTransform;
     float _stepSizeCoefficient;
-    double _time;
 
     std::shared_ptr<TSP> _tsp;
     std::shared_ptr<AtlasManager> _atlasManager;

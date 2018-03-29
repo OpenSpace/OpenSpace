@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
@@ -64,13 +65,13 @@ local Keybindings = {
     },
     {
         Key = "q",
-        Command = sceneHelper.property.invert('SunMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.SunMarker.renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Sun.",
         Local = false
     },
     {
         Key = "e",
-        Command = sceneHelper.property.invert('EarthMarker.renderable.Enabled'),
+        Command = propertyHelper.invert('Scene.EarthMarker.renderable.Enabled'),
         Documentation = "Toggles the visibility of the text marking the location of the Earth.",
         Local = false
     }
@@ -123,7 +124,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = OsirisRexAsset.OsirisRex.Name,
+        Focus = OsirisRexAsset.OsirisRex.Identifier,
         Position = { 26974590199.661884, 76314608558.908020, -127086452897.101791 },
         Rotation = { 0.729548, -0.126024, 0.416827, 0.527382 },
     })

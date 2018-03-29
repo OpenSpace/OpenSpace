@@ -24,6 +24,7 @@
 
 #include <openspace/util/keys.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 
@@ -102,7 +103,7 @@ KeyWithModifier stringToKey(std::string str) {
                 m |= itMod->second;
             }
             else {
-                LERROR("Unknown modifier key '" << s << "'");
+                LERROR(fmt::format("Unknown modifier key '{}'", s));
             }
         }
     );
