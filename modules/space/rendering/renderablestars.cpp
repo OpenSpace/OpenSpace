@@ -198,7 +198,7 @@ namespace openspace {
         , _colorTextureIsDirty(true)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
-        , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 30.f)
+        , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 11.f)
         , _sharpness(SharpnessInfo, 1.f, 0.f, 5.f)
         , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
         , _program(nullptr)

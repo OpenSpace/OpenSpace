@@ -30,9 +30,9 @@ local object = {
         File = speck .. "/stars.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 8.3,
+        MagnitudeExponent = 8.30986,
         BillboardSize = 54.9,
-        Sharpness = 0.5
+        Sharpness = 0.88
     },
     GUI = {
         Path = "/Milky Way/Stars"
