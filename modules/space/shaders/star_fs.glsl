@@ -26,9 +26,9 @@
 #include "floatoperations.glsl"
 
 // keep in sync with renderablestars.h:ColorOption enum
-const int COLOROPTION_COLOR = 0;
+const int COLOROPTION_COLOR    = 0;
 const int COLOROPTION_VELOCITY = 1; 
-const int COLOROPTION_SPEED = 2;
+const int COLOROPTION_SPEED    = 2;
  
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
@@ -36,16 +36,15 @@ uniform sampler1D colorTexture;
 uniform float magnitudeExponent;
 uniform float sharpness;
 uniform int colorOption;
-uniform vec3 eyePosition;
 
-in vec4 vs_position;
-in vec4 ge_gPosition;
-in vec3 ge_brightness;
-in vec3 ge_velocity;
+in vec4  vs_position;
+in vec3  ge_brightness;
+in vec3  ge_velocity;
+in vec2  texCoord;
 in float ge_speed;
-in vec2 texCoord;
 in float ge_observationDistance;
-in vec4 ge_worldPosition;
+in float gs_screenSpaceDepth;
+
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -83,10 +82,10 @@ Fragment getFragment() {
     }
     
     Fragment frag;
-    frag.color = fullColor;
-    frag.depth = safeLength(vs_position);
-    frag.gPosition  = ge_gPosition;
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
+    frag.color     = fullColor;
+    frag.depth     = gs_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal   = vec4(0.0, 0.0, 0.0, 1.0);
     
 
     return frag;

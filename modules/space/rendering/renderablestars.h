@@ -91,8 +91,10 @@ namespace openspace {
         properties::FloatProperty _billboardSize;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        UniformCache(model, view, viewScaling, projection, colorOption, magnitudeExponent, sharpness,
-            billboardSize, screenSize, scaling, psfTexture, colorTexture, eyePosition) _uniformCache;
+        UniformCache(modelMatrix, cameraUp, cameraViewProjectionMatrix,
+                     colorOption, magnitudeExponent, sharpness, billboardSize,
+                     screenSize, psfTexture, colorTexture, eyePosition) 
+            _uniformCache;
 
         std::string _speckFile;
 

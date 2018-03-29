@@ -34,22 +34,11 @@ in float in_speed;
 out vec3 vs_brightness;
 out vec3 vs_velocity;
 out float vs_speed;
-out vec4 vs_gPosition;
-out vec4 vs_worldPosition;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 void main() {
     vs_brightness = in_brightness;
-    vs_velocity = in_velocity;
-    vs_speed = in_speed;
+    vs_velocity   = in_velocity;
+    vs_speed      = in_speed;
 
-    vec3 modelPosition = in_position.xyz;
-    vs_worldPosition = model * vec4(modelPosition, 1.0);
-    vec4 viewPosition = view * vs_worldPosition;
-
-    vs_gPosition = viewPosition;
-    gl_Position = projection * viewPosition;
+    gl_Position = vec4(in_position);
 }

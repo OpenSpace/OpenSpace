@@ -299,10 +299,10 @@ namespace openspace {
             absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
         );
 
-        _uniformCache.model = _program->uniformLocation("model");
-        _uniformCache.view = _program->uniformLocation("view");
-        _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
-        _uniformCache.projection = _program->uniformLocation("projection");
+        _uniformCache.modelMatrix = _program->uniformLocation("modelMatrix");
+        _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
+        _uniformCache.cameraUp = _program->uniformLocation("cameraUp");
+        _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation("cameraViewProjectionMatrix");
         _uniformCache.colorOption = _program->uniformLocation("colorOption");
         _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
@@ -310,8 +310,7 @@ namespace openspace {
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
-        _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
-
+        
         bool success = loadData();
         if (!success) {
             throw ghoul::RuntimeError("Error loading data");
@@ -340,23 +339,21 @@ namespace openspace {
 
         _program->activate();
 
-        glm::mat4 model =
+        glm::dmat4 modelMatrix =
             glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
-        glm::mat4 view = data.camera.combinedViewMatrix();
-        glm::mat4 projection = data.camera.projectionMatrix();
+        glm::dmat4 modelViewMatrix  = data.camera.combinedViewMatrix() * modelMatrix;
+        glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
 
-        // Correct code to be used when stereo correction being added into master.
-        //float viewScaling = data.camera.scaling();
-        float viewScaling = 1.f;
+        glm::dmat4 cameraViewProjectionMatrix = projectionMatrix * data.camera.combinedViewMatrix();
 
-        _program->setUniform(_uniformCache.model, model);
-        _program->setUniform(_uniformCache.view, view);
-        _program->setUniform(_uniformCache.projection, projection);
-        _program->setUniform(_uniformCache.viewScaling, viewScaling);
-
+        glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+        
+        _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
+        _program->setUniform(_uniformCache.cameraViewProjectionMatrix, cameraViewProjectionMatrix);
+        _program->setUniform(_uniformCache.cameraUp, cameraUp);
         _program->setUniform(_uniformCache.colorOption, _colorOption);
         _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
         _program->setUniform(_uniformCache.sharpness, _sharpness);
@@ -365,7 +362,7 @@ namespace openspace {
             _uniformCache.screenSize,
             glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
         );
-
+        
         // Correct code to be used when stereo correction being added into master.
         //_program->setUniform(_uniformCache.eyePosition, data.camera.eyePositionVec3());
         _program->setUniform(_uniformCache.eyePosition, data.camera.positionVec3());
@@ -574,11 +571,10 @@ namespace openspace {
 
         if (_program->isDirty()) {
             _program->rebuildFromFile();
-
-            _uniformCache.model = _program->uniformLocation("model");
-            _uniformCache.view = _program->uniformLocation("view");
-            _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
-            _uniformCache.projection = _program->uniformLocation("projection");
+            _uniformCache.modelMatrix = _program->uniformLocation("modelMatrix");
+            _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
+            _uniformCache.cameraUp = _program->uniformLocation("cameraUp");
+            _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation("cameraViewProjectionMatrix");
             _uniformCache.colorOption = _program->uniformLocation("colorOption");
             _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
