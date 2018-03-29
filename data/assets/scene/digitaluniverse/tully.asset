@@ -13,7 +13,7 @@ local speck = asset.syncedResource({
     Name = "Tully Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_speck",
-    Version = 1
+    Version = 2
 })
 
 local tullyPoints = {
