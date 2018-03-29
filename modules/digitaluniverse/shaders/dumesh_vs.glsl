@@ -28,34 +28,19 @@
 
 in vec3 in_position;
 
-uniform mat4 modelViewProjectionTransform;
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
-//uniform float scaleFactor;
-
-uniform dmat4 offsetMVPMatrix;
-uniform dmat4 modelMatrix;
-uniform dvec4 offset;
-//uniform dvec3 cameraPosition;
 
 out float vs_screenSpaceDepth;
 out vec4 vs_positionViewSpace;
 
 void main() {
-    //vec4 positionClipSpace   = modelViewProjectionTransform * vec4(in_position, 1.0);
-    //vec4 positionScreenSpace = z_normalization(positionClipSpace);
-    //dvec4 offset = dvec4(0.308567756E17, 0.308567756E17, 0.308567756E17, 0.0);
-    //dvec4 offset = dvec4(0.1E17, 0.1E17, 0.1E17, 0.0);
-    //dvec4 offset = dvec4(0.9999 * cameraPosition, 0.0);
-    // dvec4 positionClipSpace = offsetMVPMatrix * 
-    // (-(dvec4(cameraPosition,0.0) - offset) + ((modelMatrix * dvec4(in_position, 1.0)) - offset));
-    dvec4 noffset = offset;
-    noffset.w = 0.0;
-    dvec4 positionClipSpace = offsetMVPMatrix * ((modelMatrix * dvec4(in_position, 1.0)) - noffset);
-    vec4 positionScreenSpace = z_normalization(vec4(positionClipSpace));
+    dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
+    vec4 positionClipSpace   = vec4(projectionTransform * positionViewSpace);
+    vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
     vs_screenSpaceDepth  = positionScreenSpace.w;
-    //vs_positionViewSpace = vec4(positionViewSpace);
+    vs_positionViewSpace = vec4(positionViewSpace);
 
     gl_Position = positionScreenSpace;
 }

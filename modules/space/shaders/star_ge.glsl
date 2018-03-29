@@ -91,16 +91,15 @@ void main() {
     
     dvec3 starPositionInParsecs = dpos.xyz / PARSEC;
     dvec3 eyePositionInParsecs  = eyePosition / PARSEC;
-    float distanceToStarInParsecs = float(length(starPositionInParsecs - eyePositionInParsecs));
-    float luminosity = ge_brightness.y;
+    double distanceToStarInParsecs = length(starPositionInParsecs - eyePositionInParsecs);
+    double luminosity = double(ge_brightness.y);
     //float absMag = ge_brightness.x;
     //float appMag = absMag + 5 * (log(distanceToStarInParsecs)-1.0);
     
     // Working like Partiview
-    float pSize = pow(10, magnitudeExponent + 14.0);
-    float slum = 1.0;
-    float samplingFactor = 1.0;
-    float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
+    double pSize              = pow(10, magnitudeExponent + 14.0);
+    double apparentBrightness = (pSize * luminosity) /
+     (distanceToStarInParsecs * distanceToStarInParsecs);
     
     //vec2 multiplier = vec2(apparentBrightness/screenSize * projectedPoint.w);
     double scaleMultiply = apparentBrightness;  
@@ -132,24 +131,47 @@ void main() {
     float height = abs(topRight.y - bottomLeft.y);
     float width  = abs(topRight.x - bottomLeft.x);    
     
-    if ((height > billboardSize) ||
-        (width > billboardSize)) {        
-        // Set maximum size as Carter's instructions
-        float correctionScale = height > billboardSize ? billboardSize / (topRight.y - bottomLeft.y) :
-                                                         billboardSize / (topRight.x - bottomLeft.x);
-        scaledRight *= correctionScale;
-        scaledUp    *= correctionScale;
-        initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-                                dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-        gs_screenSpaceDepth = initialPosition.w;
-        secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
-                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-        thirdPosition = z_normalization(vec4(cameraViewProjectionMatrix *
-                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    // JCC: Change this (horrible code :-))
+    // while((height > billboardSize) ||
+    //       (width > billboardSize)) {
+    //     scaledRight *= 0.90;
+    //     scaledUp    *= 0.90;
+    //     crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+    //     initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
+    //         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    //     topRight = crossCorner.xy/crossCorner.w;
+    //     topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
+    //     bottomLeft = initialPosition.xy/initialPosition.w;
+    //     bottomLeft = ((bottomLeft + vec2(1.0)) * halfViewSize) - vec2(0.5);
+    //     height = abs(topRight.y - bottomLeft.y);
+    //     width  = abs(topRight.x - bottomLeft.x);  
+    // }
+
+    // if ((height > billboardSize) ||
+    //     (width > billboardSize)) {    
+
+
+    // }
+
+    // if ((height > billboardSize) ||
+    //     (width > billboardSize)) {        
+    //     // Set maximum size as Carter's instructions
+    //     float correctionScale = height > billboardSize ? billboardSize / (topRight.y - bottomLeft.y) :
+    //                                                      billboardSize / (topRight.x - bottomLeft.x);
+    //     scaledRight *= correctionScale/2.0;
+    //     scaledUp    *= correctionScale/2.0;
+    //     initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
+    //                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    //     gs_screenSpaceDepth = initialPosition.w;
+    //     secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+    //     crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
+    //     thirdPosition = z_normalization(vec4(cameraViewProjectionMatrix *
+    //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
         
-    } else {            
+    // } else {            
         // if (width < 2.0f * minBillboardSize) {
         //     float maxVar = 2.0f * minBillboardSize;
         //     float minVar = minBillboardSize;
@@ -164,7 +186,7 @@ void main() {
         
         thirdPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    } 
+   // } 
     
 
     // Build primitive
