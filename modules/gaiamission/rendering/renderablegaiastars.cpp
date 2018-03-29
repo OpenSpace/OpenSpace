@@ -222,6 +222,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 PsfTextureInfo.description
             },
             {
+                ColorTextureInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                ColorTextureInfo.description
+            },
+            {
                 LuminosityMultiplierInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -256,12 +262,6 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 CloseUpBoostDistInfo.description
-            },
-            {
-                ColorTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                ColorTextureInfo.description
             },
             {
                 FirstRowInfo.identifier,
@@ -565,6 +565,32 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
+    // Buffer re-specification / orphaning
+    glMapBufferRange(
+        GL_ARRAY_BUFFER,
+        0,
+        _streamingBudget * sizeof(GLfloat),
+        GL_MAP_INVALIDATE_BUFFER_BIT
+    );
+
+    // 'Buffer update' with one insert per chunk/node. The key in map holds the offset index.
+    for (auto &[offset, subData] : updateData) {
+        // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+        std::vector<float> vectorData(subData.begin(), subData.end());
+        vectorData.resize(_chunkSize, 0.f);
+        GLfloat *mapped = reinterpret_cast<GLfloat*>(
+            glMapBufferRange(
+                GL_ARRAY_BUFFER,
+                offset * _chunkSize * sizeof(GLfloat),
+                _chunkSize * sizeof(GLfloat),
+                GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT
+            )
+        );
+        std::copy(vectorData.begin(), vectorData.end(), mapped);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
+    }
+
+    /*
     // Use buffer orphaning to update a subset of total data.
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -583,7 +609,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _chunkSize * sizeof(GLfloat),
             subData.data()
         );
-    }
+    }*/
 
     int nStars = static_cast<int>(_nRenderedStars) + deltaStars;
     _nRenderedStars.set(nStars);
@@ -989,6 +1015,7 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
         " Max Nodes in stream: " + std::to_string(maxNodesInStream));
 
     _octreeManager->initVBOIndexStack(maxNodesInStream);
+    _nRenderedStars.set(0);
 
     //_octreeManager->printStarsPerNode();
    
