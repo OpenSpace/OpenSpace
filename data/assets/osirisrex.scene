@@ -12,6 +12,7 @@ asset.require('scene/solarsystem/missions/osirisrex/osirisrex')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -79,28 +80,33 @@ local Keybindings = {
 
 local OsirisRexAsset = asset.require('scene/solarsystem/missions/osirisrex/model')
 
-asset.onInitialize(function ()
-    -- openspace.time.setTime("2019 APR 16 12:03:00.00")
-    openspace.time.setTime("2016 SEP 8 23:00:00.500")
-    sceneHelper.bindKeys(Keybindings)
-
-    openspace.setDefaultDashboard()
-    openspace.dashboard.addDashboardItem({
+assetHelper.registerDashboardItems(asset, {
+    {
         Type = "DashboardItemSpacing",
+        Identifier = "OsirisRexSpacing",
+        GuiName = "OSIRIS-REx Spacing",
         Spacing = 25
-    })
-
-    openspace.dashboard.addDashboardItem({
+    },
+    {
         Type = "DashboardItemDistance",
+        Identifier = "OsirisRexBennuDistance",
+        GuiName = "OSIRIS-REx Bennu Distance",
         SourceType = "Node",
         SourceNodeName = "OsirisRex",
         DestinationType = "Node",
         DestinationNodeName = "BennuBarycenter"
-    })
+    },
+    {
+        Type = "DashboardItemInstruments",
+        Identifier = "OsirisRexInstruments",
+        GuiName = "OSIRIS-REx Instruments",
+    }
+})
 
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemInstruments"
-    })
+asset.onInitialize(function ()
+    -- openspace.time.setTime("2019 APR 16 12:03:00.00")
+    openspace.time.setTime("2016 SEP 8 23:00:00.500")
+    sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultGuiSorting()
 
