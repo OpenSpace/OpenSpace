@@ -117,6 +117,10 @@ glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
     return currentWindowSize();
 }
 
+glm::ivec2 WindowWrapper::getCurrentViewportSize() const {
+    return currentWindowSize();
+}
+
 glm::vec2 WindowWrapper::dpiScaling() const {
     return glm::vec2(1.f);
 }
