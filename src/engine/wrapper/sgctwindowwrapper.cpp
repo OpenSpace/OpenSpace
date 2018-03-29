@@ -236,14 +236,13 @@ void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
 }
 
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
-    int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(
-        x1,
-        y1,
-        xSize,
-        ySize
-    );
-    return glm::ivec4(x1, xSize, y1, ySize);
+    sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();   
+    if (!window || !window->getCurrentViewport()) {
+        return glm::ivec4(0, 0, 0, 0);
+    }
+
+    const int* viewportData = sgct::Engine::instance()->getCurrentViewportPixelCoords();
+    return glm::ivec4(viewportData[0], viewportData[2], viewportData[1], viewportData[3]);
 }
 
 bool SGCTWindowWrapper::isExternalControlConnected() const {

@@ -213,7 +213,7 @@ namespace openspace {
         // JCC: Moved to here to avoid NVidia: "Program/shader state performance warning"
         updateHDRData();
         updateDeferredcastData();
-        updateMSAASamplingPattern();
+        _dirtyMsaaSamplingPattern = true;
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
@@ -269,19 +269,6 @@ namespace openspace {
     }
 
     void FramebufferRenderer::update() {
-        if (_dirtyResolution) {
-            updateResolution();
-            updateMSAASamplingPattern();
-        }
-
-        if (_dirtyRaycastData) {
-            updateRaycastData();
-        }
-
-        if (_dirtyDeferredcastData) {
-            updateDeferredcastData();
-        }
-
         // If the resolve dictionary changed (or a file changed on disk)
         // then rebuild the resolve program.
         if (_hdrBackGroundProgram && _hdrBackGroundProgram->isDirty()) {
@@ -661,8 +648,8 @@ namespace openspace {
         // Saves current state
         GLint defaultFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        glm::ivec4 viewport = OsEng.windowWrapper().viewportPixelCoordinates();
 
         // Main framebuffer
         GLuint pixelSizeTexture = 0;
@@ -899,7 +886,7 @@ namespace openspace {
         // Convert back to [-1, 1] range and then scale for the current viewport size:
         for (int d = 0; d < _nAaSamples; ++d) {
             _mSAAPattern[d * 3] = (2.0 * _mSAAPattern[d * 3] - 1.0) /
-                static_cast<double>(viewport[2]);
+                static_cast<double>(viewport[1]);
             _mSAAPattern[(d * 3) + 1] = (2.0 * _mSAAPattern[(d * 3) + 1] - 1.0) /
                 static_cast<double>(viewport[3]);
             _mSAAPattern[(d * 3) + 2] = 0.0;
@@ -909,7 +896,7 @@ namespace openspace {
 
         // Restores default state
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        glViewport(viewport[0], viewport[2], viewport[1], viewport[3]);
 
         // Deletes unused buffers
         glDeleteFramebuffers(1, &pixelSizeFramebuffer);
@@ -921,9 +908,27 @@ namespace openspace {
         glDeleteTextures(1, &nOneStripTexture);
         glDeleteBuffers(1, &nOneStripVBO);
         glDeleteVertexArrays(1, &nOneStripVAO);
+
+        _dirtyMsaaSamplingPattern = false;
     }
 
     void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
+        if (_dirtyResolution) {
+            updateResolution();
+        }
+
+        if (_dirtyMsaaSamplingPattern) {
+            updateMSAASamplingPattern();
+        }
+
+        if (_dirtyRaycastData) {
+            updateRaycastData();
+        }
+
+        if (_dirtyDeferredcastData) {
+            updateDeferredcastData();
+        }
+
         std::unique_ptr<performance::PerformanceMeasurement> perf;
         if (doPerformanceMeasurements) {
             perf = std::make_unique<performance::PerformanceMeasurement>(
@@ -1211,7 +1216,7 @@ namespace openspace {
             LERROR("Framebuffer renderer does not support more than 8 MSAA samples.");
             _nAaSamples = 8;
         }
-        _dirtyResolution = true;
+        _dirtyMsaaSamplingPattern = true;
     }
 
     void FramebufferRenderer::setHDRExposure(float hdrExposure) {

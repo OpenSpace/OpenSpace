@@ -133,6 +133,7 @@ private:
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
+    bool _dirtyMsaaSamplingPattern;
 
     Camera* _camera;
     Scene* _scene;
