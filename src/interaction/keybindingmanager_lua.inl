@@ -162,9 +162,22 @@ int getKeyBindings(lua_State* L) {
 int clearKey(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::clearKey");
 
-    std::string key = ghoul::lua::checkStringAndPop(L);
-
-    OsEng.keyBindingManager().removeKeyBinding(key);
+    int t = lua_type(L, 1);
+    if (t == LUA_TSTRING) {
+        // The user provided a single key
+        std::string key = ghoul::lua::checkStringAndPop(L);
+        OsEng.keyBindingManager().removeKeyBinding(key);
+    }
+    else {
+        // The user provided a list of keys
+        ghoul::Dictionary d;
+        ghoul::lua::luaDictionaryFromState(L, d);
+        for (int i = 1; i <= d.size(); ++i) {
+            std::string k = d.value<std::string>(std::to_string(i));
+            OsEng.keyBindingManager().removeKeyBinding(k);
+        }
+        lua_pop(L, 1);
+    }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
