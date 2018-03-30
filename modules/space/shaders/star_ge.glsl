@@ -34,30 +34,16 @@ in vec3 vs_brightness[];
 in vec3 vs_velocity[];
 in vec4 vs_gPosition[];
 in float vs_speed[];
-<<<<<<< HEAD
-in vec4 vs_correctedPositionViewSpace[];
-
-layout(triangle_strip, max_vertices = 4) out;
-=======
 //in vec4 vs_worldPosition[];
->>>>>>> 02a910bc5d14de80267c24fbc83de961e9159085
 
 out vec4 vs_position;
 out vec3 ge_brightness;
 out vec3 ge_velocity;
 out float ge_speed;
 out vec2 texCoord;
-<<<<<<< HEAD
-out float billboardSize;
-out float gs_clipSpaceDepth;
-
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
-=======
 out float ge_observationDistance;
 out float gs_screenSpaceDepth;
 out float ta;
->>>>>>> 02a910bc5d14de80267c24fbc83de961e9159085
 
 //uniform float viewScaling;
 uniform float scaleFactor;
