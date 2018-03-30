@@ -168,7 +168,7 @@ void TorrentSynchronization::createSyncFile() {
     std::string directoryName = directory();
     std::string filepath = directoryName + ".ossync";
 
-    FileSys.createDirectory(directoryName, ghoul::filesystem::Directory::Recursive::Yes);
+    FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
 
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";

@@ -265,7 +265,7 @@ bool UrlSynchronization::nTotalBytesIsKnown() {
 void UrlSynchronization::createSyncFile() {
     std::string dir = directory();
     std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
+    FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();

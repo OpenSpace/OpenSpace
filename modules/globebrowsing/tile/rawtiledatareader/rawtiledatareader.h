@@ -46,7 +46,7 @@ class GeodeticPatch;
 
 class RawTileDataReader {
 public:
-    using PerformPreprocessing = ghoul::Boolean;
+    BooleanType(PerformPreprocessing);
 
     RawTileDataReader(const TileTextureInitData& initData,
                       PerformPreprocessing preprocess = PerformPreprocessing::No);
