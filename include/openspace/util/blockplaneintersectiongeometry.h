@@ -48,7 +48,7 @@ public:
 private:
     void updateVertices();
     std::vector<float> _vertices;
-    bool _initialized;
+    // bool _initialized;
     GLuint _vaoId;
     GLuint _vBufferId;
     glm::vec3 _size;

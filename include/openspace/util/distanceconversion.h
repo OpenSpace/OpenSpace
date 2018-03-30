@@ -85,7 +85,7 @@ constexpr const char* DistanceUnitKiloparsecs = "kiloparsecs";
 constexpr const char* DistanceUnitMegaparsecs = "megaparsecs";
 constexpr const char* DistanceUnitGigaparsecs = "gigaparsecs";
 
-constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
+constexpr const std::array<DistanceUnit, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
 DistanceUnits = {
     DistanceUnit::Nanometer, DistanceUnit::Micrometer, DistanceUnit::Millimeter,
     DistanceUnit::Meter, DistanceUnit::Kilometer, DistanceUnit::AU,
@@ -94,7 +94,7 @@ DistanceUnits = {
     DistanceUnit::Megaparsec, DistanceUnit::Gigaparsec
 };
 
-constexpr std::array<const char*, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
+constexpr const std::array<const char*, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
 DistanceUnitNamesSingular = {
     DistanceUnitNanometer, DistanceUnitMicrometer, DistanceUnitMillimeter,
     DistanceUnitMeter, DistanceUnitKilometer, DistanceUnitAU, DistanceUnitLighthour,
@@ -103,7 +103,7 @@ DistanceUnitNamesSingular = {
     DistanceUnitGigaparsec
 };
 
-constexpr std::array<const char*, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
+constexpr const std::array<const char*, static_cast<int>(DistanceUnit::Gigaparsec) + 1>
 DistanceUnitNamesPlural = {
     DistanceUnitNanometers, DistanceUnitMicrometers, DistanceUnitMillimeters,
     DistanceUnitMeters, DistanceUnitKilometers, DistanceUnitAUs, DistanceUnitLighthours,
@@ -159,10 +159,12 @@ constexpr const char* nameForDistanceUnit(DistanceUnit unit, bool pluralForm = f
 }
 
 constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
+    int found = -1;
     int i = 0;
     for (const char* val : DistanceUnitNamesSingular) {
         if (ghoul::equal(unitName, val)) {
-            return static_cast<DistanceUnit>(i);
+            found = i;
+            break;
         }
         ++i;
     }
@@ -170,13 +172,19 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
     i = 0;
     for (const char* val : DistanceUnitNamesPlural) {
         if (ghoul::equal(unitName, val)) {
-            return static_cast<DistanceUnit>(i);
+            found = i;
+            break;
         }
         ++i;
     }
 
-    ghoul_assert(false, "Unit name is not a valid name");
-    throw ghoul::MissingCaseException();
+
+    if (found != -1) {
+        return static_cast<DistanceUnit>(found);
+    }
+    else {
+        throw ghoul::MissingCaseException();
+    }
 }
 
 

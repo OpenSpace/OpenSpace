@@ -30,21 +30,33 @@
 #include <ghoul/misc/assert.h>
 #include "dashboard_lua.inl"
 
+namespace {
+    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "IsEnabled",
+        "Enabled",
+        "If this value is 'false', this dashboard will be invisible, regardless of the "
+        "state of the individual components"
+    };
+} // namespace
+
 namespace openspace {
 
 Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
-{}
+    , _isEnabled(EnabledInfo, true)
+{
+    addProperty(_isEnabled);
+}
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
-    std::string originalName = item->name();
+    std::string originalIdentifier = item->identifier();
     int suffix = 1;
     while (true) {
         auto it = std::find_if(
             _items.begin(),
             _items.end(),
             [&item](const std::unique_ptr<DashboardItem>& i) {
-                return (i->name() == item->name());
+                return (i->identifier() == item->identifier());
             }
         );
 
@@ -53,7 +65,8 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
             break;
         }
         else {
-            item->setName(originalName + " " + std::to_string(suffix));
+            item->setIdentifier(originalIdentifier + std::to_string(suffix));
+            item->setGuiName(originalIdentifier + " " + std::to_string(suffix));
             ++suffix;
         }
     }
@@ -85,6 +98,10 @@ void Dashboard::removeDashboardItems() {
 }
 
 void Dashboard::render(glm::vec2& penPosition) {
+    if (!_isEnabled) {
+        return;
+    }
+
     for (const std::unique_ptr<DashboardItem>& item : _items) {
         if (item->isEnabled()) {
             item->render(penPosition);

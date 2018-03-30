@@ -65,12 +65,21 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         "ScreenSpaceFramebuffer"
     );
 
-    _id = id();
-    if (_id == 0) {
-        setName("ScreenSpaceFramebuffer");
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
+        iIdentifier = id();
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceFramebuffer");
+        }
+        else {
+            setIdentifier("ScreenSpaceFramebuffer" + std::to_string(iIdentifier));
+        }
     }
-    else {
-        setName("ScreenSpaceFramebuffer " + std::to_string(_id));
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
     glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
@@ -182,6 +191,8 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
         _originalViewportSize.y,
         1
     ));
+    _objectSize = glm::ivec2(_originalViewportSize);
+
     _texture->uploadTexture();
     _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
@@ -191,6 +202,10 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
 int ScreenSpaceFramebuffer::id() {
     static int id = 0;
     return id++;
+}
+
+void ScreenSpaceFramebuffer::bindTexture() {
+    _texture->bind();
 }
 
 } //namespace openspace

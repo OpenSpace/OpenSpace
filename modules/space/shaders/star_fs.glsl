@@ -23,32 +23,28 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "floatoperations.glsl"
 
 // keep in sync with renderablestars.h:ColorOption enum
-const int COLOROPTION_COLOR = 0;
+const int COLOROPTION_COLOR    = 0;
 const int COLOROPTION_VELOCITY = 1; 
-const int COLOROPTION_SPEED = 2;
+const int COLOROPTION_SPEED    = 2;
  
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
-uniform float minBillboardSize;
 
-uniform float alphaValue;
+uniform float magnitudeExponent;
+uniform float sharpness;
 uniform int colorOption;
 
-uniform vec2 magnitudeClamp;
-
-in vec4 vs_position;
-in vec4 gs_gPosition;
-in vec3 ge_brightness;
-in vec3 ge_velocity;
+in vec4  vs_position;
+in vec3  ge_brightness;
+in vec3  ge_velocity;
+in vec2  texCoord;
 in float ge_speed;
-in vec2 texCoord;
-in float billboardSize;
-in float gs_clipSpaceDepth
+in float ge_observationDistance;
+in float gs_screenSpaceDepth;
 
-#include "fragment.glsl"
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -59,13 +55,7 @@ vec4 bv2rgb(float bv) {
 Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
-        
-    if (vs_position[0] == 0.0 &&
-        vs_position[1] == 0.0 &&
-        vs_position[2] == 0.0) {
-            discard;
-        }
-    
+
     vec4 color = vec4(0.0);
     switch (colorOption) {
         case COLOROPTION_COLOR: 
@@ -82,24 +72,20 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a *= alphaValue;
+    fullColor.a = pow(fullColor.a, sharpness);
 
-    vec4 position = vs_position;
-    // This has to be fixed when the scale graph is in place ---emiax
-    position.w = 15;
+    //float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
+    //fullColor.a *= clamp(d, 0.0, 1.0);
 
     if (fullColor.a == 0) {
         discard;
     }
-
+    
     Fragment frag;
-    frag.color = fullColor;
-    frag.depth = gs_clipSpaceDepth;
-
-    // G-Buffer
-    frag.gPosition  = gs_gPosition;
-    // There is no normal here
-    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
-
+    frag.color     = fullColor;
+    frag.depth     = gs_screenSpaceDepth;
+    frag.gPosition = vs_position;
+    frag.gNormal   = vec4(0.0, 0.0, 0.0, 1.0);
+    
     return frag;
 }

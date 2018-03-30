@@ -31,17 +31,16 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* KeyName = "Name";
-    const char* KeyTexturePath = "TexturePath";
+    constexpr const char* KeyName = "Name";
 
-    static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
-        "TexturePath",
-        "Texture path",
+    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+        "URL",
+        "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
@@ -64,10 +63,10 @@ documentation::Documentation ScreenSpaceImageOnline::Documentation() {
                 "Specifies the GUI name of the ScreenspaceImage"
             },
             {
-                KeyTexturePath,
+                TextureInfo.identifier,
                 new StringVerifier,
                 Optional::Yes,
-                TexturePathInfo.description
+                TextureInfo.description
             }
         }
     };
@@ -76,36 +75,40 @@ documentation::Documentation ScreenSpaceImageOnline::Documentation() {
 ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _textureIsDirty(false)
-    , _texturePath(TexturePathInfo)
+    , _texturePath(TextureInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "ScreenSpaceImage"
+        "ScreenSpaceImageOnline"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceImageOnline");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceImageOnline");
         }
         else {
-            setName("ScreenSpaceImageOnline " + std::to_string(id));
+            setIdentifier("ScreenSpaceImageOnline" + std::to_string(iIdentifier));
         }
         ++id;
+    }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceImageOnline " + std::to_string(iIdentifier));
     }
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     addProperty(_texturePath);
 
     std::string texturePath;
-    if (dictionary.hasKey(TexturePathInfo.identifier)) {
-        _texturePath = dictionary.value<std::string>(TexturePathInfo.identifier);
+    if (dictionary.hasKey(TextureInfo.identifier)) {
+        _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
     }
-
 }
 
 void ScreenSpaceImageOnline::update() {
@@ -125,7 +128,7 @@ void ScreenSpaceImageOnline::update() {
             if (imageFile.corrupted) {
                 LERRORC(
                     "ScreenSpaceImageOnline",
-                    "Error loading image from URL '" << _texturePath << "'"
+                    fmt::format("Error loading image from URL '{}'", _texturePath)
                 );
                 return;
             }
@@ -149,6 +152,7 @@ void ScreenSpaceImageOnline::update() {
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
                 _texture = std::move(texture);
+                _objectSize = _texture->dimensions();
                 _textureIsDirty = false;
             }
         }
@@ -173,6 +177,15 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
             );
         }
     );
+}
+
+void ScreenSpaceImageOnline::bindTexture() {
+    if (_texture) {
+        _texture->bind();
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }
 
 } // namespace openspace

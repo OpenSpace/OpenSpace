@@ -50,6 +50,8 @@ glm::ivec3 fromLuaConversion(lua_State* state, bool& success) {
             lua_pop(state, 1);
         }
     }
+    // The last accessor argument and the table are still on the stack
+    lua_pop(state, 2);
     success = true;
     return result;
 }
@@ -59,7 +61,7 @@ bool toLuaConversion(lua_State* state, glm::ivec3 value) {
     int number = 1;
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::ivec3>::value; ++i) {
         lua_pushnumber(state, static_cast<lua_Number>(value[i]));
-        lua_setfield(state, -2, std::to_string(number).c_str());
+        lua_rawseti(state, -2, number);
         ++number;
     }
     return true;

@@ -13,11 +13,11 @@ local speck = asset.syncedResource({
     Name = "Tully Speck Files",
     Type = "HttpSynchronization",
     Identifier = "digitaluniverse_tully_speck",
-    Version = 1
+    Version = 2
 })
 
 local tullyPoints = {
-    Name = "Tully Galaxies",
+    Identifier = "TullyGalaxies",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -46,11 +46,14 @@ local tullyPoints = {
         BillboardMaxSize = 50.0,
         BillboardMinSize = 0.0,
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Tully Galaxies",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 local tullyImages = {
-    Name = "Tully Galaxies Images",
+    Identifier = "TullyGalaxiesImages",
     Renderable = {
         Type = "RenderablePlanesCloud",
         Enabled = false,
@@ -72,7 +75,10 @@ local tullyImages = {
         FadeInDistances = {0.05, 0.1},
         PlaneMinSize = 5.0
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Tully Galaxies Images",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

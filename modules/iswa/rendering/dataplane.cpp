@@ -27,10 +27,6 @@
 
 #include <ghoul/opengl/programobject.h>
 
-namespace {
-    constexpr const char* _loggerCat = "DataPlane";
-} // namespace
-
 namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
@@ -182,7 +178,7 @@ std::vector<float*> DataPlane::textureData(){
     std::chrono::duration<double> elapsed_seconds = end-start;
     _avgBenchmarkTime = ((_avgBenchmarkTime * (_numOfBenchmarks - 1))
                          + elapsed_seconds.count()) / _numOfBenchmarks;
-    std::cout << " processData() " << name() << std::endl;
+    std::cout << " processData() " << identifier() << std::endl;
     std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
     std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
     // ===========

@@ -151,6 +151,18 @@ documentation::Documentation ProjectionComponent::Documentation() {
                 "The aspect ratio of the instrument in relation between x and y axis"
             },
             {
+                keySequenceType,
+                new StringInListVerifier(
+                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
+                      sequenceTypeInstrumentTimes }
+                ),
+                Optional::Yes,
+                "This value determines which type of sequencer is used for generating "
+                "image schedules. The 'playbook' is using a custom format designed by "
+                "the New Horizons team, the 'image-sequence' uses lbl files from a "
+                "directory, and the 'hybrid' uses both methods."
+            },
+            {
                 keyProjObserver,
                 new StringAnnotationVerifier("A SPICE name of the observing object"),
                 Optional::No,
@@ -235,7 +247,9 @@ ProjectionComponent::ProjectionComponent()
     _applyTextureSize.onChange([this]() { _textureSizeDirty = true; });
 }
 
-void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
+void ProjectionComponent::initialize(const std::string& identifier,
+                                     const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -278,9 +292,6 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
 
-    std::string name;
-    dictionary.getValue(SceneGraphNode::KeyName, name);
-
     std::vector<SequenceParser*> parsers;
 
     if (dictionary.hasKey(keySequenceDir)) {
@@ -312,7 +323,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             for (std::string& sequenceSource : sequenceSources) {
                 if (sequenceType == sequenceTypePlaybook) {
                     parsers.push_back(new HongKangParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         _projectorID,
                         translationDictionary,
@@ -320,14 +331,14 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 }
                 else if (sequenceType == sequenceTypeImage) {
                     parsers.push_back(new LabelParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary));
                 }
                 else if (sequenceType == sequenceTypeHybrid) {
                     //first read labels
                     parsers.push_back(new LabelParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary));
 
@@ -337,7 +348,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                         //then read playbook
                         _eventFile = absPath(_eventFile);
                         parsers.push_back(new HongKangParser(
-                            name,
+                            identifier,
                             _eventFile,
                             _projectorID,
                             translationDictionary,
@@ -349,7 +360,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 }
                 else if (sequenceType == sequenceTypeInstrumentTimes) {
                     parsers.push_back(new InstrumentTimesParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary)
                     );
@@ -402,11 +413,8 @@ bool ProjectionComponent::initializeGL() {
         absPath(placeholderFile)
     );
     if (texture) {
-        texture->uploadTexture();
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
+        texture->setWrapping(Texture::WrappingMode::ClampToEdge);
     }
     _placeholderTexture = std::move(texture);
 
@@ -474,7 +482,7 @@ void ProjectionComponent::imageProjectBegin() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     if (_textureSizeDirty) {
-        LDEBUG("Changing texture size to " << std::to_string(_textureSize));
+        LDEBUG(fmt::format("Changing texture size to {}", std::to_string(_textureSize)));
 
         // If the texture size has changed, we have to allocate new memory and copy
         // the image texture to the new target
@@ -505,10 +513,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Read Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Read Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glFramebufferTexture(
@@ -520,10 +529,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Draw Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Draw Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glBlitFramebuffer(
@@ -546,10 +556,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Read Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Read Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glFramebufferTexture(
@@ -561,10 +572,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Draw Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Draw Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glBlitFramebuffer(
@@ -944,6 +956,7 @@ void ProjectionComponent::clearAllProjections() {
 }
 
 void ProjectionComponent::generateMipMap() {
+
     _projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
     _mipMapDirty = false;
 }
@@ -967,27 +980,28 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         if (texture->format() == Texture::Format::Red)
             ghoul::opengl::convertTextureFormat(*texture, Texture::Format::RGB);
         texture->uploadTexture();
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        texture->setWrapping(
+            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
+        );
         texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     return std::move(texture);
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
-    LINFO(
-        "Creating projection texture of size '" << size.x << ", " << size.y << "'"
-    );
-    _projectionTexture = std::make_unique<ghoul::opengl::Texture> (
+    LINFO(fmt::format("Creating projection texture of size '{}, {}'", size.x, size.y));
+
+    using namespace ghoul::opengl;
+    _projectionTexture = std::make_unique<Texture>(
         glm::uvec3(size, 1),
-        ghoul::opengl::Texture::Format::RGBA
+        Texture::Format::RGBA
     );
     if (_projectionTexture) {
         _projectionTexture->uploadTexture();
-        //_projectionTexture->setFilter(
-        //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-        //);
+        _projectionTexture->setWrapping(
+            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
+        );
+        _projectionTexture->setFilter(Texture::FilterMode::LinearMipMap);
     }
 
     if (_dilation.isEnabled) {
@@ -1018,21 +1032,17 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
         }
     }
 
-
     return _projectionTexture != nullptr;
-
 }
 
 bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
-    LINFO(
-        "Creating depth texture of size '" << size.x << ", " << size.y << "'"
-        );
+    LINFO(fmt::format("Creating depth texture of size '{}, {}'", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),
         ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F
-        );
+    );
 
     if (_shadowing.texture) {
         _shadowing.texture->uploadTexture();

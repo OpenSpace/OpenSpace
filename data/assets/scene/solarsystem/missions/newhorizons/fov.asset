@@ -9,8 +9,8 @@ local AliceOffset = {   -7.9, -1.7,  8.3  }
 local RexOffset   = {      0,    0,    0  }
 
 local Lorri = {
-    Name = "NH_LORRI",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_LORRI",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -32,12 +32,15 @@ local Lorri = {
             Position = LorriOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "LORRI",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphLeisa = {
-    Name = "NH_RALPH_LEISA",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_LEISA",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -59,12 +62,15 @@ local RalphLeisa = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH LEISA",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicPan1 = {
-    Name = "NH_RALPH_MVIC_PAN1",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_PAN1",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -86,12 +92,15 @@ local RalphMvicPan1 = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC PAN 1",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicPan2 = {
-    Name = "NH_RALPH_MVIC_PAN2",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_PAN2",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -113,12 +122,15 @@ local RalphMvicPan2 = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC PAN 2",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicRed = {
-    Name = "NH_RALPH_MVIC_RED",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_RED",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -140,12 +152,15 @@ local RalphMvicRed = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC RED",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicBlue = {
-    Name = "NH_RALPH_MVIC_BLUE",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_BLUE",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -167,12 +182,15 @@ local RalphMvicBlue = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC BLUE",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicFt = {
-    Name = "NH_RALPH_MVIC_FT",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_FT",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -194,12 +212,15 @@ local RalphMvicFt = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC FT",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicMethane = {
-    Name = "NH_RALPH_MVIC_METHANE",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_METHANE",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -221,12 +242,15 @@ local RalphMvicMethane = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC METHANE",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local RalphMvicNir = {
-    Name = "NH_RALPH_MVIC_NIR",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_RALPH_MVIC_NIR",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -248,12 +272,15 @@ local RalphMvicNir = {
             Position = RalphOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "RALPH MVIC NIR",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local AliceAirglow = {
-    Name = "NH_ALICE_AIRGLOW",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_ALICE_AIRGLOW",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -267,7 +294,8 @@ local AliceAirglow = {
             "Pluto",
             "Charon",
             -- "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
-        }
+        },
+        SimplifyBounds = true
     },
     Transform = {
         Translation = {
@@ -275,12 +303,15 @@ local AliceAirglow = {
             Position = AliceOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "ALICE AIRGLOW",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local AliceSoc = {
-    Name = "NH_ALICE_SOC",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_ALICE_SOC",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "NEW HORIZONS",
@@ -302,12 +333,15 @@ local AliceSoc = {
             Position = AliceOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "ALICE SOC",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
 
 local Rex = {
-    Name = "NH_REX",
-    Parent = transforms.NewHorizonsPosition.Name,
+    Identifier = "NH_REX",
+    Parent = transforms.NewHorizonsPosition.Identifier,
     Renderable = {
         Type  = "RenderableCrawlingLine",
         Source = "NH_REX",
@@ -332,8 +366,13 @@ local Rex = {
             Position = RexOffset
         }
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "REX",
+        Path = "/Solar System/Missions/New Horizons/Instruments"
+    }
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Lorri,

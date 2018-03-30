@@ -15,8 +15,8 @@ local textures = asset.syncedResource({
 local charonRadius = 6.035E5
 
 local Charon = {
-    Name = "Charon",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Charon",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -66,12 +66,14 @@ local Charon = {
             }
         }
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local CharonText = {
-    Name = "CharonText",
-    Parent = Charon.Name,
+    Identifier = "CharonText",
+    Parent = Charon.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -79,19 +81,22 @@ local CharonText = {
         }
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10^6.3,
         Origin = "Center",
         Billboard = true,
         Texture = textures .. "/Charon-Text.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Charon Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local CharonShadow = {
-    Name = "CharonShadow",
-    Parent = Charon.Name,
+    Identifier = "CharonShadow",
+    Parent = Charon.Identifier,
     Renderable = {
         Type = "RenderableShadowCylinder",
         TerminatorType = "PENUMBRAL",
@@ -101,12 +106,15 @@ local CharonShadow = {
         BodyFrame = "IAU_CHARON",
         Aberration = "NONE"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Charon Shadow",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local CharonTrail = {
-    Name = "CharonTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "CharonTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -118,8 +126,13 @@ local CharonTrail = {
         Period = 6.38725,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Charon Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     Charon,

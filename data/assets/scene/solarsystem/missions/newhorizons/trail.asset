@@ -4,8 +4,8 @@ local transforms = asset.require('./transforms')
 
 
 local TrailAtPluto = {
-    Name = "NewHorizonsTrailPluto",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "NewHorizonsTrailPluto",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailTrajectory",
         Translation = {
@@ -23,7 +23,10 @@ local TrailAtPluto = {
         EnableFade = false,
         Rendering = "Lines+Points"
     },
-    GuiPath = "/Solar System/Missions/New Horizons"
+    GUI = {
+        Name = "New Horizons Trail Pluto",
+        Path = "/Solar System/Missions/New Horizons"
+    }
 }
 
 

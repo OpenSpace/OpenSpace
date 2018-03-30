@@ -60,9 +60,12 @@ void OptionProperty::addOption(int value, std::string desc) {
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
-            LWARNING("The value of option {" << o.value << " -> " << o.description <<
-                "} was already registered when trying to add option {" << option.value <<
-                " -> " << option.description << "}");
+            LWARNING(fmt::format(
+                "The value of option {{ {} -> {} }} was already registered when trying "
+                "to add option {{ {} -> {} }}",
+                o.value, o.description, option.value, option.description
+
+            ));
             return;
         }
     }
@@ -75,19 +78,30 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
     }
 }
 
+void OptionProperty::clearOptions() {
+    _options.clear();
+    _value = 0;
+}
+
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (const Option& o : _options) {
+    for (size_t i = 0; i < _options.size(); ++i) {
+        const Option& o = _options[i];
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
-            NumericalProperty::setValue(value);
+            NumericalProperty::setValue(static_cast<int>(i));
             return;
         }
     }
 
     // Otherwise, log an error
-    LERROR("Could not find an option for value '" << value << "' in OptionProperty");
+    LERROR(fmt::format("Could not find an option for value '{}'", value));
 }
+
+bool OptionProperty::hasOption() const {
+    return value() >= 0 && value() < static_cast<int>(_options.size());
+}
+
 
 const OptionProperty::Option& OptionProperty::option() const {
     return _options[value()];
@@ -110,18 +124,18 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
-std::string OptionProperty::generateAdditionalDescription() const {
+std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result;
-    result += OptionsKey + " = {";
+    std::string result =
+        "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
-        result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+        result += "{\"" + std::to_string(o.value) + "\": \"" + o.description + "\"}";
         if (i != _options.size() - 1)
             result += ",";
     }
 
-    result += "}";
+    result += "] }";
     return result;
 }
 

@@ -36,17 +36,10 @@ out vec3 vs_velocity;
 out float vs_speed;
 out vec4 vs_correctedPositionViewSpace;
 
-uniform mat4 modelCameraMatrix;
-uniform mat4 viewMatrix;
-
 void main() {
     vs_brightness = in_brightness;
     vs_velocity   = in_velocity;
     vs_speed      = in_speed;
 
-    vec4 positionCameraRigSpace = modelCameraMatrix * in_position;
-
-    vs_correctedPositionViewSpace = viewMatrix * (vec4(1E19, 1E19, 1E19, 1.0) * positionCameraRigSpace);
-    
-    gl_Position = positionCameraRigSpace;
+    gl_Position = vec4(in_position);
 }

@@ -192,7 +192,9 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "Sets the current simulation time to the "
                 "specified value. If the parameter is a number, the value is the number "
                 "of seconds past the J2000 epoch. If it is a string, it has to be a "
-                "valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
+                "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
+                "Note: providing time zone using the Z format is not supported. UTC is "
+                "assumed."
             },
             {
                 "currentTime",

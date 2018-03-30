@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Local Dwarf Galaxies",
+    Identifier = "LocalDwarfGalaxies",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -33,7 +33,10 @@ local object = {
         TextMinSize = 7.3,
         Unit = "Mpc"
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Name = "Local Dwarf Galaxies",
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

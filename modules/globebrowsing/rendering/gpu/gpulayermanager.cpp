@@ -50,7 +50,7 @@ void GPULayerManager::bind(ghoul::opengl::ProgramObject* programObject,
     }
 
     for (size_t i = 0; i < layerGroups.size(); ++i) {
-        const std::string& nameBase = layergroupid::LAYER_GROUP_NAMES[i];
+        const std::string& nameBase = layergroupid::LAYER_GROUP_IDENTIFIERS[i];
         _gpuLayerGroups[i]->bind(
             programObject,
             *layerGroups[i],

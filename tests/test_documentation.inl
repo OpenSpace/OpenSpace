@@ -770,6 +770,7 @@ TEST_F(DocumentationTest, RequiredInOptional) {
     EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
+// Exhaustive documentations went away, but we are keeping this test just for funsies
 TEST_F(DocumentationTest, Exhaustive) {
     using namespace openspace::documentation;
 
@@ -789,22 +790,18 @@ TEST_F(DocumentationTest, Exhaustive) {
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenses.size());
-    EXPECT_EQ("False_Int", negativeRes.offenses[0].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
-    EXPECT_EQ("Int", negativeRes.offenses[1].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[1].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "Double", 2.0 }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenses.size());
-    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
-    EXPECT_EQ("Int", negativeRes.offenses[1].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[1].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NestedExhaustive) {
@@ -829,11 +826,9 @@ TEST_F(DocumentationTest, NestedExhaustive) {
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenses.size());
+    ASSERT_EQ(1, negativeRes.offenses.size());
     EXPECT_EQ("Table.a", negativeRes.offenses[0].offender);
     EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
-    EXPECT_EQ("Table.b", negativeRes.offenses[1].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[1].reason);
 }
 
 TEST_F(DocumentationTest, EmptyEntriesNonExhaustive) {
@@ -876,13 +871,9 @@ TEST_F(DocumentationTest, EmptyNestedExhaustive) {
         { "Table", ghoul::Dictionary{ { "a", 1 }}}
     };
     TestResult negativeRes = testSpecification(doc, negative);
-    EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenses.size());
-    EXPECT_EQ("Table.a", negativeRes.offenses[0].offender);
-    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
+    EXPECT_TRUE(negativeRes.success);
+    ASSERT_EQ(0, negativeRes.offenses.size());
 }
-
-
 
 TEST_F(DocumentationTest, LessInt) {
     using namespace openspace::documentation;

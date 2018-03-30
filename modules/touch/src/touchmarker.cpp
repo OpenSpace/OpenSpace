@@ -79,7 +79,6 @@ TouchMarker::TouchMarker()
         glm::vec3(1.f)
     )
     , _shader(nullptr)
-    , _numFingers(0)
 {
     addProperty(_visible);
     addProperty(_radiusSize);
@@ -135,25 +134,25 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor>& list) {
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
         glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
         glBindVertexArray(_quad);
-        glDrawArrays(GL_POINTS, 0, _numFingers);
+        glDrawArrays(GL_POINTS, 0, _vertexData.size() / 2);
 
         _shader->deactivate();
     }
 }
 
 void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
-    _numFingers = static_cast<int>(list.size());
-    GLfloat vertexData[MAX_FINGERS];
+    _vertexData.resize(list.size() * 2);
+
     int i = 0;
     for (const TUIO::TuioCursor& c : list) {
-        vertexData[i] = 2 * (c.getX() - 0.5f);
-        vertexData[i + 1] = -2 * (c.getY() - 0.5f);
+        _vertexData[i] = 2 * (c.getX() - 0.5f);
+        _vertexData[i + 1] = -2 * (c.getY() - 0.5f);
         i += 2;
     }
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertexData.size() * sizeof(GLfloat), _vertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

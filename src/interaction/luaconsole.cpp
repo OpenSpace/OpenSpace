@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -198,7 +198,7 @@ void LuaConsole::initialize() {
             if (version != CurrentVersion) {
                 LWARNINGC(
                     "LuaConsole",
-                    "Outdated console history version: " << version
+                    fmt::format("Outdated console history version: {}", version)
                 );
             }
             else {
@@ -272,11 +272,11 @@ void LuaConsole::initialize() {
         ghoul::fontrendering::Font::Outline::No
     );
 
-    OsEng.parallelConnection().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent()->subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = OsEng.parallelConnection().status();
+            ParallelConnection::Status status = OsEng.parallelPeer().status();
             parallelConnectionChanged(status);
         }
     );
@@ -316,7 +316,7 @@ void LuaConsole::deinitialize() {
 
     _program = nullptr;
 
-    OsEng.parallelConnection().connectionEvent()->unsubscribe("luaConsole");
+    OsEng.parallelPeer().connectionEvent()->unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -339,7 +339,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
         else {
             _isVisible = true;
-            if (OsEng.parallelConnection().status() == ParallelConnection::Status::Host) {
+            if (OsEng.parallelPeer().status() == ParallelConnection::Status::Host) {
                 _remoteScripting = true;
             }
         }
@@ -857,10 +857,10 @@ void LuaConsole::render() {
     if (_remoteScripting) {
         const glm::vec4 red(1, 0, 0, 1);
 
-        ParallelConnection::Status status = OsEng.parallelConnection().status();
+        ParallelConnection::Status status = OsEng.parallelPeer().status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
-            OsEng.parallelConnection().nConnections() - 1 :
+            OsEng.parallelPeer().nConnections() - 1 :
             0;
 
         const std::string nClientsText =
@@ -870,7 +870,7 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, red, nClientsText.c_str());
-    } else if (OsEng.parallelConnection().isHost()) {
+    } else if (OsEng.parallelPeer().isHost()) {
         const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
 
         const std::string localExecutionText = "Local script execution";

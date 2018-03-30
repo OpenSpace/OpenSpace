@@ -71,11 +71,11 @@ public:
         long long updateTimeScaling;  // time in ns
     };
 
-    static const std::string RootNodeName;
-    static const std::string KeyName;
-    static const std::string KeyParentName;
-    static const std::string KeyDependencies;
-    static const std::string KeyTag;
+    static constexpr const char* RootNodeIdentifier = "Root";
+    static constexpr const char* KeyIdentifier = "Identifier";
+    static constexpr const char* KeyParentName = "Parent";
+    static constexpr const char* KeyDependencies = "Dependencies";
+    static constexpr const char* KeyTag = "Tag";
 
     SceneGraphNode();
     ~SceneGraphNode();
@@ -137,6 +137,7 @@ public:
     Renderable* renderable();
 
     const std::string& guiPath() const;
+    bool hasGuiHintHidden() const;
 
     static documentation::Documentation Documentation();
 
@@ -151,6 +152,10 @@ private:
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
     Scene* _scene;
+
+    // If this value is 'true' GUIs are asked to hide this node from collections, as it
+    // might be a node that is not very interesting (for example barycenters)
+    bool _guiHintHidden = false;
 
     PerformanceRecord _performanceRecord;
 

@@ -36,7 +36,7 @@
 #include <sstream>
 #include <streambuf>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 namespace {
     const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
@@ -282,18 +282,7 @@ std::string DocumentationEngine::generateJson() const {
 
     json << "]";
 
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        switch (c) {
-            case '\'':
-                jsonString += "\\'";
-                break;
-            default:
-                jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {

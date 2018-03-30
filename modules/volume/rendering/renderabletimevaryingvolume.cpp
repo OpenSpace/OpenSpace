@@ -23,9 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
+
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolume.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -34,13 +34,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/fmt.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace {
@@ -54,8 +53,6 @@ namespace {
     const char* KeySourceDirectory = "SourceDirectory";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyLowerValueBound = "LowerValueBound";
-    const char* KeyUpperValueBound = "UpperValueBound";
     const char* KeyClipPlanes = "ClipPlanes";
     const char* KeySecondsBefore = "SecondsBefore";
     const char* KeySecondsAfter = "SecondsAfter";
@@ -63,6 +60,7 @@ namespace {
     const char* KeyMinValue = "MinValue";
     const char* KeyMaxValue = "MaxValue";
     const char* KeyTime = "Time";
+    const char* KeyUnit = "VisUnit";
     const float SecondsInOneDay = 60 * 60 * 24;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
@@ -156,9 +154,12 @@ namespace volume {
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clipPlanes(nullptr)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
+    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
@@ -166,13 +167,9 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
-    , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
-    , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
-    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
-    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _raycaster(nullptr)
-    , _transferFunction(nullptr)
+    , _transferFunctionHandler(nullptr)
+
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -182,9 +179,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
-    _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
-    _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
-    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+    _transferFunctionHandler = std::make_shared<TransferFunctionHandler>(_transferFunctionPath);
+
 
     _gridType.addOptions({
         { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
@@ -204,7 +200,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
-    _clipPlanes->setName("clipPlanes");
+    _clipPlanes->setIdentifier("clipPlanes");
+    _clipPlanes->setGuiName("Clip Planes");
 
     if (dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
@@ -222,7 +219,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
 
     if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load sequence directory '" << sequenceDir.path() << "'");
+        LERROR(fmt::format("Could not load sequence directory '{}'", sequenceDir.path()));
         return;
     }
 
@@ -235,6 +232,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
         std::string extension = currentFile.fileExtension();
         if (extension == "dictionary") {
             loadTimestepMetadata(path);
+        }
+        if (extension == "tf") {
+            _transferFunctionHandler->setFilepath(path);
         }
     }
 
@@ -250,11 +250,16 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         float min = t.minValue;
         float diff = t.maxValue - t.minValue;
-
         float *data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
         }
+
+        t.histogram = std::make_shared<Histogram>(0.0, 1.0, 100);
+        for (int i = 0; i < t.rawVolume->nCells(); ++i) {
+            t.histogram->add(data[i]);
+        }
+
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
@@ -273,13 +278,11 @@ void RenderableTimeVaryingVolume::initializeGL() {
         t.texture->uploadTexture();
     }
 
+    _transferFunctionHandler->initialize();
     _clipPlanes->initialize();
-    _transferFunction->update();
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
-        nullptr,
-        _transferFunction,
-        _clipPlanes
-    );
+
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunctionHandler, _clipPlanes);
+
     _raycaster->initialize();
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
     auto onChange = [&](bool enabled) {
@@ -309,14 +312,14 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());
+    addPropertySubOwner(_transferFunctionHandler.get());
+
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
     addProperty(_currentTimestep);
     addProperty(_opacity);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
-    addProperty(_lowerValueBound);
-    addProperty(_upperValueBound);
 
     _raycaster->setGridType(
         (_gridType.value() == 1) ?
@@ -332,24 +335,19 @@ void RenderableTimeVaryingVolume::initializeGL() {
     });
 
     _transferFunctionPath.onChange([this] {
-        _transferFunction =
-            std::make_shared<TransferFunction>(_transferFunctionPath);
-        _raycaster->setTransferFunction(_transferFunction);
+        _transferFunctionHandler =
+            std::make_shared<TransferFunctionHandler>(_transferFunctionPath);
+        _raycaster->setTransferFunctionHandler(_transferFunctionHandler);
     });
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
     ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-    try {
-        documentation::testSpecificationAndThrow(
-            TimestepDocumentation(),
-            dictionary,
-            "TimeVaryingVolumeTimestep"
-        );
-    } catch (const documentation::SpecificationError& e) {
-        LERROR(e.message << e.component);
-        return;
-    }
+    documentation::testSpecificationAndThrow(
+        TimestepDocumentation(),
+        dictionary,
+        "TimeVaryingVolumeTimestep"
+    );
 
     Timestep t;
     t.baseName = ghoul::filesystem::File(path).baseName();
@@ -358,6 +356,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
     t.minValue = dictionary.value<float>(KeyMinValue);
     t.maxValue = dictionary.value<float>(KeyMaxValue);
+    t.unit = dictionary.value<std::string>(KeyUnit);
 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);
@@ -368,7 +367,6 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    using TimeStep = RenderableTimeVaryingVolume::Timestep;
     if (_volumeTimesteps.size() == 0) {
         return nullptr;
     }
@@ -436,7 +434,6 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData&) {
-    _transferFunction->update();
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
@@ -459,18 +456,9 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
-
-            // Remap volume value to that TF value 0 is sampled for lowerValueBound, and 1
-            // is sampled for upperLowerBound.
-            // This means that volume values = 0 need to be remapped to how localMin
-            // relates to the global range.
-            float zeroMap = (t->minValue - _lowerValueBound) /
-                            (_upperValueBound - _lowerValueBound);
-
-            // Volume values = 1 are mapped to how localMax relates to the global range.
-            float oneMap = (t->maxValue - _lowerValueBound) /
-                           (_upperValueBound - _lowerValueBound);
-            _raycaster->setValueRemapping(zeroMap, oneMap);
+            _transferFunctionHandler->setUnit(t->unit);
+            _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
+            _transferFunctionHandler->setHistogramProperty(t->histogram);
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }
@@ -515,20 +503,6 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
                 new StringVerifier,
                 Optional::No,
                 "Specifies the transfer function file path"
-            },
-            {
-                KeyLowerValueBound,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the lower value bound."
-                "This number will be mapped to 0 before uploadin to the GPU."
-            },
-            {
-                KeyUpperValueBound,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the lower value bound."
-                "This number will be mapped to 0 before uploadin to the GPU."
             },
             {
                 KeyGridType,

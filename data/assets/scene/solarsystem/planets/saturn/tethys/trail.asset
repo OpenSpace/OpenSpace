@@ -5,8 +5,8 @@ local kernels375 = asset.require('../sat375').Kernels
 
 
 local TethysTrail = {
-    Name = "TethysTrail",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "TethysTrail",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -20,7 +20,10 @@ local TethysTrail = {
         Resolution = 1000
     },
     Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Name = "Tethys Trail",
+        Path = "/Solar System/Planets/Saturn/Moons"
+    }
 }
 
 
