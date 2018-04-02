@@ -18,13 +18,13 @@ asset.require('scene/solarsystem/missions/voyager/voyager2')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 local VoyagerAsset = asset.require('scene/solarsystem/missions/voyager/voyager1')
 
 asset.onInitialize(function ()
     openspace.time.setTime("1977 SEP 10 12:00:00")
 
-    openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
     sceneHelper.setDeltaTimeKeys({

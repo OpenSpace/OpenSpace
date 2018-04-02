@@ -166,7 +166,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local color = nil
     if ColorFile then
         color = {
-            Name = Name,
+            Identifier = Identifier,
             Description = Description or "",
             FilePath = dir .. '/' .. ColorFile,
             BlendMode = "Color"
@@ -176,7 +176,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local height = nil
     if HeightFile then
         height = {
-            Name = Name,
+            Identifier = Identifier,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
             TilePixelSize = 90
@@ -194,11 +194,11 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
             c, h = openspace.globebrowsing.parseInfoFile(file)
 
             if c then
-                openspace.printInfo("Adding color layer '" .. c["Name"] .. "'")
+                openspace.printInfo("Adding color layer '" .. c["Identifier"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "ColorLayers", c)
             end
             if h then
-                openspace.printInfo("Adding height layer '" .. h["Name"] .. "'")
+                openspace.printInfo("Adding height layer '" .. h["Identifier"] .. "'")
                 openspace.globebrowsing.addLayer(node_name, "HeightLayers", h)
             end
         end
