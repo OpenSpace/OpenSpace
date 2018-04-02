@@ -86,7 +86,7 @@ documentation::Documentation DashboardItemParallelConnection::Documentation() {
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
                                                              ghoul::Dictionary dictionary)
-    : DashboardItem("ParallelConnection", "Parallel Connection")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {

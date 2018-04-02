@@ -261,12 +261,13 @@ namespace openspace {
     }
 
     void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster,
-        ghoul::Boolean isAttached)
+        isAttached isAttached)
     {
         (void)deferredcaster;
         (void)isAttached;
         _dirtyDeferredcastData = true;
     }
+
 
     void FramebufferRenderer::update() {
         if (_dirtyResolution) {

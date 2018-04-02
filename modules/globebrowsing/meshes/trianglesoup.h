@@ -44,12 +44,11 @@ namespace openspace::globebrowsing {
 // that is faster
 class TriangleSoup {
 public:
-    using Positions = ghoul::Boolean;
-    using TextureCoordinates = ghoul::Boolean;
-    using Normals = ghoul::Boolean;
+    BooleanType(Positions);
+    BooleanType(TextureCoordinates);
+    BooleanType(Normals);
 
-    TriangleSoup(
-        std::vector<unsigned int> elements, // At least elements are required
+    TriangleSoup(std::vector<unsigned int> elements, // At least elements are required
         Positions usePositions = Positions::No,
         TextureCoordinates useTextures = TextureCoordinates::No,
         Normals useNormals = Normals::No);

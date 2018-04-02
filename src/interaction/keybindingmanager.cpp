@@ -191,8 +191,10 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
                 "clearKey",
                 &luascriptfunctions::clearKey,
                 {},
-                "string",
-                "Unbinds all of the scripts that are bound to the provided key + modifier"
+                "string or strings",
+                "Unbinds the key or keys that have been provided. This function can be "
+                "called with a single key or with an array of keys to remove all of the "
+                "provided keys at once"
             },
             {
                 "bindKey",

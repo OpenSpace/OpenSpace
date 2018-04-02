@@ -42,7 +42,7 @@ class Syncable;
  */
 class SyncEngine {
 public:
-    using IsMaster = ghoul::Boolean;
+    BooleanType(IsMaster);
 
     /**
      * Creates a new SyncEngine which a buffer size of \p syncBufferSize

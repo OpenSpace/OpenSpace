@@ -43,24 +43,22 @@ public:
     bool isDone();
 
     /* https://httpstatuses.com/ */
-    static const struct Statuses {
-        enum StatusCode {
-            OK            = 200,
-            Accepted      = 202,
+    enum class StatusCode : int {
+        OK            = 200,
+        Accepted      = 202,
 
-            BadRequest    = 400,
-            Unauthorized  = 401,
-            NotAcceptable = 406,
+        BadRequest    = 400,
+        Unauthorized  = 401,
+        NotAcceptable = 406,
 
-            NotImplemented = 501
-        };
+        NotImplemented = 501
     };
 private:
     bool _isAuthenticated;
 
     const std::string getKey() const;
     bool authorize(const std::string key);
-    nlohmann::json message(const std::string &message, const int &statusCode = Statuses::NotImplemented);
+    nlohmann::json message(const std::string &message, StatusCode statusCode = StatusCode::NotImplemented);
 };
 
 }

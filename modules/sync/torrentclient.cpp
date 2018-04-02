@@ -61,10 +61,6 @@ TorrentError::TorrentError(std::string msg)
     : RuntimeError(std::move(msg), "TorrentClient")
 {}
 
-TorrentClient::~TorrentClient() {
-    deinitialize();
-}
-
 void TorrentClient::initialize() {
 #ifdef SYNC_USE_LIBTORRENT
     libtorrent::settings_pack settings;

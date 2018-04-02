@@ -50,10 +50,10 @@ namespace openspace {
 
 class LoadingScreen {
 public:
-    using ShowMessage = ghoul::Boolean;
-    using ShowNodeNames = ghoul::Boolean;
-    using ShowProgressbar = ghoul::Boolean;
-    using CatastrophicError = ghoul::Boolean;
+    BooleanType(ShowMessage);
+    BooleanType(ShowNodeNames);
+    BooleanType(ShowProgressbar);
+    BooleanType(CatastrophicError);
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
         ShowProgressbar showProgressbar);

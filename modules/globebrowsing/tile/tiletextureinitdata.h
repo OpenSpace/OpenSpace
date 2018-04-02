@@ -39,7 +39,7 @@ namespace openspace::globebrowsing {
 class TileTextureInitData {
 public:
     using HashKey = unsigned long long;
-    using ShouldAllocateDataOnCPU = ghoul::Boolean;
+    BooleanType(ShouldAllocateDataOnCPU);
     using Format = ghoul::opengl::Texture::Format;
 
     TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,

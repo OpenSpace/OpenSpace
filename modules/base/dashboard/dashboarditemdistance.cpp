@@ -183,7 +183,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
 }
 
 DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
-    : DashboardItem("Distance")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)

@@ -49,12 +49,13 @@ void GuiKeybindingComponent::render() {
     const std::multimap<K, V>& binds = OsEng.keyBindingManager().keyBindings();
 
     for (const std::pair<K, V>& p : binds) {
-        if (ImGui::Button(std::to_string(p.first).c_str())) {
+        // JCC: FIX ME!!!!
+        /*if (ImGui::Button(std::to_string(p.first).c_str())) {
             OsEng.scriptEngine().queueScript(
                 p.second.command,
                 p.second.synchronization
             );
-        }
+        }*/
         ImGui::SameLine();
 
         // Poor mans table layout

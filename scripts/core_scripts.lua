@@ -52,28 +52,6 @@ openspace.removeInterestingNodes = function(nodes)
     end
 end
 
-openspace.setDefaultDashboard = function()
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemDate"
-    })
-
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemSimulationIncrement"
-    })
-
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemDistance"
-    })
-
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemFramerate"
-    })
-
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemParallelConnection"
-    })
-end
-
 openspace.setDefaultGuiSorting = function()
     openspace.setPropertyValueSingle(
         'Modules.ImGUI.Main.SceneProperties.Ordering',
