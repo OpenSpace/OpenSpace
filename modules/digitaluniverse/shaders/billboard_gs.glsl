@@ -188,8 +188,8 @@ void main() {
         if ((height > maxBillboardSize) ||
             (width > maxBillboardSize)) {        
             // Set maximum size as Carter's instructions
-            float correctionScale = height > maxBillboardSize ? maxBillboardSize / (topRight.y - bottomLeft.y) :
-                                                                maxBillboardSize / (topRight.x - bottomLeft.x);
+            float correctionScale = height > maxBillboardSize ? maxBillboardSize / height :
+                                                                maxBillboardSize / width;
             scaledRight *= correctionScale;
             scaledUp    *= correctionScale;
             initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
