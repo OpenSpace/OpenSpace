@@ -233,19 +233,15 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
-            // Eye Space in SGCT to Eye Space in OS
+            // Eye Space in SGCT to Eye Space in OS (SGCT View to OS Camera Rig)
             glm::dmat4 dSgctEye2OSEye = glm::inverse(
                 glm::dmat4(renderData.camera.viewMatrix()));            
+           
+            glm::dmat4 dSGCTViewToWorldMatrix = glm::inverse(renderData.camera.combinedViewMatrix());
 
-            glm::dmat4 dFragmentToWorldMatrix =
-                glm::mat4_cast(
-                    static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
-                ) * glm::inverse(renderData.camera.viewScaleMatrix());
-
-
-            // Eye Space in SGCT to OS Camera Before Rotation
-            program.setUniform(_uniformCache2.dFragmentToWorldMatrix,
-                dFragmentToWorldMatrix);
+            // Eye Space in SGCT to OS World Space
+            program.setUniform(_uniformCache2.dSGCTViewToWorldMatrix,
+                dSGCTViewToWorldMatrix);
             
             // SGCT Projection to SGCT Eye Space
             glm::dmat4 dInverseProjection = glm::inverse(
@@ -469,7 +465,7 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation("dInverseModelTransformMatrix");
     _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
     _uniformCache2.dSgctProjectionToModelTransformMatrix = program.uniformLocation("dSgctProjectionToModelTransformMatrix");
-    _uniformCache2.dFragmentToWorldMatrix = program.uniformLocation("dFragmentToWorldMatrix");
+    _uniformCache2.dSGCTViewToWorldMatrix = program.uniformLocation("dSGCTViewToWorldMatrix");
     _uniformCache2.dCamRigPos = program.uniformLocation("dCamRigPos");
     _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
     _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");

@@ -136,7 +136,7 @@ private:
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
         dSgctProjectionToModelTransformMatrix,
-        dFragmentToWorldMatrix,
+        dSGCTViewToWorldMatrix,
         dCamRigPos, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;

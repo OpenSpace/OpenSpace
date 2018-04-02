@@ -86,7 +86,7 @@ uniform sampler2DMS mainColorTexture;
 
 uniform dmat4 dInverseModelTransformMatrix; 
 uniform dmat4 dModelTransformMatrix;
-uniform dmat4 dFragmentToWorldMatrix;
+uniform dmat4 dSGCTViewToWorldMatrix;
 uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
 uniform dvec3 dCamRigPos;
@@ -249,7 +249,8 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray,
     // Compute positions and directions in object space.
     dvec2 samplePos  = dvec2(msaaSamplePatter[mssaSample],
                              msaaSamplePatter[mssaSample+1]);
-    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
+    //dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
+    dvec4 clipCoords = dvec4(interpolatedNDCPos.xy, 0.0, 1.0);
 
     // Clip to Object Coords
     dvec4 objectCoords = dSgctProjectionToModelTransformMatrix * clipCoords;
@@ -610,7 +611,7 @@ void main() {
                 vec4 position = texelFetch(mainPositionTexture, fragCoords, i);
 
                 // OS Eye to World coords                
-                dvec4 fragWorldCoords = dFragmentToWorldMatrix * position;
+                dvec4 fragWorldCoords = dSGCTViewToWorldMatrix * position;
 
                 // World to Object (Normal and Position in meters)
                 dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
