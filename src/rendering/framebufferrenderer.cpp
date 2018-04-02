@@ -711,7 +711,6 @@ namespace openspace {
                 "OnePixel MSAA",
                 absPath("${SHADERS}/framebuffer/pixelSizeMSAA.vert"),
                 absPath("${SHADERS}/framebuffer/pixelSizeMSAA.frag")
-
             );
         }
         catch (const ghoul::RuntimeError& e) {

@@ -49,7 +49,8 @@ uniform float viewScaling;
 uniform float scaleFactor;
 uniform float billboardSize;
 uniform vec2 screenSize;
-uniform vec3 eyePosition;
+uniform dvec3 eyePosition;
+uniform float magnitudeExponent;
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
@@ -57,6 +58,8 @@ const vec2 corners[4] = vec2[4](
     vec2(1.0, 1.0), 
     vec2(1.0, 0.0) 
 );
+
+const double PARSEC =  3.0856776E16;
 
 void main() {
 
@@ -74,18 +77,21 @@ void main() {
 
     vec4 projectedPoint = gl_in[0].gl_Position;
     
-    float distanceToStarInParsecs = length(ge_worldPosition.xyz / 3.0856776E16 - eyePosition / 3.0856776E16);
-
+    dvec3 starPositionInParsecs = dvec3(ge_worldPosition.xyz) / PARSEC;
+    dvec3 eyePositionInParsecs  = eyePosition / PARSEC;
+    float distanceToStarInParsecs = float(length(starPositionInParsecs - eyePositionInParsecs));
     float luminosity = ge_brightness.y;
-      
+    //float absMag = ge_brightness.x;
+    //float appMag = absMag + 5 * (log(distanceToStarInParsecs)-1.0);
+    
     // Working like Partiview
-    float pSize = 3.0E5;
+     float pSize = pow(10, magnitudeExponent);;
     float slum = 1.0;
     float samplingFactor = 1.0;
     float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
     
-    vec2 multiplier = vec2(apparentBrightness * projectedPoint.w);
-   
+    vec2 multiplier = vec2(apparentBrightness/screenSize * projectedPoint.w);
+    
     // Max Star Sizes:
     // Fragment Coords:
     vec2 bottomLeft = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[1])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
@@ -95,7 +101,7 @@ void main() {
     float width  = abs(topRight.x - bottomLeft.x);    
     float var    = (height + width);
 
-    float maxBillboardSize = billboardSize;
+    float maxBillboardSize = luminosity > 100.0 ? billboardSize + 40 : billboardSize;
     float minBillboardSize = 1.0;
 
     if ((height > maxBillboardSize) ||

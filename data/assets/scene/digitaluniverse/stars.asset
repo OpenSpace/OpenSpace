@@ -31,9 +31,9 @@ local object = {
         --File = speck .. "/stellar_test_grid3.speck",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
-        MagnitudeExponent = 19,
-        BillboardSize = 30,
-        Sharpness = 1.3
+        MagnitudeExponent = 8.3,
+        BillboardSize = 54.9,
+        Sharpness = 0.5
     },
     GUI = {
         Path = "/Milky Way/Stars"

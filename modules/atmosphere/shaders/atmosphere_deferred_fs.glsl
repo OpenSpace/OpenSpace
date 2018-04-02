@@ -537,7 +537,6 @@ void main() {
     ivec2 fragCoords = ivec2(gl_FragCoord);
 
     if (cullAtmosphere == 0) {
-
         vec4 atmosphereFinalColor = vec4(0.0f);
         int nSamples = 1;
         // First we determine if the pixel is complex (different fragments on it)
@@ -611,16 +610,16 @@ void main() {
                 vec4 position = texelFetch(mainPositionTexture, fragCoords, i);
 
                 // OS Eye to World coords                
-                dvec4 fragWorldCoords = dSGCTViewToWorldMatrix * position;
+                dvec4 positionWorldCoords = dSGCTViewToWorldMatrix * position;
 
                 // World to Object (Normal and Position in meters)
-                dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
+                dvec4 positionObjectsCoords = dInverseModelTransformMatrix * positionWorldCoords;
 
                 
                 // Distance of the pixel in the gBuffer to the observer
                 // JCC (12/12/2017): AMD distance function is buggy.
-                //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
-                double pixelDepth = length(cameraPositionInObject.xyz - fragObjectCoords.xyz);
+                //double pixelDepth = distance(cameraPositionInObject.xyz, positionObjectsCoords.xyz);
+                double pixelDepth = length(cameraPositionInObject.xyz - positionObjectsCoords.xyz);
                 
                 // JCC (12/13/2017): Trick to remove floating error in texture.
                 // We see a squared noise on planet's surface when seeing the planet
@@ -640,8 +639,8 @@ void main() {
                 }
 
                 // All calculations are done in Km:
-                pixelDepth           *= 0.001;
-                fragObjectCoords.xyz *= 0.001;
+                pixelDepth                *= 0.001;
+                positionObjectsCoords.xyz *= 0.001;
                 
                 if (position.xyz != vec3(0.0) && (pixelDepth < offset)) {
                     atmosphereFinalColor += vec4(HDR(color.xyz * backgroundConstant, atmExposure), color.a);                      
@@ -668,7 +667,7 @@ void main() {
                     
                     dvec4 onATMPos           = dModelTransformMatrix * dvec4(x * 1000.0, 1.0);
                     vec4 eclipseShadowATM    = calcShadow(shadowDataArray, onATMPos.xyz, false);            
-                    vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, fragWorldCoords.xyz, true);
+                    vec4 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
                   
                     float sunIntensityInscatter = sunRadiance * eclipseShadowATM.x;
                     float sunIntensityGround    = sunRadiance * eclipseShadowPlanet.x;
@@ -677,7 +676,7 @@ void main() {
 
                     vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                             s, r, mu, attenuation, 
-                                                            vec3(fragObjectCoords.xyz),
+                                                            vec3(positionObjectsCoords.xyz),
                                                             maxLength, pixelDepth,
                                                             color, sunIntensityInscatter); 
                     vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,

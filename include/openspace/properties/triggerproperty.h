@@ -57,7 +57,7 @@ public:
      * \param state The unused Lua state
      * \return Returns always <code>true</code>
      */
-    bool setLuaValue(lua_State* state) override;
+    bool setLuaValue(lua_State* state, bool leaveOnStack = false) override;
 
     /**
      * Silently ignores any value that is passed into this function and will trigger the

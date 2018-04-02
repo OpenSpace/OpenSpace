@@ -63,7 +63,7 @@ U PropertyDelegate<T>::defaultSteppingValue() {
 
 template <typename T>
 template <typename U>
-U PropertyDelegate<T>::fromLuaValue(lua_State*, bool&) {
+U PropertyDelegate<T>::fromLuaValue(lua_State*, bool, bool&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::fromLuaValue specialization");
 }

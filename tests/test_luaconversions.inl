@@ -70,6 +70,7 @@ TEST_F(LuaConversionTest, Bool) {
     bool value = static_cast<bool>(0);
     value = PropertyDelegate<TemplateProperty<bool>>::fromLuaValue<bool>(
         state,
+        false,
         success
     );
     EXPECT_TRUE(success) << "fromLuaValue";
@@ -88,6 +89,7 @@ TEST_F(LuaConversionTest, Char) {
     EXPECT_TRUE(success) << "toLuaValue";
     T value = PropertyDelegate<NumericalProperty<T>>::fromLuaValue<T>(
         state,
+        false,
         success
     );
     EXPECT_TRUE(success) << "fromLuaValue";
@@ -114,6 +116,7 @@ TEST_F(LuaConversionTest, CharFuzz) {
         EXPECT_TRUE(success) << "toLuaValue";
         T value = PropertyDelegate<NumericalProperty<T>>::fromLuaValue<T>(
             state,
+            false,
             success
         );
         EXPECT_TRUE(success) << "fromLuaValue";
@@ -134,6 +137,7 @@ TEST_F(LuaConversionTest, CharFuzz) {
 //    EXPECT_TRUE(success) << "toLuaValue";
 //    T value = PropertyDelegate<NumericalProperty<T>>::fromLuaValue<T>(
 //        state,
+//        false,
 //        success
 //    );
 //    EXPECT_TRUE(success) << "fromLuaValue";
@@ -161,6 +165,7 @@ TEST_F(LuaConversionTest, CharFuzz) {
 //        EXPECT_TRUE(success) << "toLuaValue";
 //        T value = PropertyDelegate<NumericalProperty<T>>::fromLuaValue<T>(
 //            state,
+//            false,
 //            success
 //        );
 //        EXPECT_TRUE(success) << "fromLuaValue";
@@ -180,6 +185,7 @@ TEST_F(LuaConversionTest, SignedChar) {
     EXPECT_TRUE(success) << "toLuaValue";
     T value = PropertyDelegate<NumericalProperty<T>>::fromLuaValue<T>(
         state,
+        false,
         success
     );
     EXPECT_TRUE(success) << "fromLuaValue";

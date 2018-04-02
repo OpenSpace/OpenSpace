@@ -43,7 +43,12 @@ Fragment getFragment() {
     else {
         frag.color = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
     }
-
     frag.depth = pscDepth(gs_position);
+    
+    // G-Buffer
+    frag.gPosition  = vec4(0.0);//vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal if necessary (JCC)
+    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
     return frag;
 }

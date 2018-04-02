@@ -30,6 +30,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -197,9 +198,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _colorTextureIsDirty(true)
     , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _dataIsDirty(true)
-    , _magnitudeExponent(MagnitudeExponentInfo, 19.f, 0.f, 30.f)
+    , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 30.f)
     , _sharpness(SharpnessInfo, 1.f, 0.f, 5.f)
-    , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 100.f)
+    , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
     , _program(nullptr)
     , _speckFile("")
     , _nValuesPerStar(0)
@@ -309,6 +310,7 @@ void RenderableStars::initializeGL() {
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+    _uniformCache.eyePosition = _program->uniformLocation("eyePosition");
 
     bool success = loadData();
     if (!success) {
@@ -358,8 +360,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.billboardSize, _billboardSize);
     _program->setUniform(
         _uniformCache.screenSize,
-        glm::vec2(OsEng.renderEngine().renderingResolution())
+        glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
     );
+    
+    _program->setUniform(_uniformCache.eyePosition, data.camera.eyePositionVec3());
 
     _program->setUniform("eyePosition", glm::vec3(data.camera.eyePositionVec3()));
 
@@ -654,7 +658,7 @@ bool RenderableStars::readSpeckFile() {
             file.seekg(position);
             break;
         }
-
+        
         if (line.substr(0, 7) == "datavar") {
             // datavar lines are structured as follows:
             // datavar # description

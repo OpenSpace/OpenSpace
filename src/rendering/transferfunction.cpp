@@ -92,7 +92,7 @@ ghoul::opengl::Texture& TransferFunction::getTexture() {
 }
 
 void TransferFunction::update() {
-  /*  if (_needsUpdate) {
+    if (_needsUpdate) {
         if (hasExtension(_filepath, "txt")) {
             setTextureFromTxt();
         } else {
@@ -103,7 +103,7 @@ void TransferFunction::update() {
         if (_tfChangedCallback) {
             _tfChangedCallback(*this);
         }
-    }*/
+    }
 }
 
 void TransferFunction::setCallback(TfChangedCallback callback) {

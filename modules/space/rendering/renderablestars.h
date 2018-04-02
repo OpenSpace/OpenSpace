@@ -92,7 +92,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, colorOption, magnitudeExponent, sharpness,
-        billboardSize, screenSize, scaling, psfTexture, colorTexture) _uniformCache;
+        billboardSize, screenSize, scaling, psfTexture, colorTexture, eyePosition) _uniformCache;
 
     std::string _speckFile;
 

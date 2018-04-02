@@ -31,11 +31,11 @@
 
 namespace {
 
-short fromLuaConversion(lua_State* state, bool& success) {
+short fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         short val = static_cast<short>(lua_tonumber(state, -1));
-        lua_pop(state, 1);
+        lua_pop(state, leaveOnStack ? 0 : 1);
         return val;
     }
     else {
