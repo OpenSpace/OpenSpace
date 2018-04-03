@@ -18,6 +18,19 @@ window.onload = function () {
     return identifier;
   });
 
+  Handlebars.registerHelper('level', function(options, context) {
+    var data = context.data;
+    var level = 0;
+
+    while (data = data._parent) {
+      if (data.key !== undefined) {
+        ++level;
+      }
+    }
+
+    return level;
+  });
+
   scripting.sort(function (a, b) {
     return a.library < b.library ? -1 : (a.library > b.library ? 1 : 0);
   });

@@ -1,0 +1,31 @@
+@import '../../../styles/all';
+
+.ScrollOverlay {
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: " ";
+    pointer-events: none;
+    z-index: 22;
+  }
+}
+
+.notAtTop::before {
+  animation: $fade-in-animation;
+  background: linear-gradient(to top, transparent, $ui-background-solid);
+  height: 2 * $base-padding;
+  position: fixed;
+  width: unquote("calc(100% - #{$scrollbar-width})");
+}
+
+.notAtBottom::after {
+  animation: $fade-in-animation;
+  background: linear-gradient(to top, $ui-background-solid, transparent);
+  height: 2 * $base-padding;
+  position: fixed;
+  bottom: 0;
+  width: unquote("calc(100% - #{$scrollbar-width})");
+}

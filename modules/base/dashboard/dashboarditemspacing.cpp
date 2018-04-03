@@ -60,7 +60,7 @@ documentation::Documentation DashboardItemSpacing::Documentation() {
 }
 
 DashboardItemSpacing::DashboardItemSpacing(ghoul::Dictionary dictionary)
-    : DashboardItem("Spacing")
+    : DashboardItem(dictionary)
     , _spacing(SpacingInfo, 15.f, 0.f, 2048.f)
 {
     documentation::testSpecificationAndThrow(

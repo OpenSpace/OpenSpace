@@ -34,6 +34,7 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -182,7 +183,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
 }
 
 DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
-    : DashboardItem("Distance")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)
@@ -380,7 +381,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 
     switch (mainComp.type) {
         case Type::Node:
-            return { mainComp.node->worldPosition(), mainComp.node->name() };
+            return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
             glm::dvec3 otherPos;
@@ -397,7 +398,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             glm::dvec3 dir = glm::normalize(otherPos - thisPos);
             glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            return { thisPos + dirLength, "surface of " + mainComp.node->name() };
+            return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
         }
         case Type::Focus:
             return {

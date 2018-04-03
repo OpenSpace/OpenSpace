@@ -35,23 +35,21 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <iterator>
-#include <numeric>
 #include <fstream>
 #include <string>
 #include <stack>
@@ -63,35 +61,18 @@
 namespace {
     constexpr const char* _loggerCat = "Scene";
     constexpr const char* KeyName = "Name";
-    constexpr const char* KeyParentName = "Parent";
+    constexpr const char* KeyIdentifier = "Identifier";
+    constexpr const char* KeyParent = "Parent";
 } // namespace
 
 namespace openspace {
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
-    : DocumentationGenerator(
-        "Documented",
-        "propertyOwners",
-        {
-            {
-                "mainTemplate",
-                "${WEB}/properties/main.hbs"
-            },
-            {
-                "propertyOwnerTemplate",
-                "${WEB}/properties/propertyowner.hbs"
-            },
-            {
-                "propertyTemplate",
-                "${WEB}/properties/property.hbs"
-            }
-        },
-        "${WEB}/properties/script.js"
-    )
+    : properties::PropertyOwner({"Scene", "Scene"})
     , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
 {
-    _rootDummy.setName(SceneGraphNode::RootNodeName);
+    _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
     _rootDummy.setScene(this);
 }
 
@@ -117,14 +98,15 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByName.count(node->name())){
+    if (_nodesByIdentifier.count(node->identifier())){
         throw Scene::InvalidSceneError(
-            "Node with name " + node->name() + " already exits."
+            "Node with identifier " + node->identifier() + " already exits."
         );
     }
 
     _topologicallySortedNodes.push_back(node);
-    _nodesByName[node->name()] = node;
+    _nodesByIdentifier[node->identifier()] = node;
+    addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
 
@@ -137,7 +119,13 @@ void Scene::unregisterNode(SceneGraphNode* node) {
         ),
         _topologicallySortedNodes.end()
     );
-    _nodesByName.erase(node->name());
+    _nodesByIdentifier.erase(node->identifier());
+    // Just try to remove all properties; if the property doesn't exist, the
+    // removeInterpolation will not do anything
+    for (properties::Property* p : node->properties()) {
+        removeInterpolation(p);
+    }
+    removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
 }
 
@@ -163,7 +151,7 @@ void Scene::sortTopologically() {
     _circularNodes.clear();
 
     ghoul_assert(
-        _topologicallySortedNodes.size() == _nodesByName.size(),
+        _topologicallySortedNodes.size() == _nodesByIdentifier.size(),
         "Number of scene graph nodes is inconsistent"
     );
 
@@ -172,7 +160,7 @@ void Scene::sortTopologically() {
     }
 
     // Only the Root node can have an in-degree of 0
-    SceneGraphNode* root = _nodesByName[SceneGraphNode::RootNodeName];
+    SceneGraphNode* root = _nodesByIdentifier[SceneGraphNode::RootNodeIdentifier];
     if (!root) {
         throw Scene::InvalidSceneError("No root node found");
     }
@@ -214,10 +202,10 @@ void Scene::sortTopologically() {
         }
     }
     if (inDegrees.size() > 0) {
-        LERROR(
-            "The scene contains circular dependencies. " <<
-            inDegrees.size() << " nodes will be disabled."
-        );
+        LERROR(fmt::format(
+            "The scene contains circular dependencies. {} nodes will be disabled",
+            inDegrees.size()
+        ));
     }
 
     for (auto it : inDegrees) {
@@ -321,9 +309,9 @@ void Scene::update(const UpdateData& data) {
     }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::update(begin '" + node->name() + "')");
+            LTRACE("Scene::update(begin '" + node->identifier() + "')");
             node->update(data);
-            LTRACE("Scene::update(end '" + node->name() + "')");
+            LTRACE("Scene::update(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -334,9 +322,9 @@ void Scene::update(const UpdateData& data) {
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
-            LTRACE("Scene::render(begin '" + node->name() + "')");
+            LTRACE("Scene::render(begin '" + node->identifier() + "')");
             node->render(data, tasks);
-            LTRACE("Scene::render(end '" + node->name() + "')");
+            LTRACE("Scene::render(end '" + node->identifier() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -349,8 +337,8 @@ void Scene::clear() {
     _rootDummy.clearChildren();
 }
 
-const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
-    return _nodesByName;
+const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
+    return _nodesByIdentifier;
 }
 
 SceneGraphNode* Scene::root() {
@@ -362,8 +350,8 @@ const SceneGraphNode* Scene::root() const {
 }
 
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
-    auto it = _nodesByName.find(name);
-    if (it != _nodesByName.end()) {
+    auto it = _nodesByIdentifier.find(name);
+    if (it != _nodesByIdentifier.end()) {
         return it->second;
     }
     return nullptr;
@@ -377,28 +365,26 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 
-    if (!dict.hasKey(KeyName)) {
-        // TODO: Throw exception
-        LERROR("Name missing for scene graph node");
-        return nullptr;
-    }
+    const std::string nodeIdentifier = dict.value<std::string>(KeyIdentifier);
+    const bool hasParent = dict.hasKey(KeyParent);
 
-    const std::string nodeName = dict.value<std::string>(KeyName);
-    const bool hasParent = dict.hasKey(KeyParentName);
-
-    if (_nodesByName.find(nodeName) != _nodesByName.end()) {
-        LERROR("Cannot add scene graph node " << nodeName <<
-               ". A node with that name already exisis.");
+    if (_nodesByIdentifier.find(nodeIdentifier) != _nodesByIdentifier.end()) {
+        LERROR(fmt::format(
+            "Cannot add scene graph node '{}'. A node with that name already exists",
+            nodeIdentifier
+        ));
         return nullptr;
     }
 
     SceneGraphNode* parent = nullptr;
     if (hasParent) {
-        std::string parentName = dict.value<std::string>(KeyParentName);
-        parent = sceneGraphNode(parentName);
+        const std::string parentIdentifier = dict.value<std::string>(KeyParent);
+        parent = sceneGraphNode(parentIdentifier);
         if (!parent) {
             // TODO: Throw exception
-            LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
+            LERROR(fmt::format(
+                "Could not find parent '{}' for '{}'", parentIdentifier, nodeIdentifier
+            ));
             return nullptr;
         }
     }
@@ -406,7 +392,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
     if (!node) {
         // TODO: Throw exception
-        LERROR("Could not create node from dictionary: " + nodeName);
+        LERROR("Could not create node from dictionary: " + nodeIdentifier);
     }
 
     if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
@@ -427,11 +413,13 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // Make sure all dependencies are found
     std::vector<SceneGraphNode*> dependencies;
     bool foundAllDeps = true;
-    for (const auto& depName : dependencyNames) {
+    for (const std::string& depName : dependencyNames) {
         SceneGraphNode* dep = sceneGraphNode(depName);
         if (!dep) {
             // TODO: Throw exception
-            LERROR("Could not find dependency '" + depName + "' for '" + nodeName + "'");
+            LERROR(fmt::format(
+                "Could not find dependency '{}' for '{}'", depName, nodeIdentifier
+            ));
             foundAllDeps = false;
             continue;
         }
@@ -455,77 +443,115 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     return rawNodePointer;
 }
 
+void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
+                             ghoul::EasingFunction easingFunction)
+{
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    ghoul_precondition(durationSeconds > 0.0, "durationSeconds must be positive");
+    ghoul_postcondition(
+        std::find_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [prop](const InterpolationInfo& info) {
+                return info.prop == prop && !info.isExpired;
+            }
+        ) != _interpolationInfos.end(),
+        "A new interpolation record exists for p that is not expired"
+    );
+
+    ghoul::EasingFunc<float> func =
+        easingFunction == ghoul::EasingFunction::Linear
+         ?
+        nullptr :
+        ghoul::easingFunction<float>(easingFunction);
+
+    // First check if the current property already has an interpolation information
+    for (std::vector<InterpolationInfo>::iterator it = _interpolationInfos.begin();
+        it != _interpolationInfos.end();
+        ++it)
+    {
+        if (it->prop == prop) {
+            it->beginTime = std::chrono::steady_clock::now();
+            it->durationSeconds = durationSeconds;
+            it->easingFunction = func;
+            // If we found it, we can break since we make sure that each property is only
+            // represented once in this
+            return;
+        }
+    }
+
+    InterpolationInfo i;
+    i.prop = prop;
+    i.beginTime = std::chrono::steady_clock::now();
+    i.durationSeconds = durationSeconds;
+    i.easingFunction = func;
+
+    _interpolationInfos.push_back(std::move(i));
+}
+
+void Scene::removeInterpolation(properties::Property* prop) {
+    ghoul_precondition(prop != nullptr, "prop must not be nullptr");
+    ghoul_postcondition(
+        std::find_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [prop](const InterpolationInfo& info) {
+                return info.prop == prop;
+            }
+        ) == _interpolationInfos.end(),
+        "No interpolation record exists for prop"
+    );
+
+    _interpolationInfos.erase(
+        std::remove_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [prop](const InterpolationInfo& info) { return info.prop == prop; }
+        ),
+        _interpolationInfos.end()
+    );
+}
+
+void Scene::updateInterpolations() {
+    using namespace std::chrono;
+    auto now = steady_clock::now();
+
+    for (InterpolationInfo& i : _interpolationInfos) {
+        long long usPassed = duration_cast<std::chrono::microseconds>(
+            now - i.beginTime
+        ).count();
+
+        float t = static_cast<float>(
+            static_cast<double>(usPassed) /
+            static_cast<double>(i.durationSeconds * 1000000)
+        );
+
+        // @FRAGILE(abock): This method might crash if someone deleted the property
+        //                  underneath us. We take care of removing entire PropertyOwners,
+        //                  but we assume that Propertys live as long as their
+        //                  SceneGraphNodes. This is true in general, but if Propertys are
+        //                  created and destroyed often by the SceneGraphNode, this might
+        //                  become a problem.
+        i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f), i.easingFunction);
+
+        i.isExpired = (t >= 1.f);
+    }
+
+    _interpolationInfos.erase(
+        std::remove_if(
+            _interpolationInfos.begin(),
+            _interpolationInfos.end(),
+            [](const InterpolationInfo& i) {
+                return i.isExpired;
+            }
+        ),
+        _interpolationInfos.end()
+    );
+}
+
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {
     SceneLicenseWriter writer(_licenses);
     writer.writeDocumentation(path);
-}
-
-std::string Scene::generateJson() const {
-    std::function<std::string(properties::PropertyOwner*)> createJson =
-        [&createJson](properties::PropertyOwner* owner) -> std::string
-    {
-        std::stringstream json;
-        json << "{";
-        json << "\"name\": \"" << owner->name() << "\",";
-
-        json << "\"properties\": [";
-        auto properties = owner->properties();
-        for (properties::Property* p : properties) {
-            json << "{";
-            json << "\"id\": \"" << p->identifier() << "\",";
-            json << "\"type\": \"" << p->className() << "\",";
-            json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-            json << "\"guiName\": \"" << p->guiName() << "\",";
-            json << "\"description\": \"" << escapedJson(p->description()) << "\"";
-            json << "}";
-            if (p != properties.back()) {
-                json << ",";
-            }
-        }
-        json << "],";
-
-        json << "\"propertyOwners\": [";
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            json << createJson(o);
-            if (o != propertyOwners.back()) {
-                json << ",";
-            }
-        }
-        json << "]";
-        json << "}";
-
-        return json.str();
-    };
-
-
-    std::stringstream json;
-    json << "[";
-    std::vector<SceneGraphNode*> nodes = allSceneGraphNodes();
-    if (!nodes.empty()) {
-        json << std::accumulate(
-            std::next(nodes.begin()),
-            nodes.end(),
-            createJson(*nodes.begin()),
-            [createJson](std::string a, SceneGraphNode* n) {
-            return a + "," + createJson(n);
-        }
-        );
-    }
-
-    json << "]";
-
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {
@@ -536,41 +562,42 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 {},
-                "string, *",
+                "name, value [, duration, easing, optimization]",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
                 "to match the type that the property (or properties) expect. If the "
-                "first term (separated by '.') in the uri is bracketed with { }, then "
-                "this term is treated as a group tag name, and the function will "
-                "search through all property owners to find those that are tagged with "
-                "this group name, and set their property values accordingly."
-            },
-            {
-                "setPropertyValueRegex",
-                &luascriptfunctions::property_setValueRegex,
-                {},
-                "string, *",
-                "Sets all property(s) that pass the regular expression in the first "
-                "argument. The second argument can be any type, but it has to match "
-                "the type of the properties that matched the regular expression. "
-                "The regular expression has to be of the ECMAScript grammar. If the "
-                "first term (separated by '.') in the uri is bracketed with { }, then "
-                "this term is treated as a group tag name, and the function will search "
-                "through all property owners to find those that are tagged with this "
-                "group name, and set their property values accordingly."
+                "third is not present or is '0', the value changes instantly, otherwise "
+                "the change will take that many seconds and the value is interpolated at "
+                "each steap in between. The fourth parameter is an optional easing "
+                "function if a 'duration' has been specified. If 'duration' is 0, this "
+                "parameter value is ignored. Otherwise, it can be one of many supported "
+                "easing functions. See easing.h for available functions. The fifth "
+                "argument must be either empty, 'regex', or 'single'. If the last "
+                "argument is empty (the default), the URI is interpreted using a "
+                "wildcard in which '*' is expanded to '(.*)' and bracketed components "
+                "'{ }' are interpreted as group tag names. Then, the passed value will "
+                "be set on all properties that fit the regex + group name combination. "
+                "If the third argument is 'regex' neither the '*' expansion, nor the "
+                "group tag expansion is performed and the first argument is used as an "
+                "ECMAScript style regular expression that matches against the fully "
+                "qualified IDs of properties. If the third arugment is 'single' no "
+                "substitutions are performed and exactly 0 or 1 properties are changed."
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
                 {},
-                "string, *",
-                "Sets all property(s) identified by the URI in the first argument to the "
-                "value passed in the second argument. The type of the second argument is "
-                "arbitrary, but it must agree with the type the denoted Property expects."
-                " If the first term (separated by '.') in the uri is bracketed with { }, "
-                " then this term is treated as a group tag name, and the function will "
-                "search through all property owners to find those that are tagged with "
-                "this group name, and set their property values accordingly."
+                "URI, value [, duration, easing]",
+                "Sets the property identified by the URI in the first argument. The "
+                "second argument can be any type, but it has to match the type that the "
+                "property expects. If the third is not present or is '0', the value "
+                "changes instantly, otherwise the change will take that many seconds and "
+                "the value is interpolated at each steap in between. The fourth "
+                "parameter is an optional easing function if a 'duration' has been "
+                "specified. If 'duration' is 0, this parameter value is ignored. "
+                "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
+                "This is the same as calling the setValue method and passing 'single' as "
+                "the fourth argument to setPropertyValue."
             },
             {
                 "getPropertyValue",

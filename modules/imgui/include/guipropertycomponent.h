@@ -48,10 +48,11 @@ class GuiPropertyComponent : public GuiComponent {
 public:
     using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
-    using UseTreeLayout = ghoul::Boolean;
+    BooleanType(UseTreeLayout);
 
 
-    GuiPropertyComponent(std::string name, UseTreeLayout useTree = UseTreeLayout::No);
+    GuiPropertyComponent(std::string identifier, std::string guiName = "",
+        UseTreeLayout useTree = UseTreeLayout::No);
 
     // This is the function that evaluates to the list of Propertyowners that this
     // component should render
@@ -66,7 +67,7 @@ protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    properties::Property::Visibility _visibility;
+    properties::Property::Visibility _visibility = properties::Property::Visibility::User;
 
     SourceFunction _function;
     /// This is set to \c true if all properties contained in this GUIPropertyComponent
@@ -76,6 +77,7 @@ protected:
 
     properties::BoolProperty _useTreeLayout;
     properties::StringListProperty _treeOrdering;
+    properties::BoolProperty _ignoreHiddenHint;
 };
 
 } // namespace openspace::gui

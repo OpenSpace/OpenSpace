@@ -57,7 +57,7 @@ void ScreenLog::log(LogLevel level, const string& category, const string& messag
         _entries.push_back({
             level,
             std::chrono::steady_clock::now(),
-            Log::getTimeString(),
+            Log::timeString(),
             category,
             message
         });

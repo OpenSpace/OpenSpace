@@ -1,0 +1,84 @@
+@import '../../../styles/all';
+
+$background: $ui-background-solid;
+$arrow-size: $popover-arrow-size;
+$popover-corner-radius: $arrow-size / 2;
+
+$padding-horizontal: 0.3rem;
+$padding-vertical: 0.5rem;
+$padding: $padding-horizontal $padding-vertical;
+
+.popover {
+  background: $background;
+  border-radius: $popover-corner-radius;
+  box-shadow: $box-shadow;
+  color: $text-color-focus;
+  max-width: 300px;
+
+  &.small {
+    max-width: 150px;
+  }
+
+  > :last-child {
+    padding-bottom: $popover-corner-radius;
+  }
+}
+
+.popover header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  padding: $padding;
+  text-transform: uppercase;
+}
+
+.popover p, .content {
+  padding: 0 $padding-horizontal;
+}
+
+.delimiter {
+  margin: ($base-padding / 3) 0;
+  border: 1px solid $ui-background-hover;
+}
+
+.row {
+  display: flex;
+
+  * + * {
+    margin-left: $popover-corner-radius;
+  }
+}
+
+.popover.arrow {
+  &:after {
+    border-color: transparent;
+    border-style: solid;
+    border-width: $arrow-size;
+    content: " ";
+    height: 0;
+    margin-left: -$arrow-size;
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+  }
+
+  &.bottom:after {
+    top: 100%;
+    left: 50%;
+    border-top-color: $background;
+  }
+
+  &.bottom.leftside:after {
+    left: $arrow-size * 2;
+  }
+
+  &.bottom.rightside:after {
+    left: auto;
+    right: $arrow-size * 2;
+  }
+}

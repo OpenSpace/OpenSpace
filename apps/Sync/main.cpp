@@ -52,8 +52,11 @@ int main(int argc, char** argv) {
         Task& task = *tasks[i].get();
         LINFOC(
             "Sync",
-            "Synchronizing scene " << (i + 1) << " out of " <<
-                tasks.size() << ": " << task.description()
+            fmt::format(
+                "Synchronizing scene {} out of {}: {}",
+                i + 1, tasks.size(),
+                task.description()
+            )
         );
         ProgressBar progressBar(100);
         task.perform([&progressBar](float progress) {

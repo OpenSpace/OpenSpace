@@ -39,7 +39,9 @@ LodModelSwitch::LodModelSwitch()
 
 void LodModelSwitch::initialize(RenderableGlobe * owner) {
  _owner = owner;
- std::string planetName = _owner->owner()->name();
+
+ //TODO: Rickard fix this!!!
+ std::string planetName = "Mars";
  _parent = OsEng.renderEngine().scene()->sceneGraphNode(planetName)->parent();
     _ellipsoidShrinkTerm = 10000.0;// _owner->interactionDepthBelowEllipsoid();
 }

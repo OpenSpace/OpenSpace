@@ -82,7 +82,7 @@ public:
     float noDataValueAsFloat() const;
 
 protected:
-    using ResetRawTileDataReader = ghoul::Boolean;
+    BooleanType(ResetRawTileDataReader);
 
     enum class ResetMode {
         ShouldResetAll,

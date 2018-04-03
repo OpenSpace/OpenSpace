@@ -29,8 +29,6 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
-#include <ghoul/logging/logmanager.h>
-
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";
@@ -201,7 +199,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     })
     , _debugPropertyOwner({ "Debug" })
 {
-    setName("RenderableGlobe");
+    setIdentifier("RenderableGlobe");
 
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
@@ -219,6 +217,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     double patchSegmentsd;
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = static_cast<int>(patchSegmentsd);
+
+    if (dictionary.hasValue<bool>("PerformShading")) {
+        _generalProperties.performShading = dictionary.value<bool>("PerformShading");
+    }
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;

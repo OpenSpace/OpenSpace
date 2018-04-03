@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
 #include <openspace/util/time.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ext/json/json.hpp>
 #include <fstream>
@@ -142,7 +143,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     std::ifstream ifs(pathToJsonFile);
 
     if (!ifs.is_open()) {
-        LERROR("FAILED TO OPEN FILE: " << pathToJsonFile);
+        LERROR(fmt::format("FAILED TO OPEN FILE: {}", pathToJsonFile));
         return false;
     }
 
@@ -254,7 +255,9 @@ void FieldlinesState::saveStateToOsfls(const std::string& absPath) {
 
     std::ofstream ofs(absPath + fileName, std::ofstream::binary | std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR("Failed to save state to binary file: " << absPath << fileName);
+        LERROR(fmt::format(
+            "Failed to save state to binary file: {}{}", absPath, fileName
+        ));
         return;
     }
 
@@ -326,10 +329,12 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const char* ext = ".json";
     std::ofstream ofs(absPath + ext, std::ofstream::trunc);
     if (!ofs.is_open()) {
-        LERROR("Failed to save state to json file at location: " << absPath << ext);
+        LERROR(fmt::format(
+            "Failed to save state to json file at location: {}{}", absPath, ext
+        ));
         return;
     }
-    LINFO("Saving fieldline state to: " << absPath << ext );
+    LINFO(fmt::format("Saving fieldline state to: {}{}", absPath, ext));
 
     json jColumns = { "x", "y", "z" };
     for (const std::string& s : _extraQuantityNames) {
@@ -340,13 +345,13 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 
     const std::string timeStr = Time(_triggerTime).ISO8601();
     const size_t nLines       = _lineStart.size();
-    const size_t nPoints      = _vertexPositions.size();
+    // const size_t nPoints      = _vertexPositions.size();
     const size_t nExtras      = _extraQuantities.size();
 
     size_t pointIndex = 0;
     for (size_t lineIndex = 0; lineIndex < nLines; ++lineIndex) {
         json jData = json::array();
-        for (size_t i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
+        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = {pos.x, pos.y, pos.z};
 
@@ -369,7 +374,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const int indentationSpaces = 2;
     ofs << std::setw(indentationSpaces) << jFile << std::endl;
 
-    LINFO("Saved fieldline state to: " << absPath << ext );
+    LINFO(fmt::format("Saved fieldline state to: {}{}", absPath, ext));
 }
 
 // Returns one of the extra quantity vectors, _extraQuantities[index].

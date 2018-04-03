@@ -59,7 +59,6 @@ namespace openspace {
 }
 
 void DrivePropertyOwner::goToSubsite(std::string drive) {
-	LERROR("DRIVE: " << drive);
 	globebrowsing::Geodetic2 tempGeo = (globebrowsing::Geodetic2{ _driveCoords.x, _driveCoords.y } * 180.0) / glm::pi<double>();
 	//OsEng.ref().interactionHandler().goToGeo(tempGeo.lat, tempGeo.lon);
 }

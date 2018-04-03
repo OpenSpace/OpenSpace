@@ -171,7 +171,7 @@ namespace openspace {
             absPath("${MODULE_ROVERTERRAINRENDERER}/shaders/fullsubsite_fs.glsl")
         );
         
-        std::string ownerName = owner()->name();
+        // std::string ownerName = owner()->name();
 
         _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
 
@@ -189,7 +189,7 @@ namespace openspace {
 
     void RoverTerrain::initialize() {
 
-        std::string ownerName = owner()->name();
+        // std::string ownerName = owner()->name();
 
         _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
 

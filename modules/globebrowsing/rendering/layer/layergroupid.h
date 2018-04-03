@@ -30,12 +30,20 @@
 namespace openspace::globebrowsing::layergroupid {
 
 static constexpr int NUM_LAYER_GROUPS = 5;
-static constexpr const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+static constexpr const char* LAYER_GROUP_IDENTIFIERS[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
     "Overlays",
     "NightLayers",
     "WaterMasks"
+};
+
+static constexpr const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+    "Height Layers",
+    "Color Layers",
+    "Overlays",
+    "Night Layers",
+    "Water Masks"
 };
 
 enum GroupID {

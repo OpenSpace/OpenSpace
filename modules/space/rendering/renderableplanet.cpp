@@ -51,6 +51,7 @@
 #include <math.h>
 
 namespace {
+    constexpr const char* KeyBody         = "Body";
     constexpr const char* KeyGeometry     = "Geometry";
     constexpr const char* KeyRadius       = "Radius";
     constexpr const char* _loggerCat      = "RenderablePlanet";
@@ -118,7 +119,15 @@ documentation::Documentation RenderablePlanet::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 "Specifies the radius of the planet. If this value is not specified, it "
-                "will try to query the SPICE library for radius values."
+                "will try to query the SPICE library for radius values using the body "
+                "key."
+            },
+            {
+                KeyBody,
+                new StringVerifier,
+                Optional::Yes,
+                "If that radius is not specified, this name is used to query the SPICE "
+                "library for the radius values."
             },
             {
                 ColorTextureInfo.identifier,
@@ -178,18 +187,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _shadowEnabled(false)
     , _time(0.f)
 {
-    ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "RenderablePlanet needs the name to be specified"
-    );
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "RenderablePlanet"
     );
-
-    const std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
 
     ghoul::Dictionary geomDict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
 
@@ -197,18 +199,31 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         // If the user specified a radius, we want to use this
         _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
     }
-    else if (SpiceManager::ref().hasValue(name, "RADII") ) {
+    else {
+        if (!dictionary.hasKey(KeyBody)) {
+            documentation::TestResult res;
+            res.success = false;
+            documentation::TestResult::Offense offense = {
+                fmt::format("{} or {}", KeyRadius, KeyBody),
+                documentation::TestResult::Offense::Reason::MissingKey
+            };
+            res.offenses.push_back(std::move(offense));
+            throw documentation::SpecificationError(
+                std::move(res),
+                std::move("RenderablePlanet")
+            );
+        }
+
+        const std::string body = dictionary.value<std::string>(KeyBody);
+
         // If the user didn't specfify a radius, but Spice has a radius, we can use this
         glm::dvec3 radius;
-        SpiceManager::ref().getValue(name, "RADII", radius);
+        SpiceManager::ref().getValue(body, "RADII", radius);
         radius *= 1000.0; // Spice gives radii in KM.
         std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
         geomDict.setValue(KeyRadius, radius);
 
         _planetRadius = static_cast<float>((radius.x + radius.y + radius.z) / 3.0);
-    }
-    else {
-        LERRORC("RenderablePlanet", "Missing radius specification");
     }
 
     _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);
@@ -278,11 +293,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
                 else {
-                    LWARNING(
-                        "No Radius value expecified for Shadow Source Name "
-                        << sourceName << " from " << name
-                        << " planet.\nDisabling shadows for this planet."
-                    );
+                    LWARNING(fmt::format(
+                        "No Radius value specified for Shadow Source Name '{}' from "
+                        "'{}' planet. Disabling shadows for this planet",
+                        sourceName,
+                        identifier()
+                    ));
                     disableShadows = true;
                     break;
                 }
@@ -306,9 +322,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         casterArray.emplace_back(casterName, casterRadius);
                     }
                     else {
-                        LWARNING("No Radius value expecified for Shadow Caster Name "
-                            << casterName << " from " << name
-                            << " planet.\nDisabling shadows for this planet.");
+                        LWARNING(fmt::format(
+                            "No Radius value expecified for Shadow Caster Name '{}' from "
+                            "'{}' planet. Disabling shadows for this planet.",
+                            casterName,
+                            identifier()
+                        ));
                         disableShadows = true;
                         break;
                     }
@@ -626,7 +645,7 @@ void RenderablePlanet::loadTexture() {
                 _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
             }
 
-            LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
+            LDEBUG(fmt::format("Loaded texture from '{}'", _colorTexturePath.value()));
             _texture->uploadTexture();
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than
@@ -644,9 +663,14 @@ void RenderablePlanet::loadTexture() {
                 absPath(_nightTexturePath)
             );
             if (_nightTexture) {
-                LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    _nightTexturePath.value()
+                ));
                 _nightTexture->uploadTexture();
-                _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                _nightTexture->setFilter(
+                    ghoul::opengl::Texture::FilterMode::LinearMipMap
+                );
                 //_nightTexture->setFilter(
                 //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
                 //);
@@ -661,7 +685,10 @@ void RenderablePlanet::loadTexture() {
                 absPath(_heightMapTexturePath)
             );
             if (_heightMapTexture) {
-                LDEBUG("Loaded texture from '" << _heightMapTexturePath << "'");
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    _heightMapTexturePath.value()
+                ));
                 _heightMapTexture->uploadTexture();
                 _heightMapTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
                 //_nightTexture->setFilter(

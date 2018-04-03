@@ -62,7 +62,18 @@ public:
 
     virtual std::string className() const override;
 
+    std::string jsonValue() const override;
+
     using TemplateProperty<T>::operator=;
+
+
+    void setInterpolationTarget(ghoul::any value) override;
+    void setLuaInterpolationTarget(lua_State* state) override;
+    void setStringInterpolationTarget(std::string value) override;
+    
+    void interpolateValue(float t,
+        ghoul::EasingFunc<float> easingFunc = nullptr) override;
+
 
 protected:
     static const std::string MinimumValueKey;
@@ -70,12 +81,22 @@ protected:
     static const std::string SteppingValueKey;
     static const std::string ExponentValueKey;
 
-    std::string generateAdditionalDescription() const override;
+    std::string generateAdditionalJsonDescription() const override;
+
+    /**
+     * convert a lua formatted value to a JSON formatted value
+     * @param luaValue
+     * @return a json formatted string representation of the given lua value
+     */
+    std::string luaToJson(std::string luaValue) const;
 
     T _minimumValue;
     T _maximumValue;
     T _stepping;
     float _exponent;
+
+    T _interpolationStart;
+    T _interpolationEnd;
 };
 
 } // namespace openspace::properties

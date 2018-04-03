@@ -49,10 +49,10 @@ namespace openspace {
 
 class LoadingScreen {
 public:
-    using ShowMessage = ghoul::Boolean;
-    using ShowNodeNames = ghoul::Boolean;
-    using ShowProgressbar = ghoul::Boolean;
-    using CatastrophicError = ghoul::Boolean;
+    BooleanType(ShowMessage);
+    BooleanType(ShowNodeNames);
+    BooleanType(ShowProgressbar);
+    BooleanType(CatastrophicError);
 
     LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeNames,
         ShowProgressbar showProgressbar);
@@ -84,7 +84,8 @@ public:
         Failed
     };
 
-    void updateItem(const std::string& itemName, ItemStatus newStatus, float progress);
+    void updateItem(const std::string& itemIdentifier, const std::string& itemName,
+        ItemStatus newStatus, float progress);
 
 private:
     bool _showMessage;
@@ -122,6 +123,7 @@ private:
     std::mutex _messageMutex;
 
     struct Item {
+        std::string identifier;
         std::string name;
         ItemStatus status;
         float progress;

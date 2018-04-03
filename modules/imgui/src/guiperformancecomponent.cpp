@@ -33,7 +33,7 @@
 
 #include <ghoul/misc/sharedmemory.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include <algorithm>
 #include <numeric>
@@ -80,7 +80,7 @@ namespace {
 namespace openspace::gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
-    : GuiComponent("PerformanceComponent")
+    : GuiComponent("PerformanceComponent", "Performance Component")
     , _sortingSelection(SortingSelectionInfo, -1, -1, 6)
     , _sceneGraphIsEnabled(SceneGraphEnabledInfo, false)
     , _functionsIsEnabled(FunctionsEnabledInfo, false)

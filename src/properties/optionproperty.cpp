@@ -60,9 +60,12 @@ void OptionProperty::addOption(int value, std::string desc) {
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
-            LWARNING("The value of option {" << o.value << " -> " << o.description <<
-                "} was already registered when trying to add option {" << option.value <<
-                " -> " << option.description << "}");
+            LWARNING(fmt::format(
+                "The value of option {{ {} -> {} }} was already registered when trying "
+                "to add option {{ {} -> {} }}",
+                o.value, o.description, option.value, option.description
+
+            ));
             return;
         }
     }
@@ -92,7 +95,7 @@ void OptionProperty::setValue(int value) {
     }
 
     // Otherwise, log an error
-    LERROR("Could not find an option for value '" << value << "' in OptionProperty");
+    LERROR(fmt::format("Could not find an option for value '{}'", value));
 }
 
 bool OptionProperty::hasOption() const {
@@ -121,18 +124,18 @@ std::string OptionProperty::getDescriptionByValue(int value) {
     }
 }
 
-std::string OptionProperty::generateAdditionalDescription() const {
+std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result;
-    result += OptionsKey + " = {";
+    std::string result =
+        "{ \"" + OptionsKey + "\": [";
     for (size_t i = 0; i < _options.size(); ++i) {
         const Option& o = _options[i];
-        result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+        result += "{\"" + std::to_string(o.value) + "\": \"" + o.description + "\"}";
         if (i != _options.size() - 1)
             result += ",";
     }
 
-    result += "}";
+    result += "] }";
     return result;
 }
 

@@ -1,0 +1,23 @@
+local assetHelper = asset.require('util/asset_helper')
+local shared = asset.require('../satellites_shared')
+
+local group = {
+    Title = "100 Brightest",
+    Url = "http://www.celestrak.com/NORAD/elements/visual.txt",
+    TrailColor = { 0.55, 0.25, 0.65 }
+}
+
+local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+
+
+local objectNames = {}
+
+asset.onInitialize(function ()
+    objectNames = shared.addSatelliteGroupObjects(group, tle, true)
+end)
+
+asset.onDeinitialize(function ()
+    for _, n in ipairs(objectNames) do
+        openspace.removeSceneGraphNode(n)
+    end
+end)

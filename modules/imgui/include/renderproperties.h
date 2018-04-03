@@ -29,14 +29,12 @@
 
 #include <string>
 
-namespace openspace::properties {
-    class Property;
-} // namespace openspace::properties
+namespace openspace::properties { class Property; }
 
 namespace openspace {
 
-using IsRegularProperty = ghoul::Boolean;
-using ShowToolTip = ghoul::Boolean;
+BooleanType(IsRegularProperty);
+BooleanType(ShowToolTip);
 
 void executeScript(const std::string& id, const std::string& value,
     IsRegularProperty isRegular = IsRegularProperty::Yes);

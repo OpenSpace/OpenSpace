@@ -23,13 +23,17 @@
 ****************************************************************************************/
 
 #include <modules/roverterrainrenderer/filehandler/roverpathfilereader.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
+#include <sstream>
 #include <gdal_priv.h>
 #include "ogrsf_frmts.h"
 #include "ogr_feature.h"
+
+
+namespace ghoul::filesystem { class File; }
 
 template<typename Out>
 static void split(const std::string &s, char delim, Out result) {
@@ -66,11 +70,8 @@ namespace openspace {
             throw ghoul::FileNotFoundError(roverLocationFilePath);
 
         GDALDataset *poDS;
-        
+
         poDS = (GDALDataset*)GDALOpenEx(roverLocationFilePath.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
-        if (poDS == NULL) {
-            LERROR("Could not open .shp file");
-        }
 
         OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
 
@@ -90,7 +91,7 @@ namespace openspace {
             std::string sol = poFeature->GetFieldAsString("sol");
             double lat = poFeature->GetFieldAsDouble("plcl");
             double lon = poFeature->GetFieldAsDouble("longitude");
-            
+
             // Saves all coordinates for rendering the path and only site coordinates for rendering sites.
             // GetFieldAsDouble resturns zero (0) if field is empty.
             if (lat != 0 && lon != 0) {
@@ -109,7 +110,7 @@ namespace openspace {
                 subsite->siteGeodetic = globebrowsing::Geodetic2{ siteLat, siteLon } / 180.0 * glm::pi<double>();
                 subsite->sol = sol;
 
-                // All features with the the frame is "Site" will have "Drive" that is -1. 
+                // All features with the the frame is "Site" will have "Drive" that is -1.
                 // The feature right after each site frame has the same coordinates as the site frame.
                 // E.g. feature 1: "Frame = SITE, Site = 6, Drive = -1, Lat = -4.7000, Lon = 137.4000"
                 //		feature 2: "Frame = ROVER, Site = 6, Drive = 0, Lat = -4.7000, Lon = 137.4000"
@@ -157,11 +158,12 @@ namespace openspace {
             pathToMeshFolderLevel3 = absPathToTModels + "level3/" + "site" + site + "/" + "drive" + drive;
 
             // If the folder exists it means there are models for this subsite, then check if that
-            // specific site/drive combination has already been added. If the models haven't already been 
+            // specific site/drive combination has already been added. If the models haven't already been
             // added, loop through the text file with file names and add those to the subsite.
             // Also store information about which levels are available for this specific subsite.
             std::string restPath = "/OBJ.obj";
-            bool level1Exist = FileSys.fileExists(pathToMeshFolderLevel1 + restPath);
+
+            bool level1Exist = FileSys.fileExists(pathToMeshFolderLevel2 + restPath);
             bool level2Exist = FileSys.fileExists(pathToMeshFolderLevel2 + restPath);
             bool level3Exist = FileSys.fileExists(pathToMeshFolderLevel3 + restPath);
 
@@ -260,9 +262,6 @@ namespace openspace {
                 counter++;
             }
         }
-        else {
-            LERROR("Could not open file: " << filename);
-        }
 
         return temp2;
 
@@ -317,8 +316,6 @@ namespace openspace {
             }
             myfile.close();
         }
-        else
-            LERROR("Could not open .txt file " << absoluteFilePath);
 
         std::shared_ptr<TextureInformation> textureInformation = std::make_shared<TextureInformation>();
         textureInformation->cameraInfoVector = cameraInfoVector;

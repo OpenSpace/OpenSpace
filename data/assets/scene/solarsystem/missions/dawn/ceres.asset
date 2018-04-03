@@ -12,8 +12,8 @@ local textures = asset.syncedResource({
 })
 
 local Ceres = {
-    Name = "Ceres",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "Ceres",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -50,7 +50,9 @@ local Ceres = {
             }
         }
     },
-    GuiPath = "/Solar System/Dwarf Planets/Ceres"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Ceres"
+    }
 }
 
 

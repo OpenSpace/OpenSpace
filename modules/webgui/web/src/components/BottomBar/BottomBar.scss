@@ -1,0 +1,11 @@
+@import "../../styles/all";
+
+.BottomBar {
+  display: flex;
+  height: $bottom-bar-height;
+  transition: $background-transition;
+
+  &:hover {
+    background: $ui-background;
+  }
+}

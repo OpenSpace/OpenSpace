@@ -25,17 +25,17 @@
 #include <modules/space/translation/tletranslation.h>
 
 #include <openspace/documentation/verifier.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
-
 #include <chrono>
 #include <fstream>
-#include <vector>
 #include <system_error>
+#include <vector>
 
 namespace {
-    const char* KeyFile = "File";
-    const char* KeyLineNum = "LineNum";
+    constexpr const char* KeyFile = "File";
+    constexpr const char* KeyLineNumber = "LineNumber";
 
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
@@ -248,7 +248,7 @@ documentation::Documentation TLETranslation::Documentation() {
                 "Specifies the filename of the Two-Line-Element file"
             },
             {
-                KeyLineNum,
+                KeyLineNumber,
                 new DoubleGreaterVerifier(0),
                 Optional::No,
                 "Specifies the line number within the file where the group of 3 TLE "
@@ -268,7 +268,7 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary)
     );
 
     std::string file = dictionary.value<std::string>(KeyFile);
-    int lineNum = static_cast<int>(dictionary.value<double>(KeyLineNum));
+    int lineNum = static_cast<int>(dictionary.value<double>(KeyLineNumber));
     readTLEFile(file, lineNum);
 }
 

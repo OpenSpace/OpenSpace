@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -80,7 +81,7 @@ documentation::Documentation DashboardItemDate::Documentation() {
 }
 
 DashboardItemDate::DashboardItemDate(ghoul::Dictionary dictionary)
-    : DashboardItem("Date")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {

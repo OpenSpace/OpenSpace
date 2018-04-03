@@ -13,13 +13,14 @@ asset.require('scene/solarsystem/missions/dawn/vesta')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+
 
 local DawnAsset = asset.require('scene/solarsystem/missions/dawn/dawn')
 
 asset.onInitialize(function ()
     openspace.time.setTime("2011 AUG 06 00:00:00")
 
-    openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
     openspace.markInterestingNodes({
@@ -37,7 +38,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = DawnAsset.Dawn.Name,
+        Focus = DawnAsset.Dawn.Identifier,
         Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
         Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
     })

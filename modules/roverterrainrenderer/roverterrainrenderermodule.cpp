@@ -46,8 +46,6 @@ namespace openspace {
     RoverTerrainRendererModule::RoverTerrainRendererModule() : OpenSpaceModule(Name) {}
 
     void RoverTerrainRendererModule::internalInitialize(const ghoul::Dictionary& configuration) {
-        LERROR("INITIALIZING");
-
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
         ghoul_assert(fRenderable, "No renderableFactory existed");
 

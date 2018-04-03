@@ -56,7 +56,7 @@ RenderableExplorationPath::RenderableExplorationPath()
 
 RenderableExplorationPath::~RenderableExplorationPath() {}
 void RenderableExplorationPath::initializeGL() {
-    
+
 }
 bool RenderableExplorationPath::initialize(globebrowsing::RenderableGlobe* globe, const std::vector<globebrowsing::Geodetic2> allCoordinates,
  const std::vector<globebrowsing::Geodetic2> coordinatesWithModels) {
@@ -90,7 +90,7 @@ bool RenderableExplorationPath::initialize(globebrowsing::RenderableGlobe* globe
     _globe = globe;
     _allGeodetics = allCoordinates;
     _geodeticsWithModel = coordinatesWithModels;
-       
+
     _stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
     _stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
 
@@ -176,8 +176,6 @@ void RenderableExplorationPath::render(const RenderData& data) {
   _pathShader->deactivate();
  //}
 
- //LERROR(_currentLevel);
-
  if(_currentLevel >= 2) {
   if (_currentLevel >= 2 && _fading2 < 1.f)
    _fading2 += 0.01f;
@@ -233,7 +231,7 @@ std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std:
   glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 
   double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
-  
+
   globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
   glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
   cartesianCoordinates.push_back(glm::dvec4(tempPos2, 1.0));

@@ -153,7 +153,8 @@ documentation::Documentation ProjectionComponent::Documentation() {
             {
                 keySequenceType,
                 new StringInListVerifier(
-                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid }
+                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
+                      sequenceTypeInstrumentTimes }
                 ),
                 Optional::Yes,
                 "This value determines which type of sequencer is used for generating "
@@ -246,7 +247,9 @@ ProjectionComponent::ProjectionComponent()
     _applyTextureSize.onChange([this]() { _textureSizeDirty = true; });
 }
 
-void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
+void ProjectionComponent::initialize(const std::string& identifier,
+                                     const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -289,9 +292,6 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
 
-    std::string name;
-    dictionary.getValue(SceneGraphNode::KeyName, name);
-
     std::vector<SequenceParser*> parsers;
 
     if (dictionary.hasKey(keySequenceDir)) {
@@ -323,7 +323,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             for (std::string& sequenceSource : sequenceSources) {
                 if (sequenceType == sequenceTypePlaybook) {
                     parsers.push_back(new HongKangParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         _projectorID,
                         translationDictionary,
@@ -331,14 +331,14 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 }
                 else if (sequenceType == sequenceTypeImage) {
                     parsers.push_back(new LabelParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary));
                 }
                 else if (sequenceType == sequenceTypeHybrid) {
                     //first read labels
                     parsers.push_back(new LabelParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary));
 
@@ -348,7 +348,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                         //then read playbook
                         _eventFile = absPath(_eventFile);
                         parsers.push_back(new HongKangParser(
-                            name,
+                            identifier,
                             _eventFile,
                             _projectorID,
                             translationDictionary,
@@ -360,7 +360,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 }
                 else if (sequenceType == sequenceTypeInstrumentTimes) {
                     parsers.push_back(new InstrumentTimesParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary)
                     );
@@ -482,7 +482,7 @@ void ProjectionComponent::imageProjectBegin() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     if (_textureSizeDirty) {
-        LDEBUG("Changing texture size to " << std::to_string(_textureSize));
+        LDEBUG(fmt::format("Changing texture size to {}", std::to_string(_textureSize)));
 
         // If the texture size has changed, we have to allocate new memory and copy
         // the image texture to the new target
@@ -513,10 +513,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Read Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Read Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glFramebufferTexture(
@@ -528,10 +529,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Draw Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Draw Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glBlitFramebuffer(
@@ -554,10 +556,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Read Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Read Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glFramebufferTexture(
@@ -569,10 +572,11 @@ void ProjectionComponent::imageProjectBegin() {
 
             status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
             if (!FramebufferObject::errorChecking(status).empty()) {
-                LERROR(
-                    "Draw Buffer (" << msg << "): " <<
+                LERROR(fmt::format(
+                    "Draw Buffer ({}): {}",
+                    msg,
                     FramebufferObject::errorChecking(status)
-                );
+                ));
             }
 
             glBlitFramebuffer(
@@ -985,9 +989,8 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
-    LINFO(
-        "Creating projection texture of size '" << size.x << ", " << size.y << "'"
-    );
+    LINFO(fmt::format("Creating projection texture of size '{}, {}'", size.x, size.y));
+
     using namespace ghoul::opengl;
     _projectionTexture = std::make_unique<Texture>(
         glm::uvec3(size, 1),
@@ -1033,9 +1036,7 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
 }
 
 bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
-    LINFO(
-        "Creating depth texture of size '" << size.x << ", " << size.y << "'"
-        );
+    LINFO(fmt::format("Creating depth texture of size '{}, {}'", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),

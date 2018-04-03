@@ -33,7 +33,7 @@
 #include <ghoul/misc/defer.h>
 #include <ghoul/filesystem/filesystem.h>
 
-#include <fmt/format.h>
+#include <ghoul/fmt.h>
 
 #include "assetloader_lua.inl"
 
@@ -254,8 +254,9 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     };
 
     if (!FileSys.fileExists(asset->assetFilePath())) {
-        LERROR("Could not load asset '" << asset->assetFilePath() <<
-               "': File does not exist.");
+        LERROR(fmt::format(
+            "Could not load asset '{}': File does not exist", asset->assetFilePath())
+        );
         lua_settop(*_luaState, top);
         return false;
     }
@@ -263,7 +264,9 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     try {
         ghoul::lua::runScriptFile(*_luaState, asset->assetFilePath());
     } catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR("Could not load asset '" << asset->assetFilePath() << "': " << e.message);
+        LERROR(fmt::format(
+            "Could not load asset '{}': {}", asset->assetFilePath(), e.message)
+        );
         lua_settop(*_luaState, top);
         return false;
     }
@@ -420,11 +423,11 @@ int AssetLoader::onInitializeDependencyLua(Asset* dependant, Asset* dependency) 
 
 int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::onDeinitializeDependency");
-    
+
     int referenceIndex = luaL_ref(*_luaState, LUA_REGISTRYINDEX);
     _onDependencyDeinitializationFunctionRefs[dependant][dependency]
         .push_back(referenceIndex);
-    
+
     lua_settop(*_luaState, 0);
     return 0;
 }

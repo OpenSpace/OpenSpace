@@ -1,0 +1,24 @@
+local assetHelper = asset.require('util/asset_helper')
+local shared = asset.require('../satellites_shared')
+
+local group = {
+    Title = "Other comm",
+    Url = "http://www.celestrak.com/NORAD/elements/other-comm.txt",
+    TrailColor = { 0.75, 0.75, 0.35 }
+}
+
+local tle = shared.downloadTLEFile(asset, group.Url, group.Title)
+
+
+local objectNames = {}
+
+asset.onInitialize(function ()
+    objectNames = shared.addSatelliteGroupObjects(group, tle, false)
+end)
+
+
+asset.onDeinitialize(function ()
+    for _, n in ipairs(objectNames) do
+        openspace.removeSceneGraphNode(n)
+    end
+end)
