@@ -35,6 +35,8 @@ layout(points) in;
 in vec3 vs_velocity[];
 in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
+in float vs_cameraDist[];
+in float vs_starDistFromOrigin[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out vec4 vs_position;
@@ -43,6 +45,8 @@ out vec2 ge_brightness;
 out vec4 ge_gPosition;               
 out vec2 texCoord;
 out float ge_observationDistance;
+out float ge_cameraDist;
+out float ge_starDistFromOrigin;
 
 uniform float viewScaling;
 uniform float closeUpBoostDist;
@@ -65,6 +69,8 @@ void main() {
 
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
+    ge_cameraDist = vs_cameraDist[0];
+    ge_starDistFromOrigin = vs_starDistFromOrigin[0];
 
     // Make closer stars look a bit bigger.
     float observedDistance = safeLength(vs_gPosition[0] / viewScaling);

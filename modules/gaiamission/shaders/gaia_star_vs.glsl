@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
+#include "floatoperations.glsl"
 
 // Keep in sync with renderablegaiastars.h:ColumnOption enum
 const int COLUMNOPTION_STATIC = 0;
@@ -38,6 +39,8 @@ in vec2 in_brightness;
 out vec3 vs_velocity;
 out vec2 vs_brightness;
 out vec4 vs_gPosition;
+out float vs_cameraDist;
+out float vs_starDistFromOrigin;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -57,6 +60,10 @@ void main() {
     } 
 
     vec4 viewPosition = view * model * modelPosition;
+    vec4 sunPosition = view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    vs_starDistFromOrigin = safeLength(modelPosition);
+    vs_cameraDist = safeLength(sunPosition);
 
     // Remove stars without position, but still wasn't nullArrays.
     // Has to be done in Geometry shader because Vertices cannot be discarded here.
