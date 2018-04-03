@@ -38,13 +38,14 @@ uniform float sharpness;
 uniform int colorOption;
 
 in vec4  vs_position;
-in vec3  ge_brightness;
-in vec3  ge_velocity;
+flat in vec3  ge_brightness;
+flat in vec3  ge_velocity;
 in vec2  texCoord;
-in float ge_speed;
-in float ge_observationDistance;
-in float gs_screenSpaceDepth;
-
+flat in float ge_speed;
+flat in float ge_observationDistance;
+flat in float gs_screenSpaceDepth;
+flat in int big;
+flat in double appB;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -72,15 +73,22 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a = pow(fullColor.a, sharpness);
+    //fullColor.a = pow(fullColor.a, sharpness);
+    float power =  float(abs(appB));
+    fullColor.a = pow(fullColor.a, power > 1.0 ? power : 1.0);
 
     //float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
     //fullColor.a *= clamp(d, 0.0, 1.0);
+    //fullColor.xyz = vec3(pow(fullColor.a, float(abs(appB))));
+    // DEBUGGING
+    if (big == 1) {
+        fullColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
 
     if (fullColor.a == 0) {
         discard;
     }
-    
+
     Fragment frag;
     frag.color     = fullColor;
     frag.depth     = gs_screenSpaceDepth;
