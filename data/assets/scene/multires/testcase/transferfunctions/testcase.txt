@@ -1,4 +1,4 @@
-width 16
+width 8
 lower 0.0
 upper 1.0
 

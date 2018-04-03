@@ -184,6 +184,8 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* ma
             _brickMap.insert(std::pair<unsigned int, unsigned int>(brickIndex, atlasData));
             _nStreamedBricks++;
             fillVolume(&sequenceBuffer[_nBrickVals*(brickIndex - firstBrickIndex)], mappedBuffer, atlasCoords);
+            const auto a = _nBrickVals * (brickIndex - firstBrickIndex);
+            LDEBUG( fmt::format( "Brick, loc, value ({}, {}, {})", brickIndex, a, *(&sequenceBuffer[a]) ) );
         }
     }
 
