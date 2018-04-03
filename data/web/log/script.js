@@ -1,5 +1,18 @@
+var sessionData = {};
+try {
+  sessionData = JSON.parse(decodeURIComponent(window.location.hash.slice(1)));
+} catch (e) {}
+
 var levels = ['trace', 'debug', 'info', 'warning', 'error', 'fatal'];
 var filterLevel = 0;
+
+function insert(newNode, parentNode) {
+  parentNode.insertBefore(newNode, null);
+}
+
+function insertBefore(newNode, referenceNode) {
+  referenceNode.parentNode.insertBefore(newNode, referenceNode);
+}
 
 function insertAfter(newNode, referenceNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
@@ -12,7 +25,9 @@ function remove(node) {
 function scrollToPosition(selector) {
   var element = document.querySelector(selector);
   if (element && element.scrollIntoView) {
-    element.scrollIntoView();
+    var rect = element.getBoundingClientRect();
+    // Header is 80 px, 40 px margin
+    window.scrollTo(window.scrollX, + window.scrollY + rect.top - 80 - 40);
   }
 }
 
@@ -80,49 +95,132 @@ function updateFilter() {
     }
   });
   if (nShown === 0) {
-    var select = document.getElementsByTagName('select')[0];
+    var header = document.getElementsByTagName('header')[0];
     var p = document.createElement("p");
     p.id = "no-messages";
     p.innerHTML = "There are no log messages with the level '" + levels[filterLevel] + "' or higher.";
-    insertAfter(p, select);
+    insertAfter(p, header);
     table.classList.add('hidden');
   }
 }
 
+var reloadHandle = 0;
+
+function scheduleReload() {
+  updateSessionData({
+    reload: true
+  });
+  reloadHandle = window.setTimeout(function () {
+    window.location.reload();
+  }, 5000);
+}
+
+function unscheduleReload() {
+  updateSessionData({
+    reload: false
+  });
+  window.clearTimeout(reloadHandle);
+}
+
+function updateSessionData(obj) {
+  var changed = false;
+  Object.keys(obj).forEach(function (k) {
+    if (sessionData != obj[k]) {
+      sessionData[k] = obj[k];
+      changed = true;
+    }
+    if (!sessionData[k]) {
+      delete sessionData[k];
+    }
+  });
+  if (changed) {
+    window.location.hash = '#' + JSON.stringify(sessionData);
+  }
+}
+
 window.onload = function () {
-  var header = document.getElementsByTagName('h1')[0];
-  header.innerHTML = "OpenSpace Log";
+  var header = document.createElement('header');
+
+  var headerTitle = document.createElement('h1');
+  headerTitle.innerHTML = "OpenSpace Log";
 
   var summary = document.createElement('p');
+  summary.id = 'summary';
   summary.innerHTML = getSummary();
 
-  var select = document.createElement('select');
-  select.id = 'filter-level-selector';
+  var selectFilter = document.createElement('select');
+  selectFilter.id = 'filter-level-selector';
 
-  var selectLabel = document.createElement('label');
-  selectLabel.for = 'filter-level-selector';
-  selectLabel.innerHTML = "Lowest log level to show: ";
+  var selectFilterGroup = document.createElement('div');
+  var selectFilterLabel = document.createElement('label');
+  selectFilterLabel.innerHTML = "Filter level";
 
   levels.forEach(function (level) {
     var option = document.createElement('option');
     option.value = level;
     option.innerHTML = level;
-    select.appendChild(option);
+    selectFilter.appendChild(option);
   });
 
-  insertAfter(summary, header);
-  insertAfter(selectLabel, summary);
-  insertAfter(select, selectLabel);
 
-  var preselectedIndex = levels.indexOf(window.location.hash.slice(1));
+  var autoReloadToggle = document.createElement('input');
+  autoReloadToggle.type = 'checkbox';
+
+  if (sessionData.reload) {
+    scheduleReload();
+    autoReloadToggle.checked = true;
+    if (sessionData.trackBottom) {
+      window.setTimeout(function () {
+        window.scrollTo(window.scrollX, document.body.scrollHeight);
+      }, 1);
+    }
+  }
+
+  autoReloadToggle.onchange = function () {
+    if (autoReloadToggle.checked) {
+      scheduleReload();
+    } else {
+      unscheduleReload();
+    }
+  };
+
+  var autoReloadLabel = document.createElement('label');
+  autoReloadLabel.innerHTML = "Auto-reload";
+
+  var autoReloadGroup = document.createElement('div');
+
+  insertBefore(header, document.getElementsByTagName('table')[0]);
+  insert(headerTitle, header);
+  insert(summary, header);
+
+  insert(selectFilterLabel, selectFilterGroup)
+  insert(selectFilter, selectFilterGroup);
+  insert(selectFilterGroup, header);
+
+  insert(autoReloadLabel, autoReloadGroup);
+  insert(autoReloadToggle, autoReloadGroup);
+  insert(autoReloadGroup, header)
+
+
+  var preselectedIndex = levels.indexOf(sessionData.filter || 'trace');
   if (preselectedIndex >= 0) {
-    filterLevel = select.selectedIndex = preselectedIndex;
+    filterLevel = selectFilter.selectedIndex = preselectedIndex;
     updateFilter();
   }
 
-  select.onchange = function (evt) {
-    filterLevel = select.selectedIndex;
+  selectFilter.onchange = function (evt) {
+    filterLevel = selectFilter.selectedIndex;
     updateFilter();
-    window.location.hash = '#' + select.options[select.selectedIndex].value;
+    updateSessionData({
+      filter: selectFilter.options[selectFilter.selectedIndex].value
+    });
   };
+
+  window.onscroll = function () {
+    var scroll = document.documentElement.scrollTop || document.body.scrollTop;
+    scroll += window.innerHeight;
+    updateSessionData({
+      trackBottom: scroll > document.body.scrollHeight - 10
+    });
+  }
 }

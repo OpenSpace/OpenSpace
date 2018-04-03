@@ -104,7 +104,7 @@ class TuioEar : public TUIO::TuioListener {
         void clearInput();
 
     private:
-        bool _tap;
+        bool _tap = false;
         TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
         std::mutex _mx;
 

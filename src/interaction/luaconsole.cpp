@@ -263,13 +263,13 @@ void LuaConsole::initialize() {
     _font = OsEng.fontManager().font(
         FontName,
         EntryFontSize,
-        ghoul::fontrendering::Font::Outline::No
+        ghoul::fontrendering::FontManager::Outline::No
     );
 
     _historyFont = OsEng.fontManager().font(
         FontName,
         HistoryFontSize,
-        ghoul::fontrendering::Font::Outline::No
+        ghoul::fontrendering::FontManager::Outline::No
     );
 
     OsEng.parallelPeer().connectionEvent()->subscribe(

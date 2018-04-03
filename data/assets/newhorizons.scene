@@ -13,6 +13,7 @@ asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -131,27 +132,32 @@ local Keybindings = {
 
 local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
 
-asset.onInitialize(function ()
-    openspace.time.setTime("2015-07-14T08:00:00.00")
-    sceneHelper.bindKeys(Keybindings)
-
-    openspace.setDefaultDashboard()
-    openspace.dashboard.addDashboardItem({
+assetHelper.registerDashboardItems(asset, {
+    {
         Type = "DashboardItemSpacing",
+        Identifier = "NewHorizonsSpacing",
+        GuiName = "New Horizons Spacing",
         Spacing = 25
-    })
-
-    openspace.dashboard.addDashboardItem({
+    },
+    {
         Type = "DashboardItemDistance",
+        Identifier = "NewHorizonsPlutoDistance",
+        GuiName = "New Horizons Pluto Distance",
         SourceType = "Node",
         SourceNodeName = "NewHorizons",
         DestinationType = "Node Surface",
         DestinationNodeName = "Pluto"
-    })
+    },
+    {
+        Type = "DashboardItemInstruments",
+        Identifier = "NewHorizonsInstruments",
+        GuiName = "NewHorizons Instruments",
+    }
+})
 
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemInstruments"
-    })
+asset.onInitialize(function ()
+    openspace.time.setTime("2015-07-14T08:00:00.00")
+    sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultGuiSorting()
 

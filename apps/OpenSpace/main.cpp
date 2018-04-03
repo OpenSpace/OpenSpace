@@ -655,7 +655,7 @@ int main_main(int argc, char** argv) {
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
 
-    using IsInitialized = ghoul::Boolean;
+    BooleanType(IsInitialized);
     auto cleanup = [&](IsInitialized isInitialized){
         if (isInitialized) {
             OsEng.deinitialize();

@@ -61,7 +61,6 @@
 #pragma warning (pop)
 #endif // WIN32
 
-
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 
@@ -141,6 +140,24 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+    static const openspace::properties::Property::PropertyInfo ZoomSensitivityInfo = {
+        "ZoomSensitivity",
+        "Sensitivity of exponential zooming in relation to distance from focus node",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ZoomSensitivityDistanceThresholdInfo = {
+        "ZoomSensitivityDistanceThreshold",
+        "Threshold of distance to target node for whether or not to use exponential zooming",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo ZoomBoundarySphereMultiplierInfo = {
+        "ZoomBoundarySphereMultiplier",
+        "Multiplies a node's boundary sphere by this in order to limit zoom & prevent surface collision",
+        "" // @TODO Missing documentation
+    };
+
     static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
@@ -150,6 +167,12 @@ namespace {
     static const openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
+        "" // @TODO Missing documentation
+    };
+
+    static const openspace::properties::Property::PropertyInfo PanModeInfo = {
+        "PanMode",
+        "Allow panning gesture",
         "" // @TODO Missing documentation
     };
 
@@ -202,9 +225,13 @@ TouchInteraction::TouchInteraction()
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
     , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
+    , _zoomSensitivity(ZoomSensitivityInfo, 1.025f, 1.0f, 1.1f)
+    , _zoomSensitivityDistanceThreshold(ZoomSensitivityDistanceThresholdInfo, 0.05, 0.01, 0.25)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
+    , _panEnabled(PanModeInfo, false)
     , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
     , _slerpTime(SlerpTimeInfo, 3.f, 0.f, 5.f)
     , _guiButton(
@@ -215,11 +242,20 @@ TouchInteraction::TouchInteraction()
     )
     , _friction(
         FrictionInfo,
-        glm::vec4(0.01f, 0.025f, 0.02f, 0.02f),
+        glm::vec4(0.025f, 0.025f, 0.02f, 0.02f),
         glm::vec4(0.f),
         glm::vec4(0.2f)
     )
-    , _pickingRadiusMinimum(PickingRadiusInfo, 0.1f, 0.f, 1.f)
+    , _pickingRadiusMinimum(
+        { "Picking Radius", "Minimum radius for picking in NDC coordinates", "" },
+        0.1f,
+        0.f,
+        1.f
+    )
+    , _ignoreGui(
+        { "Ignore GUI", "Disable GUI touch interaction", "" }, // @TODO Missing documentation
+        false
+    )
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
     // calculated with two vectors with known diff in length, then
@@ -234,6 +270,9 @@ TouchInteraction::TouchInteraction()
     , _doubleTap(false)
     , _lmSuccess(true)
     , _guiON(false)
+#ifdef TOUCH_DEBUG_PROPERTIES
+    , _debugProperties()
+#endif
     , _centroid(glm::dvec3(0.0))
 {
     addProperty(_touchActive);
@@ -247,13 +286,22 @@ TouchInteraction::TouchInteraction()
     addProperty(_rollAngleThreshold);
     addProperty(_orbitSpeedThreshold);
     addProperty(_spinSensitivity);
+    addProperty(_zoomSensitivity);
+    addProperty(_zoomSensitivityDistanceThreshold);
+    addProperty(_zoomBoundarySphereMultiplier);
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
+    addProperty(_panEnabled);
     addProperty(_interpretPan);
     addProperty(_slerpTime);
     addProperty(_guiButton);
     addProperty(_friction);
     addProperty(_pickingRadiusMinimum);
+    addProperty(_ignoreGui);
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+    addPropertySubOwner(_debugProperties);
+#endif
 
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -276,6 +324,9 @@ TouchInteraction::TouchInteraction()
 void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
                                             std::vector<Point>& lastProcessed)
 {
+#ifdef TOUCH_DEBUG_PROPERTIES
+    _debugProperties.nFingers = list.size();
+#endif
     if (_tap) { // check for doubletap
         if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
             _doubleTap = true;
@@ -286,12 +337,18 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
     if (!guiMode(list)) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+            _debugProperties.interactionMode = "Direct";
+#endif
             directControl(list);
         }
         if (_lmSuccess) {
             findSelectedNode(list);
         }
         if (!_directTouchMode) {
+#ifdef TOUCH_DEBUG_PROPERTIES
+            _debugProperties.interactionMode = "Velocities";
+#endif
             computeVelocities(list, lastProcessed);
         }
 
@@ -303,6 +360,9 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)
 bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
+    if (_ignoreGui) {
+        return false;
+    }
     WindowWrapper& wrapper = OsEng.windowWrapper();
     glm::ivec2 res = wrapper.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
@@ -340,7 +400,9 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     _vel.zoom = 0.0;
     _vel.roll = 0.0;
     _vel.pan = glm::dvec2(0.0, 0.0);
-
+#ifdef TOUCH_DEBUG_PROPERTIES
+    LINFO("DirectControl");
+#endif
     // Returns the screen point s(xi,par) dependent the transform M(par) and object
     // point xi
     auto distToMinimize = [](double* par, int x, void* fdata, LMstat* lmstat) {
@@ -519,11 +581,15 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
             list.end(),
             [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; }
         );
-        // normalized -1 to 1 coordinates on screen
-        screenPoints.push_back(
-            glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))
-        );
+        if (c != list.end()) {
+            screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
+        } else {
+            OsEng.moduleEngine().module<ImGUIModule>()->touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
+            resetAfterInput();
+            return;
+        }
     }
+
     FunctionData fData = {
         selectedPoints,
         screenPoints,
@@ -541,7 +607,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     _lmSuccess = levmarq(
         nDOF,
         par.data(),
-        nFingers,
+        screenPoints.size(),
         nullptr,
         distToMinimize,
         gradient,
@@ -555,7 +621,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         if (nDOF > 2) {
             _vel.zoom = par.at(2);
             _vel.roll = par.at(3);
-            if (nDOF > 4) {
+            if (_panEnabled && nDOF > 4) {
                 _vel.roll = 0.0;
                 _vel.pan = glm::dvec2(par.at(4), par.at(5));
             }
@@ -764,12 +830,20 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     double minDiff = 1000;
     long id = 0;
     for (const TuioCursor& c : list) {
-        TuioPoint itPoint = std::find_if(
+        auto it = std::find_if(
             lastProcessed.begin(),
             lastProcessed.end(),
-            [&c](const Point& p) { return p.first == c.getSessionID(); }
-        )->second;
+            [&c](const Point& p) {
+                return p.first == c.getSessionID();
+        });
+
+        if (it == lastProcessed.end()) {
+            continue;
+        }
+
+        TuioPoint itPoint = it->second;
         double diff = c.getX() - itPoint.getX() + c.getY() - itPoint.getY();
+
         if (!c.isMoving()) {
             diff = minDiff = 0.0;
             id = c.getSessionID();
@@ -817,6 +891,13 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         }
     );
 
+    double normalizedCentroidDistance = glm::distance(_centroid, lastCentroid) / list.size();
+#ifdef TOUCH_DEBUG_PROPERTIES
+    _debugProperties.normalizedCentroidDistance = normalizedCentroidDistance;
+    _debugProperties.rollOn = rollOn;
+    _debugProperties.minDiff = minDiff;
+#endif
+
     if (_doubleTap) {
         return PICK;
     }
@@ -828,17 +909,17 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
             std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
         );
         // if average distance between 3 fingers are constant we have panning
-        if (avgDistance < _interpretPan && list.size() == 3) {
+        if (_panEnabled && (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < _interpretPan && list.size() == 3)) {
             return PAN;
         }
+
         // we have roll if one finger is still, or the total roll angles around the
         // centroid is over _rollAngleThreshold (_centroidStillThreshold is used to void
         // misinterpretations)
         else if (std::abs(minDiff) < _inputStillThreshold ||
-                (std::abs(rollOn) < 100.0 &&
-                glm::distance(_centroid, lastCentroid) / list.size()
-                    < _centroidStillThreshold))
-        {
+	        (std::abs(rollOn) < 100.0 &&
+		normalizedCentroidDistance < _centroidStillThreshold)) {
+
             return ROLL;
         }
         else {
@@ -852,7 +933,25 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                                          const std::vector<Point>& lastProcessed)
 {
     TuioCursor cursor = list.at(0);
-    int action = interpretInteraction(list, lastProcessed);
+    const int action = interpretInteraction(list, lastProcessed);
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+    const std::map<int, std::string> interactionNames = {
+        {ROT, "Rotation"},
+        {PINCH, "Pinch"},
+        {PAN, "Pan"},
+        {ROLL, "Roll"},
+        {PICK, "Pick"}
+    };
+    _debugProperties.interpretedInteraction = interactionNames.at(action);
+
+    if (pinchConsecCt > 0 && action != PINCH) {
+        if( pinchConsecCt > 3 )
+            LINFO("PINCH_gesture_ended_with " << pinchConsecZoomFactor << " drag_distance_and " << pinchConsecCt << " counts.");
+        pinchConsecCt = 0;
+        pinchConsecZoomFactor = 0.0;
+    }
+#endif
 
     switch (action) {
         case ROT: { // add rotation velocity
@@ -887,9 +986,19 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 }
             ) / lastProcessed.size();
 
-            double zoomFactor = (distance - lastDistance) *
-                (glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) -
-                _focusNode->boundingSphere());
+            glm::dvec3 camPos = _camera->positionVec3();
+            glm::dvec3 centerPos = _focusNode->worldPosition();
+            glm::dvec3 currDistanceToFocusNode = camPos - centerPos;
+
+            double distanceFromFocusSurface = length(currDistanceToFocusNode) - _focusNode->boundingSphere();
+            double zoomFactor = (distance - lastDistance);
+#ifdef TOUCH_DEBUG_PROPERTIES
+            pinchConsecCt++;
+            pinchConsecZoomFactor += zoomFactor;
+#endif
+            if ((length(currDistanceToFocusNode) / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
+                zoomFactor *= pow(distanceFromFocusSurface, (float)_zoomSensitivity);
+            }
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
             break;
@@ -967,6 +1076,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                 _vel.zoom = _sensitivity.zoom *
                             std::max(_touchScreenSize.value() * 0.1, 1.0) *
                             _tapZoomFactor * dist;
+
             }
             break;
         }
@@ -1048,16 +1158,20 @@ void TouchInteraction::step(double dt) {
         }
         { // Zooming
             centerToBoundingSphere = -directionToCenter * boundingSphere;
-            dvec3 centerToCam = camPos - centerPos;
-            double distToSurface = length(centerToCam - centerToBoundingSphere);
-
-            if (length(_vel.zoom * dt) < distToSurface &&
-                length(centerToCam + directionToCenter*_vel.zoom * dt) >
-                    length(centerToBoundingSphere))
+            centerToCamera = camPos - centerPos;
+            double planetBoundaryRadius = length(centerToBoundingSphere);
+            planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
+            double distToSurface = length(centerToCamera - planetBoundaryRadius);
+            if (length(_vel.zoom*dt) < distToSurface &&
+                 length(centerToCamera + directionToCenter*_vel.zoom*dt)
+                 > planetBoundaryRadius)
             {
                 camPos += directionToCenter * _vel.zoom * dt;
             }
             else {
+#ifdef TOUCH_DEBUG_PROPERTIES
+                LINFO("Zero the zoom velocity close to surface.");
+#endif
                 _vel.zoom = 0.0;
             }
         }
@@ -1066,6 +1180,14 @@ void TouchInteraction::step(double dt) {
         // Update the camera state
         _camera->setPositionVec3(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+        //Show velocity status every N frames
+        /*if (++stepVelUpdate >= 60) {
+            stepVelUpdate = 0;
+            LINFO("DistToFocusNode " << length(centerToCamera) << " stepZoomVelUpdate " << _vel.zoom);
+        }*/
+#endif
 
         _tap = false;
         _doubleTap = false;
@@ -1127,7 +1249,7 @@ void TouchInteraction::decelerate(double dt) {
     // time slack over from last frame
     int times = static_cast<int>((dt + _timeSlack) / frequency);
     // Save the new time slack for the next frame
-    _timeSlack = fmod((dt + _timeSlack), frequency);
+    _timeSlack = fmod((dt + _timeSlack), frequency) * frequency;
 
     // Decelerate zoom velocity quicker if we're close enough to use direct-manipulation
     if (!_directTouchMode && _currentRadius > _nodeRadiusThreshold &&
@@ -1143,6 +1265,10 @@ void TouchInteraction::decelerate(double dt) {
 
 // Called if all fingers are off the screen
 void TouchInteraction::resetAfterInput() {
+#ifdef TOUCH_DEBUG_PROPERTIES
+    _debugProperties.nFingers = 0;
+    _debugProperties.interactionMode = "None";
+#endif
     if (_directTouchMode && _selected.size() > 0 && _lmSuccess) {
         double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
@@ -1190,12 +1316,13 @@ void TouchInteraction::resetToDefault() {
     _rollAngleThreshold.set(0.025f);
     _orbitSpeedThreshold.set(0.005f);
     _spinSensitivity.set(1.0f);
+    _zoomSensitivity.set(1.025f);
     _inputStillThreshold.set(0.0005f);
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
     _slerpTime.set(3.0f);
     _guiButton.set(glm::ivec2(32, 64));
-    _friction.set(glm::vec4(0.01, 0.025, 0.02, 0.02));
+    _friction.set(glm::vec4(0.025, 0.025, 0.02, 0.02));
 }
 
 void TouchInteraction::tap() {
@@ -1220,5 +1347,42 @@ void TouchInteraction::setCamera(Camera* camera) {
 void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
 }
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+TouchInteraction::DebugProperties::DebugProperties()
+    : properties::PropertyOwner({ "TouchDebugProperties" })
+    , interactionMode(
+        { "interactionMode", "Current interaction mode", "" },
+        "Unknown"
+    )
+    , nFingers(
+        {"nFingers", "Number of fingers", ""},
+        0, 0, 20
+    )
+    , interpretedInteraction(
+        { "interpretedInteraction", "Interpreted interaction", "" },
+        "Unknown"
+    )
+    , normalizedCentroidDistance(
+        { "normalizedCentroidDistance", "Normalized Centroid Distance", "" },
+        0.f, 0.f, 0.01f
+    )
+    , minDiff(
+        { "minDiff", "Movement of slowest moving finger", "" },
+        0.f, 0.f, 100.f
+    )
+    , rollOn(
+        { "rollOn", "Roll On", "" },
+        0.f, 0.f, 100.f
+    )
+{
+    addProperty(interactionMode);
+    addProperty(nFingers);
+    addProperty(interpretedInteraction);
+    addProperty(normalizedCentroidDistance);
+    addProperty(minDiff);
+    addProperty(rollOn);
+}
+#endif
 
 } // openspace namespace
