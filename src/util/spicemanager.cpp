@@ -767,10 +767,46 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     SpiceBoolean success = !(failed_c());
     reset_c();
     if (!success)
-        result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
+        result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime); //multiplicate with the right rotation matrix
+    
+    LDEBUG(
+        format(
+            "toFrame!!!!!!!!!!!!! '{}' and FROMFRAME {}",
+            toFrame,
+            fromFrame
+        )
+    );
 
-    return glm::transpose(result);
+    glm::dmat3 rotationMatrixX;
+
+    if (toFrame == "MSL_RA_SHOULDER_AZ" && fromFrame == "MSL_RA_SHOULDER_EL") {
+        rotationMatrixX = { 
+                1, 0, 0,
+                0, 0, -1,
+                0, 1, 0 
+        };
+
+        glm::dmat3 hej =  glm::transpose(rotationMatrixX) * glm::transpose(result);
+        LDEBUG(
+            format(
+                "innan!!!!!!!!!!!!! '{}' and efter {}",
+                result ,
+                hej
+            )
+        );
+        return (hej); //check if its the right multiplication!!!
+
+    }
+
+    else {
+        return glm::transpose(result);
+    }
+
+
 }
+
+
+
 
 glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     const std::string& toFrame, double ephemerisTimeFrom, double ephemerisTimeTo) const
@@ -792,6 +828,9 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         "at time '{}'",
         fromFrame, ephemerisTimeFrom, toFrame, ephemerisTimeTo
     ));
+
+
+
     return glm::transpose(result);
 }
 
@@ -932,6 +971,14 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 
     ckobj_c(path.c_str(), &ids);
     throwOnSpiceError("Error finding Ck Coverage");
+
+    LDEBUG(
+            format(
+                "Kernel PATH '{}'",
+                path
+            )
+       );
+
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
         SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);

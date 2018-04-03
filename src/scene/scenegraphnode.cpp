@@ -587,7 +587,7 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return rotationMatrix() * _parent->calculateWorldRotation();
+        return  rotationMatrix() * _parent->calculateWorldRotation();   //changed by kristin, rotationmatrix shall come first
     }
     else {
         return rotationMatrix();

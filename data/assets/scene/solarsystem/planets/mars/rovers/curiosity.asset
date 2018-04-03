@@ -35,9 +35,9 @@ local Curiosity = {
 --    Parent = "Root",
 --    Renderable = {
 --        Type = "RenderablePlane",
---        Size = 1, 
---        Billboard = false, 
---        Texture = testTexture 
+--        Size = 1,
+--        Billboard = false,
+--        Texture = testTexture
 --    }
 --}
 
@@ -58,7 +58,7 @@ local CuriosityRA = {
 local CuriosityMastCam = {
     Name = "CuriosityMastCam",
     Parent = Curiosity.Name,
-    GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
 
@@ -74,7 +74,7 @@ local Body = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_body.obj"
+          GeometryFile = models .. "/test_body_origo.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -82,380 +82,137 @@ local Body = {
 }
 
 
-local MastCam_Arm1 = {
-    Name = "mastcam_arm1",
-    Parent = CuriosityMastCam.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_AZ",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_MastCam_arm_1.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
+-- RA 
 
-local MastCam_Arm2 = {
-    Name = "mastcam_arm2",
-    Parent = CuriosityMastCam.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_EL",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_MastCam_arm_2.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local MastCam_NavCam = {
-    Name = "mastcam_navcam",
-    Parent = CuriosityMastCam.Name,
+local RA_Shoulder_AZ = {
+    Name = "RA_Shoulder_AZ",
+    Parent = transforms.RA_Shoulder_AZ_Location.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_MastCam_NavCam.obj"
+          --GeometryFile = models .. "/root_test_origo.obj"
+          --GeometryFile = models .. "/test_root_fitToRover.obj"
+          GeometryFile = models .. "/root_right_fitToRover.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local MastCam = {
-    Name = "mastcam",
-    Parent = CuriosityMastCam.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_HEAD",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_MastCam.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
 
 
--- front/back ?
-local HazCam = {
-    Name = "HazCam",
-    Parent = CuriosityModel.Name,
+-- EL
+local RA_Shoulder_EL = {
+    Name = "RA_Shoulder_EL",
+    Parent = transforms.RA_Shoulder_EL_Location.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_HazCam.obj"
+          --GeometryFile = models .. "/MSL_RA_arm_1.obj"
+          GeometryFile = models .. "/test_arm_1_origo_roverCoord.obj"
+          --GeometryFile = models .. "/test_arm_1_fitToRover.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
--- Antenna 
-local HGA = {
-    Name = "HGA",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_HGA.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local HGA_arm = {
-    Name = "HGA_arm",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_HGA_arm.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local MARDI = {
-    Name = "mardi",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_MARDI.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
 
 
-local OneMin = {
-    Name = "onemin",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_OneMin.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local OneMin_Cover = {
-    Name = "onemin_cover",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_OneMin_cover.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-
-local RA_root = {
-    Name = "ra_root",
-    Parent = transforms.RA_Orientation.Name, --CuriosityRA.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_root.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local RA_Arm1 = {
-    Name = "ra_arm1",
-    Parent = transforms.RA_SHOULDER_AZ_Orientation.Name, --RA_root.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_arm_1.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local RA_Arm2 = {
-    Name = "ra_arm2",
-    Parent = transforms.RA_SHOULDER_EL_Orientation.Name, --RA_Arm1.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_arm_2.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local RA_Arm3 = {
-    Name = "ra_arm3",
-    Parent = RA_Arm2.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_arm_3.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local RA = {
-    Name = "ra",
-    Parent = CuriosityRA.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local RA_MAHLI = {
-    Name = "ra_mahli",
-    Parent = CuriosityRA.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_MAHLI.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-local SAM = {
-    Name = "sam",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_SAM.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local SAM_cover1 = {
-    Name = "sam_cover1",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_SAM_cover_1.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local SAM_cover2 = {
-    Name = "sam_cover2",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_SAM_cover_2.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-local StaticParts = {
-    Name = "static_parts",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_static_parts.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-local Wheels_All = {
-    Name = "wheels_all",
-    Parent = CuriosityModel.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_wheels_ALL.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-
-assetHelper.registerSceneGraphNodesAndExport(asset, { 
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+   RA_Shoulder_AZ,
+   RA_Shoulder_EL,
     Curiosity,
-    -- TestPlane,
     CuriosityModel,
-    CuriosityMastCam,
-    CuriosityRA,
     Body,
-    HGA,
-    HGA_arm,
-    HazCam,
-    MARDI,
-    MastCam,
-    MastCam_Arm1,
-    MastCam_Arm2,
-    MastCam_NavCam,
-    OneMin,
-    OneMin_Cover,
-    RA,
-    RA_root,
-    RA_MAHLI,
-    RA_Arm1,
-    RA_Arm2,
-    RA_Arm3,
-    SAM,
-    SAM_cover1,
-    SAM_cover2,
-    StaticParts,
-    Wheels_All
+    --Wheels_All
 })
+
+
+
+
+
+--local SAM = {
+--    Name = "sam",
+--    Parent = CuriosityModel.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_SAM.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    Tag = {"planet_solarsystem", "planet_terrestrial"},
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
+--
+--local SAM_cover1 = {
+--    Name = "sam_cover1",
+--    Parent = CuriosityModel.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_SAM_cover_1.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    Tag = {"planet_solarsystem", "planet_terrestrial"},
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
+--
+--local SAM_cover2 = {
+--    Name = "sam_cover2",
+--    Parent = CuriosityModel.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_SAM_cover_2.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    Tag = {"planet_solarsystem", "planet_terrestrial"},
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
+--
+--local StaticParts = {
+--    Name = "static_parts",
+--    Parent = CuriosityModel.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_static_parts.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    Tag = {"planet_solarsystem", "planet_terrestrial"},
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
+--
+--
+--local Wheels_All = {
+--    Name = "wheels_all",
+--    Parent = CuriosityModel.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_wheels_ALL.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    Tag = {"planet_solarsystem", "planet_terrestrial"},
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
