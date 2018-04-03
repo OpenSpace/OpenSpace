@@ -44,6 +44,7 @@ OctreeManager::OctreeManager()
     , _numLeafNodes(0)
     , _numInnerNodes(0)
     , _biggestChunkIndexInUse(0)
+    , _rebuildVBO(false)
 {   }
 
 OctreeManager::~OctreeManager() {   }
@@ -58,8 +59,14 @@ void OctreeManager::initOctree() {
     _culler = std::make_unique<OctreeCuller>(
         globebrowsing::AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e2)) 
     );
-    _freeSpotsInVBO = std::stack<int>();
     _removedKeysInPrevCall = std::set<int>();
+
+    // Reset default values when rebuilding the Octree during runtime.
+    _numInnerNodes = 0;
+    _numLeafNodes = 0;
+    _totalDepth = 0;
+    _numNodesPerFile = 0;
+    _totalNodes = 0;
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
@@ -83,11 +90,17 @@ void OctreeManager::initOctree() {
 
 // Initialize a stack that keeps track of all free spot in VBO stream.
 void OctreeManager::initVBOIndexStack(int maxIndex) {
+    
+    // Clear stack if we've used it before.
+    _biggestChunkIndexInUse = 0;
+    _freeSpotsInVBO = std::stack<int>();
+
     // Build stack back-to-front.
-    for (int idx = maxIndex; idx >= 0; --idx) {
+    for (int idx = maxIndex - 1; idx >= 0; --idx) {
         _freeSpotsInVBO.push(idx);
     }
-    LINFO("StackSize: " + std::to_string(_freeSpotsInVBO.size()) );
+    _maxStackSize = static_cast<int>(_freeSpotsInVBO.size());
+    LINFO("StackSize: " + std::to_string(_maxStackSize) );
 }
 
 // Inserts star values in correct position in Octree.
@@ -119,26 +132,54 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(
     const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars) {
 
     auto renderData = std::unordered_map<int, std::vector<float>>();
-    
+
     // Reclaim indices from previous render call. 
-    for (auto removedKey =_removedKeysInPrevCall.rbegin(); 
+    for (auto removedKey = _removedKeysInPrevCall.rbegin();
         removedKey != _removedKeysInPrevCall.rend(); ++removedKey) {
 
         // Uses a reverse loop to try to decrease the biggest chunk.
         if (*removedKey == _biggestChunkIndexInUse - 1) {
             _biggestChunkIndexInUse = *removedKey;
-            //LINFO("Decreased size to: " + std::to_string(_biggestChunkIndexInUse));
+            LINFO("Decreased size to: " + std::to_string(_biggestChunkIndexInUse) +
+                " FreeSpotsInVBO: " + std::to_string(_freeSpotsInVBO.size()));
         }
         _freeSpotsInVBO.push(*removedKey);
     }
     // Clear cache of removed keys before next render call.
     _removedKeysInPrevCall.clear();
 
+    // Rebuild VBO from scratch if we're not using most of it but have a high max index.
+    if (_biggestChunkIndexInUse > _maxStackSize * 4 / 5 &&
+        _freeSpotsInVBO.size() > _maxStackSize * 5 / 6) {
+        LINFO("Rebuilding VBO! - Biggest Chunk: " + std::to_string(_biggestChunkIndexInUse) +
+            " 4/5: " + std::to_string(_maxStackSize * 4 / 5) +
+            " FreeSpotsInVBO: " + std::to_string(_freeSpotsInVBO.size()) +
+            " 5/6: " + std::to_string(_maxStackSize * 5 / 6));
+        initVBOIndexStack(_maxStackSize);
+        _rebuildVBO = true;
+    }
+
     for (size_t i = 0; i < 8; ++i) {
         auto tmpData = checkNodeIntersection(_root->Children[i], mvp, screenSize, deltaStars);
         // Observe that if there exists identical keys in renderData then those values in 
         // tmpData will be ignored! Thus we store the removed keys until next render call!
         renderData.insert(tmpData.begin(), tmpData.end());
+    }
+
+    if (_rebuildVBO) {
+        // We need to overwrite bigger indices that had data before!
+        auto idxToRemove = std::unordered_map<int, std::vector<float>>();
+        for (size_t idx : _removedKeysInPrevCall) {
+            idxToRemove[idx] = std::vector<float>();
+        }
+        _removedKeysInPrevCall.clear();
+
+        // This will only insert indices that doesn't already exist in map (i.e. > biggestIdx).
+        renderData.insert(idxToRemove.begin(), idxToRemove.end());
+        deltaStars = 0;
+        _rebuildVBO = false;
+        LINFO("After rebuild - Biggest Chunk: " + std::to_string(_biggestChunkIndexInUse) +
+            " _freeSpotsInVBO.size(): " + std::to_string(_freeSpotsInVBO.size()));
     }
 
     return renderData;
@@ -368,7 +409,11 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
         if (!lodData.empty()) {
             // Get correct insert index from stack if node didn't exist already. 
             // Otherwise we will overwrite the old data. Key merging is not a problem here. 
-            if (node->vboIndex == DEFAULT_INDEX) {
+            if (node->vboIndex == DEFAULT_INDEX || _rebuildVBO) {
+                if (node->vboIndex != DEFAULT_INDEX) {
+                    // If we're rebuilding VBO cache then store indices to overwrite later. 
+                    _removedKeysInPrevCall.insert(node->vboIndex);
+                }
                 node->vboIndex = _freeSpotsInVBO.top();
                 _freeSpotsInVBO.pop();
 
@@ -404,7 +449,11 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
     // Return node data if node is a leaf.
     else {
         // If node already is in cache then skip it, otherwise store it.
-        if (node->vboIndex == DEFAULT_INDEX) {
+        if (node->vboIndex == DEFAULT_INDEX || _rebuildVBO) {
+            if (node->vboIndex != DEFAULT_INDEX) {
+                // If we're rebuilding VBO cache then store indices to overwrite later. 
+                _removedKeysInPrevCall.insert(node->vboIndex);
+            }
             // Get correct insert index from stack.
             node->vboIndex = _freeSpotsInVBO.top();
             _freeSpotsInVBO.pop();
@@ -441,6 +490,9 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
     std::shared_ptr<OctreeNode> node, int& deltaStars, bool recursive) {
     
     auto keysToRemove = std::unordered_map<int, std::vector<float>>();
+
+    // If we're in rebuilding mode then there is no need to remove any nodes.
+    if(_rebuildVBO) return keysToRemove;
 
     // Check if this node was rendered == had a specified index.
     if (node->vboIndex != DEFAULT_INDEX) {

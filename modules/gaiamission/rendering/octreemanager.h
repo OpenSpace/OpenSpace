@@ -72,7 +72,7 @@ private:
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
     const size_t MAX_STARS_PER_NODE = 1000; 
     const int DEFAULT_INDEX = -1;
-    const float MIN_TOTAL_PIXELS_LOD = 250.0; // Will be multiplied by depth.
+    const float MIN_TOTAL_PIXELS_LOD = 200.0; // Will be multiplied by depth.
     const int FIRST_LOD_DEPTH = 3; // No layer beneath this will not store any LOD cache.
 
     size_t getChildIndex(float posX, float posY, float posZ,
@@ -101,6 +101,8 @@ private:
     size_t _numInnerNodes;
     size_t _biggestChunkIndexInUse;
     size_t _valuesPerStar;
+    int _maxStackSize;
+    bool _rebuildVBO;
 
 }; // class OctreeManager
 
