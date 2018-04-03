@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 
+#include <modules/roverterrainrenderer/filehandler/subsite.h>
+
 #include <array>
 #include <functional>
 #include <memory>
@@ -55,6 +57,8 @@ public:
     bool isRoot() const;
     bool isLeaf() const;
 
+    void addSites(const std::vector<std::shared_ptr<Subsite>> subSites);
+
     void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
     void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
     void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
@@ -62,6 +66,8 @@ public:
     const ChunkNode& find(const Geodetic2& location) const;
     const ChunkNode& getChild(Quad quad) const;
     const Chunk& getChunk() const;
+
+    const std::vector<std::shared_ptr<Subsite>> getSubsites() const;
 
     /**
      * Updates all children recursively. If this ChunkNode wants to split it will,
@@ -75,6 +81,8 @@ public:
 private:
     ChunkNode* _parent;
     std::array<std::unique_ptr<ChunkNode>, 4> _children;
+
+    std::vector<std::shared_ptr<Subsite>> _subsites;
 
     Chunk _chunk;
 };

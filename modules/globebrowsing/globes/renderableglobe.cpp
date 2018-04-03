@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     const char* keyFrame = "Frame";
@@ -38,6 +39,7 @@ namespace {
     const char* keyShadowGroup = "ShadowGroup";
     const char* keyShadowSource = "Source";
     const char* keyShadowCaster = "Caster";
+    const std::string _loggerCat = "RenderableGlobe";
 
     static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
@@ -188,20 +190,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         IntProperty(ModelSpaceRenderingInfo, 10, 1, 22)
     })
     , _generalProperties({
-        BoolProperty(PerformShadingInfo, true),
+        BoolProperty(PerformShadingInfo, false),
         BoolProperty(AtmosphereInfo, false),
         BoolProperty(AccurateNormalsInfo, false),
         BoolProperty(EclipseInfo, false),
         BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
-        FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
+        FloatProperty(CameraMinHeightInfo, -1000.f, -10000.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner({ "Debug" })
 {
     setName("RenderableGlobe");
-
-    dictionary.getValue(keyFrame, _frame);
 
     // Read the radii in to its own dictionary
     if (dictionary.hasKeyAndValue<glm::dvec3>(keyRadii)) {
@@ -353,6 +353,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             }
         }
     }
+}
+
+std::string RenderableGlobe::getName() {
+    return _name;
 }
 
 void RenderableGlobe::initializeGL() {

@@ -71,6 +71,11 @@ public:
     size_t size() const;
     size_t maximumCacheSize() const;
 
+    /**
+    * Return the whole list of.
+    */
+    std::list<std::pair<KeyType, ValueType>> list();
+
 private:
     void putWithoutCleaning(const KeyType& key, const ValueType& value);
     void clean();

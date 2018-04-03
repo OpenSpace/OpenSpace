@@ -24,8 +24,14 @@
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <algorithm>
 #include <vector>
+
+namespace {
+    std::string _loggerCat = "Ellipsoid";
+}
 
 namespace openspace::globebrowsing {
 
@@ -86,6 +92,39 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
 {
     glm::dvec3 normal = p * _cached._oneOverRadiiSquared;
     return glm::normalize(normal);
+}
+
+glm::dvec3 Ellipsoid::geodeticSurfaceNorthPoleTangent(glm::dvec3 positionWorldSpace) const {
+
+    //Plane eq: n * (x - x0)
+    glm::dvec3 orig = glm::dvec3(0.0, 0.0, 0.0);
+    glm::dvec3 dir = glm::dvec3(0.0, 0.0, 1.0);
+    glm::dvec3 ray = dir - orig;
+    glm::dvec3 planeOrig = positionWorldSpace;
+    Geodetic2 geodetic2 = cartesianToGeodetic2(positionWorldSpace);
+
+    glm::dvec3 planeNormal = geodeticSurfaceNormal(geodetic2);
+
+    float d = glm::dot(planeNormal, planeOrig);
+
+
+    // The plane is parallell to the rotation axis of the ellipsoid
+    if (glm::dot(planeNormal, ray) == 0.0) {
+        return glm::dvec3(0, 0, 1);
+    }
+
+    float x = (d - glm::dot(planeNormal, orig)) / glm::dot(planeNormal, ray);
+
+    glm::dvec3 contact = orig + glm::dvec3(ray.x * x, ray.y * x, ray.z * x);
+
+    glm::dvec3 northPoleDir = glm::normalize(contact - planeOrig);
+
+    // Since the position is below equator, the north vector is switched
+    if (geodetic2.lat < 0) {
+        return -northPoleDir;
+    }
+
+    return northPoleDir;
 }
 
 glm::dvec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const {

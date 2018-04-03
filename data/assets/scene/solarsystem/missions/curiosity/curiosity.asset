@@ -1,0 +1,18 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
+
+local dataPath = asset.localResource("data")
+
+local Curiosity = {
+    Name = "RoverSite",
+    Parent = transforms.MarsBarycenter.Name,
+    Renderable = {
+        Type = "RoverTerrain",
+        RoverLocationPath = dataPath .. "/path/rover_locations.shp",
+        ModelPath = dataPath .. "/models/",
+        TexturePath = dataPath .. "/textures/"
+    },
+    GuiPath = "/Solar System/Curiosity"
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Curiosity })

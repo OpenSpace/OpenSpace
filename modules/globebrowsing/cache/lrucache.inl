@@ -165,4 +165,12 @@ LRUCache<KeyType, ValueType, HasherType>::cleanAndFetchPopped()
     return toReturn;
 }
 
+template<typename KeyType, typename ValueType, typename HasherType>
+std::list<std::pair<KeyType, ValueType>>
+LRUCache<KeyType, ValueType, HasherType>::list() {
+    if (_itemList.size() > 0)
+        return _itemList;
+    return _itemList;
+}
+
 } // namespace openspace::globebrowsing::cache

@@ -128,6 +128,8 @@ public:
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
                                              const glm::dvec3& targetModelSpace) override;
 
+    std::string getName();
+
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
     // <code>ChunkedLodGlobe</code> does not have to be rendered at far distances.
@@ -149,6 +151,8 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
+
+    std::string _name;
 };
 
 } // namespace openspace::globebrowsing
