@@ -36,7 +36,7 @@ public:
     virtual ~BrickSelector();
     virtual bool initialize();
     virtual void selectBricks(int timestep,
-                      std::vector<int>& bricks);
+                      std::vector<int>& bricks) = 0;
     virtual void setMemoryBudget(int memoryBudget);
     virtual void setStreamingBudget(int streamingBudget);
     virtual int getTimeStepCount();

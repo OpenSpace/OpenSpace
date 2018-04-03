@@ -30,9 +30,6 @@
 #include <algorithm>
 #include <cassert>
 
-namespace {
-    const std::string _loggerCat = "BrickSelector";
-}
 
 namespace openspace {
 BrickSelector::BrickSelector() {}
@@ -58,41 +55,6 @@ int BrickSelector::getBrickCount() {
 
 float BrickSelector::getRank() {
     return -1.;
-}
-
-void BrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
-    int numTimeSteps = getTimeStepCount();
-    int numBricksPerDim = getBrickCount();
-
-    unsigned int rootNode = 0;
-    BrickSelection::SplitType splitType = BrickSelection::SplitType::None;
-    float rootSplitPoints = getRank();
-
-
-    BrickSelection brickSelection = BrickSelection(numBricksPerDim, numTimeSteps, splitType, rootSplitPoints);
-
-    std::vector<BrickSelection> priorityQueue;
-    std::vector<BrickSelection> leafSelections;
-    std::vector<BrickSelection> temporalSplitQueue;
-    std::vector<BrickSelection> deadEnds;
-
-    if (splitType != BrickSelection::SplitType::None) {
-        priorityQueue.push_back(brickSelection);
-    } else {
-        leafSelections.push_back(brickSelection);
-    }
-
-    int memoryBudget = _memoryBudget;
-    int totalStreamingBudget = _streamingBudget * numTimeSteps;
-    int nBricksInMemory = 1;
-    int nStreamedBricks = 1;
-
-    // First loop: While neither the memory nor the streaming budget is reached,
-    // try to optimize for visual quality vs memory.
-
-    while (nBricksInMemory <= memoryBudget - 7 && priorityQueue.size() > 0) {
-
-    }
 }
 
 } // namespace openspace

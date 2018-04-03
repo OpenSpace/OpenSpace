@@ -345,9 +345,11 @@ std::vector<float> TSP::calculateBrickAverages() {
 
     const uint64_t dim = paddedBrickDim_;
     const uint64_t numBrickVals = dim * dim * dim;
-
-    const float * voxelData = (float *)_memoryMap.data();
-    const uint64_t headerOffset = dataPosition() / sizeof(float);
+    
+    char * dataPtr = (char *)_memoryMap.data();
+    const float * voxelData = (float *)(dataPtr + sizeof(Header) / sizeof(char));
+    //const float * voxelData = (float *)_memoryMap.data();
+    //const uint64_t headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> averages(numTotalNodes_);
 
@@ -355,7 +357,8 @@ std::vector<float> TSP::calculateBrickAverages() {
     LDEBUG("Calculating spatial error, first pass");
     for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
         // Offset in file
-        const uint64_t brickStart = headerOffset + (brick * numBrickVals);
+        //const uint64_t brickStart = headerOffset + (brick * numBrickVals);
+        const uint64_t brickStart = (brick * numBrickVals);
         double average = 0.0;
 
         for (size_t i = 0; i < numBrickVals; i++) {
@@ -375,8 +378,10 @@ std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) 
     const uint64_t dim = paddedBrickDim_;
     const uint64_t numBrickVals = dim * dim * dim;
 
-    const float * voxelData = (float *)_memoryMap.data();
-    const uint64_t headerOffset = dataPosition() / sizeof(float);
+    char * dataPtr = (char *)_memoryMap.data();
+    const float * voxelData = (float *)(dataPtr + sizeof(Header)/sizeof(char));
+    //const float * voxelData = (float *)_memoryMap.data();
+    //const uint64_t headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> stdDevs(numTotalNodes_);
 
@@ -405,8 +410,8 @@ std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) 
         float stdDev = 0.f;
         for (auto lb = coveredLeafBricks.begin(); lb != coveredLeafBricks.end(); ++lb) {
             // Offset in file
-            const auto leafStart = headerOffset + static_cast<long long>((*lb)*numBrickVals);
-
+            //const auto leafStart = headerOffset + static_cast<long long>((*lb)*numBrickVals);
+            const auto leafStart = static_cast<long long>((*lb)*numBrickVals);
             for (size_t i = 0; i < numBrickVals; i++) {
                 stdDev += pow(voxelData[leafStart + i] - brickAvg, 2.f);
             }
@@ -481,8 +486,10 @@ bool TSP::calculateTemporalError() {
     const uint64_t dim = paddedBrickDim_;
     const uint64_t numBrickVals = dim * dim * dim;
 
-    const float * voxelData = (float *)_memoryMap.data();
-    const uint64_t headerOffset = dataPosition() / sizeof(float);
+    char * dataPtr = (char *)_memoryMap.data();
+    const float * voxelData = (float *)(dataPtr + sizeof(Header) / sizeof(char));
+    //const float * voxelData = (float *)_memoryMap.data();
+    //const uint64_t headerOffset = dataPosition() / sizeof(float);
 
     std::vector<float> averages(numTotalNodes_);
 
@@ -504,7 +511,8 @@ bool TSP::calculateTemporalError() {
         std::vector<float> voxelAverages(numBrickVals);
 
         // Read the whole brick to fill the averages
-        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
+        //const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
+        const auto brickStart = static_cast<long long>(brick*numBrickVals);
 
         // Build a list of the BST leaf bricks (within the same octree level) that
         // this brick covers
@@ -526,8 +534,8 @@ bool TSP::calculateTemporalError() {
             float stdDev = 0.f;
             for (auto leaf = coveredBricks.begin(); leaf != coveredBricks.end(); ++leaf) {
                 // Sample the leaves at the corresponding voxel position
-                const auto leafOffset = headerOffset + static_cast<long long>(*leaf*numBrickVals + voxel);
-
+                //const auto leafOffset = headerOffset + static_cast<long long>(*leaf*numBrickVals + voxel);
+                const auto leafOffset = static_cast<long long>(*leaf*numBrickVals + voxel);
                 const float sample = voxelData[leafOffset];
                 stdDev += pow(sample - voxelData[brickStart + voxel], 2.f);
             }

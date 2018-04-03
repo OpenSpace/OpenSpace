@@ -65,15 +65,13 @@ std::vector<float> ShenTSP::calculateBrickStdDevs(std::vector<float> brickAverag
         return {};
     }
 
-    boost::iostreams::mapped_file_source mfile;
-    mfile.open(_filename);
-
-    if (!mfile.is_open()) {
+    if (!openMemoryMap()) {
         return {};
     }
 
-    const float * voxelData = (float *)mfile.data();
-    const long long headerOffset = dataPosition() / sizeof(float);
+    char * dataPtr = (char *)_memoryMap.data();
+    const float * voxelData = (float *)(dataPtr + sizeof(Header) / sizeof(char));
+
     const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
     std::vector<float> stdDevs(numTotalNodes_);
 
@@ -97,7 +95,7 @@ std::vector<float> ShenTSP::calculateBrickStdDevs(std::vector<float> brickAverag
         const float brickAvg = brickAverages[brick];
 
         // Offset in file
-        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
+        const auto brickStart = static_cast<long long>(brick*numBrickVals);
         for (size_t i = 0; i < numBrickVals; i++) {
             stdDev += pow(voxelData[brickStart + i] - brickAvg, 2.f);
         }
@@ -109,7 +107,7 @@ stdDev = sqrt(stdDev);
 stdDevs[brick] = stdDev;
     }
 
-    mfile.close();
+    closeMemoryMap();
 
     return stdDevs;
 }
@@ -164,16 +162,12 @@ bool ShenTSP::calculateSpatialError() {
 }
 
 bool ShenTSP::calculateTemporalError() {
-
-    boost::iostreams::mapped_file_source mfile;
-    mfile.open(_filename);
-
-    if (!mfile.is_open()) {
+    if (!openMemoryMap()) {
         return false;
     }
 
-    const float * voxelData = (float *)mfile.data();
-    const long long headerOffset = dataPosition() / sizeof(float);
+    char * dataPtr = (char *)_memoryMap.data();
+    const float * voxelData = (float *)(dataPtr + sizeof(Header) / sizeof(char));
 
     LDEBUG("Calculating temporal error");
 
@@ -189,7 +183,7 @@ bool ShenTSP::calculateTemporalError() {
         // Save the individual voxel's average over timesteps. Because the
         // BSTs are built by averaging leaf nodes, we only need to sample
         // the brick at the correct coordinate.
-        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
+        const auto brickStart = static_cast<long long>(brick*numBrickVals);
 
         std::list<unsigned int> coveredBricks = CoveredBSTLeafBricks(brick);
 
@@ -208,7 +202,7 @@ bool ShenTSP::calculateTemporalError() {
             float stdDev = 0.f;
             for (auto leaf = coveredBricks.begin(); leaf != coveredBricks.end(); ++leaf) {
                 // Sample the leaves at the corresponding voxel position
-                const auto leafOffset = headerOffset + static_cast<long long>(*leaf*numBrickVals + voxel);
+                const auto leafOffset = static_cast<long long>(*leaf*numBrickVals + voxel);
 
                 const float sample = voxelData[leafOffset];
                 stdDev += pow(sample - voxelData[brickStart + voxel], 2.f);
@@ -225,7 +219,7 @@ bool ShenTSP::calculateTemporalError() {
 
     } // for all bricks
 
-    mfile.close();
+    closeMemoryMap();
 
     // Adjust errors using user-provided exponents
     float minNorm = 1e20f;
