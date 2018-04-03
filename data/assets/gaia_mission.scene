@@ -16,6 +16,7 @@ asset.request('scene/milkyway/gaia/gaiamission')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -29,19 +30,21 @@ local Keybindings = {
 
 local GaiaModelAsset = asset.require('scene/milkyway/gaia/gaiamodel')
 
-asset.onInitialize(function ()
-    openspace.time.setTime(openspace.time.currentWallTime())
-    sceneHelper.bindKeys(Keybindings)
-
-    openspace.setDefaultDashboard()
-
-    openspace.dashboard.addDashboardItem({
+assetHelper.registerDashboardItems(asset, {
+    {
         Type = "DashboardItemDistance",
+        Identifier = "GaiaModelEarthDistance",
+        GuiName = "GaiaModel Earth Distance",
         SourceType = "Node",
         SourceNodeName = "GaiaModel",
         DestinationType = "Node Surface",
         DestinationNodeName = "Earth"
-    })
+    }
+})
+
+asset.onInitialize(function ()
+    openspace.time.setTime(openspace.time.currentWallTime())
+    sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultGuiSorting()
 
