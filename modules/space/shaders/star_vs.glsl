@@ -34,6 +34,7 @@ in float in_speed;
 out vec3 vs_brightness;
 out vec3 vs_velocity;
 out float vs_speed;
+out vec4 vs_correctedPositionViewSpace;
 
 void main() {
     vs_brightness = in_brightness;
