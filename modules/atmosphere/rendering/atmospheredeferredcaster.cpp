@@ -258,6 +258,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform("eyeToModel",
                 glm::mat4(eyeToModel));
 
+            float viewScaling = renderData.camera.scaling();
+            program.setUniform("viewScaling", viewScaling);
+
             glm::mat4 invProjection =
                 glm::inverse(renderData.camera.projectionMatrix());
             program.setUniform("inverseProjection", invProjection);

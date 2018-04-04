@@ -77,6 +77,7 @@ uniform int cullAtmosphere;
 uniform float backgroundConstant;
 uniform bool firstPaint;
 uniform float atmExposure;
+uniform float viewScaling;
 
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
@@ -252,6 +253,9 @@ void dCalculateRayRenderableGlobe(in int mssaSample, out dRay ray) {
     dvec4 clipCoords = dvec4(interpolatedNDCPos.xy + samplePos, 0.0, 1.0);
     vec4 eyeSpaceCoords = inverseProjection * vec4(clipCoords);
     eyeSpaceCoords.w = 1.0;
+
+    // Scale the vector to avoid floating point inaccuracy.
+    eyeSpaceCoords.xyz *= viewScaling * 1000000.0;
 
     dvec4 objectCoords = eyeToModel * eyeSpaceCoords;
 
