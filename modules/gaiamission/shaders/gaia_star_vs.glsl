@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
+
 #include "floatoperations.glsl"
 
 // Keep in sync with renderablegaiastars.h:ColumnOption enum

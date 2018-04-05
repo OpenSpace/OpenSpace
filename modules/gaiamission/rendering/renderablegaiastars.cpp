@@ -790,7 +790,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             // Generate a new texture and attach it to our FBO. 
             glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA
+                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA32F,
+                GL_FLOAT
             );
             _fboTexture->uploadTexture();
             LDEBUG("Generating Framebuffer Texture!");
@@ -1036,7 +1037,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
         if ( glm::any(glm::notEqual(_fboTexture->dimensions(), glm::uvec3(screenSize, 1.0)))) {
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA
+                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA32F,
+                GL_FLOAT
                 );
             _fboTexture->uploadTexture();
             LDEBUG("Re-Generating Gaia Framebuffer Texture!");

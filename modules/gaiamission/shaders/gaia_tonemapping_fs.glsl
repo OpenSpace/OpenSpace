@@ -35,7 +35,11 @@ Fragment getFragment() {
     vec4 color = vec4(1.0);
     vec4 intensity = texture( renderedTexture, uv );
 
-    // TODO: Tonemap intensity to color!
+    // Tonemap intensity to color!
+    //color = vec4(intensity / (intensity + 1.0), 1.0f);
+    //color = vec4(0.985663 - 0.9862771 * exp(-4.761438*intensity), 1.0);
+    //intensity = 1.0 - 1.0 * exp(-9.0 * intensity);
+    //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0); // Check for any int.
     color = intensity;
 
 

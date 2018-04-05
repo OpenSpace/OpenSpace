@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
-//#include "fragment.glsl"
+
 #include "floatoperations.glsl"
 
 layout (location = 0) out vec4 outColor;
@@ -32,7 +32,8 @@ layout (location = 0) out vec4 outColor;
 const int COLUMNOPTION_STATIC = 0;
 const int COLUMNOPTION_MOTION = 1; 
 const int COLUMNOPTION_COLOR = 2;
-const float MIN_DIST = 3.08567758e18; // 100 Pc - When we should star to decrease alpha
+const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
+const float FLT_MAX  = 3.402823466e38; // Max float constant in GLSL
 
 in vec4 vs_position;
 in vec3 ge_velocity;
@@ -56,10 +57,6 @@ vec4 bv2rgb(float bv) {
 }
 
 void main() {
-//Fragment getFragment() {
-
-    //outColor = vec4(1.0);
-    //return;
 
     vec4 color = vec4(1.0);
 
@@ -79,37 +76,22 @@ void main() {
             luminosity = 0.001;
         }
 
-        // Luminosity decrease by squared distance.
-        float observedDistance = safeLength(ge_gPosition / viewScaling);
-        //luminosity /= pow(observedDistance, 2.0);
+        // Luminosity decrease by squared distance [measured in Pc].
+        float observedDistance = safeLength(ge_gPosition / viewScaling) / ONE_PARSEC;
+        luminosity /= pow(observedDistance, 2.0);
 
-        // TODO: Save color to FBO.
-        color *= luminosity * luminosityMultiplier;
+        color *= luminosity * pow(luminosityMultiplier, 2.0);
     }
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a = pow(fullColor.a, sharpness);
-    fullColor.a = clamp(fullColor.a, 0.0f, 1.0f);
 
-    // Decrease alpha in center when camera moves further away.
-    /*if (ge_cameraDist > MIN_DIST && ge_starDistFromOrigin < (ge_cameraDist / 5.0f)) {
-        float normDist = ((ge_cameraDist / 5.0f) - ge_starDistFromOrigin) / (ge_cameraDist * 3.0);
-        fullColor.a -= clamp(normDist, 0.0f, 1.0f);
-    }*/
+    //fullColor = vec4(color.rgb * textureColor.a / 255.0, 1.0);
 
     if (fullColor.a < 0.0001) {
         discard;
     }
 
     outColor = fullColor;
-
-    /*Fragment frag;
-    frag.color = fullColor;
-    frag.depth = safeLength(vs_position);
-    frag.gPosition = ge_gPosition;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-    frag.blend = BLEND_MODE_NORMAL;
-
-    return frag;*/
 }
