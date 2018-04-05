@@ -121,12 +121,18 @@ void main() {
     // Testing size:
     vec2 halfViewSize = vec2(screenSize.x, screenSize.y) / 2.0f;
     vec2 topRight = topRightVertex.xy/topRightVertex.w;
-    topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
     vec2 bottomLeft = bottomLeftVertex.xy/bottomLeftVertex.w;
-    bottomLeft = ((bottomLeft + vec2(1.0)) * halfViewSize) - vec2(0.5);
-
-    float height = abs(topRight.y - bottomLeft.y);
-    float width  = abs(topRight.x - bottomLeft.x);    
+    
+    // Complete algebra
+    // topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
+    // bottomLeft = ((bottomLeft + vec2(1.0)) * halfViewSize) - vec2(0.5);
+    //vec2 sizes = abs(topRight - bottomLeft);
+    
+    // Optimized version
+    vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
+    
+    float height = sizes.y;
+    float width  = sizes.x;
 
     big = 0;
 
@@ -146,41 +152,31 @@ void main() {
     //     height = abs(topRight.y - bottomLeft.y);
     //     width  = abs(topRight.x - bottomLeft.x);  
     // }
-    
 
-
-
-    // if ((height > billboardSize) ||
-    //     (width > billboardSize)) { 
+    if ((height > billboardSize) ||
+        (width > billboardSize)) { 
         
-    //     if (height > screenSize.y)
-    //         big = 1;
+        if (height > screenSize.y)
+            big = 1;
 
-    //     float correctionScale = height > billboardSize ? billboardSize / height :
-    //                                                      billboardSize / width;
-    //     correctionScale *= 0.5;
-    //     scaledRight *= correctionScale;
-    //     scaledUp    *= correctionScale;
-    //     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-    //                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    //     gs_screenSpaceDepth = bottomLeftVertex.w;
-    //     bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-    //     topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    //     topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-    //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-        
+        float correctionScale = height > billboardSize ? billboardSize / height :
+                                                         billboardSize / width;
+        //correctionScale *= 0.5;
+        scaledRight *= correctionScale;
+        scaledUp    *= correctionScale;
         bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
                                 dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
         gs_screenSpaceDepth = bottomLeftVertex.w;
-        bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
         topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-        topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));        
-    //} else {            
+                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))); 
+
+    
+        bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+                    dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+        
+        topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    } else {            
         // if (width < 2.0f * minBillboardSize) {
         //     float maxVar = 2.0f * minBillboardSize;
         //     float minVar = minBillboardSize;
@@ -195,7 +191,7 @@ void main() {
         
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    // } 
+    } 
 
     // Build primitive
     texCoord    = corners[3];

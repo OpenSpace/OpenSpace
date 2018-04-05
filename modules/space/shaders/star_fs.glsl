@@ -73,9 +73,11 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    //fullColor.a = pow(fullColor.a, sharpness);
-    float power =  float(abs(appB));
-    fullColor.a = pow(fullColor.a, power > 1.0 ? power : 1.0);
+    fullColor.a = pow(fullColor.a, sharpness);
+    //float power =  float(abs(appB));
+    //fullColor.a = pow(fullColor.a, power > 1.0 ? power : 1.0);
+
+    //fullColor.a = pow(fullColor.a, 1.0/power);
 
     //float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
     //fullColor.a *= clamp(d, 0.0, 1.0);
