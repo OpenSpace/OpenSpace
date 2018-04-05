@@ -22,8 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
+//#include "fragment.glsl"
 #include "floatoperations.glsl"
+
+layout (location = 0) out vec4 outColor;
 
 // Keep in sync with renderablegaiastars.h:ColumnOption enum
 const int COLUMNOPTION_STATIC = 0;
@@ -52,7 +55,11 @@ vec4 bv2rgb(float bv) {
     return texture(colorTexture, st);
 }
 
-Fragment getFragment() {
+void main() {
+//Fragment getFragment() {
+
+    //outColor = vec4(1.0);
+    //return;
 
     vec4 color = vec4(1.0);
 
@@ -65,7 +72,7 @@ Fragment getFragment() {
 
         // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
         // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
-        float luminosity = pow(10, 1.89 - 0.4 * absoluteMagnitude);
+        float luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
 
         // If luminosity is really really small then set it to a static low number.
         if (luminosity < 0.001) {
@@ -78,6 +85,8 @@ Fragment getFragment() {
 
         // TODO: Save color to FBO.
         color *= luminosity * luminosityMultiplier;
+        outColor = color;
+        return;
     }
 
     vec4 textureColor = texture(psfTexture, texCoord);
@@ -95,12 +104,14 @@ Fragment getFragment() {
         discard;
     }
 
-    Fragment frag;
+    outColor = fullColor;
+
+    /*Fragment frag;
     frag.color = fullColor;
     frag.depth = safeLength(vs_position);
     frag.gPosition = ge_gPosition;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
     frag.blend = BLEND_MODE_NORMAL;
 
-    return frag;
+    return frag;*/
 }

@@ -114,6 +114,10 @@ private:
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
         screenSize, psfTexture, time, colorTexture) _uniformCache;
 
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
+    UniformCache1(renderedTexture) _uniformCacheTM;
+    std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
+
     std::shared_ptr<OctreeManager> _octreeManager;
 
     std::vector<float> _fullData;
@@ -123,9 +127,11 @@ private:
     size_t _streamingBudget;
     size_t _chunkSize;
 
-
     GLuint _vao;
     GLuint _vbo;
+    GLuint _vaoQuad;
+    GLuint _vboQuad;
+    GLuint _fbo;
 };
 
 } // namespace openspace

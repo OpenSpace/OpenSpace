@@ -30,6 +30,7 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
@@ -310,10 +311,15 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _columnNamesList(ColumnNamesInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2539913)
     , _program(nullptr)
+    , _programTM(nullptr)
+    , _fboTexture(nullptr)
     , _nValuesPerStar(0)
     , _nValuesInSlice(0)
     , _vao(0)
     , _vbo(0)
+    , _vaoQuad(0)
+    , _vboQuad(0)
+    , _fbo(0)
 {
     using File = ghoul::filesystem::File;
 
@@ -481,19 +487,24 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 RenderableGaiaStars::~RenderableGaiaStars() {}
 
 bool RenderableGaiaStars::isReady() const {
-    return (_program != nullptr) && (_octreeManager != nullptr);
+    return (_program != nullptr) && (_programTM != nullptr) && (_octreeManager != nullptr);
 }
 
 void RenderableGaiaStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram("GaiaStar",
+    /*_program = renderEngine.buildRenderProgram("GaiaStar",
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
         //absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_vs.glsl"),
         //absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
         //absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
-        
+    );*/
+    _program = ghoul::opengl::ProgramObject::Build(
+        "GaiaStar",
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
     );
     //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     //_program->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -513,6 +524,12 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.time = _program->uniformLocation("time");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+
+    _programTM = renderEngine.buildRenderProgram("ToneMapping",
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_fs.glsl")
+    );
+    _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
     
     bool success = readFitsFile(ColumnOption(static_cast<int>(_columnOption)));
     if (!success) {
@@ -525,20 +542,38 @@ void RenderableGaiaStars::deinitializeGL() {
     _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
+    glDeleteBuffers(1, &_vboQuad);
+    _vboQuad = 0;
+    glDeleteVertexArrays(1, &_vaoQuad);
+    _vaoQuad = 0;
+    glDeleteFramebuffers(1, &_fbo);
+    _fbo = 0;
 
     _fitsFile = nullptr;
     _pointSpreadFunctionTexture = nullptr;
     _colorTexture = nullptr;
+    _fboTexture = nullptr;
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
     }
+    if (_programTM) {
+        renderEngine.removeRenderProgram(_programTM);
+        _programTM = nullptr;
+    }
 }
 
 void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     
+    // Saves current FBO and viewport.
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
     glm::mat4 model =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
@@ -565,6 +600,31 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        switch (error) {
+        case GL_INVALID_ENUM:
+            LINFO("0 - GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            LINFO("0 - GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_OPERATION:
+            LINFO("0 - GL_INVALID_OPERATION");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            LINFO("0 - GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_OUT_OF_MEMORY:
+            LINFO("0 - GL_OUT_OF_MEMORY");
+            break;
+        default:
+            LINFO("0 - Unknown error");
+            break;
+        }
+    }
+
+    /* // TODO: This chunk generates an GL_INVALID_OPERATION error.
     // Buffer re-specification / orphaning
     glMapBufferRange(
         GL_ARRAY_BUFFER,
@@ -588,9 +648,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         );
         std::copy(vectorData.begin(), vectorData.end(), mapped);
         glUnmapBuffer(GL_ARRAY_BUFFER);
-    }
+    }*/
 
-    /*
     // Use buffer orphaning to update a subset of total data.
     glBufferData(
         GL_ARRAY_BUFFER,
@@ -609,15 +668,40 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _chunkSize * sizeof(GLfloat),
             subData.data()
         );
-    }*/
+    }
 
     int nStars = static_cast<int>(_nRenderedStars) + deltaStars;
     _nRenderedStars.set(nStars);
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    error = glGetError();
+    if (error != GL_NO_ERROR) {
+        switch (error) {
+        case GL_INVALID_ENUM:
+            LINFO("1 - GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            LINFO("1 - GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_OPERATION:
+            LINFO("1 - GL_INVALID_OPERATION");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            LINFO("1 - GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_OUT_OF_MEMORY:
+            LINFO("1 - GL_OUT_OF_MEMORY");
+            break;
+        default:
+            LINFO("1 - Unknown error");
+            break;
+        }
+    }
     
     // Activate shader program and send uniforms.
+    //glDisable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(false);
     _program->activate();
@@ -649,8 +733,34 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _colorTexture->bind();
     _program->setUniform(_uniformCache.colorTexture, colorUnit);
 
+    error = glGetError();
+    if (error != GL_NO_ERROR) {
+        switch (error) {
+        case GL_INVALID_ENUM:
+            LINFO("2 - GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            LINFO("2 - GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_OPERATION:
+            LINFO("2 - GL_INVALID_OPERATION");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            LINFO("2 - GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_OUT_OF_MEMORY:
+            LINFO("2 - GL_OUT_OF_MEMORY");
+            break;
+        default:
+            LINFO("2 - Unknown error");
+            break;
+        }
+    }
 
-    // Draw call.
+    // Render to FBO.
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     //glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(_vao);
     glDrawArrays(GL_POINTS, 0, maxStarsToRender);
@@ -658,8 +768,86 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     //glDisable(GL_PROGRAM_POINT_SIZE);
     _program->deactivate();
 
+    //glDepthMask(true);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+
+    error = glGetError();
+    if (error != GL_NO_ERROR) {
+        switch (error) {
+        case GL_INVALID_ENUM:
+            LINFO("3 - GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            LINFO("3 - GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_OPERATION:
+            LINFO("3 - GL_INVALID_OPERATION");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            LINFO("3 - GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_OUT_OF_MEMORY:
+            LINFO("3 - GL_OUT_OF_MEMORY");
+            break;
+        default:
+            LINFO("3 - Unknown error");
+            break;
+        }
+    }
+
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //glDepthMask(false);
+
+    // Render to screen!
+    _programTM->activate();
+    
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    ghoul::opengl::TextureUnit fboTexUnit;
+    fboTexUnit.activate();
+    _fboTexture->bind();
+    _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
+
+    glBindVertexArray(_vaoQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
+    glBindVertexArray(0);
+
+    _programTM->deactivate();
+
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Restores default state
+    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    //glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    error = glGetError();
+    if (error != GL_NO_ERROR) {
+        switch (error) {
+        case GL_INVALID_ENUM:
+            LINFO("4 - GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            LINFO("4 - GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_OPERATION:
+            LINFO("4 - GL_INVALID_OPERATION");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            LINFO("4 - GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_OUT_OF_MEMORY:
+            LINFO("4 - GL_OUT_OF_MEMORY");
+            break;
+        default:
+            LINFO("4 - Unknown error");
+            break;
+        }
+    }
 }
 
 void RenderableGaiaStars::update(const UpdateData&) {
@@ -683,6 +871,27 @@ void RenderableGaiaStars::update(const UpdateData&) {
         if (_vbo == 0) {
             glGenBuffers(1, &_vbo);
             LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+        }
+        if (_vaoQuad == 0) {
+            glGenVertexArrays(1, &_vaoQuad);
+            LDEBUG(fmt::format("Generating Quad Vertex Array id '{}'", _vaoQuad));
+        }
+        if (_vboQuad == 0) {
+            glGenBuffers(1, &_vboQuad);
+            LDEBUG(fmt::format("Generating Quad Vertex Buffer Object id '{}'", _vboQuad));
+        }
+        if (_fbo == 0) {
+            glGenFramebuffers(1, &_fbo);
+            LDEBUG(fmt::format("Generating Framebuffer Object id '{}'", _fbo));
+        }
+        if (!_fboTexture) {
+            // Generate a new texture and attach it to our FBO. 
+            glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
+            _fboTexture = std::make_unique<ghoul::opengl::Texture>(
+                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA
+            );
+            _fboTexture->uploadTexture();
+            LDEBUG("Generating Framebuffer Texture!");
         }
         
         // Bind the VBO to our vertex array layout. 
@@ -785,6 +994,61 @@ void RenderableGaiaStars::update(const UpdateData&) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
+
+        // Bind VBO and VAO for Quad rendering.
+        glBindVertexArray(_vaoQuad);
+        glBindBuffer(GL_ARRAY_BUFFER, _vboQuad);
+
+        // Quad for fullscreen.
+        static const GLfloat vbo_quad_data[] = {
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+        };
+
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(vbo_quad_data),
+            vbo_quad_data,
+            GL_STATIC_DRAW
+        );
+
+        GLint tmPositionAttrib = _programTM->attributeLocation("in_position");
+        glEnableVertexAttribArray(tmPositionAttrib);
+        glVertexAttribPointer(
+            tmPositionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            0,
+            nullptr
+        );
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        // Bind render texture to FBO. 
+        // TODO: Should I have a depth buffer as well for Fragment depth in 2nd pass!?
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        glBindTexture(GL_TEXTURE_2D, *_fboTexture);
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            *_fboTexture,
+            0);
+        GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, textureBuffers);
+
+        // Check that our framebuffer is ok.
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Error when generating GaiaStar Framebuffer.");
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         _dataIsDirty = false;
     }
 
@@ -859,6 +1123,21 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.time = _program->uniformLocation("time");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
     }
+
+    if (_programTM->isDirty()) {
+        _programTM->rebuildFromFile();
+        _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
+    }
+
+    /*if (OsEng.windowWrapper().windowHasResized()) {
+        // Update FBO texture resolution. 
+        glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
+        _fboTexture = std::make_unique<ghoul::opengl::Texture>(
+            glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA
+            );
+        _fboTexture->uploadTexture();
+        LDEBUG("Re-Generating Gaia Framebuffer Texture!");
+    }*/
 }
 
 bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
