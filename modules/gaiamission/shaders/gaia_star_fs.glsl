@@ -85,14 +85,12 @@ void main() {
 
         // TODO: Save color to FBO.
         color *= luminosity * luminosityMultiplier;
-        outColor = color;
-        return;
     }
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
     fullColor.a = pow(fullColor.a, sharpness);
-    //fullColor.a = clamp(fullColor.a, 0.0f, 1.0f);
+    fullColor.a = clamp(fullColor.a, 0.0f, 1.0f);
 
     // Decrease alpha in center when camera moves further away.
     /*if (ge_cameraDist > MIN_DIST && ge_starDistFromOrigin < (ge_cameraDist / 5.0f)) {
@@ -100,7 +98,7 @@ void main() {
         fullColor.a -= clamp(normDist, 0.0f, 1.0f);
     }*/
 
-    if (fullColor.a == 0.0) {
+    if (fullColor.a < 0.0001) {
         discard;
     }
 
