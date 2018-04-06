@@ -33,107 +33,142 @@
 #include <ghoul/misc/assert.h>
 
 #include <fstream>
+#include <sstream>
+#include <algorithm>
+
+struct exoplanet {
+    float A;
+    double AUPPER;
+    double ALOWER;
+    double UA;
+    float BIGOM;
+    float BIGOMUPPER;
+    float BIGOMLOWER;
+    float UBIGOM;
+    float ECC;
+    float ECCUPPER;
+    float ECCLOWER;
+    float UECC;
+    float I;
+    float IUPPER;
+    float ILOWER;
+    float UI;
+    float KOI;
+    int MULT; // 0 and 1 are values(boolean), -1 indicates missing value
+    float OM;
+    float OMUPPER;
+    float OMLOWER;
+    float UOM;
+    double PER;
+    float PERUPPER; //skrivs med e ibland
+    float PERLOWER; //skrivs med e ibland
+    float UPER; //skrivs med e ibland
+    double R;
+    double RUPPER;
+    double RLOWER;
+    double UR;
+    float RSTAR;
+    float RSTARUPPER;
+    float RSTARLOWER;
+    float URSTAR;
+    float TEFF;
+    float TEFFUPPER;
+    float TEFFLOWER;
+    float UTEFF;
+    double TT;
+    float TTUPPER;
+    float TTLOWER;
+    float UTT;
+    float POSITIONX;
+    float POSITIONY;
+    float POSITIONZ;
+};
 
 namespace openspace {
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
-std::vector<float> readSpeckFile(std::string starname) {
-    std::ifstream file("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/stars.speck");
-	  if (!file.good()) {
-		    std::cout << "Failed to open Speck file";
-	  }
-
-	   int _nValuesPerStar = 0;
-
-  	// The beginning of the speck file has a header that either contains comments
-  	// (signaled by a preceding '#') or information about the structure of the file
-  	// (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-	   std::string line = "";
-	   while (true) {
-		 std::streampos position = file.tellg();
-		 std::getline(file, line);
-
-     if (line[0] == '#' || line.empty()) {
-       continue;
-		 }
-
-		if (line.substr(0, 7) != "datavar" &&
-			line.substr(0, 10) != "texturevar" &&
-			line.substr(0, 7) != "texture")
-		{
-			// we read a line that doesn't belong to the header, so we have to jump back
-			// before the beginning of the current line
-			file.seekg(position);
-			break;
-		}
-
-		if (line.substr(0, 7) == "datavar") {
-			// datavar lines are structured as follows:
-			// datavar # description
-			// where # is the index of the data variable; so if we repeatedly overwrite
-			// the 'nValues' variable with the latest index, we will end up with the total
-			// number of values (+3 since X Y Z are not counted in the Speck file index)
-			std::stringstream str(line);
-
-			std::string dummy;
-			str >> dummy;
-			str >> _nValuesPerStar;
-			_nValuesPerStar += 1; // We want the number, but the index is 0 based
-		}
-	}
-
-	_nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
-    std::vector<float> coords;
-
-	do {
-        std::vector<float> temp(_nValuesPerStar);
-
-		std::getline(file, line);
-		std::stringstream str(line);
-
-		for (int i = 0; i < _nValuesPerStar; ++i) {
-			str >> temp[i];
-		}
-
-		std::string next;
-		std::getline(str, next);
-		std::stringstream namestr(next);
-
-		std::string value;
-        std::vector<std::string> names;
-
-		while (namestr >> value) {
-			if (value == "#" || value == "|")
-				continue;
-			else {
-				names.push_back(value);
-			}
-		}
-
-		for (size_t i = 0; i < names.size(); ++i) {
-			if (names[i].compare(starname) == 0) {
-                for (int i = 0; i < 3; i++) {
-                    coords.push_back(temp[i]);
-                }
-                return coords;
-			}
-		}
-
-	} while (!file.eof());
-
-    return coords;
-}
-
 int addNode(lua_State* L) {
 
     const int StringLocation = -1;
-    const std::string starname = luaL_checkstring(L, StringLocation);
+    const std::string starname = luaL_checkstring(L, StringLocation); // has white spaces
 
-    std::vector<float> values = readSpeckFile(starname);
 
-    if (!values.empty())
+    std::ifstream data("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/data.bin", std::ios::in | std::ios::binary);
+    if (!data.good()) {
+        std::cout << "Failed to open exoplanets data file";
+    }
+
+    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lut.txt");
+    if (!lut.good()) {
+        std::cout << "Failed to open exoplanets look-up table file";
+    }
+
+    //1. search lut for the starname and return the corresponding location
+    //2. go to that location in the data file
+    //3. read sizeof(exoplanet) bytes into an exoplanet object.
+    std::string planetname;
+    size_t len = 0;
+    exoplanet p;
+    std::string line;
+    bool found = false;
+    while (getline(lut, line)) {
+
+        std::istringstream ss(line);
+        getline(ss, planetname, ',');
+
+        if (planetname.compare(0, starname.length(), starname) == 0) {
+            std::string location_s;
+            getline(ss, location_s);
+            long location = std::stol(location_s.c_str());
+
+            data.seekg(location);
+            data.read((char*)&p, sizeof(struct exoplanet));
+
+            found = true;
+        }
+    }
+    data.close();
+    lut.close();
+
+
+    if (found && !isnan(p.POSITIONX))
     {
+        
+        if (isnan(p.RSTAR))
+        {
+            p.RSTAR = 1.46046;
+        }
+        if (isnan(p.R))
+        {
+            p.R = 0.320116;
+        }
+        if (isnan(p.ECC))
+        {
+            p.ECC = 0.0585235;
+        }
+        if (isnan(p.A))
+        {
+            p.A = 0.435568;
+        }
+        if (isnan(p.I))
+        {
+            p.I = 86.6873;
+        }
+        if (isnan(p.BIGOM))
+        {
+            p.BIGOM = 44.705;
+        }
+        if (isnan(p.OM))
+        {
+            p.OM = 90;
+        }
+        if (isnan(p.PER))
+        {
+            p.PER = 358.802;
+        }
+
+
         double parsecinmeter = 3.08567758*10e16;
 
         const std::string luaTableParent = "{"
@@ -142,7 +177,7 @@ int addNode(lua_State* L) {
             "Transform = {"
                 "Translation = {"
                     "Type = 'StaticTranslation',"
-                    "Position = {" + std::to_string(values[0] * parsecinmeter) + ", " + std::to_string(values[1] * parsecinmeter) + ", " + std::to_string(values[2] * parsecinmeter) + "}"
+                    "Position = {" + std::to_string(p.POSITIONX * parsecinmeter) + ", " + std::to_string(p.POSITIONY * parsecinmeter) + ", " + std::to_string(p.POSITIONZ * parsecinmeter) + "}"
                 "}"
             "}"
         "}";
@@ -151,7 +186,7 @@ int addNode(lua_State* L) {
             "Parent = '" + starname + "',"
             "Renderable = {"
                 "Type = 'RenderablePlaneImageLocal',"
-                "Size = 0.68 * 6.95700*10e8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+                "Size = "+ std::to_string(p.RSTAR) +" * 6.95700*10e8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
                 "Billboard = true,"
                 "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/glare.png',"
                 "BlendMode = 'Additive'"
@@ -162,7 +197,7 @@ int addNode(lua_State* L) {
             "Parent = '" + starname + "',"
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
-                "Radii = 0.1*7.1492*10e7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
+                "Radii = "+ std::to_string(p.R) +" *7.1492*10e7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
                 "SegmentsPerPatch = 64,"
                 "Layers = {"
                     "ColorLayers = {"
@@ -177,14 +212,14 @@ int addNode(lua_State* L) {
             "Transform = {"
                 "Translation = {"
                     "Type = 'KeplerTranslation',"
-                     "Eccentricity = 0.05," //ECC
-                     "SemiMajorAxis = 0.177758 * 149597871," // 149 597 871km = 1 AU. A
-                     "Inclination = 88.91," //I
-                     "AscendingNode  = 35.5," //BIGOM
-                     "ArgumentOfPeriapsis  = 356.2," //OM
+                     "Eccentricity = "+ std::to_string(p.ECC) +"," //ECC
+                     "SemiMajorAxis = "+ std::to_string(p.A) +" * 149597871," // 149 597 871km = 1 AU. A
+                     "Inclination = "+ std::to_string(p.I) +"," //I
+                     "AscendingNode  = "+ std::to_string(p.BIGOM) +"," //BIGOM
+                     "ArgumentOfPeriapsis  = "+ std::to_string(p.OM) +"," //OM
                      "MeanAnomaly = 0.0,"
                      "Epoch = '2010 07 14 19:34:21.8'," //TT. JD to YYYY MM DD hh:mm:ss
-                     "Period = 32.03 * 86400" //PER. 86 400sec = 1 day. 
+                     "Period = "+ std::to_string(p.PER) +" * 86400" //PER. 86 400sec = 1 day.
                  "}"
             "},"
         "}";
@@ -194,12 +229,13 @@ int addNode(lua_State* L) {
             scriptParent,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
+
     }
     else
     {
         printf("No star with that name.");
     }
-
+    
     return 0;
 }
 
