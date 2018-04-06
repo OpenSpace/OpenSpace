@@ -35,13 +35,9 @@ const int COLUMNOPTION_COLOR = 2;
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float FLT_MAX  = 3.402823466e38; // Max float constant in GLSL
 
-in vec4 vs_position;
-in vec3 ge_velocity;
 in vec2 ge_brightness;
 in vec4 ge_gPosition;
 in vec2 texCoord;
-in float ge_cameraDist;
-in float ge_starDistFromOrigin;
 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;

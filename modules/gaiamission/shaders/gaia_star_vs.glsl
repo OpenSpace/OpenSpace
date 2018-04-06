@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "floatoperations.glsl"
-
 // Keep in sync with renderablegaiastars.h:ColumnOption enum
 const int COLUMNOPTION_STATIC = 0;
 const int COLUMNOPTION_MOTION = 1; 
@@ -37,11 +35,8 @@ in vec3 in_position;
 in vec3 in_velocity;
 in vec2 in_brightness;
 
-out vec3 vs_velocity;
 out vec2 vs_brightness;
 out vec4 vs_gPosition;
-out float vs_cameraDist;
-out float vs_starDistFromOrigin;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -50,7 +45,6 @@ uniform float time;
 uniform int columnOption;
 
 void main() {
-    vs_velocity = in_velocity;
     vs_brightness = in_brightness;
     
     // Convert kiloParsec to meter.
@@ -61,12 +55,8 @@ void main() {
     } 
 
     vec4 viewPosition = view * model * modelPosition;
-    vec4 sunPosition = view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-    vs_starDistFromOrigin = safeLength(modelPosition);
-    vs_cameraDist = safeLength(sunPosition);
-
-    // Remove stars without position, but still wasn't nullArrays.
+    // Remove stars without position, happens when VBO chunk is stuffed with zeros.
     // Has to be done in Geometry shader because Vertices cannot be discarded here.
     if ( length(in_position) > EPS ){
         vs_gPosition = viewPosition;    

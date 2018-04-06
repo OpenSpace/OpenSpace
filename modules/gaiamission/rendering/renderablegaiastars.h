@@ -115,7 +115,7 @@ private:
         screenSize, psfTexture, time, colorTexture) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
-    UniformCache1(renderedTexture) _uniformCacheTM;
+    UniformCache(renderedTexture, screenSize) _uniformCacheTM;
     std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
 
     std::shared_ptr<OctreeManager> _octreeManager;

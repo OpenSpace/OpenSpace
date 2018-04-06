@@ -26,24 +26,40 @@
 
 #include "floatoperations.glsl"
 
-layout(points) in;
-layout(points, max_vertices = 1) out;
-
-out vec4 vs_position;
-
 const float EPS = 1e-5;
+
+layout(points) in;
+in vec2 vs_brightness[];
+in vec4 vs_gPosition[];
+
+layout(points, max_vertices = 1) out;
+out vec2 ge_brightness;
+out vec4 ge_gPosition;
+
+uniform float viewScaling;
+uniform float cutOffThreshold;
 
 void main() {
 
-    vs_position = gl_in[0].gl_Position;
+    ge_brightness = vs_brightness[0];
 
-    if( length(vs_position) < EPS ) {
+    float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
+    float distThreshold = cutOffThreshold - log(observedDistance) / log(4.0);
+
+    vec4 position = gl_in[0].gl_Position;
+
+    // Discard geometry if star has no position (but wasn't a nullArray).
+    // Or if observed distance is above threshold set by cutOffThreshold.
+    // By discarding in gs instead of fs we save computations for when nothing is visible.
+    if( length(position) < EPS || distThreshold <= 0){
         return;
     }
-    
+
     gl_PointSize = 1.0;
-    gl_Position = vs_position;
+    gl_Position = position;
     gl_Position.z = 0.0;
+    ge_gPosition  = vs_gPosition[0];
+
     EmitVertex();
 
     EndPrimitive();

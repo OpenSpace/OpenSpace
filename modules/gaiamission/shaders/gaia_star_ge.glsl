@@ -30,23 +30,16 @@
 const int COLUMNOPTION_STATIC = 0;
 const int COLUMNOPTION_MOTION = 1; 
 const int COLUMNOPTION_COLOR = 2;
+const float EPS = 1e-5;
 
 layout(points) in;
-in vec3 vs_velocity[];
 in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
-in float vs_cameraDist[];
-in float vs_starDistFromOrigin[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec4 vs_position;
-out vec3 ge_velocity;
 out vec2 ge_brightness;
 out vec4 ge_gPosition;               
 out vec2 texCoord;
-out float ge_observationDistance;
-out float ge_cameraDist;
-out float ge_starDistFromOrigin;
 
 uniform float viewScaling;
 uniform float closeUpBoostDist;
@@ -63,14 +56,10 @@ const vec2 corners[4] = vec2[4](
     vec2(1.0, 0.0) 
 );
 
-const float EPS = 1e-5;
 
 void main() {
 
     ge_brightness = vs_brightness[0];
-    ge_velocity = vs_velocity[0];
-    ge_cameraDist = vs_cameraDist[0];
-    ge_starDistFromOrigin = vs_starDistFromOrigin[0];
 
     // Make closer stars look a bit bigger.
     float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
@@ -90,26 +79,23 @@ void main() {
         initStarSize += normalizedMagnitude * (magnitudeBoost / 100);
     }
 
-    vs_position = gl_in[0].gl_Position;
-    vec2 starSize = vec2(initStarSize + closeUpBoost) / screenSize * vs_position.w;
+    vec4 position = gl_in[0].gl_Position;
+    vec2 starSize = vec2(initStarSize + closeUpBoost) / screenSize * position.w;
 
     float distThreshold = cutOffThreshold - log(observedDistance) / log(4.0);
 
     // Discard geometry if star has no position (but wasn't a nullArray).
-    // Or if observed distance is above threshold set by magnitudeExponent.
-    // By discarding in gs instead of in fs we save computations for when nothing is visible.
-    if( length(vs_position) < EPS || distThreshold <= 0){
+    // Or if observed distance is above threshold set by cutOffThreshold.
+    // By discarding in gs instead of fs we save computations for when nothing is visible.
+    if( length(position) < EPS || distThreshold <= 0){
         return;
     }
 
     for (int i = 0; i < 4; i++) {
-        gl_Position = vs_position + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
+        gl_Position = position + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
         gl_Position.z = 0.0;
         texCoord = corners[i];
-
-        // G-Buffer
         ge_gPosition  = vs_gPosition[0];
-        ge_observationDistance = observedDistance;
         
         EmitVertex();
     }

@@ -300,7 +300,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _luminosityMultiplier(LuminosityMultiplierInfo, 100.f, 1.f, 1000.f)
+    , _luminosityMultiplier(LuminosityMultiplierInfo, 100.f, 1.f, 100000.f)
     , _magnitudeBoost(MagnitudeBoostInfo, 25.f, 0.f, 100.f)
     , _cutOffThreshold(CutOffThresholdInfo, 38.f, 0.f, 50.f)
     , _sharpness(SharpnessInfo, 1.45f, 0.f, 5.f)
@@ -494,9 +494,9 @@ void RenderableGaiaStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = ghoul::opengl::ProgramObject::Build(
         "GaiaStar",
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_vs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_fs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_star_ge.glsl")
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_vs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
     );
     //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     //_program->setIgnoreUniformLocationError(IgnoreError::Yes);
@@ -522,6 +522,7 @@ void RenderableGaiaStars::initializeGL() {
         absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_fs.glsl")
     );
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
+    _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
     
     bool success = readFitsFile(ColumnOption(static_cast<int>(_columnOption)));
     if (!success) {
@@ -717,6 +718,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     fboTexUnit.activate();
     _fboTexture->bind();
     _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
+    _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
 
     glBindVertexArray(_vaoQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
@@ -1030,6 +1032,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_programTM->isDirty()) {
         _programTM->rebuildFromFile();
         _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
+        _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
     }
 
     if (OsEng.windowWrapper().windowHasResized()) {

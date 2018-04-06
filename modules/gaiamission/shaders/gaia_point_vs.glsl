@@ -24,22 +24,45 @@
 
 #version __CONTEXT__
 
+// Keep in sync with renderablegaiastars.h:ColumnOption enum
+const int COLUMNOPTION_STATIC = 0;
+const int COLUMNOPTION_MOTION = 1; 
+const int COLUMNOPTION_COLOR = 2;
+const float EPS = 1e-5;
+const float Parsec = 3.0856776e16;
+
 in vec3 in_position;
+in vec3 in_velocity;
+in vec2 in_brightness;
+
+out vec2 vs_brightness;
+out vec4 vs_gPosition;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-
-const float EPS = 1e-5;
+uniform float time; 
+uniform int columnOption;
 
 void main() {
+    vs_brightness = in_brightness;
+    
+    // Convert kiloParsec to meter.
+    vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
-    vec4 modelPosition = vec4(in_position, 1.0);
+    if ( columnOption != COLUMNOPTION_STATIC ) {
+        modelPosition.xyz += time * in_velocity;
+    } 
+
     vec4 viewPosition = view * model * modelPosition;
 
+    // Remove stars without position, happens when VBO chunk is stuffed with zeros.
+    // Has to be done in Geometry shader because Vertices cannot be discarded here.
     if ( length(in_position) > EPS ){
+        vs_gPosition = viewPosition;    
         gl_Position = projection * viewPosition;
     } else {
+        vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
     }
 }
