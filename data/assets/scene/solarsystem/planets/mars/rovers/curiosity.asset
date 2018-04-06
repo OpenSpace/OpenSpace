@@ -2,6 +2,7 @@ local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
 --local testTexture = asset.require("../../../../../test3.jpg")
+local texturePath2 = asset.localResource("./test2.jpg")
 
 local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
@@ -11,11 +12,19 @@ local textures = asset.syncedResource({
 })
 
 local models = asset.syncedResource({
-    Name = "Mars Curiosity Model",
+    Name = "Mars Curiosity Model Old",
     Type = "HttpSynchronization",
     Identifier = "marscuriosity_model",
     Version = 4
 })
+
+
+--local models = asset.syncedResource({
+--    Name = "Mars Curiosity Model",
+--    Type = "HttpSynchronization",
+--    Identifier = "marscuriosity_model",
+--    Version = 6
+--})
 
 
 -- Curiosity Model --
@@ -35,11 +44,12 @@ local Curiosity = {
 --    Parent = "Root",
 --    Renderable = {
 --        Type = "RenderablePlane",
---        Size = 1,
---        Billboard = false,
---        Texture = testTexture
+--        Size = 1, 
+--        Billboard = false, 
+--        Texture = testTexture 
 --    }
 --}
+
 
 
 
@@ -58,17 +68,27 @@ local CuriosityRA = {
 local CuriosityMastCam = {
     Name = "CuriosityMastCam",
     Parent = Curiosity.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+    GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
 }
 
 
 -- Curiosity Model Instruments --
 -- Test Model
 
+--local renderTestMarsrover = {
+--    Name = "renderTestMarsrover",
+--    Parent = transforms.RoverLocation.Name,
+--    Renderable = {
+--        Type = "RenderableSphere",
+--        Size = 300.0,
+--        Segments = 100.0,
+--        Texture = texturePath2
+--    }
+--}
 
 local Body = {
     Name = "body",
-    Parent = CuriosityModel.Name,
+    Parent = transforms.RoverLocation.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -81,40 +101,54 @@ local Body = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
+local Body_staticParts = {
+    Name = "body_staticparts",
+    Parent = Body.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/test_static_parts_origo.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+
+
+
+
 
 -- RA 
 
 local RA_Shoulder_AZ = {
     Name = "RA_Shoulder_AZ",
-    Parent = transforms.RA_Shoulder_AZ_Location.Name,
+    Parent = transforms.RA_Shoulder_AZ_SpiceRotation.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          --GeometryFile = models .. "/root_test_origo.obj"
-          --GeometryFile = models .. "/test_root_fitToRover.obj"
-          GeometryFile = models .. "/root_right_fitToRover.obj"
+          GeometryFile = models .. "/root_test_origo.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
-
-
 
 -- EL
 local RA_Shoulder_EL = {
     Name = "RA_Shoulder_EL",
-    Parent = transforms.RA_Shoulder_EL_Location.Name,
+    Parent = transforms.RA_Shoulder_EL_SpiceRotation.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          --GeometryFile = models .. "/MSL_RA_arm_1.obj"
-          GeometryFile = models .. "/test_arm_1_origo_roverCoord.obj"
-          --GeometryFile = models .. "/test_arm_1_fitToRover.obj"
+          -- GeometryFile = models .. "/MSL_RA_arm_1.obj"
+          GeometryFile = models .. "/test_arm_1_origo.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -122,85 +156,75 @@ local RA_Shoulder_EL = {
 }
 
 
+local RA_Elbow = {
+    Name = "RA_Elbow",
+    Parent = transforms.RA_Elbow_SpiceRotation.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+            Type = "MultiModelGeometry",
+            GeometryFile = models .. "/test_arm_2_origo.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+--
+--local RA_Wrist = {
+--    Name = "RA_Wrist",
+--    Parent = transforms.RA_Wrist_Location.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          -- GeometryFile = models .. "/MSL_RA_arm_3.obj"
+--          GeometryFile = models .. "/test_arm_3_origo.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {
-   RA_Shoulder_AZ,
-   RA_Shoulder_EL,
-    Curiosity,
-    CuriosityModel,
-    Body,
-    --Wheels_All
-})
+--local RA_aaaaarm = {
+--    Name = "ra_aaaarm",
+--    Parent = transforms.RA_Arm1_Location.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/Origo_RA_arm_1.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
 
-
-
-
-
---local SAM = {
---    Name = "sam",
+-- MastCam
+--
+--local RSM_ = {
+--    Name = "body",
 --    Parent = CuriosityModel.Name,
 --    Renderable = {
 --        Type = "RenderableModel",
 --        Body = "MARS SCIENCE LABORATORY",
 --        Geometry = {
 --          Type = "MultiModelGeometry",
---          GeometryFile = models .. "/MSL_SAM.obj"
+--          GeometryFile = modelsOld .. "/MSL_body.obj"
 --        },
 --        ColorTexture = textures .. "/MSLTextureTest.png"
 --    },
---    Tag = {"planet_solarsystem", "planet_terrestrial"},
 --    GuiPath = "/Solar System/Planets/Mars/Curiosity"
 --}
 --
---local SAM_cover1 = {
---    Name = "sam_cover1",
---    Parent = CuriosityModel.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = models .. "/MSL_SAM_cover_1.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    Tag = {"planet_solarsystem", "planet_terrestrial"},
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
---
---local SAM_cover2 = {
---    Name = "sam_cover2",
---    Parent = CuriosityModel.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = models .. "/MSL_SAM_cover_2.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    Tag = {"planet_solarsystem", "planet_terrestrial"},
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
---
---local StaticParts = {
---    Name = "static_parts",
---    Parent = CuriosityModel.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = models .. "/MSL_static_parts.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    Tag = {"planet_solarsystem", "planet_terrestrial"},
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
---
---
+
+
+
+
+
+
 --local Wheels_All = {
 --    Name = "wheels_all",
 --    Parent = CuriosityModel.Name,
@@ -209,10 +233,27 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 --        Body = "MARS SCIENCE LABORATORY",
 --        Geometry = {
 --          Type = "MultiModelGeometry",
---          GeometryFile = models .. "/MSL_wheels_ALL.obj"
+--          GeometryFile = modelsOld .. "/MSL_wheels_ALL.obj"
 --        },
 --        ColorTexture = textures .. "/MSLTextureTest.png"
 --    },
 --    Tag = {"planet_solarsystem", "planet_terrestrial"},
 --    GuiPath = "/Solar System/Planets/Mars/Curiosity"
 --}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { 
+    --renderTestMarsrover,
+    Curiosity,
+    CuriosityModel, 
+    Body,
+    Body_staticParts,
+
+    RA_Shoulder_AZ,
+    RA_Shoulder_EL
+    --RA_Elbow
+    --RA_Wrist
+
+    -- Wheels_All
+})
