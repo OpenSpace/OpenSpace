@@ -246,7 +246,7 @@ void RenderableSolarImagery::initializeGL() {
         ghoul::opengl::Texture::WrappingMode::ClampToEdge
         );
 
-    _texture->setDataOwnership(ghoul::Boolean::No);
+    _texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     _texture->uploadTexture();
 
     // Initialize time
