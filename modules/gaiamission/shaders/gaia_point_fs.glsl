@@ -36,27 +36,31 @@ const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 
 in vec2 ge_brightness;
 in vec4 ge_gPosition;
+in float ge_starDistFromSun;
+in float ge_cameraDistFromSun;
 
 uniform sampler1D colorTexture;
 uniform float luminosityMultiplier;
 uniform int columnOption;
 uniform float viewScaling;
 
-vec4 bv2rgb(float bv) {
+vec3 bv2rgb(float bv) {
     // BV is [-0.4, 2.0]
     float st = (bv + 0.4) / (2.0 + 0.4);
-    return texture(colorTexture, st);
+    return texture(colorTexture, st).rgb;
 }
 
 void main() {
 
     // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
-    float luminosity = 1.0;
-    vec4 color = vec4(luminosity);
+    float luminosity = 0.1;
+    vec3 color = vec3(luminosity);
+    float ratioMultiplier = 1.0;
 
     // Calculate the color and luminosity if we have the magnitude and B-V color.
     if ( columnOption == COLUMNOPTION_COLOR ) {
         color = bv2rgb(ge_brightness.y);
+        ratioMultiplier = 1.0;
 
         // Absolute magnitude is brightness a star would have at 10 pc away.
         float absoluteMagnitude = ge_brightness.x;
@@ -71,16 +75,18 @@ void main() {
         }
     }
 
-    // Luminosity decrease by squared distance [measured in Pc].
+    // Luminosity decrease by {squared} distance [measured in Pc].
     float observedDistance = safeLength(ge_gPosition / viewScaling) / ONE_PARSEC;
-    luminosity /= pow(observedDistance, 2.0);
+    luminosity /= observedDistance; //pow(observedDistance, 2.0);
 
-    // Multiply our color with the mluminosity as well as a user-controlled property.
-    color *= luminosity * pow(luminosityMultiplier, 3.0);
+    // Multiply our color with the luminosity as well as a user-controlled property.
+    color *= luminosity * luminosityMultiplier; //pow(luminosityMultiplier, 2.0);
 
-    if (color.a < 0.0001) {
-        discard;
+    // Decrease contributing brightness for stars in central cluster.
+    if ( ge_cameraDistFromSun > ge_starDistFromSun ) {
+        float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
+        color *= ratio * ratioMultiplier;
     }
 
-    outColor = color;
+    outColor = vec4(color, 1.0f);
 }

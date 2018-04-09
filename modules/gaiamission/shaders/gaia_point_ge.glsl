@@ -31,10 +31,14 @@ const float EPS = 1e-5;
 layout(points) in;
 in vec2 vs_brightness[];
 in vec4 vs_gPosition[];
+in float vs_starDistFromSun[];
+in float vs_cameraDistFromSun[];
 
 layout(points, max_vertices = 1) out;
 out vec2 ge_brightness;
 out vec4 ge_gPosition;
+out float ge_starDistFromSun;
+out float ge_cameraDistFromSun;
 
 uniform float viewScaling;
 uniform float cutOffThreshold;
@@ -42,6 +46,8 @@ uniform float cutOffThreshold;
 void main() {
 
     ge_brightness = vs_brightness[0];
+    ge_starDistFromSun = vs_starDistFromSun[0];
+    ge_cameraDistFromSun = vs_cameraDistFromSun[0];
 
     float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
     float distThreshold = cutOffThreshold - log(observedDistance) / log(4.0);

@@ -38,6 +38,8 @@ const float FLT_MAX  = 3.402823466e38; // Max float constant in GLSL
 in vec2 ge_brightness;
 in vec4 ge_gPosition;
 in vec2 texCoord;
+in float ge_starDistFromSun;
+in float ge_cameraDistFromSun;
 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
@@ -46,48 +48,58 @@ uniform float sharpness;
 uniform int columnOption;
 uniform float viewScaling;
 
-vec4 bv2rgb(float bv) {
+vec3 bv2rgb(float bv) {
     // BV is [-0.4, 2.0]
     float st = (bv + 0.4) / (2.0 + 0.4);
-    return texture(colorTexture, st);
+    return texture(colorTexture, st).rgb;
 }
 
 void main() {
 
-    vec4 color = vec4(1.0);
+    // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
+    float luminosity = 1.0;
+    vec3 color = vec3(luminosity);
+    float ratioMultiplier = 0.03;
 
-    // Calculate the color and luminosity.
+    vec4 textureColor = texture(psfTexture, texCoord);
+    textureColor.a = pow(textureColor.a, sharpness);
+    if (textureColor.a < 0.01) {
+        discard;
+    }
+
+    // Calculate the color and luminosity if we have the magnitude and B-V color.
     if ( columnOption == COLUMNOPTION_COLOR ) {
         color = bv2rgb(ge_brightness.y);
+        ratioMultiplier = 0.5;
 
         // Absolute magnitude is brightness a star would have at 10 pc away.
         float absoluteMagnitude = ge_brightness.x;
 
         // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
         // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
-        float luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
+        luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
 
         // If luminosity is really really small then set it to a static low number.
         if (luminosity < 0.001) {
             luminosity = 0.001;
         }
-
-        // Luminosity decrease by squared distance [measured in Pc].
-        float observedDistance = safeLength(ge_gPosition / viewScaling) / ONE_PARSEC;
-        luminosity /= pow(observedDistance, 2.0);
-
-        color *= luminosity * pow(luminosityMultiplier, 2.0);
     }
 
-    vec4 textureColor = texture(psfTexture, texCoord);
-    vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a = pow(fullColor.a, sharpness);
+    // Luminosity decrease by {squared} distance [measured in Pc].
+    float observedDistance = safeLength(ge_gPosition / viewScaling) / ONE_PARSEC;
+    luminosity /= observedDistance; //pow(observedDistance, 2.0);
 
-    //fullColor = vec4(color.rgb * textureColor.a / 255.0, 1.0);
+    // Multiply our color with the luminosity as well as a user-controlled property.
+    color *= luminosity * luminosityMultiplier; //pow(luminosityMultiplier, 2.0);
 
-    if (fullColor.a < 0.0001) {
-        discard;
+    // Decrease contributing brightness for stars in central cluster.
+    if ( ge_cameraDistFromSun > ge_starDistFromSun ) {
+        float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
+        color *= ratio * ratioMultiplier;
     }
 
-    outColor = fullColor;
+    // Use truncating tonemapping here so we don't overexposure individual stars.
+    color = 1.0 - 1.0 * exp(-5.0 * color.rgb);
+
+    outColor = vec4(color, textureColor.a);
 }

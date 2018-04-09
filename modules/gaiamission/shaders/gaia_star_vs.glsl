@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "floatoperations.glsl"
+
 // Keep in sync with renderablegaiastars.h:ColumnOption enum
 const int COLUMNOPTION_STATIC = 0;
 const int COLUMNOPTION_MOTION = 1; 
@@ -37,6 +39,9 @@ in vec2 in_brightness;
 
 out vec2 vs_brightness;
 out vec4 vs_gPosition;
+out float vs_starDistFromSun;
+out float vs_cameraDistFromSun;
+
 
 uniform mat4 model;
 uniform mat4 view;
@@ -55,6 +60,10 @@ void main() {
     } 
 
     vec4 viewPosition = view * model * modelPosition;
+    vec4 sunPosition = view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    vs_starDistFromSun = safeLength(modelPosition);
+    vs_cameraDistFromSun = safeLength(sunPosition);
 
     // Remove stars without position, happens when VBO chunk is stuffed with zeros.
     // Has to be done in Geometry shader because Vertices cannot be discarded here.
