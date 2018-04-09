@@ -62,7 +62,7 @@ public:
         GLInitialized
     };
 
-    using UpdateScene = ghoul::Boolean;
+    BooleanType(UpdateScene);
 
     struct PerformanceRecord {
         std::chrono::nanoseconds renderTime;

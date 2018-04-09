@@ -174,7 +174,7 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 }
 
 DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
-    : DashboardItem("Angle")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{

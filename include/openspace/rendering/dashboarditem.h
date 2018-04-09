@@ -36,13 +36,17 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class DashboardItem : public properties::PropertyOwner {
 public:
+    static documentation::Documentation Documentation();
+
     static std::unique_ptr<DashboardItem> createFromDictionary(
         ghoul::Dictionary dictionary
     );
 
-    DashboardItem(std::string identifier, std::string guiName = "");
+    DashboardItem(ghoul::Dictionary dictionary);
 
     bool isEnabled() const;
     virtual void render(glm::vec2& penPosition) = 0;

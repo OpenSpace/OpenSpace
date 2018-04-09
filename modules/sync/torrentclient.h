@@ -84,9 +84,6 @@ public:
     using TorrentProgressCallback = std::function<void(TorrentProgress)>;
     using TorrentId = int32_t;
 
-    //TorrentClient();
-    ~TorrentClient();
-
     void initialize();
     void deinitialize();
 

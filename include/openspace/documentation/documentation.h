@@ -36,7 +36,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace::documentation {
 
-using Optional = ghoul::Boolean;
+BooleanType(Optional);
 
 /**
  * The TestResult structure returns the information from the #testSpecification method. It

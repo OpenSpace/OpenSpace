@@ -48,7 +48,7 @@ class GuiPropertyComponent : public GuiComponent {
 public:
     using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
-    using UseTreeLayout = ghoul::Boolean;
+    BooleanType(UseTreeLayout);
 
 
     GuiPropertyComponent(std::string identifier, std::string guiName = "",

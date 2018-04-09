@@ -88,6 +88,10 @@ void MissionManager::unloadMission(const std::string& missionName) {
         "missionName must name a previously loaded mission"
     );
 
+    if (it == _currentMission) {
+        _currentMission = _missionMap.end();
+    }
+
     _missionMap.erase(it);
 }
 

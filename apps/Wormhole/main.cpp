@@ -93,28 +93,28 @@ int main(int argc, char** argv) {
             )
     );
 
-    if (password == "") {
-        password = defaultPassword.str();
-        LINFO(fmt::format("Connection password: {}", password));
-    }
-
     std::string changeHostPassword = "";
     commandlineParser.addCommand(
         std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
-            password,
+            changeHostPassword,
             "--hostpassword",
             "-h",
             "Sets the host password to use"
             )
     );
 
-    if (changeHostPassword == "") {
-        changeHostPassword = defaultChangeHostPassword.str();
-        LINFO(fmt::format("Host password: {}", changeHostPassword));
-    }
-
     commandlineParser.setCommandLine(arguments);
     commandlineParser.execute();
+
+    if (password == "") {
+        password = defaultPassword.str();
+    }
+    if (changeHostPassword == "") {
+        changeHostPassword = defaultChangeHostPassword.str();
+    }
+
+    LINFO(fmt::format("Connection password: {}", password));
+    LINFO(fmt::format("Host password: {}", changeHostPassword));
 
     int port = 25001;
 
