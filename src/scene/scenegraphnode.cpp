@@ -585,12 +585,15 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
             // Distance from the camera to the node
             double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
 
-            double zoomThreshold = 0.5;
+            double zoomThreshold = 0.5, moveThreshold = 1;
+
             if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
                 _distFromCamToNode = distFromCamToNode;
             }
-
-            _screenSpacePosition = screenSpacePosition;
+            if (abs(static_cast<glm::ivec2>(_screenSpacePosition).x - screenSpacePosition.x) > moveThreshold ||
+                    abs(static_cast<glm::ivec2>(_screenSpacePosition).y - screenSpacePosition.y) > moveThreshold) {
+                _screenSpacePosition = screenSpacePosition;
+            }
         }
         // If not on the screen, we want to reset it or don't update it
         else {
