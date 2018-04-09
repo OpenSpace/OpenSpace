@@ -41,19 +41,23 @@ namespace {
 namespace openspace::globebrowsing {
 
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
-                             std::shared_ptr<LayerManager> layerManager)
+                             std::shared_ptr<LayerManager> layerManager,
+                             Ellipsoid& ellipsoid)
     : _grid(grid)
     , _layerManager(layerManager)
+    , _ellipsoid(ellipsoid)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
-            "GlobalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
+        "GlobalChunkedLodPatch",
+        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
+        "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"
+    );
 
     _localLayerShaderManager = std::make_shared<LayerShaderManager>(
-            "LocalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
+        "LocalChunkedLodPatch",
+        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
+        "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"
+    );
 
     _globalGpuLayerManager = std::make_shared<GPULayerManager>();
     _localGpuLayerManager = std::make_shared<GPULayerManager>();
@@ -101,11 +105,20 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     gpuLayerManager->setValue(programObject, *_layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
-    // TODO: Skirt length should probably be proportional to the size reffered to by
-    // the chunk's most high resolution height map.
-    programObject->setUniform("skirtLength",
-        glm::min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000),
-            8700.0f));
+    programObject->setUniform(
+        "skirtLength",
+        static_cast<float>(
+            glm::min(
+                chunk.surfacePatch().halfSize().lat * 1000000,
+                _ellipsoid.minimumRadius()
+            )
+        )
+    );
+
+    //programObject->setUniform("skirtLength",
+    //    glm::min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000),
+    //        8700.0f));
+
     programObject->setUniform("xSegments", _grid->xSegments());
 
     if (chunk.owner().debugProperties().showHeightResolution) {
