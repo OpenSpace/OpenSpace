@@ -39,7 +39,8 @@ function sgct.makeConfig(config) end
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
 -- capture: Settings to configure the image capture [example: capture = { path = "./images"]
 -- sgctDebug: Determines whether a higher debug level in SGCT is enabled [example: sgctDebug=true] {default: false}
--- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=30.0, right=30.0, up=16.875, down=16.875}}
+-- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=40.0, right=40.0, up=22.5, down=22.5}}
+-- tracked: Determines whether the aspect ratio of the camera defined at application startup should persist when the window is resized [example: tracked=false] {default: true}
 
 -- Thus this function can be called the following ways:
 -- sgct.config.single() -> Leading to a 1280x720 resolution window
@@ -684,9 +685,9 @@ function sgct.config.single(arg)
         type(arg["tracked"]) == "boolean" or type(arg["tracked"]) == "nil",
         "tracked must be a boolean or nil"
     )
-    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
-        trackedSpecifier = "tracked=\"true\""
-    else
+    trackedSpecifier = "tracked=\"true\""
+
+    if (arg["tracked"] ~= nil and arg["tracked"] == false) then
         trackedSpecifier = "tracked=\"false\""
     end
 
