@@ -660,8 +660,8 @@ function sgct.config.single(arg)
             assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
 
             local ratio = arg["windowSize"][1] / arg["windowSize"][2]
-            local horizontalFov = 30
-            local verticalFov = 30
+            local horizontalFov = 40
+            local verticalFov = 40
 
             if (ratio > 1) then
                 verticalFov = horizontalFov / ratio
@@ -676,10 +676,14 @@ function sgct.config.single(arg)
                 right = horizontalFov
             }
         else
-            arg["fov"] = { down = 16.875, up = 16.875, left = 30.0, right = 30.0 }
+            arg["fov"] = { down = 22.5, up = 22.5, left = 40.0, right = 40.0 }
         end
     end
 
+    assert(
+        type(arg["tracked"]) == "boolean" or type(arg["tracked"]) == "nil",
+        "tracked must be a boolean or nil"
+    )
     if (arg["tracked"] ~= nil and arg["tracked"] == true) then
         trackedSpecifier = "tracked=\"true\""
     else
