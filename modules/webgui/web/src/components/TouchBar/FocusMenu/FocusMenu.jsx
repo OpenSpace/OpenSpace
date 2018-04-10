@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import FocusButton from './FocusButton';
-import { OriginKey } from '../../../api/keys';
+import { OriginKey, SolarSystemKey } from '../../../api/keys';
 import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
 import styles from './FocusMenu.scss';
@@ -18,28 +18,42 @@ class FocusMenu extends Component {
 
     this.state = {
       origin: '',
+      solarSystem: '',
       listening: false,
     };
   }
 
   componentDidUpdate(nextProps, nextState) {
-    // If a button is clicked change property value
+    // If a focus button is clicked change property value
     if (this.state.listening && nextState.origin !== this.state.origin) {
       this.props.ChangePropertyValue(this.props.originNode.Description, this.state.origin);
     }
+    // If the overview button is clicked change property value
+    if (this.state.listening && nextState.solarSystem !== this.state.solarSystem) {
+      this.props.ChangePropertyValue(this.props.overview.Description, this.state.solarSystem);
+    } 
     // If changes are made in another gui update state
     if (this.state.listening && nextState.origin !== this.props.originNode.Value) {
       this.setState({ origin: this.props.originNode.Value });
     }
-    // Start listening on the origin property
+    // If changes are made to the solar system prop in another gui update state
+    if (this.state.listening && nextState.solarSystem !== this.props.overview.Value) {
+      this.setState({ solarSystem: this.props.overview.Value });
+    } 
+    // Start listening on the origin property and the viewSolarSystem property
     if (!this.state.listening && this.props.nodes.length > 0) {
       this.props.StartListening(OriginKey);
-      this.setState({ origin: this.props.originNode.Value, listening: true });
+      this.props.StartListening(SolarSystemKey);
+      this.setState({ 
+        origin: this.props.originNode.Value, 
+        solarSystem: this.props.overview.Value, 
+        listening: true });
     }
   }
 
   componentWillUnmount() {
     this.props.StopListening(OriginKey);
+    this.props.StopListening(SolarSystemKey);
     this.setState({ listening: false });
   }
 
@@ -59,7 +73,12 @@ class FocusMenu extends Component {
   render() {
     return (
       <div className={styles.FocusMenu}>
-        {this.props.nodes.length > 0 && <OverViewButton />}
+        {this.props.nodes.length > 0 && 
+          <OverViewButton 
+            identifier={this.props.overview.Description.Identifier}
+            value={(this.props.overview.Value === 'true' || this.props.overview.Value === '1')}
+            onChangeView={newVal => this.setState({ solarSystem: newVal })}
+          />}
         {this.props.nodes.length > 0 && this.createFocusButtons()}
       </div>
     );
@@ -70,6 +89,7 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let originNode = [];
   let nodes = [];
+  let overview = {};
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
@@ -79,16 +99,21 @@ const mapStateToProps = (state) => {
     nodes = nodes.filter(node => node.tag.some(tag => tag.includes(REQUIRED_TAG)))
       .map(node => Object.assign(node, { key: node.identifier }));
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
+
+    // Get the overview node for the overview of the solar system
+    overview = traverseTreeWithURI(state.propertyTree, SolarSystemKey);
+
   }
   return {
     nodes,
     originNode,
+    overview,
   };
 };
 
 const mapDispatchToProps = dispatch => ({
-  ChangePropertyValue: (discription, URI) => {
-    dispatch(changePropertyValue(discription, URI));
+  ChangePropertyValue: (description, value) => {
+    dispatch(changePropertyValue(description, value));
   },
   StartListening: (URI) => {
     dispatch(startListening(URI));
@@ -116,6 +141,11 @@ FocusMenu.propTypes = {
     Value: PropTypes.string,
     listeners: PropTypes.number,
   })),
+  overview: PropTypes.objectOf(PropTypes.shape({
+    Identifier: PropTypes.string,
+    Description: PropTypes.string,
+    Value: PropTypes.string,
+  })),
   ChangePropertyValue: PropTypes.func,
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,
@@ -126,8 +156,12 @@ FocusMenu.defaultProps = {
   properties: [],
   subowners: [],
   originNode: [],
+  overview: {},
   Description: '',
   Value: '',
+  ChangePropertyValue: null,
+  StopListening: null,
+  StartListening: null,
 };
 
 export default FocusMenu;

@@ -31,3 +31,5 @@ export const DeltaTime = 'deltaTime';
 export const ValuePlaceholder = '___value___';
 // script for setting deltatime
 export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholder})`;
+// key for setting/getting the solarSystemOverview property
+export const SolarSystemKey = 'NavigationHandler.OrbitalNavigator.solarSystemOverview';
