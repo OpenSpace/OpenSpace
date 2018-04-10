@@ -189,7 +189,7 @@ void RenderablePlane::deinitializeGL() {
     BaseModule::ProgramObjectManager.releaseProgramObject(
         ProgramName,
         [](ghoul::opengl::ProgramObject* p) {
-        OsEng.renderEngine().removeRenderProgram(p);
+            OsEng.renderEngine().removeRenderProgram(p);
         }
     );
     _shader = nullptr;

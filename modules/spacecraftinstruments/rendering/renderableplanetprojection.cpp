@@ -328,9 +328,11 @@ void RenderablePlanetProjection::initializeGL() {
                 return OsEng.renderEngine().buildRenderProgram(
                     ProjectiveProgramName,
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                            "renderablePlanet_vs.glsl"),
+                            "renderablePlanet_vs.glsl"
+                    ),
                     absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                            "renderablePlanet_fs.glsl")
+                            "renderablePlanet_fs.glsl"
+                    )
                 );
             }
         );
@@ -364,10 +366,14 @@ void RenderablePlanetProjection::initializeGL() {
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
                 return ghoul::opengl::ProgramObject::Build(
                     FBOPassProgramName,
-                        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                                "renderablePlanetProjection_vs.glsl"),
-                        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                                "renderablePlanetProjection_fs.glsl")
+                        absPath(
+                            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanetProjection_vs.glsl"
+                        ),
+                        absPath(
+                            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanetProjection_fs.glsl"
+                        )
                 );
             }
         );

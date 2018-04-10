@@ -700,8 +700,7 @@ void RenderableBillboardsCloud::deinitializeGL() {
     DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
         ProgramObjectName,
         [](ghoul::opengl::ProgramObject* p) {
-            RenderEngine& renderEngine = OsEng.renderEngine();
-            renderEngine.removeRenderProgram(p);
+            OsEng.renderEngine().removeRenderProgram(p);
         }
     );
     _program = nullptr;

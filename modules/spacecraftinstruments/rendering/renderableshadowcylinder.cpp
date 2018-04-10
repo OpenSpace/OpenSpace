@@ -271,10 +271,12 @@ void RenderableShadowCylinder::initializeGL() {
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return OsEng.renderEngine().buildRenderProgram(
                 ProgramName,
-                absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                        "terminatorshadow_vs.glsl"),
-                absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                        "terminatorshadow_fs.glsl")
+                absPath(
+                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_vs.glsl"
+                ),
+                absPath(
+                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/terminatorshadow_fs.glsl"
+                )
             );
         }
     );
