@@ -24,12 +24,12 @@
 
 #include <modules/digitaluniverse/rendering/renderablepoints.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
@@ -37,7 +37,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -46,6 +45,7 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderablePoints";
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyColor          = "Color";
     constexpr const char* keyUnit           = "Unit";
@@ -267,12 +267,21 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
+    // OBS:  The ProgramObject name is later used to release the program as well, so the
+    //       name parameter to requestProgramObject and the first parameter to
+    //       buildRenderProgram has to be the same or an assertion will be thrown at the
+    //       end of the program.
+
     if (_hasSpriteTexture) {
-        _program = renderEngine.buildRenderProgram(
-            "RenderablePoints",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+            "RenderablePoints Sprite",
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    "RenderablePoints Sprite",
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+                );
+            }
         );
 
         _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
@@ -286,10 +295,15 @@ void RenderablePoints::initializeGL() {
         _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
     else {
-        _program = renderEngine.buildRenderProgram(
+        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
             "RenderablePoints",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl")
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    "RenderablePoints",
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+                );
+            }
         );
 
         _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
@@ -309,11 +323,13 @@ void RenderablePoints::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        _program->name(),
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
 
     if (_hasSpriteTexture) {
         _spriteTexture = nullptr;

@@ -464,6 +464,7 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_renderEngine->deinitializeGL();
 
+    _engine->_moduleEngine->deinitializeGL();
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 
@@ -1221,6 +1222,8 @@ void OpenSpaceEngine::initializeGL() {
 
     LDEBUG("Initializing Rendering Engine");
     _renderEngine->initializeGL();
+
+    _moduleEngine->initializeGL();
 
     for (const auto& func : _moduleCallbacks.initializeGL) {
         func();
