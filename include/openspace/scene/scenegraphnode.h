@@ -27,6 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
@@ -62,7 +64,7 @@ public:
         GLInitialized
     };
 
-    using UpdateScene = ghoul::Boolean;
+    BooleanType(UpdateScene);
 
     struct PerformanceRecord {
         long long renderTime;  // time in ns
@@ -180,6 +182,10 @@ private:
 
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;
+
+    properties::IVec2Property _screenSpacePosition;
+    properties::BoolProperty _screenVisibility;
+    properties::DoubleProperty _distFromCamToNode;
 };
 
 } // namespace openspace

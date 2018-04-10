@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCENE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
 
 #include <vector>
 #include <unordered_map>
@@ -54,7 +55,7 @@ class Scene
     : public properties::PropertyOwner
 {
 public:
-    using UpdateDependencies = ghoul::Boolean;
+    BooleanType(UpdateDependencies);
 
     struct InvalidSceneError : ghoul::RuntimeError {
         /**
@@ -95,6 +96,8 @@ public:
      * Return the camera
      */
     Camera* camera() const;
+
+    std::string storyIdentifier();
 
     /**
      * Updates all SceneGraphNodes relative positions
@@ -253,6 +256,7 @@ private:
         bool isExpired = false;
     };
     std::vector<InterpolationInfo> _interpolationInfos;
+    properties::StringProperty _storyIdentifier;
 };
 
 } // namespace openspace

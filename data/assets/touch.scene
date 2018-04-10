@@ -1,0 +1,82 @@
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
+
+-- Specifying which other assets should be loaded in this scene
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets')
+asset.require('scene/solarsystem/planets/mars/moons/phobos')
+asset.require('scene/solarsystem/planets/mars/moons/deimos')
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+
+asset.request('customization/globebrowsing')
+
+
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+
+asset.onInitialize(function ()
+    openspace.time.setTime(openspace.time.currentWallTime())
+
+    openspace.setDefaultGuiSorting()
+
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    )
+
+    openspace.markInterestingNodes(
+        "Story.Basic",
+        { "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune" }
+    )
+
+    openspace.markInterestingNodes(
+        "Story.SolarEclipse",
+        { "Sun", "Earth", "Moon" }
+    )
+
+    openspace.markInterestingNodes(
+        "Touch.Interesting",
+        { "Sun", "Earth", "Moon" }
+    )
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "Scene.*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.navigation.setCameraState({
+        Focus = earthAsset.Earth.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+    })
+
+    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+end)
+
+asset.onDeinitialize(function ()
+
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+
+    openspace.removeInterestingNodes(
+        "Story.Baisc",
+         { "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune" }
+    )
+
+    openspace.removeInterestingNodes(
+        "Story.SolarEclipse",
+        { "Sun", "Earth", "Moon" }
+    )
+
+    openspace.removeInterestingNodes(
+        "Touch.Interesting",
+        { "Sun", "Earth", "Moon" }
+    )
+end)

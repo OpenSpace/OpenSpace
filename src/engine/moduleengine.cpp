@@ -63,8 +63,14 @@ void ModuleEngine::deinitialize() {
         LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
         m->deinitialize();
     }
-    _modules.clear();
+
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG(fmt::format("Destroying module '{}'", m->identifier()));
+        m = nullptr;
+    }
+
     LDEBUG("Finished destroying modules");
+    _modules.clear();
 }
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,

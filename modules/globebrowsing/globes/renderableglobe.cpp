@@ -30,13 +30,13 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace {
-    const char* keyFrame = "Frame";
-    const char* keyRadii = "Radii";
-    const char* keySegmentsPerPatch = "SegmentsPerPatch";
-    const char* keyLayers = "Layers";
-    const char* keyShadowGroup = "ShadowGroup";
-    const char* keyShadowSource = "Source";
-    const char* keyShadowCaster = "Caster";
+    constexpr const char* keyFrame = "Frame";
+    constexpr const char* keyRadii = "Radii";
+    constexpr const char* keySegmentsPerPatch = "SegmentsPerPatch";
+    constexpr const char* keyLayers = "Layers";
+    constexpr const char* keyShadowGroup = "ShadowGroup";
+    constexpr const char* keyShadowSource = "Source";
+    constexpr const char* keyShadowCaster = "Caster";
 
     static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
@@ -163,26 +163,6 @@ namespace {
         "orenNayarRoughness",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
-        "ScreenSpacePosition",
-        "ScreenSpacePosition",
-        "" // @TODO Missing documentation
-    };
-    static const openspace::properties::Property::PropertyInfo ClipSpaceCoordinatesInfo = {
-        "ClipSpaceCoordinates",
-        "ClipSpaceCoordinates",
-        "" // @TODO Missing documentation
-    };
-    static const openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
-        "ScreenVisibility",
-        "ScreenVisibility",
-        "" // @TODO Missing documentation
-    };
-    static const openspace::properties::Property::PropertyInfo DistanceFromCameraToNodeInfo = {
-        "DistanceFromCameraToNode",
-        "DistanceFromCameraToNode",
-        "" // @TODO Missing documentation
-    };
 } // namespace
 
 using namespace openspace::properties;
@@ -214,11 +194,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
-        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
-        IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)),
-        DVec4Property(ClipSpaceCoordinatesInfo, glm::dvec4(-1,-1,-1,-1)),
-        BoolProperty(ScreenVisibilityInfo, false),
-        DoubleProperty(DistanceFromCameraToNodeInfo, -1),
+        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     })
     , _debugPropertyOwner({ "Debug" })
 {
@@ -258,8 +234,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
         *this,
         patchSegments,
-        _layerManager
-        );
+        _layerManager,
+        _ellipsoid
+    );
     //_pointGlobe = std::make_shared<PointGlobe>(*this);
 
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
@@ -273,10 +250,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
-    addProperty(_generalProperties.screenSpacePosition);
-    addProperty(_generalProperties.clipSpaceCoordinates);
-    addProperty(_generalProperties.screenVisibility);
-    addProperty(_generalProperties.distanceFromCameraToNode);
 
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);

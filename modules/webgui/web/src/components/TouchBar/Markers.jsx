@@ -4,9 +4,11 @@ import PropTypes from 'prop-types';
 import MarkerInfo from './MarkerInfo';
 import { traverseTreeWithURI, jsonToLuaTable } from '../../utils/propertyTreeHelpers';
 import { startListening, stopListening } from '../../api/Actions';
+import {StoryKey} from "../../api/keys";
 
 class Markers extends Component {
   componentDidUpdate() {
+    console.log(this.props);
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
     } = this.props;
@@ -42,6 +44,7 @@ class Markers extends Component {
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
     } = this.props;
+    console.log(this.props);
 
     const markerInfo = nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
@@ -82,19 +85,20 @@ const mapStateToProps = (state) => {
   const distFromCamToNodeProperties = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
+    const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
     const rootNodes = state.propertyTree.subowners
       .filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
 
-    nodes = nodes.filter(node => node.tag.some(tag => tag.includes('Touch.Interesting')))
+    nodes = nodes.filter(node => node.tag.some(tag => tag.includes(storyIdentifierNode.Value)))
       .map(node => Object.assign(node, { key: node.identifier }));
 
     nodes.forEach((node) => {
-      screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ScreenSpacePosition`));
-      screenVisibilityProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.ScreenVisibility`));
-      distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.RenderableGlobe.DistanceFromCameraToNode`));
+      screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSpacePosition`));
+      screenVisibilityProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenVisibility`));
+      distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.DistanceFromCamToNode`));
     });
   }
   return {

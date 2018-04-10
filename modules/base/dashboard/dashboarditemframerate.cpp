@@ -96,7 +96,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
 }
 
 DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
-    : DashboardItem("Framerate")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _frametimeType(FrametimeInfo, properties::OptionProperty::DisplayType::Dropdown)

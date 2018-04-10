@@ -3,14 +3,11 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import FocusButton from './FocusButton';
-import { OriginKey, SolarSystemKey } from '../../../api/keys';
+import { OriginKey, SolarSystemKey, StoryKey } from '../../../api/keys';
 import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
 import styles from './FocusMenu.scss';
 import OverViewButton from './OverViewButton';
-
-// Tag needed for touch nodes
-const REQUIRED_TAG = 'Touch.Interesting';
 
 class FocusMenu extends Component {
   constructor(props) {
@@ -92,17 +89,17 @@ const mapStateToProps = (state) => {
   let overview = {};
 
   if (Object.keys(state.propertyTree).length !== 0) {
+    const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
     const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
-    nodes = nodes.filter(node => node.tag.some(tag => tag.includes(REQUIRED_TAG)))
+    nodes = nodes.filter(node => node.tag.some(tag => tag.includes(storyIdentifierNode.Value)))
       .map(node => Object.assign(node, { key: node.identifier }));
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
 
     // Get the overview node for the overview of the solar system
     overview = traverseTreeWithURI(state.propertyTree, SolarSystemKey);
-
   }
   return {
     nodes,

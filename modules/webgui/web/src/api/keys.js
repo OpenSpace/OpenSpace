@@ -22,7 +22,6 @@ export const ToggleConsoleScript = 'openspace.setPropertyValueSingle("LuaConsole
 export const ToggleNativeGuiScript = 'local b = openspace.getPropertyValue("Modules.ImGUI.Main.Enabled");' + 
                                      'openspace.setPropertyValueSingle("Modules.ImGUI.Main.Enabled", not b);' +
                                      'openspace.setPropertyValueSingle("Modules.ImGUI.Main.IsHidden", b);';
-
 // key for getting current simulation time
 export const CurrenTimeKey = 'currentTime';
 // key for getting the delta time
@@ -33,3 +32,5 @@ export const ValuePlaceholder = '___value___';
 export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholder})`;
 // key for setting/getting the solarSystemOverview property
 export const SolarSystemKey = 'NavigationHandler.OrbitalNavigator.solarSystemOverview';
+// key for setting/getting the Story identifier
+export const StoryKey = 'Scene.StoryIdentifier';

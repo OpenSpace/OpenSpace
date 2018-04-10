@@ -78,7 +78,7 @@ std::string WebBrowserModule::findHelperExecutable() {
         LWARNING(fmt::format("Assuming web helper name is {}", subprocessName));
         auto subLength = (int)subprocessName.length();
 
-        Directory binDir("${BASE}/bin/openspace", Directory::AbsolutePath::No);
+        Directory binDir("${BASE}/bin/openspace", Directory::RawPath::No);
         std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
 
         // find files matching the given file name

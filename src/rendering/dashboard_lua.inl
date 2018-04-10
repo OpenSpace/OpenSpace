@@ -60,12 +60,31 @@ int addDashboardItem(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* removeDashboardItem(string):
+*/
+int removeDashboardItem(lua_State* L) {
+    using ghoul::lua::errorLocation;
+
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashbordItem");
+
+    std::string identifier = luaL_checkstring(L, -1);
+
+    OsEng.dashboard().removeDashboardItem(identifier);
+
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+
+/**
+* \ingroup LuaScripts
 * removeDashboardItems():
 */
-int removeDashboardItems(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeDashboardItems");
+int clearDashboardItems(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clearDashboardItems");
 
-    OsEng.dashboard().removeDashboardItems();
+    OsEng.dashboard().clearDashboardItems();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
