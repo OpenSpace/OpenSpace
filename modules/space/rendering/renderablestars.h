@@ -73,11 +73,6 @@ namespace openspace {
         bool loadCachedFile(const std::string& file);
         bool saveCachedFile(const std::string& file) const;
 
-        properties::StringProperty _pointSpreadFunctionTexturePath;
-        std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-        std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-        bool _pointSpreadFunctionTextureIsDirty;
-
         properties::StringProperty _colorTexturePath;
         std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
         std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
@@ -87,13 +82,13 @@ namespace openspace {
         bool _dataIsDirty;
 
         properties::FloatProperty _magnitudeExponent;
-        properties::FloatProperty _sharpness;
+        properties::FloatProperty _colorContribution;
         properties::FloatProperty _billboardSize;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         UniformCache(modelMatrix, cameraUp, cameraViewProjectionMatrix,
-                     colorOption, magnitudeExponent, sharpness, billboardSize,
-                     screenSize, psfTexture, colorTexture, eyePosition) 
+                     colorOption, magnitudeExponent, colorContribution, billboardSize,
+                     screenSize, colorTexture, eyePosition) 
             _uniformCache;
 
         std::string _speckFile;

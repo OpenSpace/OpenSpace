@@ -40,12 +40,9 @@ out vec4 vs_position;
 out vec3 ge_brightness;
 out vec3 ge_velocity;
 out float ge_speed;
-out vec2 texCoord;
+out vec2 psfCoords;
 out float ge_observationDistance;
 out float gs_screenSpaceDepth;
-//out float ta;
-out int big;
-out double appB;
 
 //uniform float viewScaling;
 uniform float scaleFactor;
@@ -55,10 +52,11 @@ uniform vec2 screenSize;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
 
-//uniform dmat4 modelViewMatrix;
-//uniform dmat4 projectionMatrix;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
+
+uniform dmat4 cameraViewMatrix;
+uniform dmat4 projectionMatrix;
 
 const double PARSEC = 0.308567756e17LF;
 
@@ -71,7 +69,7 @@ const vec2 corners[4] = vec2[4](
 
 void main() {
     vs_position = gl_in[0].gl_Position; // in object space
-
+    
     // JCC: Don't display the Sun for now.
     if ((vs_position.x == 0.0) &&
         (vs_position.y == 0.0) &&
@@ -80,9 +78,15 @@ void main() {
         return;
     }
     
-    //ta          = 1.0f;
     vs_position = gl_in[0].gl_Position; // in object space
     dvec4 dpos  = modelMatrix * dvec4(vs_position); 
+
+    dvec4 clipTestPos = cameraViewProjectionMatrix * dpos;
+    clipTestPos /= clipTestPos.w;
+    if ((clipTestPos.x < -1.0 || clipTestPos.x > 1.0) ||
+        (clipTestPos.y < -1.0 || clipTestPos.y > 1.0)) {
+        return;
+    }
 
     ge_brightness    = vs_brightness[0];
     ge_velocity      = vs_velocity[0];
@@ -90,15 +94,14 @@ void main() {
     
     double distanceToStarInParsecs = length(dpos.xyz - eyePosition) / PARSEC;
     double luminosity = double(ge_brightness.y);
-    //float absMag = ge_brightness.x;
-    //float appMag = absMag + 5 * (log(distanceToStarInParsecs)-1.0);
+    float absMag = ge_brightness.x;
+    float appMag = absMag + 5 * (log(float(distanceToStarInParsecs))-1.0);
     
     // Working like Partiview
     double pSize              = pow(10, magnitudeExponent + 14.0);
-    double apparentBrightness = (pSize * luminosity) /
-     (distanceToStarInParsecs * distanceToStarInParsecs);
-    
-    appB = apparentBrightness / PARSEC;
+    // double apparentBrightness = (pSize * luminosity) /
+    //  (distanceToStarInParsecs * distanceToStarInParsecs);
+    double apparentBrightness = pSize * luminosity / distanceToStarInParsecs;
     double scaleMultiply = apparentBrightness;  
 
     dvec3 scaledRight    = dvec3(0.0);
@@ -119,7 +122,7 @@ void main() {
                             dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));        
 
     // Testing size:
-    vec2 halfViewSize = vec2(screenSize.x, screenSize.y) / 2.0f;
+    vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
     vec2 topRight = topRightVertex.xy/topRightVertex.w;
     vec2 bottomLeft = bottomLeftVertex.xy/bottomLeftVertex.w;
     
@@ -134,34 +137,11 @@ void main() {
     float height = sizes.y;
     float width  = sizes.x;
 
-    big = 0;
-
-    // JCC: Change this (horrible code :-))
-    // while((height > billboardSize) ||
-    //       (width > billboardSize)) {
-    //     scaledRight *= 0.99;
-    //     scaledUp    *= 0.99;
-    //     topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-    //         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    //     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-    //         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    //     topRight = topRightVertex.xy/topRightVertex.w;
-    //     topRight =  ((topRight + vec2(1.0)) * halfViewSize) - vec2(0.5);
-    //     bottomLeft = bottomLeftVertex.xy/bottomLeftVertex.w;
-    //     bottomLeft = ((bottomLeft + vec2(1.0)) * halfViewSize) - vec2(0.5);
-    //     height = abs(topRight.y - bottomLeft.y);
-    //     width  = abs(topRight.x - bottomLeft.x);  
-    // }
-
     if ((height > billboardSize) ||
         (width > billboardSize)) { 
-        
-        if (height > screenSize.y)
-            big = 1;
-
         float correctionScale = height > billboardSize ? billboardSize / height :
                                                          billboardSize / width;
-        //correctionScale *= 0.5;
+
         scaledRight *= correctionScale;
         scaledUp    *= correctionScale;
         bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
@@ -177,34 +157,24 @@ void main() {
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
     } else {            
-        // if (width < 2.0f * minBillboardSize) {
-        //     float maxVar = 2.0f * minBillboardSize;
-        //     float minVar = minBillboardSize;
-        //     float var    = (height + width);    
-        //     ta = ( (var - minVar)/(maxVar - minVar) );
-        //     if (ta == 0.0f)
-        //         return;
-        // }
-
         bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
-        
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
     } 
 
     // Build primitive
-    texCoord    = corners[3];
     gl_Position = topLeftVertex;
+    psfCoords   = vec2(-1.0, 1.0);
     EmitVertex();
-    texCoord    = corners[0];
     gl_Position = bottomLeftVertex;
+    psfCoords   = vec2(-1.0, -1.0);
     EmitVertex();
-    texCoord    = corners[2];
     gl_Position = topRightVertex;
+    psfCoords   = vec2(1.0, 1.0);
     EmitVertex();
-    texCoord    = corners[1];
     gl_Position = bottomRightVertex;
+    psfCoords   = vec2(1.0, -1.0);
     EmitVertex();
     EndPrimitive();     
 }

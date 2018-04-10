@@ -84,13 +84,6 @@ namespace {
         float speed;
     };
 
-    static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
-        "Texture",
-        "Point Spread Function Texture",
-        "The path to the texture that should be used as a point spread function for the "
-        "stars."
-    };
-
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
@@ -113,10 +106,10 @@ namespace {
         "Farther away, stars dim proportionally to the logarithm of their distance."
     };
 
-    static const openspace::properties::Property::PropertyInfo SharpnessInfo = {
-        "Sharpness",
-        "Sharpness",
-        "Adjust star sharpness"
+    static const openspace::properties::Property::PropertyInfo ColorContributionInfo = {
+        "ColorContribution",
+        "Color Contribution",
+        "Adjust the color intensity of the stars"
     };
 
     static const openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
@@ -147,12 +140,6 @@ namespace openspace {
                 "being rendered."
             },
             {
-                PsfTextureInfo.identifier,
-                new StringVerifier,
-                Optional::No,
-                PsfTextureInfo.description
-            },
-            {
                 ColorTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
@@ -173,10 +160,10 @@ namespace openspace {
                 MagnitudeExponentInfo.description
             },
             {
-                SharpnessInfo.identifier,
+                ColorContributionInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
-                SharpnessInfo.description
+                ColorContributionInfo.description
             },
             {
                 BillboardSizeInfo.identifier,
@@ -190,16 +177,13 @@ namespace openspace {
 
     RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         : Renderable(dictionary)
-        , _pointSpreadFunctionTexturePath(PsfTextureInfo)
-        , _pointSpreadFunctionTexture(nullptr)
-        , _pointSpreadFunctionTextureIsDirty(true)
         , _colorTexturePath(ColorTextureInfo)
         , _colorTexture(nullptr)
         , _colorTextureIsDirty(true)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
         , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 12.f)
-        , _sharpness(SharpnessInfo, 1.f, 0.f, 10.f)
+        , _colorContribution(ColorContributionInfo, 2.f, 0.f, 10.f)
         , _billboardSize(BillboardSizeInfo, 30.f, 1.f, 500.f)
         , _program(nullptr)
         , _speckFile("")
@@ -214,11 +198,6 @@ namespace openspace {
             dictionary,
             "RenderableStars"
         );
-
-        _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
-            PsfTextureInfo.identifier
-            ));
-        _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
 
         _colorTexturePath = absPath(dictionary.value<std::string>(
             ColorTextureInfo.identifier
@@ -249,14 +228,6 @@ namespace openspace {
         _colorOption.onChange([&] { _dataIsDirty = true; });
         addProperty(_colorOption);
 
-        _pointSpreadFunctionTexturePath.onChange(
-            [&] { _pointSpreadFunctionTextureIsDirty = true; }
-        );
-        _pointSpreadFunctionFile->setCallback(
-            [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
-        );
-        addProperty(_pointSpreadFunctionTexturePath);
-
         _colorTexturePath.onChange([&] { _colorTextureIsDirty = true; });
         _colorTextureFile->setCallback(
             [&](const File&) { _colorTextureIsDirty = true; }
@@ -270,12 +241,12 @@ namespace openspace {
         }
         addProperty(_magnitudeExponent);
 
-        if (dictionary.hasKey(SharpnessInfo.identifier)) {
-            _sharpness = static_cast<float>(
-                dictionary.value<double>(SharpnessInfo.identifier)
+        if (dictionary.hasKey(ColorContributionInfo.identifier)) {
+            _colorContribution = static_cast<float>(
+                dictionary.value<double>(ColorContributionInfo.identifier)
                 );
         }
-        addProperty(_sharpness);
+        addProperty(_colorContribution);
 
         if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
             _billboardSize = static_cast<float>(
@@ -305,10 +276,9 @@ namespace openspace {
         _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation("cameraViewProjectionMatrix");
         _uniformCache.colorOption = _program->uniformLocation("colorOption");
         _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
-        _uniformCache.sharpness = _program->uniformLocation("sharpness");
+        _uniformCache.colorContribution = _program->uniformLocation("colorContribution");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
         
         bool success = loadData();
@@ -323,7 +293,6 @@ namespace openspace {
         glDeleteVertexArrays(1, &_vao);
         _vao = 0;
 
-        _pointSpreadFunctionTexture = nullptr;
         _colorTexture = nullptr;
 
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -356,7 +325,7 @@ namespace openspace {
         _program->setUniform(_uniformCache.cameraUp, cameraUp);
         _program->setUniform(_uniformCache.colorOption, _colorOption);
         _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
-        _program->setUniform(_uniformCache.sharpness, _sharpness);
+        _program->setUniform(_uniformCache.colorContribution, _colorContribution);
         _program->setUniform(_uniformCache.billboardSize, _billboardSize);
         _program->setUniform(
             _uniformCache.screenSize,
@@ -366,11 +335,6 @@ namespace openspace {
         // Correct code to be used when stereo correction being added into master.
         //_program->setUniform(_uniformCache.eyePosition, data.camera.eyePositionVec3());
         _program->setUniform(_uniformCache.eyePosition, data.camera.positionVec3());
-
-        ghoul::opengl::TextureUnit psfUnit;
-        psfUnit.activate();
-        _pointSpreadFunctionTexture->bind();
-        _program->setUniform(_uniformCache.psfTexture, psfUnit);
 
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
@@ -513,37 +477,6 @@ namespace openspace {
             _dataIsDirty = false;
         }
 
-        if (_pointSpreadFunctionTextureIsDirty) {
-            LDEBUG("Reloading Point Spread Function texture");
-            _pointSpreadFunctionTexture = nullptr;
-            if (_pointSpreadFunctionTexturePath.value() != "") {
-                _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-                    absPath(_pointSpreadFunctionTexturePath)
-                );
-
-                if (_pointSpreadFunctionTexture) {
-                    LDEBUG(fmt::format(
-                        "Loaded texture from '{}'",
-                        absPath(_pointSpreadFunctionTexturePath)
-                    ));
-                    _pointSpreadFunctionTexture->uploadTexture();
-                }
-                _pointSpreadFunctionTexture->setFilter(
-                    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-                );
-
-                _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-                    _pointSpreadFunctionTexturePath
-                    );
-                _pointSpreadFunctionFile->setCallback(
-                    [&](const ghoul::filesystem::File&) {
-                    _pointSpreadFunctionTextureIsDirty = true;
-                }
-                );
-            }
-            _pointSpreadFunctionTextureIsDirty = false;
-        }
-
         if (_colorTextureIsDirty) {
             LDEBUG("Reloading Color Texture");
             _colorTexture = nullptr;
@@ -577,10 +510,9 @@ namespace openspace {
             _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation("cameraViewProjectionMatrix");
             _uniformCache.colorOption = _program->uniformLocation("colorOption");
             _uniformCache.magnitudeExponent = _program->uniformLocation("magnitudeExponent");
-            _uniformCache.sharpness = _program->uniformLocation("sharpness");
+            _uniformCache.colorContribution = _program->uniformLocation("colorContribution");
             _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
             _uniformCache.screenSize = _program->uniformLocation("screenSize");
-            _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
             _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
         }
     }

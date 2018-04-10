@@ -30,22 +30,19 @@ const int COLOROPTION_COLOR    = 0;
 const int COLOROPTION_VELOCITY = 1; 
 const int COLOROPTION_SPEED    = 2;
  
-uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
 
 uniform float magnitudeExponent;
-uniform float sharpness;
+uniform float colorContribution;
 uniform int colorOption;
 
-in vec4  vs_position;
-flat in vec3  ge_brightness;
-flat in vec3  ge_velocity;
-in vec2  texCoord;
+in vec4 vs_position;
+flat in vec3 ge_brightness;
+flat in vec3 ge_velocity;
+in vec2 psfCoords;
 flat in float ge_speed;
 flat in float ge_observationDistance;
 flat in float gs_screenSpaceDepth;
-flat in int big;
-flat in double appB;
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -71,22 +68,18 @@ Fragment getFragment() {
             break;
     }
 
-    vec4 textureColor = texture(psfTexture, texCoord);
-    vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a = pow(fullColor.a, sharpness);
-    //float power =  float(abs(appB));
-    //fullColor.a = pow(fullColor.a, power > 1.0 ? power : 1.0);
-
-    //fullColor.a = pow(fullColor.a, 1.0/power);
-
-    //float d = (magnitudeExponent+15.0) - log(ge_observationDistance) / log(10.0);
-    //fullColor.a *= clamp(d, 0.0, 1.0);
-    //fullColor.xyz = vec3(pow(fullColor.a, float(abs(appB))));
-    // DEBUGGING
-    if (big == 1) {
-        fullColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
-
+    vec4 fullColor = vec4(color.rgb, 1.0);
+    
+    // PSF Functions from paper: Physically-Based Galre Effects for Digital
+    // Images - Spencer, Shirley, Zimmerman and Greenberg.
+    float theta = sqrt((psfCoords.y*psfCoords.y + psfCoords.x*psfCoords.x)) * 90.0;
+    float alpha = 0.02;
+    float f0  = 2.61E6 * exp(-pow(theta/alpha, 2.0));
+    float f1  = 20.91/pow(theta + alpha, 3.0);
+    float f2  = 72.37/pow(theta + alpha, 2.0);
+    float psf_p = 0.384 * f0 + 0.478 * f1 + 0.138 * f2;
+    fullColor = vec4((colorContribution * color.rgb + psf_p) / (colorContribution + 1.0), psf_p);
+    
     if (fullColor.a == 0) {
         discard;
     }
