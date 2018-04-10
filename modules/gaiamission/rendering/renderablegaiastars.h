@@ -72,7 +72,7 @@ private:
     };
     
     bool readFitsFile(ColumnOption option);
-    std::vector<float> sliceStarValues(ColumnOption option, std::vector<float> starValues);
+    std::vector<float> sliceFitsValues(ColumnOption option, std::vector<float> starValues);
     std::vector<float> sliceSpeckStars(ColumnOption option, std::vector<float> starValues);
     float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
@@ -81,8 +81,8 @@ private:
     bool _dataIsDirty;
 
     std::string _fileTypeOrigin;
-    const std::string fitsOrigin = "fits";
-    const std::string speckOrigin = "speck";
+    const std::string FITS = "fits";
+    const std::string SPECK = "speck";
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;

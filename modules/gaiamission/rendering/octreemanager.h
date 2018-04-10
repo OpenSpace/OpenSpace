@@ -44,7 +44,7 @@ public:
         float originY;
         float originZ;
         float halfDimension;
-        size_t numStars;
+        size_t numStars; // TODO: Use in LOD checks, else remove?
         bool isLeaf;
         int vboIndex;
         size_t lodInUse;
@@ -60,6 +60,8 @@ public:
     std::unordered_map<int, std::vector<float>> traverseData(const glm::mat4 mvp,
         const glm::vec2 screenSize, int& deltaStars);
     std::vector<float> getAllData();
+    void writeToFile(std::ofstream& outFileStream);
+    void readFromFile(std::ifstream& inFileStream);
 
     size_t numLeafNodes() const;
     size_t maxStarsPerNode() const;
@@ -88,6 +90,9 @@ private:
     std::unordered_map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<
         OctreeNode> node, int& deltaStars, bool recursive = true);
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node);
+    void createNodeChildren(std::shared_ptr<OctreeNode> node);
+    void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
+    void readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;

@@ -1093,10 +1093,10 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
 
                 // Data needs to be sliced differently depending on file origin.
                 auto slicedValues = std::vector<float>();
-                if (fitsOrigin == _fileTypeOrigin) {
-                    slicedValues = sliceStarValues(option, values);
+                if (_fileTypeOrigin == FITS) {
+                    slicedValues = sliceFitsValues(option, values);
                 }
-                else if (speckOrigin == _fileTypeOrigin) {
+                else if (_fileTypeOrigin == SPECK) {
                     slicedValues = sliceSpeckStars(option, values);
                 }
                 else {
@@ -1106,7 +1106,6 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
                 _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
                 _octreeManager->insert(slicedValues);
             }
-
         }
         else {
             LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
@@ -1197,7 +1196,7 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
 
             // Slice star data and insert star into octree.
             // TODO: Do this earlier so I don't read values to just throw them away!? 
-            auto slicedValues = sliceStarValues(option, values); 
+            auto slicedValues = sliceFitsValues(option, values); 
             _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
 
             // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
@@ -1226,9 +1225,9 @@ bool RenderableGaiaStars::readFitsFile(ColumnOption option) {
     return true;
 }
 
-// Slices every star seperately, before they are inserted into Octree. 
+// Slices every star seperately, from FITS file, before they are inserted into Octree. 
 // Conversion of position is done in vertex shader to simplify calculations in Octree.
-std::vector<float> RenderableGaiaStars::sliceStarValues(ColumnOption option, 
+std::vector<float> RenderableGaiaStars::sliceFitsValues(ColumnOption option,
     std::vector<float> starValues) {
 
     auto tmpData = std::vector<float>();

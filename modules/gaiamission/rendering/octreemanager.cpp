@@ -29,7 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
 #include <ghoul/fmt.h>
-
+#include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "OctreeManager";
@@ -196,6 +196,68 @@ std::vector<float> OctreeManager::getAllData() {
     return fullData;
 }
 
+// Write entire Octree to a file.
+void OctreeManager::writeToFile(std::ofstream& outFileStream) {
+    
+    outFileStream.write(reinterpret_cast<const char*>(&_valuesPerStar), sizeof(int32_t));
+
+    // Use pre-traversal (Morton code / Z-order).
+    for (size_t i = 0; i < 8; ++i) {
+        writeNodeToFile(outFileStream, _root->Children[i]);
+    }
+}
+
+// Write a node to outStream.
+void OctreeManager::writeNodeToFile(std::ofstream& outFileStream, 
+    std::shared_ptr<OctreeNode> node) {
+
+    // Write node data.
+    int32_t nBytes = sizeof(node->data.data());
+    outFileStream.write(reinterpret_cast<const char*>(node->isLeaf), sizeof(bool));
+    outFileStream.write(reinterpret_cast<const char*>(node->numStars), sizeof(int16_t));
+    outFileStream.write(reinterpret_cast<const char*>(&nBytes), sizeof(int32_t));
+    outFileStream.write(reinterpret_cast<const char*>(node->data.data()), nBytes);
+
+    // Write children to file (in Morton order) if we're in an inner node.
+    if (!node->isLeaf) {
+        for (size_t i = 0; i < 8; ++i) {
+            writeNodeToFile(outFileStream, node->Children[i]);
+        }
+    }
+}
+
+// Read a constructed Octree from a file. 
+void OctreeManager::readFromFile(std::ifstream& inFileStream) {
+
+    inFileStream.read(reinterpret_cast<char*>(&_valuesPerStar), sizeof(int32_t));
+
+    // Use the same technique to construct octree from file. 
+    for (size_t i = 0; i < 8; ++i) {
+        readNodeFromFile(inFileStream, _root->Children[i]);
+    }
+}
+
+// Read a node from file and its potential children.
+void OctreeManager::readNodeFromFile(std::ifstream& inFileStream, 
+    std::shared_ptr<OctreeNode> node) {
+
+    int32_t nBytes = 0;
+    auto readData = std::vector<float>(nBytes, 0.0f);
+    node->data.resize(nBytes);
+    inFileStream.read(reinterpret_cast<char*>(node->isLeaf), sizeof(bool));
+    inFileStream.read(reinterpret_cast<char*>(node->numStars), sizeof(int16_t));
+    inFileStream.read(reinterpret_cast<char*>(&nBytes), sizeof(int32_t));
+    inFileStream.read(reinterpret_cast<char*>(&node->data[0]), nBytes);
+
+    // Create children if we're in an inner node and read from the corresponding nodes.
+    if (!node->isLeaf) {
+        createNodeChildren(node);
+        for (size_t i = 0; i < 8; ++i) {
+            readNodeFromFile(inFileStream, node->Children[i]);
+        }
+    }
+}
+
 // Return number of leaf nodes in Octree.
 size_t OctreeManager::numLeafNodes() const {
     return _numLeafNodes;
@@ -245,28 +307,8 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
         // Too many stars in leaf node, subdivide into 8 new nodes.
         _valuesPerStar = starValues.size();
 
-        // Create children.
-        for (size_t i = 0; i < 8; ++i) {
-            _numLeafNodes++;
-            node->Children[i] = std::make_unique<OctreeNode>();
-            node->Children[i]->isLeaf = true;
-            node->Children[i]->vboIndex = DEFAULT_INDEX;
-            node->Children[i]->lodInUse = 0;
-            node->Children[i]->numStars = 0;
-            node->Children[i]->data = std::vector<float>();
-            node->Children[i]->halfDimension = node->halfDimension / 2.f;
-
-            // Calculate new origin.
-            node->Children[i]->originX = node->originX;
-            node->Children[i]->originX += (i % 2 == 0) ? node->Children[i]->halfDimension
-                : -node->Children[i]->halfDimension;
-            node->Children[i]->originY = node->originY;
-            node->Children[i]->originY += (i % 4 < 2) ? node->Children[i]->halfDimension
-                : -node->Children[i]->halfDimension;
-            node->Children[i]->originZ = node->originZ;
-            node->Children[i]->originZ += (i < 4) ? node->Children[i]->halfDimension
-                : -node->Children[i]->halfDimension;
-        }
+        // Create children and clean up parent.
+        createNodeChildren(node);
 
         // Construct an initial LOD cache in inner node for faster traversals during render.
         auto tmpLodNode = std::make_shared<OctreeNode>();
@@ -285,11 +327,6 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             // Check if we should keep this star in LOD cache. 
             insertStarInLodCache(tmpLodNode, starValues);
         }
-
-        // Clean up parent.
-        node->isLeaf = false;
-        _numLeafNodes--;
-        _numInnerNodes++;
         
         // Copy LOD cache data from the first MAX_STARS_PER_NODE stars.
         // Don't use LOD cache for our more shallow layers.
@@ -540,6 +577,37 @@ std::vector<float> OctreeManager::getNodeData(std::shared_ptr<OctreeNode> node) 
         nodeData.insert(nodeData.end(), tmpData.begin(), tmpData.end());
     }
     return nodeData;
+}
+
+// Contruct children for specified node.
+void OctreeManager::createNodeChildren(std::shared_ptr<OctreeNode> node) {
+    
+    for (size_t i = 0; i < 8; ++i) {
+        _numLeafNodes++;
+        node->Children[i] = std::make_unique<OctreeNode>();
+        node->Children[i]->isLeaf = true;
+        node->Children[i]->vboIndex = DEFAULT_INDEX;
+        node->Children[i]->lodInUse = 0;
+        node->Children[i]->numStars = 0;
+        node->Children[i]->data = std::vector<float>();
+        node->Children[i]->halfDimension = node->halfDimension / 2.f;
+
+        // Calculate new origin.
+        node->Children[i]->originX = node->originX;
+        node->Children[i]->originX += (i % 2 == 0) ? node->Children[i]->halfDimension
+            : -node->Children[i]->halfDimension;
+        node->Children[i]->originY = node->originY;
+        node->Children[i]->originY += (i % 4 < 2) ? node->Children[i]->halfDimension
+            : -node->Children[i]->halfDimension;
+        node->Children[i]->originZ = node->originZ;
+        node->Children[i]->originZ += (i < 4) ? node->Children[i]->halfDimension
+            : -node->Children[i]->halfDimension;
+    }
+
+    // Clean up parent.
+    node->isLeaf = false;
+    _numLeafNodes--;
+    _numInnerNodes++;
 }
 
 }
