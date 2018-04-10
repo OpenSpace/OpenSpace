@@ -8,7 +8,6 @@ import {StoryKey} from "../../api/keys";
 
 class Markers extends Component {
   componentDidUpdate() {
-    console.log(this.props);
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
     } = this.props;
@@ -44,7 +43,6 @@ class Markers extends Component {
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
     } = this.props;
-    console.log(this.props);
 
     const markerInfo = nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');

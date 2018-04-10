@@ -7,29 +7,12 @@ import Button from '../common/Input/Button/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
 import Time from '../common/Input/Time/Time';
-import { TogglePauseScript, CurrenTimeKey, ValuePlaceholder, SetDeltaTimeScript } from '../../api/keys';
+import { CurrenTimeKey } from '../../api/keys';
 import SimulationIncrement from './SimulationIncrement';
 import styles from './TimePicker.scss';
-
-/**
- * Make sure the date string contains a time zone
- * @param date
- * @param zone - the time zone in ISO 8601 format
- * @constructor
- */
-const DateStringWithTimeZone = (date, zone = 'Z') =>
-  (!date.includes('Z') ? `${date}${zone}` : date);
+import * as timeHelpers from '../../utils/timeHelpers';
 
 class TimePicker extends Component {
-  static togglePause() {
-    DataManager.runScript(TogglePauseScript);
-  }
-
-  static realtime() {
-    const script = SetDeltaTimeScript.replace(ValuePlaceholder, 1);
-    DataManager.runScript(script);
-  }
-
   constructor(props) {
     super(props);
 
@@ -42,7 +25,6 @@ class TimePicker extends Component {
 
     this.subscriptionCallback = this.subscriptionCallback.bind(this);
     this.togglePopover = this.togglePopover.bind(this);
-    this.now = this.now.bind(this);
     this.setDate = this.setDate.bind(this);
   }
 
@@ -84,13 +66,13 @@ class TimePicker extends Component {
         <hr className={Popover.styles.delimiter} />
 
         <div className={`${Popover.styles.row} ${Popover.styles.content}`}>
-          <Button block smalltext onClick={TimePicker.togglePause}>
+          <Button block smalltext onClick={timeHelpers.togglePause}>
             Pause
           </Button>
-          <Button block smalltext onClick={TimePicker.realtime}>
+          <Button block smalltext onClick={timeHelpers.realtime}>
             Realtime
           </Button>
-          <Button block smalltext onClick={this.now}>
+          <Button block smalltext onClick={timeHelpers.now}>
             Now
           </Button>
         </div>
@@ -100,19 +82,11 @@ class TimePicker extends Component {
 
   setDate(time) {
     this.setState({ time });
-    // Spice, that is handling the time parsing in OpenSpace does not support
-    // ISO 8601-style time zones (the Z). It does, however, always assume that UTC
-    // is given.
-    const fixedTimeString = time.toJSON().replace('Z', '');
-    DataManager.setValue('__time', fixedTimeString);
+    timeHelpers.setDate(time);
   }
 
   togglePopover() {
     this.setState({ showPopover: !this.state.showPopover });
-  }
-
-  now() {
-    this.setDate(new Date());
   }
 
   /**
@@ -120,7 +94,7 @@ class TimePicker extends Component {
    * @param message [object] - message object sent from Subscription
    */
   subscriptionCallback(message) {
-    const time = new Date(DateStringWithTimeZone(message.time));
+    const time = new Date(timeHelpers.DateStringWithTimeZone(message.time));
     this.setState({ time, hasTime: true });
   }
 

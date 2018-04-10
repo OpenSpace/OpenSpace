@@ -21,5 +21,7 @@ storiesOf('Input/Button', module)
   .add('disabled', () => (<Button disabled>disabled button!</Button>))
   .add('nopadding', () => (<Button nopadding>nopadding button!</Button>))
   .add('uppercase', () => (<Button uppercase>uppercase button!</Button>))
+  .add('flexgrow', () => (<Button flexgrow>flexgrow button!</Button>))
+  .add('fixedwidth', () => (<Button fixedwidth>fixedwidth button!</Button>))
   .add('ALL the variations', () =>
     (<Button small smalltext block uppercase transparent>crazy button!</Button>));
