@@ -271,8 +271,11 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {
-        glm::vec3 directionToSunWorldSpace =
-            glm::normalize(-data.modelTransform.translation);
+        glm::dvec3 directionToSunWorldSpace =
+            length(data.modelTransform.translation) > 0.0 ?
+            glm::normalize(-data.modelTransform.translation) :
+            glm::dvec3(0.0);
+
         glm::vec3 directionToSunCameraSpace =
             glm::vec3(viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
         programObject.setUniform(

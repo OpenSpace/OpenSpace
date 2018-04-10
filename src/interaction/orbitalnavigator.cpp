@@ -377,7 +377,11 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
             localCameraRotation,
             glm::dquat(glm::dvec3(0.0)),
             glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0));
-        if (angle(result) < 0.01) {
+
+        // Retrieving the angle of a quaternion uses acos on the w component, which can
+        // have numerical instability for values close to 1.0
+        constexpr double Epsilon = 1.0e-13;
+        if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
             _rotateToFocusNodeInterpolator.end();
         }
         return result;
