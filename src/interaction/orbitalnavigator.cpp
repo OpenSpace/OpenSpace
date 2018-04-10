@@ -100,6 +100,12 @@ namespace {
         "Fly to focus node",
         "Determines whether to fly to the focus node or just focus on it."
     };
+
+    static const openspace::properties::Property::PropertyInfo solarSystemOverview = {
+        "solarSystemOverview",
+        "Show Solar System overview",
+        "Determines whether to zoom out to the entire Solar System or not."
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -125,6 +131,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
     , _velocitySensitivity(velocityZoomControl, 0.05f, 0.001f, 0.1f)
     , _flyTo(flyToNode, true)
+    , _showSolarSystem(solarSystemOverview, false)
 {
     auto smoothStep =
         [](double t) {
@@ -178,6 +185,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_sensitivity);
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
+    addProperty(_showSolarSystem);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -226,6 +234,22 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
                 camPos = zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit);
             else 
                 _flyTo = false; 
+        }
+
+        // Zoom away from the focus node until the entire solar system is in the camera view
+        /* TODO: Remove magic numbers */
+        if (_showSolarSystem) {
+            double solarSystemLimit = 2.2e+13;
+            _flyTo = false;
+
+            if (length(camPos) <= solarSystemLimit) {
+                camPos = zoomToFocusNode(camPos, solarSystemLimit, -camPosToCenterPosDiff, length(camPos));
+                if (length(camPos) > solarSystemLimit*0.9)
+                    _showSolarSystem = false;
+            }
+            else {
+                _showSolarSystem = false;
+            }
         }
 
         // Decompose camera rotation so that we can handle global and local rotation

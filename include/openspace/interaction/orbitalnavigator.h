@@ -85,6 +85,7 @@ private:
     properties::FloatProperty _sensitivity;
     properties::FloatProperty _velocitySensitivity;
     properties::BoolProperty _flyTo;
+    properties::BoolProperty _showSolarSystem;
 
     MouseStates _mouseStates;
 
