@@ -94,7 +94,7 @@ private:
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    ghoul::opengl::ProgramObject* _programObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;

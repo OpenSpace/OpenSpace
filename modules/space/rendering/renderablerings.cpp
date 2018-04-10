@@ -216,7 +216,7 @@ void RenderableRings::deinitializeGL() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    OsEng.renderEngine().removeRenderProgram(_shader);
+    OsEng.renderEngine().removeRenderProgram(_shader.get());
     _shader = nullptr;
 }
 
