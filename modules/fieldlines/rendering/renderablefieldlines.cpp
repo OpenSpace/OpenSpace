@@ -123,16 +123,10 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     , _fieldlineVAO(0)
     , _vertexPositionBuffer(0)
 {
-    ghoul_assert(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "Renderable does not have a name"
-    );
+    std::string identifier = dictionary.value<std::string>(SceneGraphNode::KeyIdentifier);
+    setIdentifier(identifier);
 
-    std::string name;
-    dictionary.getValue(SceneGraphNode::KeyName, name);
-    setName(name);
-
-    _loggerCat = "RenderableFieldlines [" + name + "]";
+    _loggerCat = "RenderableFieldlines [" + identifier + "]";
 
     bool success = dictionary.getValue(keyVectorField, _vectorFieldInfo);
     if (!success) {
@@ -254,7 +248,7 @@ void RenderableFieldlines::deinitializeGL() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program);
+        renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
 }
@@ -355,7 +349,7 @@ void RenderableFieldlines::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(LinePoint),
-            (void*)(sizeof(glm::vec3))
+            reinterpret_cast<void*>(sizeof(glm::vec3))
         );
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -184,8 +184,8 @@ for i = 0, #CaseDependentKernels do
 end
 
 local OsirisRex = {
-    Name = "OsirisRex",
-    Parent = sunTransforms.SolarSystemBarycenter.Name,
+    Identifier = "OsirisRex",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -208,12 +208,15 @@ local OsirisRex = {
         },
         ColorTexture = textures .. "/osirisTex.png"
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OSIRIS REx",
+        Path = "/Solar System/Missions/OSIRIS REx"
+    }
 }
 
 local PolyCam = {
-    Name = "ORX_OCAMS_POLYCAM",
-    Parent = OsirisRex.Name,
+    Identifier = "ORX_OCAMS_POLYCAM",
+    Parent = OsirisRex.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -234,12 +237,15 @@ local PolyCam = {
         }, 
         ColorTexture = textures .. "/osirisTex.png"
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "OCAMS POLYCAM",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 local Rexis = {
-    Name = "ORX_REXIS",
-    Parent = OsirisRex.Name,
+    Identifier = "ORX_REXIS",
+    Parent = OsirisRex.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "OSIRIS-REX",
@@ -260,12 +266,15 @@ local Rexis = {
             DestinationFrame = "ORX_SPACECRAFT"
         },
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "REXIS",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 local PolyCamFov = {
-    Name = "POLYCAM FOV",
-    Parent = PolyCam.Name,
+    Identifier = "POLYCAM FOV",
+    Parent = PolyCam.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "OSIRIS-REX",
@@ -278,12 +287,15 @@ local PolyCamFov = {
         },
         PotentialTargets = { BENNU_BODY }
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "POLYCAM FOV",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 local RexisFov = {
-    Name = "REXIS FOV",
-    Parent = Rexis.Name,
+    Identifier = "REXIS FOV",
+    Parent = Rexis.Identifier,
     Renderable = {
         Type  = "RenderableFov",
         Body  = "OSIRIS-REX",
@@ -299,7 +311,10 @@ local RexisFov = {
             [BENNU_BODY] = "IAU_BENNU"
         }
     },
-    GuiPath = "/Solar System/Missions/OSIRIS REx"
+    GUI = {
+        Name = "REXIS FOV",
+        Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    }
 }
 
 

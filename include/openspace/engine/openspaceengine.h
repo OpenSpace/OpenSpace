@@ -51,7 +51,7 @@ class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
-class ParallelConnection;
+class ParallelPeer;
 class RenderEngine;
 class Scene;
 class SyncEngine;
@@ -128,7 +128,7 @@ public:
     ModuleEngine& moduleEngine();
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
-    ParallelConnection& parallelConnection();
+    ParallelPeer& parallelPeer();
     RenderEngine& renderEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
@@ -212,7 +212,7 @@ private:
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
-    std::unique_ptr<ParallelConnection> _parallelConnection;
+    std::unique_ptr<ParallelPeer> _parallelPeer;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;

@@ -111,7 +111,7 @@ double getTime(ccmc::Kameleon* kameleon) {
                     case 17: // YYYY-MM-DDTHH:MM:      =>       YYYY-MM-DDTHH:MM:SS
                         seqStartStr += "00";
                         [[fallthrough]];
-                        // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
+                    // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
                     //     seqStartStr += ".000";
                     // case 23 : // YYYY-MM-DDTHH:MM:SS.   =>    YYYY-MM-DDTHH:MM:SS.000Z
                     //     seqStartStr += "Z";
@@ -142,7 +142,7 @@ double getTime(ccmc::Kameleon* kameleon) {
                     Time::convertTime(
                             seqStartStr.substr(0, seqStartStr.length() - 2));
         } else {
-            LWARNING("No starting time attribute could be found in the .cdf file." 
+            LWARNING("No starting time attribute could be found in the .cdf file."
                 "Starting time is set to 01.JAN.2000 12:00.");
             seqStartDbl = 0.0;
         }

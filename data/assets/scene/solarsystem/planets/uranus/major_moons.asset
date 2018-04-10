@@ -5,78 +5,88 @@ local kernels111 = asset.require('./ura111').Kernels
 
 
 
-local parentName = transforms.UranusBarycenter.Name
+local parentIdentifier = transforms.UranusBarycenter.Identifier
 local parentSpice = "URANUS BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major" }
 local trailColor = { 0.60, 0.65, 0.84 }
 
 local majorMoons = {
     {
-        Name = "Miranda",
+        Identifier = "Miranda",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "MIRANDA",
         Radii = { 471600, 468000, 466000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1.413479,
         Kernels = kernels111
     },
     {
-        Name = "Ariel",
+        Identifier = "Ariel",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "ARIEL",
         Radii = { 1162000, 1156000, 1155000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 2.520379,
         Kernels = kernels111
     },
     {
-        Name = "Umbriel",
+        Identifier = "Umbriel",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "UMBRIEL",
         Radii = { 1169400, 1169400, 1169400 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 4.144177,
         Kernels = kernels111
     },
     {
-        Name = "Titania",
+        Identifier = "Titania",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "TITANIA",
         Radii = { 1576800, 1576800, 1576800 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 8.705872,
         Kernels = kernels111
     },
     {
-        Name = "Oberon",
+        Identifier = "Oberon",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "OBERON",
         Radii = { 1522800, 1522800, 1522800 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Uranus/Moons/Major Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Uranus/Moons/Major Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 13.463239,
         Kernels = kernels111

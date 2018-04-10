@@ -27,10 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboarditem.h>
-
 #include <ghoul/glm.h>
-
 #include <memory>
 #include <vector>
 
@@ -49,8 +48,9 @@ public:
     void addDashboardItem(std::unique_ptr<DashboardItem> item);
     bool hasItem(int index) const;
     const DashboardItem& item(int index) const;
+    void removeDashboardItem(const std::string& identifier);
     void removeDashboardItem(int index);
-    void removeDashboardItems();
+    void clearDashboardItems();
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -59,6 +59,8 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
+    properties::BoolProperty _isEnabled;
+
     std::vector<std::unique_ptr<DashboardItem>> _items;
 };
 

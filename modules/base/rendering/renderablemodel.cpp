@@ -24,8 +24,8 @@
 
 #include <modules/base/rendering/renderablemodel.h>
 
+#include <modules/base/basemodule.h>
 #include <modules/base/rendering/modelgeometry.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/configurationmanager.h>
@@ -43,7 +43,8 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const char* KeyGeometry = "Geometry";
+    constexpr const char* ProgramName = "ModelProgram";
+    constexpr const char* KeyGeometry = "Geometry";
 
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "ColorTexture",
@@ -112,21 +113,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
 {
-    ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "Name was not passed to RenderableModel"
-    );
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "RenderableModel"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
+
     if (dictionary.hasKey(KeyGeometry)) {
-        std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
         ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-        dict.setValue(SceneGraphNode::KeyName, name);
         _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
     }
 
@@ -157,12 +155,18 @@ bool RenderableModel::isReady() const {
 }
 
 void RenderableModel::initializeGL() {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
-        "ModelProgram",
-        absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/model_fs.glsl")
+    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/model_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/model_fs.glsl")
+            );
+        }
     );
 
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
         "directionToSunViewSpace"
     );
@@ -176,6 +180,8 @@ void RenderableModel::initializeGL() {
         "performShading"
     );
     _uniformCache.texture = _programObject->uniformLocation("texture1");
+
+
     loadTexture();
 
     _geometry->initialize(this);
@@ -188,14 +194,19 @@ void RenderableModel::deinitializeGL() {
     }
     _texture = nullptr;
 
-    if (_programObject) {
-        OsEng.renderEngine().removeRenderProgram(_programObject);
-        _programObject = nullptr;
-    }
+    BaseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _programObject = nullptr;
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
+
+    _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
@@ -244,6 +255,7 @@ void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
+        _uniformCache.opacity = _programObject->uniformLocation("opacity");
         _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
             "directionToSunViewSpace"
         );

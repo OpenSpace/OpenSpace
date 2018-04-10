@@ -123,7 +123,7 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                              ghoul::Dictionary dictionary)
-    : DashboardItem("Simulation Increment")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)
@@ -192,7 +192,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
-    
+
     penPosition.y -= _font->height();
     RenderFont(
         *_font,

@@ -69,7 +69,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.windowWrapper()),
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
-                        &(OsEng.parallelConnection()),
+                        &(OsEng.parallelPeer()),
                         &(OsEng.console()),
                         &(OsEng.dashboard())
                     };
@@ -79,9 +79,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._screenSpaceProperty.setSource(
                 []() {
-                   const std::vector<ScreenSpaceRenderable*>& ssr =
-                       OsEng.renderEngine().screenSpaceRenderables();
-                   return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
+                    return OsEng.renderEngine().screenSpaceOwner().propertySubOwners();
                 }
             );
 

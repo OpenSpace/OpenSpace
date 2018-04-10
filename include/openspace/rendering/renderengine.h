@@ -120,8 +120,7 @@ public:
         std::string csPath,
         const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
-    void removeRenderProgram(
-        const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+    void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
@@ -166,6 +165,8 @@ public:
     glm::ivec2 fontResolution() const;
 
     std::vector<Syncable*> getSyncables();
+
+    properties::PropertyOwner& screenSpaceOwner();
 
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
@@ -216,6 +217,7 @@ private:
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
+    properties::PropertyOwner _screenSpaceOwner;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;

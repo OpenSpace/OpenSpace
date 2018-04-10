@@ -178,7 +178,7 @@ template <typename T>
 void openspace::properties::TemplateProperty<T>::setValue(T val) {
     if (val != _value) {
         _value = std::move(val);
-        notifyListener();
+        notifyChangeListeners();
     }
 }
 
@@ -199,7 +199,7 @@ void TemplateProperty<T>::set(ghoul::any value) {
         T v = ghoul::any_cast<T>(std::move(value));
         if (v != _value) {
             _value = std::move(v);
-            notifyListener();
+            notifyChangeListeners();
         }
     }
     catch (ghoul::bad_any_cast&) {

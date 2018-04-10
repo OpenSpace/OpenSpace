@@ -106,7 +106,7 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 
     LINFO(fmt::format("Creating dump file: {}", dumpFile));
 
-    HANDLE hDumpFile = CreateFile(
+    HANDLE hDumpFile = CreateFileA(
         dumpFile.c_str(),
         GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
@@ -310,7 +310,7 @@ void mainInitFunc() {
 
 #endif // OPENSPACE_HAS_SPOUT
     }
-    
+
     std::string k = openspace::ConfigurationManager::KeyScreenshotUseDate;
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
@@ -329,7 +329,7 @@ void mainInitFunc() {
             SgctEngine->getWindowPtr(i)->getScreenCapturePointer(0);
         sgct_core::ScreenCapture* cpt1 =
             SgctEngine->getWindowPtr(i)->getScreenCapturePointer(1);
-        
+
         if (cpt0) {
             cpt0->setPathAndFileName(
                 absPath(screenshotPath),
@@ -655,7 +655,7 @@ int main_main(int argc, char** argv) {
         "Unknown OpenGL version. Missing statement in version mapping map"
     );
 
-    using IsInitialized = ghoul::Boolean;
+    BooleanType(IsInitialized);
     auto cleanup = [&](IsInitialized isInitialized){
         if (isInitialized) {
             OsEng.deinitialize();

@@ -40,8 +40,8 @@ namespace openspace::interaction {
 
 class KeyBindingManager : public DocumentationGenerator {
 public:
-    using IsLocalBind = ghoul::Boolean;
-    using IsSynchronized = ghoul::Boolean;
+    BooleanType(IsLocalBind);
+    BooleanType(IsSynchronized);
 
     struct KeyInformation {
         std::string command;

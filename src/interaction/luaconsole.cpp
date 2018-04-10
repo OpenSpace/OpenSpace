@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -263,20 +263,20 @@ void LuaConsole::initialize() {
     _font = OsEng.fontManager().font(
         FontName,
         EntryFontSize,
-        ghoul::fontrendering::Font::Outline::No
+        ghoul::fontrendering::FontManager::Outline::No
     );
 
     _historyFont = OsEng.fontManager().font(
         FontName,
         HistoryFontSize,
-        ghoul::fontrendering::Font::Outline::No
+        ghoul::fontrendering::FontManager::Outline::No
     );
 
-    OsEng.parallelConnection().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent()->subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = OsEng.parallelConnection().status();
+            ParallelConnection::Status status = OsEng.parallelPeer().status();
             parallelConnectionChanged(status);
         }
     );
@@ -316,7 +316,7 @@ void LuaConsole::deinitialize() {
 
     _program = nullptr;
 
-    OsEng.parallelConnection().connectionEvent()->unsubscribe("luaConsole");
+    OsEng.parallelPeer().connectionEvent()->unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -339,7 +339,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
         else {
             _isVisible = true;
-            if (OsEng.parallelConnection().status() == ParallelConnection::Status::Host) {
+            if (OsEng.parallelPeer().status() == ParallelConnection::Status::Host) {
                 _remoteScripting = true;
             }
         }
@@ -641,15 +641,22 @@ void LuaConsole::update() {
     _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
-    const float frametime = static_cast<float>(OsEng.windowWrapper().deltaTime());
+    // The first frame is going to be finished in approx 10 us, which causes a floating
+    // point overflow when computing dHeight
+    const double frametime = std::max(
+        OsEng.windowWrapper().deltaTime(),
+        1e-4
+    );
 
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
-    _currentHeight += (_targetHeight - _currentHeight) *
-        std::pow(0.98f, 1.f / (ConsoleOpenSpeed / dpiScaling.y * frametime));
+    const double dHeight = (_targetHeight - _currentHeight) *
+        std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
+
+    _currentHeight += static_cast<float>(dHeight);
 
     _currentHeight = std::max(0.0f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
@@ -857,10 +864,10 @@ void LuaConsole::render() {
     if (_remoteScripting) {
         const glm::vec4 red(1, 0, 0, 1);
 
-        ParallelConnection::Status status = OsEng.parallelConnection().status();
+        ParallelConnection::Status status = OsEng.parallelPeer().status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
-            OsEng.parallelConnection().nConnections() - 1 :
+            OsEng.parallelPeer().nConnections() - 1 :
             0;
 
         const std::string nClientsText =
@@ -870,7 +877,7 @@ void LuaConsole::render() {
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, red, nClientsText.c_str());
-    } else if (OsEng.parallelConnection().isHost()) {
+    } else if (OsEng.parallelPeer().isHost()) {
         const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
 
         const std::string localExecutionText = "Local script execution";

@@ -119,7 +119,7 @@ int addScreenSpaceRenderable(lua_State* L) {
 
 int removeScreenSpaceRenderable(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
-    
+
     using ghoul::lua::errorLocation;
 
     std::string name = ghoul::lua::checkStringAndPop(L);

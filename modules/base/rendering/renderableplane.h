@@ -73,7 +73,7 @@ private:
     properties::FloatProperty _size;
     properties::OptionProperty _blendMode;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    ghoul::opengl::ProgramObject* _shader;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;

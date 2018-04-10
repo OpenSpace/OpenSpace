@@ -52,7 +52,7 @@ int remove(lua_State* state) {
 int removeAll(lua_State* state) {
     ghoul::lua::checkArgumentsAndThrow(state, 0, "lua::removeAll");
 
-    
+
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 

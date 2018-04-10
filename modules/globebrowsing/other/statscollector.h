@@ -78,7 +78,7 @@ class StatsCollector {
 public:
     StatsCollector() = delete;
 
-    using Enabled = ghoul::Boolean;
+    BooleanType(Enabled);
 
     StatsCollector(const std::string& filename, int dumpEveryXRecord,
         Enabled enabled = Enabled::Yes, const std::string& delimiter = ",");

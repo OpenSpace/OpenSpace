@@ -37,7 +37,7 @@ TypeID getTypeIDFromTypeString(const std::string& typeString) {
 
 layergroupid::GroupID getGroupIDFromName(const std::string& layerGroupName) {
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        if (layerGroupName == layergroupid::LAYER_GROUP_NAMES[i]) {
+        if (layerGroupName == layergroupid::LAYER_GROUP_IDENTIFIERS[i]) {
             return static_cast<layergroupid::GroupID>(i);
         }
     }

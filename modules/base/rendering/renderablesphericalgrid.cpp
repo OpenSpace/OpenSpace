@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderablesphericalgrid.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -36,6 +37,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const char* ProgramName = "GridProgram";
+
     static const openspace::properties::Property::PropertyInfo GridColorInfo = {
         "GridColor",
         "Grid Color",
@@ -137,6 +140,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         "RenderableSphericalGrid"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     if (dictionary.hasKey(GridMatrixInfo.identifier)) {
         _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
     }
@@ -179,10 +185,15 @@ bool RenderableSphericalGrid::isReady() const {
 }
 
 void RenderableSphericalGrid::initializeGL() {
-    _gridProgram = OsEng.renderEngine().buildRenderProgram(
-        "GridProgram",
-        absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
+    _gridProgram = BaseModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/grid_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/grid_fs.glsl")
+            );
+        }
     );
 
     glGenVertexArrays(1, &_vaoID);
@@ -205,10 +216,20 @@ void RenderableSphericalGrid::deinitializeGL() {
 
     glDeleteBuffers(1, &_iBufferID);
     _iBufferID = 0;
+
+    BaseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _gridProgram = nullptr;
 }
 
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
+
+    _gridProgram->setUniform("opacity", _opacity);
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation

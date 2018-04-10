@@ -49,29 +49,42 @@ namespace {
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
-    const char* KeyInputFileType = "InputFileType";   // [STRING] "cdf", "json" or "osfls"
-    const char* KeySourceFolder = "SourceFolder";    // [STRING] should be path to folder containing the input files
+    // [STRING] "cdf", "json" or "osfls"
+    constexpr const char* KeyInputFileType = "InputFileType";
+    // [STRING] should be path to folder containing the input files
+    constexpr const char* KeySourceFolder = "SourceFolder";
 
-                                                     // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
-    const char* KeyCdfSeedPointFile = "SeedPointFile";   // [STRING] Path to a .txt file containing seed points
-    const char* KeyJsonSimulationModel = "SimulationModel"; // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
+    // ---------------------- MANDATORY INPUT TYPE SPECIFIC KEYS ---------------------- //
+    // [STRING] Path to a .txt file containing seed points
+    constexpr const char* KeyCdfSeedPointFile = "SeedPointFile";
+    // [STRING] Currently supports: "batsrus", "enlil" & "pfss"
+    constexpr const char* KeyJsonSimulationModel = "SimulationModel";
 
-                                                            // ----------------------- OPTIONAL INPUT TYPE SPECIFIC KEYS ---------------------- //
-    const char* KeyCdfExtraVariables = "ExtraVariables";  // [STRING ARRAY]
-    const char* KeyCdfTracingVariable = "TracingVariable"; // [STRING]
-    const char* KeyJsonScalingFactor = "ScaleToMeters";   // [STRING]
-    const char* KeyOslfsLoadAtRuntime = "LoadAtRuntime";   // [BOOLEAN] If value False => Load in initializing step and store in RAM
+    // ----------------------- OPTIONAL INPUT TYPE SPECIFIC KEYS ---------------------- //
+    // [STRING ARRAY]
+    constexpr const char* KeyCdfExtraVariables = "ExtraVariables";
+    // [STRING]
+    constexpr const char* KeyCdfTracingVariable = "TracingVariable";
+    // [STRING]
+    constexpr const char* KeyJsonScalingFactor = "ScaleToMeters";
+    // [BOOLEAN] If value False => Load in initializing step and store in RAM
+    constexpr const char* KeyOslfsLoadAtRuntime = "LoadAtRuntime";
 
-                                                           // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
-    const char* KeyColorTablePaths = "ColorTablePaths"; // [STRING ARRAY] Values should be paths to .txt files
-    const char* KeyColorTableRanges = "ColorTableRanges";// [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    const char* KeyMaskingRanges = "MaskingRanges";   // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
-    const char* KeyOutputFolder = "OutputFolder";    // [STRING] Value should be path to folder where states are saved (JSON/CDF input => osfls output & oslfs input => JSON output)
+    // ---------------------------- OPTIONAL MODFILE KEYS  ---------------------------- //
+    // [STRING ARRAY] Values should be paths to .txt files
+    constexpr const char* KeyColorTablePaths = "ColorTablePaths";
+    // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    constexpr const char* KeyColorTableRanges = "ColorTableRanges";
+    // [VEC2 ARRAY] Values should be entered as {X, Y}, where X & Y are numbers
+    constexpr const char* KeyMaskingRanges = "MaskingRanges";
+    // [STRING] Value should be path to folder where states are saved (JSON/CDF input
+    // => osfls output & oslfs input => JSON output)
+    constexpr const char* KeyOutputFolder = "OutputFolder";
 
-                                                     // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
-    const char* ValueInputFileTypeCdf = "cdf";
-    const char* ValueInputFileTypeJson = "json";
-    const char* ValueInputFileTypeOsfls = "osfls";
+    // ------------- POSSIBLE STRING VALUES FOR CORRESPONDING MODFILE KEY ------------- //
+    constexpr const char* ValueInputFileTypeCdf = "cdf";
+    constexpr const char* ValueInputFileTypeJson = "json";
+    constexpr const char* ValueInputFileTypeOsfls = "osfls";
 
     // --------------------------------- Property Info -------------------------------- //
     static const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
@@ -288,7 +301,8 @@ void RenderableFieldlinesSequence::initializeGL() {
     std::string outputFolderPath;
     extractOptionalInfoFromDictionary(outputFolderPath);
 
-    // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM SOURCE
+    // EXTRACT SOURCE FILE TYPE SPECIFIC INFOMRATION FROM DICTIONARY & GET STATES FROM
+    // SOURCE
     switch (sourceFileType) {
         case SourceFileType::Cdf:
             if (!getStatesFromCdfFiles(outputFolderPath)) {
@@ -360,13 +374,13 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
                                                            SourceFileType& sourceFileType)
 {
 
-    _dictionary->getValue(SceneGraphNode::KeyName, _name);
+    _dictionary->getValue(SceneGraphNode::KeyIdentifier, _identifier);
 
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
     if (!_dictionary->getValue(KeyInputFileType, inputFileTypeString)) {
         LERROR(fmt::format(
-            "{}: The field {} is missing", _name, KeyInputFileType
+            "{}: The field {} is missing", _identifier, KeyInputFileType
         ));
     }
     else {
@@ -389,7 +403,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         else {
             LERROR(fmt::format(
                 "{}: {} is not a recognized {}",
-                _name, inputFileTypeString, KeyInputFileType
+                _identifier, inputFileTypeString, KeyInputFileType
             ));
             sourceFileType = SourceFileType::Invalid;
             return false;
@@ -399,7 +413,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     std::string sourceFolderPath;
     if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
         LERROR(fmt::format(
-            "{}: The field {} is missing", _name, KeySourceFolder
+            "{}: The field {} is missing", _identifier, KeySourceFolder
         ));
         return false;
     }
@@ -431,14 +445,14 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(
                 "{}: {} contains no {} files",
-                _name, sourceFolderPath, inputFileTypeString
+                _identifier, sourceFolderPath, inputFileTypeString
             ));
             return false;
         }
     }
     else {
         LERROR(fmt::format(
-            "{}: FieldlinesSequence {} is not a valid directory", _name, sourceFolderPath
+            "{}: FieldlinesSequence {} is not a valid directory", _identifier, sourceFolderPath
         ));
         return false;
     }
@@ -458,7 +472,7 @@ void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
         else {
             LERROR(fmt::format(
                 "{}: The specified output path: '{}', does not exist",
-                _name, outputFolderPath
+                _identifier, outputFolderPath
             ));
             outputFolderPath = "";
         }
@@ -518,7 +532,7 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
     }
     else {
         LERROR(fmt::format(
-            "{}: Must specify '{}'", _name, KeyJsonSimulationModel
+            "{}: Must specify '{}'", _identifier, KeyJsonSimulationModel
         ));
         return false;
     }
@@ -530,13 +544,14 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
     else {
         LWARNING(fmt::format(
             "{}: Does not provide scalingFactor. Assumes coordinates are in meters",
-            _name
+            _identifier
         ));
     }
     return true;
 }
 
-bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outputFolder) {
+bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outputFolder)
+{
     fls::Model model;
     if (!extractJsonInfoFromDictionary(model)) {
         return false;
@@ -570,9 +585,10 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
 
 }
 
-void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder) {
+void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder)
+{
     // Load states from .osfls files into RAM!
-    for (const std::string filePath : _sourceFiles) {
+    for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
         if (newState.loadStateFromOsfls(filePath)) {
             addStateToSequence(newState);
@@ -595,7 +611,7 @@ void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
     else {
         LWARNING(fmt::format(
             "{}: {} is not specified. States will be stored in RAM",
-            _name, KeyOslfsLoadAtRuntime
+            _identifier, KeyOslfsLoadAtRuntime
         ));
     }
 }
@@ -650,7 +666,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         // the given sequence have the same extra quantities! */
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
-        for (int i = 0; i < nExtraQuantities; ++i) {
+        for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
             _pColorQuantity.addOption(i, extraNamesVec[i]);
             _pMaskingQuantity.addOption(i, extraNamesVec[i]);
         }
@@ -730,10 +746,10 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     }
 
     _pFocusOnOriginBtn.onChange([this] {
-        SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_name);
+        SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_identifier);
         if (!node) {
             LWARNING(fmt::format(
-                "Could not find a node in scenegraph called '{}'", _name
+                "Could not find a node in scenegraph called '{}'", _identifier
             ));
             return;
         }
@@ -883,20 +899,20 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
         else {
             LERROR(fmt::format(
                 "{}: The specified seed poitn file: '{}' does not exist",
-                _name, seedFilePath
+                _identifier, seedFilePath
             ));
             return false;
         }
     }
     else {
-        LERROR(fmt::format("{}: Must specify '{}'", _name, KeyCdfSeedPointFile));
+        LERROR(fmt::format("{}: Must specify '{}'", _identifier, KeyCdfSeedPointFile));
         return false;
     }
 
     if (!_dictionary->getValue(KeyCdfTracingVariable, tracingVar)) {
         tracingVar = "b"; //  Magnetic field variable as default
         LWARNING(fmt::format("{}: No '{}', using default '{}'",
-            _name, KeyCdfTracingVariable, tracingVar
+            _identifier, KeyCdfTracingVariable, tracingVar
         ));
     }
 
@@ -946,7 +962,7 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
                                                    std::vector<std::string>& extraMagVars)
 {
 
-    for (int i = 0; i < extraVars.size(); i++) {
+    for (int i = 0; i < static_cast<int>(extraVars.size()); i++) {
         const std::string str = extraVars[i];
         // Check if string is in the format specified for magnitude variables
         if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
@@ -987,7 +1003,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shaderProgram) {
-        renderEngine.removeRenderProgram(_shaderProgram);
+        renderEngine.removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 
@@ -1104,15 +1120,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
-        const int nextIdx = _activeTriggerTimeIndex + 1;
+        const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
             // true => Previous frame was not within the sequence interval
-            _activeTriggerTimeIndex < 0                                   
+            _activeTriggerTimeIndex < 0
             // true => We stepped back to a time represented by another state
-            || currentTime < _startTimes[_activeTriggerTimeIndex]             
+            || currentTime < _startTimes[_activeTriggerTimeIndex]
             // true => We stepped forward to a time represented by another state
             || (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
-        { 
+        {
             updateActiveTriggerTimeIndex(currentTime);
 
             if (_loadingStatesDynamically) {

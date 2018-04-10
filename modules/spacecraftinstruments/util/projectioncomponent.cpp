@@ -153,7 +153,8 @@ documentation::Documentation ProjectionComponent::Documentation() {
             {
                 keySequenceType,
                 new StringInListVerifier(
-                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid }
+                    { sequenceTypeImage, sequenceTypePlaybook, sequenceTypeHybrid,
+                      sequenceTypeInstrumentTimes }
                 ),
                 Optional::Yes,
                 "This value determines which type of sequencer is used for generating "
@@ -246,7 +247,9 @@ ProjectionComponent::ProjectionComponent()
     _applyTextureSize.onChange([this]() { _textureSizeDirty = true; });
 }
 
-void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
+void ProjectionComponent::initialize(const std::string& identifier,
+                                     const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
@@ -289,9 +292,6 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
 
-    std::string name;
-    dictionary.getValue(SceneGraphNode::KeyName, name);
-
     std::vector<SequenceParser*> parsers;
 
     if (dictionary.hasKey(keySequenceDir)) {
@@ -323,7 +323,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
             for (std::string& sequenceSource : sequenceSources) {
                 if (sequenceType == sequenceTypePlaybook) {
                     parsers.push_back(new HongKangParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         _projectorID,
                         translationDictionary,
@@ -331,14 +331,14 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 }
                 else if (sequenceType == sequenceTypeImage) {
                     parsers.push_back(new LabelParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary));
                 }
                 else if (sequenceType == sequenceTypeHybrid) {
                     //first read labels
                     parsers.push_back(new LabelParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary));
 
@@ -348,7 +348,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                         //then read playbook
                         _eventFile = absPath(_eventFile);
                         parsers.push_back(new HongKangParser(
-                            name,
+                            identifier,
                             _eventFile,
                             _projectorID,
                             translationDictionary,
@@ -360,7 +360,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                 }
                 else if (sequenceType == sequenceTypeInstrumentTimes) {
                     parsers.push_back(new InstrumentTimesParser(
-                        name,
+                        identifier,
                         std::move(sequenceSource),
                         translationDictionary)
                     );
@@ -515,7 +515,7 @@ void ProjectionComponent::imageProjectBegin() {
             if (!FramebufferObject::errorChecking(status).empty()) {
                 LERROR(fmt::format(
                     "Read Buffer ({}): {}",
-                    msg, 
+                    msg,
                     FramebufferObject::errorChecking(status)
                 ));
             }

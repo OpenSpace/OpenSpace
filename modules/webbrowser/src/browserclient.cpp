@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,50 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::luascriptfunctions {
 
-int connect(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::connect");
+#include "include/browserclient.h"
+#include <modules/webbrowser/include/defaultbrowserlauncher.h>
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().clientConnect();
-    }
+namespace openspace {
 
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+BrowserClient::BrowserClient(WebRenderHandler* handler) {
+    _renderHandler = handler;
+    auto *browserLauncher = new DefaultBrowserLauncher;
+    _lifeSpanHandler = browserLauncher;
+    _requestHandler = browserLauncher;
+};
+
+CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
+    return _renderHandler;
 }
 
-int disconnect(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::disconnect");
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().signalDisconnect();
-    }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+CefRefPtr<CefLifeSpanHandler> BrowserClient::GetLifeSpanHandler() {
+    return _lifeSpanHandler;
 }
 
-int requestHostship(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::requestHostship");
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
+CefRefPtr<CefRequestHandler> BrowserClient::GetRequestHandler() {
+    return _requestHandler;
 }
 
-int resignHostship(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resignHostship");
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    return 0;
-}
-
-} // namespace openspace::luascriptfunctions
+} // namespace openspace

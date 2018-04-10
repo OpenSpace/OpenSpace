@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
@@ -39,6 +40,8 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
+    constexpr const char* ProgramName = "Plane";
+
     enum BlendMode {
         BlendModeNormal = 0,
         BlendModeAdditive
@@ -111,6 +114,9 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         "RenderablePlane"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
 
     if (dictionary.hasKey(BillboardInfo.identifier)) {
@@ -161,11 +167,16 @@ void RenderablePlane::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    _shader = OsEng.renderEngine().buildRenderProgram(
-        "PlaneProgram",
-        absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
-    );
+    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/plane_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
+            );
+        }
+    ); 
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -175,15 +186,19 @@ void RenderablePlane::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
+    BaseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
 }
 
 void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
+
+    _shader->setUniform("opacity", _opacity);
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 rotationTransform = _billboard ?

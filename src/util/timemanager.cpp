@@ -26,7 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 
 namespace openspace {
@@ -34,7 +34,6 @@ namespace openspace {
 using datamessagestructures::TimeKeyframe;
 
 void TimeManager::preSynchronization(double dt) {
-//    double now = OsEng.runTime();
     removeKeyframesBefore(_latestConsumedTimestamp);
     if (_shouldSetTime) {
         time().setTime(_timeNextFrame.j2000Seconds());
@@ -44,6 +43,22 @@ void TimeManager::preSynchronization(double dt) {
     } else {
         consumeKeyframes(dt);
     }
+
+    // Notify observers about time changes if any.
+    double newTime = time().j2000Seconds();
+    double newDeltaTime = time().deltaTime();
+    if (newTime != _lastTime) {
+        for (const auto& it : _timeChangeCallbacks) {
+            it.second();
+        }
+    }
+    if (newDeltaTime != _lastDeltaTime) {
+        for (const auto& it : _deltaTimeChangeCallbacks) {
+            it.second();
+        }
+    }
+    _lastTime = newTime;
+    _lastDeltaTime = newDeltaTime;
 }
 
 void TimeManager::consumeKeyframes(double dt) {
@@ -108,7 +123,7 @@ void TimeManager::consumeKeyframes(double dt) {
             return;
         }
 
-        const double secondsOffTolerance = OsEng.parallelConnection().timeTolerance();
+        const double secondsOffTolerance = OsEng.parallelPeer().timeTolerance();
 
         double predictedTime = time().j2000Seconds() + time().deltaTime() *
                                (next.timestamp - now);
@@ -174,4 +189,51 @@ std::vector<Syncable*> TimeManager::getSyncables() {
     return{ &_currentTime };
 }
 
+TimeManager::CallbackHandle TimeManager::addTimeChangeCallback(TimeChangeCallback cb) {
+    CallbackHandle handle = _nextCallbackHandle++;
+    _timeChangeCallbacks.push_back({ handle, std::move(cb) });
+    return handle;
 }
+
+TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCallback cb)
+{
+    CallbackHandle handle = _nextCallbackHandle++;
+    _deltaTimeChangeCallbacks.push_back({ handle, std::move(cb) });
+    return handle;
+}
+
+void TimeManager::removeTimeChangeCallback(CallbackHandle handle) {
+    auto it = std::find_if(
+        _timeChangeCallbacks.begin(),
+        _timeChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _timeChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _timeChangeCallbacks.erase(it);
+}
+
+void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
+    auto it = std::find_if(
+        _deltaTimeChangeCallbacks.begin(),
+        _deltaTimeChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+            return cb.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _deltaTimeChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _deltaTimeChangeCallbacks.erase(it);
+}
+
+} // namespace openspace

@@ -111,7 +111,7 @@ void RenderablePlaneProjection::initializeGL() {
 void RenderablePlaneProjection::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
+        renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 

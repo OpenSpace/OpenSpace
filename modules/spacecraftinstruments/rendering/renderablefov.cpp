@@ -24,24 +24,23 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablefov.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <glm/gtx/projection.hpp>
 
 #include <openspace/performance/performancemeasurement.h>
 
 namespace {
+    constexpr const char* ProgramName             = "FovProgram";
     constexpr const char* KeyBody                 = "Body";
     constexpr const char* KeyFrame                = "Frame";
 //    const char* KeyColor                = "RGB";
@@ -56,7 +55,7 @@ namespace {
     constexpr const char* KeyBoundsSimplification = "SimplifyBounds";
 
     const int InterpolationSteps = 5;
-    
+
     const double Epsilon = 1e-4;
 
     static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -317,12 +316,17 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFov::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram(
-        "FovProgram",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
-    );
+    _programObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            ProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    ProgramName,
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
+                );
+            }
+        );
 
     _uniformCache.modelViewProjection = _programObject->uniformLocation(
         "modelViewProjectionTransform"
@@ -360,7 +364,7 @@ void RenderableFov::initializeGL() {
             "RenderableFov"
         );
     }
-    
+
     if (_simplifyBounds) {
         const size_t sizeBefore = res.bounds.size();
         for (size_t i = 1; i < res.bounds.size() - 1; ++i) {
@@ -481,7 +485,12 @@ void RenderableFov::initializeGL() {
 }
 
 void RenderableFov::deinitializeGL() {
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
     _programObject = nullptr;
 
     glDeleteBuffers(1, &_orthogonalPlane.vbo);

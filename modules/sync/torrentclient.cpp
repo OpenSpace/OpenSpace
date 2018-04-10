@@ -61,10 +61,6 @@ TorrentError::TorrentError(std::string msg)
     : RuntimeError(std::move(msg), "TorrentClient")
 {}
 
-TorrentClient::~TorrentClient() {
-    deinitialize();
-}
-
 void TorrentClient::initialize() {
 #ifdef SYNC_USE_LIBTORRENT
     libtorrent::settings_pack settings;
@@ -85,7 +81,7 @@ void TorrentClient::initialize() {
     settings.set_int(libtorrent::settings_pack::active_downloads, -1);
     settings.set_int(libtorrent::settings_pack::active_seeds, -1);
     settings.set_int(libtorrent::settings_pack::active_limit, 30);
-    
+
     settings.set_str(
         libtorrent::settings_pack::dht_bootstrap_nodes,
         "router.utorrent.com,dht.transmissionbt.com,router.bittorrent.com,\
@@ -146,7 +142,7 @@ void TorrentClient::deinitialize() {
 void TorrentClient::pollAlerts() {
 #ifdef SYNC_USE_LIBTORRENT
     // Libtorrent does not seem to reliably generate alerts for all added torrents.
-    // To make sure that the program does not keep waiting for already finished 
+    // To make sure that the program does not keep waiting for already finished
     // downsloads, we go through the whole list of torrents when polling.
     // However, in theory, the commented code below should be more efficient:
     /*

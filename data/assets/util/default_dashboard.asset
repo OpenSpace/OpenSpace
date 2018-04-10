@@ -1,0 +1,29 @@
+local assetHelper = asset.require('util/asset_helper')
+
+assetHelper.registerDashboardItems(asset, {
+    {
+        Identifier = "Date",
+        GuiName = "Date",
+        Type = "DashboardItemDate"
+    },
+    {
+        Identifier = "SimulationIncrement",
+        GuiName = "Simulation Increment",
+        Type = "DashboardItemSimulationIncrement"
+    },
+    {
+        Identifier = "Distance",
+        GuiName = "Distance",
+        Type = "DashboardItemDistance"
+    },
+    {
+        Identifier = "Framerate",
+        GuiName = "Framerate",
+        Type = "DashboardItemFramerate"
+    },
+    {
+        Identifier = "ParallelConnection",
+        GuiName = "Parallel Connection",
+        Type = "DashboardItemParallelConnection"
+    }
+})
