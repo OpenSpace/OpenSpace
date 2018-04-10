@@ -11,6 +11,7 @@ asset.require('scene/solarsystem/planets/mars/moons/deimos')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 asset.request('customization/globebrowsing')
 
@@ -20,7 +21,6 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
 
-    openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
     openspace.globebrowsing.loadWMSServersFromFile(
