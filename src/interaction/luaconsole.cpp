@@ -641,15 +641,22 @@ void LuaConsole::update() {
     _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
-    const float frametime = static_cast<float>(OsEng.windowWrapper().deltaTime());
+    // The first frame is going to be finished in approx 10 us, which causes a floating
+    // point overflow when computing dHeight
+    const double frametime = std::max(
+        OsEng.windowWrapper().deltaTime(),
+        1e-4
+    );
 
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
-    _currentHeight += (_targetHeight - _currentHeight) *
-        std::pow(0.98f, 1.f / (ConsoleOpenSpeed / dpiScaling.y * frametime));
+    const double dHeight = (_targetHeight - _currentHeight) *
+        std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
+
+    _currentHeight += static_cast<float>(dHeight);
 
     _currentHeight = std::max(0.0f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);

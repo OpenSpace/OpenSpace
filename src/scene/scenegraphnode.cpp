@@ -612,11 +612,12 @@ bool SceneGraphNode::hasGuiHintHidden() const {
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return
-            _parent->calculateWorldPosition() +
-            _parent->worldRotationMatrix() *
-            _parent->worldScale() *
-            position();
+        const glm::dvec3 wp = _parent->calculateWorldPosition();
+        const glm::dmat3 wrot = _parent->worldRotationMatrix();
+        const double ws = _parent->worldScale();
+        const glm::dvec3 p = position();
+
+        return wp + wrot * ws * p;
     }
     else {
         return position();
