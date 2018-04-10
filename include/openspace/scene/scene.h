@@ -55,7 +55,7 @@ class Scene
     : public properties::PropertyOwner
 {
 public:
-    using UpdateDependencies = ghoul::Boolean;
+    BooleanType(UpdateDependencies);
 
     struct InvalidSceneError : ghoul::RuntimeError {
         /**

@@ -11,13 +11,13 @@ assetHelper.requireAll(asset, 'scene/solarsystem/missions/juno')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 local junoAsset = asset.require('scene/solarsystem/missions/juno/juno')
 
 asset.onInitialize(function ()
     openspace.time.setTime("2016-07-01T10:05:00.00")
 
-    openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
     sceneHelper.setDeltaTimeKeys({

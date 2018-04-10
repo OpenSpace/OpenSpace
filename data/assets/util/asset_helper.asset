@@ -42,6 +42,20 @@ local registerSceneGraphNodes = function (sceneAsset, nodes, override)
     end)
 end
 
+local registerDashboardItems = function (dashboardAsset, items)
+    dashboardAsset.onInitialize(function ()
+            for i, item in ipairs(items) do
+                openspace.dashboard.addDashboardItem(item)
+            end
+        end)
+    dashboardAsset.onDeinitialize(function ()
+        for i = #items, 1, -1 do
+            item = items[i]
+            openspace.dashboard.removeDashboardItem(item.Identifier)
+        end
+    end)
+end
+
 local registerSceneGraphNodesAndExport = function (sceneAsset, nodes, override)
     override = override or false
     if not override then
@@ -110,5 +124,6 @@ end
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerSpiceKernels", registerSpiceKernels)
+asset.export("registerDashboardItems", registerDashboardItems)
 asset.export("requireAll", requireAll)
 asset.export("requestAll", requestAll)

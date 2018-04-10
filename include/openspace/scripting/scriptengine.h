@@ -52,7 +52,7 @@ namespace openspace::scripting {
  */
 class ScriptEngine : public Syncable, public DocumentationGenerator {
 public:
-    using RemoteScripting = ghoul::Boolean;
+    BooleanType(RemoteScripting);
 
     ScriptEngine();
 

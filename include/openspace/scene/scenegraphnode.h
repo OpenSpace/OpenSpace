@@ -64,7 +64,7 @@ public:
         GLInitialized
     };
 
-    using UpdateScene = ghoul::Boolean;
+    BooleanType(UpdateScene);
 
     struct PerformanceRecord {
         long long renderTime;  // time in ns
