@@ -313,6 +313,14 @@ float Histogram::entropy() {
     return entropy;
 }
 
+std::vector<char> Histogram::getBinaryData() const {
+    std::vector<char> dataVector(
+        reinterpret_cast<char*>(_data),
+        reinterpret_cast<char*>(_data + _numValues)
+    );
+    return dataVector;
+}
+
 void Histogram::print() const {
     //for (int i = 0; i < _numBins; i++) {
     //    //float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);

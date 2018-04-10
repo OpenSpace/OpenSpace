@@ -94,7 +94,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
         }
 
         dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-        
+
         lua_settop(L, 0);
         return 0;
     }
@@ -120,7 +120,7 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
         return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
     }
 
-    dash->dashboard().removeDashboardItems();
+    dash->dashboard().clearDashboardItems();
     return 0;
 }
 
@@ -159,18 +159,23 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         "ScreenSpaceDashboard"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceDashboard");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceDashboard");
         }
         else {
-            setName("ScreenSpaceDashboard" + std::to_string(id));
+            setIdentifier("ScreenSpaceDashboard" + std::to_string(iIdentifier));
         }
         ++id;
+    }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceDashboard " + std::to_string(iIdentifier));
     }
 
     if (dictionary.hasKey(UseMainInfo.identifier)) {

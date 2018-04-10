@@ -32,7 +32,6 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -40,7 +39,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 
 #include <openspace/performance/performancemeasurement.h>
 
@@ -81,7 +80,10 @@
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/opengl/debugcontext.h>
-#include <ghoul/systemcapabilities/systemcapabilities>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include <glbinding/callbacks.h>
 
@@ -155,9 +157,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _networkEngine(new NetworkEngine)
-    , _parallelConnection(new ParallelConnection)
+    , _parallelPeer(new ParallelPeer)
     , _renderEngine(new RenderEngine)
-    , _settingsEngine(new SettingsEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
     , _windowWrapper(std::move(windowWrapper))
@@ -169,7 +170,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
-    , _globalPropertyNamespace(new properties::PropertyOwner({ "" }))
+    , _rootPropertyOwner(new properties::PropertyOwner({ "" }))
     , _loadingScreen(nullptr)
     , _versionInformation{
         properties::StringProperty(VersionInfo, OPENSPACE_VERSION_STRING_FULL),
@@ -180,24 +181,26 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
-    _navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    _rootPropertyOwner->addPropertySubOwner(_moduleEngine.get());
 
+    _navigationHandler->setPropertyOwner(_rootPropertyOwner.get());
     // New property subowners also have to be added to the ImGuiModule callback!
-    _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
-    _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
-    _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
-    if (_windowWrapper) {
-        _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
-    }
-    _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
-    _globalPropertyNamespace->addPropertySubOwner(_console.get());
-    _globalPropertyNamespace->addPropertySubOwner(_dashboard.get());
+    _rootPropertyOwner->addPropertySubOwner(_navigationHandler.get());
 
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
+    _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
+
+    if (_windowWrapper) {
+        _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
+    }
+    _rootPropertyOwner->addPropertySubOwner(_parallelPeer.get());
+    _rootPropertyOwner->addPropertySubOwner(_console.get());
+    _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
     _versionInformation.versionString.setReadOnly(true);
-    _globalPropertyNamespace->addProperty(_versionInformation.versionString);
+    _rootPropertyOwner->addProperty(_versionInformation.versionString);
     _versionInformation.sourceControlInformation.setReadOnly(true);
-    _globalPropertyNamespace->addProperty(_versionInformation.sourceControlInformation);
+    _rootPropertyOwner->addProperty(_versionInformation.sourceControlInformation);
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -315,7 +318,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
             "Configuration file '" + configurationFilePath + "'"
         );
     }
-    LINFO("Configuration Path: '" << configurationFilePath << "'");
+    LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
 
     // Loading configuration from disk
     LDEBUG("Loading configuration from disk");
@@ -323,7 +326,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         _engine->configurationManager().loadFromFile(configurationFilePath);
     }
     catch (const documentation::SpecificationError& e) {
-        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATAL(fmt::format(
+            "Loading of configuration file '{}' failed", configurationFilePath
+        ));
         for (const documentation::TestResult::Offense& o : e.result.offenses) {
             LERRORC(o.offender, std::to_string(o.reason));
         }
@@ -333,7 +338,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         throw;
     }
     catch (const ghoul::RuntimeError& e) {
-        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        LFATAL(fmt::format(
+            "Loading of configuration file '{}' failed", configurationFilePath
+        ));
         LFATALC(e.component, e.message);
         throw;
     }
@@ -354,8 +361,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
             cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
         }
 
-        LINFO("Old cache: " << absPath("${CACHE}"));
-        LINFO("New cache: " << cacheFolder);
+        LINFO(fmt::format("Old cache: {}", absPath("${CACHE}")));
+        LINFO(fmt::format("New cache: {}", cacheFolder));
         FileSys.registerPathToken(
             "${CACHE}",
             cacheFolder,
@@ -417,8 +424,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
         ConfigurationManager::KeyConfigSgct, sgctConfigurationPath);
 
     if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
-        LDEBUG("Overwriting SGCT configuration file with commandline argument: " <<
-            commandlineArgumentPlaceholders.sgctConfigurationName);
+        LDEBUG(fmt::format(
+            "Overwriting SGCT configuration file with commandline argument: {}",
+            commandlineArgumentPlaceholders.sgctConfigurationName
+        ));
         sgctConfigurationPath = commandlineArgumentPlaceholders.sgctConfigurationName;
     }
 
@@ -444,10 +453,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
-    if (_engine->parallelConnection().status() !=
+    if (_engine->parallelPeer().status() !=
         ParallelConnection::Status::Disconnected)
     {
-        _engine->parallelConnection().signalDisconnect();
+        _engine->parallelPeer().disconnect();
     }
 
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
@@ -523,7 +532,7 @@ void OpenSpaceEngine::initialize() {
     // Check the required OpenGL versions of the registered modules
     ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO("Required OpenGL version: " << std::to_string(version));
+    LINFO(fmt::format("Required OpenGL version: {}", std::to_string(version)));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -567,10 +576,6 @@ void OpenSpaceEngine::initialize() {
         );
     }
 
-    // Initialize the SettingsEngine
-    _settingsEngine->initialize();
-    _settingsEngine->setModules(_moduleEngine->modules());
-
     // Initialize the NavigationHandler
     _navigationHandler->initialize();
 
@@ -601,26 +606,21 @@ void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
 
 std::unique_ptr<LoadingScreen> OpenSpaceEngine::createLoadingScreen() {
     bool showMessage = true;
-    std::string kMessage =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowMessage;
+    constexpr const char* kMessage = ConfigurationManager::KeyLoadingScreenShowMessage;
     if (configurationManager().hasKey(kMessage)) {
         showMessage = configurationManager().value<bool>(kMessage);
     }
 
     bool showNodeNames = true;
-    std::string kNames =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowNodeNames;
+    constexpr const char* kNames = ConfigurationManager::KeyLoadingScreenShowNodeNames;
 
     if (configurationManager().hasKey(kNames)) {
         showNodeNames = configurationManager().value<bool>(kNames);
     }
 
     bool showProgressbar = true;
-    std::string kProgress =
-        ConfigurationManager::KeyLoadingScreen + "." +
-        ConfigurationManager::PartShowProgressbar;
+    constexpr const char* kProgress =
+                                    ConfigurationManager::KeyLoadingScreenShowProgressbar;
 
     if (configurationManager().hasKey(kProgress)) {
         showProgressbar = configurationManager().value<bool>(kProgress);
@@ -652,6 +652,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         _renderEngine->setCamera(nullptr);
         _navigationHandler->setCamera(nullptr);
         _scene->clear();
+        _rootPropertyOwner->removePropertySubOwner(_scene.get());
     }
 
     bool multiThreadedInitialization = configurationManager().hasKeyAndValue<bool>(
@@ -670,6 +671,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     }
 
     _scene = std::make_unique<Scene>(std::move(sceneInitializer));
+    _rootPropertyOwner->addPropertySubOwner(_scene.get());
     _scene->setCamera(std::make_unique<Camera>());
     Camera* camera = _scene->camera();
     camera->setParent(_scene->root());
@@ -704,6 +706,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 resourceSyncs.insert(s);
                 _loadingScreen->updateItem(
                     s->name(),
+                    s->name(),
                     LoadingScreen::ItemStatus::Started,
                     s->progress()
                 );
@@ -724,6 +727,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
                 loading = true;
                 _loadingScreen->updateItem(
                     (*it)->name(),
+                    (*it)->name(),
                     LoadingScreen::ItemStatus::Started,
                     (*it)->progress()
                 );
@@ -731,6 +735,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
             } else {
                 _loadingScreen->tickItem();
                 _loadingScreen->updateItem(
+                    (*it)->name(),
                     (*it)->name(),
                     LoadingScreen::ItemStatus::Finished,
                     1.0f
@@ -859,14 +864,14 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 
             if (FileSys.fileExists(script)) {
                 try {
-                    LINFO("Running global customization script: " << script);
+                    LINFO(fmt::format("Running global customization script: {}", script));
                     ghoul::lua::runScriptFile(state, script);
                 } catch (ghoul::RuntimeError& e) {
                     LERRORC(e.component, e.message);
                 }
             }
             else {
-                LDEBUG("Ignoring non-existing script file: " << script);
+                LDEBUG(fmt::format("Ignoring non-existing script file: {}", script));
             }
         }
     }
@@ -882,15 +887,15 @@ void OpenSpaceEngine::loadFonts() {
         std::string font = absPath(fonts.value<std::string>(key));
 
         if (!FileSys.fileExists(font)) {
-            LERROR("Could not find font '" << font << "'");
+            LERROR(fmt::format("Could not find font '{}'", font));
             continue;
         }
 
-        LDEBUG("Registering font '" << font << "' with key '" << key << "'");
+        LDEBUG(fmt::format("Registering font '{}' with key '{}'", font, key));
         bool success = _fontManager->registerFontPath(key, font);
 
         if (!success) {
-            LERROR("Error registering font '" << font << "' with key '" << key << "'");
+            LERROR(fmt::format("Error registering font '{}' with key '{}'", font, key));
         }
     }
 
@@ -913,12 +918,10 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::configureLogging(bool consoleLog) {
-    const std::string KeyLogLevel =
-        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
-    const std::string KeyLogImmediateFlush =
-        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartImmediateFlush;
-    const std::string KeyLogs =
-        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
+    constexpr const char* KeyLogLevel = ConfigurationManager::KeyLoggingLogLevel;
+    constexpr const char* KeyLogImmediateFlush =
+                                           ConfigurationManager::KeyLoggingImmediateFlush;
+    constexpr const char* KeyLogs = ConfigurationManager::KeyLoggingLogs;
 
     if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
         std::string logLevel = "Info";
@@ -994,8 +997,19 @@ void OpenSpaceEngine::writeSceneDocumentation() {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+    if (configurationManager().hasKey(
+            ConfigurationManager::KeyScenePropertyDocumentation
+        ))
+    {
         _scene->writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyScenePropertyDocumentation
+                ))
+        );
+    }
+
+    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+        _rootPropertyOwner->writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyPropertyDocumentation
                 ))
@@ -1142,38 +1156,40 @@ void OpenSpaceEngine::initializeGL() {
                     case GL_INVALID_ENUM:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_INVALID_ENUM"
+                            fmt::format("Function {}: GL_INVALID_ENUM", f.toString())
                         );
                         break;
                     case GL_INVALID_VALUE:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_INVALID_VALUE"
+                            fmt::format("Function {}: GL_INVALID_VALUE", f.toString())
                         );
                         break;
                     case GL_INVALID_OPERATION:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_INVALID_OPERATION"
+                            fmt::format("Function {}: GL_INVALID_OPERATION", f.toString())
                         );
                         break;
                     case GL_INVALID_FRAMEBUFFER_OPERATION:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() <<
-                                ": GL_INVALID_FRAMEBUFFER_OPERATION"
+                            fmt::format(
+                                "Function {}: GL_INVALID_FRAMEBUFFER_OPERATION",
+                                f.toString()
+                            )
                         );
                         break;
                     case GL_OUT_OF_MEMORY:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Function " << f.toString() << ": GL_OUT_OF_MEMORY"
+                            fmt::format("Function {}: GL_OUT_OF_MEMORY", f.toString())
                         );
                         break;
                     default:
                         LERRORC(
                             "OpenGL Invalid State",
-                            "Unknown error code: " << std::hex << error
+                            fmt::format("Unknown error code: {0:x}", error)
                         );
                 }
             });
@@ -1190,19 +1206,22 @@ void OpenSpaceEngine::initializeGL() {
             setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
             glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
                 std::string arguments = std::accumulate(
-                        call.parameters.begin(),
-                        call.parameters.end(),
-                        std::string("("),
-                        [](std::string a, AbstractValue* v) {
-                            return a + ", " + v->asString();
-                        }
+                    call.parameters.begin(),
+                    call.parameters.end(),
+                    std::string("("),
+                    [](std::string a, AbstractValue* v) {
+                        return a + ", " + v->asString();
+                    }
                 );
 
                 std::string returnValue = call.returnValue ?
                     " -> " + call.returnValue->asString() :
                     "";
 
-                LTRACEC("OpenGL", call.function->name() << arguments << returnValue);
+                LTRACEC(
+                    "OpenGL",
+                    call.function->name() + arguments + returnValue
+                );
             });
         }
     }
@@ -1235,7 +1254,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
     if (_hasScheduledAssetLoading) {
-        LINFO("Loading asset: " << _scheduledAssetPathToLoad);
+        LINFO(fmt::format("Loading asset: {}", _scheduledAssetPathToLoad));
         loadSingleAsset(_scheduledAssetPathToLoad);
         _hasScheduledAssetLoading = false;
         _scheduledAssetPathToLoad = "";
@@ -1270,7 +1289,7 @@ void OpenSpaceEngine::preSynchronization() {
             _navigationHandler->updateCamera(dt);
             _renderEngine->camera()->invalidateCache();
         }
-        _parallelConnection->preSynchronization();
+        _parallelPeer->preSynchronization();
     }
 
     for (const auto& func : _moduleCallbacks.preSync) {
@@ -1287,7 +1306,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         perf = std::make_unique<performance::PerformanceMeasurement>(
             "OpenSpaceEngine::postSynchronizationPreDraw",
             OsEng.renderEngine().performanceManager()
-            );
+        );
     }
 
     bool master = _windowWrapper->isMaster();
@@ -1328,13 +1347,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
 
     if (warningCounter > 0) {
-        LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
+        LWARNINGC("Logging", fmt::format("Number of Warnings: {}", warningCounter));
     }
     if (errorCounter > 0) {
-        LWARNINGC("Logging", "Number of Errors raised: " << errorCounter);
+        LWARNINGC("Logging", fmt::format("Number of Errors: {}", errorCounter));
     }
     if (fatalCounter > 0) {
-        LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
+        LWARNINGC("Logging", fmt::format("Number of Fatals: {}", fatalCounter));
     }
 
     LogMgr.resetMessageCounters();
@@ -1544,8 +1563,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
                 {},
-                "type, name, identifier, description,"
-                "[value, minimumValue, maximumValue]",
+                "type, name, identifier,"
+                "[description, value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
             },
             {
@@ -1680,19 +1699,14 @@ ModuleEngine& OpenSpaceEngine::moduleEngine() {
     return *_moduleEngine;
 }
 
-ParallelConnection& OpenSpaceEngine::parallelConnection() {
-    ghoul_assert(_parallelConnection, "ParallelConnection must not be nullptr");
-    return *_parallelConnection;
+ParallelPeer& OpenSpaceEngine::parallelPeer() {
+    ghoul_assert(_parallelPeer, "ParallelPeer must not be nullptr");
+    return *_parallelPeer;
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine() {
     ghoul_assert(_renderEngine, "RenderEngine must not be nullptr");
     return *_renderEngine;
-}
-
-SettingsEngine& OpenSpaceEngine::settingsEngine() {
-    ghoul_assert(_settingsEngine, "Settings Engine must not be nullptr");
-    return *_settingsEngine;
 }
 
 TimeManager& OpenSpaceEngine::timeManager() {
@@ -1730,12 +1744,12 @@ interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
     return *_keyBindingManager;
 }
 
-properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
+properties::PropertyOwner& OpenSpaceEngine::rootPropertyOwner() {
     ghoul_assert(
-        _globalPropertyNamespace,
-        "Global Property Namespace must not be nullptr"
-    );
-    return *_globalPropertyNamespace;
+                 _rootPropertyOwner,
+                 "Root Property Namespace must not be nullptr"
+                 );
+    return *_rootPropertyOwner;
 }
 
 VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {

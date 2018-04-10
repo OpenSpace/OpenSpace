@@ -51,7 +51,10 @@ const char* Property::ViewOptions::LightPosition = "lightPosition";
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
 const char* Property::TypeKey = "Type";
+const char* Property::DescriptionKey = "Description";
+const char* Property::JsonValueKey = "Value";
 const char* Property::MetaDataKey = "MetaData";
+const char* Property::AdditionalDataKey = "AdditionalData";
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
@@ -73,6 +76,10 @@ Property::Property(PropertyInfo info)
     setVisibility(info.visibility);
 }
 
+Property::~Property() {
+    notifyDeleteListeners();
+}
+
 const std::string& Property::identifier() const {
     return _identifier;
 }
@@ -81,7 +88,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     std::string identifier = _identifier;
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
-        std::string ownerId = currentOwner->name();
+        std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
             identifier = ownerId + "." + identifier;
         }
@@ -114,6 +121,15 @@ int Property::typeLua() const {
 
 bool Property::getStringValue(std::string&) const {
     return false;
+}
+
+std::string Property::getStringValue() const {
+    std::string value;
+    bool status = getStringValue(value);
+    if (!status) {
+        throw std::runtime_error("Could not get string value");
+    }
+    return value;
 }
 
 bool Property::setStringValue(std::string) {
@@ -173,10 +189,34 @@ const ghoul::Dictionary& Property::metaData() const {
     return _metaData;
 }
 
+std::string Property::toJson() const {
+    std::string result = "{";
+    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription() + ", ";
+    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
+    result += "}";
+    return result;
+}
+
+std::string Property::jsonValue() const {
+    std::string value = getStringValue();
+    if (value[0] == '"' && value[value.size() - 1] == '"') {
+        value.erase(0, 1);
+        value.erase(value.size() - 1, 1);
+    }
+    return value;
+}
+
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
     OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
+    return handle;
+}
+
+Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
+    ghoul_assert(callback, "The callback must not be empty");
+    OnDeleteHandle handle = _currentHandleValue++;
+    _onDeleteCallbacks.emplace_back(handle, std::move(callback));
     return handle;
 }
 
@@ -202,6 +242,23 @@ void Property::removeOnChange(OnChangeHandle handle) {
     }
 }
 
+void Property::removeOnDelete(OnDeleteHandle handle) {
+    auto it = std::find_if(
+        _onDeleteCallbacks.begin(),
+        _onDeleteCallbacks.end(),
+        [handle](const std::pair<OnDeleteHandle, std::function<void()>>& p) {
+            return p.first == handle;
+        }
+    );
+
+    ghoul_assert(
+        it != _onDeleteCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _onDeleteCallbacks.erase(it);
+}
+
 PropertyOwner* Property::owner() const {
     return _owner;
 }
@@ -210,44 +267,59 @@ void Property::setPropertyOwner(PropertyOwner* owner) {
     _owner = owner;
 }
 
-void Property::notifyListener() {
+void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
         p.second();
     }
 }
 
-// This was used in the old version of Property::Description but was never used. Is this
-// still useful? ---abock
-std::string Property::generateBaseDescription() const {
-    return
-        std::string(TypeKey) + " = \"" + className() + "\", " +
-        IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
-        NameKey + " = \"" + guiName() + "\", " +
-        generateMetaDataDescription() + ", " +
-        generateAdditionalDescription();
+void Property::notifyDeleteListeners() {
+    for (const std::pair<OnDeleteHandle, std::function<void()>>& p : _onDeleteCallbacks) {
+        p.second();
+    }
 }
 
-std::string Property::generateMetaDataDescription() const {
+std::string Property::generateBaseJsonDescription() const {
+    return 
+        "{ \"" + std::string(TypeKey) + "\": \"" + className() + "\", " +
+        "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", " +
+        "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", " +
+        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataJsonDescription() + ", " +
+        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalJsonDescription() +
+        " }";
+}
+
+std::string Property::generateMetaDataJsonDescription() const {
     static const std::map<Visibility, std::string> VisibilityConverter = {
         { Visibility::All, "All" },
         { Visibility::Developer, "Developer" },
         { Visibility::User, "User" },
         { Visibility::Hidden, "Hidden" }
     };
-    Visibility visibility = _metaData.value<Visibility>(MetaDataKeyVisibility);
-    bool isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
-
+    Visibility visibility = static_cast<Visibility>(
+        _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility));
     std::string vis = VisibilityConverter.at(visibility);
 
-    return
-        std::string(MetaDataKey) + " = {" +
-        MetaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
-        MetaDataKeyVisibility + " = " + vis + "," +
-        MetaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+    bool isReadOnly = false;
+    if (_metaData.hasKey(MetaDataKeyReadOnly)) {
+        isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
+    }
+
+    std::string result = "{ ";
+    result += "\"" + std::string(MetaDataKeyGroup) + "\": \"" + groupIdentifier() + "\", ";
+    result += "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
+    result += "\"" + std::string(MetaDataKeyReadOnly) + "\": " + (isReadOnly ? "true" : "false");
+    result += " }";
+    return result;
 }
 
-std::string Property::generateAdditionalDescription() const {
-    return "";
+std::string Property::generateAdditionalJsonDescription() const {
+    return "{}";
 }
+
+void Property::setInterpolationTarget(ghoul::any) {}
+void Property::setLuaInterpolationTarget(lua_State*) {}
+void Property::setStringInterpolationTarget(std::string) {}
+void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

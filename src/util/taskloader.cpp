@@ -24,6 +24,7 @@
 
 #include <openspace/util/taskloader.h>
 
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
@@ -54,7 +55,9 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
             std::string taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {
-                LERROR("Failed to create a Task object of type '" << taskType << "'");
+                LERROR(fmt::format(
+                    "Failed to create a Task object of type '{}'", taskType
+                ));
             }
             tasks.push_back(std::move(task));
         }
@@ -65,8 +68,9 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
     std::string absTasksFile = absPath(path);
     if (!FileSys.fileExists(ghoul::filesystem::File(absTasksFile))) {
-        LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
-            "File not found");
+        LERROR(fmt::format(
+            "Could not load tasks file '{}. File not found", absTasksFile
+        ));
         return std::vector<std::unique_ptr<Task>>();
     }
 
@@ -77,8 +81,12 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
             tasksDictionary
         );
     } catch (const ghoul::RuntimeError& e) {
-        LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
-            "Lua error: " << e.message << ": " << e.component);
+        LERROR(fmt::format(
+            "Could not load tasks file '{}. Lua error: {}: {}",
+            absTasksFile,
+            e.message,
+            e.component
+        ));
         return std::vector<std::unique_ptr<Task>>();
     }
     return tasksFromDictionary(tasksDictionary);

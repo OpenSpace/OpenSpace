@@ -1,0 +1,91 @@
+@import "../../../../styles/all";
+@import "../Input/Input";
+
+// wrapper element
+.inputGroup {
+  position: relative;
+  box-sizing: border-box;
+  height: $input-total-height;
+}
+
+// the descriptive label
+.rangeLabel {
+  @extend .label;
+  display: block;
+}
+
+// display value
+.value {
+  position: absolute;
+  bottom: $padding-bottom;
+  left: $padding-horizontal;
+}
+
+.wide,
+.wide .range {
+  width: 100%;
+}
+
+// mouse-tracking hover event
+.hoverHint {
+  background: rgba($blue, 0.3);
+  height: 100%;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+
+// state changes
+.inputGroup {
+  .range:focus + .rangeLabel {
+    color: $green;
+  }
+
+  &:hover {
+    background: $ui-background-active;
+
+    .rangeLabel {
+      color: $text-color-focus;
+    }
+  }
+}
+
+// TODO: consider using something like https://github.com/darlanrod/input-range-scss for cross-browser support
+.range {
+  // calculate the width of the background bar using variables set in the component
+  --normalized-value: calc(var(--value) - var(--min));
+  --normalized-max: calc(var(--max) - var(--min));
+  --bg-width: calc(100% * var(--normalized-value) / var(--normalized-max));
+
+  height: $input-total-height;
+  margin: 0;
+
+  // reset styles
+  background: $ui-background-hover;
+  -webkit-appearance: none;
+
+  &:hover {
+    background: transparent;
+  }
+
+  &:focus {
+    outline: 0;
+    background: $ui-background-hover;
+  }
+
+  // this cannot be completely removed, as that breaks the input.
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 100%;
+    width: 1px;
+    background: transparent;
+  }
+
+  &::-webkit-slider-runnable-track {
+    transition: $background-transition;
+    background: linear-gradient(to right, $ui-background-hover var(--bg-width), transparent var(--bg-width));
+    height: 100%;
+    min-width: 2px;
+  }
+}

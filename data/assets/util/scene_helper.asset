@@ -52,11 +52,3 @@ local setDeltaTimeKeys = function(t)
     return result
 end
 asset.export("setDeltaTimeKeys", setDeltaTimeKeys)
-
------------------------------------------------------------------
-
-dofile(openspace.absPath("${SCRIPTS}/common.lua"))
-
-asset.export("property", helper.property)
-asset.export("renderable", helper.renderable)
-asset.export("scheduledScript", helper.scheduledScript)

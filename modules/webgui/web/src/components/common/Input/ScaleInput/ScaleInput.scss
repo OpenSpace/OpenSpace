@@ -1,0 +1,80 @@
+@import "../../../../styles/all";
+
+$marker-height: 10px;
+$tick-height: 60%;
+$tick-width: 1px;
+$dot-size: $marker-height;
+
+.group {
+  position: relative;
+}
+
+.markers {
+  display: flex;
+  justify-content: space-between;
+  height: 10px;
+}
+
+.ticks {
+  display: flex;
+  justify-content: space-around;
+  height: 100%;
+}
+
+.tick {
+  align-items: center;
+  background: #9a9a9a;
+  content: ' ';
+  height: $tick-height;
+  width: $tick-width;
+}
+
+.centerMarker {
+  background: #9a9a9a;
+  content: ' ';
+  height: 100%;
+  width: $tick-width * 2;
+}
+
+.wide {
+  width: 100%;
+}
+
+.labels {
+  color: $text-color-blur;
+  display: flex;
+  justify-content: space-between;
+  line-height: $font-size;
+  width: 100%;
+
+  label {
+    font-size: 0.8em;
+  }
+}
+
+.input {
+  background: transparent;
+  height: $marker-height;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  -webkit-appearance: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: white;
+    border-radius: $dot-size;
+    height: $dot-size;
+    width: $dot-size;
+  }
+
+  &::-webkit-slider-runnable-track {
+    background: transparent;
+    border: none;
+  }
+}

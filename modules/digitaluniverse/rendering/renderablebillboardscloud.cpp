@@ -30,7 +30,8 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -756,7 +757,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         "screenSize",
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-    
+
     _program->setUniform(_uniformCache.modelViewProjection, projMatrix * modelViewMatrix);
     _program->setUniform(
         _uniformCache.cameraPos,
@@ -834,8 +835,6 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
                                              const glm::dvec3& orthoUp,
                                              float fadeInVariable)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -1020,11 +1019,11 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
-            LDEBUG("Generating Vertex Array id '" << _vao << "'");
+            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
         }
         if (_vbo == 0) {
             glGenBuffers(1, &_vbo);
-            LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
         }
 
         glBindVertexArray(_vao);
@@ -1089,7 +1088,10 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 absPath(_spriteTexturePath)
             );
             if (_spriteTexture) {
-                LINFO("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
+                LINFO(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_spriteTexturePath)
+                ));
                 _spriteTexture->uploadTexture();
             }
             _spriteTexture->setFilter(
@@ -1136,16 +1138,17 @@ bool RenderableBillboardsCloud::loadSpeckData() {
 
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             ghoul::filesystem::File(_file),
-            "RenderableDUMeshes|" + name(),
+            "RenderableDUMeshes|" + identifier(),
             ghoul::filesystem::CacheManager::Persistent::Yes
         );
 
         bool hasCachedFile = FileSys.fileExists(cachedFile);
         if (hasCachedFile) {
-            LINFO(
-                "Cached file '" << cachedFile << "' used for Speck file '" <<
-                _file << "'"
-            );
+            LINFO(fmt::format(
+                "Cached file '{}' used for Speck file '{}'",
+                cachedFile,
+                _file
+            ));
 
             success = loadCachedFile(cachedFile);
             if (success) {
@@ -1158,9 +1161,9 @@ bool RenderableBillboardsCloud::loadSpeckData() {
             }
         }
         else {
-            LINFO("Cache for Speck file '" << _file << "' not found");
+            LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
         }
-        LINFO("Loading Speck file '" << _file << "'");
+        LINFO(fmt::format("Loading Speck file '{}'", _file));
 
         success = readSpeckFile();
         if (!success) {
@@ -1186,10 +1189,11 @@ bool RenderableBillboardsCloud::loadLabelData() {
         }
         bool hasCachedFile = FileSys.fileExists(cachedFile);
         if (hasCachedFile) {
-            LINFO(
-                "Cached file '" << cachedFile << "' used for Label file '" <<
-                labelFile << "'"
-            );
+            LINFO(fmt::format(
+                "Cached file '{}' used for Label file '{}'",
+                cachedFile,
+                labelFile
+            ));
 
             success &= loadCachedFile(cachedFile);
             if (!success) {
@@ -1199,8 +1203,8 @@ bool RenderableBillboardsCloud::loadLabelData() {
             }
         }
         else {
-            LINFO("Cache for Label file '" << labelFile << "' not found");
-            LINFO("Loading Label file '" << labelFile << "'");
+            LINFO(fmt::format("Cache for Label file '{}' not found", labelFile));
+            LINFO(fmt::format("Loading Label file '{}'", labelFile));
 
             success &= readLabelFile();
             if (!success) {
@@ -1217,7 +1221,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
         return false;
     }
 
@@ -1307,7 +1311,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
     std::string _file = _colorMapFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Color Map file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Color Map file '{}'", _file));
         return false;
     }
 
@@ -1356,7 +1360,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
     std::string _file = _labelFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Label file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Label file '{}'", _file));
         return false;
     }
 
@@ -1491,7 +1495,7 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for loading cache file");
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
@@ -1543,7 +1547,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
 }

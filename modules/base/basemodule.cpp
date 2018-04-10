@@ -64,8 +64,6 @@
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
 
-#include <ghoul/filesystem/filesystem>
-
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;

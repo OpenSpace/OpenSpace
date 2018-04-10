@@ -33,6 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -173,7 +174,7 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 }
 
 DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
-    : DashboardItem("Distance")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{
@@ -380,7 +381,7 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
 
     switch (comp.type) {
         case Type::Node:
-            return { comp.node->worldPosition(), comp.node->name() };
+            return { comp.node->worldPosition(), comp.node->guiName() };
         case Type::Focus:
             return {
                 OsEng.navigationHandler().focusNode()->worldPosition(),

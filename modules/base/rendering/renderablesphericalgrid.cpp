@@ -140,6 +140,9 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         "RenderableSphericalGrid"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     if (dictionary.hasKey(GridMatrixInfo.identifier)) {
         _gridMatrix = dictionary.value<glm::dmat4>(GridMatrixInfo.identifier);
     }
@@ -225,6 +228,8 @@ void RenderableSphericalGrid::deinitializeGL() {
 
 void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     _gridProgram->activate();
+
+    _gridProgram->setUniform("opacity", _opacity);
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation

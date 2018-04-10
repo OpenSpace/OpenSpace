@@ -14,8 +14,8 @@ local textures = asset.syncedResource({
 })
 
 local Callisto = {
-    Name = "Callisto",
-    Parent = transforms.JupiterBarycenter.Name,
+    Identifier = "Callisto",
+    Parent = transforms.JupiterBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -37,7 +37,7 @@ local Callisto = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Callisto Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/callisto.jpg",
                     Enabled = true
                 }
@@ -45,7 +45,9 @@ local Callisto = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
-    GuiPath = "/Solar System/Planets/Jupiter/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Jupiter/Moons"
+    }
 }
 
 

@@ -37,6 +37,8 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 
+//#define TOUCH_DEBUG_PROPERTIES
+
 namespace openspace {
 
 class Camera;
@@ -62,7 +64,7 @@ public:
     // Stores the selected node, the cursor ID as well as the surface coordinates the
     // cursor touched
     struct SelectedBody {
-        int id;
+        long id;
         SceneGraphNode* node;
         glm::dvec3 coordinates;
     };
@@ -170,13 +172,34 @@ private:
     properties::FloatProperty _rollAngleThreshold;
     properties::FloatProperty _orbitSpeedThreshold;
     properties::FloatProperty _spinSensitivity;
+    properties::FloatProperty _zoomSensitivity;
+    properties::FloatProperty _zoomSensitivityDistanceThreshold;
+    properties::FloatProperty _zoomBoundarySphereMultiplier;
     properties::FloatProperty _inputStillThreshold;
     properties::FloatProperty _centroidStillThreshold;
+    properties::BoolProperty  _panEnabled;
     properties::FloatProperty _interpretPan;
     properties::FloatProperty _slerpTime;
     properties::IVec2Property _guiButton;
     properties::Vec4Property _friction;
     properties::FloatProperty _pickingRadiusMinimum;
+    properties::BoolProperty _ignoreGui;
+
+#ifdef TOUCH_DEBUG_PROPERTIES
+    struct DebugProperties : PropertyOwner {
+        DebugProperties();
+        properties::StringProperty interactionMode;
+        properties::IntProperty nFingers;
+        properties::StringProperty interpretedInteraction;
+        properties::FloatProperty normalizedCentroidDistance;
+        properties::FloatProperty minDiff;
+        properties::FloatProperty rollOn;
+    } _debugProperties;
+
+    int pinchConsecCt = 0;
+    double pinchConsecZoomFactor = 0;
+    //int stepVelUpdate = 0;
+#endif
 
     // Class variables
     VelocityStates _vel;

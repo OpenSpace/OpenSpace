@@ -272,6 +272,14 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             "getGeoPosition",
             &globebrowsing::luascriptfunctions::getGeoPosition,
             {},
+            "name, latitude, longitude, altitude",
+            "Returns the specified surface position on the globe as three floating point "
+            "values"
+        },
+        {
+            "getGeoPositionForCamera",
+            &globebrowsing::luascriptfunctions::getGeoPositionForCamera,
+            {},
             "void",
             "Get geographic coordinates of the camera poosition in latitude, "
             "longitude, and altitude"
@@ -348,6 +356,28 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
     );
 }
 
+glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
+                                                    globebrowsing::RenderableGlobe& globe,
+                                       double latitude, double longitude, double altitude)
+{
+    using namespace globebrowsing;
+
+    Geodetic3 pos = {
+        {
+            Angle<double>::fromDegrees(latitude).asRadians(),
+            Angle<double>::fromDegrees(longitude).asRadians()
+        },
+        altitude
+    };
+
+    glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(pos);
+    //glm::dmat4 modelTransform = globe.modelTransform();
+    //glm::dvec3 positionWorldSpace = glm::dvec3(modelTransform *
+        //glm::dvec4(positionModelSpace, 1.0));
+
+    return glm::vec3(positionModelSpace);
+}
+
 void GlobeBrowsingModule::goToChunk(Camera& camera, globebrowsing::TileIndex ti,
                                     glm::vec2 uv, bool resetCameraDirection)
 {
@@ -362,8 +392,9 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, globebrowsing::TileIndex ti,
     // Camera position in model space
     glm::dvec3 camPos = camera.positionVec3();
     glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
-    glm::dvec3 cameraPositionModelSpace =
-    glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+    glm::dvec3 cameraPositionModelSpace = glm::dvec3(
+        inverseModelTransform * glm::dvec4(camPos, 1)
+    );
 
     GeodeticPatch patch(ti);
     Geodetic2 corner = patch.getCorner(SOUTH_WEST);
@@ -490,10 +521,10 @@ std::string GlobeBrowsingModule::layerGroupNamesList() {
     std::string listLayerGroups("");
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
         listLayerGroups +=
-            globebrowsing::layergroupid::LAYER_GROUP_NAMES[i] + std::string(", ");
+            globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] + std::string(", ");
     }
     listLayerGroups +=
-        std::string(" and ") + globebrowsing::layergroupid::LAYER_GROUP_NAMES[
+        std::string(" and ") + globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
             globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1];
     return listLayerGroups;
 }
@@ -596,6 +627,11 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
     }
     return res;
 }
+
+bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
+    return _urlList.find(globe) != _urlList.end();
+}
+
 
 #endif // GLOBEBROWSING_USE_GDAL
 

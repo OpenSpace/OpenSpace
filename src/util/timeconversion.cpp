@@ -55,7 +55,7 @@ std::pair<double, std::string> simplifyTime(double seconds, bool forceSingularFo
         double val = seconds / 1e-3;
         return {
             val,
-            (val == 1.0 || forceSingularForm) ? "millisecond" : "milliseconds" 
+            (val == 1.0 || forceSingularForm) ? "millisecond" : "milliseconds"
         };
     }
 

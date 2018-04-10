@@ -25,15 +25,19 @@
 #include <fstream>
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 
-#ifdef __GNUC__
+#ifdef __clang__
+#elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif // __GNUC__
 
 #include <modules/iswa/ext/json.h>
-#ifdef __GNUC__
+
+#ifdef __clang__
+
+#elif defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif // __GNUC__
 
@@ -318,7 +322,7 @@ void KameleonPlane::updateFieldlineSeeds() {
 }
 
 void KameleonPlane::readFieldlinePaths(std::string indexFile) {
-    LINFO("Reading seed points paths from file '" << indexFile << "'");
+    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
         std::dynamic_pointer_cast<IswaKameleonGroup>(_group)->setFieldlineInfo(
             indexFile,
@@ -330,14 +334,14 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile) {
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR("Could not open seed points file '" << indexFile << "'");
+        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
     }
     else {
         try {
             //Parse and add each fieldline as an selection
             json fieldlines = json::parse(seedFile);
             int i = 0;
-            std::string fullName = name();
+            std::string fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
@@ -363,8 +367,8 @@ void KameleonPlane::subscribeToGroup() {
 
     //Add additional Events specific to KameleonPlane
     auto groupEvent = _group->groupEvent();
-    groupEvent->subscribe(name(), "resolutionChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(name() + " Event resolutionChanged");
+    groupEvent->subscribe(identifier(), "resolutionChanged", [&](ghoul::Dictionary dict) {
+        LDEBUG(identifier() + " Event resolutionChanged");
         float resolution;
         bool success = dict.getValue("resolution", resolution);
         if (success) {
@@ -372,8 +376,8 @@ void KameleonPlane::subscribeToGroup() {
         }
     });
 
-    groupEvent->subscribe(name(), "cdfChanged", [&](ghoul::Dictionary dict) {
-        LDEBUG(name() + " Event cdfChanged");
+    groupEvent->subscribe(identifier(), "cdfChanged", [&](ghoul::Dictionary dict) {
+        LDEBUG(identifier() + " Event cdfChanged");
         std::string path;
         bool success = dict.getValue("path", path);
         if (success) {

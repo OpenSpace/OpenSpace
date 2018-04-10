@@ -159,7 +159,7 @@ std::string KeyBindingManager::generateJson() const {
         first = false;
         json << "{";
         json << "\"key\": \"" << std::to_string(p.first) << "\",";
-        json << "\"script\": \"" << p.second.command << "\",";
+        json << "\"script\": \"" << escapedJson(p.second.command) << "\",";
         json << "\"remoteScripting\": "
              << (p.second.synchronization ? "true," : "false,");
         json << "\"documentation\": \"" << escapedJson(p.second.documentation) << "\"";
@@ -167,16 +167,7 @@ std::string KeyBindingManager::generateJson() const {
     }
     json << "]";
 
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        } else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 scripting::LuaLibrary KeyBindingManager::luaLibrary() {
@@ -194,8 +185,10 @@ scripting::LuaLibrary KeyBindingManager::luaLibrary() {
                 "clearKey",
                 &luascriptfunctions::clearKey,
                 {},
-                "string",
-                "Unbinds all of the scripts that are bound to the provided key + modifier"
+                "string or strings",
+                "Unbinds the key or keys that have been provided. This function can be "
+                "called with a single key or with an array of keys to remove all of the "
+                "provided keys at once"
             },
             {
                 "bindKey",

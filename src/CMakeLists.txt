@@ -38,7 +38,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/settingsengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
@@ -58,10 +57,13 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
-    ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
+    ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/binaryproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -203,7 +205,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/settingsengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
@@ -224,10 +225,13 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/binaryproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl

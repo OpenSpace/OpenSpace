@@ -22,26 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "httpsynchronization.h"
+#include <modules/sync/syncs/httpsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
-
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
-
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/documentation/verifier.h>
-
-#include <sstream>
+#include <ghoul/logging/logmanager.h>
+#include <cstdio>
 #include <fstream>
 #include <numeric>
 #include <memory>
+#include <sstream>
 
 namespace {
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyVersion = "Version";
+
+    constexpr const char* TempSuffix = ".tmp";
 
     constexpr const char* QueryKeyIdentifier = "identifier";
     constexpr const char* QueryKeyFileVersion = "file_version";
@@ -167,7 +167,7 @@ void HttpSynchronization::createSyncFile() {
     std::string directoryName = directory();
     std::string filepath = directoryName + ".ossync";
 
-    FileSys.createDirectory(directoryName, ghoul::filesystem::Directory::Recursive::Yes);
+    FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
 
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
@@ -214,8 +214,8 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         std::string filename = line.substr(lastSlash + 1);
 
         std::string fileDestination = directory() +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        filename;
+            ghoul::filesystem::FileSystem::PathSeparator +
+            filename + TempSuffix;
 
         downloads.push_back(std::make_unique<AsyncHttpFileDownload>(
             line, fileDestination, HttpFileDownload::Overwrite::Yes));
@@ -256,7 +256,31 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     bool failed = false;
     for (std::unique_ptr<AsyncHttpFileDownload>& d : downloads) {
         d->wait();
-        if (!d->hasSucceeded()) {
+        if (d->hasSucceeded()) {
+            // If we are forcing the override, we download to a temporary file
+            // first, so when we are done here, we need to rename the file to the
+            // original name
+
+            const std::string& tempName = d->destination();
+            std::string originalName = tempName.substr(
+                0,
+                tempName.size() - strlen(TempSuffix)
+            );
+
+            FileSys.deleteFile(originalName);
+            int success = rename(tempName.c_str(), originalName.c_str());
+            if (success != 0) {
+                LERRORC(
+                    "HTTPSynchronization",
+                    fmt::format(
+                        "Error renaming file {} to {}", tempName, originalName
+                    )
+                );
+
+                failed = true;
+            }
+        }
+        else {
             failed = true;
         }
     }

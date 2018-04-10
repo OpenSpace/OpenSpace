@@ -97,11 +97,11 @@ PowerScaledScalar & PowerScaledScalar::operator+=(const PowerScaledScalar &rhs) 
     double ds = this->_data[1] - rhs._data[1];
     if(ds >= 0.0) {
         *this = PowerScaledScalar(
-            static_cast<float>(rhs._data[0] * pow(k, -ds) + this->_data[0]), 
+            static_cast<float>(rhs._data[0] * pow(k, -ds) + this->_data[0]),
             this->_data[1]);
     } else {
         *this = PowerScaledScalar(
-            static_cast<float>(rhs._data[0] + this->_data[0] * pow(k, ds)), 
+            static_cast<float>(rhs._data[0] + this->_data[0] * pow(k, ds)),
             rhs._data[1]);
     }
 
@@ -117,11 +117,11 @@ PowerScaledScalar & PowerScaledScalar::operator-=(const PowerScaledScalar &rhs) 
     double ds = this->_data[1] - rhs._data[1];
     if(ds >= 0.0) {
         *this = PowerScaledScalar(
-            static_cast<float>(-rhs._data[0] * pow(k, -ds) + this->_data[0]), 
+            static_cast<float>(-rhs._data[0] * pow(k, -ds) + this->_data[0]),
             this->_data[1]);
     } else {
         *this = PowerScaledScalar(
-            static_cast<float>(-rhs._data[0] + this->_data[0] * pow(k, ds)), 
+            static_cast<float>(-rhs._data[0] + this->_data[0] * pow(k, ds)),
             rhs._data[1]);
     }
 
@@ -136,11 +136,11 @@ PowerScaledScalar & PowerScaledScalar::operator*=(const PowerScaledScalar &rhs) 
     double ds = this->_data[1] - rhs._data[1];
     if(ds >= 0.0) {
         *this = PowerScaledScalar(
-            static_cast<float>(rhs._data[0] * pow(k, -ds) * this->_data[0]), 
+            static_cast<float>(rhs._data[0] * pow(k, -ds) * this->_data[0]),
             this->_data[1] + this->_data[1]);
     } else {
         *this = PowerScaledScalar(
-            static_cast<float>(rhs._data[0] * this->_data[0] * pow(k, ds)), 
+            static_cast<float>(rhs._data[0] * this->_data[0] * pow(k, ds)),
             rhs._data[1] + rhs._data[1]);
     }
 
@@ -157,7 +157,7 @@ PowerScaledScalar & PowerScaledScalar::operator*=(const float &rhs) {
     double ds = this->_data[1];
     if(ds >= 0) {
         *this = PowerScaledScalar(
-            static_cast<float>(rhs*pow(k, -ds) * this->_data[0]), 
+            static_cast<float>(rhs*pow(k, -ds) * this->_data[0]),
             this->_data[1] + this->_data[1]);
     } else {
         *this = PowerScaledScalar(
@@ -188,11 +188,6 @@ bool PowerScaledScalar::operator<(const PowerScaledScalar &other) const {
     if(ds >= 0) {
         double upscaled = other._data[0]*pow(k,-ds);
         return _data[0] < upscaled;
-        /*
-        bool retur =(vec_[0] < upscaled);
-        std::printf("this: %f, upscaled: %f, this<upscaled: %i\n", vec_[0], upscaled, retur);
-        return retur;
-        */
     } else {
         double upscaled = _data[0]*pow(k,-ds);
         return other._data[0] > upscaled;

@@ -160,8 +160,8 @@ private:
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject;
 
-    UniformCache(modelView, projection, color, useLineFade, lineFade, vertexSorting,
-        idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
+    UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
+        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;
 };
 
 } // namespace openspace

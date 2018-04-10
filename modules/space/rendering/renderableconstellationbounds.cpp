@@ -179,7 +179,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
                 // The user has specified a constellation name that doesn't exist
                 LWARNINGC(
                     "RenderableConstellationBounds",
-                    "Option '" << s << "' not found in list of constellations"
+                    fmt::format("Option '{}' not found in list of constellations", s)
                 );
             }
             else {
@@ -201,7 +201,6 @@ void RenderableConstellationBounds::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/constellationbounds_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/constellationbounds_fs.glsl")
     );
-
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -311,7 +310,11 @@ bool RenderableConstellationBounds::loadVertexFile() {
             // means that the line was incomplete, so there was an error
             LERRORC(
                 "RenderableConstellationBounds",
-                "Error reading file '" << fileName << "' at line #" << currentLineNumber
+                fmt::format(
+                    "Error reading file '{}' at line #{}",
+                    fileName,
+                    currentLineNumber
+                )
             );
             break;
         }
@@ -393,7 +396,7 @@ bool RenderableConstellationBounds::loadConstellationFile() {
         if (it == _constellationBounds.end()) {
             LERRORC(
                 "RenderableConstellationBounds",
-                "Could not find constellation '" << abbreviation << "' in list"
+                fmt::format("Could not find constellation '{}' in list", abbreviation)
             );
             return false;
         }

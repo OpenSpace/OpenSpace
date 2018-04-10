@@ -4,8 +4,8 @@ local transforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local UranusTrail = {
-    Name = "UranusTrail",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "UranusTrail",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -18,7 +18,10 @@ local UranusTrail = {
         Resolution = 1000
     },
     Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
-    GuiPath = "/Solar System/Planets/Uranus"
+    GUI = {
+        Name = "Uranus Trail",
+        Path = "/Solar System/Planets/Uranus"
+    }
 }
 
 

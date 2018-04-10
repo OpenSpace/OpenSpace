@@ -31,6 +31,7 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -100,7 +101,7 @@ documentation::Documentation DashboardItemMission::Documentation() {
 }
 
 DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
-    : DashboardItem("Mission")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {

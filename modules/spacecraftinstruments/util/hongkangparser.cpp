@@ -31,6 +31,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>

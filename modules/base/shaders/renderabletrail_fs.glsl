@@ -30,6 +30,7 @@ in float fade;
 
 uniform vec3 color;
 uniform int renderPhase;
+uniform float opacity = 1.0;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
 #define RenderPhaseLines 0
@@ -40,7 +41,7 @@ uniform int renderPhase;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vec4(color * fade, fade);
+    frag.color = vec4(color * fade, fade * opacity);
     frag.depth = vs_positionScreenSpace.w;
     frag.blend = BLEND_MODE_ADDITIVE;
 

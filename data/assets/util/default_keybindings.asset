@@ -1,23 +1,24 @@
-local helper = asset.require('./scene_helper')
+local sceneHelper = asset.require('./scene_helper')
+local propertyHelper = asset.require('./property_helper')
 
 local Keybindings = {
     {
         Key = "F2",
         Command =
-[[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');
-local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');
-openspace.setPropertyValue('Global Properties.ImGUI.*.Enabled', false);
+[[local b = openspace.getPropertyValue('Modules.ImGUI.Main.SceneProperties.Enabled');
+local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');
+openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);
 if b and c then
     -- This can happen if the main properties window is enabled, the main gui is enabled
     -- and then closed again. So the main properties window is enabled, but also all
     -- windows are hidden
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', true);
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', true);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', false);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SceneProperties.Enabled', true);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SpaceTime.Enabled', true);
 else
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Properties.Enabled', not b);
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Space/Time.Enabled', not b);
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SceneProperties.Enabled', not b);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.SpaceTime.Enabled', not b);
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);
 end]],
         Documentation = "Shows or hides the properties window",
         Local = true
@@ -25,15 +26,15 @@ end]],
     {
         Key = "F3",
         Command = 
-[[local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Enabled');
-openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.Enabled', not b);
-openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
+[[local b = openspace.getPropertyValue('Modules.ImGUI.Main.Enabled');
+openspace.setPropertyValueSingle('Modules.ImGUI.Main.Enabled', not b);
+openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
         Documentation = "Shows or hides the entire user interface",
         Local = true
     },
     {
         Key = "F4",
-        Command = helper.property.invert("RenderEngine.PerformanceMeasurements"),
+        Command = propertyHelper.invert("RenderEngine.PerformanceMeasurements"),
         Documentation = "Toogles performance measurements that shows rendering time informations.",
         Local = true
     },
@@ -57,19 +58,19 @@ openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
     },
     {
         Key = "f",
-        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
         Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely.",
         Local = false
     },
     {
         Key = "Shift+f",
-        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
         Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely.",
         Local = false
     },
     {
         Key = "Ctrl+f",
-        Command = helper.property.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+        Command = propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
         Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely.",
         Local = false
     },
@@ -84,9 +85,9 @@ openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);]],
 local DeltaTimeKeys
 
 asset.onInitialize(function()
-    Keys = helper.bindKeys(Keybindings)
+    Keys = sceneHelper.bindKeys(Keybindings)
 
-    DeltaTimeKeys = helper.setDeltaTimeKeys({
+    DeltaTimeKeys = sceneHelper.setDeltaTimeKeys({
     --  1           2           3           4           5           6           7           8           9           0
     --------------------------------------------------------------------------------------------------------------------------
     --  1s          2s          5s          10s         30s         1m          2m          5m          10m         30m
@@ -102,8 +103,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function ()
-    helper.unbindKeys(Keybindings)
-    helper.unbindKeys(DeltaTimeKeys)
+    sceneHelper.unbindKeys(Keybindings)
+    sceneHelper.unbindKeys(DeltaTimeKeys)
 end)
 
 asset.export("DefaultKeybindings", Keybindings)

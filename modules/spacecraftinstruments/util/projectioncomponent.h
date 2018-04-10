@@ -48,7 +48,7 @@ class ProjectionComponent : public properties::PropertyOwner {
 public:
     ProjectionComponent();
 
-    void initialize(const ghoul::Dictionary& dictionary);
+    void initialize(const std::string& identifier, const ghoul::Dictionary& dictionary);
     bool initializeGL();
     bool deinitialize();
 

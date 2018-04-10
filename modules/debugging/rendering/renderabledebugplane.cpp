@@ -33,7 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>

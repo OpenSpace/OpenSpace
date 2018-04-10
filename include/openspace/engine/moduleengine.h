@@ -28,6 +28,7 @@
 #include <memory>
 #include <vector>
 
+#include <openspace/properties/propertyowner.h>
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/misc/assert.h>
@@ -47,8 +48,10 @@ namespace scripting { struct LuaLibrary; }
  * Additional OpenSpaceModule%s can be registered with the #registerModule function, which
  * will internally call the OpenSpaceModule::initialize method.
  */
-class ModuleEngine {
+class ModuleEngine : public properties::PropertyOwner {
 public:
+    ModuleEngine();
+
     /**
      * Registers all of the OpenSpaceModule%s which are created by the CMake configuration
      * and stored in the <code>moduleregistration.h</code> file. For all of those modules
@@ -102,7 +105,7 @@ public:
     ModuleSubClass* module() const {
         auto it = std::find_if(_modules.begin(), _modules.end(),
             [](const std::unique_ptr<OpenSpaceModule>& m) {
-                return m->name() == ModuleSubClass::Name;
+                return m->identifier() == ModuleSubClass::Name;
             });
         if (it != _modules.end()) {
             return dynamic_cast<ModuleSubClass*>(it->get());

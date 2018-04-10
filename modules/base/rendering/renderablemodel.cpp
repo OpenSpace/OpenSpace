@@ -113,21 +113,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _programObject(nullptr)
     , _texture(nullptr)
 {
-    ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "Name was not passed to RenderableModel"
-    );
-
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
         "RenderableModel"
     );
 
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
+
     if (dictionary.hasKey(KeyGeometry)) {
-        std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
         ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
-        dict.setValue(SceneGraphNode::KeyName, name);
         _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
     }
 
@@ -169,6 +166,7 @@ void RenderableModel::initializeGL() {
         }
     );
 
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
         "directionToSunViewSpace"
     );
@@ -182,6 +180,8 @@ void RenderableModel::initializeGL() {
         "performShading"
     );
     _uniformCache.texture = _programObject->uniformLocation("texture1");
+
+
     loadTexture();
 
     _geometry->initialize(this);
@@ -205,6 +205,8 @@ void RenderableModel::deinitializeGL() {
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
+
+    _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
@@ -253,6 +255,7 @@ void RenderableModel::update(const UpdateData&) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
+        _uniformCache.opacity = _programObject->uniformLocation("opacity");
         _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
             "directionToSunViewSpace"
         );
@@ -282,7 +285,7 @@ void RenderableModel::loadTexture() {
         if (_texture) {
             LDEBUGC(
                 "RenderableModel",
-                "Loaded texture from '" << absPath(_colorTexturePath) << "'"
+                fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath))
             );
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

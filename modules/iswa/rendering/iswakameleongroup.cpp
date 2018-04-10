@@ -98,7 +98,7 @@ void IswaKameleonGroup::registerProperties() {
     //OsEng.gui()._iswa.registerProperty(&_fieldlines);
 
     _resolution.onChange([this]{
-        LDEBUG("Group " + name() + " published resolutionChanged");
+        LDEBUG("Group " + identifier() + " published resolutionChanged");
         _groupEvent->publish(
             "resolutionChanged",
             ghoul::Dictionary({{"resolution", _resolution.value()}})
@@ -111,12 +111,12 @@ void IswaKameleonGroup::registerProperties() {
 }
 
 void IswaKameleonGroup::readFieldlinePaths(std::string indexFile) {
-    LINFO("Reading seed points paths from file '" << indexFile << "'");
+    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
 
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good())
-        LERROR("Could not open seed points file '" << indexFile << "'");
+        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
     else {
         std::string line;
         std::string fileContent;
@@ -132,7 +132,7 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile) {
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
-                    name() + "/" + it.key(),
+                    identifier() + "/" + it.key(),
                     it.value(),
                     false
                 );

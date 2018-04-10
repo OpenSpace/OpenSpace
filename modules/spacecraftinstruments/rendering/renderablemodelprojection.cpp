@@ -132,16 +132,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         dictionary,
         "RenderableModelProjection"
     );
-
-    std::string name;
-    [[ maybe_unused ]] bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "Name was not passed to RenderableModelProjection");
-
     using ghoul::Dictionary;
     Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
-    using modelgeometry::ModelGeometry;
-    geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-    _geometry = ModelGeometry::createFromDictionary(geometryDictionary);
+    _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 
     _colorTexturePath = absPath(dictionary.value<std::string>(
         ColorTextureInfo.identifier
@@ -154,6 +147,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
 
     _projectionComponent.initialize(
+        identifier(),
         dictionary.value<ghoul::Dictionary>(keyProjection)
     );
 
@@ -225,7 +219,9 @@ void RenderableModelProjection::initializeGL() {
     _fboUniformCache.ProjectorMatrix = _fboProgramObject->uniformLocation(
         "ProjectorMatrix"
     );
-    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation("ModelTransform");
+    _fboUniformCache.ModelTransform = _fboProgramObject->uniformLocation(
+        "ModelTransform"
+    );
     _fboUniformCache.boresight = _fboProgramObject->uniformLocation("boresight");
 
 
@@ -547,7 +543,7 @@ bool RenderableModelProjection::loadTextures() {
             absPath(_colorTexturePath)
         );
         if (_baseTexture) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+            LDEBUG(fmt::format("Loaded texture from '{}'", absPath(_colorTexturePath)));
             _baseTexture->uploadTexture();
             _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         }
