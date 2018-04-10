@@ -2,7 +2,7 @@
 -- example:
 -- asset.require('../scene/solarsystem/planets/mars/mars')
 
-local CreateFocusNodes = true
+local CreateFocusNodes = false
 
 -- Add folders to this list that contain .info files describing patches
 -- OBS: Even on Windows, you have to use forward slashes (/) or double backslashes (\\)
