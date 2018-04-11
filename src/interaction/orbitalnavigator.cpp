@@ -106,6 +106,11 @@ namespace {
         "Show Solar System overview",
         "Determines whether to zoom out to the entire Solar System or not."
     };
+    static const openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
+        "ApplyOverview",
+        "Apply overview ",
+        "Triggering this property makes the camera move to an overview."
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -132,6 +137,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _velocitySensitivity(velocityZoomControl, 0.05f, 0.001f, 0.1f)
     , _flyTo(flyToNode, true)
     , _showSolarSystem(solarSystemOverview, false)
+    , _applyOverview(ApplyOverviewInfo)
 {
     auto smoothStep =
         [](double t) {
@@ -139,6 +145,9 @@ OrbitalNavigator::OrbitalNavigator()
             return glm::clamp(res, 0.0, 1.0);
         };
     _followRotationInterpolator.setTransferFunction(smoothStep);
+
+    addProperty(_applyOverview);
+    _applyOverview.onChange([this]() { _showSolarSystem = true; });
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an

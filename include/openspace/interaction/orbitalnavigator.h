@@ -33,6 +33,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
@@ -86,6 +87,7 @@ private:
     properties::FloatProperty _velocitySensitivity;
     properties::BoolProperty _flyTo;
     properties::BoolProperty _showSolarSystem;
+    properties::TriggerProperty _applyOverview;
 
     MouseStates _mouseStates;
 
