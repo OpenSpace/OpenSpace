@@ -88,23 +88,23 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo velocityZoomControl = {
-        "velocityZoomControl",
+    static const openspace::properties::Property::PropertyInfo VelocityZoomControlInfo = {
+        "VelocityZoomControl",
         "Velocity zoom control",
         "Controls the velocity of the camera motion when zooming in to the focus node. "
         "The higher the value the faster the camera will move towards the focus."
     };
 
-    static const openspace::properties::Property::PropertyInfo flyToNode = {
-        "flyToNode",
+    static const openspace::properties::Property::PropertyInfo FlyToNodeInfo = {
+        "FlyToNode",
         "Fly to focus node",
         "Determines whether to fly to the focus node or just focus on it."
     };
 
-    static const openspace::properties::Property::PropertyInfo solarSystemOverview = {
-        "solarSystemOverview",
-        "Show Solar System overview",
-        "Determines whether to zoom out to the entire Solar System or not."
+    static const openspace::properties::Property::PropertyInfo OverviewInfo = {
+        "Overview",
+        "Overview",
+        "Determines whether to zoom out to an overview or not."
     };
     static const openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
         "ApplyOverview",
@@ -134,9 +134,9 @@ OrbitalNavigator::OrbitalNavigator()
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
     , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
-    , _velocitySensitivity(velocityZoomControl, 0.05f, 0.001f, 0.1f)
-    , _flyTo(flyToNode, true)
-    , _showSolarSystem(solarSystemOverview, false)
+    , _velocitySensitivity(VelocityZoomControlInfo, 0.05f, 0.001f, 0.1f)
+    , _flyTo(FlyToNodeInfo, true)
+    , _overview(OverviewInfo, false)
     , _applyOverview(ApplyOverviewInfo)
 {
     auto smoothStep =
@@ -147,7 +147,7 @@ OrbitalNavigator::OrbitalNavigator()
     _followRotationInterpolator.setTransferFunction(smoothStep);
 
     addProperty(_applyOverview);
-    _applyOverview.onChange([this]() { _showSolarSystem = true; });
+    _applyOverview.onChange([this]() { _overview = true; });
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
@@ -194,7 +194,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_sensitivity);
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
-    addProperty(_showSolarSystem);
+    addProperty(_overview);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -247,17 +247,17 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
 
         // Zoom away from the focus node until the entire solar system is in the camera view
         /* TODO: Remove magic numbers */
-        if (_showSolarSystem) {
+        if (_overview) {
             double solarSystemLimit = 2.2e+13;
             _flyTo = false;
 
             if (length(camPos) <= solarSystemLimit) {
                 camPos = zoomToFocusNode(camPos, solarSystemLimit, -camPosToCenterPosDiff, length(camPos));
                 if (length(camPos) > solarSystemLimit*0.9)
-                    _showSolarSystem = false;
+                    _overview = false;
             }
             else {
-                _showSolarSystem = false;
+                _overview = false;
             }
         }
 
