@@ -8,6 +8,12 @@
 }
 
 .TimeText {
-  width: 9em;
+  width: 17em;
   text-align: center;
+}
+
+.SimulationIncrement {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }

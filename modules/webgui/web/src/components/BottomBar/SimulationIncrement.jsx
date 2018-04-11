@@ -7,14 +7,11 @@ import Row from '../common/Row/Row';
 import Select from '../common/Input/Select/Select';
 import { round10 } from '../../utils/rounding';
 import ScaleInput from '../common/Input/ScaleInput/ScaleInput';
+import {UpdateDeltaTimeNow} from "../../utils/timeHelpers";
 
 const UpdateDelayMs = 1000;
 // Throttle the delta time updating, so that we don't accidentally flood
 // the simulation with updates.
-const UpdateDeltaTimeNow = (value) => {
-  const script = SetDeltaTimeScript.replace(ValuePlaceholder, value);
-  DataManager.runScript(script);
-};
 const UpdateDeltaTime = throttle(UpdateDeltaTimeNow, UpdateDelayMs);
 
 const Steps = {
@@ -63,18 +60,18 @@ class SimulationIncrement extends Component {
       quickAdjust: 1,
     };
 
-    this.deltaTimeUpdated = this.deltaTimeUpdated.bind(this);
+    this.deltaTimeCallback = this.deltaTimeCallback.bind(this);
     this.setDeltaTime = this.setDeltaTime.bind(this);
     this.setStepSize = this.setStepSize.bind(this);
     this.setQuickAdjust = this.setQuickAdjust.bind(this);
   }
 
   componentDidMount() {
-    DataManager.subscribe(DeltaTime, this.deltaTimeUpdated, TopicTypes.time);
+    DataManager.subscribe(DeltaTime, this.deltaTimeCallback, TopicTypes.time);
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(DeltaTime, this.deltaTimeUpdated);
+    DataManager.unsubscribe(DeltaTime, this.deltaTimeCallback);
   }
 
   get stepSize() {
@@ -114,7 +111,7 @@ class SimulationIncrement extends Component {
     }
   }
 
-  deltaTimeUpdated({deltaTime}) {
+  deltaTimeCallback({deltaTime}) {
     this.setState({deltaTime});
   }
 

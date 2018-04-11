@@ -51,10 +51,10 @@ class ScaleInput extends Component {
   }
 
   render() {
-    const { leftLabel, rightLabel, label, wide } = this.props;
+    const { leftLabel, rightLabel, label, wide, saveValue } = this.props;
     const { id } = this.state;
     const inheritedProps = excludeKeys(this.props,
-      'rightLabel leftLabel label onChange wide centerMarker defaultValue leftTicks rightTicks');
+      'rightLabel leftLabel label onChange wide centerMarker saveValue defaultValue leftTicks rightTicks');
 
     return (
       <div className={`${styles.group} ${wide ? styles.wide : ''}`}>
@@ -65,8 +65,8 @@ class ScaleInput extends Component {
           id={id}
           value={this.state.value}
           onChange={this.onChange}
-          onMouseUp={this.reset}
-          onBlur={this.reset}
+          onMouseUp={!saveValue && this.reset}
+          onBlur={!saveValue && this.reset}
           type="range"
           className={`${styles.input} ${wide ? styles.wide : ''}`}
         />

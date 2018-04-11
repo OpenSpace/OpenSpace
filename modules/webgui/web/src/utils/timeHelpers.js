@@ -32,5 +32,9 @@ export const DateStringWithTimeZone = (date, zone = 'Z') => {
   return (!date.includes('Z') ? `${date}${zone}` : date);
 };
 
+export const UpdateDeltaTimeNow = (value) => {
+  const script = SetDeltaTimeScript.replace(ValuePlaceholder, value);
+  DataManager.runScript(script);
+};
 
 
