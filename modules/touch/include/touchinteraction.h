@@ -38,6 +38,8 @@
 #include <openspace/properties/vector/vec4property.h>
 
 //#define TOUCH_DEBUG_PROPERTIES
+#define CONST_TIME_DECAY
+
 
 namespace openspace {
 
@@ -184,6 +186,10 @@ private:
     properties::Vec4Property _friction;
     properties::FloatProperty _pickingRadiusMinimum;
     properties::BoolProperty _ignoreGui;
+#ifdef CONST_TIME_DECAY
+    properties::FloatProperty _constTimeDecay_secs;
+#endif
+    properties::FloatProperty _speedLimitDistanceFraction;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
@@ -222,6 +228,47 @@ private:
     LMstat _lmstat;
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;
+
+#ifdef CONST_TIME_DECAY
+    class FrameTimeAverage
+    {
+    public:
+        void updateWithNewFrame (double sample)
+        {
+            if (sample > 0.0005) {
+                _samples[index++] = sample;
+                if (index >= totalSamples)
+                    index = 0;
+                if (_nSamples < totalSamples)
+                    _nSamples++;
+            }
+        }
+
+        double getAvgFrameTime () {
+            if (_nSamples == 0)
+                return 1.0 / 60.0;
+            else
+                return std::accumulate(_samples, _samples + _nSamples, 0.0)
+                    / (double)(_nSamples);
+        }
+
+    private:
+        static const int totalSamples = 10;
+        int _nSamples = 0;
+        double _samples[totalSamples];
+        double _runningTotal = 0.0;
+        int index = 0;
+    };
+    FrameTimeAverage _frameTimeAvg;
+
+    struct ConstantTimeDecayCoefficients {
+        double zoom = 0.0;
+        double orbit = 0.0;
+        double roll = 0.0;
+        double pan = 0.0;
+    };
+    ConstantTimeDecayCoefficients _constTimeDecayCoeff;
+#endif
 };
 
 } // openspace namespace

@@ -157,6 +157,20 @@ namespace {
         "" // @TODO Missing documentation
     };
 
+#ifdef CONST_TIME_DECAY
+    static const openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
+        "ConstantTimeDecaySecs",
+        "Time duration that a pitch/roll/zoom/pan should take to decay to zero (seconds)",
+        ""
+    };
+#endif
+
+    static const openspace::properties::Property::PropertyInfo SpeedLimitDistanceFractionInfo = {
+        "SpeedLimitDistanceFraction",
+        "Speed limiting factor as a fraction of distance to focus node",
+        ""
+    };
+
     static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
@@ -224,7 +238,7 @@ TouchInteraction::TouchInteraction()
     , _rollAngleThreshold(RollThresholdInfo, 0.025f, 0.f, 0.05f)
     , _orbitSpeedThreshold(OrbitSpinningThreshold, 0.005f, 0.f, 0.01f)
     , _spinSensitivity(SpinningSensitivityInfo, 1.f, 0.f, 2.f)
-    , _zoomSensitivity(ZoomSensitivityInfo, 1.025f, 1.0f, 1.1f)
+    , _zoomSensitivity(ZoomSensitivityInfo, 1.035f, 1.0f, 1.1f)
     , _zoomSensitivityDistanceThreshold(ZoomSensitivityDistanceThresholdInfo, 0.05, 0.01, 0.25)
     , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
@@ -257,6 +271,10 @@ TouchInteraction::TouchInteraction()
     )
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
+    , _speedLimitDistanceFraction(SpeedLimitDistanceFractionInfo, 7.f, 0.1f, 20.0f)
+#ifdef CONST_TIME_DECAY
+    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 2.0f, 0.1f, 2.5f)
+#endif
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
     , _projectionScaleFactor(1.000004)
@@ -288,6 +306,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_zoomSensitivity);
     addProperty(_zoomSensitivityDistanceThreshold);
     addProperty(_zoomBoundarySphereMultiplier);
+    addProperty(_speedLimitDistanceFraction);
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
     addProperty(_panEnabled);
@@ -926,6 +945,9 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 {
     TuioCursor cursor = list.at(0);
     const int action = interpretInteraction(list, lastProcessed);
+#ifdef CONST_TIME_DECAY
+    double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.getAvgFrameTime();
+#endif
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     const std::map<int, std::string> interactionNames = {
@@ -950,6 +972,16 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             _vel.orbit += glm::dvec2(cursor.getXSpeed() *
                           _sensitivity.orbit.x, cursor.getYSpeed() *
                           _sensitivity.orbit.y);
+#ifdef CONST_TIME_DECAY
+            /*double orbitVelocityAvg = (cursor.getXSpeed() * _sensitivity.orbit.x
+                + cursor.getYSpeed() * _sensitivity.orbit.y) / 2.0;*/
+            double orbitVelocityAvg = glm::distance(_vel.orbit.x, _vel.orbit.y);
+            if( stepsToDecay > 0.0 )
+                _constTimeDecayCoeff.orbit = std::pow((1e-6 / std::abs(orbitVelocityAvg)), (1.0 / stepsToDecay));
+            else
+                _constTimeDecayCoeff.orbit = 1.0;
+//LINFO("Orbit coeff " << _constTimeDecayCoeff.orbit << " with velocity " << orbitVelocityAvg);
+#endif
             break;
         }
         case PINCH: {
@@ -988,11 +1020,26 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             pinchConsecCt++;
             pinchConsecZoomFactor += zoomFactor;
 #endif
+
+#ifdef CONST_TIME_DECAY
+            if( stepsToDecay > 0.0 && std::abs(_vel.zoom) > 1e-6)
+                _constTimeDecayCoeff.zoom = std::pow((1e-6 / std::abs(_vel.zoom)), (1.0 / stepsToDecay));
+            else
+                _constTimeDecayCoeff.zoom = 1.0;
+#endif
             if ((length(currDistanceToFocusNode) / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
-                zoomFactor *= pow(distanceFromFocusSurface, (float)_zoomSensitivity);
+                zoomFactor *= pow(std::abs(distanceFromFocusSurface), (float)_zoomSensitivity);
             }
+//LINFO("Zoom vel factor " << zoomFactor << " with velocity " << _vel.zoom);
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
+//LINFO("VVelocity= " << _vel.zoom);
+            //Speed Limit on zoom velocity
+            double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
+            if (std::abs(_vel.zoom) > 1e-7)
+                _vel.zoom = std::min(std::abs(speedLimit), std::abs(_vel.zoom)) * (_vel.zoom / std::abs(_vel.zoom));
+            else
+                _vel.zoom = 0.0;
             break;
         }
         case ROLL: {
@@ -1031,12 +1078,27 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             ) / list.size();
 
             _vel.roll += -rollFactor * _sensitivity.roll;
+#ifdef CONST_TIME_DECAY
+            if( stepsToDecay > 0.0 )
+                _constTimeDecayCoeff.roll = std::pow((1e-6 / std::abs(_vel.roll)), (1.0 / stepsToDecay));
+            else
+                _constTimeDecayCoeff.roll = 1.0;
+#endif
             break;
         }
         case PAN: {
              // add local rotation velocity
             _vel.pan += glm::dvec2(cursor.getXSpeed() *
                         _sensitivity.pan.x, cursor.getYSpeed() * _sensitivity.pan.y);
+#ifdef CONST_TIME_DECAY
+            /*double panVelocityAvg = (cursor.getXSpeed() * _sensitivity.pan.x
+                + cursor.getYSpeed() * _sensitivity.pan.y) / 2.0;*/
+            double panVelocityAvg = glm::distance(_vel.pan.x, _vel.pan.y);
+            if( stepsToDecay > 0.0 )
+                _constTimeDecayCoeff.pan = std::pow((1e-6 / std::abs(panVelocityAvg)), (1.0 / stepsToDecay));
+            else
+                _constTimeDecayCoeff.pan = 1.0;
+#endif
             break;
         }
         case PICK: {
@@ -1236,6 +1298,50 @@ void TouchInteraction::unitTest() {
 // _timeSlack = 0.0501 % 0.01 = 0.01
 
 void TouchInteraction::decelerate(double dt) {
+#ifdef CONST_TIME_DECAY
+    _frameTimeAvg.updateWithNewFrame(dt);
+    double expectedFrameTime = _frameTimeAvg.getAvgFrameTime();
+
+    // Number of times velocities should decelerate, depending on chosen frequency and
+    // time slack over from last frame
+    int times = static_cast<int>((dt + _timeSlack) / expectedFrameTime);
+    // Save the new time slack for the next frame
+    _timeSlack = fmod((dt + _timeSlack), expectedFrameTime) * expectedFrameTime;
+
+    if (times > 0) {
+        if (_constTimeDecayCoeff.orbit > 0.0001)
+            _vel.orbit *= std::pow(_constTimeDecayCoeff.orbit, times);
+        else
+            _vel.orbit = { 0.0, 0.0 };
+
+        if (_constTimeDecayCoeff.roll > 0.0001)
+            _vel.roll *= std::pow(_constTimeDecayCoeff.roll, times);
+        else
+            _vel.roll = 0.0;
+
+        if (_constTimeDecayCoeff.pan > 0.0001)
+            _vel.pan *= std::pow(_constTimeDecayCoeff.pan, times);
+        else
+            _vel.pan = { 0.0, 0.0 };
+
+        if( _constTimeDecayCoeff.zoom > 0.0001) {
+            // Decelerate zoom velocity quicker if we're close enough to use direct-manipulation
+            if (!_directTouchMode && _currentRadius > _nodeRadiusThreshold &&
+                _vel.zoom > _focusNode->boundingSphere())
+            {
+                _vel.zoom *= std::pow(2 * _constTimeDecayCoeff.zoom, times);
+            }
+            else {
+                _vel.zoom *= std::pow(_constTimeDecayCoeff.zoom, times);
+            }
+        }
+        else {
+            _vel.zoom = 0.0;
+        }
+    }
+//if(std::abs(_vel.zoom) > 10000)  LINFO("Decelerate:velocity= " << _vel.zoom << " from " << times << " times using coeff " << _constTimeDecayCoeff.zoom);
+
+#else
     double frequency = 1.0 / _deceleratesPerSecond;
     // Number of times velocities should decelerate, depending on chosen frequency and
     // time slack over from last frame
@@ -1250,9 +1356,22 @@ void TouchInteraction::decelerate(double dt) {
         _vel.zoom *= std::pow(1 - 2 * _friction.value().y, times);
     }
     _vel.orbit *= std::pow(1 - _friction.value().x, times);
-    _vel.zoom *= std::pow(1 - _friction.value().y, times);
     _vel.roll *= std::pow(1 - _friction.value().z, times);
     _vel.pan *= std::pow(1 - _friction.value().w, times);
+#endif //#ifdef CONST_TIME_DECAY
+
+#ifndef CONST_TIME_DECAY
+    float frictionDecayValue = _friction.value().y;
+#endif //#ifndef CONST_TIME_DECAY
+
+    glm::dvec3 camPos = _camera->positionVec3();
+    glm::dvec3 centerPos = _focusNode->worldPosition();
+    glm::dvec3 centerToCamera = camPos - centerPos;
+
+#ifndef CONST_TIME_DECAY
+    _vel.zoom *= std::pow((1 - frictionDecayValue), times);
+#endif //#ifndef CONST_TIME_DECAY
+
 }
 
 // Called if all fingers are off the screen
@@ -1308,7 +1427,7 @@ void TouchInteraction::resetToDefault() {
     _rollAngleThreshold.set(0.025f);
     _orbitSpeedThreshold.set(0.005f);
     _spinSensitivity.set(1.0f);
-    _zoomSensitivity.set(1.025f);
+    _zoomSensitivity.set(1.01f);
     _inputStillThreshold.set(0.0005f);
     _centroidStillThreshold.set(0.0018f);
     _interpretPan.set(0.015f);
