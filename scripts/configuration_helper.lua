@@ -677,7 +677,7 @@ function sgct.config.single(arg)
                 right = horizontalFov
             }
         else
-            arg["fov"] = { down = 22.5, up = 22.5, left = 40.0, right = 40.0 }
+            arg["fov"] = { down = 25, up = 25, left = 40.0, right = 40.0 }
         end
     end
 
