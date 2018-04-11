@@ -532,8 +532,9 @@ void Scene::addTimeInterpolation(float targetTime, double durationSeconds) {
     else {
         i.easingTime = i.durationSeconds * 0.25f;
     }
+    //i.easingTime = 0.f;
 
-    i.interpolationStart = Time::now().j2000Seconds();
+    i.interpolationStart = OsEng.timeManager().time().j2000Seconds();
     i.interpolationEnd = targetTime;
 
     //Time::now().setPause(false);
@@ -600,7 +601,7 @@ void Scene::updateInterpolations() {
             0.f,
             1.f
         );
-        LINFOC("t", std::to_string(t));
+        //LINFOC("t", std::to_string(t));
 
         //
         // t_1: duration
@@ -631,35 +632,38 @@ void Scene::updateInterpolations() {
         const float a = i.easingTime;
         const float aprime = a / t1;
 
-        LINFOC("e", std::to_string(e));
-        LINFOC("s", std::to_string(s));
-        LINFOC("t1", std::to_string(t1));
-        LINFOC("a", std::to_string(a));
-        LINFOC("aprime", std::to_string(aprime));
+        //LINFOC("e", std::to_string(e));
+        //LINFOC("s", std::to_string(s));
+        //LINFOC("t1", std::to_string(t1));
+        //LINFOC("a", std::to_string(a));
+        //LINFOC("aprime", std::to_string(aprime));
 
 
         const double x = (e - s) / (t1 - a);
-        LINFOC("x", std::to_string(x));
+        //LINFOC("x", std::to_string(x));
 
         double targetDelta = x;
         if (t < aprime) {
             float localT = t / aprime;
-            LINFOC("localT", std::to_string(localT));
+            //LINFOC("localT", std::to_string(localT));
             targetDelta = localT * x;
         }
 
         if (t > (1.f - aprime)) {
             //float localT = (t - t1 - a) / a;
             float localT = (t - (1.f - aprime)) / (aprime);
-            LINFOC("localT", std::to_string(localT));
+            //LINFOC("localT", std::to_string(localT));
             targetDelta = (1 - localT) * x;
         }
-        LINFOC("targetDelta", std::to_string(targetDelta));
-        LINFOC("=====", "=========");
+        //LINFOC("targetDelta", std::to_string(targetDelta));
+        //LINFOC("=====", "=========");
 
-        OsEng.timeManager().time().setDeltaTime(targetDelta);
         if (t == 1.f) {
+            OsEng.timeManager().time().setDeltaTime(0.0);
             _timeInterpolationInfo = nullptr;
+        }
+        else {
+            OsEng.timeManager().time().setDeltaTime(targetDelta);
         }
     }
 }
