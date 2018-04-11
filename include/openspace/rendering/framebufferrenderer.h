@@ -91,7 +91,7 @@ public:
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
-        ghoul::Boolean isAttached) override;
+        isAttached isAttached) override;
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
@@ -118,7 +118,6 @@ private:
     GLuint _screenQuad;
     GLuint _vertexPositionBuffer;
     GLuint _mainColorTexture;
-    GLuint _mainOtherDataTexture;
     GLuint _mainPositionTexture;
     GLuint _mainNormalTexture;
     GLuint _mainDepthTexture;

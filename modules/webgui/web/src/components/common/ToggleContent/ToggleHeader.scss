@@ -1,0 +1,22 @@
+@import "../../../styles/all";
+
+.toggle {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: $sidebar-padding;
+
+  &:hover {
+    background: $ui-background-hover;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+.icon {
+  color: $text-color-blur;
+  font-size: 18px;
+}
+

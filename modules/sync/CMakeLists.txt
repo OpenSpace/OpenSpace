@@ -29,6 +29,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.h
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/urlsynchronization.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -38,6 +39,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/torrentclient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/httpsynchronization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/syncs/torrentsynchronization.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/syncs/urlsynchronization.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/syncassettask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

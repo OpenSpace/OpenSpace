@@ -33,10 +33,6 @@ uniform vec2 clipOffsets_#{id}[8];
 
 uniform float opacity_#{id} = 10.0;
 
-// Value remapping:
-// Linearly remap volume values of zero to x and one to y
-// before using the values to sample the transfer function.
-uniform vec2 valueRemapping_#{id} = vec2(0.0, 1.0);
 
 // Normalization factor x for radius r [0, 1].
 // value *= 1/(r^x)
@@ -70,8 +66,6 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
     if (clipAlpha > 0) {
         float val = texture(volumeTexture_#{id}, transformedPos).r;
-
-        val = mix(valueRemapping_#{id}.x, valueRemapping_#{id}.y, val);
 
         if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
             val *= pow(transformedPos.x, rNormalization_#{id});

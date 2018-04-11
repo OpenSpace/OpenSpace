@@ -46,6 +46,7 @@
 #endif
 
 #include <cmath>
+#include <ghoul/fmt.h>
 #include <functional>
 #include <fstream>
 
@@ -323,17 +324,17 @@ TouchInteraction::TouchInteraction()
 
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
-        if (!node) {
-            LWARNING(
-                "Could not find a node in scenegraph called '" << _origin.value() << "'"
-            );
-            return;
+        if (node) {
+            setFocusNode(node);
         }
-        setFocusNode(node);
+        else {
+            LWARNING(fmt::format(
+                "Could not find a node in scenegraph called '{}'", _origin.value()
+            ));
+        }
     });
 
     levmarq_init(&_lmstat);
-
 
     _time.initSession();
 }
@@ -398,12 +399,12 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
         _guiON = !_guiON;
         module.gui.setEnabled(_guiON);
 
-        std::string mode = (_guiON) ? "" : "de";
-        LINFO(
-            "GUI mode is " << mode << "activated. Inside box by: (" <<
-            static_cast<int>(100 * (pos.x / _guiButton.value().x)) << "%, " <<
-            static_cast<int>(100 * (pos.y / _guiButton.value().y)) << "%)\n"
-        );
+        LINFO(fmt::format(
+            "GUI mode is {}. Inside box by: ({}%, {}%)",
+            _guiON ? "activated" : "deactivated",
+            static_cast<int>(100 * (pos.x / _guiButton.value().x)),
+            static_cast<int>(100 * (pos.y / _guiButton.value().y))
+        ));
     }
     else if (_guiON) {
         module.touchInput = { _guiON, pos, 1 }; // emulate touch input as a mouse
@@ -677,8 +678,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     std::vector<SceneGraphNode*> selectableNodes;
     for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes())
         for (std::string name : selectables)
-            if (node->name() == name)
+            if (node->identifier() == name) {
                 selectableNodes.push_back(node);
+            }
 
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
@@ -701,9 +703,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
             glm::dvec4(xCo, yCo, -1.0, 1.0));
         glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
 
-        int id = c.getSessionID();
+        long id = c.getSessionID();
 
-       for (SceneGraphNode* node : selectableNodes) {
+        for (SceneGraphNode* node : selectableNodes) {
             double boundingSphere = node->boundingSphere();
             glm::dvec3 camToSelectable = node->worldPosition() - camPos;
             double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) /
@@ -762,7 +764,10 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     // If the user touched the planet directly, this is definitely the one
                     // they are interested in  =>  minimum distance
                     if (dist <= 0.0) {
-                        LINFOC(node->name(), "Picking candidate based on direct touch");
+                        LINFOC(
+                            node->identifier(),
+                            "Picking candidate based on direct touch"
+                        );
                         pickingInfo.push_back({
                             node,
                             -std::numeric_limits<double>::max(),
@@ -771,7 +776,10 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
                     }
                     else {
                         // The node was considered due to minimum picking distance radius
-                        LINFOC(node->name(), "Picking candidate based on proximity");
+                        LINFOC(
+                            node->identifier(),
+                            "Picking candidate based on proximity"
+                        );
                         pickingInfo.push_back({
                             node,
                             ndcDist,
@@ -797,7 +805,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
     // If an item has been picked, it's in the first position of the vector now
     if (!pickingInfo.empty()) {
         _pickingSelected = pickingInfo.begin()->node;
-        LINFOC("Picking", "Picked node: " + _pickingSelected->name());
+        LINFOC("Picking", "Picked node: " + _pickingSelected->identifier());
     }
 
     _selected = std::move(newSelected);
@@ -839,7 +847,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     }
     // find the slowest moving finger - used in roll interpretation
     double minDiff = 1000;
-    int id = 0;
+    long id = 0;
     for (const TuioCursor& c : list) {
         auto it = std::find_if(
             lastProcessed.begin(),
@@ -1030,10 +1038,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             if ((length(currDistanceToFocusNode) / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
                 zoomFactor *= pow(std::abs(distanceFromFocusSurface), (float)_zoomSensitivity);
             }
-//LINFO("Zoom vel factor " << zoomFactor << " with velocity " << _vel.zoom);
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
-//LINFO("VVelocity= " << _vel.zoom);
             //Speed Limit on zoom velocity
             double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
             if (std::abs(_vel.zoom) > 1e-7)

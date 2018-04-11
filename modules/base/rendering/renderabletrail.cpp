@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
@@ -35,7 +36,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const char* KeyTranslation = "Translation";
+    constexpr const char* ProgramName = "EphemerisProgram";
+    constexpr const char* KeyTranslation = "Translation";
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -169,6 +171,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
     )
 {
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
+
     _translation = Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     );
@@ -219,13 +224,18 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableTrail::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram(
-        "EphemerisProgram",
-        absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
+    _programObject = BaseModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/renderabletrail_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/renderabletrail_fs.glsl")
+            );
+        }
     );
 
+    _uniformCache.opacity = _programObject->uniformLocation("opacity");
     _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
     _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
     _uniformCache.color = _programObject->uniformLocation("color");
@@ -242,11 +252,13 @@ void RenderableTrail::initializeGL() {
 }
 
 void RenderableTrail::deinitializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_programObject) {
-        renderEngine.removeRenderProgram(_programObject);
-        _programObject = nullptr;
-    }
+    BaseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _programObject = nullptr;
 }
 
 bool RenderableTrail::isReady() const {
@@ -255,6 +267,7 @@ bool RenderableTrail::isReady() const {
 
 void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
+    _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -300,7 +313,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
-    auto render = [renderLines, renderPoints, p = _programObject.get(), &data,
+    auto render = [renderLines, renderPoints, p = _programObject, &data,
                    &modelTransform, pointSize = _pointSize.value(), c = _uniformCache]
                   (RenderInformation& info, int nVertices, int offset)
     {

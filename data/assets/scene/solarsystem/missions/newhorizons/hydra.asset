@@ -12,20 +12,15 @@ local textures = asset.syncedResource({
 })
 
 local Hydra = {
-    Name = "Hydra",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Hydra",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
             Target = "HYDRA",
             Observer = "PLUTO BARYCENTER",
             Kernels = kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
-        },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_HYDRA",
-            DestinationFrame = "GALACTIC"
-        },
+        }
     },
     Renderable = {
         Type = "RenderablePlanet",
@@ -39,12 +34,14 @@ local Hydra = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local HydraText = {
-    Name = "HydraText",
-    Parent = Hydra.Name,
+    Identifier = "HydraText",
+    Parent = Hydra.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -52,19 +49,22 @@ local HydraText = {
         },
     },
     Renderable = {
-        Type = "RenderablePlane",
+        Type = "RenderablePlaneImageLocal",
         Size = 10.0^6.3,
         Origin = "Center",
         Billboard = true,
         Texture = textures .. "/Hydra-Text.png",
         BlendMode = "Additive"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Hydra Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local HydraTrail = {
-    Name = "HydraTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "HydraTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -76,7 +76,10 @@ local HydraTrail = {
         Period = 38.20177,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Hydra Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

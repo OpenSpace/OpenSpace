@@ -55,6 +55,9 @@ public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
+    static constexpr const char* KeyName = "Name";
+    static constexpr const char* KeyIdentifier = "Identifier";
+
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() = default;
 
@@ -99,7 +102,11 @@ protected:
     glm::mat4 scaleMatrix();
     glm::mat4 rotationMatrix();
     glm::mat4 translationMatrix();
+
     void draw(glm::mat4 modelTransform);
+
+    virtual void bindTexture();
+    virtual void unbindTexture();
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _useFlatScreen;
@@ -112,7 +119,7 @@ protected:
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-    std::unique_ptr<ghoul::opengl::Texture>  _texture;
+    glm::ivec2 _objectSize;
     UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 

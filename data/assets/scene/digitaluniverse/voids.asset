@@ -10,7 +10,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Voids",
+    Identifier = "Voids",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -22,7 +22,9 @@ local object = {
         TextMinSize = 8.0,
         Unit = "Mpc"
     },
-    GuiPath = "/Universe/Galaxies"
+    GUI = {
+        Path = "/Universe/Galaxies"
+    }
 }
 
 

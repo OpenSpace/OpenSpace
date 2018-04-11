@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/fmt.h>
 
 namespace openspace::properties {
 
@@ -177,7 +178,7 @@ template <typename T>
 void openspace::properties::TemplateProperty<T>::setValue(T val) {
     if (val != _value) {
         _value = std::move(val);
-        notifyListener();
+        notifyChangeListeners();
     }
 }
 
@@ -198,12 +199,18 @@ void TemplateProperty<T>::set(ghoul::any value) {
         T v = ghoul::any_cast<T>(std::move(value));
         if (v != _value) {
             _value = std::move(v);
-            notifyListener();
+            notifyChangeListeners();
         }
     }
     catch (ghoul::bad_any_cast&) {
-        LERRORC("TemplateProperty", "Illegal cast from '" << value.type().name()
-            << "' to '" << typeid(T).name() << "'");
+        LERRORC(
+            "TemplateProperty",
+            fmt::format(
+                "Illegal cast from '{}' to '{}'",
+                value.type().name(),
+                typeid(T).name()
+            )
+        );
     }
 }
 

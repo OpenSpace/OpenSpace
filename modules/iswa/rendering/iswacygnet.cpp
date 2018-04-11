@@ -53,16 +53,17 @@ namespace openspace {
 
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _delete(DeleteInfo)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
+    , _delete(DeleteInfo)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
     , _rotation(glm::mat4(1.0f))
 {
+    // This changed from setIdentifier to setGuiName, 2018-03-14 ---abock
     std::string name;
     dictionary.getValue("Name", name);
-    setName(name);
+    setGuiName(name);
 
     _data = std::make_shared<Metadata>();
 
@@ -82,8 +83,8 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("CoordinateType", _data->coordinateType);
     dictionary.getValue("XOffset", xOffset);
 
-    _data->id = (int) renderableId;
-    _data->updateTime = (int) updateTime;
+    _data->id = static_cast<int>(renderableId);
+    _data->updateTime = static_cast<int>(updateTime);
     _data->spatialScale = spatialScale;
     _data->gridMin = min;
     _data->gridMax = max;
@@ -98,7 +99,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
         (max.z - min.z)
     );
 
-
     offset = glm::vec3(
         (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f)+xOffset,
         (min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
@@ -112,7 +112,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     addProperty(_delete);
 
     dictionary.getValue("Group", _data->groupName);
-
 }
 
 IswaCygnet::~IswaCygnet(){}
@@ -126,7 +125,7 @@ void IswaCygnet::initialize() {
         _delete.onChange([this]() {
             deinitialize();
             OsEng.scriptEngine().queueScript(
-                "openspace.removeSceneGraphNode('" + name() + "')",
+                "openspace.removeSceneGraphNode('" + identifier() + "')",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
         });
@@ -140,7 +139,7 @@ void IswaCygnet::initialize() {
 
 void IswaCygnet::deinitialize() {
     if (!_data->groupName.empty()) {
-        _group->groupEvent()->unsubscribe(name());
+        _group->groupEvent()->unsubscribe(identifier());
     }
 
     unregisterProperties();
@@ -242,7 +241,7 @@ void IswaCygnet::update(const UpdateData&) {
 bool IswaCygnet::destroyShader() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
+        renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
     return true;
@@ -284,20 +283,28 @@ void IswaCygnet::initializeGroup() {
 
     //Subscribe to enable and delete property
     auto groupEvent = _group->groupEvent();
-    groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict) {
-        LDEBUG(name() + " Event enabledChanged");
-        _enabled.setValue(dict.value<bool>("enabled"));
-    });
+    groupEvent->subscribe(
+        identifier(),
+        "enabledChanged",
+        [&](const ghoul::Dictionary& dict) {
+            LDEBUG(identifier() + " Event enabledChanged");
+            _enabled.setValue(dict.value<bool>("enabled"));
+        }
+    );
 
-    groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict) {
-        LDEBUG(name() + " Event alphaChanged");
-        _alpha.setValue(dict.value<float>("alpha"));
-    });
+    groupEvent->subscribe(
+        identifier(),
+        "alphaChanged",
+        [&](const ghoul::Dictionary& dict) {
+            LDEBUG(identifier() + " Event alphaChanged");
+            _alpha.setValue(dict.value<float>("alpha"));
+        }
+    );
 
-    groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event clearGroup");
+    groupEvent->subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
+        LDEBUG(identifier() + " Event clearGroup");
         OsEng.scriptEngine().queueScript(
-            "openspace.removeSceneGraphNode('" + name() + "')",
+            "openspace.removeSceneGraphNode('" + identifier() + "')",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     });

@@ -52,7 +52,7 @@ void main() {
     vec4 position = pscTransform(tmp, mat4(1.0));
     
     // G-Buffer
-    vs_gPosition = position;
+    vs_gPosition = view * (vec4(1E19, 1E19, 1E19, 1.0) * position);
     
     position = view * position;
     

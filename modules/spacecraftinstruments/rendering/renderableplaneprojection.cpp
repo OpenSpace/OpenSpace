@@ -34,7 +34,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -111,7 +111,7 @@ void RenderablePlaneProjection::initializeGL() {
 void RenderablePlaneProjection::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
+        renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 

@@ -24,6 +24,7 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #ifdef WIN32
@@ -43,6 +44,8 @@
 #pragma warning (pop)
 #endif // WIN32
 
+#include <ghoul/fmt.h>
+
 namespace {
     constexpr const char* _loggerCat = "KameleonVolumeReader";
 } // namespace
@@ -54,15 +57,14 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     : _path(path)
 {
     if (!FileSys.fileExists(path)) {
-        LERROR(_path << " does not exist");
+        LERROR(fmt::format("'{}' does not exist", _path));
         throw ghoul::FileNotFoundError(_path);
     }
 
     long status = _kameleon.open(_path);
     if (status != ccmc::FileReader::OK) {
-        LERROR("Failed to open file " << _path << " with Kameleon");
+        LERROR(fmt::format("Failed to open file '{}' with Kameleon", _path));
         throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
-        return;
     }
 
     _model = _kameleon.model;
@@ -89,12 +91,12 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 }
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
-    const glm::uvec3 & dimensions,
-    const std::string & variable,
-    const glm::vec3 & lowerBound,
-    const glm::vec3 & upperBound,
-    float& minValue,
-    float& maxValue) const
+                                                            const glm::uvec3 & dimensions,
+                                                            const std::string & variable,
+                                                            const glm::vec3 & lowerBound,
+                                                            const glm::vec3 & upperBound,
+                                                            float& minValue,
+                                                            float& maxValue) const
 {
     minValue = FLT_MAX;
     maxValue = FLT_MIN;
@@ -104,9 +106,9 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 diff = upperBound - lowerBound;
 
     auto interpolate =
-        [this](const std::string& variable, glm::vec3 volumeCoords) {
+        [this](const std::string& var, glm::vec3 volumeCoords) {
             return _interpolator->interpolate(
-                variable,
+                var,
                 volumeCoords[0],
                 volumeCoords[1],
                 volumeCoords[2]);
@@ -322,6 +324,10 @@ float KameleonVolumeReader::elapsedTime() const {
 
 std::string KameleonVolumeReader::simulationEnd() const {
     return _model->getGlobalAttribute("end_time").getAttributeString();
+}
+
+std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const {
+    return _model->getNativeUnit(variable);
 }
 
 std::string KameleonVolumeReader::time() const {

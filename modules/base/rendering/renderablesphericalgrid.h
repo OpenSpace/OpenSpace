@@ -63,7 +63,7 @@ protected:
         float location[3];
     };
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
+    ghoul::opengl::ProgramObject* _gridProgram;
 
     properties::DMat4Property _gridMatrix;
     properties::Vec4Property _gridColor;

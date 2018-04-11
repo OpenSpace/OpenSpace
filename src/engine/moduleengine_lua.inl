@@ -33,13 +33,12 @@ namespace openspace::luascriptfunctions {
  * Checks whether the passed OpenSpaceModule is loaded or not
  */
 int isLoaded(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::isLoaded");
 
     const int type = lua_type(L, -1);
-    if (type != LUA_TSTRING)
+    if (type != LUA_TSTRING) {
         return luaL_error(L, "Expected argument of type 'string'");
+    }
     std::string moduleName = lua_tostring(L, -1);
 
     std::vector<OpenSpaceModule*> modules = OsEng.moduleEngine().modules();
@@ -48,15 +47,18 @@ int isLoaded(lua_State* L) {
         modules.begin(),
         modules.end(),
         [moduleName](OpenSpaceModule* module) {
-            return module->name() == moduleName;
+            return module->identifier() == moduleName;
         }
     );
 
-    if (it != modules.end())
+    if (it != modules.end()) {
         lua_pushboolean(L, 1);
-    else
+    }
+    else {
         lua_pushboolean(L, 0);
+    }
 
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

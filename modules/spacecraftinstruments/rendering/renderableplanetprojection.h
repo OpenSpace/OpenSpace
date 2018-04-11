@@ -76,11 +76,12 @@ private:
     properties::StringProperty _addHeightMapTexturePath;
     bool _heightMapTextureDirty;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _fboProgramObject;
     UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
-        hasHeightMap, heightExaggeration, meridianShift, projectionFading,
-        baseTexture, projectionTexture, heightTexture) _mainUniformCache;
+        hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
+        projectionFading, baseTexture, projectionTexture, heightTexture)
+        _mainUniformCache;
 
     UniformCache(projectionTexture, projectorMatrix, modelTransform, scaling, boresight,
         radius, segments) _fboUniformCache;
@@ -90,6 +91,7 @@ private:
 
     properties::FloatProperty _heightExaggeration;
     properties::BoolProperty _meridianShift;
+    properties::FloatProperty _ambientBrightness;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
 

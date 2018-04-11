@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Supernova Remnants",
+    Identifier = "SupernovaRemnants",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -33,7 +33,10 @@ local object = {
         TextMinSize = 8.0,
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Supernova Remnants"
+    GUI = {
+        Name = "Supernova Remnants",
+        Path = "/Milky Way/Supernova Remnants"
+    }
 }
 
 

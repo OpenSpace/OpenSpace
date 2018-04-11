@@ -24,19 +24,19 @@
 
 #include <modules/digitaluniverse/rendering/renderablepoints.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -45,6 +45,7 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderablePoints";
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyColor          = "Color";
     constexpr const char* keyUnit           = "Unit";
@@ -266,12 +267,21 @@ void RenderablePoints::initialize() {
 }
 
 void RenderablePoints::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
+    // OBS:  The ProgramObject name is later used to release the program as well, so the
+    //       name parameter to requestProgramObject and the first parameter to
+    //       buildRenderProgram has to be the same or an assertion will be thrown at the
+    //       end of the program.
+
     if (_hasSpriteTexture) {
-        _program = renderEngine.buildRenderProgram(
-            "RenderablePoints",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+            "RenderablePoints Sprite",
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    "RenderablePoints Sprite",
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+                );
+            }
         );
 
         _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
@@ -285,10 +295,15 @@ void RenderablePoints::initializeGL() {
         _uniformCache.hasColorMap = _program->uniformLocation("hasColorMap");
     }
     else {
-        _program = renderEngine.buildRenderProgram(
+        _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
             "RenderablePoints",
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
-            absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_fs.glsl")
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    "RenderablePoints",
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_vs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/points_sprite_fs.glsl")
+                );
+            }
         );
 
         _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
@@ -308,11 +323,13 @@ void RenderablePoints::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        _program->name(),
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
 
     if (_hasSpriteTexture) {
         _spriteTexture = nullptr;
@@ -369,11 +386,9 @@ void RenderablePoints::update(const UpdateData&) {
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
-            LDEBUG("Generating Vertex Array id '" << _vao << "'");
         }
         if (_vbo == 0) {
             glGenBuffers(1, &_vbo);
-            LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
         }
 
         glBindVertexArray(_vao);
@@ -388,8 +403,8 @@ void RenderablePoints::update(const UpdateData&) {
 
         if (_hasColorMapFile) {
 
-            const size_t nAstronomicalObjects = _fullData.size() /
-                                                        _nValuesPerAstronomicalObject;
+            // const size_t nAstronomicalObjects = _fullData.size() /
+                                                        // _nValuesPerAstronomicalObject;
             // const size_t nValues = _slicedData.size() / nAstronomicalObjects;
             // GLsizei stride = static_cast<GLsizei>(sizeof(double) * nValues);
 
@@ -436,7 +451,10 @@ void RenderablePoints::update(const UpdateData&) {
                 absPath(_spriteTexturePath)
             );
             if (_spriteTexture) {
-                LDEBUG("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
+                LDEBUG(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_spriteTexturePath)
+                ));
                 _spriteTexture->uploadTexture();
             }
             _spriteTexture->setFilter(
@@ -462,9 +480,11 @@ bool RenderablePoints::loadData() {
 
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO(
-            "Cached file '" << cachedFile << "' used for Speck file '" << _file << "'"
-        );
+        LINFO(fmt::format(
+            "Cached file '{}' used for Speck file '{}'",
+            cachedFile,
+            _file
+        ));
 
         bool success = loadCachedFile(cachedFile);
         if (success) {
@@ -480,9 +500,9 @@ bool RenderablePoints::loadData() {
         }
     }
     else {
-        LINFO("Cache for Speck file '" << _file << "' not found");
+        LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
     }
-    LINFO("Loading Speck file '" << _file << "'");
+    LINFO(fmt::format("Loading Speck file '{}'", _file));
 
     bool success = readSpeckFile();
     if (!success) {
@@ -503,7 +523,7 @@ bool RenderablePoints::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
         return false;
     }
 
@@ -571,7 +591,7 @@ bool RenderablePoints::readColorMapFile() {
     std::string _file = _colorMapFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Color Map file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Color Map file '{}'", _file));
         return false;
     }
 
@@ -643,7 +663,10 @@ bool RenderablePoints::loadCachedFile(const std::string& file) {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for loading cache file");
+        LERROR(fmt::format(
+            "Error opening file '{}' for loading cache file",
+            file
+        ));
         return false;
     }
 }
@@ -676,7 +699,7 @@ bool RenderablePoints::saveCachedFile(const std::string& file) const {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
 }

@@ -24,34 +24,39 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablefov.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
 #include <ghoul/opengl/programobject.h>
-
 #include <glm/gtx/projection.hpp>
 
 #include <openspace/performance/performancemeasurement.h>
 
 namespace {
-    const char* KeyBody                 = "Body";
-    const char* KeyFrame                = "Frame";
+    constexpr const char* ProgramName             = "FovProgram";
+    constexpr const char* KeyBody                 = "Body";
+    constexpr const char* KeyFrame                = "Frame";
 //    const char* KeyColor                = "RGB";
 
-    const char* KeyInstrument           = "Instrument";
-    const char* KeyInstrumentName       = "Name";
-    const char* KeyInstrumentAberration = "Aberration";
+    constexpr const char* KeyInstrument           = "Instrument";
+    constexpr const char* KeyInstrumentName       = "Name";
+    constexpr const char* KeyInstrumentAberration = "Aberration";
 
-    const char* KeyPotentialTargets     = "PotentialTargets";
-    const char* KeyFrameConversions     = "FrameConversions";
+    constexpr const char* KeyPotentialTargets     = "PotentialTargets";
+    constexpr const char* KeyFrameConversions     = "FrameConversions";
+
+    constexpr const char* KeyBoundsSimplification = "SimplifyBounds";
 
     const int InterpolationSteps = 5;
+
+    const double Epsilon = 1e-4;
 
     static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
@@ -130,7 +135,6 @@ namespace {
         "the case that there is no intersection and that the instrument is not currently "
         "active."
     };
-
 } // namespace
 
 namespace openspace {
@@ -214,6 +218,15 @@ documentation::Documentation RenderableFov::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 StandoffDistanceInfo.description
+            },
+            {
+                KeyBoundsSimplification,
+                new BoolVerifier,
+                Optional::Yes,
+                "If this value is set to 'true' the field-of-views bounds values will be "
+                "simplified on load. Bound vectors will be removed if they are the "
+                "strict linear interpolation between the two neighboring vectors. This "
+                "value is disabled on default."
             }
         }
     };
@@ -285,6 +298,10 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         ));
     }
 
+    if (dictionary.hasKey(KeyBoundsSimplification)) {
+        _simplifyBounds = dictionary.value<bool>(KeyBoundsSimplification);
+    }
+
     addProperty(_lineWidth);
     addProperty(_drawSolid);
     addProperty(_standOffDistance);
@@ -299,12 +316,17 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableFov::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram(
-        "FovProgram",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
-    );
+    _programObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            ProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    ProgramName,
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_vs.glsl"),
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/fov_fs.glsl")
+                );
+            }
+        );
 
     _uniformCache.modelViewProjection = _programObject->uniformLocation(
         "modelViewProjectionTransform"
@@ -342,6 +364,36 @@ void RenderableFov::initializeGL() {
             "RenderableFov"
         );
     }
+
+    if (_simplifyBounds) {
+        const size_t sizeBefore = res.bounds.size();
+        for (size_t i = 1; i < res.bounds.size() - 1; ++i) {
+            const glm::dvec3& prev = res.bounds[i - 1];
+            const glm::dvec3& curr = res.bounds[i];
+            const glm::dvec3& next = res.bounds[i + 1];
+
+            const double area = glm::length(
+                glm::cross((curr - prev), (next - prev))
+            );
+
+            const bool isCollinear = area < Epsilon;
+
+            if (isCollinear) {
+                res.bounds.erase(res.bounds.begin() + i);
+
+                // Need to subtract one as we have shortened the array and the next
+                // item is now on the current position
+                --i;
+            }
+        }
+        const size_t sizeAfter = res.bounds.size();
+
+        LINFOC(
+            _instrument.name,
+            fmt::format("Simplified from {} to {}", sizeBefore, sizeAfter)
+        );
+    }
+
 
     _instrument.bounds = std::move(res.bounds);
     _instrument.boresight = std::move(res.boresightVector);
@@ -433,7 +485,12 @@ void RenderableFov::initializeGL() {
 }
 
 void RenderableFov::deinitializeGL() {
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
     _programObject = nullptr;
 
     glDeleteBuffers(1, &_orthogonalPlane.vbo);
@@ -1315,24 +1372,24 @@ void RenderableFov::update(const UpdateData& data) {
 }
 
 std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
+    SpiceManager::UseException oldValue = SpiceManager::ref().exceptionHandling();
+    defer { SpiceManager::ref().setExceptionHandling(oldValue); };
+
     // First, for all potential targets, check whether they are in the field of view
     for (const std::string& pt : _instrument.potentialTargets) {
-        try {
-            bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
-                pt,
-                _instrument.spacecraft,
-                _instrument.name,
-                SpiceManager::FieldOfViewMethod::Ellipsoid,
-                _instrument.aberrationCorrection,
-                time
-            );
+        bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
+            pt,
+            _instrument.spacecraft,
+            _instrument.name,
+            SpiceManager::FieldOfViewMethod::Ellipsoid,
+            _instrument.aberrationCorrection,
+            time
+        );
 
-            if (inFOV) {
-                _previousTarget = pt;
-                return { pt, true };
-            }
+        if (inFOV) {
+            _previousTarget = pt;
+            return { pt, true };
         }
-        catch (const openspace::SpiceManager::SpiceException&) {}
     }
 
     // If none of the targets is in field of view, either use the last target or if there

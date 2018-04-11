@@ -30,6 +30,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/assert.h>
 
 #include <algorithm>
 
@@ -41,25 +42,56 @@ namespace {
 
 namespace openspace {
 
+ModuleEngine::ModuleEngine()
+    : properties::PropertyOwner({"Modules"})
+{}
+
 void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
     for (OpenSpaceModule* m : AllModules()) {
-        const std::string name = m->name();
+        const std::string identifier = m->identifier();
         ghoul::Dictionary configuration;
-        if (moduleConfigurations.hasKey(name)) {
-            moduleConfigurations.getValue(name, configuration);
+        if (moduleConfigurations.hasKey(identifier)) {
+            moduleConfigurations.getValue(identifier, configuration);
         }
         registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
     }
 }
 
+void ModuleEngine::initializeGL() {
+    LDEBUG("Initializing OpenGL of modules");
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG(fmt::format("Initializing OpenGL of module '{}'", m->identifier()));
+        m->initializeGL();
+    }
+    LDEBUG("Finished initializing OpenGL of modules");
+}
+
 void ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
-    for (auto& m : _modules) {
-        LDEBUG("Deinitializing module '" << m->name() << "'");
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG(fmt::format("Deinitializing module '{}'", m->identifier()));
         m->deinitialize();
     }
-    _modules.clear();
+
+    LDEBUG("Finished deinitializing modules");
+
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG(fmt::format("Destroying module '{}'", m->identifier()));
+        m = nullptr;
+    }
+
     LDEBUG("Finished destroying modules");
+    _modules.clear();
+}
+
+void ModuleEngine::deinitializeGL() {
+    LDEBUG("Deinitializing OpenGL of modules");
+    for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
+        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", m->identifier()));
+        m->deinitializeGL();
+
+    }
+    LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
 void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
@@ -71,19 +103,20 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
         _modules.begin(),
         _modules.end(),
         [&m](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->name() == m->name();
+            return rhs->identifier() == m->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + m->name() + "' was registered before",
+            "Module name '" + m->identifier() + "' was registered before",
             "ModuleEngine"
         );
     }
 
-    LDEBUG("Registering module '" << m->name() << "'");
+    LDEBUG(fmt::format("Registering module '{}'", m->identifier()));
     m->initialize(this, configuration);
-    LDEBUG("Registered module '" << m->name() << "'");
+    addPropertySubOwner(m.get());
+    LDEBUG(fmt::format("Registered module '{}'", m->identifier()));
     _modules.push_back(std::move(m));
 }
 

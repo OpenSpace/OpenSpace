@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
@@ -39,6 +40,8 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
+    constexpr const char* ProgramName = "Sphere";
+
     enum Orientation {
         Outside = 1,
         Inside = 2
@@ -69,13 +72,6 @@ namespace {
         "Size",
         "Size (in meters)",
         "This value specifies the radius of the sphere in meters."
-    };
-
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
-        "Alpha",
-        "Transparency",
-        "This value determines the transparency of the sphere. If this value is set to "
-        "1, the sphere is completely opaque. At 0, the sphere is completely transparent."
     };
 
     static const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
@@ -132,12 +128,6 @@ documentation::Documentation RenderableSphere::Documentation() {
                 OrientationInfo.description
             },
             {
-                TransparencyInfo.identifier,
-                new DoubleInRangeVerifier(0.0, 1.0),
-                Optional::Yes,
-                TransparencyInfo.description
-            },
-            {
                 FadeOutThreshouldInfo.identifier,
                 new DoubleInRangeVerifier(0.0, 1.0),
                 Optional::Yes,
@@ -166,7 +156,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
-    , _transparency(TransparencyInfo, 1.f, 0.f, 1.f)
     , _disableFadeInDistance(DisableFadeInOuInfo, true)
     , _fadeOutThreshold(-1.0)
     , _fadeInThreshold(0.0)
@@ -180,6 +169,9 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableSphere"
     );
+
+    addProperty(_opacity);
+    registerUpdateRenderBinFromOpacity();
 
     _size = static_cast<float>(dictionary.value<double>(SizeInfo.identifier));
     _segments = static_cast<int>(dictionary.value<double>(SegmentsInfo.identifier));
@@ -217,21 +209,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_segments);
     _segments.onChange([this](){ _sphereIsDirty = true; });
 
-    _transparency.onChange([this](){
-        if (_transparency > 0.f && _transparency < 1.f) {
-            setRenderBin(Renderable::RenderBin::Transparent);
-        }
-        else {
-            setRenderBin(Renderable::RenderBin::Opaque);
-        }
-    });
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
-        _transparency = static_cast<float>(
-            dictionary.value<double>(TransparencyInfo.identifier)
-        );
-    }
-    addProperty(_transparency);
-
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
 
@@ -252,7 +229,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
         _disableFadeInDistance.set(false);
         addProperty(_disableFadeInDistance);
     }
-
 }
 
 bool RenderableSphere::isReady() const {
@@ -265,12 +241,21 @@ void RenderableSphere::initializeGL() {
     );
     _sphere->initialize();
 
-    // pscstandard
-    _shader = OsEng.renderEngine().buildRenderProgram(
-        "Sphere",
-        absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+    _shader = BaseModule::ProgramObjectManager.requestProgramObject(
+        ProgramName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramName,
+                absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+            );
+        }
     );
+
+    _uniformCache.opacity = _shader->uniformLocation("opacity");
+    _uniformCache.viewProjection = _shader->uniformLocation("ViewProjection");
+    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
+    _uniformCache.texture = _shader->uniformLocation("texture1");
 
     loadTexture();
 }
@@ -278,10 +263,13 @@ void RenderableSphere::initializeGL() {
 void RenderableSphere::deinitializeGL() {
     _texture = nullptr;
 
-    if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
+    BaseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
 }
 
 void RenderableSphere::render(const RenderData& data, RendererTasks&) {
@@ -294,24 +282,24 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
     _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
+    _shader->setUniform(_uniformCache.viewProjection, data.camera.viewProjectionMatrix());
+    _shader->setUniform(_uniformCache.modelTransform, transform);
 
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    setPscUniforms(*_shader, data.camera, data.position);
 
-    float adjustedTransparency = _transparency;
+    float adjustedTransparency = _opacity;
 
     if (_fadeInThreshold > 0.0) {
-        float distCamera = glm::length(data.camera.positionVec3());
+        double distCamera = glm::length(data.camera.positionVec3());
         float funcValue = static_cast<float>(
             (1.0 / double(_fadeInThreshold/1E24))*(distCamera / 1E24)
         );
 
-        adjustedTransparency *= funcValue > 1.0 ? 1.0 : funcValue;
+        adjustedTransparency *= funcValue > 1.f ? 1.f : funcValue;
     }
 
     if (_fadeOutThreshold > -1.0) {
-        float distCamera = glm::distance(
+        double distCamera = glm::distance(
             data.camera.positionVec3(),
             data.position.dvec3()
         );
@@ -323,16 +311,16 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     }
 
     // Performance wise
-    if (adjustedTransparency < 0.01) {
+    if (adjustedTransparency < 0.01f) {
         return;
     }
 
-    _shader->setUniform("alpha", adjustedTransparency);
+    _shader->setUniform(_uniformCache.opacity, _opacity);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform(_uniformCache.texture, unit);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -366,6 +354,11 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 void RenderableSphere::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+
+        _uniformCache.opacity = _shader->uniformLocation("opacity");
+        _uniformCache.viewProjection = _shader->uniformLocation("ViewProjection");
+        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
+        _uniformCache.texture = _shader->uniformLocation("texture1");
     }
 
     if (_sphereIsDirty) {
@@ -386,7 +379,7 @@ void RenderableSphere::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
-                "Loaded texture from '" << absPath(_texturePath) << "'"
+                fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             texture->uploadTexture();
 

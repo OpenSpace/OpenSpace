@@ -1,4 +1,4 @@
--- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}-- Helper functions that are useful to customize the openspace.cfg loading
+-- Helper functions that are useful to customize the openspace.cfg loading
 
 --[[
 ########################################################################################## 
@@ -39,7 +39,8 @@ function sgct.makeConfig(config) end
 --      [example: scene = {offset = {x = 1.0, y = 1.0, z = 2.0}, orientation = { yaw = 120, pitch = 15, roll = 0.0 }, scale = 10.0}]
 -- capture: Settings to configure the image capture [example: capture = { path = "./images"]
 -- sgctDebug: Determines whether a higher debug level in SGCT is enabled [example: sgctDebug=true] {default: false}
--- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=30.0, right=30.0, up=16.875, down=16.875}}
+-- fov: The field of view settings [example: fov={ left=20, right=30, up=10, down=50}] {default: { left=40.0, right=40.0, up=22.5, down=22.5}}
+-- tracked: Determines whether the aspect ratio of the camera defined at application startup should persist when the window is resized [example: tracked=false] {default: true}
 
 -- Thus this function can be called the following ways:
 -- sgct.config.single() -> Leading to a 1280x720 resolution window
@@ -94,10 +95,10 @@ function sgct.config.cube(arg) end
 ########################################################################################## 
 ]]--
 
-function generateSingleViewportFOV(down, up, left, right)
+function generateSingleViewportFOV(down, up, left, right, tracked)
     return
 [[
-<Viewport>
+<Viewport ]]..tracked..[[>
     <Pos x="0.0" y="0.0" />
     <Size x="1.0" y="1.0" />
     <PlanarProjection>
@@ -110,10 +111,10 @@ end
 
 
 
-function generateSingleViewport(lowerLeft, upperLeft, upperRight)
+function generateSingleViewport(lowerLeft, upperLeft, upperRight, tracked)
     return
 [[
-<Viewport>
+<Viewport ]]..tracked..[[>
     <Pos x="0.0" y="0.0" />
     <Size x="1.0" y="1.0" />
     <Projectionplane>
@@ -127,7 +128,7 @@ end
 
 
 
-function generateFisheyeViewport(fov, quality, tilt, background, crop, offset)
+function generateFisheyeViewport(fov, quality, tilt, background, crop, offset, trackedSpecifier)
     local b = [[
             <Background 
                 r="]]..background["r"]..[["
@@ -161,7 +162,7 @@ function generateFisheyeViewport(fov, quality, tilt, background, crop, offset)
     end
 
     return [[
-    <Viewport name="fisheye">
+    <Viewport name="fisheye" ]]..trackedSpecifier..[[>
         <Pos x="0.0" y="0.0" />
         <Size x="1.0" y="1.0" />
         <FisheyeProjection fov="]]..fov..[[" quality="]]..quality..[[" tilt="]]..tilt..[[">
@@ -361,15 +362,6 @@ end
 function generateSingleWindowConfig(arg)
     -- First some type checking
     assert(
-        type(arg[1]) == "number" or type(arg[1]) == "nil",
-        "First argument must be a number or nil"
-    )
-    assert(
-        type(arg[2]) == "number" or type(arg[2]) == "nil",
-        "Second argument must be a number or nil"
-    )
-
-    assert(
         type(arg["res"]) == "table" or type(arg["res"]) == "nil",
         "res must be a table or nil"
     )
@@ -400,10 +392,6 @@ function generateSingleWindowConfig(arg)
     if (type(arg["windowSize"]) == "table") then
         assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
         assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
-        assert(
-            type(arg[1]) == "nil" and type(arg[2]) == "nil",
-            "Only windowSize or the first and second arguments can be set. Not both"
-        )
     end
 
     assert(
@@ -594,9 +582,7 @@ function generateSingleWindowConfig(arg)
     end
 
     if not arg["windowSize"] then
-        arg["windowSize"] = {}
-        arg["windowSize"][1] = arg[1] or 1280
-        arg["windowSize"][2] = arg[2] or 720
+        arg["windowSize"] = {1280, 720}
     end
 
     arg["scene"] = generateScene(arg)
@@ -608,6 +594,35 @@ function generateSingleWindowConfig(arg)
     return generateCluster(arg)
 end
 
+
+function normalizeArg(arg)
+    arg = arg or {}
+
+    if (type(arg["windowSize"]) == "table") then
+        assert(
+            type(arg[1]) == "nil" and type(arg[2]) == "nil",
+            "Only windowSize or the first and second arguments can be set. Not both"
+        )
+    end
+    assert(
+        type(arg[1]) == "number" or type(arg[1]) == "nil",
+        "First argument must be a number or nil"
+    )
+    assert(
+        type(arg[2]) == "number" or type(arg[2]) == "nil",
+        "Second argument must be a number or nil"
+    )
+    if (type(arg[1]) == "number") then
+        if (type(arg[2]) == "nil") then
+            arg[2] = arg[1] * 9/16
+        end
+        arg["windowSize"] = { arg[1], arg[2] }
+        arg[1] = nil
+        arg[2] = nil
+    end
+
+    return arg
+end
 
 
 function sgct.makeConfig(config)
@@ -624,7 +639,12 @@ end
 
 
 function sgct.config.single(arg)
-    arg = arg or {}
+    arg = normalizeArg(arg)
+
+    assert(
+        type(arg["windowSize"]) == "table" or type(arg["windowSize"]) == "nil",
+        "windowSize must be a table or nil"
+    )
 
     assert(
         type(arg["fov"]) == "table" or type(arg["fov"]) == "nil",
@@ -635,23 +655,56 @@ function sgct.config.single(arg)
         assert(type(arg["fov"]["right"]) == "number", "fov['right'] must be a number")
         assert(type(arg["fov"]["up"]) == "number",    "fov['up'] must be a number")
         assert(type(arg["fov"]["down"]) == "number",  "fov['down'] must be a number")
+    else
+        if (type(arg["windowSize"]) == "table") then
+            assert(type(arg["windowSize"][1]) == "number", "windowPos[1] must be a number")
+            assert(type(arg["windowSize"][2]) == "number", "windowPos[2] must be a number")
+
+            local ratio = arg["windowSize"][1] / arg["windowSize"][2]
+            local horizontalFov = 40
+            local verticalFov = 40
+
+            if (ratio > 1) then
+                verticalFov = horizontalFov / ratio
+            else
+                horizontalFov = verticalFov * ratio
+            end
+
+            arg["fov"] = {
+                down = verticalFov,
+                up = verticalFov,
+                left = horizontalFov,
+                right = horizontalFov
+            }
+        else
+            arg["fov"] = { down = 25, up = 25, left = 40.0, right = 40.0 }
+        end
     end
-    
-    arg["fov"] = arg["fov"] or { down = 16.875, up = 16.875, left = 30.0, right = 30.0 }
+
+    assert(
+        type(arg["tracked"]) == "boolean" or type(arg["tracked"]) == "nil",
+        "tracked must be a boolean or nil"
+    )
+    trackedSpecifier = "tracked=\"true\""
+
+    if (arg["tracked"] ~= nil and arg["tracked"] == false) then
+        trackedSpecifier = "tracked=\"false\""
+    end
+
     arg["viewport"] = generateSingleViewportFOV(
         arg["fov"]["down"],
         arg["fov"]["up"], 
         arg["fov"]["left"],
-        arg["fov"]["right"]
+        arg["fov"]["right"],
+        trackedSpecifier
     )
-
     return sgct.makeConfig(generateSingleWindowConfig(arg))
 end
 
 
 
 function sgct.config.fisheye(arg)
-    arg = arg or {}
+    arg = normalizeArg(arg)
 
     assert(
         type(arg["fov"]) == "number" or type(arg["fov"]) == "nil",
@@ -724,13 +777,20 @@ function sgct.config.fisheye(arg)
         arg["background"] = { r = 0.1, g = 0.1, b = 0.1, a = 1.0 }
     end
 
+    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
+        trackedSpecifier = "tracked=\"true\""
+    else
+        trackedSpecifier = "tracked=\"false\""
+    end
+
     arg["viewport"] = generateFisheyeViewport(
         arg["fov"],
         arg["quality"],
         arg["tilt"],
         arg["background"],
         arg["crop"],
-        arg["offset"]
+        arg["offset"],
+        trackedSpecifier
     )
 
     return sgct.makeConfig(generateSingleWindowConfig(arg))
@@ -739,7 +799,7 @@ end
 
 
 function sgct.config.cube(arg)
-    function getCubeWindow(location, res, size)
+    function getCubeWindow(location, res, size, trackedSpecifier)
         local pos
         local lowerLeft
         local upperLeft
@@ -784,14 +844,14 @@ function sgct.config.cube(arg)
         arg["windowSize"] = size
         arg["windowPos"] = pos
         arg["res"] = { res, res }
-        arg["viewport"] = generateSingleViewport(lowerLeft, upperLeft, upperRight)
+        arg["viewport"] = generateSingleViewport(lowerLeft, upperLeft, upperRight, trackedSpecifier)
 
         return generateWindow(arg)
     end
 
-    function getControlWindow(down, up, left, right)
+    function getControlWindow(down, up, left, right, trackedSpecifier)
         arg = {}
-        arg["viewport"] = generateSingleViewportFOV(down, up, left, right)
+        arg["viewport"] = generateSingleViewportFOV(down, up, left, right, trackedSpecifier)
         return generateWindow(arg)
     end
 
@@ -801,9 +861,19 @@ function sgct.config.cube(arg)
     
     arg["scene"] = generateScene(arg)
     arg["settings"] = generateSettings(arg)
-    arg["window"] = getControlWindow(16.875, 16.875, 30.0, 30.0) .. getCubeWindow('front', res, size) .. getCubeWindow('back', res, size) .. 
-        getCubeWindow('left', res, size) .. getCubeWindow('right', res, size) .. 
-        getCubeWindow('up', res, size) .. getCubeWindow('down', res, size)
+    if (arg["tracked"] ~= nil and arg["tracked"] == true) then
+        trackedSpecifier = "tracked=\"true\""
+    else
+        trackedSpecifier = "tracked=\"false\""
+    end
+
+    arg["window"] = getControlWindow(16.875, 16.875, 30.0, 30.0, trackedSpecifier) ..
+        getCubeWindow('front', res, size, trackedSpecifier) ..
+        getCubeWindow('back', res, size, trackedSpecifier) ..
+        getCubeWindow('left', res, size, trackedSpecifier) ..
+        getCubeWindow('right', res, size, trackedSpecifier) ..
+        getCubeWindow('up', res, size, trackedSpecifier) ..
+        getCubeWindow('down', res, size, trackedSpecifier)
 
     arg["user"] = generateUser(arg)
     arg["capture"] = generateCapture(arg)

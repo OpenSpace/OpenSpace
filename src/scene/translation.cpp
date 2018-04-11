@@ -67,14 +67,14 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
     std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
-    result->setName("Translation");
+    result->setIdentifier("Translation");
     return result;
 }
 
 Translation::Translation()
     : properties::PropertyOwner({ "Translation" })
-    , _cachedPosition(glm::dvec3(0.0))
     , _needsUpdate(true)
+    , _cachedPosition(glm::dvec3(0.0))
 {}
 
 bool Translation::initialize() {

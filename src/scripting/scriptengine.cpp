@@ -32,7 +32,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 
 #include <fstream>
@@ -81,6 +81,8 @@ void ScriptEngine::deinitialize() {
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");
+    int top = lua_gettop(state);
+
     lua_newtable(state);
     lua_setglobal(state, OpenSpaceLibraryName.c_str());
 
@@ -88,6 +90,8 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     for (LuaLibrary& lib : _registeredLibraries) {
         registerLuaLibrary(state, lib);
     }
+
+    lua_settop(state, top);
 }
 
 ghoul::lua::LuaState * ScriptEngine::luaState() {
@@ -125,8 +129,11 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
             if (itf != merged.functions.end()) {
                 // the function with the desired name is already present, but we don't
                 // want to overwrite it
-                LERROR("Lua function '" << fun.name << "' in library '" << library.name <<
-                    "' has been defined twice");
+                LERROR(fmt::format(
+                    "Lua function '{}' in library '{}' has been defined twice",
+                    fun.name,
+                    library.name
+                ));
                 return;
             }
             else {
@@ -188,7 +195,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
         return false;
     }
     if (!FileSys.fileExists(filename)) {
-        LERROR("Script with name '" << filename << "' did not exist");
+        LERROR(fmt::format("Script with name '{}' did not exist", filename));
         return false;
     }
 
@@ -223,32 +230,34 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
             result = true;
             break;
         case LUA_TBOOLEAN:
-            LERROR("Library name '" << name << "' specifies a boolean");
+            LERROR(fmt::format("Library name '{}' specifies a boolean", name));
             break;
         case LUA_TLIGHTUSERDATA:
-            LERROR("Library name '" << name << "' specifies a light user data");
+            LERROR(fmt::format("Library name '{}' specifies a light user data", name));
             break;
         case LUA_TNUMBER:
-            LERROR("Library name '" << name << "' specifies a number");
+            LERROR(fmt::format("Library name '{}' specifies a number", name));
             break;
         case LUA_TSTRING:
-            LERROR("Library name '" << name << "' specifies a string");
+            LERROR(fmt::format("Library name '{}' specifies a string", name));
             break;
         case LUA_TTABLE: {
             if (hasLibrary(name))
-                LERROR("Library with name '" << name << "' has been registered before");
+                LERROR(fmt::format(
+                    "Library with name '{}' has been registered before", name
+                ));
             else
-                LERROR("Library name '" << name << "' specifies a table");
+                LERROR(fmt::format("Library name '{}' specifies a table", name));
             break;
         }
         case LUA_TFUNCTION:
-            LERROR("Library name '" << name << "' specifies a function");
+            LERROR(fmt::format("Library name '{}' specifies a function", name));
             break;
         case LUA_TUSERDATA:
-            LERROR("Library name '" << name << "' specifies a user data");
+            LERROR(fmt::format("Library name '{}' specifies a user data", name));
             break;
         case LUA_TTHREAD:
-            LERROR("Library name '" << name << "' specifies a thread");
+            LERROR(fmt::format("Library name '{}' specifies a thread", name));
             break;
     }
 
@@ -265,7 +274,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
             lua_getfield(state, -1, p.name.c_str());
             const bool isNil = lua_isnil(state, -1);
             if (!isNil) {
-                LERROR("Function name '" << p.name << "' was already assigned");
+                LERROR(fmt::format("Function name '{}' was already assigned", p.name));
                 return;
             }
             lua_pop(state, 1);
@@ -288,9 +297,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         lua_pushstring(state, "documentation");
         lua_gettable(state, -2);
         if (lua_isnil(state, -1)) {
-            LERROR(
-                "Module '" << library.name << "' did not provide a documentation in " <<
-                "script file '" << script << "'");
+            LERROR(fmt::format(
+                "Module '{}' did not provide a documentation in script file '{}'",
+                library.name,
+                script
+            ));
         }
         else {
             lua_pushnil(state);
@@ -462,6 +473,7 @@ void ScriptEngine::remapPrintFunction() {
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     ghoul_assert(state, "State must not be nullptr");
+    int top = lua_gettop(state);
 
     lua_getglobal(state, OpenSpaceLibraryName.c_str());
     if (library.name.empty()) {
@@ -471,6 +483,7 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     else {
         const bool allowed = isLibraryNameAllowed(state, library.name);
         if (!allowed) {
+            lua_settop(state, top);
             return false;
         }
 
@@ -492,6 +505,8 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
         // Pop the table
         lua_pop(state, 1);
     }
+
+    lua_settop(state, top);
     return true;
 }
 
@@ -565,17 +580,7 @@ std::string ScriptEngine::generateJson() const {
     }
     json << "]";
 
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        }
-        else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
+    return json.str();
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
@@ -594,15 +599,17 @@ bool ScriptEngine::writeLog(const std::string& script) {
             _logFilename = absPath(_logFilename);
             _logFileExists = true;
 
-            LDEBUG("Using script log of type '" << _logType <<
-                   "' to file '" << _logFilename << "'");
+            LDEBUG(fmt::format(
+                "Using script log of type '{}' to file '{}'", _logType, _logFilename
+            ));
 
             // Test file and clear previous input
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
-                LERROR("Could not open file '" << _logFilename
-                       << "' for logging scripts");
+                LERROR(fmt::format(
+                    "Could not open file '{}' for logging scripts", _logFilename
+                ));
 
                 return false;
             }
@@ -615,7 +622,7 @@ bool ScriptEngine::writeLog(const std::string& script) {
     // Simple text output to logfile
     std::ofstream file(_logFilename, std::ofstream::app);
     if (!file.good()) {
-        LERROR("Could not open file '" << _logFilename << "' for logging scripts");
+        LERROR(fmt::format("Could not open file '{}' for logging scripts", _logFilename));
         return false;
     }
 
@@ -639,8 +646,8 @@ void ScriptEngine::presync(bool isMaster) {
         _receivedScripts.push_back(_currentSyncedScript);
         _queuedScripts.pop_back();
 
-        if (OsEng.parallelConnection().isHost() && remoteScripting) {
-            OsEng.parallelConnection().sendScript(_currentSyncedScript);
+        if (OsEng.parallelPeer().isHost() && remoteScripting) {
+            OsEng.parallelPeer().sendScript(_currentSyncedScript);
         }
     }
     _mutex.unlock();

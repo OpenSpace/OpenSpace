@@ -53,6 +53,7 @@ class Scene;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
+struct ShutdownInformation;
 class Syncable;
 class SyncBuffer;
 
@@ -90,11 +91,7 @@ public:
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
 
-    void renderScreenLog();
-    void renderVersionInformation();
-    void renderCameraInformation();
-    void renderShutdownInformation(float timer, float fullTime);
-    void renderDashboard();
+    void renderOverlays(const ShutdownInformation& shutdownInfo);
     void postDraw();
 
     // Performance measurements
@@ -123,8 +120,7 @@ public:
         std::string csPath,
         const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
-    void removeRenderProgram(
-        const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+    void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.
@@ -170,9 +166,18 @@ public:
 
     std::vector<Syncable*> getSyncables();
 
+    properties::PropertyOwner& screenSpaceOwner();
+
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method) const;
+
+    void renderScreenLog();
+    void renderVersionInformation();
+    void renderCameraInformation();
+    void renderShutdownInformation(float timer, float fullTime);
+    void renderDashboard();
+
 
     Camera* _camera;
     Scene* _scene;
@@ -188,6 +193,7 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
+    properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;
     properties::BoolProperty _showVersionInfo;
     properties::BoolProperty _showCameraInfo;
@@ -211,6 +217,7 @@ private:
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
+    properties::PropertyOwner _screenSpaceOwner;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
     std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;

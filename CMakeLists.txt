@@ -29,7 +29,7 @@ message(STATUS "Generating OpenSpace project")
 
 set(OPENSPACE_VERSION_MAJOR 0)
 set(OPENSPACE_VERSION_MINOR 11)
-set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_PATCH 1)
 set(OPENSPACE_VERSION_STRING "Beta-1")
 
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
@@ -78,6 +78,18 @@ execute_process(
   OUTPUT_VARIABLE OPENSPACE_GIT_COMMIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+
+# See if working directory is clean or not
+execute_process(
+  COMMAND git diff-index --quiet HEAD --
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
+)
+if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0) 
+    set(OPENSPACE_GIT_STATUS "uncomitted changes")
+else()
+    set(OPENSPACE_GIT_STATUS "")
+endif()
 
 option(OPENSPACE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
@@ -229,6 +241,8 @@ if (OPENSPACE_HAVE_TESTS)
         "GTEST_HAS_TR1_TUPLE=0"
     )
     target_link_libraries(OpenSpaceTest gtest libOpenSpace)
+
+    set_property(TARGET OpenSpaceTest PROPERTY FOLDER "Unit Tests")
 
     if (MSVC)
         set_target_properties(OpenSpaceTest PROPERTIES LINK_FLAGS

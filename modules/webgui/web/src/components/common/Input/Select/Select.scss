@@ -1,0 +1,106 @@
+@import "../../../../styles/all";
+@import "../Input/Input";
+
+.selectgroup {
+  height: $input-total-height;
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  font-family: $font-family;
+  font-size: $input-font-size;
+  height: 100%;
+  width: 100%;
+
+  // if input isn't disabled, apply background and highlight interaction
+  &:not(:global(.is-disabled)) {
+    background: $ui-background-hover;
+
+    &:focus,
+    &:active,
+    &:global(.is-open),
+    &:global(.is-focused) {
+      background: $ui-background-solid;
+
+      + .selectlabel {
+        color: $green;
+      }
+    }
+  }
+
+  &:hover {
+    background: $ui-background-selected;
+  }
+
+  &:global(.is-disabled) {
+    :global(.Select-value-label) {
+      color: $text-color-blur !important;
+    }
+
+    > :global(.Select-control) {
+      background-color: transparent;
+    }
+  }
+}
+
+.selectlabel {
+  font-size: $input-label-size;
+  left: $input-padding-horizontal;
+  position: absolute;
+  top: $input-label-margin;
+}
+
+// override react-select's styles
+.select :global {
+  .Select-control {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .Select-value {
+    line-height: 1 !important;
+    padding: $padding-top $input-padding-horizontal 0 !important;
+  }
+
+  .Select-value-label {
+    color: $text-color-focus !important;
+  }
+
+  .Select-menu-outer {
+    background: $ui-background-solid;
+    border: 1px solid black;
+    border-radius: 0;
+    box-shadow: $box-shadow;
+
+    .Select-option {
+      background: transparent;
+      color: $text-color-focus;
+    }
+
+    .Select-option.is-selected {
+      background: $ui-background-hover;
+      font-width: bold;
+    }
+
+    .Select-option:hover {
+      background: $blue;
+    }
+  }
+}
+
+.select.up :global(.Select-menu-outer) {
+  top: auto;
+  bottom: 100% !important;
+}
+
+:global {
+  .is-focused:not(.is-open) > .Select-control {
+    border: 0;
+    box-shadow: none;
+  }
+}

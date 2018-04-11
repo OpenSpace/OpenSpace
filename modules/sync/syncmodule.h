@@ -36,19 +36,23 @@ public:
     constexpr static const char* Name = "Sync";
 
     SyncModule();
-    virtual ~SyncModule() = default;
-    std::vector<documentation::Documentation> documentations() const override;
+
     std::string synchronizationRoot() const;
-    void addHttpSynchronizationRepository(const std::string& repository);
+
+    void addHttpSynchronizationRepository(std::string repository);
     std::vector<std::string> httpSynchronizationRepositories() const;
-    TorrentClient* torrentClient();
+
+    TorrentClient& torrentClient();
+
+    std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalDeinitialize() override;
 
 private:
     TorrentClient _torrentClient;
-    std::vector<std::string> _httpSynchronizationRepositories;
+    std::vector<std::string> _synchronizationRepositories;
     std::string _synchronizationRoot;
 };
 

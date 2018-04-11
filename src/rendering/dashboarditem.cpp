@@ -25,6 +25,8 @@
 #include <openspace/rendering/dashboarditem.h>
 
 #include <openspace/util/factorymanager.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/templatefactory.h>
 
@@ -36,9 +38,55 @@ namespace {
         "Is Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
     };
+
+    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+        "Type",
+        "Type",
+        ""
+    };
+
+    static const openspace::properties::Property::PropertyInfo IdentifierInfo = {
+        "Identifier",
+        "Identifier",
+        ""
+    };
+
+    static const openspace::properties::Property::PropertyInfo GuiNameInfo = {
+        "GuiName",
+        "Gui Name",
+        ""
+    };
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation DashboardItem::Documentation() {
+    using namespace documentation;
+    return {
+        "DashboardItem",
+        "dashboarditem",
+        {
+            {
+                TypeInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                TypeInfo.description
+            },
+            {
+                IdentifierInfo.identifier,
+                new StringVerifier,
+                Optional::No,
+                IdentifierInfo.description
+            },
+            {
+                GuiNameInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                GuiNameInfo.description
+            }
+        }
+    };
+}
 
 std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
                                                              ghoul::Dictionary dictionary)
@@ -51,10 +99,24 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     return factory->create(dashboardType, dictionary);
 }
 
-DashboardItem::DashboardItem(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
+DashboardItem::DashboardItem(ghoul::Dictionary dictionary)
+    : properties::PropertyOwner({ "", "" })
     , _isEnabled(EnabledInfo, true)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "DashboardItem"
+    );
+
+    const std::string identifier =
+        dictionary.value<std::string>(IdentifierInfo.identifier);
+
+    const std::string guiName =
+        dictionary.value<std::string>(GuiNameInfo.identifier);
+
+    setIdentifier(identifier);
+    setGuiName(guiName);
     addProperty(_isEnabled);
 }
 

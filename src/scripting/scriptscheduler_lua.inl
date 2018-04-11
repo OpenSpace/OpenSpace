@@ -25,12 +25,9 @@
 namespace openspace::luascriptfunctions {
 
 int loadFile(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadFile");
 
-    std::string missionFileName = luaL_checkstring(L, -1);
+    std::string missionFileName = ghoul::lua::checkStringAndPop(L);
     if (missionFileName.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
@@ -39,11 +36,17 @@ int loadFile(lua_State* L) {
         ghoul::lua::loadDictionaryFromFile(missionFileName, L)
     );
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int loadScheduledScript(lua_State* L) {
-    int nArguments = lua_gettop(L);
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 4 },
+        "lua::loadScheduledScript"
+    );
+
     if (nArguments == 2) {
         OsEng.scriptScheduler().loadScripts({
             {
@@ -80,21 +83,18 @@ int loadScheduledScript(lua_State* L) {
             }
         });
     }
-    else {
-        return luaL_error(L, "Expected %i-%i arguments, got %i", 2, 4, nArguments);
-    }
 
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int clear(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::clear");
 
     OsEng.scriptScheduler().clearSchedule();
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 

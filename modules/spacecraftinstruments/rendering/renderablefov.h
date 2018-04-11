@@ -92,7 +92,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawSolid;
     properties::DoubleProperty _standOffDistance;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    ghoul::opengl::ProgramObject* _programObject;
     UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
         targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
         squareColor, interpolation) _uniformCache;
@@ -100,6 +100,7 @@ private:
     // instance variables
     bool _rebuild = false;
 
+    bool _simplifyBounds = false;
 
     //std::vector<float> _fovBounds;
     //std::vector<float> _fovPlane;

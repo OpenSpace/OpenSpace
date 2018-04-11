@@ -70,22 +70,21 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
 
     auto factory = FactoryManager::ref().factory<Scale>();
     std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
-    result->setName("Scale");
+    result->setIdentifier("Scale");
     return result;
 }
 
 Scale::Scale()
     : properties::PropertyOwner({ "Scale" })
-    , _cachedScale(1.0)
     , _needsUpdate(true)
+    , _cachedScale(1.0)
 {}
 
 bool Scale::initialize() {
     return true;
 }
 
-double Scale::scaleValue() const
-{
+double Scale::scaleValue() const {
     return _cachedScale;
 }
 

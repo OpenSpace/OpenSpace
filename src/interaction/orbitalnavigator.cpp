@@ -105,7 +105,7 @@ OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _sensitivity(SensitivityInfo, 20.0f, 1.0f, 50.f)
+    , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
     , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
 {
     auto smoothStep =
@@ -377,7 +377,11 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
             localCameraRotation,
             glm::dquat(glm::dvec3(0.0)),
             glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0));
-        if (angle(result) < 0.01) {
+
+        // Retrieving the angle of a quaternion uses acos on the w component, which can
+        // have numerical instability for values close to 1.0
+        constexpr double Epsilon = 1.0e-13;
+        if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
             _rotateToFocusNodeInterpolator.end();
         }
         return result;

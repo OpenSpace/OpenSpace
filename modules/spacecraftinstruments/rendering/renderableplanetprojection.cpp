@@ -24,35 +24,29 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/space/rendering/planetgeometry.h>
-
+#include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
-
 namespace {
     constexpr const char* _loggerCat = "RenderablePlanetProjection";
+    constexpr const char* ProjectiveProgramName = "ProjectiveProgram";
+    constexpr const char* FBOPassProgramName = "FBOPassProgram";
+
 
     constexpr const char* KeyGeometry = "Geometry";
     constexpr const char* KeyProjection = "Projection";
@@ -60,6 +54,8 @@ namespace {
     constexpr const char* KeyRadius = "Geometry.Radius";
 //    const char* keyShading = "PerformShading";
     constexpr const char* _mainFrame = "GALACTIC";
+
+    constexpr const char* NoImageText = "No Image";
 
     static const openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
@@ -106,6 +102,12 @@ namespace {
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
         "shift."
+    };
+
+    static const openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
+        "AmbientBrightness",
+        "Ambient Brightness",
+        "This value determines the ambient brightness of the dark side of the planet."
     };
 } // namespace
 
@@ -158,6 +160,12 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 MeridianShiftInfo.description
+            },
+            {
+                AmbientBrightnessInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                AmbientBrightnessInfo.description
             }
         }
     };
@@ -175,8 +183,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 100.f)
+    , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f, 3.f)
     , _meridianShift(MeridianShiftInfo, false)
+    , _ambientBrightness(AmbientBrightnessInfo, 0.075f, 0.f, 1.f)
     , _capture(false)
 {
     documentation::testSpecificationAndThrow(
@@ -185,21 +194,20 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         "RenderablePlanetProjection"
     );
 
-    std::string name;
-    bool success = dict.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "");
-
     ghoul::Dictionary geometryDictionary;
-    success = dict.getValue(KeyGeometry, geometryDictionary);
+    bool success = dict.getValue(KeyGeometry, geometryDictionary);
     if (success) {
-        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        using planetgeometry::PlanetGeometry;
-        _geometry = PlanetGeometry::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(
+            geometryDictionary
+        );
     }
 
-    _projectionComponent.initialize(dict.value<ghoul::Dictionary>(KeyProjection));
+    _projectionComponent.initialize(
+        identifier(),
+        dict.value<ghoul::Dictionary>(KeyProjection)
+    );
 
-    _colorTexturePaths.addOption(0, "");
+    _colorTexturePaths.addOption(0, NoImageText);
     _colorTexturePaths.onChange([this](){
         _colorTextureDirty = true;
     });
@@ -244,7 +252,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 
 
-    _heightMapTexturePaths.addOption(0, "");
+    _heightMapTexturePaths.addOption(0, NoImageText);
     _heightMapTexturePaths.onChange([this]() {
         _heightMapTextureDirty = true;
     });
@@ -307,16 +315,27 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_heightExaggeration);
     addProperty(_meridianShift);
+    addProperty(_ambientBrightness);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
 void RenderablePlanetProjection::initializeGL() {
-    _programObject = OsEng.renderEngine().buildRenderProgram(
-        "projectiveProgram",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl")
-    );
+    _programObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            ProjectiveProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    ProjectiveProgramName,
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanet_vs.glsl"
+                    ),
+                    absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanet_fs.glsl"
+                    )
+                );
+            }
+        );
 
     _mainUniformCache.sunPos = _programObject->uniformLocation("sun_pos");
     _mainUniformCache.modelTransform = _programObject->uniformLocation("modelTransform");
@@ -329,6 +348,9 @@ void RenderablePlanetProjection::initializeGL() {
         "_heightExaggeration"
     );
     _mainUniformCache.meridianShift = _programObject->uniformLocation("_meridianShift");
+    _mainUniformCache.ambientBrightness = _programObject->uniformLocation(
+        "_ambientBrightness"
+    );
     _mainUniformCache.projectionFading = _programObject->uniformLocation(
         "_projectionFading"
     );
@@ -338,15 +360,23 @@ void RenderablePlanetProjection::initializeGL() {
     );
     _mainUniformCache.heightTexture = _programObject->uniformLocation("heightTexture");
 
-    _fboProgramObject = ghoul::opengl::ProgramObject::Build(
-        "fboPassProgram",
-        absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_vs.glsl"
-        ),
-        absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanetProjection_fs.glsl"
-        )
-    );
+    _fboProgramObject =
+        SpacecraftInstrumentsModule::ProgramObjectManager.requestProgramObject(
+            FBOPassProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return ghoul::opengl::ProgramObject::Build(
+                    FBOPassProgramName,
+                        absPath(
+                            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanetProjection_vs.glsl"
+                        ),
+                        absPath(
+                            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
+                            "renderablePlanetProjection_fs.glsl"
+                        )
+                );
+            }
+        );
 
     _fboUniformCache.projectionTexture = _fboProgramObject->uniformLocation(
         "projectionTexture"
@@ -408,9 +438,17 @@ void RenderablePlanetProjection::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
     glDeleteBuffers(1, &_vertexPositionBuffer);
 
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        ProjectiveProgramName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
     _programObject = nullptr;
 
+    SpacecraftInstrumentsModule::ProgramObjectManager.releaseProgramObject(
+        FBOPassProgramName
+    );
     _fboProgramObject = nullptr;
 }
 
@@ -469,12 +507,12 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     //90 deg rotation w.r.t spice req.
     glm::mat4 rot = glm::rotate(
         _transform,
-        static_cast<float>(M_PI_2),
+        glm::half_pi<float>(),
         glm::vec3(1, 0, 0)
     );
     glm::mat4 roty = glm::rotate(
         _transform,
-        static_cast<float>(M_PI_2),
+        glm::half_pi<float>(),
         glm::vec3(0, -1, 0)
     );
 
@@ -579,13 +617,24 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     // meridian and y completes the right handed coordinate system.
     // Doing this is part of changing from using the transforms defined by the
     // scenegraph node (data.modelTransform) to achieve higher precision rendering. //KB
-    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
-    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
+    glm::dmat4 rot = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(1.0, 0.0, 0.0)
+    );
+    glm::dmat4 roty = glm::rotate(
+        glm::dmat4(1.0),
+        glm::half_pi<double>(),
+        glm::dvec3(0.0, -1.0, 0.0)
+    );
     modelTransform = modelTransform * rot * roty;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform(_mainUniformCache.modelTransform, glm::mat4(modelTransform));
+    _programObject->setUniform(
+        _mainUniformCache.modelTransform,
+        glm::mat4(modelTransform)
+    );
     _programObject->setUniform(_mainUniformCache
         .modelViewProjectionTransform,
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
@@ -598,6 +647,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     );
     _programObject->setUniform(_mainUniformCache.heightExaggeration, _heightExaggeration);
     _programObject->setUniform(_mainUniformCache.meridianShift, _meridianShift);
+    _programObject->setUniform(_mainUniformCache.ambientBrightness, _ambientBrightness);
     _programObject->setUniform(
         _mainUniformCache.projectionFading,
         _projectionComponent.projectionFading()
@@ -642,6 +692,9 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         );
         _mainUniformCache.meridianShift = _programObject->uniformLocation(
             "_meridianShift"
+        );
+        _mainUniformCache.ambientBrightness = _programObject->uniformLocation(
+            "_ambientBrightness"
         );
         _mainUniformCache.projectionFading = _programObject->uniformLocation(
             "_projectionFading"
@@ -713,13 +766,16 @@ void RenderablePlanetProjection::loadColorTexture() {
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _baseTexture = nullptr;
-    if (!selectedPath.empty()) {
+    if (selectedPath != NoImageText) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath)
         );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
             _baseTexture->uploadTexture();
+            _baseTexture->setWrapping(
+                { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat}
+            );
             _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
         }
     }
@@ -732,7 +788,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     // We delete the texture first in order to free up the memory, which could otherwise
     // run out in the case of two large textures
     _heightMapTexture = nullptr;
-    if (!selectedPath.empty()) {
+    if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath)
         );

@@ -33,6 +33,9 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/defer.h>
+
 namespace {
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
@@ -121,6 +124,22 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
                 "the FactoryDocumentation."
             },
             {
+                KeyName,
+                new StringVerifier,
+                Optional::Yes,
+                "Specifies the name of this screenspace renderable. This does not have "
+                "to be unique to the scene, but it is recommended to be."
+            },
+            {
+                KeyIdentifier,
+                new StringVerifier,
+                Optional::Yes,
+                "This is the unique identifier for this screenspace renderable. It has "
+                "to be unique amongst all existing screenspace nodes that already have "
+                "been added to the scene. The identifier is not allowed to have any "
+                "whitespace or '.' and must not be empty."
+            },
+            {
                 EnabledInfo.identifier,
                 new BoolVerifier,
                 Optional::Yes,
@@ -187,9 +206,10 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
     );
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
-
-    auto factory = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    return factory->create(renderableType, dictionary);
+    return FactoryManager::ref().factory<ScreenSpaceRenderable>()->create(
+        renderableType,
+        dictionary
+    );
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
@@ -214,10 +234,18 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _delete(DeleteInfo)
     , _quad(0)
     , _vertexPositionBuffer(0)
-    , _texture(nullptr)
     , _shader(nullptr)
     , _radius(PlaneDepth)
 {
+    if (dictionary.hasKey(KeyIdentifier)) {
+        setIdentifier(dictionary.value<std::string>(KeyIdentifier));
+    }
+
+    if (dictionary.hasKey(KeyName)) {
+        setGuiName(dictionary.value<std::string>(KeyName));
+    }
+
+
     addProperty(_enabled);
     addProperty(_useFlatScreen);
     addProperty(_euclideanPosition);
@@ -294,7 +322,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     _delete.onChange([this](){
         std::string script =
-            "openspace.removeScreenSpaceRenderable('" + name() + "');";
+            "openspace.removeScreenSpaceRenderable('" + identifier() + "');";
         OsEng.scriptEngine().queueScript(
             script,
             scripting::ScriptEngine::RemoteScripting::No
@@ -327,11 +355,9 @@ bool ScreenSpaceRenderable::deinitializeGL() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    _texture = nullptr;
-
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
+        renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 
@@ -343,7 +369,7 @@ void ScreenSpaceRenderable::render() {
 }
 
 bool ScreenSpaceRenderable::isReady() const {
-    return _shader && _texture;
+    return _shader != nullptr;
 }
 
 void ScreenSpaceRenderable::update() {}
@@ -427,31 +453,30 @@ glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
 }
 
 void ScreenSpaceRenderable::createShaders() {
-    if (!_shader) {
-        ghoul::Dictionary dict = ghoul::Dictionary();
+    ghoul::Dictionary dict = ghoul::Dictionary();
 
-        auto res = OsEng.windowWrapper().currentWindowResolution();
-        ghoul::Dictionary rendererData = {
-            { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
-            { "windowWidth" , res.x },
-            { "windowHeight" , res.y }
-        };
+    auto res = OsEng.windowWrapper().currentWindowResolution();
+    ghoul::Dictionary rendererData = {
+        { "fragmentRendererPath", "${SHADERS}/framebuffer/renderframebuffer.frag" },
+        { "windowWidth" , res.x },
+        { "windowHeight" , res.y }
+    };
 
-        dict.setValue("rendererData", rendererData);
-        dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
-        _shader = ghoul::opengl::ProgramObject::Build(
-            "ScreenSpaceProgram",
-            "${MODULE_BASE}/shaders/screenspace_vs.glsl",
-            "${SHADERS}/render.frag",
-            dict
-        );
+    dict.setValue("rendererData", rendererData);
+    dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+    _shader = ghoul::opengl::ProgramObject::Build(
+        "ScreenSpaceProgram",
+        absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
+        absPath("${SHADERS}/render.frag"),
+        dict
+    );
 
-        _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
-        _uniformCache.alpha = _shader->uniformLocation("Alpha");
-        _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
-        _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
-        _uniformCache.texture = _shader->uniformLocation("texture1");
-    }
+    _uniformCache.occlusionDepth = _shader->uniformLocation("OcclusionDepth");
+    _uniformCache.alpha = _shader->uniformLocation("Alpha");
+    _uniformCache.modelTransform = _shader->uniformLocation("ModelTransform");
+    _uniformCache.viewProj = _shader->uniformLocation("ViewProjectionMatrix");
+    _uniformCache.texture = _shader->uniformLocation("texture1");
+
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
@@ -459,7 +484,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     //to scale the plane
     float textureRatio =
-        static_cast<float>(_texture->height()) / static_cast<float>(_texture->width());
+        static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
     float scalingRatioX = _originalViewportSize.x / resolution.x;
     float scalingRatioY = _originalViewportSize.y / resolution.y;
@@ -520,7 +545,8 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
+    bindTexture();
+    defer { unbindTexture(); };
     _shader->setUniform(_uniformCache.texture, unit);
 
     glBindVertexArray(_quad);
@@ -530,5 +556,10 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->deactivate();
 }
+
+void ScreenSpaceRenderable::bindTexture() {}
+
+void ScreenSpaceRenderable::unbindTexture() {}
+
 
 } // namespace openspace

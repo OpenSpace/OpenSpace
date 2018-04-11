@@ -6,15 +6,17 @@ local kernels081 = asset.require('./nep081').Kernels
 
 
 local Triton = {
-    Name = "Triton",
+    Identifier = "Triton",
     Parent = {
-        Name = transforms.NeptuneBarycenter.Name,
+        Identifier = transforms.NeptuneBarycenter.Identifier,
         Spice = "NEPTUNE BARYCENTER"
     },
     Spice = "TRITON",
     Radii = { 2709000, 2706000, 2705000 },
     Tags = { "moon_solarSystem", "moon_giants", "moon_neptune" },
-    GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+    GUI = {
+        Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+    },
     TrailColor = { 0.2, 0.5, 0.75 },
     OrbitPeriod = 5.877,
     Kernels = kernels081
@@ -24,5 +26,5 @@ local Triton = {
 
 assetHelper.registerSceneGraphNodesAndExport(
     asset,
-    proceduralGlobes.createGlobes(Triton)
+    proceduralGlobes.createGlobes({ Triton })
 )

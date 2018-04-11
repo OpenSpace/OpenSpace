@@ -36,6 +36,7 @@
 #include <openspace/util/keys.h>
 
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
     class Camera;

@@ -36,9 +36,11 @@
 #include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 
 namespace openspace {
+
+ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
 
 DigitalUniverseModule::DigitalUniverseModule()
     : OpenSpaceModule(DigitalUniverseModule::Name)
@@ -52,6 +54,10 @@ void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableBillboardsCloud>("RenderableBillboardsCloud");
     fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
+}
+
+void DigitalUniverseModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {

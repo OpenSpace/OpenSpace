@@ -45,7 +45,8 @@
 #include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
-#include <modules/base/rendering/renderableplane.h>
+#include <modules/base/rendering/renderableplaneimagelocal.h>
+#include <modules/base/rendering/renderableplaneimageonline.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/multimodelgeometry.h>
 #include <modules/base/rendering/screenspacedashboard.h>
@@ -63,9 +64,9 @@
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
 
-#include <ghoul/filesystem/filesystem>
-
 namespace openspace {
+
+ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
 
 BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
 
@@ -107,7 +108,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
     fRenderable->registerClass<RenderableModel>("RenderableModel");
-    fRenderable->registerClass<RenderablePlane>("RenderablePlane");
+    fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
+    fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
@@ -135,6 +137,10 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fGeometry, "Model geometry factory was not created");
     fGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
+}
+
+void BaseModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {

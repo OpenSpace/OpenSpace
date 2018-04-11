@@ -24,13 +24,14 @@
 
 #include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -50,6 +51,9 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderablePlanesCloud";
+    constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
+
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyUnit           = "Unit";
     constexpr const char* MeterUnit         = "m";
@@ -328,7 +332,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     , _planeMinSize(PlaneMinSizeInfo, 0.5, 0.0, 500.0)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _program(nullptr)
-    , _fontRenderer(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _labelFile("")
@@ -518,19 +521,21 @@ void RenderablePlanesCloud::initialize() {
 }
 
 void RenderablePlanesCloud::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _program = renderEngine.buildRenderProgram(
-        "RenderablePlanesCloud",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
+    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        ProgramObjectName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                "RenderablePlanesCloud",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
+            );
+        }
     );
 
     _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
         "modelViewProjectionTransform"
     );
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-    //_uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
     _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
 
@@ -539,9 +544,6 @@ void RenderablePlanesCloud::initializeGL() {
     loadTextures();
 
     if (_hasLabel) {
-        if (_fontRenderer == nullptr)
-            _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
-                ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 30;
             _font = OsEng.fontManager().font(
@@ -565,11 +567,12 @@ void RenderablePlanesCloud::deleteDataGPU() {
 void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPU();
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramObjectName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
 }
 
 void RenderablePlanesCloud::renderPlanes(const RenderData&,
@@ -606,7 +609,6 @@ void RenderablePlanesCloud::renderPlanes(const RenderData&,
         modelViewProjectionMatrix
     );
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
-    _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
     GLint viewport[4];
@@ -680,10 +682,6 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
                                          const glm::dvec3& orthoRight,
                                          const glm::dvec3& orthoUp, float fadeInVariable)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-
     float scale = 0.0;
     switch (_unit) {
         case Meter:
@@ -715,7 +713,7 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
-        _fontRenderer->render(
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             //_textColor,
@@ -847,7 +845,6 @@ void RenderablePlanesCloud::update(const UpdateData&) {
             "modelViewProjectionTransform"
         );
         _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
         _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
         _uniformCache.galaxyTexture = _program->uniformLocation("galaxyTexture");
     }
@@ -880,7 +877,7 @@ bool RenderablePlanesCloud::loadData() {
         // else
         // {
         //     LINFO("Cache for Speck file '" << _file << "' not found");
-            LINFO("Loading Speck file '" << _file << "'");
+        LINFO(fmt::format("Loading Speck file '{}'", _file));
 
             success = readSpeckFile();
             if (!success) {
@@ -916,7 +913,7 @@ bool RenderablePlanesCloud::loadData() {
         // else
         // {
         //     LINFO("Cache for Label file '" << labelFile << "' not found");
-            LINFO("Loading Label file '" << labelFile << "'");
+            LINFO(fmt::format("Loading Label file '{}'", labelFile));
 
             success &= readLabelFile();
             if (!success) {
@@ -939,7 +936,7 @@ bool RenderablePlanesCloud::loadTextures() {
             if (p.second) {
                 LINFOC(
                     "RenderablePlanesCloud",
-                    "Loaded texture from '" << pair.second << "'"
+                    fmt::format("Loaded texture from '{}'", pair.second)
                 );
                 auto it = p.first;
                 it->second->uploadTexture();
@@ -957,7 +954,7 @@ bool RenderablePlanesCloud::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
         return false;
     }
 
@@ -1128,7 +1125,7 @@ bool RenderablePlanesCloud::readLabelFile() {
     std::string _file = _labelFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Label file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Label file '{}'", _file));
         return false;
     }
 
@@ -1239,7 +1236,7 @@ bool RenderablePlanesCloud::loadCachedFile(const std::string& file) {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for loading cache file");
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
@@ -1272,7 +1269,7 @@ bool RenderablePlanesCloud::saveCachedFile(const std::string& file) const {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
 }

@@ -56,7 +56,9 @@
 namespace {
     constexpr const char* _loggerCat = "SceneGraphNode";
     constexpr const char* KeyRenderable = "Renderable";
-    constexpr const char* KeyGuiPath = "GuiPath";
+    constexpr const char* KeyGuiName = "GUI.Name";
+    constexpr const char* KeyGuiPath = "GUI.Path";
+    constexpr const char* KeyGuiHidden = "GUI.Hidden";
 
     constexpr const char* keyTransformTranslation = "Transform.Translation";
     constexpr const char* keyTransformRotation = "Transform.Rotation";
@@ -64,13 +66,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
-// Constants used outside of this file
-const std::string SceneGraphNode::RootNodeName = "Root";
-const std::string SceneGraphNode::KeyName = "Name";
-const std::string SceneGraphNode::KeyParentName = "Parent";
-const std::string SceneGraphNode::KeyDependencies = "Dependencies";
-const std::string SceneGraphNode::KeyTag = "Tag";
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -83,8 +78,16 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
 
-    std::string name = dictionary.value<std::string>(KeyName);
-    result->setName(name);
+    std::string identifier = dictionary.value<std::string>(KeyIdentifier);
+    result->setIdentifier(std::move(identifier));
+
+    if (dictionary.hasKey(KeyGuiName)) {
+        result->setGuiName(dictionary.value<std::string>(KeyGuiName));
+    }
+
+    if (dictionary.hasKey(KeyGuiHidden)) {
+        result->_guiHintHidden = dictionary.value<bool>(KeyGuiHidden);
+    }
 
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
@@ -93,12 +96,15 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             translationDictionary
         );
         if (result->_transform.translation == nullptr) {
-            LERROR("Failed to create ephemeris for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create ephemeris for SceneGraphNode '{}'", result->identifier()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.translation.get());
-        LDEBUG("Successfully created ephemeris for '" << result->name() << "'");
+        LDEBUG(fmt::format(
+            "Successfully created ephemeris for '{}'", result->identifier()
+        ));
     }
 
     if (dictionary.hasKey(keyTransformRotation)) {
@@ -106,12 +112,15 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         dictionary.getValue(keyTransformRotation, rotationDictionary);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
         if (result->_transform.rotation == nullptr) {
-            LERROR("Failed to create rotation for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create rotation for SceneGraphNode '{}'", result->identifier()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.rotation.get());
-        LDEBUG("Successfully created rotation for '" << result->name() << "'");
+        LDEBUG(fmt::format(
+            "Successfully created rotation for '{}'", result->identifier()
+        ));
     }
 
     if (dictionary.hasKey(keyTransformScale)) {
@@ -119,12 +128,13 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         dictionary.getValue(keyTransformScale, scaleDictionary);
         result->_transform.scale = Scale::createFromDictionary(scaleDictionary);
         if (result->_transform.scale == nullptr) {
-            LERROR("Failed to create scale for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create scale for SceneGraphNode '{}'", result->identifier()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.scale.get());
-        LDEBUG("Successfully created scale for '" << result->name() << "'");
+        LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
     }
 
     // We initialize the renderable last as it probably has the most dependencies
@@ -132,16 +142,20 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary renderableDictionary;
         dictionary.getValue(KeyRenderable, renderableDictionary);
 
-        renderableDictionary.setValue(KeyName, name);
+        renderableDictionary.setValue(KeyIdentifier, identifier);
 
         result->_renderable = Renderable::createFromDictionary(renderableDictionary);
         if (result->_renderable == nullptr) {
-            LERROR("Failed to create renderable for SceneGraphNode '"
-                << result->name() << "'");
+            LERROR(fmt::format(
+                "Failed to create renderable for SceneGraphNode '{}'",
+                result->identifier()
+            ));
             return nullptr;
         }
         result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG("Successfully created renderable for '" << result->name() << "'");
+        LDEBUG(fmt::format(
+            "Successfully created renderable for '{}'", result->identifier()
+        ));
     }
 
     if (dictionary.hasKey(KeyTag)) {
@@ -167,8 +181,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_guiPath = dictionary.value<std::string>(KeyGuiPath);
     }
 
-    LDEBUG("Successfully created SceneGraphNode '"
-                   << result->name() << "'");
+    LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
     return result;
 }
 
@@ -189,7 +202,7 @@ SceneGraphNode::SceneGraphNode()
 SceneGraphNode::~SceneGraphNode() {}
 
 void SceneGraphNode::initialize() {
-    LDEBUG("Initialize: " << name());
+    LDEBUG(fmt::format("Initialize: {}", identifier()));
     if (_renderable) {
         _renderable->initialize();
     }
@@ -214,7 +227,7 @@ void SceneGraphNode::initializeGL() {
 }
 
 void SceneGraphNode::deinitialize() {
-    LDEBUG("Deinitialize: " << name());
+    LDEBUG(fmt::format("Deinitialize: {}", identifier()));
 
     setScene(nullptr);
 
@@ -565,14 +578,19 @@ const std::string& SceneGraphNode::guiPath() const {
     return _guiPath;
 }
 
+bool SceneGraphNode::hasGuiHintHidden() const {
+    return _guiHintHidden;
+}
+
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return
-            _parent->calculateWorldPosition() +
-            _parent->worldRotationMatrix() *
-            _parent->worldScale() *
-            position();
+        const glm::dvec3 wp = _parent->calculateWorldPosition();
+        const glm::dmat3 wrot = _parent->worldRotationMatrix();
+        const double ws = _parent->worldScale();
+        const glm::dvec3 p = position();
+
+        return wp + wrot * ws * p;
     }
     else {
         return position();
@@ -691,21 +709,21 @@ bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScal
 }
 */
 
-SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
-{
-    if (this->name() == name)
+SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
+    if (this->identifier() == identifier) {
         return this;
+    }
     else
         for (std::unique_ptr<SceneGraphNode>& it : _children) {
-            SceneGraphNode* tmp = it->childNode(name);
-            if (tmp)
+            SceneGraphNode* tmp = it->childNode(identifier);
+            if (tmp) {
                 return tmp;
+            }
         }
     return nullptr;
 }
 
-void SceneGraphNode::updateCamera(Camera* camera) const{
-
+void SceneGraphNode::updateCamera(Camera* camera) const {
     psc origin(worldPosition());
     //int i = 0;
     // the camera position

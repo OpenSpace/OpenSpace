@@ -191,14 +191,14 @@ NSArray* focusIdentifiers;
         (void)sender;
         OsEng.scriptEngine().queueScript(
             "local b = openspace.getPropertyValue(\
-                'Global Properties.ImGUI.Main.Enabled'\
+                'Modules.ImGUI.Main.Enabled'\
             );\
             openspace.setPropertyValueSingle(\
-                'Global Properties.ImGUI.Main.Enabled',\
+                'Modules.ImGUI.Main.Enabled',\
                 not b\
             );\
             openspace.setPropertyValueSingle(\
-                'Global Properties.ImGUI.Main.IsHidden',\
+                'Modules.ImGUI.Main.IsHidden',\
                 b\
             );",
             openspace::scripting::ScriptEngine::RemoteScripting::No
@@ -209,32 +209,32 @@ NSArray* focusIdentifiers;
         // Remove unused variable warning
         (void)sender;
         OsEng.scriptEngine().queueScript(
-"local b = openspace.getPropertyValue('Global Properties.ImGUI.Main.Properties.Enabled');\n\
-local c = openspace.getPropertyValue('Global Properties.ImGUI.Main.IsHidden');\n\
-openspace.setPropertyValue('Global Properties.ImGUI.*.Enabled', false);\n\
+"local b = openspace.getPropertyValue('Modules.ImGUI.Main.Properties.Enabled');\n\
+local c = openspace.getPropertyValue('Modules.ImGUI.Main.IsHidden');\n\
+openspace.setPropertyValue('Modules.ImGUI.*.Enabled', false);\n\
 if b and c then\n\
     -- This can happen if the main properties window is enabled, the main gui\n\
     -- is enabled and then closed again. So the main properties window is\n\
     -- enabled, but also all windows are hidden\n\
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', false);\n\
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', false);\n\
     openspace.setPropertyValueSingle(\n\
-        'Global Properties.ImGUI.Main.Properties.Enabled',\n\
+        'Modules.ImGUI.Main.Properties.Enabled',\n\
         true\n\
     );\n\
     openspace.setPropertyValueSingle(\n\
-        'Global Properties.ImGUI.Main.Space/Time.Enabled',\n\
+        'Modules.ImGUI.Main.Space/Time.Enabled',\n\
         true\n\
     );\n\
 else\n\
     openspace.setPropertyValueSingle(\n\
-        'Global Properties.ImGUI.Main.Properties.Enabled',\n\
+        'Modules.ImGUI.Main.Properties.Enabled',\n\
         not b\n\
     );\n\
     openspace.setPropertyValueSingle(\n\
-        'Global Properties.ImGUI.Main.Space/Time.Enabled',\n\
+        'Modules.ImGUI.Main.Space/Time.Enabled',\n\
         not b\n\
     );\n\
-    openspace.setPropertyValueSingle('Global Properties.ImGUI.Main.IsHidden', b);\n\
+    openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);\n\
 end",
             openspace::scripting::ScriptEngine::RemoteScripting::No
         );
@@ -264,7 +264,7 @@ void showTouchbar() {
         nodes.begin(),
         nodes.end(),
         [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            return lhs->name() < rhs->name();
+            return lhs->guiName() < rhs->guiName();
         }
     );
 
@@ -273,7 +273,7 @@ void showTouchbar() {
         const std::vector<std::string>& tags = n->tags();
         auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {
-            [ids addObject: [NSString stringWithCString:n->name().c_str()
+            [ids addObject: [NSString stringWithCString:n->identifier().c_str()
                                       encoding:[NSString defaultCStringEncoding]]];
         }
     }

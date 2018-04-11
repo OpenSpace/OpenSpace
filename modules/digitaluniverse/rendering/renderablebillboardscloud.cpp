@@ -24,13 +24,14 @@
 
 #include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-
-#include <ghoul/filesystem/filesystem>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -38,10 +39,8 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
 #include <glm/gtx/string_cast.hpp>
 #include <ghoul/glm.h>
-
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -50,6 +49,9 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderableBillboardsCloud";
+    constexpr const char* ProgramObjectName = "RenderableBillboardsCloud";
+    constexpr const char* RenderToPolygonProgram = "RenderableBillboardsCloud_Polygon";
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyColor          = "Color";
     constexpr const char* keyUnit           = "Unit";
@@ -390,7 +392,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     , _polygonTexture(nullptr)
     , _spriteTexture(nullptr)
     , _program(nullptr)
-    , _fontRenderer(nullptr)
+    , _renderToPolygonProgram(nullptr)
     , _font(nullptr)
     , _speckFile("")
     , _colorMapFile("")
@@ -623,17 +625,32 @@ void RenderableBillboardsCloud::initialize() {
 }
 
 void RenderableBillboardsCloud::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _program = renderEngine.buildRenderProgram(
-        "RenderableBillboardsCloud",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_fs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard2_gs.glsl")
+    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        ProgramObjectName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                ProgramObjectName,
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_fs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboard_gs.glsl")
+            );
+        }
     );
 
-    //_uniformCache.projection = _program->uniformLocation("projection");
-    //_uniformCache.modelView = _program->uniformLocation("modelViewTransform");
+    _renderToPolygonProgram =
+        DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+            RenderToPolygonProgram,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return ghoul::opengl::ProgramObject::Build(
+                    RenderToPolygonProgram,
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
+                    absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
+                );
+            }
+        );
+
+
     _uniformCache.modelViewProjection = _program->uniformLocation(
         "modelViewProjectionTransform"
     );
@@ -646,7 +663,6 @@ void RenderableBillboardsCloud::initializeGL() {
     _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
     _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
     _uniformCache.color = _program->uniformLocation("color");
-    //_uniformCache.sides = _program->uniformLocation("sides");
     _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
     _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
     _uniformCache.up = _program->uniformLocation("up");
@@ -663,9 +679,6 @@ void RenderableBillboardsCloud::initializeGL() {
     }
 
     if (_hasLabel) {
-        if (_fontRenderer == nullptr)
-            _fontRenderer = std::unique_ptr<ghoul::fontrendering::FontRenderer>(
-                ghoul::fontrendering::FontRenderer::createProjectionSubjectText());
         if (_font == nullptr) {
             size_t _fontSize = 50;
             _font = OsEng.fontManager().font(
@@ -684,11 +697,18 @@ void RenderableBillboardsCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramObjectName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
+    _program = nullptr;
+
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        RenderToPolygonProgram
+    );
+    _renderToPolygonProgram = nullptr;
 
     if (_hasSpriteTexture) {
         _spriteTexture = nullptr;
@@ -736,8 +756,7 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         "screenSize",
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
-    //_program->setUniform(_uniformCache.projection, projMatrix);
-    //_program->setUniform(_uniformCache.modelView, modelViewMatrix);
+
     _program->setUniform(_uniformCache.modelViewProjection, projMatrix * modelViewMatrix);
     _program->setUniform(
         _uniformCache.cameraPos,
@@ -750,10 +769,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
         )
     );
 
-    //_program->setUniform("cameraPosition", data.camera.positionVec3());
-    //_program->setUniform("cameraLookUp", data.camera.lookUpVectorWorldSpace());
-
-
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
     glm::dvec4 centerScreenWorld = glm::inverse(data.camera.combinedViewMatrix()) *
                                    glm::dvec4(0.0, 0.0, 0.0, 1.0);
@@ -763,7 +778,6 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.minBillboardSize, _billboardMinSize); // in pixels
     _program->setUniform(_uniformCache.maxBillboardSize, _billboardMaxSize); // in pixels
     _program->setUniform(_uniformCache.color, _pointColor);
-    //_program->setUniform(_uniformCache.sides, 4);
     _program->setUniform(_uniformCache.alphaValue, _alphaValue);
     _program->setUniform(_uniformCache.scaleFactor, _scaleFactor);
 
@@ -820,10 +834,6 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
                                              const glm::dvec3& orthoUp,
                                              float fadeInVariable)
 {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _fontRenderer->setFramebufferSize(renderEngine.renderingResolution());
-
     float scale = 0.0;
     switch (_unit) {
     case Meter:
@@ -855,7 +865,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
         //glm::vec3 scaledPos(_transformationMatrix * glm::dvec4(pair.first, 1.0));
         glm::vec3 scaledPos(pair.first);
         scaledPos *= scale;
-        _fontRenderer->render(
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
             textColor,
@@ -869,7 +879,8 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             data.camera.lookUpVectorWorldSpace(),
             _renderOption.value(),
             "%s",
-            pair.second.c_str());
+            pair.second.c_str()
+        );
     }
 }
 
@@ -934,7 +945,6 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
-    // glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
@@ -1008,11 +1018,11 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
 
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
-            LDEBUG("Generating Vertex Array id '" << _vao << "'");
+            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
         }
         if (_vbo == 0) {
             glGenBuffers(1, &_vbo);
-            LDEBUG("Generating Vertex Buffer Object id '" << _vbo << "'");
+            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
         }
 
         glBindVertexArray(_vao);
@@ -1077,7 +1087,10 @@ void RenderableBillboardsCloud::update(const UpdateData&) {
                 absPath(_spriteTexturePath)
             );
             if (_spriteTexture) {
-                LINFO("Loaded texture from '" << absPath(_spriteTexturePath) << "'");
+                LINFO(fmt::format(
+                    "Loaded texture from '{}'",
+                    absPath(_spriteTexturePath)
+                ));
                 _spriteTexture->uploadTexture();
             }
             _spriteTexture->setFilter(
@@ -1124,16 +1137,17 @@ bool RenderableBillboardsCloud::loadSpeckData() {
 
         std::string cachedFile = FileSys.cacheManager()->cachedFilename(
             ghoul::filesystem::File(_file),
-            "RenderableDUMeshes|" + name(),
+            "RenderableDUMeshes|" + identifier(),
             ghoul::filesystem::CacheManager::Persistent::Yes
         );
 
         bool hasCachedFile = FileSys.fileExists(cachedFile);
         if (hasCachedFile) {
-            LINFO(
-                "Cached file '" << cachedFile << "' used for Speck file '" <<
-                _file << "'"
-            );
+            LINFO(fmt::format(
+                "Cached file '{}' used for Speck file '{}'",
+                cachedFile,
+                _file
+            ));
 
             success = loadCachedFile(cachedFile);
             if (success) {
@@ -1146,9 +1160,9 @@ bool RenderableBillboardsCloud::loadSpeckData() {
             }
         }
         else {
-            LINFO("Cache for Speck file '" << _file << "' not found");
+            LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
         }
-        LINFO("Loading Speck file '" << _file << "'");
+        LINFO(fmt::format("Loading Speck file '{}'", _file));
 
         success = readSpeckFile();
         if (!success) {
@@ -1174,10 +1188,11 @@ bool RenderableBillboardsCloud::loadLabelData() {
         }
         bool hasCachedFile = FileSys.fileExists(cachedFile);
         if (hasCachedFile) {
-            LINFO(
-                "Cached file '" << cachedFile << "' used for Label file '" <<
-                labelFile << "'"
-            );
+            LINFO(fmt::format(
+                "Cached file '{}' used for Label file '{}'",
+                cachedFile,
+                labelFile
+            ));
 
             success &= loadCachedFile(cachedFile);
             if (!success) {
@@ -1187,8 +1202,8 @@ bool RenderableBillboardsCloud::loadLabelData() {
             }
         }
         else {
-            LINFO("Cache for Label file '" << labelFile << "' not found");
-            LINFO("Loading Label file '" << labelFile << "'");
+            LINFO(fmt::format("Cache for Label file '{}' not found", labelFile));
+            LINFO(fmt::format("Loading Label file '{}'", labelFile));
 
             success &= readLabelFile();
             if (!success) {
@@ -1205,7 +1220,7 @@ bool RenderableBillboardsCloud::readSpeckFile() {
     std::string _file = _speckFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Speck file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Speck file '{}'", _file));
         return false;
     }
 
@@ -1295,7 +1310,7 @@ bool RenderableBillboardsCloud::readColorMapFile() {
     std::string _file = _colorMapFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Color Map file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Color Map file '{}'", _file));
         return false;
     }
 
@@ -1344,7 +1359,7 @@ bool RenderableBillboardsCloud::readLabelFile() {
     std::string _file = _labelFile;
     std::ifstream file(_file);
     if (!file.good()) {
-        LERROR("Failed to open Label file '" << _file << "'");
+        LERROR(fmt::format("Failed to open Label file '{}'", _file));
         return false;
     }
 
@@ -1479,7 +1494,7 @@ bool RenderableBillboardsCloud::loadCachedFile(const std::string& file) {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for loading cache file");
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 }
@@ -1531,7 +1546,7 @@ bool RenderableBillboardsCloud::saveCachedFile(const std::string& file) const {
         return success;
     }
     else {
-        LERROR("Error opening file '" << file << "' for save cache file");
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
         return false;
     }
 }
@@ -1700,25 +1715,18 @@ void RenderableBillboardsCloud::loadPolygonGeometryForRendering() {
 }
 
 void RenderableBillboardsCloud::renderPolygonGeometry(GLuint vao) {
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build("RenderableBillboardsCloud_Polygon",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_fs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/billboardpolygon_gs.glsl")
-    );
-
-    program->activate();
+    _renderToPolygonProgram->activate();
     static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     glClearBufferfv(GL_COLOR, 0, black);
 
-    program->setUniform("sides", _polygonSides);
-    program->setUniform("polygonColor", _pointColor);
+    _renderToPolygonProgram->setUniform("sides", _polygonSides);
+    _renderToPolygonProgram->setUniform("polygonColor", _pointColor);
 
     glBindVertexArray(vao);
     glDrawArrays(GL_POINTS, 0, 1);
     glBindVertexArray(0);
 
-    program->deactivate();
+    _renderToPolygonProgram->deactivate();
 }
 
 } // namespace openspace

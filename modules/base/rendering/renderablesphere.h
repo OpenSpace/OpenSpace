@@ -31,6 +31,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -68,17 +69,18 @@ private:
     properties::FloatProperty _size;
     properties::IntProperty _segments;
 
-    properties::FloatProperty _transparency;
-
     properties::BoolProperty _disableFadeInDistance;
 
     float _fadeOutThreshold;
     float _fadeInThreshold;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    ghoul::opengl::ProgramObject* _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::unique_ptr<PowerScaledSphere> _sphere;
+
+    UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
+
 
     bool _sphereIsDirty;
 };

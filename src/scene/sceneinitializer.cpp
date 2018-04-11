@@ -54,7 +54,8 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         LoadingScreen& loadingScreen = OsEng.loadingScreen();
 
         loadingScreen.updateItem(
-            node->name(),
+            node->identifier(),
+            node->guiName(),
             LoadingScreen::ItemStatus::Initializing,
             1.f
         );
@@ -65,7 +66,8 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
         _initializingNodes.erase(node);
 
         loadingScreen.updateItem(
-            node->name(),
+            node->identifier(),
+            node->guiName(),
             LoadingScreen::ItemStatus::Finished,
             1.f
         );
@@ -74,9 +76,10 @@ void MultiThreadedSceneInitializer::initializeNode(SceneGraphNode* node) {
     LoadingScreen& loadingScreen = OsEng.loadingScreen();
     loadingScreen.setItemNumber(loadingScreen.itemNumber() + 1);
     loadingScreen.updateItem(
-        node->name(),
+        node->identifier(),
+        node->guiName(),
         LoadingScreen::ItemStatus::Started,
-        0.0f
+        0.f
     );
 
     std::lock_guard<std::mutex> g(_mutex);

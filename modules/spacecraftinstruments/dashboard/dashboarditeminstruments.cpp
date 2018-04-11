@@ -35,6 +35,7 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -137,7 +138,7 @@ documentation::Documentation DashboardItemInstruments::Documentation() {
 }
 
 DashboardItemInstruments::DashboardItemInstruments(ghoul::Dictionary dictionary)
-    : DashboardItem("Instruments")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _activeColor(
