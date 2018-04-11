@@ -7,7 +7,7 @@ import { OriginKey, SolarSystemKey, StoryKey } from '../../../api/keys';
 import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
 import styles from './FocusMenu.scss';
-import OverViewButton from './OverViewButton';
+//import OverViewButton from './OverViewButton';
 
 class FocusMenu extends Component {
   constructor(props) {
@@ -15,7 +15,7 @@ class FocusMenu extends Component {
 
     this.state = {
       origin: '',
-      solarSystem: '',
+      //solarSystem: '',
       listening: false,
     };
   }
@@ -26,31 +26,31 @@ class FocusMenu extends Component {
       this.props.ChangePropertyValue(this.props.originNode.Description, this.state.origin);
     }
     // If the overview button is clicked change property value
-    if (this.state.listening && nextState.solarSystem !== this.state.solarSystem) {
+/*    if (this.state.listening && nextState.solarSystem !== this.state.solarSystem) {
       this.props.ChangePropertyValue(this.props.overview.Description, this.state.solarSystem);
-    } 
+    } */
     // If changes are made in another gui update state
     if (this.state.listening && nextState.origin !== this.props.originNode.Value) {
       this.setState({ origin: this.props.originNode.Value });
     }
     // If changes are made to the solar system prop in another gui update state
-    if (this.state.listening && nextState.solarSystem !== this.props.overview.Value) {
+   /* if (this.state.listening && nextState.solarSystem !== this.props.overview.Value) {
       this.setState({ solarSystem: this.props.overview.Value });
-    } 
+    } */
     // Start listening on the origin property and the viewSolarSystem property
     if (!this.state.listening && this.props.nodes.length > 0) {
       this.props.StartListening(OriginKey);
-      this.props.StartListening(SolarSystemKey);
+      //this.props.StartListening(SolarSystemKey);
       this.setState({ 
         origin: this.props.originNode.Value, 
-        solarSystem: this.props.overview.Value, 
+        //solarSystem: this.props.overview.Value,
         listening: true });
     }
   }
 
   componentWillUnmount() {
     this.props.StopListening(OriginKey);
-    this.props.StopListening(SolarSystemKey);
+    //this.props.StopListening(SolarSystemKey);
     this.setState({ listening: false });
   }
 
@@ -68,14 +68,14 @@ class FocusMenu extends Component {
   }
 
   render() {
+/*    {this.props.nodes.length > 0 &&
+    <OverViewButton
+      identifier={this.props.overview.Description.Identifier}
+      value={(this.props.overview.Value === 'true' || this.props.overview.Value === '1')}
+      onChangeView={newVal => this.setState({ solarSystem: newVal })}
+    />}*/
     return (
       <div className={styles.FocusMenu}>
-        {this.props.nodes.length > 0 && 
-          <OverViewButton 
-            identifier={this.props.overview.Description.Identifier}
-            value={(this.props.overview.Value === 'true' || this.props.overview.Value === '1')}
-            onChangeView={newVal => this.setState({ solarSystem: newVal })}
-          />}
         {this.props.nodes.length > 0 && this.createFocusButtons()}
       </div>
     );
@@ -86,7 +86,7 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let originNode = [];
   let nodes = [];
-  let overview = {};
+  //let overview = {};
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
@@ -99,12 +99,12 @@ const mapStateToProps = (state) => {
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
 
     // Get the overview node for the overview of the solar system
-    overview = traverseTreeWithURI(state.propertyTree, SolarSystemKey);
+    //overview = traverseTreeWithURI(state.propertyTree, SolarSystemKey);
   }
   return {
     nodes,
     originNode,
-    overview,
+    //overview,
   };
 };
 
