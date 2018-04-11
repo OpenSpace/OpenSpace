@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/distanceconversion.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -43,7 +44,6 @@ namespace {
     const char* KeyColumnNames = "ColumnNames";
 
     constexpr const char* _loggerCat = "ReadFitsTask";
-    constexpr int8_t CurrentFileVersion = 1;
 } // namespace
 
 namespace openspace {
@@ -90,6 +90,7 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     progressCallback(0.0f);
     srand(1234567890);
 
+    // Read columns from FITS file.
     FitsFileReader fitsInFile(false);
     std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_inFilePath, 
         _columnNames, _firstRow, _lastRow);
@@ -99,11 +100,12 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     }
     progressCallback(0.5f);
 
-    int32_t nValuesPerStar = _columnNames.size();
+    int32_t nValuesPerStar = 8; //_columnNames.size() + 1; // +1 for B-V color value.
     int nNullArr = 0;
-    size_t defaultCols = 17; // Default: 8, Full: 17
+    size_t defaultCols = 8; // Default: 8, Full: 17
     int multiplier = 1;
 
+    // Copy columns to local variables.
     std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
     std::vector<float> posXcol = tableContent[_columnNames[0]];
     std::vector<float> posYcol = tableContent[_columnNames[1]];
@@ -124,11 +126,18 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
     std::vector<float> tycho_v = tableContent[_columnNames[15]];
     std::vector<float> tycho_v_err = tableContent[_columnNames[16]];
 
+    // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
     for (int i = 0; i < nStars * multiplier; ++i) {
         std::vector<float> values(nValuesPerStar);
         size_t idx = 0;
 
-        // Read positions.
+        // Default order for rendering:
+        // Position [X, Y, Z]
+        // Absolute Magnitude
+        // B-V Color
+        // Velocity [X, Y, Z]
+
+        // Store positions.
         values[idx++] = posXcol[i%nStars];
         values[idx++] = posYcol[i%nStars];
         values[idx++] = posZcol[i%nStars];
@@ -139,22 +148,26 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
             continue;
         }
 
-        // Read the rest of the default values.
-        values[idx++] = velXcol[i%nStars];
-        values[idx++] = velYcol[i%nStars];
-        values[idx++] = velZcol[i%nStars];
+        // Store color values.
         values[idx++] = magCol[i%nStars];
-        values[idx++] = parallax[i%nStars];
+        values[idx++] = tycho_b[i%nStars] - tycho_v[i%nStars];
+
+        // Store velocity convert it with parallax.
+        values[idx++] = convertMasPerYearToMeterPerSecond(velXcol[i%nStars], parallax[i%nStars]);
+        values[idx++] = convertMasPerYearToMeterPerSecond(velYcol[i%nStars], parallax[i%nStars]);
+        values[idx++] = convertMasPerYearToMeterPerSecond(velZcol[i%nStars], parallax[i%nStars]);
         
-        values[idx++] = parallax_err[i%nStars];
-        values[idx++] = pr_mot_ra[i%nStars];
-        values[idx++] = pr_mot_ra_err[i%nStars];
-        values[idx++] = pr_mot_dec[i%nStars];
-        values[idx++] = pr_mot_dec_err[i%nStars];
-        values[idx++] = tycho_b[i%nStars];
-        values[idx++] = tycho_b_err[i%nStars];
-        values[idx++] = tycho_v[i%nStars];
-        values[idx++] = tycho_v_err[i%nStars];
+        // Store additional parameters to filter by.
+        //values[idx++] = parallax[i%nStars];
+        //values[idx++] = parallax_err[i%nStars];
+        //values[idx++] = pr_mot_ra[i%nStars];
+        //values[idx++] = pr_mot_ra_err[i%nStars];
+        //values[idx++] = pr_mot_dec[i%nStars];
+        //values[idx++] = pr_mot_dec_err[i%nStars];
+        //values[idx++] = tycho_b[i%nStars];
+        //values[idx++] = tycho_b_err[i%nStars];
+        //values[idx++] = tycho_v[i%nStars];
+        //values[idx++] = tycho_v_err[i%nStars];
 
         // Read extra columns, if any. This will slow down the sorting tremendously!
         for (size_t col = defaultCols; col < nValuesPerStar; ++col) {
@@ -175,9 +188,10 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
         fullData.insert(fullData.end(), values.begin(), values.end());
     }
 
-    LINFO(std::to_string(nNullArr / multiplier) + " out of " + std::to_string(nStars) +
-        " read stars were nullArrays");
-    
+    LINFO(std::to_string(nNullArr) + " out of " + 
+        std::to_string(fullData.size() / nValuesPerStar) + " read stars were nullArrays.");
+    LINFO("Multiplier: " + std::to_string(multiplier));
+
     progressCallback(0.9f);
 
     std::ofstream fileStream(_outFilePath, std::ofstream::binary);

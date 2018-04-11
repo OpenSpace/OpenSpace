@@ -39,7 +39,6 @@ namespace {
     const char* KeyOutFilePath = "OutFilePath";
 
     constexpr const char* _loggerCat = "ReadSpeckTask";
-    constexpr int8_t CurrentFileVersion = 1;
 } // namespace
 
 namespace openspace {
@@ -54,7 +53,6 @@ ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
 
     _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
     _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
-
 }
 
 ReadSpeckTask::~ReadSpeckTask() {}
@@ -76,6 +74,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
     }
 
     int32_t nValuesPerStar = 0;
+    int32_t nRenderValues = 0;
     int nNullArr = 0;
     size_t nStars = 0;
 
@@ -119,8 +118,24 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
 
     nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
 
+    // Order in Speck file:
+    // 0 BVcolor
+    // 1 lum
+    // 2 Vabsmag
+    // 3 Vappmag
+    // 4 distly
+    // 5 distpcPctErr
+    // 6 U
+    // 7 V
+    // 8 W
+    // 9 speed
+    // 10 sptypeindex
+    // 11 lumclassindex
+    // 12 catsource
+    // 13 texture
+
     do {
-        std::vector<float> values(nValuesPerStar);
+        std::vector<float> readValues(nValuesPerStar);
         nStars++;
 
         std::getline(file, line);
@@ -128,13 +143,13 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
 
         // Read values. 
         for (int i = 0; i < nValuesPerStar; ++i) {
-            str >> values[i];
+            str >> readValues[i];
         }
 
         // Check if star is a nullArray.
         bool nullArray = true;
-        for (size_t i = 0; i < values.size(); ++i) {
-            if (values[i] != 0.0) {
+        for (size_t i = 0; i < readValues.size(); ++i) {
+            if (readValues[i] != 0.0) {
                 nullArray = false;
                 break;
             }
@@ -143,14 +158,29 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
         // Insert to data if we found some values.
         if (!nullArray) {
 
+            // Re-order data here because Octree expects the data in correct order when read.
+            // Default order for rendering:
+            // Position [X, Y, Z]
+            // Absolute Magnitude
+            // B-V Color
+            // Velocity [X, Y, Z]
+
+            nRenderValues = 8;
+            std::vector<float> renderValues(nRenderValues);
+
             // Gaia DR1 data from AMNH measures positions in Parsec, but RenderableGaiaStars
             // expects kiloParsec (because fits file from Vienna had in kPc).
             // Thus we need to convert positions twice atm.
-            values[0] /= 1000.0; // PosX
-            values[1] /= 1000.0; // PosY
-            values[2] /= 1000.0; // PosZ
+            renderValues[0] = readValues[0] / 1000.0; // PosX
+            renderValues[1] = readValues[1] / 1000.0; // PosY
+            renderValues[2] = readValues[2] / 1000.0; // PosZ
+            renderValues[3] = readValues[5]; // AbsMag
+            renderValues[4] = readValues[3]; // B-V color
+            renderValues[5] = readValues[9]; // Vel X
+            renderValues[6] = readValues[10]; // Vel Y
+            renderValues[7] = readValues[11]; // Vel Z
 
-            fullData.insert(fullData.end(), values.begin(), values.end());
+            fullData.insert(fullData.end(), renderValues.begin(), renderValues.end());
         }
         else {
             nNullArr++;
@@ -174,7 +204,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& progressCallback) {
             LERROR("Error writing file - No values were read from file.");
         }
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-        fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+        fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
 
         size_t nBytes = nValues * sizeof(fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);

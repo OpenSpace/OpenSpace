@@ -61,7 +61,7 @@ public:
         const glm::vec2 screenSize, int& deltaStars);
     std::vector<float> getAllData();
     void writeToFile(std::ofstream& outFileStream);
-    void readFromFile(std::ifstream& inFileStream);
+    size_t readFromFile(std::ifstream& inFileStream);
 
     size_t numLeafNodes() const;
     size_t maxStarsPerNode() const;

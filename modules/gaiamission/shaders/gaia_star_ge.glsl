@@ -28,8 +28,8 @@
 
 // Keep in sync with renderablegaiastars.h:ColumnOption enum
 const int COLUMNOPTION_STATIC = 0;
-const int COLUMNOPTION_MOTION = 1; 
-const int COLUMNOPTION_COLOR = 2;
+const int COLUMNOPTION_COLOR = 1;
+const int COLUMNOPTION_MOTION = 2; 
 const float EPS = 1e-5;
 
 layout(points) in;
@@ -73,7 +73,7 @@ void main() {
     float initStarSize = billboardSize;
 
     // Use magnitude for size boost as well.
-    if ( columnOption == COLUMNOPTION_COLOR ) {
+    if ( columnOption != COLUMNOPTION_STATIC ) {
         // DR1 magnitudes are [4, 20], but could be [-15, 20] according to this chart:
         // https://qph.fs.quoracdn.net/main-qimg-317a18e3b228efc7d7f67a1632a55961
         // Negative magnitude => Giants

@@ -30,8 +30,8 @@ layout (location = 0) out vec4 outColor;
 
 // Keep in sync with renderablegaiastars.h:ColumnOption enum
 const int COLUMNOPTION_STATIC = 0;
-const int COLUMNOPTION_MOTION = 1; 
-const int COLUMNOPTION_COLOR = 2;
+const int COLUMNOPTION_COLOR = 1;
+const int COLUMNOPTION_MOTION = 2; 
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 
 in vec2 ge_brightness;
@@ -58,7 +58,7 @@ void main() {
     float ratioMultiplier = 1.0;
 
     // Calculate the color and luminosity if we have the magnitude and B-V color.
-    if ( columnOption == COLUMNOPTION_COLOR ) {
+    if ( columnOption != COLUMNOPTION_STATIC ) {
         color = bv2rgb(ge_brightness.y);
         ratioMultiplier = 1.0;
 

@@ -47,7 +47,7 @@ void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fRenderable, "No task factory existed");
     fTask->registerClass<ReadFitsTask>("ReadFitsTask");
     fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
-    fTask->registerClass<ReadSpeckTask>("ConstructOctreeTask");
+    fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
 std::vector<documentation::Documentation> GaiaMissionModule::documentations() const {

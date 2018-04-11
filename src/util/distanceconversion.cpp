@@ -25,6 +25,7 @@
 #include <openspace/util/distanceconversion.h>
 
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/timeconversion.h>
 
 #include <ghoul/glm.h>
 
@@ -91,6 +92,17 @@ std::pair<double, std::string> simplifyDistance(double meters, bool forceSingula
     else {
         return { meters / 1000.0, "km" };
     }
+}
+
+float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax) {
+
+    float degreeFromMas = 1.0 / 3600000.0;
+    float radiusInMeter = (static_cast<float>(distanceconstants::Parsec) * 1000.0)
+        / parallax;
+    float perYearToPerSecond = 1.0 / SecondsPerYear;
+
+    float meterPerSecond = masPerYear * degreeFromMas * radiusInMeter * perYearToPerSecond;
+    return meterPerSecond;
 }
 
 } // namespace openspace

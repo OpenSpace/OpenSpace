@@ -188,11 +188,10 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
 }
 
 
-
-
-
 std::pair<double, std::string> simplifyDistance(double meters,
     bool forceSingularForm = false);
+
+float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
 constexpr double convertDistance(double meters, DistanceUnit requestedUnit) {
     switch (requestedUnit) {

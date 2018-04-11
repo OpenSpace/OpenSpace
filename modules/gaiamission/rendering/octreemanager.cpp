@@ -212,11 +212,15 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream,
     std::shared_ptr<OctreeNode> node) {
 
     // Write node data.
-    int32_t nBytes = sizeof(node->data.data());
-    outFileStream.write(reinterpret_cast<const char*>(node->isLeaf), sizeof(bool));
-    outFileStream.write(reinterpret_cast<const char*>(node->numStars), sizeof(int16_t));
-    outFileStream.write(reinterpret_cast<const char*>(&nBytes), sizeof(int32_t));
-    outFileStream.write(reinterpret_cast<const char*>(node->data.data()), nBytes);
+    bool isLeaf = node->isLeaf;
+    int32_t numStars = node->numStars;
+    std::vector<float> nodeData = node->data;
+    int32_t nDataSize = nodeData.size();
+    size_t nBytes = nDataSize * sizeof(nodeData[0]);
+    outFileStream.write(reinterpret_cast<const char*>(&isLeaf), sizeof(bool));
+    outFileStream.write(reinterpret_cast<const char*>(&numStars), sizeof(int32_t));
+    outFileStream.write(reinterpret_cast<const char*>(&nDataSize), sizeof(int32_t));
+    outFileStream.write(reinterpret_cast<const char*>(nodeData.data()), nBytes);
 
     // Write children to file (in Morton order) if we're in an inner node.
     if (!node->isLeaf) {
@@ -227,27 +231,38 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream,
 }
 
 // Read a constructed Octree from a file. 
-void OctreeManager::readFromFile(std::ifstream& inFileStream) {
+size_t OctreeManager::readFromFile(std::ifstream& inFileStream) {
 
+    _valuesPerStar = 0;
     inFileStream.read(reinterpret_cast<char*>(&_valuesPerStar), sizeof(int32_t));
 
     // Use the same technique to construct octree from file. 
     for (size_t i = 0; i < 8; ++i) {
         readNodeFromFile(inFileStream, _root->Children[i]);
     }
+    return _valuesPerStar;
 }
 
 // Read a node from file and its potential children.
 void OctreeManager::readNodeFromFile(std::ifstream& inFileStream, 
     std::shared_ptr<OctreeNode> node) {
 
-    int32_t nBytes = 0;
-    auto readData = std::vector<float>(nBytes, 0.0f);
-    node->data.resize(nBytes);
-    inFileStream.read(reinterpret_cast<char*>(node->isLeaf), sizeof(bool));
-    inFileStream.read(reinterpret_cast<char*>(node->numStars), sizeof(int16_t));
-    inFileStream.read(reinterpret_cast<char*>(&nBytes), sizeof(int32_t));
-    inFileStream.read(reinterpret_cast<char*>(&node->data[0]), nBytes);
+    // Read node data.
+    bool isLeaf;
+    int32_t numStars = 0;
+    int32_t nDataSize = 0;
+
+    inFileStream.read(reinterpret_cast<char*>(&isLeaf), sizeof(bool));
+    inFileStream.read(reinterpret_cast<char*>(&numStars), sizeof(int32_t));
+    inFileStream.read(reinterpret_cast<char*>(&nDataSize), sizeof(int32_t));
+
+    auto readData = std::vector<float>(nDataSize, 0.0f);
+    size_t nBytes = nDataSize * sizeof(readData[0]);
+    inFileStream.read(reinterpret_cast<char*>(&readData[0]), nBytes);
+
+    node->isLeaf = isLeaf;
+    node->numStars = numStars;
+    node->data = readData;
 
     // Create children if we're in an inner node and read from the corresponding nodes.
     if (!node->isLeaf) {

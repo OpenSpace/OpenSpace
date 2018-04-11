@@ -67,17 +67,16 @@ public:
 private:
     enum ColumnOption {
         Static = 0,
-        Motion = 1,
-        Color = 2
+        Color = 1,
+        Motion = 2
     };
     
-    bool readFitsFile(ColumnOption option);
+    bool readDataFile(ColumnOption option);
     std::vector<float> sliceFitsValues(ColumnOption option, std::vector<float> starValues);
     std::vector<float> sliceSpeckStars(ColumnOption option, std::vector<float> starValues);
-    float convertMasPerYearToMeterPerSecond(float masPerYear, float parallax);
 
-    properties::StringProperty _fitsFilePath;
-    std::unique_ptr<ghoul::filesystem::File> _fitsFile;
+    properties::StringProperty _filePath;
+    std::unique_ptr<ghoul::filesystem::File> _dataFile;
     bool _dataIsDirty;
 
     std::string _fileTypeOrigin;
