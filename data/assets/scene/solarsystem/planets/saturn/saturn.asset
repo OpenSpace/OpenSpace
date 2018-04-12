@@ -55,7 +55,7 @@ local SaturnRings = {
         Name = "Saturn Rings",
         Path = "/Solar System/Planets/Saturn"
     }
-},
+}
 
 
 

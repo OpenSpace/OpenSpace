@@ -243,8 +243,6 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
         _sunPosition
     );
 
-    setPscUniforms(*_shader, data.camera, data.position);
-
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
