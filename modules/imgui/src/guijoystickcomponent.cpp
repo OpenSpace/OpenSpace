@@ -22,59 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
+#include <modules/imgui/include/guijoystickcomponent.h>
 
+#include <modules/imgui/include/imgui_include.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
 
-#include <ghoul/glm.h>
+namespace {
+    const ImVec2 Size = ImVec2(350, 500);
+} // namespace
 
-#include <list>
+namespace openspace::gui {
 
-namespace openspace::interaction {
+GuiJoystickComponent::GuiJoystickComponent()
+    : GuiComponent("joystick_information", "Joystick Information")
+{}
 
-class InputState {
-public:
-    InputState() = default;
-    ~InputState() = default;
+void GuiJoystickComponent::render() {
+    using namespace interaction;
 
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
+    ImGui::SetNextWindowCollapsed(_isCollapsed);
 
-    void setJoystickInputStates(JoystickInputStates states);
+    bool v = _isEnabled;
+    ImGui::Begin("Joystick Information", &v, Size, 0.5f);
+    _isEnabled = v;
+    _isCollapsed = ImGui::IsWindowCollapsed();
 
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& pressedKeys() const;
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
+    const JoystickInputStates& states =
+        OsEng.navigationHandler().inputState().joystickInputStates();
 
-    const std::list<MouseButton>& pressedMouseButtons() const;
-    glm::dvec2 mousePosition() const;
-    double mouseScrollDelta() const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
+    for (int i = 0; i < states.size(); ++i) {
+        const std::unique_ptr<JoystickInputState>& state = states[i];
+        if (!state) {
+            continue;
+        }
 
-    const JoystickInputStates& joystickInputStates() const;
-    float joystickAxis(int i) const;
-    bool joystickButton(int i) const;
+        ImGui::Text("%s [%i]", state->name.c_str(), i);
+        ImGui::Text("%s", "Axes");
+        for (int j = 0; j < state->nAxes; ++j) {
+            float f = state->axes[j];
+            ImGui::SliderFloat(
+                std::to_string(j).c_str(),
+                &f,
+                -1.f,
+                1.f
+            );
+        }
+        ImGui::Text("%s", "Buttons");
+        for (int j = 0; j < state->nButtons; ++j) {
+            ImGui::RadioButton(std::to_string(j).c_str(), state->buttons[j] == 1);
+        }
 
-private:
-    // Input from keyboard
-    std::list<std::pair<Key, KeyModifier>> _keysDown;
+        ImGui::Separator();
+    }
 
-    // Input from mouse
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
+    ImGui::End();
+}
 
-    // Input from joysticks
-    JoystickInputStates _joystickInputStates;
-};
-
-} // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__
+} // namespace openspace::gui

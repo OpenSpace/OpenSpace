@@ -22,59 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
+#ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
+#define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
-#include <openspace/interaction/joystickinputstate.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
-
-#include <ghoul/glm.h>
-
-#include <list>
+#include <array>
+#include <memory>
+#include <string>
 
 namespace openspace::interaction {
 
-class InputState {
-public:
-    InputState() = default;
-    ~InputState() = default;
+struct JoystickInputState {
+    ~JoystickInputState();
 
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
+    std::string name;
 
-    void setJoystickInputStates(JoystickInputStates states);
+    int nAxes;
+    const float* axes;
 
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& pressedKeys() const;
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
+    int nButtons;
+    const unsigned char* buttons;
 
-    const std::list<MouseButton>& pressedMouseButtons() const;
-    glm::dvec2 mousePosition() const;
-    double mouseScrollDelta() const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
-
-    const JoystickInputStates& joystickInputStates() const;
-    float joystickAxis(int i) const;
-    bool joystickButton(int i) const;
-
-private:
-    // Input from keyboard
-    std::list<std::pair<Key, KeyModifier>> _keysDown;
-
-    // Input from mouse
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
-
-    // Input from joysticks
-    JoystickInputStates _joystickInputStates;
+    bool* buttonsTriggered;
+    
 };
+// Number is derived from GLFW constants
+struct JoystickInputStates : public std::array<std::unique_ptr<JoystickInputState>, 16> {
+    float axis(int i) const;
+    bool buttonPressed(int i) const;
+    bool buttonTriggered(int i) const;
+};
+
+bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
+bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
+bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
+bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
+
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__
+#endif // __OPENSPACE_CORE___JOYSTICKSTATE___H__

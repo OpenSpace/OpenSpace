@@ -26,11 +26,12 @@
 #define __OPENSPACE_CORE___MOUSESTATE___H__
 
 #include <openspace/interaction/delayedvariable.h>
-#include <openspace/interaction/inputstate.h>
 
 #include <ghoul/glm.h>
 
 namespace openspace::interaction {
+
+class InputState;
 
 struct MouseState {
     MouseState(double scaleFactor);

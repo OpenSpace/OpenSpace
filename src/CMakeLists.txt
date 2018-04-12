@@ -44,6 +44,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/joystickstate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
@@ -215,6 +217,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h

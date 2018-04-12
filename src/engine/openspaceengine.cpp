@@ -35,8 +35,8 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
@@ -1507,6 +1507,10 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     }
 
     _navigationHandler->mouseScrollWheelCallback(posY);
+}
+
+void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates states) {
+    _navigationHandler->setJoystickInputStates(std::move(states));
 }
 
 void OpenSpaceEngine::encode() {

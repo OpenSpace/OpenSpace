@@ -24,6 +24,8 @@
 
 #include <openspace/interaction/mousestate.h>
 
+#include <openspace/interaction/inputstate.h>
+
 namespace openspace::interaction {
 
 MouseState::MouseState(double scaleFactor)
@@ -51,7 +53,7 @@ MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
 void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
                                              double deltaTime)
 {
-    glm::dvec2 mousePosition = inputState.getMousePosition();
+    glm::dvec2 mousePosition = inputState.mousePosition();
 
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
     bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);

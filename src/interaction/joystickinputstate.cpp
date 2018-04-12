@@ -22,59 +22,77 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
-
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
 
 #include <ghoul/glm.h>
 
-#include <list>
-
 namespace openspace::interaction {
 
-class InputState {
-public:
-    InputState() = default;
-    ~InputState() = default;
+bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
+    return lhs.name == rhs.name &&
+        lhs.axes == rhs.axes && lhs.nAxes == rhs.nAxes &&
+        lhs.buttons == rhs.buttons && lhs.nButtons == rhs.nButtons;
+}
 
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
+bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
+    return !(lhs == rhs);
+}
 
-    void setJoystickInputStates(JoystickInputStates states);
+bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
+    for (int i = 0; i < lhs.size(); ++i) {
+        if (lhs[i] != nullptr ^ rhs[i] != nullptr) {
+            // One of the states was empty, the other one was not
+            return false;
+        }
 
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& pressedKeys() const;
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
+        if (lhs[i] && rhs[i] && (*lhs[i] != *rhs[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 
-    const std::list<MouseButton>& pressedMouseButtons() const;
-    glm::dvec2 mousePosition() const;
-    double mouseScrollDelta() const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
+bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
+    return !(lhs == rhs);
+}
 
-    const JoystickInputStates& joystickInputStates() const;
-    float joystickAxis(int i) const;
-    bool joystickButton(int i) const;
 
-private:
-    // Input from keyboard
-    std::list<std::pair<Key, KeyModifier>> _keysDown;
+JoystickInputState::~JoystickInputState() {
+    // The other pointers are owned by GLFW
+    // buttonsTriggered gets allocated in main 
+    delete buttonsTriggered;
+}
 
-    // Input from mouse
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
+float JoystickInputStates::axis(int i) const {
+    float res = 0.f;
+    for (const std::unique_ptr<JoystickInputState>& state : *this) {
+        if (state) {
+            res += state->axes[i];
+        }
+    }
+    glm::clamp(res, -1.f, 1.f);
+    return res;
+}
 
-    // Input from joysticks
-    JoystickInputStates _joystickInputStates;
-};
+bool JoystickInputStates::buttonPressed(int i) const {
+    bool res = false;
+    for (const std::unique_ptr<JoystickInputState>& state : *this) {
+        if (state) {
+            res |= state->buttons[i] == 1;
+        }
+    }
+    return res;
+}
+
+
+bool JoystickInputStates::buttonTriggered(int i) const {
+    bool res = false;
+    for (const std::unique_ptr<JoystickInputState>& state : *this) {
+        if (state) {
+            res |= state->buttonsTriggered[i] == 1;
+        }
+    }
+    return res;
+}
 
 } // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__

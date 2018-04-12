@@ -153,8 +153,8 @@ void NavigationHandler::updateCamera(double deltaTime) {
                 _keyframeNavigator->updateCamera(*_camera);
             }
             else {
-                _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
-                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
+                _orbitalNavigator->updateStatesFromInput(*_inputState, deltaTime);
+                _orbitalNavigator->updateCameraStateFromStates(*_camera, deltaTime);
             }
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
@@ -201,6 +201,10 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     _inputState->keyboardCallback(key, modifier, action);
 }
 
+void NavigationHandler::setJoystickInputStates(JoystickInputStates states) {
+    _inputState->setJoystickInputStates(std::move(states));
+}
+
 void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict)
 {
     bool readSuccessful = true;
@@ -226,7 +230,7 @@ void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& ca
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
 }
 
-ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
+ghoul::Dictionary NavigationHandler::cameraStateDictionary() {
     glm::dvec3 cameraPosition;
     glm::dquat quat;
     glm::dvec4 cameraRotation;
@@ -248,7 +252,7 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
         std::string fullpath = absPath(filepath);
         LINFO(fmt::format("Saving camera position: {}", filepath));
 
-        ghoul::Dictionary cameraDict = getCameraStateDictionary();
+        ghoul::Dictionary cameraDict = cameraStateDictionary();
 
         // TODO : Should get the camera state as a dictionary and save the dictionary to
         // a file in form of a lua state and not use ofstreams here.

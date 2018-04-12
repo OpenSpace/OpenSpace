@@ -24,8 +24,8 @@
 
 #include <openspace/interaction/inputstate.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-
 #include <algorithm>
 
 namespace openspace::interaction {
@@ -47,8 +47,9 @@ void InputState::mouseButtonCallback(MouseButton button, MouseAction action) {
     }
     else if (action == MouseAction::Release) {
         // Remove all key pressings for 'button'
-        _mouseButtonsDown.remove_if([button](MouseButton buttonInList)
-        { return button == buttonInList; });
+        _mouseButtonsDown.remove(button);
+        //    [button](MouseButton buttonInList) { return button == buttonInList; }
+        //);
     }
 }
 
@@ -60,19 +61,64 @@ void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
     _mouseScrollDelta = mouseScrollDelta;
 }
 
-const std::list<std::pair<Key, KeyModifier> >& InputState::getPressedKeys() const {
+void InputState::setJoystickInputStates(JoystickInputStates states) {
+    if (states != _joystickInputStates) {
+        for (int i = 0; i < states.size(); ++i) {
+            const std::unique_ptr<JoystickInputState>& state = _joystickInputStates[i];
+            if (state) {
+                LINFOC(
+                    "InputState",
+                    fmt::format(
+                        "[{}]: {} ; nAxes: {} ; nButtons: {}",
+                        i,
+                        state->name,
+                        state->nAxes,
+                        state->nButtons
+                    )
+                );
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < states.size(); ++i) {
+            std::unique_ptr<JoystickInputState>& newState = states[i];
+            const std::unique_ptr<JoystickInputState>& oldState = _joystickInputStates[i];
+
+            if (oldState && newState) {
+                ghoul_assert(
+                    *newState == *oldState,
+                    "Bug in JoystickInputStates equality?"
+                );
+            }
+
+            if (oldState) {
+                for (int j = 0; j < newState->nButtons; ++j) {
+                    bool oldPressed = oldState->buttons[j] == 1;
+                    bool newPressed = newState->buttons[j] == 1;
+
+                    // Mark a button as triggered iff it has been pressed in this frame
+                    newState->buttonsTriggered[j] = !oldPressed && newPressed;
+                }
+            }
+        }
+    }
+
+    _joystickInputStates = std::move(states);
+}
+
+const std::list<std::pair<Key, KeyModifier> >& InputState::pressedKeys() const {
     return _keysDown;
 }
 
-const std::list<MouseButton>& InputState::getPressedMouseButtons() const {
+const std::list<MouseButton>& InputState::pressedMouseButtons() const {
     return _mouseButtonsDown;
 }
 
-glm::dvec2 InputState::getMousePosition() const {
+glm::dvec2 InputState::mousePosition() const {
     return _mousePosition;
 }
 
-double InputState::getMouseScrollDelta() const {
+double InputState::mouseScrollDelta() const {
     return _mouseScrollDelta;
 }
 
@@ -90,6 +136,18 @@ bool InputState::isKeyPressed(Key key) const {
 bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
     return std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(),
         mouseButton) != _mouseButtonsDown.end();
+}
+
+const JoystickInputStates& InputState::joystickInputStates() const {
+    return _joystickInputStates;
+}
+
+float InputState::joystickAxis(int i) const {
+    return _joystickInputStates.axis(i);
+}
+
+bool InputState::joystickButton(int i) const{
+    return _joystickInputStates.buttonTriggered(i);
 }
 
 } // namespace openspace::interaction

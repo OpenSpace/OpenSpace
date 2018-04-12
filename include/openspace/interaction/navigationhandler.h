@@ -29,6 +29,7 @@
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -63,7 +64,7 @@ public:
     void updateCamera(double deltaTime);
 
     // Accessors
-    ghoul::Dictionary getCameraStateDictionary();
+    ghoul::Dictionary cameraStateDictionary();
     SceneGraphNode* focusNode() const;
     glm::dvec3 focusNodeToCameraVector() const;
     glm::quat focusNodeToCameraRotation() const;
@@ -74,9 +75,13 @@ public:
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void setJoystickInputStates(JoystickInputStates states);
+
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);

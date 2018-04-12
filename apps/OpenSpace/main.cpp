@@ -351,6 +351,34 @@ void mainInitFunc() {
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
     OsEng.preSynchronization();
+
+    // Query joystick status
+    using namespace openspace::interaction;
+    JoystickInputStates states;
+    std::fill(states.begin(), states.end(), nullptr);
+
+    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        int present = glfwJoystickPresent(i);
+        if (present == GLFW_TRUE) {
+            std::unique_ptr<JoystickInputState> state =
+                std::make_unique<JoystickInputState>();
+
+            state->name = SgctEngine->getJoystickName(i);
+            state->axes = SgctEngine->getJoystickAxes(i, &state->nAxes);
+            state->buttons = SgctEngine->getJoystickButtons(i, &state->nButtons);
+            state->buttonsTriggered = new bool[state->nButtons];
+            std::fill(
+                state->buttonsTriggered,
+                state->buttonsTriggered + state->nButtons,
+                false
+            );
+
+            states[i] = std::move(state);
+        }
+    }
+
+    OsEng.setJoystickInputStates(std::move(states));
+
     LTRACE("main::mainPreSyncFunc(end)");
 }
 
