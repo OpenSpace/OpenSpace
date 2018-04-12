@@ -88,6 +88,7 @@ private:
     properties::BoolProperty _flyTo;
     properties::BoolProperty _overview;
     properties::TriggerProperty _applyOverview;
+    properties::TriggerProperty _applyFlyTo;
 
     MouseStates _mouseStates;
 

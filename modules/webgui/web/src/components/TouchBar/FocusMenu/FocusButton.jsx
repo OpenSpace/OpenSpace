@@ -15,7 +15,7 @@ class FocusButton extends Component {
   }
 
   select() {
-    this.props.onChangeOrigin(this.props.identifier);
+    this.isActive ?  this.props.onRefocus(this.props.descriptionFlyTo) : this.props.onChangeOrigin(this.props.identifier);
   }
 
   render() {
@@ -32,6 +32,7 @@ FocusButton.propTypes = {
   active: PropTypes.string.isRequired,
   identifier: PropTypes.string.isRequired,
   onChangeOrigin: PropTypes.func.isRequired,
+  onRefocus: PropTypes.func.isRequired,
 };
 
 export default FocusButton;

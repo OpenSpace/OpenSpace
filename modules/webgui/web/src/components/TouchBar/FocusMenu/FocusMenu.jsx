@@ -21,7 +21,7 @@ class FocusMenu extends Component {
       listening: false,
     };
 
-    this.applyOverView = throttle(this.applyOverView.bind(this), UpdateDelayMs);
+    this.triggerChanges = throttle(this.triggerChanges.bind(this), UpdateDelayMs);
   }
 
   componentDidUpdate(nextProps, nextState) {
@@ -56,18 +56,24 @@ class FocusMenu extends Component {
           identifier={node.identifier}
           active={this.state.origin}
           onChangeOrigin={origin => this.setState({ origin })}
+          onRefocus={this.triggerChanges}
+          descriptionFlyTo={this.props.applyFlyTo.Description}
         />));
     return (focusPicker);
   }
 
-  applyOverView(){
-    this.props.ChangePropertyValue(this.props.applyOverview.Description,'');
+  triggerChanges(description){
+    this.props.ChangePropertyValue(description,'');
   }
 
   render() {
     return (
       <div className={styles.FocusMenu}>
-        {this.props.nodes.length> 0 && <OverViewButton onApplyOverview={this.applyOverView}/>}
+        {this.props.nodes.length> 0 &&
+          <OverViewButton
+            onApplyOverview={this.triggerChanges}
+            descriptionOverview={this.props.applyOverview.Description}
+          />}
         {this.props.nodes.length > 0 && this.createFocusButtons()}
       </div>
     );
@@ -79,6 +85,7 @@ const mapStateToProps = (state) => {
   let originNode = [];
   let nodes = [];
   let applyOverview;
+  let applyFlyTo;
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
@@ -90,11 +97,13 @@ const mapStateToProps = (state) => {
       .map(node => Object.assign(node, { key: node.identifier }));
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
     applyOverview = traverseTreeWithURI(state.propertyTree, ApplyOverviewKey);
+    applyFlyTo = traverseTreeWithURI(state.propertyTree, 'NavigationHandler.OrbitalNavigator.ApplyFlyTo');
   }
   return {
     nodes,
     originNode,
-    applyOverview
+    applyOverview,
+    applyFlyTo,
   };
 };
 

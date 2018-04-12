@@ -11,7 +11,7 @@ class OverViewButton extends Component {
   }
 
   applyOverview() {
-    this.props.onApplyOverview();
+    this.props.onApplyOverview(this.props.descriptionOverview);
   }
 
   render() {

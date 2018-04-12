@@ -111,6 +111,11 @@ namespace {
         "Apply overview ",
         "Triggering this property makes the camera move to an overview."
     };
+    static const openspace::properties::Property::PropertyInfo ApplyFlyToInfo = {
+        "ApplyFlyTo",
+        "Apply fly to node",
+        "Triggering this property makes the camera move to the focus node."
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -138,6 +143,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _flyTo(FlyToNodeInfo, true)
     , _overview(OverviewInfo, false)
     , _applyOverview(ApplyOverviewInfo)
+    ,_applyFlyTo(ApplyFlyToInfo)
 {
     auto smoothStep =
         [](double t) {
@@ -147,7 +153,10 @@ OrbitalNavigator::OrbitalNavigator()
     _followRotationInterpolator.setTransferFunction(smoothStep);
 
     addProperty(_applyOverview);
+    addProperty(_applyFlyTo);
+
     _applyOverview.onChange([this]() { _overview = true; });
+    _applyFlyTo.onChange([this]() { _flyTo = true; });
 
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
