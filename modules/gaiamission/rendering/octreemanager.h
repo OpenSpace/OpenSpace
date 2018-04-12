@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <modules/gaiamission/rendering/renderoption.h>
 
 namespace openspace {
 
@@ -39,7 +40,9 @@ class OctreeManager {
 public:
     struct OctreeNode {
         std::shared_ptr<OctreeNode> Children[8];
-        std::vector<float> data;
+        std::vector<float> posData;
+        std::vector<float> colData;
+        std::vector<float> velData;
         float originX;
         float originY;
         float originZ;
@@ -58,10 +61,10 @@ public:
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
     std::unordered_map<int, std::vector<float>> traverseData(const glm::mat4 mvp,
-        const glm::vec2 screenSize, int& deltaStars);
-    std::vector<float> getAllData();
+        const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option);
+    std::vector<float> getAllData(gaiamission::RenderOption option);
     void writeToFile(std::ofstream& outFileStream);
-    size_t readFromFile(std::ifstream& inFileStream);
+    void readFromFile(std::ifstream& inFileStream);
 
     size_t numLeafNodes() const;
     size_t maxStarsPerNode() const;
@@ -72,7 +75,7 @@ private:
     const size_t MAX_DIST = 5; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
-    const size_t MAX_STARS_PER_NODE = 10000; 
+    size_t MAX_STARS_PER_NODE = 10000; 
     const int DEFAULT_INDEX = -1;
     const float MIN_TOTAL_PIXELS_LOD = 0.0; // Will be multiplied by depth.
     const int FIRST_LOD_DEPTH = 3; // No layer beneath this will not store any LOD cache.
@@ -85,14 +88,18 @@ private:
     void insertStarInLodCache(std::shared_ptr<OctreeNode> node, std::vector<float> starValues);
     std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
         std::string prefix) const;
-    std::unordered_map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<
-        OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars);
+    std::unordered_map<int, std::vector<float>> checkNodeIntersection(
+        std::shared_ptr<OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize, 
+        int& deltaStars, gaiamission::RenderOption option);
     std::unordered_map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<
         OctreeNode> node, int& deltaStars, bool recursive = true);
-    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node);
+    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, 
+        gaiamission::RenderOption option);
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
     void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
     void readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);
+    std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
+        gaiamission::RenderOption option);
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
@@ -106,6 +113,9 @@ private:
     size_t _numInnerNodes;
     size_t _biggestChunkIndexInUse;
     size_t _valuesPerStar;
+    const size_t _posSize = 3;
+    const size_t _colSize = 2;
+    const size_t _velSize = 3;
     int _maxStackSize;
     bool _rebuildVBO;
 

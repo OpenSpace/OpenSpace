@@ -22,56 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
-#include "floatoperations.glsl"
-
-// Keep in sync with renderoption.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
-const float EPS = 1e-5;
-const float Parsec = 3.0856776e16;
-
-in vec3 in_position;
-in vec3 in_velocity;
-in vec2 in_brightness;
-
-out vec2 vs_brightness;
-out vec4 vs_gPosition;
-out float vs_starDistFromSun;
-out float vs_cameraDistFromSun;
+#ifndef __OPENSPACE_MODULE_GAIAMISSION___RENDEROPTION___H__
+#define __OPENSPACE_MODULE_GAIAMISSION___RENDEROPTION___H__
 
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-uniform float time; 
-uniform int renderOption;
+namespace openspace::gaiamission {
 
-void main() {
-    vs_brightness = in_brightness;
-    
-    // Convert kiloParsec to meter.
-    vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
+    enum RenderOption {
+        Static = 0,
+        Color = 1,
+        Motion = 2
+    };
 
-    if ( renderOption == RENDEROPTION_MOTION ) {
-        modelPosition.xyz += time * in_velocity;
-    } 
+} // namespace openspace::gaiamission
 
-    vec4 viewPosition = view * model * modelPosition;
-    vec4 sunPosition = view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-    vs_starDistFromSun = safeLength(modelPosition);
-    vs_cameraDistFromSun = safeLength(sunPosition);
-
-    // Remove stars without position, happens when VBO chunk is stuffed with zeros.
-    // Has to be done in Geometry shader because Vertices cannot be discarded here.
-    if ( length(in_position) > EPS ){
-        vs_gPosition = viewPosition;    
-        gl_Position = projection * viewPosition;
-    } else {
-        vs_gPosition = vec4(0.0);    
-        gl_Position = vec4(0.0);
-    }
-}
+#endif // __OPENSPACE_MODULE_GAIAMISSION___RENDEROPTION___H__

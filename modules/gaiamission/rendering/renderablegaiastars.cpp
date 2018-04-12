@@ -34,6 +34,7 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaiamission/rendering/octreemanager.h>
+#include <modules/gaiamission/rendering/renderoption.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
@@ -88,12 +89,12 @@ namespace {
         "If false then a FITS file will be read."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColumnOptionInfo = {
-        "ColumnOption",
-        "Column Option",
-        "This value determines which predefined columns to use. If 'Static' only the "
-        "position of the stars is used. 'Color' uses position + color parameters and "
-        "'Motion' uses pos, color as well as velocity for the stars."
+    static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+        "RenderOption",
+        "Render Option",
+        "This value determines which predefined columns to use in rendering. If 'Static' "
+        "only the position of the stars is used. 'Color' uses position + color parameters "
+        "and 'Motion' uses pos, color as well as velocity for the stars."
     };
     
     static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
@@ -211,12 +212,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 FilePreprocessedInfo.description
             },
             {
-                ColumnOptionInfo.identifier,
+                RenderOptionInfo.identifier,
                 new StringInListVerifier({
                     "Static", "Color", "Motion"
                 }),
                 Optional::Yes,
-                ColumnOptionInfo.description
+                RenderOptionInfo.description
             },
             {
                 PsfTextureInfo.identifier,
@@ -295,7 +296,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _dataFile(nullptr)
     , _dataIsDirty(true)
     , _filePreprocessed(FilePreprocessedInfo, false)
-    , _columnOption(ColumnOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _pointSpreadFunctionTexture(nullptr)
     , _pointSpreadFunctionTextureIsDirty(true)
@@ -346,27 +347,27 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     _fileTypeOrigin = dictionary.value<std::string>(FileTypeOriginInfo.identifier);
 
-    _columnOption.addOptions({
-        { ColumnOption::Static, "Static" },
-        { ColumnOption::Color, "Color" },
-        { ColumnOption::Motion, "Motion" }
+    _renderOption.addOptions({
+        { gaiamission::RenderOption::Static, "Static" },
+        { gaiamission::RenderOption::Color, "Color" },
+        { gaiamission::RenderOption::Motion, "Motion" }
     });
-    if (dictionary.hasKey(ColumnOptionInfo.identifier)) {
-        const std::string columnOption = dictionary.value<std::string>(
-            ColumnOptionInfo.identifier
+    if (dictionary.hasKey(RenderOptionInfo.identifier)) {
+        const std::string renderOption = dictionary.value<std::string>(
+            RenderOptionInfo.identifier
             );
-        if (columnOption == "Static") {
-            _columnOption = ColumnOption::Static;
+        if (renderOption == "Static") {
+            _renderOption = gaiamission::RenderOption::Static;
         }
-        else if (columnOption == "Color") {
-            _columnOption = ColumnOption::Color;
+        else if (renderOption == "Color") {
+            _renderOption = gaiamission::RenderOption::Color;
         }
         else {
-            _columnOption = ColumnOption::Motion;
+            _renderOption = gaiamission::RenderOption::Motion;
         }
     }
-    _columnOption.onChange([&] { _dataIsDirty = true; });
-    addProperty(_columnOption);
+    _renderOption.onChange([&] { _dataIsDirty = true; });
+    addProperty(_renderOption);
 
     _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
         PsfTextureInfo.identifier
@@ -507,7 +508,7 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.view = _program->uniformLocation("view");
     _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.projection = _program->uniformLocation("projection");
-    _uniformCache.columnOption = _program->uniformLocation("columnOption");
+    _uniformCache.renderOption = _program->uniformLocation("renderOption");
     _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
     _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
     _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
@@ -525,9 +526,19 @@ void RenderableGaiaStars::initializeGL() {
     );
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
     _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+
+    // Find out how much GPU memory this computer has (Nvidia cards).
+    // TODO: use for streaming budget!
+    GLint nTotalMemoryInKB = 0;
+    glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
+
+    GLint nCurrentAvailMemoryInKB = 0;
+    glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurrentAvailMemoryInKB);
+    LINFO("nTotalMemoryInKB: " + std::to_string(nTotalMemoryInKB) +
+        " - nCurrentAvailMemoryInKB: " + std::to_string(nCurrentAvailMemoryInKB));
     
     // Read data file. 
-    bool success = readDataFile(ColumnOption(static_cast<int>(_columnOption)));
+    bool success = readDataFile(gaiamission::RenderOption(static_cast<int>(_renderOption)));
     if (!success) {
         throw ghoul::RuntimeError("Error loading file data");
     }
@@ -581,8 +592,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
 
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide.
+    const int option = _renderOption;
     int deltaStars = 0;
-    auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars);
+    auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
+        gaiamission::RenderOption(option));
     deltaStars /= static_cast<int>(_nValuesInSlice);
 
     // Update VBO with new nodes. 
@@ -630,7 +643,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Update buffer with one insert per chunk/node. The key in map holds the offset index.
     for (auto & [offset, subData] : updateData) {
         // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-        subData.resize(_chunkSize, 0.f);
+        //subData.resize(_chunkSize, 0.f); // This shouldn't be needed anymore!?
         glBufferSubData(
             GL_ARRAY_BUFFER,
             offset * _chunkSize * sizeof(GLfloat),
@@ -678,7 +691,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.view, view);
     _program->setUniform(_uniformCache.viewScaling, viewScaling);
     _program->setUniform(_uniformCache.projection, projection);
-    _program->setUniform(_uniformCache.columnOption, _columnOption);
+    _program->setUniform(_uniformCache.renderOption, _renderOption);
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
     _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
     _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
@@ -760,12 +773,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 void RenderableGaiaStars::update(const UpdateData&) {
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
-        const int option = _columnOption;
+        const int option = _renderOption;
 
         // Reload data file (as long as it's not the first initialization)!
         if (_vao != 0) { 
             // This will reconstruct the Octree as well!
-            bool success = readDataFile(ColumnOption(option));
+            bool success = readDataFile(gaiamission::RenderOption(option));
             if (!success) {
                 throw ghoul::RuntimeError("Error loading FITS data");
             }
@@ -817,27 +830,31 @@ void RenderableGaiaStars::update(const UpdateData&) {
             dummyData.data(),
             GL_STREAM_DRAW
         );
-        
-        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * _nValuesInSlice);
 
         switch (option) {
-        case ColumnOption::Static: {
+        case gaiamission::RenderOption::Static: {
+            GLsizei posStride = static_cast<GLsizei>(sizeof(GLfloat) * _posSize);
+
             GLint positionAttrib = _program->attributeLocation("in_position");
 
             glEnableVertexAttribArray(positionAttrib);
 
             glVertexAttribPointer(
                 positionAttrib,
-                3,
+                _posSize,
                 GL_FLOAT,
                 GL_FALSE,
-                stride,
-                nullptr // = offsetof(StaticVBOLayout, position)
+                0, // All strides should be able to be 0 = "understood to be tightly packed"
+                nullptr // Nothing else exists in VBO
             );
 
             break;
         } 
-        case ColumnOption::Color: {
+        case gaiamission::RenderOption::Color: {
+            GLsizei posStride = static_cast<GLsizei>(sizeof(GLfloat) * _posSize);
+            GLsizei colStride = static_cast<GLsizei>(sizeof(GLfloat) * _colSize);
+            int colOffset = _octreeManager->maxStarsPerNode() * sizeof(GLfloat) * _posSize;
+
             GLint positionAttrib = _program->attributeLocation("in_position");
             GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
 
@@ -846,23 +863,29 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             glVertexAttribPointer(
                 positionAttrib,
-                3,
+                _posSize * _octreeManager->maxStarsPerNode(),
                 GL_FLOAT,
                 GL_FALSE,
-                stride,
-                nullptr // = offsetof(ColorVBOLayout, position)
+                posStride,
+                nullptr // No offset.
             );
             glVertexAttribPointer(
                 brightnessDataAttrib,
-                2,
+                _colSize * _octreeManager->maxStarsPerNode(),
                 GL_FLOAT,
                 GL_FALSE,
-                stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, magnitude))
+                colStride,
+                reinterpret_cast<GLvoid*>(colOffset) // Offset of position chunk. 
             );
             break;
         }
-        case ColumnOption::Motion: {
+        case gaiamission::RenderOption::Motion: {
+            GLsizei posStride = static_cast<GLsizei>(sizeof(GLfloat) * _posSize);
+            GLsizei colStride = static_cast<GLsizei>(sizeof(GLfloat) * _colSize);
+            GLsizei velStride = static_cast<GLsizei>(sizeof(GLfloat) * _velSize);
+            int colOffset = _octreeManager->maxStarsPerNode() * sizeof(GLfloat) * _posSize;
+            int velOffset = _octreeManager->maxStarsPerNode() * sizeof(GLfloat) * (_posSize + _colSize);
+
             GLint positionAttrib = _program->attributeLocation("in_position");
             GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
             GLint velocityAttrib = _program->attributeLocation("in_velocity");
@@ -873,27 +896,27 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             glVertexAttribPointer(
                 positionAttrib,
-                3,
+                _posSize,
                 GL_FLOAT,
                 GL_FALSE,
-                stride,
-                nullptr // = offsetof(MotionVBOLayout, position)
+                posStride,
+                nullptr // No offset.
             );
             glVertexAttribPointer(
                 brightnessDataAttrib,
-                2,
+                _colSize,
                 GL_FLOAT,
                 GL_FALSE,
-                stride,
-                reinterpret_cast<void*>(offsetof(MotionVBOLayout, magnitude))
+                colStride,
+                reinterpret_cast<GLvoid*>(colOffset) // Offset of position chunk. 
             );
             glVertexAttribPointer(
                 velocityAttrib,
-                3,
+                _velSize,
                 GL_FLOAT,
                 GL_FALSE,
-                stride,
-                reinterpret_cast<void*>(offsetof(MotionVBOLayout, velocity))
+                velStride,
+                reinterpret_cast<GLvoid*>(velOffset) // Offset of (position + color) chunk. 
             );
             break;
         }
@@ -1019,7 +1042,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.view = _program->uniformLocation("view");
         _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
         _uniformCache.projection = _program->uniformLocation("projection");
-        _uniformCache.columnOption = _program->uniformLocation("columnOption");
+        _uniformCache.renderOption = _program->uniformLocation("renderOption");
         _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
         _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
         _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
@@ -1068,7 +1091,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     }
 }
 
-bool RenderableGaiaStars::readDataFile(ColumnOption option) {
+bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
     std::string _file = _filePath;
     _fullData.clear();
     _octreeManager->initOctree();
@@ -1081,7 +1104,17 @@ bool RenderableGaiaStars::readDataFile(ColumnOption option) {
         if (fileStream.good()) {
 
             // Let's assume we've already contructed an Octree!
-            _nValuesInSlice = _octreeManager->readFromFile(fileStream);
+            _octreeManager->readFromFile(fileStream);
+
+            if (option == gaiamission::RenderOption::Static) {
+                _nValuesInSlice = 3;
+            }
+            else if (option == gaiamission::RenderOption::Color) {
+                _nValuesInSlice = 5;
+            }
+            else { // (option == gaiamission::RenderOption::Motion)
+                _nValuesInSlice = 8;
+            }
 
             // Else we're reading from a BIN file as before.
             /*else {
@@ -1240,7 +1273,7 @@ bool RenderableGaiaStars::readDataFile(ColumnOption option) {
 
 // Slices every star seperately, from FITS file, before they are inserted into Octree. 
 // Conversion of position is done in vertex shader to simplify calculations in Octree.
-std::vector<float> RenderableGaiaStars::sliceFitsValues(ColumnOption option,
+std::vector<float> RenderableGaiaStars::sliceFitsValues(gaiamission::RenderOption option,
     std::vector<float> starValues) {
 
     auto tmpData = std::vector<float>();
@@ -1257,7 +1290,7 @@ std::vector<float> RenderableGaiaStars::sliceFitsValues(ColumnOption option,
         convertMasPerYearToMeterPerSecond(starValues[5], parallax));
 
     switch (option) {
-    case ColumnOption::Static: {
+    case gaiamission::RenderOption::Static: {
         union {
             StaticVBOLayout value;
             std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
@@ -1270,7 +1303,7 @@ std::vector<float> RenderableGaiaStars::sliceFitsValues(ColumnOption option,
         tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
         break;
     }
-    case ColumnOption::Color: {
+    case gaiamission::RenderOption::Color: {
         union {
             ColorVBOLayout value;
             std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
@@ -1287,7 +1320,7 @@ std::vector<float> RenderableGaiaStars::sliceFitsValues(ColumnOption option,
         tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
         break;
     }
-    case ColumnOption::Motion: {
+    case gaiamission::RenderOption::Motion: {
         union {
             MotionVBOLayout value;
             std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;
@@ -1315,7 +1348,7 @@ std::vector<float> RenderableGaiaStars::sliceFitsValues(ColumnOption option,
 
 // Slices every star seperately, from SPECK file, before they are inserted into Octree. 
 // Conversion of position is done in vertex shader to simplify calculations in Octree.
-std::vector<float> RenderableGaiaStars::sliceSpeckStars(ColumnOption option,
+std::vector<float> RenderableGaiaStars::sliceSpeckStars(gaiamission::RenderOption option,
     std::vector<float> starValues) {
 
     auto tmpData = std::vector<float>();
@@ -1329,7 +1362,7 @@ std::vector<float> RenderableGaiaStars::sliceSpeckStars(ColumnOption option,
     glm::vec3 velocity = glm::vec3(starValues[9], starValues[10], starValues[11]);
 
     switch (option) {
-    case ColumnOption::Static: {
+    case gaiamission::RenderOption::Static: {
         union {
             StaticVBOLayout value;
             std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
@@ -1342,7 +1375,7 @@ std::vector<float> RenderableGaiaStars::sliceSpeckStars(ColumnOption option,
         tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
         break;
     }
-    case ColumnOption::Color: {
+    case gaiamission::RenderOption::Color: {
         union {
             ColorVBOLayout value;
             std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
@@ -1362,7 +1395,7 @@ std::vector<float> RenderableGaiaStars::sliceSpeckStars(ColumnOption option,
         tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
         break;
     }
-    case ColumnOption::Motion: {
+    case gaiamission::RenderOption::Motion: {
         union {
             MotionVBOLayout value;
             std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;

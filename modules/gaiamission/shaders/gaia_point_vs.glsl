@@ -26,10 +26,10 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with renderablegaiastars.h:ColumnOption enum
-const int COLUMNOPTION_STATIC = 0;
-const int COLUMNOPTION_COLOR = 1;
-const int COLUMNOPTION_MOTION = 2; 
+// Keep in sync with renderoption.h:RenderOption enum
+const int RENDEROPTION_STATIC = 0;
+const int RENDEROPTION_COLOR = 1;
+const int RENDEROPTION_MOTION = 2; 
 const float EPS = 1e-5;
 const float Parsec = 3.0856776e16;
 
@@ -46,7 +46,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform float time; 
-uniform int columnOption;
+uniform int renderOption;
 
 void main() {
     vs_brightness = in_brightness;
@@ -54,7 +54,7 @@ void main() {
     // Convert kiloParsec to meter.
     vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
-    if ( columnOption == COLUMNOPTION_MOTION ) {
+    if ( renderOption == RENDEROPTION_MOTION ) {
         modelPosition.xyz += time * in_velocity;
     } 
 

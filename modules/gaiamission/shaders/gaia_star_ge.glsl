@@ -26,10 +26,10 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with renderablegaiastars.h:ColumnOption enum
-const int COLUMNOPTION_STATIC = 0;
-const int COLUMNOPTION_COLOR = 1;
-const int COLUMNOPTION_MOTION = 2; 
+// Keep in sync with renderoption.h:RenderOption enum
+const int RENDEROPTION_STATIC = 0;
+const int RENDEROPTION_COLOR = 1;
+const int RENDEROPTION_MOTION = 2; 
 const float EPS = 1e-5;
 
 layout(points) in;
@@ -49,7 +49,7 @@ uniform float viewScaling;
 uniform float closeUpBoostDist;
 uniform float billboardSize;
 uniform vec2 screenSize;
-uniform int columnOption;
+uniform int renderOption;
 uniform float cutOffThreshold;
 uniform float magnitudeBoost;
 
@@ -73,7 +73,7 @@ void main() {
     float initStarSize = billboardSize;
 
     // Use magnitude for size boost as well.
-    if ( columnOption != COLUMNOPTION_STATIC ) {
+    if ( renderOption != RENDEROPTION_STATIC ) {
         // DR1 magnitudes are [4, 20], but could be [-15, 20] according to this chart:
         // https://qph.fs.quoracdn.net/main-qimg-317a18e3b228efc7d7f67a1632a55961
         // Negative magnitude => Giants

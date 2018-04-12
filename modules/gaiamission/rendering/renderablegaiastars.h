@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/gaiamission/rendering/renderoption.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringlistproperty.h>
@@ -65,15 +66,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum ColumnOption {
-        Static = 0,
-        Color = 1,
-        Motion = 2
-    };
-    
-    bool readDataFile(ColumnOption option);
-    std::vector<float> sliceFitsValues(ColumnOption option, std::vector<float> starValues);
-    std::vector<float> sliceSpeckStars(ColumnOption option, std::vector<float> starValues);
+    bool readDataFile(gaiamission::RenderOption option);
+    std::vector<float> sliceFitsValues(gaiamission::RenderOption option, 
+        std::vector<float> starValues);
+    std::vector<float> sliceSpeckStars(gaiamission::RenderOption option, 
+        std::vector<float> starValues);
 
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
@@ -105,11 +102,11 @@ private:
     properties::StringListProperty _columnNamesList;
     std::vector<std::string> _columnNames;
     properties::BoolProperty _filePreprocessed;
-    properties::OptionProperty _columnOption;
+    properties::OptionProperty _renderOption;
     properties::IntProperty _nRenderedStars;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(model, view, viewScaling, projection, columnOption, luminosityMultiplier,
+    UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
         screenSize, psfTexture, time, colorTexture) _uniformCache;
 
@@ -125,6 +122,9 @@ private:
     const size_t _memoryBudgetInValues = 805306368; // 3GB in bytes / sizeof(GLfloat) *4B*
     size_t _streamingBudget;
     size_t _chunkSize;
+    const size_t _posSize = 3;
+    const size_t _colSize = 2;
+    const size_t _velSize = 3;
 
     GLuint _vao;
     GLuint _vbo;

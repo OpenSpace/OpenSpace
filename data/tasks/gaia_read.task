@@ -24,11 +24,6 @@ return {
             "Tycho_V_Mag",
             "Tycho_V_Mag_Err"
         }
-    },
-    {
-        Type = "ConstructOctreeTask",
-        InFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/Sorted_DR1_17col.bin",
-        OutFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/DR1_Octree.bin",
     }
     --{
     --    Type = "ReadSpeckTask",
