@@ -319,7 +319,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _nValuesPerStar(0)
     , _nValuesInSlice(0)
     , _vao(0)
-    , _vbo(0)
+    , _vboPos(0)
+    , _vboCol(0)
+    , _vboVel(0)
     , _vaoQuad(0)
     , _vboQuad(0)
     , _fbo(0)
@@ -545,8 +547,12 @@ void RenderableGaiaStars::initializeGL() {
 }
 
 void RenderableGaiaStars::deinitializeGL() {
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
+    glDeleteBuffers(1, &_vboPos);
+    _vboPos = 0;
+    glDeleteBuffers(1, &_vboCol);
+    _vboCol = 0;
+    glDeleteBuffers(1, &_vboVel);
+    _vboVel = 0;
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vboQuad);
@@ -596,46 +602,24 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     int deltaStars = 0;
     auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
         gaiamission::RenderOption(option));
-    deltaStars /= static_cast<int>(_nValuesInSlice);
 
-    // Update VBO with new nodes. 
+    // Update number of rendered stars.
+    int nStars = static_cast<int>(_nRenderedStars) + deltaStars;
+    _nRenderedStars.set(nStars);
+
+    // Update VBOs with new nodes. 
     // This will overwrite old data that's not visible anymore as well.
-    GLsizei maxStarsToRender = _octreeManager->maxStarsPerNode() *
-        _octreeManager->biggestChunkIndexInUse();
-
     glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-    /* // TODO: This chunk generates an GL_INVALID_OPERATION error.
-    // Buffer re-specification / orphaning
-    glMapBufferRange(
-        GL_ARRAY_BUFFER,
-        0,
-        _streamingBudget * sizeof(GLfloat),
-        GL_MAP_INVALIDATE_BUFFER_BIT
-    );
-
-    // 'Buffer update' with one insert per chunk/node. The key in map holds the offset index.
-    for (auto &[offset, subData] : updateData) {
-        // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-        std::vector<float> vectorData(subData.begin(), subData.end());
-        vectorData.resize(_chunkSize, 0.f);
-        GLfloat *mapped = reinterpret_cast<GLfloat*>(
-            glMapBufferRange(
-                GL_ARRAY_BUFFER,
-                offset * _chunkSize * sizeof(GLfloat),
-                _chunkSize * sizeof(GLfloat),
-                GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT
-            )
-        );
-        std::copy(vectorData.begin(), vectorData.end(), mapped);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-    }*/
+    // Always update Position VBO.
+    glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+    size_t posChunkSize = _octreeManager->maxStarsPerNode() * _posSize;
+    size_t posStreamingBudget = _octreeManager->totalNodes() * posChunkSize;
 
     // Use buffer orphaning to update a subset of total data.
     glBufferData(
         GL_ARRAY_BUFFER,
-        _streamingBudget * sizeof(GLfloat), // TODO: Don't use the whole budget every time!?
+        posStreamingBudget * sizeof(GLfloat),
         nullptr,
         GL_STREAM_DRAW
     );
@@ -643,17 +627,72 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Update buffer with one insert per chunk/node. The key in map holds the offset index.
     for (auto & [offset, subData] : updateData) {
         // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-        //subData.resize(_chunkSize, 0.f); // This shouldn't be needed anymore!?
+        // Only required when removing nodes because chunks are filled up in octree fetch on add.
+        std::vector<float> vectorData(subData.begin(), subData.end());
+        vectorData.resize(posChunkSize, 0.f);
         glBufferSubData(
             GL_ARRAY_BUFFER,
-            offset * _chunkSize * sizeof(GLfloat),
-            _chunkSize * sizeof(GLfloat),
-            subData.data()
+            offset * posChunkSize * sizeof(GLfloat),
+            posChunkSize * sizeof(GLfloat),
+            vectorData.data()
         );
     }
 
-    int nStars = static_cast<int>(_nRenderedStars) + deltaStars;
-    _nRenderedStars.set(nStars);
+    // Update Color VBO if render option is 'Color' or 'Motion'.
+    if (option != gaiamission::RenderOption::Static) {
+        glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+        size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
+        size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
+        
+        // Use buffer orphaning to update a subset of total data.
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            colStreamingBudget * sizeof(GLfloat),
+            nullptr,
+            GL_STREAM_DRAW
+        );
+
+        // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+        for (auto &[offset, subData] : updateData) {
+            // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+            std::vector<float> vectorData(subData.begin(), subData.end());
+            vectorData.resize(posChunkSize + colChunkSize, 0.f);
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                offset * colChunkSize * sizeof(GLfloat),
+                colChunkSize * sizeof(GLfloat),
+                vectorData.data() + posChunkSize
+            );
+        }
+
+        // Update Velocity VBO if specified.
+        if (option == gaiamission::RenderOption::Motion) {
+            glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
+            size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
+            size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
+
+            // Use buffer orphaning to update a subset of total data.
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                velStreamingBudget * sizeof(GLfloat),
+                nullptr,
+                GL_STREAM_DRAW
+            );
+
+            // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+            for (auto &[offset, subData] : updateData) {
+                // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+                std::vector<float> vectorData(subData.begin(), subData.end());
+                vectorData.resize(_chunkSize, 0.f);
+                glBufferSubData(
+                    GL_ARRAY_BUFFER,
+                    offset * velChunkSize * sizeof(GLfloat),
+                    velChunkSize * sizeof(GLfloat),
+                    vectorData.data() + posChunkSize + colChunkSize
+                );
+            }
+        }
+    }
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -712,6 +751,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     colorUnit.activate();
     _colorTexture->bind();
     _program->setUniform(_uniformCache.colorTexture, colorUnit);
+
+    // Specify how many potential stars we have to render.
+    GLsizei maxStarsToRender = _octreeManager->maxStarsPerNode() *
+        _octreeManager->biggestChunkIndexInUse();
 
     // Render to FBO.
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
@@ -788,9 +831,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glGenVertexArrays(1, &_vao);
             LDEBUG(fmt::format("Generating Vertex Array id '{}'",  _vao));
         }
-        if (_vbo == 0) {
-            glGenBuffers(1, &_vbo);
-            LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+        if (_vboPos == 0) {
+            glGenBuffers(1, &_vboPos);
+            LDEBUG(fmt::format("Generating Position Vertex Buffer Object id '{}'", _vboPos));
+        }
+        if (_vboCol == 0) {
+            glGenBuffers(1, &_vboCol);
+            LDEBUG(fmt::format("Generating Color Vertex Buffer Object id '{}'", _vboCol));
+        }
+        if (_vboVel == 0) {
+            glGenBuffers(1, &_vboVel);
+            LDEBUG(fmt::format("Generating Velocity Vertex Buffer Object id '{}'", _vboVel));
         }
         if (_vaoQuad == 0) {
             glGenVertexArrays(1, &_vaoQuad);
@@ -815,28 +866,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
             LDEBUG("Generating Framebuffer Texture!");
         }
         
-        // Bind the VBO to our vertex array layout. 
+        // Bind our different VBOs to our vertex array layout. 
         glBindVertexArray(_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-        // Initialize buffer memory to zeros. Not really needed because it will be overwritten
-        // by glBufferSubData when a chunk uses the specified slot. 
-        // TODO: don't reserve memory like this!
-        std::vector<float> dummyData(_streamingBudget, 0.f);
-
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _streamingBudget * sizeof(GLfloat),
-            dummyData.data(),
-            GL_STREAM_DRAW
-        );
 
         switch (option) {
         case gaiamission::RenderOption::Static: {
-            GLsizei posStride = static_cast<GLsizei>(sizeof(GLfloat) * _posSize);
-
+            glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
             GLint positionAttrib = _program->attributeLocation("in_position");
-
             glEnableVertexAttribArray(positionAttrib);
 
             glVertexAttribPointer(
@@ -844,79 +880,78 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _posSize,
                 GL_FLOAT,
                 GL_FALSE,
-                0, // All strides should be able to be 0 = "understood to be tightly packed"
-                nullptr // Nothing else exists in VBO
+                0,
+                nullptr
             );
 
             break;
         } 
         case gaiamission::RenderOption::Color: {
-            GLsizei posStride = static_cast<GLsizei>(sizeof(GLfloat) * _posSize);
-            GLsizei colStride = static_cast<GLsizei>(sizeof(GLfloat) * _colSize);
-            int colOffset = _octreeManager->maxStarsPerNode() * sizeof(GLfloat) * _posSize;
-
+            glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
             GLint positionAttrib = _program->attributeLocation("in_position");
-            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
-
             glEnableVertexAttribArray(positionAttrib);
-            glEnableVertexAttribArray(brightnessDataAttrib);
-
-            glVertexAttribPointer(
-                positionAttrib,
-                _posSize * _octreeManager->maxStarsPerNode(),
-                GL_FLOAT,
-                GL_FALSE,
-                posStride,
-                nullptr // No offset.
-            );
-            glVertexAttribPointer(
-                brightnessDataAttrib,
-                _colSize * _octreeManager->maxStarsPerNode(),
-                GL_FLOAT,
-                GL_FALSE,
-                colStride,
-                reinterpret_cast<GLvoid*>(colOffset) // Offset of position chunk. 
-            );
-            break;
-        }
-        case gaiamission::RenderOption::Motion: {
-            GLsizei posStride = static_cast<GLsizei>(sizeof(GLfloat) * _posSize);
-            GLsizei colStride = static_cast<GLsizei>(sizeof(GLfloat) * _colSize);
-            GLsizei velStride = static_cast<GLsizei>(sizeof(GLfloat) * _velSize);
-            int colOffset = _octreeManager->maxStarsPerNode() * sizeof(GLfloat) * _posSize;
-            int velOffset = _octreeManager->maxStarsPerNode() * sizeof(GLfloat) * (_posSize + _colSize);
-
-            GLint positionAttrib = _program->attributeLocation("in_position");
-            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
-            GLint velocityAttrib = _program->attributeLocation("in_velocity");
-
-            glEnableVertexAttribArray(positionAttrib);
-            glEnableVertexAttribArray(velocityAttrib);
-            glEnableVertexAttribArray(brightnessDataAttrib);
 
             glVertexAttribPointer(
                 positionAttrib,
                 _posSize,
                 GL_FLOAT,
                 GL_FALSE,
-                posStride,
-                nullptr // No offset.
+                0,
+                nullptr
             );
+
+            glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+            glEnableVertexAttribArray(brightnessDataAttrib);
+
             glVertexAttribPointer(
                 brightnessDataAttrib,
                 _colSize,
                 GL_FLOAT,
                 GL_FALSE,
-                colStride,
-                reinterpret_cast<GLvoid*>(colOffset) // Offset of position chunk. 
+                0,
+                nullptr
             );
+            break;
+        }
+        case gaiamission::RenderOption::Motion: {
+            glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+            GLint positionAttrib = _program->attributeLocation("in_position");
+            glEnableVertexAttribArray(positionAttrib);
+
+            glVertexAttribPointer(
+                positionAttrib,
+                _posSize,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                nullptr
+            );
+
+            glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+            glEnableVertexAttribArray(brightnessDataAttrib);
+
+            glVertexAttribPointer(
+                brightnessDataAttrib,
+                _colSize,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                nullptr
+            );
+
+            glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
+            GLint velocityAttrib = _program->attributeLocation("in_velocity");
+            glEnableVertexAttribArray(velocityAttrib);
+
             glVertexAttribPointer(
                 velocityAttrib,
                 _velSize,
                 GL_FLOAT,
                 GL_FALSE,
-                velStride,
-                reinterpret_cast<GLvoid*>(velOffset) // Offset of (position + color) chunk. 
+                0,
+                nullptr 
             );
             break;
         }

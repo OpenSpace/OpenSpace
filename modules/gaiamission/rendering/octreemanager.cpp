@@ -526,17 +526,18 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
                 // Insert data and adjust stars added in this frame.
                 fetchedData[node->vboIndex] = lodData;
-                deltaStars += static_cast<int>(lodData.size());
-                node->lodInUse = lodData.size();
+                deltaStars += static_cast<int>(node->posData.size() / _posSize);
+                node->lodInUse = node->posData.size() / _posSize;
             }
             else {
                 // This node existed in cache before. Check if it was for the same level.
-                if (lodData.size() != node->lodInUse) {
+                // TODO: This will never happen because we only have 1 LOD right now.
+                if (node->posData.size() / _posSize != node->lodInUse) {
                     // Insert data and adjust stars added in this frame.
                     fetchedData[node->vboIndex] = lodData;
-                    deltaStars += static_cast<int>(lodData.size()) 
-                        - static_cast<int>(node->lodInUse);
-                    node->lodInUse = lodData.size();
+                    deltaStars += static_cast<int>(node->posData.size() / _posSize) -
+                        static_cast<int>(node->lodInUse);
+                    node->lodInUse = node->posData.size() / _posSize;
                 }
             }
             return fetchedData;
@@ -560,9 +561,8 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
             }
 
             // Insert data and adjust stars added in this frame.
-            auto insertData = constructInsertData(node, option);
-            fetchedData[node->vboIndex] = insertData;
-            deltaStars += static_cast<int>(insertData.size());
+            fetchedData[node->vboIndex] = constructInsertData(node, option);
+            deltaStars += static_cast<int>(node->posData.size() / _posSize);
         }
         return fetchedData;
     }
@@ -609,8 +609,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
             node->lodInUse = 0;
         }
         else {
-            int totalSize = node->posData.size() + node->colData.size() + node->velData.size();
-            deltaStars -= static_cast<int>(totalSize);
+            deltaStars -= static_cast<int>(node->posData.size() / _posSize);
         }
     }
 
