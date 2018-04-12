@@ -106,7 +106,10 @@ bool Time::togglePause() {
 }
 
 void Time::setTime(std::string time, bool requireJump) {
+    LINFOC("A", time);
     _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+    LINFOC("B", std::to_string(_time));
+
     _timeJumped = requireJump;
 }
 

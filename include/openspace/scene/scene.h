@@ -202,7 +202,7 @@ public:
      */
     void removePropertyInterpolation(properties::Property* prop);
 
-    void addTimeInterpolation(float targetTime, double durationSeconds);
+    void addTimeInterpolation(double targetTime, double durationSeconds);
     void removeTimeInterpolation();
 
     /**
