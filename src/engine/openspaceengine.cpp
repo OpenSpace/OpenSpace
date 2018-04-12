@@ -1474,7 +1474,16 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
     for (const auto& func : _moduleCallbacks.mouseButton) {
         bool consumed = func(button, action);
         if (consumed) {
-            return;
+            // If the mouse was released, we still want to forward it to the navigation
+            // handler in order to reliably terminate a rotation or zoom. Accidentally
+            // moving the cursor over a UI window is easy to miss and leads to weird 
+            // continuing movement
+            if (action == MouseAction::Release) {
+                break;
+            }
+            else {
+                return;
+            }
         }
     }
 
