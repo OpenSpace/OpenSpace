@@ -536,11 +536,6 @@ void Scene::addTimeInterpolation(double targetTime, double durationSeconds) {
     i.interpolationStart = OsEng.timeManager().time().j2000Seconds();
     i.interpolationEnd = targetTime;
 
-    LINFOC("S", Time(i.interpolationStart).ISO8601());
-    LINFOC("St", std::to_string(i.interpolationStart));
-    LINFOC("E", Time(i.interpolationEnd).ISO8601());
-    LINFOC("Et", std::to_string(i.interpolationEnd));
-
     OsEng.timeManager().time().setPause(false);
 }
 
@@ -598,13 +593,10 @@ void Scene::updateInterpolations() {
             now - i.beginTime
         ).count();
 
-        const float t = glm::clamp(
-            static_cast<float>(
-                static_cast<double>(usPassed) /
-                static_cast<double>(i.durationSeconds * 1000000)
-            ),
-            0.f,
-            1.f
+        const double t = glm::clamp(
+            static_cast<double>(usPassed) / (i.durationSeconds * 1000000.0),
+            0.0,
+            1.0
         );
 
         if (t == 1.f) {
@@ -641,18 +633,18 @@ void Scene::updateInterpolations() {
         const double s = i.interpolationStart;
         const float t1 = i.durationSeconds;
         const float a = i.easingTime;
-        const float aprime = a / t1;
+        const double aprime = a / t1;
 
         const double x = (e - s) / (t1 - a);
 
         double targetDelta = x;
-        if (t < aprime) {
-            float localT = t / aprime;
+        if (t <= aprime) {
+            double localT = t / aprime;
             targetDelta = localT * x;
         }
 
-        if (t > (1.f - aprime)) {
-            float localT = (t - (1.f - aprime)) / (aprime);
+        if (t >= (1.f - aprime)) {
+            double localT = (t - (1.f - aprime)) / (aprime);
             targetDelta = (1 - localT) * x;
         }
 
