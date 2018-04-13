@@ -24,6 +24,7 @@
 
 #include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
@@ -50,6 +51,9 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderablePlanesCloud";
+    constexpr const char* ProgramObjectName = "RenderablePlanesCloud";
+
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyUnit           = "Unit";
     constexpr const char* MeterUnit         = "m";
@@ -517,12 +521,15 @@ void RenderablePlanesCloud::initialize() {
 }
 
 void RenderablePlanesCloud::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-
-    _program = renderEngine.buildRenderProgram(
-        "RenderablePlanesCloud",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
+    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        ProgramObjectName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                "RenderablePlanesCloud",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/plane_fs.glsl")
+            );
+        }
     );
 
     _uniformCache.modelViewProjectionTransform = _program->uniformLocation(
@@ -560,11 +567,12 @@ void RenderablePlanesCloud::deleteDataGPU() {
 void RenderablePlanesCloud::deinitializeGL() {
     deleteDataGPU();
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramObjectName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
 }
 
 void RenderablePlanesCloud::renderPlanes(const RenderData&,

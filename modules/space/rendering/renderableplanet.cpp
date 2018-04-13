@@ -24,24 +24,22 @@
 
 #include <modules/space/rendering/renderableplanet.h>
 
+#include <modules/space/spacemodule.h>
+#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <modules/space/rendering/planetgeometry.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/misc/invariants.h>
-
 #include <memory>
 #include <fstream>
 
@@ -51,6 +49,11 @@
 #include <math.h>
 
 namespace {
+    constexpr const char* PlainProgramName = "PlanetProgram";
+    constexpr const char* ShadowNightProgramName = "ShadowNightPlanetProgram";
+    constexpr const char* NightProgramName = "NightPlanetProgram";
+    constexpr const char* ShadowProgramName = "ShadowPlanetProgram";
+
     constexpr const char* KeyBody         = "Body";
     constexpr const char* KeyGeometry     = "Geometry";
     constexpr const char* KeyRadius       = "Radius";
@@ -352,38 +355,57 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 }
 
 void RenderablePlanet::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
+    // @FRAGILE: The shader deinitialization below relies on the name names for the
+    //           request and the parameters to buildRenderProgram. That way, we can use
+    //           the ProgramObject name in the releaseProgramObject method and release the
+    //           correct one.
 
     if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
-        // shadow program
-        _programObject = renderEngine.buildRenderProgram(
-            "shadowNightProgram",
-            absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl")
+        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+            ShadowNightProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    ShadowNightProgramName,
+                    absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl"),
+                    absPath("${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl")
+                );
+            }
         );
     }
     else if (_programObject == nullptr && _shadowEnabled) {
-        // shadow program
-        _programObject = renderEngine.buildRenderProgram(
-            "shadowProgram",
-            absPath("${MODULE_SPACE}/shaders/shadow_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/shadow_fs.glsl")
+        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+            ShadowProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                        ShadowProgramName,
+                        absPath("${MODULE_SPACE}/shaders/shadow_vs.glsl"),
+                        absPath("${MODULE_SPACE}/shaders/shadow_fs.glsl")
+                );
+            }
         );
     }
     else if (_programObject == nullptr && _hasNightTexture) {
-        // Night texture program
-        _programObject = renderEngine.buildRenderProgram(
-            "nightTextureProgram",
-            absPath("${MODULE_SPACE}/shaders/nighttexture_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/nighttexture_fs.glsl")
+        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+            NightProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    NightProgramName,
+                    absPath("${MODULE_SPACE}/shaders/nighttexture_vs.glsl"),
+                    absPath("${MODULE_SPACE}/shaders/nighttexture_fs.glsl")
+                );
+            }
         );
     }
     else if (_programObject == nullptr) {
-        // pscstandard
-        _programObject = renderEngine.buildRenderProgram(
-            "pscstandard",
-            absPath("${MODULE_SPACE}/shaders/renderableplanet_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/renderableplanet_fs.glsl")
+        _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
+            PlainProgramName,
+            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+                return OsEng.renderEngine().buildRenderProgram(
+                    PlainProgramName,
+                    absPath("${MODULE_SPACE}/shaders/renderableplanet_vs.glsl"),
+                    absPath("${MODULE_SPACE}/shaders/renderableplanet_fs.glsl")
+                );
+            }
         );
     }
 
@@ -405,11 +427,12 @@ void RenderablePlanet::deinitializeGL() {
         _geometry = nullptr;
     }
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_programObject) {
-        renderEngine.removeRenderProgram(_programObject);
-        _programObject = nullptr;
-    }
+    SpaceModule::ProgramObjectManager.releaseProgramObject(
+        _programObject->name(),
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
 
     _geometry = nullptr;
     _texture = nullptr;
@@ -482,7 +505,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 //    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
 //        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
 
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
+    setPscUniforms(*_programObject, data.camera, data.position);
 
     _programObject->setUniform("_performShading", _performShading);
     _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
