@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #pragma optimize ("", off)
+#include <fstream>
 
 #include <openspace/scene/scene.h>
 
@@ -60,6 +61,8 @@
 #include <vector>
 
 #include "scene_lua.inl"
+
+std::fstream ff("d:/test.csv", std::fstream::out);
 
 namespace {
     constexpr const char* _loggerCat = "Scene";
@@ -637,18 +640,80 @@ void Scene::updateInterpolations() {
 
         const double x = (e - s) / (t1 - a);
 
+        // Middle part as default
         double targetDelta = x;
+
+        // First triangle
         if (t <= aprime) {
-            double localT = t / aprime;
+            const double localT = t / aprime;
             targetDelta = localT * x;
         }
-
+        double f = 0.0;
+        double g = 0.0;
+        double wb = targetDelta;
+        // Last triangle
         if (t >= (1.f - aprime)) {
-            double localT = (t - (1.f - aprime)) / (aprime);
+            // 0 if t at aprime,   1 if t == 1
+            const double localT = (t - (1.0 - aprime)) / (aprime);
+
+            // First estimate of target delta
             targetDelta = (1 - localT) * x;
+            
+            wb = targetDelta;
+
+            //// Easing time that is remaining
+            const double remainingEasingTime = (1.0 - localT) * a;              // real
+
+            const double currentTime = OsEng.timeManager().time().j2000Seconds(); // ingame
+            //const double currentDelta = OsEng.timeManager().time().deltaTime(); // ingame/real
+            //
+            const double remainingTime = e - currentTime; // ingame
+
+            // Times 2 since we will steadily decrease the delta time in upcoming frames,
+            // thus effectively halving the remaining time
+            const double localTargetDelta = (remainingTime / remainingEasingTime) * 2.0;
+
+            const double diff = targetDelta - localTargetDelta;
+
+            // 0.5 since we steadily decrease the delta time in upcoming frames
+            f = localTargetDelta;
+            g = diff;
+            
+            targetDelta -= 0.75 * diff;
+            
+
+
+            //const double remainingArea = remainingTime * currentDelta * 0.5;
+
+
         }
 
+        //if (t >= (1.f - aprime)) {
+        //    if (i.firstEaseOut) {
+        //        i.deltaSummation = 0.0;
+        //        i.firstEaseOut = false;
+        //    }
+        //    const double localT = (t - (1.f - aprime)) / (aprime);
+        //    targetDelta = (1 - localT) * x;
+
+        //    const double expectedArea = x * aprime * 0.5;
+        //    const double currentArea = i.deltaSummation + (1.0 - t) * targetDelta * 0.5;
+
+        //    const double delta = expectedArea - currentArea;
+
+        //    targetDelta += delta ;
+
+        //    LINFOC("expected", std::to_string(expectedArea));
+        //    LINFOC("current_have", std::to_string(i.deltaSummation));
+        //    LINFOC("current_will", std::to_string((1.0 - t) * targetDelta * 0.5));
+        //    LINFOC("current", std::to_string(currentArea));
+        //    LINFOC("===", "===");
+        //}
+
+
+        ff << targetDelta << ',' << f << ',' << g << ',' << wb << '\n';
         OsEng.timeManager().time().setDeltaTime(targetDelta);
+        //i.deltaSummation += targetDelta * OsEng.windowWrapper().averageDeltaTime();
     }
 }
 
