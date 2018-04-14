@@ -378,12 +378,33 @@ void mainPreSyncFunc() {
             }
 
             const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
+            if (state.nAxes > JoystickInputState::MaxAxes) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
+                    "All excess axes are ignored",
+                    state.name,
+                    state.nAxes,
+                    JoystickInputState::MaxAxes
+                ));
+                state.nAxes = JoystickInputState::MaxAxes;
+            }
             std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
 
             const unsigned char* buttons = SgctEngine->getJoystickButtons(
                 i,
                 &state.nButtons
             );
+
+            if (state.nButtons > JoystickInputState::MaxButtons) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
+                    "supported. All excess buttons are ignored",
+                    state.name,
+                    state.nButtons,
+                    JoystickInputState::MaxButtons
+                ));
+                state.nButtons = JoystickInputState::MaxButtons;
+            }
 
             for (int j = 0; j < state.nButtons; ++j) {
                 bool currentlyPressed = buttons[j] == GLFW_PRESS;

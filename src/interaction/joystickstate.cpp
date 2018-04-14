@@ -81,7 +81,7 @@ void JoystickStates::updateJoystickStatesFromInput(const InputState& inputState,
     if (_isInRollMode) {
         _globalRollJoystickState.velocity.set(
             glm::dvec2(
-                inputState.joystickAxis(2) * _sensitivity,
+                -inputState.joystickAxis(2) * _sensitivity,
                 inputState.joystickAxis(3) * _sensitivity
             ),
             deltaTime

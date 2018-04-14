@@ -31,36 +31,81 @@
 
 namespace openspace::interaction {
 
+/**
+ * Actions that any button of a joystick can have. Each button must be in one of these
+ * states
+ */
 enum class JoystickAction : uint8_t {
+    /// Idle state if the button is unpressed and has been unpressed since last frame
     Idle = 0,
-    Press = 1,
-    Repeat = 2,
-    Release = 3
+    /// If the button has been pressed since the last frame
+    Press,
+    /// If the button has been pressed since longer than last frame
+    Repeat,
+    /// If the button was released since the last frame
+    Release
 };
 
+/**
+ * The input state of a single joystick.
+ */
 struct JoystickInputState {
+    /// The maximum number of supported axes
+    static const int MaxAxes = 8;
+    /// The maximum number of supported buttons
+    static const int MaxButtons = 32;
+
+    /// Marks whether this joystick is connected. If this value is \c false, all other
+    /// members of this struct are undefined
     bool isConnected = false;
 
+    /// The name of this joystick
     std::string name;
 
+    /// The number of axes that this joystick supports
     int nAxes = 0;
-    std::array<float, 8> axes;
+    /// The values for each axis. Each value is in the range [-1, 1]. Only the first
+    /// \c nAxes values are defined values, the rest are undefined
+    std::array<float, MaxAxes> axes;
 
+    /// The number of buttons that this joystick possesses
     int nButtons = 0;
-    std::array<JoystickAction, 32> buttons;
+    /// The status of each button. Only the first \c nButtons values are defined, the rest
+    /// are undefined
+    std::array<JoystickAction, MaxButtons> buttons;
 };
 
-// Number is derived from GLFW constants
-struct JoystickInputStates : public std::array<JoystickInputState, 16> {
-    float axis(int i) const;
-    bool button(int i, JoystickAction action) const;
+/// The maximum number of joysticks that are supported by this system. This number is
+/// derived from the available GLFW constants
+constexpr const int MaxJoysticks = 16;
+struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks> {
+    /**
+     * This function adds the contributions of all connected joysticks for the provided
+     * \p axis. After adding each joysticks contribution, the result is clamped to [-1,1].
+     * If a joystick does not possess a particular axis, it's does not contribute to the
+     * sum.
+     *
+     * \param axis The numerical axis for which the values are added
+     * \return The summed axis values of all connected joysticks
+     *
+     * \pre \p axis must be 0 or positive
+     */
+    float axis(int axis) const;
+
+    /**
+     * This functions checks whether any connected joystick has its \p button in the
+     * passed \p action. Any joystick that does not posses the \p button, it will be
+     * ignored.
+     *
+     * \param button The button that is to be checked
+     * \param action The action which is checked for each button
+     * \return \c true if there is at least one joystick whose \param button is in the
+     *         \p action state
+     *
+     * \pre \p button must be 0 or positive
+     */
+    bool button(int button, JoystickAction action) const;
 };
-
-//bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
-//bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
-//bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
-//bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
-
 
 } // namespace openspace::interaction
 

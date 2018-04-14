@@ -25,45 +25,26 @@
 #include <openspace/interaction/joystickinputstate.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/invariants.h>
+#include <algorithm>
+#include <numeric>
 
 namespace openspace::interaction {
 
-//bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
-//    return lhs.name == rhs.name &&
-//        lhs.axes == rhs.axes && lhs.nAxes == rhs.nAxes &&
-//        lhs.buttons == rhs.buttons && lhs.nButtons == rhs.nButtons;
-//}
-//
-//bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
-//    return !(lhs == rhs);
-//}
-//
-//bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
-//    for (int i = 0; i < lhs.size(); ++i) {
-//        if (lhs[i] != nullptr ^ rhs[i] != nullptr) {
-//            // One of the states was empty, the other one was not
-//            return false;
-//        }
-//
-//        if (lhs[i] && rhs[i] && (*lhs[i] != *rhs[i])) {
-//            return false;
-//        }
-//    }
-//    return true;
-//}
-//
-//bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
-//    return !(lhs == rhs);
-//}
+float JoystickInputStates::axis(int axis) const {
+    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
-
-float JoystickInputStates::axis(int i) const {
-    float res = 0.f;
-    for (const JoystickInputState& state : *this) {
-        if (state.isConnected) {
-            res += state.axes[i];
+    float res = std::accumulate(
+        begin(),
+        end(),
+        0.f,
+        [axis](float value, const JoystickInputState& state) {
+            if (state.isConnected) {
+                value += state.axes[axis];
+            }
+            return value;
         }
-    }
+    );
 
     // If multiple joysticks are connected, we might get values outside the -1,1 range by
     // summing them up
@@ -71,13 +52,16 @@ float JoystickInputStates::axis(int i) const {
     return res;
 }
 
-bool JoystickInputStates::button(int i, JoystickAction action) const {
-    bool res = false;
-    for (const JoystickInputState& state : *this) {
-        if (state.isConnected) {
-            res |= state.buttons[i] == action;
+bool JoystickInputStates::button(int button, JoystickAction action) const {
+    ghoul_precondition(button >= 0, "button must be 0 or positive");
+
+    bool res = std::any_of(
+        begin(),
+        end(),
+        [button, action](const JoystickInputState& state) {
+            return state.isConnected ? (state.buttons[button] == action) : false;
         }
-    }
+    );
     return res;
 }
 

@@ -82,6 +82,29 @@ void GuiJoystickComponent::render() {
         ImGui::Separator();
     }
 
+    ImGui::Separator();
+    ImGui::Separator();
+
+    ImGui::Text("%s", "Summed contributions");
+    ImGui::Text("%s", "Axes");
+    for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
+        float f = states.axis(i);
+        ImGui::SliderFloat(
+            std::to_string(i).c_str(),
+            &f,
+            -1.f,
+            1.f
+        );
+    }
+    ImGui::Text("%s", "Buttons");
+    for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
+        ImGui::RadioButton(
+            std::to_string(i).c_str(),
+            states.button(i, JoystickAction::Press) ||
+                states.button(i, JoystickAction::Repeat)
+        );
+    }
+
     ImGui::End();
 }
 

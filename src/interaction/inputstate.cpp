@@ -65,7 +65,7 @@ void InputState::setJoystickInputStates(JoystickInputStates& states) {
     _joystickInputStates = &states;
 }
 
-const std::list<std::pair<Key, KeyModifier> >& InputState::pressedKeys() const {
+const std::list<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
     return _keysDown;
 }
 
