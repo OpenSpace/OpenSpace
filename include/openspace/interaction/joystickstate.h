@@ -27,17 +27,49 @@
 
 #include <openspace/interaction/inputdevicestates.h>
 
+#include <openspace/interaction/joystickinputstate.h>
+#include <ghoul/misc/boolean.h>
+#include <map>
+
 namespace openspace::interaction {
 
 class JoystickStates : public InputDeviceStates {
 public:
+    enum class AxisType {
+        None = 0,
+        OrbitX,
+        OrbitY,
+        ZoomIn,
+        ZoomOut,
+        LocalRollX,
+        LocalRollY,
+        GlobalRollX,
+        GlobalRollY,
+        PanX,
+        PanY
+    };
+
+    BooleanType(AxisInvert);
+    BooleanType(AxisNormalize);
+
     JoystickStates(double sensitivity, double velocityScaleFactor);
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 
+    void setAxisMapping(
+        int axis,
+        AxisType mapping,
+        AxisInvert shouldInvert = AxisInvert::No,
+        AxisNormalize shouldNormalize = AxisNormalize::No
+    );
+
 private:
-    bool _isInRollMode = false;
-    int _rollToggleButton = 6;
+    struct AxisInformation {
+        AxisType type = AxisType::None;
+        AxisInvert invert = AxisInvert::No;
+        AxisNormalize normalize = AxisNormalize::No;
+    };
+    std::array<AxisInformation, JoystickInputState::MaxAxes> _axisMapping;
 };
 
 
