@@ -30,6 +30,7 @@
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/joystickstate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -81,6 +82,22 @@ public:
     void mouseScrollWheelCallback(double pos);
 
     void setJoystickInputStates(JoystickInputStates& states);
+
+    void setJoystickAxisMapping(
+        int axis,
+        JoystickState::AxisType mapping,
+        JoystickState::AxisInvert shouldInvert = JoystickState::AxisInvert::No,
+        JoystickState::AxisNormalize shouldNormalize = JoystickState::AxisNormalize::No
+    );
+
+    JoystickState::AxisInformation joystickAxisMapping(int axis) const;
+
+    void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
+        JoystickState::ButtonCommandRemote remote);
+
+    void clearJoystickButtonCommand(int button);
+    std::vector<std::string> joystickButtonCommand(int button) const;
+
 
 
     void saveCameraStateToFile(const std::string& filepath);

@@ -24,22 +24,17 @@
 
 #include <openspace/interaction/joystickstate.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/inputstate.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace openspace::interaction {
 
-JoystickStates::JoystickStates(double sensitivity, double velocityScaleFactor)
+JoystickState::JoystickState(double sensitivity, double velocityScaleFactor)
     : InputDeviceStates(sensitivity, velocityScaleFactor)
-{
-    _axisMapping[0] = { AxisType::OrbitX, AxisInvert::No, AxisNormalize::No };
-    _axisMapping[1] = { AxisType::OrbitY, AxisInvert::No, AxisNormalize::No };
-    _axisMapping[2] = { AxisType::PanX, AxisInvert::Yes, AxisNormalize::No };
-    _axisMapping[3] = { AxisType::PanY, AxisInvert::Yes, AxisNormalize::No };
-    _axisMapping[4] = { AxisType::ZoomIn, AxisInvert::No, AxisNormalize::Yes };
-    _axisMapping[5] = { AxisType::ZoomOut, AxisInvert::No, AxisNormalize::Yes };
-}
+{}
 
-void JoystickStates::updateStateFromInput(const InputState& inputState, double deltaTime)
+void JoystickState::updateStateFromInput(const InputState& inputState, double deltaTime)
 {
     glm::dvec2 globalRotation;
     double zoom = 0.0;
@@ -108,58 +103,22 @@ void JoystickStates::updateStateFromInput(const InputState& inputState, double d
     _globalRollState.velocity.set(globalRoll, deltaTime);
     _localRotationState.velocity.set(localRotation, deltaTime);
 
-    // Rolling
-    //_globalRotationState.velocity.set(
-    //    glm::dvec2(
-    //        inputState.joystickAxis(0) * _sensitivity,
-    //        inputState.joystickAxis(1) * _sensitivity
-    //    ),
-    //    deltaTime
-    //);
+    for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
+        auto itRange = _buttonMapping.equal_range(i);
+        for (auto it = itRange.first; it != itRange.second; ++it) {
+            bool active = inputState.joystickInputStates().button(i, it->second.action);
 
-    //// Zooming
-    //float zoomOut = (inputState.joystickAxis(4) + 1.f) / 2.f;
-    //float zoomIn = (inputState.joystickAxis(5) + 1.f) / 2.f;
-    //float zoom = -zoomOut + zoomIn;
-
-    //_truckMovementState.velocity.set(
-    //    glm::dvec2(
-    //        zoom * _sensitivity
-    //    ),
-    //    deltaTime
-    //);
-
-    //if (inputState.joystickButton(_rollToggleButton)) {
-    //    _isInRollMode = !_isInRollMode;
-    //}
-
-    //if (_isInRollMode) {
-    //    _globalRollState.velocity.set(
-    //        glm::dvec2(
-    //            -inputState.joystickAxis(2) * _sensitivity,
-    //            inputState.joystickAxis(3) * _sensitivity
-    //        ),
-    //        deltaTime
-    //    );
-
-    //    _localRotationState.velocity.decelerate(deltaTime);
-    //}
-    //else {
-    //    // Panning
-    //    // The x-axis in panning is inverted
-    //    _localRotationState.velocity.set(
-    //        glm::dvec2(
-    //            -inputState.joystickAxis(2) * _sensitivity,
-    //            inputState.joystickAxis(3) * _sensitivity
-    //        ),
-    //        deltaTime
-    //    );
-
-    //    _globalRollState.velocity.decelerate(deltaTime);
-    //}
+            if (active) {
+                OsEng.scriptEngine().queueScript(
+                    it->second.command,
+                    scripting::ScriptEngine::RemoteScripting(it->second.synchronization)
+                );
+            }
+        }
+    }
 }
 
-void JoystickStates::setAxisMapping(int axis, AxisType mapping, AxisInvert shouldInvert,
+void JoystickState::setAxisMapping(int axis, AxisType mapping, AxisInvert shouldInvert,
                                     AxisNormalize shouldNormalize)
 {
     ghoul_assert(axis < JoystickInputState::MaxAxes, "axis must be < MaxAxes");
@@ -167,5 +126,88 @@ void JoystickStates::setAxisMapping(int axis, AxisType mapping, AxisInvert shoul
     _axisMapping[axis] = { mapping, shouldInvert, shouldNormalize };
 }
 
+JoystickState::AxisInformation JoystickState::axisMapping(int axis) const {
+    return _axisMapping[axis];
+}
+
+void JoystickState::bindButtonCommand(int button, std::string command,
+                                      JoystickAction action, ButtonCommandRemote remote)
+{
+    _buttonMapping.insert({
+        button,
+        { std::move(command), action, remote }
+    });
+}
+
+void JoystickState::clearButtonCommand(int button) {
+    for (auto it = _buttonMapping.begin(); it != _buttonMapping.end();) {
+        // If the current iterator is the button that we are looking for, delete it
+        // (std::multimap::erase will return the iterator to the next element for us)
+        if (it->first == button) {
+            it = _buttonMapping.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+std::vector<std::string> JoystickState::buttonCommand(int button) const {
+    std::vector<std::string> result;
+    auto itRange = _buttonMapping.equal_range(button);
+    for (auto it = itRange.first; it != itRange.second; ++it) {
+        result.push_back(it->second.command);
+    }
+    return result;
+}
+
 
 } // namespace openspace::interaction
+
+namespace std {
+
+std::string to_string(const openspace::interaction::JoystickState::AxisType& type) {
+    using T = openspace::interaction::JoystickState::AxisType;
+    switch (type) {
+        case T::None:        return "None";
+        case T::OrbitX:      return "Orbit X";
+        case T::OrbitY:      return "Orbit Y";
+        case T::ZoomIn:      return "Zoom In";
+        case T::ZoomOut:     return "Zoom Out";
+        case T::LocalRollX:  return "LocalRoll X";
+        case T::LocalRollY:  return "LocalRoll Y";
+        case T::GlobalRollX: return "GlobalRoll X";
+        case T::GlobalRollY: return "GlobalRoll Y";
+        case T::PanX:        return "Pan X";
+        case T::PanY:        return "Pan Y";
+        default:             return "";
+    }
+}
+
+} // namespace std
+
+namespace ghoul {
+
+template <>
+openspace::interaction::JoystickState::AxisType from_string(const std::string& string) {
+    using T = openspace::interaction::JoystickState::AxisType;
+    
+    static const std::map<std::string, T> Map = {
+        { "None",         T::None },
+        { "Orbit X",      T::OrbitX },
+        { "Orbit Y",      T::OrbitY },
+        { "Zoom In",      T::ZoomIn },
+        { "Zoom Out",     T::ZoomOut },
+        { "LocalRoll X",  T::LocalRollX },
+        { "LocalRoll Y",  T::LocalRollY },
+        { "GlobalRoll X", T::GlobalRollX },
+        { "GlobalRoll Y", T::GlobalRollY },
+        { "Pan X",        T::PanX },
+        { "Pan Y",        T::PanY }
+    };
+
+    return Map.at(string);
+
+}
+
+} // namespace ghoul

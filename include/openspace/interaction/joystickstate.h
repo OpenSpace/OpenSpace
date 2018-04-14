@@ -29,11 +29,13 @@
 
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/fromstring.h>
 #include <map>
+#include <vector>
 
 namespace openspace::interaction {
 
-class JoystickStates : public InputDeviceStates {
+class JoystickState : public InputDeviceStates {
 public:
     enum class AxisType {
         None = 0,
@@ -51,8 +53,16 @@ public:
 
     BooleanType(AxisInvert);
     BooleanType(AxisNormalize);
+    BooleanType(ButtonCommandRemote);
 
-    JoystickStates(double sensitivity, double velocityScaleFactor);
+    struct AxisInformation {
+        AxisType type = AxisType::None;
+        AxisInvert invert = AxisInvert::No;
+        AxisNormalize normalize = AxisNormalize::No;
+    };
+
+
+    JoystickState(double sensitivity, double velocityScaleFactor);
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 
@@ -63,16 +73,44 @@ public:
         AxisNormalize shouldNormalize = AxisNormalize::No
     );
 
+    AxisInformation axisMapping(int axis) const;
+
+    void bindButtonCommand(int button, std::string command, JoystickAction action,
+        ButtonCommandRemote local);
+    void clearButtonCommand(int button);
+    std::vector<std::string> buttonCommand(int button) const;
+
 private:
-    struct AxisInformation {
-        AxisType type = AxisType::None;
-        AxisInvert invert = AxisInvert::No;
-        AxisNormalize normalize = AxisNormalize::No;
-    };
+    // We use an array for the axes and a map for the buttons since the axis are going to
+    // be accessed much more often and thus have to be more efficient. And storing a few
+    // extra AxisInformation that are not used will not matter that much; finding an axis
+    // location in a potential map each frame, however, would
+
     std::array<AxisInformation, JoystickInputState::MaxAxes> _axisMapping;
+
+    struct ButtonInformation {
+        std::string command;
+        JoystickAction action;
+        ButtonCommandRemote synchronization;
+        std::string documentation;
+    };
+
+    std::multimap<int, ButtonInformation> _buttonMapping;
 };
 
-
 } // namespace openspace::interaction
+
+namespace std {
+
+std::string to_string(const openspace::interaction::JoystickState::AxisType& type);
+
+} // namespace std
+
+namespace ghoul {
+
+template <>
+openspace::interaction::JoystickState::AxisType from_string(const std::string& string);
+
+} // namespace ghoul
 
 #endif // __OPENSPACE_CORE___JOYSTICKSTATE___H__

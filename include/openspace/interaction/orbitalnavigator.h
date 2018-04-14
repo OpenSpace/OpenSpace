@@ -57,6 +57,8 @@ public:
     void setFocusNode(SceneGraphNode* focusNode);
     void startInterpolateCameraDirection(const Camera& camera);
 
+    JoystickState& joystickStates();
+
     bool followingNodeRotation() const;
     SceneGraphNode* focusNode() const;
 
@@ -84,10 +86,12 @@ private:
 
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
-    properties::FloatProperty _sensitivity;
+    
+    properties::FloatProperty _mouseSensitivity;
+    properties::FloatProperty _joystickSensitivity;
 
     MouseStates _mouseStates;
-    JoystickStates _joystickStates;
+    JoystickState _joystickStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;

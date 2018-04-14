@@ -1,0 +1,10 @@
+asset.onInitialize(function()
+    openspace.navigation.bindJoystickAxis(0, "Orbit X", true);
+    openspace.navigation.bindJoystickAxis(1, "Orbit Y");
+    openspace.navigation.bindJoystickAxis(2, "Pan X", true);
+    openspace.navigation.bindJoystickAxis(3, "Pan Y");
+    openspace.navigation.bindJoystickAxis(4, "Zoom In", false, true);
+    openspace.navigation.bindJoystickAxis(5, "Zoom Out", false, true);
+
+    -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Pressed')")
+end)

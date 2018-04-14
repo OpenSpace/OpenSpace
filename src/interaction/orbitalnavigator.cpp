@@ -58,11 +58,18 @@ namespace {
         "disabled, the camera will zoom in or out forever."
     };
 
-    static const openspace::properties::Property::PropertyInfo SensitivityInfo = {
-        "Sensitivity",
-        "Sensitivity",
-        "Determines the sensitivity of the camera motion. The lower the sensitivity is "
-        "the less impact a mouse mothion will have."
+    static const openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
+        "MouseSensitivity",
+        "Mouse Sensitivity",
+        "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
+        "the sensitivity is the less impact a mouse motion will have."
+    };
+
+    static const openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
+        "JoystickSensitivity",
+        "Joystick Sensitivity",
+        "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
+        "the sensitivity is the less impact a joystick motion will have."
     };
 
     static const openspace::properties::Property::PropertyInfo FrictionInfo = {
@@ -105,9 +112,10 @@ OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
-    , _mouseStates(_sensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
-    , _joystickStates(_sensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
+    , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
+    , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
+    , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
+    , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
 {
     auto smoothStep =
         [](double t) {
@@ -154,16 +162,20 @@ OrbitalNavigator::OrbitalNavigator()
         _joystickStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
     });
 
-    _sensitivity.onChange([&]() {
-        _mouseStates.setSensitivity(_sensitivity * pow(10.0, -4));
-        _joystickStates.setSensitivity(_sensitivity * pow(10.0,-4));
+    _mouseSensitivity.onChange([&]() {
+        _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
     });
+    _joystickSensitivity.onChange([&]() {
+        _joystickStates.setSensitivity(_joystickSensitivity * pow(10.0, -4));
+    });
+
 
     addPropertySubOwner(_friction);
 
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
-    addProperty(_sensitivity);
+    addProperty(_mouseSensitivity);
+    addProperty(_joystickSensitivity);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
@@ -620,5 +632,10 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
         _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
     return posHandle;
 }
+
+JoystickState& OrbitalNavigator::joystickStates() {
+    return _joystickStates;
+}
+
 
 } // namespace openspace::interaction

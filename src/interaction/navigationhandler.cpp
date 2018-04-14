@@ -297,6 +297,44 @@ void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) 
     }
 }
 
+void NavigationHandler::setJoystickAxisMapping(int axis, JoystickState::AxisType mapping,
+                                               JoystickState::AxisInvert shouldInvert,
+                                            JoystickState::AxisNormalize shouldNormalize)
+{
+    _orbitalNavigator->joystickStates().setAxisMapping(
+        axis,
+        mapping,
+        shouldInvert,
+        shouldNormalize
+    );
+}
+
+JoystickState::AxisInformation NavigationHandler::joystickAxisMapping(int axis) const {
+    return _orbitalNavigator->joystickStates().axisMapping(axis);
+}
+
+void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
+                                                  JoystickAction action,
+                                                JoystickState::ButtonCommandRemote remote)
+{
+    _orbitalNavigator->joystickStates().bindButtonCommand(
+        button,
+        std::move(command),
+        action,
+        remote
+    );
+}
+
+void NavigationHandler::clearJoystickButtonCommand(int button) {
+    _orbitalNavigator->joystickStates().clearButtonCommand(button);
+}
+
+std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
+    return _orbitalNavigator->joystickStates().buttonCommand(button);
+}
+
+
+
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
@@ -328,6 +366,54 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 {},
                 "void",
                 "Reset the camera direction to point at the focus node"
+            },
+            {
+                "bindJoystickAxis",
+                &luascriptfunctions::bindJoystickAxis,
+                {},
+                "int, axisType [, isInverted, isNormalized]",
+                "Binds the axis identified by the first argument to be used as the type "
+                "identified by the second argument. If 'isInverted' is 'true', the axis "
+                "value is inverted, if 'isNormalized' is true the axis value is "
+                "normalized from [-1, 1] to [0,1]."
+            },
+            {
+                "joystickAxis",
+                &luascriptfunctions::joystickAxis,
+                {},
+                "int",
+                "Returns the joystick axis information for the passed axis. The "
+                "information that is returned is the current axis binding as a string, "
+                "whether the values are inverted as bool, and whether the value are "
+                "normalized as a bool"
+            },
+            {
+                "bindJoystickButton",
+                &luascriptfunctions::bindJoystickButton,
+                {},
+                "int, string [, string, bool]",
+                "Binds a Lua script to be executed when the joystick button identified "
+                "by the first argument is triggered. The third argument determines when "
+                "the script should be executed, this defaults to 'pressed', which means "
+                "that the script is run when the user presses the button. The last "
+                "argument determines whether the command is going to be executable "
+                "locally or remotely. The latter being the default."
+            },
+            {
+                "clearJoystickButotn",
+                &luascriptfunctions::clearJoystickButton,
+                {},
+                "int",
+                "Removes all commands that are currently bound to the button identified "
+                "by the first argument"
+            },
+            {
+                "joystickButton",
+                &luascriptfunctions::joystickButton,
+                {},
+                "int",
+                "Returns the script that is currently bound to be executed when the "
+                "provided button is pressed"
             }
         }
     };
