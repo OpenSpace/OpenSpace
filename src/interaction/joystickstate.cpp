@@ -75,10 +75,8 @@ void JoystickStates::updateJoystickStatesFromInput(const InputState& inputState,
     );
 
     if (inputState.joystickButton(_rollToggleButton)) {
-        LINFOC("Switch", "");
         _isInRollMode = !_isInRollMode;
     }
-    LINFOC("_isInRollMode", std::to_string(_isInRollMode));
 
     if (_isInRollMode) {
         _globalRollJoystickState.velocity.set(
@@ -88,6 +86,8 @@ void JoystickStates::updateJoystickStatesFromInput(const InputState& inputState,
             ),
             deltaTime
         );
+
+        _localRotationJoystickState.velocity.decelerate(deltaTime);
     }
     else {
         // Panning
@@ -99,6 +99,8 @@ void JoystickStates::updateJoystickStatesFromInput(const InputState& inputState,
             ),
             deltaTime
         );
+
+        _globalRollJoystickState.velocity.decelerate(deltaTime);
     }
 }
 

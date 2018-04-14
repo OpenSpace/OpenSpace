@@ -28,68 +28,54 @@
 
 namespace openspace::interaction {
 
-bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
-    return lhs.name == rhs.name &&
-        lhs.axes == rhs.axes && lhs.nAxes == rhs.nAxes &&
-        lhs.buttons == rhs.buttons && lhs.nButtons == rhs.nButtons;
-}
+//bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
+//    return lhs.name == rhs.name &&
+//        lhs.axes == rhs.axes && lhs.nAxes == rhs.nAxes &&
+//        lhs.buttons == rhs.buttons && lhs.nButtons == rhs.nButtons;
+//}
+//
+//bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
+//    return !(lhs == rhs);
+//}
+//
+//bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
+//    for (int i = 0; i < lhs.size(); ++i) {
+//        if (lhs[i] != nullptr ^ rhs[i] != nullptr) {
+//            // One of the states was empty, the other one was not
+//            return false;
+//        }
+//
+//        if (lhs[i] && rhs[i] && (*lhs[i] != *rhs[i])) {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+//
+//bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
+//    return !(lhs == rhs);
+//}
 
-bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept {
-    return !(lhs == rhs);
-}
-
-bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
-    for (int i = 0; i < lhs.size(); ++i) {
-        if (lhs[i] != nullptr ^ rhs[i] != nullptr) {
-            // One of the states was empty, the other one was not
-            return false;
-        }
-
-        if (lhs[i] && rhs[i] && (*lhs[i] != *rhs[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept {
-    return !(lhs == rhs);
-}
-
-
-JoystickInputState::~JoystickInputState() {
-    // The other pointers are owned by GLFW
-    // buttonsTriggered gets allocated in main 
-    delete buttonsTriggered;
-}
 
 float JoystickInputStates::axis(int i) const {
     float res = 0.f;
-    for (const std::unique_ptr<JoystickInputState>& state : *this) {
-        if (state) {
-            res += state->axes[i];
+    for (const JoystickInputState& state : *this) {
+        if (state.isConnected) {
+            res += state.axes[i];
         }
     }
+
+    // If multiple joysticks are connected, we might get values outside the -1,1 range by
+    // summing them up
     glm::clamp(res, -1.f, 1.f);
     return res;
 }
 
-bool JoystickInputStates::buttonPressed(int i) const {
+bool JoystickInputStates::button(int i, JoystickAction action) const {
     bool res = false;
-    for (const std::unique_ptr<JoystickInputState>& state : *this) {
-        if (state) {
-            res |= state->buttons[i] == 1;
-        }
-    }
-    return res;
-}
-
-
-bool JoystickInputStates::buttonTriggered(int i) const {
-    bool res = false;
-    for (const std::unique_ptr<JoystickInputState>& state : *this) {
-        if (state) {
-            res |= state->buttonsTriggered[i] == 1;
+    for (const JoystickInputState& state : *this) {
+        if (state.isConnected) {
+            res |= state.buttons[i] == action;
         }
     }
     return res;

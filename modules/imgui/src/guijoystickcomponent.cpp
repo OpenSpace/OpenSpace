@@ -54,15 +54,15 @@ void GuiJoystickComponent::render() {
         OsEng.navigationHandler().inputState().joystickInputStates();
 
     for (int i = 0; i < states.size(); ++i) {
-        const std::unique_ptr<JoystickInputState>& state = states[i];
-        if (!state) {
+        const JoystickInputState& state = states[i];
+        if (!state.isConnected) {
             continue;
         }
 
-        ImGui::Text("%s [%i]", state->name.c_str(), i);
+        ImGui::Text("%s [%i]", state.name.c_str(), i);
         ImGui::Text("%s", "Axes");
-        for (int j = 0; j < state->nAxes; ++j) {
-            float f = state->axes[j];
+        for (int j = 0; j < state.nAxes; ++j) {
+            float f = state.axes[j];
             ImGui::SliderFloat(
                 std::to_string(j).c_str(),
                 &f,
@@ -71,8 +71,12 @@ void GuiJoystickComponent::render() {
             );
         }
         ImGui::Text("%s", "Buttons");
-        for (int j = 0; j < state->nButtons; ++j) {
-            ImGui::RadioButton(std::to_string(j).c_str(), state->buttons[j] == 1);
+        for (int j = 0; j < state.nButtons; ++j) {
+            ImGui::RadioButton(
+                std::to_string(j).c_str(),
+                state.buttons[j] == JoystickAction::Press ||
+                state.buttons[j] == JoystickAction::Repeat
+            );
         }
 
         ImGui::Separator();

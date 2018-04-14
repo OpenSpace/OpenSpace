@@ -1282,7 +1282,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         _renderEngine->updateScene();
-        _navigationHandler->updateCamera(dt);
+        //_navigationHandler->updateCamera(dt);
 
         Camera* camera = _renderEngine->camera();
         if (camera) {
@@ -1509,8 +1509,8 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     _navigationHandler->mouseScrollWheelCallback(posY);
 }
 
-void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates states) {
-    _navigationHandler->setJoystickInputStates(std::move(states));
+void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates& states) {
+    _navigationHandler->setJoystickInputStates(states);
 }
 
 void OpenSpaceEngine::encode() {

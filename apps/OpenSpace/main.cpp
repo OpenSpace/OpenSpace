@@ -74,6 +74,8 @@ namespace {
 constexpr const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
 
+openspace::interaction::JoystickInputStates joystickInputStates;
+
 constexpr const char* OpenVRTag = "OpenVR";
 constexpr const char* SpoutTag = "Spout";
 
@@ -345,6 +347,8 @@ void mainInitFunc() {
         }
     }
 
+    OsEng.setJoystickInputStates(joystickInputStates);
+
     LTRACE("main::mainInitFunc(end)");
 }
 
@@ -354,30 +358,66 @@ void mainPreSyncFunc() {
 
     // Query joystick status
     using namespace openspace::interaction;
-    JoystickInputStates states;
-    std::fill(states.begin(), states.end(), nullptr);
 
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        JoystickInputState& state = joystickInputStates[i];
+
         int present = glfwJoystickPresent(i);
         if (present == GLFW_TRUE) {
-            std::unique_ptr<JoystickInputState> state =
-                std::make_unique<JoystickInputState>();
+            if (!state.isConnected) {
+                // Joystick was added
+                state.isConnected = true;
+                state.name = SgctEngine->getJoystickName(i);
 
-            state->name = SgctEngine->getJoystickName(i);
-            state->axes = SgctEngine->getJoystickAxes(i, &state->nAxes);
-            state->buttons = SgctEngine->getJoystickButtons(i, &state->nButtons);
-            state->buttonsTriggered = new bool[state->nButtons];
-            std::fill(
-                state->buttonsTriggered,
-                state->buttonsTriggered + state->nButtons,
-                false
+                std::fill(state.axes.begin(), state.axes.end(), 0.f);
+                std::fill(
+                    state.buttons.begin(),
+                    state.buttons.end(),
+                    JoystickAction::Idle
+                );
+            }
+
+            const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
+            std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+
+            const unsigned char* buttons = SgctEngine->getJoystickButtons(
+                i,
+                &state.nButtons
             );
 
-            states[i] = std::move(state);
+            for (int j = 0; j < state.nButtons; ++j) {
+                bool currentlyPressed = buttons[j] == GLFW_PRESS;
+
+                if (currentlyPressed) {
+                    switch (state.buttons[j]) {
+                        case JoystickAction::Idle:
+                        case JoystickAction::Release:
+                            state.buttons[j] = JoystickAction::Press;
+                            break;
+                        case JoystickAction::Press:
+                        case JoystickAction::Repeat:
+                            state.buttons[j] = JoystickAction::Repeat;
+                            break;
+                    }
+                }
+                else {
+                    switch (state.buttons[j]) {
+                        case JoystickAction::Idle:
+                        case JoystickAction::Release:
+                            state.buttons[j] = JoystickAction::Idle;
+                            break;
+                        case JoystickAction::Press:
+                        case JoystickAction::Repeat:
+                            state.buttons[j] = JoystickAction::Release;
+                            break;
+                    }
+                }
+            }
+        }
+        else {
+            state.isConnected = false;
         }
     }
-
-    OsEng.setJoystickInputStates(std::move(states));
 
     LTRACE("main::mainPreSyncFunc(end)");
 }

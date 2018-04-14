@@ -31,31 +31,35 @@
 
 namespace openspace::interaction {
 
+enum class JoystickAction : uint8_t {
+    Idle = 0,
+    Press = 1,
+    Repeat = 2,
+    Release = 3
+};
+
 struct JoystickInputState {
-    ~JoystickInputState();
+    bool isConnected = false;
 
     std::string name;
 
-    int nAxes;
-    const float* axes;
+    int nAxes = 0;
+    std::array<float, 8> axes;
 
-    int nButtons;
-    const unsigned char* buttons;
-
-    bool* buttonsTriggered;
-    
+    int nButtons = 0;
+    std::array<JoystickAction, 32> buttons;
 };
+
 // Number is derived from GLFW constants
-struct JoystickInputStates : public std::array<std::unique_ptr<JoystickInputState>, 16> {
+struct JoystickInputStates : public std::array<JoystickInputState, 16> {
     float axis(int i) const;
-    bool buttonPressed(int i) const;
-    bool buttonTriggered(int i) const;
+    bool button(int i, JoystickAction action) const;
 };
 
-bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
-bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
-bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
-bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
+//bool operator==(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
+//bool operator!=(const JoystickInputState& lhs, const JoystickInputState& rhs) noexcept;
+//bool operator==(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
+//bool operator!=(const JoystickInputStates& lhs, const JoystickInputStates& rhs) noexcept;
 
 
 } // namespace openspace::interaction

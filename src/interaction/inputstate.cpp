@@ -61,49 +61,8 @@ void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
     _mouseScrollDelta = mouseScrollDelta;
 }
 
-void InputState::setJoystickInputStates(JoystickInputStates states) {
-    if (states != _joystickInputStates) {
-        for (int i = 0; i < states.size(); ++i) {
-            const std::unique_ptr<JoystickInputState>& state = _joystickInputStates[i];
-            if (state) {
-                LINFOC(
-                    "InputState",
-                    fmt::format(
-                        "[{}]: {} ; nAxes: {} ; nButtons: {}",
-                        i,
-                        state->name,
-                        state->nAxes,
-                        state->nButtons
-                    )
-                );
-            }
-        }
-    }
-    else {
-        for (int i = 0; i < states.size(); ++i) {
-            std::unique_ptr<JoystickInputState>& newState = states[i];
-            const std::unique_ptr<JoystickInputState>& oldState = _joystickInputStates[i];
-
-            if (oldState && newState) {
-                ghoul_assert(
-                    *newState == *oldState,
-                    "Bug in JoystickInputStates equality?"
-                );
-            }
-
-            if (oldState) {
-                for (int j = 0; j < newState->nButtons; ++j) {
-                    bool oldPressed = oldState->buttons[j] == 1;
-                    bool newPressed = newState->buttons[j] == 1;
-
-                    // Mark a button as triggered iff it has been pressed in this frame
-                    newState->buttonsTriggered[j] = !oldPressed && newPressed;
-                }
-            }
-        }
-    }
-
-    _joystickInputStates = std::move(states);
+void InputState::setJoystickInputStates(JoystickInputStates& states) {
+    _joystickInputStates = &states;
 }
 
 const std::list<std::pair<Key, KeyModifier> >& InputState::pressedKeys() const {
@@ -139,15 +98,15 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
 }
 
 const JoystickInputStates& InputState::joystickInputStates() const {
-    return _joystickInputStates;
+    return *_joystickInputStates;
 }
 
 float InputState::joystickAxis(int i) const {
-    return _joystickInputStates.axis(i);
+    return _joystickInputStates->axis(i);
 }
 
 bool InputState::joystickButton(int i) const{
-    return _joystickInputStates.buttonTriggered(i);
+    return _joystickInputStates->button(i, JoystickAction::Press);
 }
 
 } // namespace openspace::interaction

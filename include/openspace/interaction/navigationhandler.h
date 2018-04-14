@@ -80,7 +80,7 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void setJoystickInputStates(JoystickInputStates states);
+    void setJoystickInputStates(JoystickInputStates& states);
 
 
     void saveCameraStateToFile(const std::string& filepath);

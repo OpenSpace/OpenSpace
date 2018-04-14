@@ -355,14 +355,11 @@ glm::dquat OrbitalNavigator::roll(double deltaTime,
                                   const glm::dquat& localCameraRotation) const
 {
     glm::dquat mouseRollQuat = glm::angleAxis(
-        _mouseStates.localRollMouseVelocity().x * deltaTime,
-        glm::dvec3(0.0, 0.0, 1.0)
-    );
-    glm::dquat joystickRollQuat = glm::angleAxis(
+        _mouseStates.localRollMouseVelocity().x * deltaTime +
         _joystickStates.localRollJoystickVelocity().x * deltaTime,
         glm::dvec3(0.0, 0.0, 1.0)
     );
-    return localCameraRotation * joystickRollQuat * mouseRollQuat;
+    return localCameraRotation * mouseRollQuat;
 }
 
 glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
@@ -546,14 +543,11 @@ glm::dquat OrbitalNavigator::rotateHorizontally(
       glm::normalize(glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
 
     glm::dquat mouseCameraRollRotation = glm::angleAxis(
-        _mouseStates.globalRollMouseVelocity().x *
-        deltaTime, directionFromSurfaceToCamera
-    );
-    glm::dquat joystickCameraRollRotation = glm::angleAxis(
+        _mouseStates.globalRollMouseVelocity().x * deltaTime +
         _joystickStates.globalRollJoystickVelocity().x * deltaTime,
         directionFromSurfaceToCamera
     );
-    return joystickCameraRollRotation * mouseCameraRollRotation * globalCameraRotation;
+    return mouseCameraRollRotation * globalCameraRotation;
 }
 
 glm::dvec3 OrbitalNavigator::pushToSurface(

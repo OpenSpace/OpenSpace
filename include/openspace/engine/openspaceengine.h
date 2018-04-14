@@ -112,7 +112,7 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
-    void setJoystickInputStates(interaction::JoystickInputStates states);
+    void setJoystickInputStates(interaction::JoystickInputStates& states);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
