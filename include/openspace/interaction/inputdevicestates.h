@@ -22,25 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___JOYSTICKSTATE___H__
-#define __OPENSPACE_CORE___JOYSTICKSTATE___H__
+#ifndef __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#define __OPENSPACE_CORE___INPUTDEVICESTATES___H__
 
-#include <openspace/interaction/inputdevicestates.h>
+#include <openspace/interaction/delayedvariable.h>
+#include <ghoul/glm.h>
 
 namespace openspace::interaction {
 
-class JoystickStates : public InputDeviceStates {
+class InputState;
+
+class InputDeviceStates {
 public:
-    JoystickStates(double sensitivity, double velocityScaleFactor);
+    /**
+     * \param sensitivity
+     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
+     * interaction. Lower value will make it harder to move the camera.
+     */
+    InputDeviceStates(double sensitivity, double velocityScaleFactor);
+    virtual ~InputDeviceStates() = default;
 
-    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
+    
+    void setRotationalFriction(double friction);
+    void setHorizontalFriction(double friction);
+    void setVerticalFriction(double friction);
+    void setSensitivity(double sensitivity);
+    void setVelocityScaleFactor(double scaleFactor);
 
-private:
-    bool _isInRollMode = false;
-    int _rollToggleButton = 6;
+    glm::dvec2 globalRotationVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    glm::dvec2 truckMovementVelocity() const;
+    glm::dvec2 localRollVelocity() const;
+    glm::dvec2 globalRollVelocity() const;
+
+protected:
+    struct IndividualDeviceState {
+        IndividualDeviceState(double scaleFactor);
+        void setFriction(double friction);
+        void setVelocityScaleFactor(double scaleFactor);
+
+        glm::dvec2 previousPosition;
+        DelayedVariable<glm::dvec2, double> velocity;
+    };
+
+
+    double _sensitivity;
+
+    IndividualDeviceState _globalRotationState;
+    IndividualDeviceState _localRotationState;
+    IndividualDeviceState _truckMovementState;
+    IndividualDeviceState _localRollState;
+    IndividualDeviceState _globalRollState;
 };
-
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___JOYSTICKSTATE___H__
+#endif // __OPENSPACE_CORE___INPUTDEVICESTATES___H__

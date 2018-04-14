@@ -28,31 +28,11 @@
 
 namespace openspace::interaction {
 
-MouseState::MouseState(double scaleFactor)
-    : previousPosition(0.0, 0.0)
-    , velocity(scaleFactor, 1)
+MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
+    : InputDeviceStates(sensitivity, velocityScaleFactor)
 {}
 
-void MouseState::setFriction(double friction) {
-    velocity.setFriction(friction);
-}
-
-void MouseState::setVelocityScaleFactor(double scaleFactor) {
-    velocity.setScaleFactor(scaleFactor);
-}
-
-MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
-    : _sensitivity(sensitivity)
-    , _globalRotationMouseState(velocityScaleFactor)
-    , _localRotationMouseState(velocityScaleFactor)
-    , _truckMovementMouseState(velocityScaleFactor)
-    , _localRollMouseState(velocityScaleFactor)
-    , _globalRollMouseState(velocityScaleFactor)
-{ }
-
-void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
-                                             double deltaTime)
-{
+void MouseStates::updateStateFromInput(const InputState& inputState, double deltaTime) {
     glm::dvec2 mousePosition = inputState.mousePosition();
 
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
@@ -61,121 +41,85 @@ void MouseStates::updateMouseStatesFromInput(const InputState& inputState,
     bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl) |
                           inputState.isKeyPressed(Key::RightControl);
     bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift) |
-                          inputState.isKeyPressed(Key::RightShift);
+                           inputState.isKeyPressed(Key::RightShift);
     bool keyAltPressed = inputState.isKeyPressed(Key::LeftAlt) |
-                          inputState.isKeyPressed(Key::RightAlt);
+                         inputState.isKeyPressed(Key::RightAlt);
 
     // Update the mouse states
     if (button1Pressed && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
-                _localRotationMouseState.previousPosition - mousePosition;
-            _localRotationMouseState.velocity.set(
-                mousePositionDelta * _sensitivity, deltaTime);
+                _localRotationState.previousPosition - mousePosition;
+            _localRotationState.velocity.set(
+                mousePositionDelta * _sensitivity,
+                deltaTime
+            );
 
-            _globalRotationMouseState.previousPosition = mousePosition;
-            _globalRotationMouseState.velocity.decelerate(deltaTime);
+            _globalRotationState.previousPosition = mousePosition;
+            _globalRotationState.velocity.decelerate(deltaTime);
         }
         else {
             glm::dvec2 mousePositionDelta =
-                _globalRotationMouseState.previousPosition - mousePosition;
-            _globalRotationMouseState.velocity.set(
-                mousePositionDelta * _sensitivity, deltaTime);
+                _globalRotationState.previousPosition - mousePosition;
+            _globalRotationState.velocity.set(
+                mousePositionDelta * _sensitivity,
+                deltaTime
+            );
 
-            _localRotationMouseState.previousPosition = mousePosition;
-            _localRotationMouseState.velocity.decelerate(deltaTime);
+            _localRotationState.previousPosition = mousePosition;
+            _localRotationState.velocity.decelerate(deltaTime);
         }
     }
     else { // !button1Pressed
-        _localRotationMouseState.previousPosition = mousePosition;
-        _localRotationMouseState.velocity.decelerate(deltaTime);
+        _localRotationState.previousPosition = mousePosition;
+        _localRotationState.velocity.decelerate(deltaTime);
 
-        _globalRotationMouseState.previousPosition = mousePosition;
-        _globalRotationMouseState.velocity.decelerate(deltaTime);
+        _globalRotationState.previousPosition = mousePosition;
+        _globalRotationState.velocity.decelerate(deltaTime);
     }
     if (button2Pressed || (keyAltPressed && button1Pressed)) {
         glm::dvec2 mousePositionDelta =
-            _truckMovementMouseState.previousPosition - mousePosition;
-        _truckMovementMouseState.velocity.set(
-            mousePositionDelta * _sensitivity, deltaTime);
+            _truckMovementState.previousPosition - mousePosition;
+        _truckMovementState.velocity.set(
+            mousePositionDelta * _sensitivity,
+            deltaTime
+        );
     }
     else { // !button2Pressed
-        _truckMovementMouseState.previousPosition = mousePosition;
-        _truckMovementMouseState.velocity.decelerate(deltaTime);
+        _truckMovementState.previousPosition = mousePosition;
+        _truckMovementState.velocity.decelerate(deltaTime);
     }
     if (button3Pressed || (keyShiftPressed && button1Pressed)) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
-                _localRollMouseState.previousPosition - mousePosition;
-            _localRollMouseState.velocity.set(
-                mousePositionDelta * _sensitivity, deltaTime);
+                _localRollState.previousPosition - mousePosition;
+            _localRollState.velocity.set(
+                mousePositionDelta * _sensitivity,
+                deltaTime
+            );
 
-            _globalRollMouseState.previousPosition = mousePosition;
-            _globalRollMouseState.velocity.decelerate(deltaTime);
+            _globalRollState.previousPosition = mousePosition;
+            _globalRollState.velocity.decelerate(deltaTime);
         }
         else {
             glm::dvec2 mousePositionDelta =
-                _globalRollMouseState.previousPosition - mousePosition;
-            _globalRollMouseState.velocity.set(
-                mousePositionDelta * _sensitivity, deltaTime);
+                _globalRollState.previousPosition - mousePosition;
+            _globalRollState.velocity.set(
+                mousePositionDelta * _sensitivity,
+                deltaTime
+            );
 
-            _localRollMouseState.previousPosition = mousePosition;
-            _localRollMouseState.velocity.decelerate(deltaTime);
+            _localRollState.previousPosition = mousePosition;
+            _localRollState.velocity.decelerate(deltaTime);
         }
     }
     else { // !button3Pressed
-        _globalRollMouseState.previousPosition = mousePosition;
-        _globalRollMouseState.velocity.decelerate(deltaTime);
+        _globalRollState.previousPosition = mousePosition;
+        _globalRollState.velocity.decelerate(deltaTime);
 
-        _localRollMouseState.previousPosition = mousePosition;
-        _localRollMouseState.velocity.decelerate(deltaTime);
+        _localRollState.previousPosition = mousePosition;
+        _localRollState.velocity.decelerate(deltaTime);
     }
-}
-
-void MouseStates::setRotationalFriction(double friction) {
-    _localRotationMouseState.setFriction(friction);
-    _localRollMouseState.setFriction(friction);
-    _globalRollMouseState.setFriction(friction);
-}
-
-void MouseStates::setHorizontalFriction(double friction) {
-    _globalRotationMouseState.setFriction(friction);
-}
-
-void MouseStates::setVerticalFriction(double friction) {
-    _truckMovementMouseState.setFriction(friction);
-}
-
-void MouseStates::setSensitivity(double sensitivity) {
-    _sensitivity = sensitivity;
-}
-
-void MouseStates::setVelocityScaleFactor(double scaleFactor) {
-    _globalRotationMouseState.setVelocityScaleFactor(scaleFactor);
-    _localRotationMouseState.setVelocityScaleFactor(scaleFactor);
-    _truckMovementMouseState.setVelocityScaleFactor(scaleFactor);
-    _localRollMouseState.setVelocityScaleFactor(scaleFactor);
-    _globalRollMouseState.setVelocityScaleFactor(scaleFactor);
-}
-
-glm::dvec2 MouseStates::globalRotationMouseVelocity() const{
-    return _globalRotationMouseState.velocity.get();
-}
-
-glm::dvec2 MouseStates::localRotationMouseVelocity() const{
-    return _localRotationMouseState.velocity.get();
-}
-
-glm::dvec2 MouseStates::truckMovementMouseVelocity() const{
-    return _truckMovementMouseState.velocity.get();
-}
-
-glm::dvec2 MouseStates::localRollMouseVelocity() const{
-    return _localRollMouseState.velocity.get();
-}
-
-glm::dvec2 MouseStates::globalRollMouseVelocity() const{
-    return _globalRollMouseState.velocity.get();
 }
 
 } // namespace openspace::interaction

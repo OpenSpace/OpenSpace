@@ -25,52 +25,15 @@
 #ifndef __OPENSPACE_CORE___MOUSESTATE___H__
 #define __OPENSPACE_CORE___MOUSESTATE___H__
 
-#include <openspace/interaction/delayedvariable.h>
-
-#include <ghoul/glm.h>
+#include <openspace/interaction/inputdevicestates.h>
 
 namespace openspace::interaction {
 
-class InputState;
-
-struct MouseState {
-    MouseState(double scaleFactor);
-    void setFriction(double friction);
-    void setVelocityScaleFactor(double scaleFactor);
-
-    glm::dvec2 previousPosition;
-    DelayedVariable<glm::dvec2, double> velocity;
-};
-
-class MouseStates {
+class MouseStates : public InputDeviceStates {
 public:
-    /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
-     */
     MouseStates(double sensitivity, double velocityScaleFactor);
-    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
 
-    glm::dvec2 globalRotationMouseVelocity() const;
-    glm::dvec2 localRotationMouseVelocity() const;
-    glm::dvec2 truckMovementMouseVelocity() const;
-    glm::dvec2 localRollMouseVelocity() const;
-    glm::dvec2 globalRollMouseVelocity() const;
-
-private:
-    double _sensitivity;
-
-    MouseState _globalRotationMouseState;
-    MouseState _localRotationMouseState;
-    MouseState _truckMovementMouseState;
-    MouseState _localRollMouseState;
-    MouseState _globalRollMouseState;
+    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 };
 
 } // namespace openspace::interaction
