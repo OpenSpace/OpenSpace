@@ -89,7 +89,6 @@ uniform dmat4 dModelTransformMatrix;
 uniform dmat4 dSGCTViewToWorldMatrix;
 uniform dmat4 dSgctProjectionToModelTransformMatrix;
 
-uniform dvec3 dCamRigPos;
 uniform dvec4 dCamPosObj;
 uniform dvec3 sunDirectionObj;
 

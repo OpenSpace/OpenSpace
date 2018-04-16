@@ -277,8 +277,6 @@ namespace openspace {
                 program.setUniform(_uniformCache2.dSgctProjectionToModelTransformMatrix,
                     inverseWholeMatrixPipeline);
 
-                program.setUniform(_uniformCache2.dCamRigPos, renderData.camera.positionVec3());
-
                 glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
                 //glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
                 program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
@@ -466,7 +464,6 @@ namespace openspace {
         _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
         _uniformCache2.dSgctProjectionToModelTransformMatrix = program.uniformLocation("dSgctProjectionToModelTransformMatrix");
         _uniformCache2.dSGCTViewToWorldMatrix = program.uniformLocation("dSGCTViewToWorldMatrix");
-        _uniformCache2.dCamRigPos = program.uniformLocation("dCamRigPos");
         _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
         _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
         _uniformCache2.hardShadows = program.uniformLocation("hardShadows");
