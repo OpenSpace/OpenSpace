@@ -6,5 +6,8 @@ asset.onInitialize(function()
     openspace.navigation.bindJoystickAxis(4, "Zoom In", false, true);
     openspace.navigation.bindJoystickAxis(5, "Zoom Out", false, true);
 
+    -- Button binding examples
     -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Pressed')")
+    -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Repeat')", "Repeat")
+    -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Released')", "Release")
 end)
