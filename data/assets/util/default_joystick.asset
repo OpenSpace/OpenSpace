@@ -1,13 +1,105 @@
-asset.onInitialize(function()
-    openspace.navigation.bindJoystickAxis(0, "Orbit X", true);
-    openspace.navigation.bindJoystickAxis(1, "Orbit Y");
-    openspace.navigation.bindJoystickAxis(2, "Pan X", true);
-    openspace.navigation.bindJoystickAxis(3, "Pan Y");
-    openspace.navigation.bindJoystickAxis(4, "Zoom In", false, true);
-    openspace.navigation.bindJoystickAxis(5, "Zoom Out", false, true);
+local propertyHelper = asset.require('./property_helper')
 
-    -- Button binding examples
-    -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Pressed')")
-    -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Repeat')", "Repeat")
-    -- openspace.navigation.bindJoystickButton(6, "openspace.printInfo('Released')", "Release")
+-- Allowed values for the second parameter of bindJoystickAxis:
+-- "None"
+-- "Orbit X"
+-- "Orbit Y"
+-- "Zoom In"
+-- "Zoom Out"
+-- "LocalRoll X"
+-- "LocalRoll Y"
+-- "GlobalRoll X"
+-- "GlobalRoll Y"
+-- "Pan X"
+-- "Pan Y"
+-- Third parameter determines whether the axis should be inverted
+-- Fourth parameter determines whether the axis should be normalized from [-1,1] to [0,1]
+
+
+local XBoxController = {
+    LeftThumbStick = { 0 , 1 },
+    RightThumbStick = { 2, 3 },
+    LeftTrigger = 4,
+    RightTrigger = 5,
+    A = 0,
+    B = 1,
+    X = 2,
+    Y = 3,
+    LB = 4,
+    RB = 5,
+    Select = 6,
+    Start = 7,
+    LeftStick = 8,
+    RightStick = 9,
+    DPad = {
+        Up = 10,
+        Right = 11,
+        Down = 12,
+        Left = 13
+    }
+}
+
+
+-- Variables to store the state of the joystick between frames
+Joystick = {}
+Joystick.State = {}
+Joystick.State.IsInRollMode = false
+Joystick.State.Axis = {}
+
+local bindLocalRoll = function(axis)
+return [[
+        -- We only want to store the current state in the first mode that is enabled, otherwise we will overwrite the backup
+        if not Joystick.State.IsInRollMode then
+            -- Save current axis state
+            Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized = openspace.navigation.joystickAxis(]] .. axis .. [[)
+        end
+
+        -- Set new axis state
+        openspace.navigation.bindJoystickAxis(]] .. axis .. [[, "LocalRoll X", true);
+        Joystick.State.IsInRollMode = true
+    ]]
+end
+
+local bindGlobalRoll = function(axis)
+    return [[
+        -- We only want to store the current state in the first mode that is enabled, otherwise we will overwrite the backup
+        if not Joystick.State.IsInRollMode then
+            -- Save current axis state
+            Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized = openspace.navigation.joystickAxis(]] .. axis .. [[)
+        end
+
+        -- Set new axis state
+        openspace.navigation.bindJoystickAxis(]] .. axis .. [[, "GlobalRoll X", true);
+        Joystick.State.IsInRollMode = true
+    ]]
+end
+
+local unbindRoll = function(axis)
+    return [[
+        -- Reset previous state
+        openspace.navigation.bindJoystickAxis(]] .. axis .. [[, Joystick.State.Axis.Type, Joystick.State.Axis.Inverted, Joystick.State.Axis.Normalized);
+]]
+end
+
+asset.onInitialize(function()
+    local controller = XBoxController;
+
+    openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[1], "Orbit X");
+    openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[2], "Orbit Y", true);
+    openspace.navigation.bindJoystickAxis(controller.RightThumbStick[1], "Pan X", true);
+    openspace.navigation.bindJoystickAxis(controller.RightThumbStick[2], "Pan Y");
+    openspace.navigation.bindJoystickAxis(controller.LeftTrigger, "Zoom Out", false, true);
+    openspace.navigation.bindJoystickAxis(controller.RightTrigger, "Zoom In", false, true);
+
+    openspace.navigation.bindJoystickButton(controller.LB, bindLocalRoll(controller.RightThumbStick[1]))
+    openspace.navigation.bindJoystickButton(controller.LB, unbindRoll(controller.RightThumbStick[1]), "Release")
+    openspace.navigation.bindJoystickButton(controller.RB, bindGlobalRoll(controller.RightThumbStick[1]))
+    openspace.navigation.bindJoystickButton(controller.RB, unbindRoll(controller.RightThumbStick[1]), "Release")
+
+    openspace.navigation.bindJoystickButton(controller.A, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'))
+    openspace.navigation.bindJoystickButton(controller.B, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'))
+    openspace.navigation.bindJoystickButton(controller.DPad.Left, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'))
+
+    openspace.navigation.bindJoystickButton(controller.X, "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')")
+    openspace.navigation.bindJoystickButton(controller.Y, "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')")
 end)
