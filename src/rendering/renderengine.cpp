@@ -31,15 +31,15 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>

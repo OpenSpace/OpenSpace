@@ -22,17 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/mousestate.h>
+#include <openspace/interaction/mousecamerastates.h>
 
 #include <openspace/interaction/inputstate.h>
 
 namespace openspace::interaction {
 
-MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
-    : InputDeviceStates(sensitivity, velocityScaleFactor)
+MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFactor)
+    : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
-void MouseStates::updateStateFromInput(const InputState& inputState, double deltaTime) {
+void MouseCameraStates::updateStateFromInput(const InputState& inputState, double deltaTime) {
     glm::dvec2 mousePosition = inputState.mousePosition();
 
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);

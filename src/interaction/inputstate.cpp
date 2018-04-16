@@ -46,10 +46,7 @@ void InputState::mouseButtonCallback(MouseButton button, MouseAction action) {
         _mouseButtonsDown.push_back(button);
     }
     else if (action == MouseAction::Release) {
-        // Remove all key pressings for 'button'
         _mouseButtonsDown.remove(button);
-        //    [button](MouseButton buttonInList) { return button == buttonInList; }
-        //);
     }
 }
 

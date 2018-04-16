@@ -22,15 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/controller.h>
+#ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+#define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
 
-#include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/camerainteractionstates.h>
 
 namespace openspace::interaction {
 
-void Controller::setHandler(NavigationHandler* handler) {
-    _handler = handler;
-}
+class MouseCameraStates : public CameraInteractionStates {
+public:
+    MouseCameraStates(double sensitivity, double velocityScaleFactor);
+
+    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
+};
 
 } // namespace openspace::interaction
 
+#endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__

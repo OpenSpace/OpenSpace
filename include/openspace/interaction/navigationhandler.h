@@ -85,15 +85,15 @@ public:
 
     void setJoystickAxisMapping(
         int axis,
-        JoystickState::AxisType mapping,
-        JoystickState::AxisInvert shouldInvert = JoystickState::AxisInvert::No,
-        JoystickState::AxisNormalize shouldNormalize = JoystickState::AxisNormalize::No
+        JoystickCameraStates::AxisType mapping,
+        JoystickCameraStates::AxisInvert shouldInvert = JoystickCameraStates::AxisInvert::No,
+        JoystickCameraStates::AxisNormalize shouldNormalize = JoystickCameraStates::AxisNormalize::No
     );
 
-    JoystickState::AxisInformation joystickAxisMapping(int axis) const;
+    JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
 
     void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
-        JoystickState::ButtonCommandRemote remote);
+        JoystickCameraStates::ButtonCommandRemote remote);
 
     void clearJoystickButtonCommand(int button);
     std::vector<std::string> joystickButtonCommand(int button) const;

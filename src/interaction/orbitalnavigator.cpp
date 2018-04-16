@@ -633,7 +633,7 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
     return posHandle;
 }
 
-JoystickState& OrbitalNavigator::joystickStates() {
+JoystickCameraStates& OrbitalNavigator::joystickStates() {
     return _joystickStates;
 }
 

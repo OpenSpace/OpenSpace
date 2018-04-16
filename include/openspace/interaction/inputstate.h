@@ -28,13 +28,12 @@
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-
 #include <ghoul/glm.h>
-
 #include <list>
 
 namespace openspace::interaction {
 
+// This class represents the global input state of interaction devices
 class InputState {
 public:
     InputState() = default;

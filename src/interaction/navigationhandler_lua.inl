@@ -109,9 +109,9 @@ int bindJoystickAxis(lua_State* L) {
 
     OsEng.navigationHandler().setJoystickAxisMapping(
         axis,
-        ghoul::from_string<interaction::JoystickState::AxisType>(axisType),
-        interaction::JoystickState::AxisInvert(shouldInvert),
-        interaction::JoystickState::AxisNormalize(shouldNormalize)
+        ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
+        interaction::JoystickCameraStates::AxisInvert(shouldInvert),
+        interaction::JoystickCameraStates::AxisNormalize(shouldNormalize)
     );
 
 
@@ -123,7 +123,7 @@ int joystickAxis(lua_State* L) {
 
     int axis = static_cast<int>(lua_tonumber(L, 1));
 
-    using AI = interaction::JoystickState::AxisInformation;
+    using AI = interaction::JoystickCameraStates::AxisInformation;
     AI info = OsEng.navigationHandler().joystickAxisMapping(axis);
 
     lua_settop(L, 0);
@@ -154,7 +154,7 @@ int bindJoystickButton(lua_State* L) {
         button,
         std::move(command),
         action,
-        interaction::JoystickState::ButtonCommandRemote(isRemote)
+        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote)
     );
     
     lua_settop(L, 0);

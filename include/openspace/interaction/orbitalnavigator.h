@@ -29,7 +29,7 @@
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickstate.h>
-#include <openspace/interaction/mousestate.h>
+#include <openspace/interaction/mousecamerastates.h>
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -57,7 +57,7 @@ public:
     void setFocusNode(SceneGraphNode* focusNode);
     void startInterpolateCameraDirection(const Camera& camera);
 
-    JoystickState& joystickStates();
+    JoystickCameraStates& joystickStates();
 
     bool followingNodeRotation() const;
     SceneGraphNode* focusNode() const;
@@ -90,8 +90,8 @@ private:
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
 
-    MouseStates _mouseStates;
-    JoystickState _joystickStates;
+    MouseCameraStates _mouseStates;
+    JoystickCameraStates _joystickStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;

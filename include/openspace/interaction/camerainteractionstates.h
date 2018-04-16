@@ -22,30 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CONTROLLER___H__
-#define __OPENSPACE_CORE___CONTROLLER___H__
+#ifndef __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#define __OPENSPACE_CORE___INPUTDEVICESTATES___H__
 
-#include <openspace/scene/scenegraphnode.h>
-
+#include <openspace/interaction/delayedvariable.h>
 #include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
 
 namespace openspace::interaction {
 
-class NavigationHandler;
+class InputState;
 
-class Controller {
+class CameraInteractionStates {
 public:
-    Controller() :
-        _handler(nullptr)
-    {}
+    /**
+     * \param sensitivity
+     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
+     * interaction. Lower value will make it harder to move the camera.
+     */
+    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
+    virtual ~CameraInteractionStates() = default;
 
-    void setHandler(NavigationHandler* handler);
+    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
+    
+    void setRotationalFriction(double friction);
+    void setHorizontalFriction(double friction);
+    void setVerticalFriction(double friction);
+    void setSensitivity(double sensitivity);
+    void setVelocityScaleFactor(double scaleFactor);
+
+    glm::dvec2 globalRotationVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    glm::dvec2 truckMovementVelocity() const;
+    glm::dvec2 localRollVelocity() const;
+    glm::dvec2 globalRollVelocity() const;
 
 protected:
-    NavigationHandler* _handler;
+    struct InteractionState {
+        InteractionState(double scaleFactor);
+        void setFriction(double friction);
+        void setVelocityScaleFactor(double scaleFactor);
+
+        glm::dvec2 previousPosition;
+        DelayedVariable<glm::dvec2, double> velocity;
+    };
+
+
+    double _sensitivity;
+
+    InteractionState _globalRotationState;
+    InteractionState _localRotationState;
+    InteractionState _truckMovementState;
+    InteractionState _localRollState;
+    InteractionState _globalRollState;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___CONTROLLER___H__
+#endif // __OPENSPACE_CORE___INPUTDEVICESTATES___H__

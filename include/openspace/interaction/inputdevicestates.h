@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTDEVICESTATES___H__
-#define __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
 
 #include <openspace/interaction/delayedvariable.h>
 #include <ghoul/glm.h>
@@ -32,15 +32,15 @@ namespace openspace::interaction {
 
 class InputState;
 
-class InputDeviceStates {
+class CameraInteractionStates {
 public:
     /**
      * \param sensitivity
      * \param velocityScaleFactor can be set to 60 to remove the inertia of the
      * interaction. Lower value will make it harder to move the camera.
      */
-    InputDeviceStates(double sensitivity, double velocityScaleFactor);
-    virtual ~InputDeviceStates() = default;
+    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
+    virtual ~CameraInteractionStates() = default;
 
     virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
     
@@ -57,8 +57,8 @@ public:
     glm::dvec2 globalRollVelocity() const;
 
 protected:
-    struct IndividualDeviceState {
-        IndividualDeviceState(double scaleFactor);
+    struct InteractionState {
+        InteractionState(double scaleFactor);
         void setFriction(double friction);
         void setVelocityScaleFactor(double scaleFactor);
 
@@ -69,13 +69,13 @@ protected:
 
     double _sensitivity;
 
-    IndividualDeviceState _globalRotationState;
-    IndividualDeviceState _localRotationState;
-    IndividualDeviceState _truckMovementState;
-    IndividualDeviceState _localRollState;
-    IndividualDeviceState _globalRollState;
+    InteractionState _globalRotationState;
+    InteractionState _localRotationState;
+    InteractionState _truckMovementState;
+    InteractionState _localRollState;
+    InteractionState _globalRollState;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

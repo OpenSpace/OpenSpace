@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
-#define __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
+#ifndef __OPENSPACE_CORE___JOYSTICKSTATE___H__
+#define __OPENSPACE_CORE___JOYSTICKSTATE___H__
 
 #include <openspace/interaction/camerainteractionstates.h>
 
@@ -113,4 +113,4 @@ openspace::interaction::JoystickCameraStates::AxisType from_string(const std::st
 
 } // namespace ghoul
 
-#endif // __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
+#endif // __OPENSPACE_CORE___JOYSTICKSTATE___H__
