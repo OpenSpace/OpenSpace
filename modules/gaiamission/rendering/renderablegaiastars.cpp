@@ -649,11 +649,16 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         GL_STREAM_DRAW
     );
 
-    // Update SSBO Position array.
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
+    // Use orphaning strategy for all SSBOs.
     size_t posChunkSize = maxStarsPerNode * _posSize;
     size_t posStreamingBudget = _octreeManager->totalNodes() * posChunkSize;
+    size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
+    size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
+    size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
+    size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
 
+    // Always use Position SSBO.
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
     glBufferData(
         GL_SHADER_STORAGE_BUFFER,
         posStreamingBudget * sizeof(GLfloat),
@@ -661,10 +666,33 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         GL_STREAM_DRAW
     );
 
-    // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+    // Use Color SSBO if render option is 'Color' or 'Motion'.
+    if (option != gaiamission::RenderOption::Static) {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboCol);
+        glBufferData(
+            GL_SHADER_STORAGE_BUFFER,
+            colStreamingBudget * sizeof(GLfloat),
+            nullptr,
+            GL_STREAM_DRAW
+        );
+
+        // Use Velocity SSBO if specified.
+        if (option == gaiamission::RenderOption::Motion) {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboVel);
+            glBufferData(
+                GL_SHADER_STORAGE_BUFFER,
+                velStreamingBudget * sizeof(GLfloat),
+                nullptr,
+                GL_STREAM_DRAW
+            );
+        }
+    }
+
+    // Update SSBOs with one insert per chunk/node. The key in map holds the offset index.
     for (auto &[offset, subData] : updateData) {
         // We don't need to fill chunk with zeros anymore! Just check if we have any values to update.
         if (!subData.empty()) {
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
             int posDataSize = _posSize * (subData.size() / _nValuesInSlice);
             std::vector<float> posData(subData.begin(), subData.begin() + posDataSize);
             glBufferSubData(
@@ -673,58 +701,26 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 posDataSize * sizeof(GLfloat),
                 posData.data()
             );
-        }
-    }
 
-    // Update Color SSBO if render option is 'Color' or 'Motion'.
-    if (option != gaiamission::RenderOption::Static) {
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboCol);
-        size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
-        size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
-
-        glBufferData(
-            GL_SHADER_STORAGE_BUFFER,
-            colStreamingBudget * sizeof(GLfloat),
-            nullptr,
-            GL_STREAM_DRAW
-        );
-
-        // Update buffer with one insert per chunk/node. The key in map holds the offset index.
-        for (auto &[offset, subData] : updateData) {
-            // Check if we have any values to update.
-            if (!subData.empty()) {
-                auto itBegin = subData.begin() + _posSize * (subData.size() / _nValuesInSlice);
+            // Update Color SSBO if render option is 'Color' or 'Motion'.
+            if (option != gaiamission::RenderOption::Static) {
+                glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboCol);
+                auto itColBegin = subData.begin() + posDataSize;
                 int colDataSize = _colSize * (subData.size() / _nValuesInSlice);
-                std::vector<float> colData(itBegin, itBegin + colDataSize);
+                std::vector<float> colData(itColBegin, itColBegin + colDataSize);
                 glBufferSubData(
                     GL_SHADER_STORAGE_BUFFER,
                     offset * colChunkSize * sizeof(GLfloat),
                     colDataSize * sizeof(GLfloat),
                     colData.data()
                 );
-            }
-        }
 
-        // Update Velocity SSBO if specified.
-        if (option == gaiamission::RenderOption::Motion) {
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboVel);
-            size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
-            size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
-
-            glBufferData(
-                GL_SHADER_STORAGE_BUFFER,
-                velStreamingBudget * sizeof(GLfloat),
-                nullptr,
-                GL_STREAM_DRAW
-            );
-
-            // Update buffer with one insert per chunk/node. The key in map holds the offset index.
-            for (auto &[offset, subData] : updateData) {
-                // Check if we have any values to update.
-                if (!subData.empty()) {
-                    int posColDataSize = (_posSize + _colSize) * (subData.size() / _nValuesInSlice);
+                // Update Velocity SSBO if specified.
+                if (option == gaiamission::RenderOption::Motion) {
+                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboVel);
+                    auto itVelBegin = subData.begin() + posDataSize + colDataSize;
                     int velDataSize = _velSize * (subData.size() / _nValuesInSlice);
-                    std::vector<float> velData(subData.begin() + posColDataSize, subData.end());
+                    std::vector<float> velData(itVelBegin, subData.end());
                     glBufferSubData(
                         GL_SHADER_STORAGE_BUFFER,
                         offset * velChunkSize * sizeof(GLfloat),
