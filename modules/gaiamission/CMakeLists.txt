@@ -32,6 +32,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h 
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/constructoctreetask.h 
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderoption.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 

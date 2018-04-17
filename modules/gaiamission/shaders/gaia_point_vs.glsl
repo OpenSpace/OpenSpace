@@ -33,9 +33,27 @@ const int RENDEROPTION_MOTION = 2;
 const float EPS = 1e-5;
 const float Parsec = 3.0856776e16;
 
-in vec3 in_position;
-in vec3 in_velocity;
-in vec2 in_brightness;
+layout (std430) buffer ssbo_idx_data { 
+  int starsPerChunk[];
+};
+
+layout (std430) buffer ssbo_pos_data { 
+  float positionData[];
+};
+
+/*layout (std430) buffer ssbo_col_data { 
+  float colorData[];
+};
+
+layout (std430) buffer ssbo_vel_data { 
+  float velocityData[];
+};*/
+
+in int gl_VertexID;
+
+//in vec3 in_position;
+//in vec2 in_brightness;
+//in vec3 in_velocity;
 
 out vec2 vs_brightness;
 out vec4 vs_gPosition;
@@ -48,9 +66,48 @@ uniform mat4 projection;
 uniform float time; 
 uniform int renderOption;
 
-void main() {
-    vs_brightness = in_brightness;
+uniform int maxStarsPerNode;
+uniform int nChunksToRender;
+
+// Use binary search to find the chunk containing our star ID.
+int findChunkId(int left, int right, int id) {
     
+    while ( left <= right ) {
+        int middle = (left + right) / 2;
+        int firstStarInChunk = starsPerChunk[middle];
+        if (left == right || (firstStarInChunk < id && id < starsPerChunk[middle+1]) ||
+            (starsPerChunk[middle-1] < id && id == firstStarInChunk)){
+            return middle;
+        }
+        else if (id <= firstStarInChunk) {
+            // Go smaller
+            right = middle - 1;
+        }
+        else {
+            // Go bigger
+            left = middle + 1;
+        }
+    }
+    return -1;
+}
+
+void main() {
+    // Fetch our data.
+    int chunkId = findChunkId(0, nChunksToRender - 1, gl_VertexID);
+    if (chunkId == -1) {
+        vs_gPosition = vec4(0.0);    
+        gl_Position = vec4(0.0);
+        return;
+    }
+    int placeInChunk = gl_VertexID - starsPerChunk[chunkId];
+    int starId = maxStarsPerNode * chunkId + placeInChunk;
+
+    vec3 in_position = vec3(positionData[starId*3], positionData[starId*3 + 1], positionData[starId*3 + 2]);
+    vec2 in_brightness = vec2(0.0); //vec2(colorData[starId*2], colorData[starId*2 + 1]);
+    vec3 in_velocity = vec3(0.0); //vec3(velocityData[starId*3], velocityData[starId*3 + 1], velocityData[starId*3 + 2]);
+    
+    vs_brightness = in_brightness;
+
     // Convert kiloParsec to meter.
     vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
 

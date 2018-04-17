@@ -27,7 +27,7 @@
 
 #include <vector>
 #include <stack>
-#include <unordered_map>
+#include <map>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <modules/gaiamission/rendering/renderoption.h>
@@ -60,8 +60,8 @@ public:
     void initVBOIndexStack(int maxIndex);
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
-    std::unordered_map<int, std::vector<float>> traverseData(const glm::mat4 mvp,
-        const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option);
+    std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
+        int& deltaStars, gaiamission::RenderOption option);
     std::vector<float> getAllData(gaiamission::RenderOption option);
     void writeToFile(std::ofstream& outFileStream);
     void readFromFile(std::ifstream& inFileStream);
@@ -86,15 +86,13 @@ private:
         std::vector<float> starValues, int depth = 1);
     void constructLodCache(std::shared_ptr<OctreeNode> node);
     void insertStarInLodCache(std::shared_ptr<OctreeNode> node, std::vector<float> starValues);
-    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node,
-        std::string prefix) const;
-    std::unordered_map<int, std::vector<float>> checkNodeIntersection(
-        std::shared_ptr<OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize, 
-        int& deltaStars, gaiamission::RenderOption option);
-    std::unordered_map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<
-        OctreeNode> node, int& deltaStars, bool recursive = true);
-    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, 
+    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node, std::string prefix) const;
+    std::map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
+        const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars, 
         gaiamission::RenderOption option);
+    std::map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<OctreeNode> node, 
+        int& deltaStars, bool recursive = true);
+    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, gaiamission::RenderOption option);
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
     void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
     void readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);

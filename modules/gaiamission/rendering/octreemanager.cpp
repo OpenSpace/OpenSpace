@@ -131,10 +131,10 @@ void OctreeManager::printStarsPerNode() const {
 
 // Builds render data structure by traversing the Octree and checking for intersection 
 // with view frustum. Every vector in map contains data for one node.  
-std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mvp, 
+std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mvp, 
     const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option) {
 
-    auto renderData = std::unordered_map<int, std::vector<float>>();
+    auto renderData = std::map<int, std::vector<float>>();
 
     // Reclaim indices from previous render call. 
     for (auto removedKey = _removedKeysInPrevCall.rbegin();
@@ -172,7 +172,7 @@ std::unordered_map<int, std::vector<float>> OctreeManager::traverseData(const gl
 
     if (_rebuildVBO) {
         // We need to overwrite bigger indices that had data before!
-        auto idxToRemove = std::unordered_map<int, std::vector<float>>();
+        auto idxToRemove = std::map<int, std::vector<float>>();
         for (size_t idx : _removedKeysInPrevCall) {
             idxToRemove[idx] = std::vector<float>();
         }
@@ -227,7 +227,9 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream,
     outFileStream.write(reinterpret_cast<const char*>(&isLeaf), sizeof(bool));
     outFileStream.write(reinterpret_cast<const char*>(&numStars), sizeof(int32_t));
     outFileStream.write(reinterpret_cast<const char*>(&nDataSize), sizeof(int32_t));
-    outFileStream.write(reinterpret_cast<const char*>(nodeData.data()), nBytes);
+    if (nDataSize > 0) {
+        outFileStream.write(reinterpret_cast<const char*>(nodeData.data()), nBytes);
+    }
 
     // Write children to file (in Morton order) if we're in an inner node.
     if (!node->isLeaf) {
@@ -269,7 +271,9 @@ void OctreeManager::readNodeFromFile(std::ifstream& inFileStream,
 
     auto readData = std::vector<float>(nDataSize, 0.0f);
     size_t nBytes = nDataSize * sizeof(readData[0]);
-    inFileStream.read(reinterpret_cast<char*>(&readData[0]), nBytes);
+    if (nDataSize > 0) {
+        inFileStream.read(reinterpret_cast<char*>(&readData[0]), nBytes);
+    }
 
     node->isLeaf = isLeaf;
     node->numStars = numStars;
@@ -460,11 +464,10 @@ std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,
 
 // Private help function for traverseData(). Recursively checks which nodes intersects with
 // the view frustum (interpreted as an AABB) and decides if data should be optimized away.
-std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
-    std::shared_ptr<OctreeNode> node, const glm::mat4 mvp, const glm::vec2 screenSize,
-    int& deltaStars, gaiamission::RenderOption option) {
+std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
+    const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option) {
 
-    auto fetchedData = std::unordered_map<int, std::vector<float>>();
+    auto fetchedData = std::map<int, std::vector<float>>();
     glm::vec3 debugPos;
     int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
 
@@ -584,10 +587,10 @@ std::unordered_map<int, std::vector<float>> OctreeManager::checkNodeIntersection
 
 // Checks if specified node existed in cache, and removes it if that's the case. 
 // If node is an inner node then all children will be checked recursively as well.
-std::unordered_map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
-    std::shared_ptr<OctreeNode> node, int& deltaStars, bool recursive) {
+std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(std::shared_ptr<OctreeNode> node, 
+    int& deltaStars, bool recursive) {
     
-    auto keysToRemove = std::unordered_map<int, std::vector<float>>();
+    auto keysToRemove = std::map<int, std::vector<float>>();
 
     // If we're in rebuilding mode then there is no need to remove any nodes.
     if(_rebuildVBO) return keysToRemove;
@@ -679,15 +682,15 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
     // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
     // And more importantly so our attribute pointers knows where to read!
     auto insertData = std::vector<float>(node->posData.begin(), node->posData.end());
-    insertData.resize(_posSize * MAX_STARS_PER_NODE, 0.f);
+    //insertData.resize(_posSize * MAX_STARS_PER_NODE, 0.f);
 
     if (option != gaiamission::RenderOption::Static) {
         insertData.insert(insertData.end(), node->colData.begin(), node->colData.end());
-        insertData.resize((_posSize + _colSize) * MAX_STARS_PER_NODE, 0.f);
+        //insertData.resize((_posSize + _colSize) * MAX_STARS_PER_NODE, 0.f);
 
         if (option == gaiamission::RenderOption::Motion) {
             insertData.insert(insertData.end(), node->velData.begin(), node->velData.end());
-            insertData.resize((_posSize + _colSize + _velSize) * MAX_STARS_PER_NODE, 0.f);
+            //insertData.resize((_posSize + _colSize + _velSize) * MAX_STARS_PER_NODE, 0.f);
         }
     }
     return insertData;

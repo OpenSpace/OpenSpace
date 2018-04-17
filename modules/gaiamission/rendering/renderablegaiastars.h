@@ -37,6 +37,7 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/bufferbinding.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
@@ -108,15 +109,20 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
-        screenSize, psfTexture, time, colorTexture) _uniformCache;
+        screenSize, psfTexture, time, colorTexture, nChunksToRender, maxStarsPerNode) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize) _uniformCacheTM;
     std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
 
     std::shared_ptr<OctreeManager> _octreeManager;
+    std::unique_ptr<ghoul::opengl::BufferBinding<
+        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboIdxBinding;
+    std::unique_ptr<ghoul::opengl::BufferBinding<
+        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboPosBinding;
 
     std::vector<float> _fullData;
+    std::vector<int> _accumulatedIndices;
     size_t _nValuesPerStar;
     size_t _nValuesInSlice;
     const size_t _memoryBudgetInValues = 805306368; // 3GB in bytes / sizeof(GLfloat) *4B*
@@ -130,6 +136,10 @@ private:
     GLuint _vboPos;
     GLuint _vboCol;
     GLuint _vboVel;
+    GLuint _ssboIdx;
+    GLuint _ssboPos;
+    GLuint _ssboCol;
+    GLuint _ssboVel;
     GLuint _vaoQuad;
     GLuint _vboQuad;
     GLuint _fbo;
