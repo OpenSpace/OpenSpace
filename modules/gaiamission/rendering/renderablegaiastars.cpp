@@ -546,26 +546,6 @@ void RenderableGaiaStars::initializeGL() {
     glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurrentAvailMemoryInKB);
     LINFO("nTotalMemoryInKB: " + std::to_string(nTotalMemoryInKB) +
         " - nCurrentAvailMemoryInKB: " + std::to_string(nCurrentAvailMemoryInKB));
-
-    GLint maxUniformBlockSize = 0;
-    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBlockSize);
-    GLint maxUniformBufferBindings = 0;
-    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxUniformBufferBindings);
-    GLint maxVertexUniformBlocks = 0;
-    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
-    LINFO("maxUniformBlockSize: " + std::to_string(maxUniformBlockSize) +
-        " - maxUniformBufferBindings: " + std::to_string(maxUniformBufferBindings) + 
-        " - maxVertexUniformBlocks: " + std::to_string(maxVertexUniformBlocks));
-
-    GLint maxShaderStorageBlockSize = 0;
-    glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxShaderStorageBlockSize);
-    GLint maxShaderStorageBufferBindings = 0;
-    glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &maxShaderStorageBufferBindings);
-    GLint maxVertexShaderStorageBlocks = 0;
-    glGetIntegerv(GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS, &maxVertexShaderStorageBlocks);
-    LINFO("maxShaderStorageBlockSize: " + std::to_string(maxShaderStorageBlockSize) +
-        " - maxShaderStorageBufferBindings: " + std::to_string(maxShaderStorageBufferBindings) +
-        " - maxVertexShaderStorageBlocks: " + std::to_string(maxVertexShaderStorageBlocks));
     
     // Read data file. 
     bool success = readDataFile(gaiamission::RenderOption(static_cast<int>(_renderOption)));
@@ -668,12 +648,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         GL_STREAM_DRAW
     );
 
-    //GLvoid* p = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
-    //memcpy(p, _accumulatedIndices.data(), nChunksToRender * sizeof(GLint));
-    //glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-
     // Update SSBO Position array.
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
     size_t posChunkSize = maxStarsPerNode * _posSize;
@@ -699,21 +673,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             vectorData.data()
         );
     }
-
-    // 'Buffer update' with glMapBufferRange
-    //for (auto &[offset, subData] : updateData) {
-    //    // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-    //    std::vector<float> vectorData(subData.begin(), subData.end());
-    //    vectorData.resize(posChunkSize, 0.f);
-    //    GLvoid* mapped = glMapBufferRange(
-    //        GL_SHADER_STORAGE_BUFFER,
-    //        offset * posChunkSize * sizeof(GLfloat),
-    //        posChunkSize * sizeof(GLfloat),
-    //        GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT
-    //    );
-    //    memcpy(mapped, vectorData.data(), posChunkSize * sizeof(GLfloat));
-    //    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-    //}
 
     // Update Color SSBO if render option is 'Color' or 'Motion'.
    /* if (option != gaiamission::RenderOption::Static) {
@@ -883,22 +842,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     //GLsizei maxStarsToRender = maxStarsPerNode * nChunksToRender;
     _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
     _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
-    /*LINFO("maxStarsPerNode: " + std::to_string(maxStarsPerNode) +
-        " - nStarsToRender: " + std::to_string(nStarsToRender) + 
-        " - nChunksToRender: " + std::to_string(nChunksToRender));*/
 
     // Render to FBO.
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    /*glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboIdxBinding->bindingNumber(), _ssboIdx);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboPosBinding->bindingNumber(), _ssboPos);
-    int idxBufferBinding;
-    glGetBufferParameteriv(GL_SHADER_STORAGE_BUFFER, GL_BUFFER_MAPPED, &idxBufferBinding);
-    int posBufferBinding;
-    glGetBufferParameteriv(GL_SHADER_STORAGE_BUFFER, GL_BUFFER_MAPPED, &posBufferBinding);
-    LINFO("SSBO Index buffer binding: " + std::to_string(idxBufferBinding) + 
-        " - SSBO Position buffer binding: " + std::to_string(posBufferBinding));*/
     
     //glEnable(GL_PROGRAM_POINT_SIZE);
     // A non-zero named vao MUST be bound!
@@ -1026,8 +973,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Bind SSBO blocks to our shader positions.
         // Number of stars per chunk (a.k.a. Index).
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
-        GLint maxChunks = _octreeManager->totalNodes();
-        //glBufferData(GL_SHADER_STORAGE_BUFFER, maxChunks * sizeof(GLint), nullptr, GL_DYNAMIC_DRAW);
         
         _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
@@ -1036,14 +981,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Positions.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
-        size_t posChunkSize = _octreeManager->maxStarsPerNode() * _posSize;
-        //size_t posStreamingBudget = maxChunks * posChunkSize;
-        //glBufferData(
-        //    GL_SHADER_STORAGE_BUFFER,
-        //    posStreamingBudget * sizeof(GLfloat),
-        //    nullptr,
-        //    GL_DYNAMIC_DRAW
-        //);
+
         _ssboPosBinding = std::make_unique<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboPosBinding->bindingNumber(), _ssboPos);
