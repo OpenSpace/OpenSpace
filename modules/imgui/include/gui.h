@@ -30,6 +30,7 @@
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
+#include <modules/imgui/include/guikeybindingcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
@@ -71,6 +72,7 @@ public:
     GuiHelpComponent _help;
     GuiFilePathComponent _filePath;
     GuiAssetComponent _asset;
+    GuiKeybindingComponent _keybindings;
 #ifdef GLOBEBROWSING_USE_GDAL
     GuiGlobeBrowsingComponent _globeBrowsing;
 #endif //  GLOBEBROWSING_USE_GDAL

@@ -1,0 +1,173 @@
+To build and install CCfits  from source code on a UNIX-like (e.g. UNIX,
+Linux, or Cygwin) platform, take the following steps.  For building on
+a Microsoft Windows platform with Visual Developer Studio, see below.
+
+===============================================================================
+Instructions for Building CCfits on UNIX-like platforms:
+===============================================================================
+
+1. Configure
+ 
+   By default, the GCC compiler and linker will be used.  If you want to
+   compile and link with a different compiler and linker, you can set
+   some environment variable before running the configure script.  For
+   example, to use Sun's C++ compiler, do the following:
+
+   > setenv CXX CC  (csh syntax)
+
+     or
+
+   > export CXX=CC  (bash syntax)
+
+   You can set the absolute path to the compiler you want to use if necessary.
+
+   CCfits requires that the CFITSIO package, version 3.08 or later, is
+   available on your system.  See
+
+     http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html
+
+   for more information.  The configure script that you will run takes an
+   option to specify the location of the CFITSIO package.
+
+   If the CFITSIO package is installed in a directory consisting of a
+   'lib' subdirectory containing "libcfitsio.a" or "libcfitsio.so" and
+   an 'include' subdirectory containing "fitsio.h", then you can run the
+   configure script with a single option.  For example, if the cfitsio
+   package is installed in this fashion in /usr/local/cfitsio/ then the
+   configure script option will be
+
+	--with-cfitsio=/usr/local/cfitsio
+
+   If the CFITSIO package is not installed in the above manner, then you
+   need to run the configure script with two options, one to specify the
+   include directory and the other to specify the library directory.  For
+   example, if the cfitsio package was built in /home/user/cfitsio/ then
+   the two options will be
+
+	--with-cfitsio-include=/home/user/cfitsio 
+	--with-cfitsio-libdir=/home/user/cfitsio
+
+   For users of HEASOFT (instead of stand-alone CFITSIO):
+   Note that modern distributions of HEASOFT only include a
+   "libcfitsio_X.XX.so" library by default, but the configure script
+   needs to find "libcfitsio.so", so you will need to create a symbolic
+   link in $HEADAS/lib/ linking libcfitsio.so -> libcfitsio_X.XX.so in
+   order for CCfits to configure properly.  You can then configure
+   CCfits using "--with-cfitsio=$HEADAS".
+
+
+   You have the option of carrying out the build in a separate directory
+   from the source directory or in the same directory as the source.  In
+   either case, you need to run the configure script in the directory
+   where the build will occur.   For example, if building in the source
+   directory with the cfitsio directory in /usr/local/cfitsio/ then the
+   configure command should be issued like this:
+
+   > ./configure --with-cfitsio=/usr/local/cfitsio
+
+   If you do the build in a separate directory from the source, you may
+   need to issue the configure command something like this:
+
+   > ../CCfits/configure --with-cfitsio=/usr/local/cfitsio
+
+   The configure script will create the Makefile with the path to the
+   compiler you choose (or GCC by default), and the path to the CFITSIO
+   package.  The configure script has other options, such as the install
+   location.  To see these options type
+
+   > ./configure --help
+
+
+2. Build
+
+   Building the C++ shared library and Java classes will be done
+   automatically by running make without arguments like this:
+
+   > gmake
+
+
+3. Install
+
+   To install, type:
+
+   > make install
+
+   The default install location will be /usr/local/lib for the library
+   and /usr/local/include for the header files.  You can change this with
+   the --prefix option when you configure, or with something like...
+
+   > make DESTDIR=/usr/local/CCfits install
+
+===============================================================================
+Instructions for Microsft Windows build:
+===============================================================================
+
+These instructions follow similar steps to the building of the CFITSIO
+library on Windows, described at
+
+http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/README.win
+
+and rely having the following already installed on your system:
+
+a) Microsoft Visual Studio
+b) The CMake build system available from http://www.cmake.org
+c) The CFITSIO library available from
+
+http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html
+
+1. After unzipping and untarring the CCfits source code tarball, the source
+   code will appear in a new \CCfits subdirectory.
+
+2. Open the Visual Studio Developer Command Prompt window and create a
+   directory named "CCfits.build" parallel to this CCfits source code directory.
+
+      mkdir CCfits.build
+      cd CCfits.build
+   
+   This will be the directory from which CMake generate its files and performs 
+   the build.
+
+3. Decide which CMake generator you will want to use.  The full list is
+   shown by doing
+
+      cmake.exe /?
+   
+   We've done successful builds using Visual Studio's 'nmake' utility, and so
+   recommend choosing "NMake Makefiles" as the generator option.  However if
+   you wish to perform the build inside a Visual Studio IDE, you should choose
+   the appropriate "Visual Studio <version>" generator.
+
+4.  Now run cmake.exe to generate the necessary Makefiles.  With this
+    command you must specify the path to your CFITSIO library and header
+    files by setting the '-DCMAKE_PREFIX_PATH' option.  This path should
+    be set to the root directory of your CFITSIO installation, from which
+    it will look in \lib and \include subdirectories for the library and
+    header files respectively.  Your full cmake command may then look like:
+    
+    CCfits.build>cmake.exe -G"NMake Makefiles" -DCMAKE_PREFIX_PATH=C:\path\to\your\CFITSIO ..\CCfits
+    
+    If you wish to eventually install CCfits at any place other than the
+    default location ("C:\Program Files"), you should pass an additional
+    flag to the cmake command above:
+    
+    -DCMAKE_INSTALL_PREFIX=C:\path\to\your\CCfits\installation
+    
+5.  Build and install CCfits:
+
+    CCfits.build> nmake
+
+    If all goes well you should now have a CCfits.lib library and
+    cookbook.exe executable in your CCfits.build directory.  To test
+    the build you can run cookbook.exe, which should generate 3 output
+    FITS files: atestfil, btestfil, and ctestfil.fit.
+    
+    Now install CCfits.lib and its header files into the default
+    installation location, or the directory you specified in step 4:
+    
+    CCfits.build> nmake install
+    
+
+Author: Paul_Kunz@slac.stanford.edu
+Revised 1 Nov 2006 by Bryan Irby
+Revised Jan 2016 by Craig Gordon
+

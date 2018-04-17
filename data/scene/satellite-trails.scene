@@ -1,0 +1,131 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+  --  openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setTime("2012 JUL 01 00:00:00.000")
+    --dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/sun_earth_event.lua'))
+
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
+    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.setPropertyValue("SolarImagery_*_Marker.renderable.enabled", false)
+    openspace.setPropertyValue("SolarImagery_*_Trail.renderable.enabled", false)
+    --openspace.setPropertyValue("SolarImagery_SDO_Image.renderable.enabled", true)
+
+    -- Loops
+    openspace.addVirtualProperty("BoolProperty", "Activate Looping", "Sun_Projection.renderable.activateLooping", false, nil, nil)
+    openspace.addVirtualProperty("IntProperty",  "Loop Id", "Sun_Projection.renderable.loopId", 0, 0, 5)
+
+    -- Display Frustums
+    openspace.addVirtualProperty("BoolProperty", "Display Frustums", "SolarImagery_*_Image*.renderable.enableFrustum", true, nil, nil)
+    -- Display Markers
+    openspace.addVirtualProperty("BoolProperty", "Display Markers", "SolarImagery_*_Marker.renderable.enabled", true, nil, nil)
+
+    --openspace.addVirtualProperty("IntProperty", "Buffer Size", "SolarImagery*.renderable.bufferSize", 5, 1, 150)
+    openspace.addVirtualProperty("FloatProperty", "Plane Opacity", "SolarImagery*.renderable.planeOpacity", 1.0, 0.0, 1.0)
+    openspace.addVirtualProperty("BoolProperty",  "Verbose All Planes", "SolarImagery*.renderable.verboseMode", false, nil, nil)
+    --openspace.addVirtualProperty("BoolProperty", "Use PBO", "SolarImagery*.renderable.usePBO", true, nil, nil)
+    openspace.addVirtualProperty("FloatProperty", "Move Factor", "SolarImagery*.renderable.moveFactor", 1.0, 0.0, 1.0)
+    openspace.addVirtualProperty("IntProperty",   "Update Interval", "SolarImagery*.renderable.minRealTimeUpdateInterval", 65, 0, 300)
+    --openspace.addVirtualProperty("IntProperty", "Switch to 304", "SolarImagery*.renderable.activeInstrument", 0, 0, 1)
+    --openspace.addVirtualProperty("FloatProperty", "Fieldline Alpha", "Fieldlines*.renderable.fieldlineAlpha", 1.0, 0.0, 1.0)
+    openspace.addVirtualProperty("BoolProperty",  "Soho C2", "SolarImagery_Soho_Image_C2.renderable.enabled", false, nil, nil)
+    openspace.addVirtualProperty("BoolProperty",  "Soho C3", "SolarImagery_Soho_Image_C3.renderable.enabled", false, nil, nil)
+
+    -- Stereo Orbits
+    openspace.addVirtualProperty("BoolProperty",  "Stereo Orbits",   "SolarImagery_Stereo_O*.renderable.enabled", false, nil, nil)
+    -- Stereo Labels
+    openspace.addVirtualProperty("BoolProperty",  "Stereo Labels",   "SolarImagery_Stereo_L*.renderable.enabled", false, nil, nil)
+    -- Stereo Frustums
+    openspace.addVirtualProperty("BoolProperty",  "Stereo Frustums",   "SolarImagery_Stereo_*_Image_*.renderable.enableFrustum", false, nil, nil)
+
+    -- Stereo A
+    openspace.addVirtualProperty("BoolProperty",  "Stereo A EUV",   "SolarImagery_Stereo_StereoA_Image_EUV.renderable.enabled", false, nil, nil)
+    openspace.addVirtualProperty("BoolProperty",  "Stereo A COR2",  "SolarImagery_Stereo_StereoA_Image_COR.renderable.enabled", false, nil, nil)
+
+    -- Stereo B
+    openspace.addVirtualProperty("BoolProperty",  "Stereo B EUV", "SolarImagery_Stereo_StereoB_Image_EUV.renderable.enabled", false, nil, nil)
+    openspace.addVirtualProperty("BoolProperty",  "Stereo B COR2", "SolarImagery_Stereo_StereoB_Image_COR.renderable.enabled", false, nil, nil)
+
+    -- SDO Orbit
+    openspace.addVirtualProperty("BoolProperty",  "SDO Orbit",   "SolarImagery_SDO_Trail.renderable.enabled", false, nil, nil)
+    -- SDO Label
+    openspace.addVirtualProperty("BoolProperty",  "SDO Label", "SolarImagery_SDO_Marker.renderable.enabled", false, nil, nil)
+    -- SDO Frustum
+    openspace.addVirtualProperty("BoolProperty",  "SDO Frustum", "SolarImagery_SDO_Image_AIA.renderable.enableFrustum", false, nil, nil)
+    -- Image Image
+    openspace.addVirtualProperty("BoolProperty",  "SDO",   "SolarImagery_SDO_Image*.renderable.enabled", false, nil, nil)
+    -- SDO label
+    --openspace.addVirtualProperty("BoolProperty", "SDO Marker", "SolarImageryMarker_SDO.renderable.enabled", false, nil, nil)
+
+
+    -- Soho Orbit
+    openspace.addVirtualProperty("BoolProperty",  "SOHO Orbit",   "SolarImagery_Soho_Trail.renderable.enabled", false, nil, nil)
+    -- Soho Label
+    openspace.addVirtualProperty("BoolProperty",  "SOHO Label",   "SolarImagery_Soho_Marker.renderable.enabled", false, nil, nil)
+    -- Soho Frustum
+    openspace.addVirtualProperty("BoolProperty",  "SOHO Frustum",   "SolarImagery_Soho_Image_*.renderable.enableFrustum", false, nil, nil)
+
+    openspace.resetCameraDirection()
+
+    openspace.printInfo("Done setting default values")
+end
+
+-- Define locals
+--solarImageryDataRootPath = "C:/Users/novalsain/Documents/localsolardata"
+solarImageryDataRootPath = "D:/solarbrowsingdata"
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Sun",
+        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
+    },
+    Modules = {
+        "sun",
+        "sun-imagery",
+        -- "mercury",
+        -- "venus",
+         "earth",
+        -- "mars",
+        -- "jupiter",
+        -- "saturn",
+        -- "uranus",
+        -- "neptune",
+        "stars",
+        -- "stars-denver",
+        --"milkyway",
+        "milkyway-eso",
+        --"constellationbounds",
+        "missions/sdo",
+      --  "missions/stereo-a",
+       -- "missions/stereo-b",
+       -- "missions/soho"
+    }
+}

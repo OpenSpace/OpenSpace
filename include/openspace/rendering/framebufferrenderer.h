@@ -82,6 +82,8 @@ public:
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
 
     /**
      * Update render data
@@ -131,6 +133,7 @@ private:
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
+    bool _dirtyMsaaSamplingPattern;
 
     Camera* _camera;
     Scene* _scene;

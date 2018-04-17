@@ -34,7 +34,7 @@ using std::numeric_limits;
 
 namespace {
 
-glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
+glm::mat4x4 fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     glm::mat4x4 result;
     lua_pushnil(state);
     int number = 1;
@@ -57,7 +57,7 @@ glm::mat4x4 fromLuaConversion(lua_State* state, bool& success) {
         }
     }
     // The last accessor argument and the table are still on the stack
-    lua_pop(state, 2);
+    lua_pop(state, leaveOnStack ? 1 : 2);
     success = true;
     return result;
 }

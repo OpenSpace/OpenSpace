@@ -24,15 +24,15 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "floatoperations.glsl"
 
 layout(points) in;
-in vec4 psc_position[];
+
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
 in vec4 vs_gPosition[];
 in float vs_speed[];
-in vec4 cam_position[];
+in vec4 vs_worldPosition[];
 
 layout(triangle_strip, max_vertices = 4) out;
 
@@ -42,13 +42,15 @@ out vec3 ge_brightness;
 out vec3 ge_velocity;
 out float ge_speed;
 out vec2 texCoord;
-out float billboardSize;
+out float ge_observationDistance;
+out vec4 ge_worldPosition;
 
-uniform mat4 projection;
-
+uniform float viewScaling;
 uniform float scaleFactor;
-uniform float minBillboardSize;
+uniform float billboardSize;
 uniform vec2 screenSize;
+uniform dvec3 eyePosition;
+uniform float magnitudeExponent;
 
 const vec2 corners[4] = vec2[4]( 
     vec2(0.0, 1.0), 
@@ -57,50 +59,80 @@ const vec2 corners[4] = vec2[4](
     vec2(1.0, 0.0) 
 );
 
+const double PARSEC =  3.0856776E16;
 
 void main() {
-    // JCC: We want to display the Sun.
-    // if ((psc_position[0].x == 0.0) &&
-    //     (psc_position[0].y == 0.0) &&
-    //     (psc_position[0].z == 0.0))
-    // {
-    //     return;
-    // }
+
+    if ((vs_worldPosition[0].x == 0.0) &&
+        (vs_worldPosition[0].y == 0.0) &&
+        (vs_worldPosition[0].z == 0.0))
+    {
+        return;
+    }
 
     ge_brightness = vs_brightness[0];
     ge_velocity = vs_velocity[0];
     ge_speed = vs_speed[0];
+    ge_worldPosition = vs_worldPosition[0];
 
-    float absoluteMagnitude = vs_brightness[0].z;
-    float modifiedSpriteSize =
-        exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
+    vec4 projectedPoint = gl_in[0].gl_Position;
+    
+    dvec3 starPositionInParsecs = dvec3(ge_worldPosition.xyz) / PARSEC;
+    dvec3 eyePositionInParsecs  = eyePosition / PARSEC;
+    float distanceToStarInParsecs = float(length(starPositionInParsecs - eyePositionInParsecs));
+    float luminosity = ge_brightness.y;
+    //float absMag = ge_brightness.x;
+    //float appMag = absMag + 5 * (log(distanceToStarInParsecs)-1.0);
+    
+    // Working like Partiview
+     float pSize = pow(10, magnitudeExponent);;
+    float slum = 1.0;
+    float samplingFactor = 1.0;
+    float apparentBrightness = (pSize * slum * samplingFactor * luminosity) / (distanceToStarInParsecs * distanceToStarInParsecs);
+    
+    vec2 multiplier = vec2(apparentBrightness/screenSize * projectedPoint.w);
+    
+    // Max Star Sizes:
+    // Fragment Coords:
+    vec2 bottomLeft = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[1])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
+    vec2 topRight   = screenSize * ((projectedPoint.xy + vec2(multiplier) * corners[2])/projectedPoint.w + vec2(1.0)) - vec2(0.5);
 
-    vec4 projPos[4];
-    for (int i = 0; i < 4; ++i) {
-        vec4 p1 = gl_in[0].gl_Position;
-        p1.xy += vec2(modifiedSpriteSize * (corners[i] - vec2(0.5)));
-        projPos[i] = projection * p1;
-    }
+    float height = abs(topRight.y - bottomLeft.y);
+    float width  = abs(topRight.x - bottomLeft.x);    
+    float var    = (height + width);
 
-    // Calculate the positions of the lower left and upper right corners of the
-    // billboard in screen-space
-    vec2 ll = (((projPos[1].xy / projPos[1].w) + 1.0) / 2.0) * screenSize;
-    vec2 ur = (((projPos[2].xy / projPos[2].w) + 1.0) / 2.0) * screenSize;
+    float maxBillboardSize = luminosity > 100.0 ? billboardSize + 40 : billboardSize;
+    float minBillboardSize = 1.0;
 
-    // The billboard is smaller than one pixel, we can discard it
-    float sizeInPixels = length(ll - ur);
-    if (sizeInPixels < minBillboardSize) {
-        return;
-    }
+    if ((height > maxBillboardSize) ||
+        (width > maxBillboardSize)) {
+    //if (height > maxBillboardSize) {        
+        float correctionScale = height > maxBillboardSize ? maxBillboardSize / (topRight.y - bottomLeft.y) :
+                                                            maxBillboardSize / (topRight.x - bottomLeft.x);
+        multiplier *= correctionScale;
+    } else {            
+        if (width < 2.0f * minBillboardSize) {
+            float maxVar = 2.0f * minBillboardSize;
+            float minVar = minBillboardSize;
+            float ta = ( (var - minVar)/(maxVar - minVar) );
+            if (ta == 0.0f)
+                return;
+        }        
+    } 
 
+    vec2 starSize = multiplier;
+    
     for (int i = 0; i < 4; i++) {
         vs_position = gl_in[0].gl_Position;
-        gl_Position = projPos[i];
+        gl_Position = projectedPoint + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
+        gl_Position.z = 0.0;
+
         texCoord    = corners[i];
 
         // G-Buffer
         ge_gPosition  = vs_gPosition[0];
-        billboardSize = sizeInPixels;
+        ge_observationDistance = safeLength(vs_gPosition[0] / viewScaling);
+
         EmitVertex();
     }
 

@@ -31,11 +31,11 @@
 
 namespace {
 
-double fromLuaConversion(lua_State* state, bool& success) {
+double fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     success = (lua_isnumber(state, -1) == 1);
     if (success) {
         double val = lua_tonumber(state, -1);
-        lua_pop(state, 1);
+        lua_pop(state, leaveOnStack ? 0 : 1);
         return val;
     }
     else {

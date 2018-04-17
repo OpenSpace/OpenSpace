@@ -135,9 +135,8 @@ private:
         HO, betaOzoneExtinction, SAMPLES_R,
         SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU) _uniformCache;
     UniformCache(dInverseModelTransformMatrix, dModelTransformMatrix,
-        dInverseSgctProjectionToModelTransformMatrix,
-        dInverseSGCTEyeToTmpRotTransformMatrix,
-        dCampos, dCamPosObj, sunDirectionObj,
+        dSgctProjectionToModelTransformMatrix,
+        dSGCTViewToWorldMatrix, dCamPosObj, sunDirectionObj,
         hardShadows, transmittanceTexture, irradianceTexture,
         inscatterTexture) _uniformCache2;
 

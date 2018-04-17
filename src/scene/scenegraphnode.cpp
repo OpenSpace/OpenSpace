@@ -79,7 +79,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
 
     std::string identifier = dictionary.value<std::string>(KeyIdentifier);
-    result->setIdentifier(std::move(identifier));
+    result->setIdentifier(identifier);
 
     if (dictionary.hasKey(KeyGuiName)) {
         result->setGuiName(dictionary.value<std::string>(KeyGuiName));

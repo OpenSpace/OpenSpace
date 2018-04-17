@@ -28,8 +28,12 @@ local object = {
     Renderable = {
         Type = "RenderableStars",
         File = speck .. "/stars.speck",
+        --File = speck .. "/stellar_test_grid3.speck",
         Texture = textures .. "/halo.png",
-        ColorMap = colorLUT .. "/colorbv.cmap"
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        MagnitudeExponent = 8.3,
+        BillboardSize = 54.9,
+        Sharpness = 0.5
     },
     GUI = {
         Path = "/Milky Way/Stars"

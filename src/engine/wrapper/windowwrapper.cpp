@@ -109,11 +109,19 @@ glm::ivec2 WindowWrapper::currentWindowSize() const {
     return glm::ivec2(0);
 }
 
+glm::ivec2 WindowWrapper::currentSubwindowSize() const {
+    return currentWindowSize();
+}
+
 glm::ivec2 WindowWrapper::currentWindowResolution() const {
     return currentWindowSize();
 }
 
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
+    return currentWindowSize();
+}
+
+glm::ivec2 WindowWrapper::getCurrentViewportSize() const {
     return currentWindowSize();
 }
 

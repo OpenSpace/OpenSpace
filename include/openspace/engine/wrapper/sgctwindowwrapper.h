@@ -53,8 +53,10 @@ public:
     glm::vec2 mousePosition() const override;
     uint32_t mouseButtons(int maxNumber) const override;
     glm::ivec2 currentWindowSize() const override;
+    glm::ivec2 currentSubwindowSize() const override;
     glm::ivec2 currentWindowResolution() const override;
     glm::ivec2 currentDrawBufferResolution() const override;
+    glm::ivec2 getCurrentViewportSize() const override;
     glm::vec2 dpiScaling() const override;
     int currentNumberOfAaSamples() const override;
 

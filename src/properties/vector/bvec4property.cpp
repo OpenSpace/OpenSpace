@@ -32,7 +32,7 @@
 
 namespace {
 
-glm::bvec4 fromLuaConversion(lua_State* state, bool& success) {
+glm::bvec4 fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     glm::bvec4 result;
     lua_pushnil(state);
     for (glm::length_t i = 0; i < ghoul::glm_components<glm::bvec4>::value; ++i) {
@@ -51,6 +51,8 @@ glm::bvec4 fromLuaConversion(lua_State* state, bool& success) {
         }
     }
     success = true;
+    lua_pop(state, leaveOnStack ? 1 : 2);
+
     return result;
 }
 

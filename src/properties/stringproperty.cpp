@@ -28,10 +28,12 @@
 
 namespace {
 
-std::string fromLuaConversion(lua_State* state, bool& success) {
+std::string fromLuaConversion(lua_State* state, bool leaveOnStack, bool& success) {
     success = lua_isstring(state, -1) == 1;
     if (success) {
-        return lua_tostring(state, -1);
+        std::string s = lua_tostring(state, -1);
+        lua_pop(state, leaveOnStack ? 0 : 1);
+        return s;
     }
     else {
         return "";

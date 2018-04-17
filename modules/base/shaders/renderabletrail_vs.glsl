@@ -31,6 +31,7 @@ layout(location = 0) in vec3 in_point_position;
 out vec4 vs_positionScreenSpace;
 out vec4 vs_gPosition;
 out float fade;
+out float v_pointSize;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -75,5 +76,6 @@ void main() {
     vs_positionScreenSpace = z_normalization(projectionTransform * vs_gPosition);
 
     gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? float(pointSize) : float(pointSize) / 2;
+    v_pointSize = gl_PointSize;
     gl_Position = vs_positionScreenSpace;
 }

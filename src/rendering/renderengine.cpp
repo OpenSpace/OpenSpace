@@ -537,7 +537,8 @@ glm::ivec2 RenderEngine::fontResolution() const {
         value
     );
     if (hasValue && value == "framebuffer") {
-        return OsEng.windowWrapper().currentWindowResolution();
+        return OsEng.windowWrapper().getCurrentViewportSize();
+        //return OsEng.windowWrapper().currentWindowResolution();
     }
     else {
         // The default is to use the window size

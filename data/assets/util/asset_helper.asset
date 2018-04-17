@@ -19,6 +19,31 @@ local registerSpiceKernels = function (spiceAsset, kernels)
     end)
 end
 
+local registrationFunctions = function (sceneAsset, nodes, overrideWarning)
+    overrideWarning = overrideWarning or false
+    if not overrideWarning then
+        if tableLength(nodes) == 0 then
+            openspace.printWarning("Register function was called with an empty node list. Pass 'true' as third argument to silence this warning.")
+            return
+        end
+    end
+
+    local initFunc = function()
+        for i, node in ipairs(nodes) do
+            openspace.addSceneGraphNode(node)
+        end
+    end
+
+    local deinitFunc = function()
+        for i = #nodes, 1, -1 do
+            node = nodes[i]
+            openspace.removeSceneGraphNode(node.Identifier)
+        end
+    end
+
+    return initFunc, deinitFunc
+end
+
 local registerSceneGraphNodes = function (sceneAsset, nodes, override)
     override = override or false
     if not override then
@@ -121,6 +146,7 @@ local requestAll = function (sceneAsset, directory)
     end
 end
 
+asset.export("registrationFunctions", registrationFunctions)
 asset.export("registerSceneGraphNodes", registerSceneGraphNodes)
 asset.export("registerSceneGraphNodesAndExport", registerSceneGraphNodesAndExport)
 asset.export("registerSpiceKernels", registerSpiceKernels)
