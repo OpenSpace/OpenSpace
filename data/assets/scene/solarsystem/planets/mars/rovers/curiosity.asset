@@ -94,7 +94,7 @@ local Body = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/test_body_origo.obj"
+          GeometryFile = models .. "/MSL_body.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -109,7 +109,7 @@ local Body_staticParts = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/test_static_parts_origo.obj"
+          GeometryFile = models .. "/MSL_static_parts.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -117,8 +117,17 @@ local Body_staticParts = {
 }
 
 
+local RotationMatrixAZ = {
+    1, 0, 0,
+    0, 0, 1,
+    0, -1, 0
+}
 
-
+local RotationMatrixEL = {
+    1, 0, 0,
+    0, 0, -1,
+    0, 1, 0
+}
 
 
 -- RA 
@@ -128,10 +137,10 @@ local RA_Shoulder_AZ = {
     Parent = transforms.RA_Shoulder_AZ_SpiceRotation.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
+        Body = "MSL_RA_SHOULDER_AZ",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/root_test_origo.obj"
+          GeometryFile = models .. "/test_root_roverCoord.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -144,24 +153,25 @@ local RA_Shoulder_EL = {
     Parent = transforms.RA_Shoulder_EL_SpiceRotation.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
+        Body = "MSL_RA_SHOULDER_EL",
         Geometry = {
           Type = "MultiModelGeometry",
           -- GeometryFile = models .. "/MSL_RA_arm_1.obj"
           GeometryFile = models .. "/test_arm_1_origo.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
+        --ModelTransform = RotationMatrixEL
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
-
+--
 local RA_Elbow = {
     Name = "RA_Elbow",
     Parent = transforms.RA_Elbow_SpiceRotation.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
+        Body = "MSL_RA_ELBOW",
         Geometry = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/test_arm_2_origo.obj"
