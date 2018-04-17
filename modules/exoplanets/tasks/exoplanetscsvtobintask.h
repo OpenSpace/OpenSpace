@@ -22,31 +22,82 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
-#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
+#define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/task.h>
+
+#include <string>
 
 namespace openspace {
+namespace exoplanets {
 
-class ExoplanetsModule : public OpenSpaceModule {
+class ExoplanetsCsvToBinTask : public Task {
 public:
-    constexpr static const char* Name = "Exoplanets";
+    ExoplanetsCsvToBinTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-    ExoplanetsModule();
-    virtual ~ExoplanetsModule() = default;
+private:
+    std::string _inputCSVPath;
+    std::string _inputSPECKPath;
+    std::string _outputBINPath;
+    std::string _outputLUTPath;
 
-    scripting::LuaLibrary luaLibrary() const override;
+    std::string getExplName(std::string csvName);
+    std::vector<float> getStarPosition(std::string starName);
 
-    std::vector<documentation::Documentation> documentations() const override;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
-
+    struct Exoplanet {
+    	float A;
+    	double AUPPER;
+    	double ALOWER;
+    	double UA;
+    	float BIGOM;
+    	float BIGOMUPPER;
+    	float BIGOMLOWER;
+    	float UBIGOM;
+    	int BINARY; //  **one or more stars**
+    	float ECC;
+    	float ECCUPPER;
+    	float ECCLOWER;
+    	float UECC;
+    	float I;
+    	float IUPPER;
+    	float ILOWER;
+    	float UI;
+    	int NCOMP; //  **number of planets**
+    	float OM;
+    	float OMUPPER;
+    	float OMLOWER;
+    	float UOM;
+    	double PER;
+    	float PERUPPER;
+    	float PERLOWER;
+    	float UPER;
+    	double R;
+    	double RUPPER;
+    	double RLOWER;
+    	double UR;
+    	float RSTAR;
+    	float RSTARUPPER;
+    	float RSTARLOWER;
+    	float URSTAR;
+    	float TEFF;
+    	float TEFFUPPER;
+    	float TEFFLOWER;
+    	float UTEFF;
+    	double TT;
+    	float TTUPPER;
+    	float TTLOWER;
+    	float UTT;
+    	float POSITIONX;
+    	float POSITIONY;
+    	float POSITIONZ;
+    };
 };
 
+} // namespace exoplanets
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__

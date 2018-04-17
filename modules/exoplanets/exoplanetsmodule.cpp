@@ -27,18 +27,23 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
 
-//#include <openspace/rendering/renderable.h>
-//#include <openspace/util/factorymanager.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
 
 #include <ghoul/misc/assert.h>
+
+#include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
 
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <string>
 
-struct exoplanet {
+namespace openspace {
+
+using namespace exoplanets;
+
+struct Exoplanet {
     float A;
     double AUPPER;
     double ALOWER;
@@ -47,7 +52,7 @@ struct exoplanet {
     float BIGOMUPPER;
     float BIGOMLOWER;
     float UBIGOM;
-    int BINARY;
+    bool BINARY;
     float ECC;
     float ECCUPPER;
     float ECCLOWER;
@@ -56,16 +61,15 @@ struct exoplanet {
     float IUPPER;
     float ILOWER;
     float UI;
-    //int MULT; // 0 and 1 are values(boolean), -1 indicates missing value
     int NCOMP;
     float OM;
     float OMUPPER;
     float OMLOWER;
     float UOM;
     double PER;
-    float PERUPPER; //skrivs med e ibland
-    float PERLOWER; //skrivs med e ibland
-    float UPER; //skrivs med e ibland
+    float PERUPPER;
+    float PERLOWER;
+    float UPER; 
     double R;
     double RUPPER;
     double RLOWER;
@@ -87,22 +91,21 @@ struct exoplanet {
     float POSITIONZ;
 };
 
-namespace openspace {
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
 int addNode(lua_State* L) {
 
     const int StringLocation = -1;
-    const std::string starname = luaL_checkstring(L, StringLocation); // has white spaces
+    const std::string starname = luaL_checkstring(L, StringLocation);
 
 
-    std::ifstream data("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/data.bin", std::ios::in | std::ios::binary);
+    std::ifstream data("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/expl_data.bin", std::ios::in | std::ios::binary);
     if (!data.good()) {
         std::cout << "Failed to open exoplanets data file";
     }
 
-    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lut.txt");
+    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lookup.txt");
     if (!lut.good()) {
         std::cout << "Failed to open exoplanets look-up table file";
     }
@@ -112,11 +115,11 @@ int addNode(lua_State* L) {
     //3. read sizeof(exoplanet) bytes into an exoplanet object.
     std::string planetname;
     size_t len = 0;
-    exoplanet p;
+    Exoplanet p;
     std::string line;
     bool found = false;
 
-    std::vector<exoplanet> plsy;
+    std::vector<Exoplanet> plsy;
     std::vector<std::string> plna;
     while (getline(lut, line)) {
 
@@ -129,7 +132,7 @@ int addNode(lua_State* L) {
             long location = std::stol(location_s.c_str());
 
             data.seekg(location);
-            data.read((char*)&p, sizeof(struct exoplanet));
+            data.read((char*)&p, sizeof(struct Exoplanet));
             plna.push_back(planetname);
             plsy.push_back(p);
             found = true;
@@ -137,11 +140,9 @@ int addNode(lua_State* L) {
     }
     data.close();
     lut.close();
-    int ncomp = plsy[0].NCOMP;
-    printf( std::to_string( plsy.size() ).c_str() );
 
 
-    if (found && !isnan(p.POSITIONX))
+    if (found && !isnan(p.POSITIONX) && !p.BINARY )
     {
         Time epoch;
         double parsecinmeter = 3.08567758*10e16;
@@ -150,33 +151,35 @@ int addNode(lua_State* L) {
             "Name = '" + starname + "',"
             "Parent = 'SolarSystemBarycenter',"
             "Transform = {"
-            "Translation = {"
-            "Type = 'StaticTranslation',"
-            "Position = {" + std::to_string(p.POSITIONX * parsecinmeter) + ", " + std::to_string(p.POSITIONY * parsecinmeter) + ", " + std::to_string(p.POSITIONZ * parsecinmeter) + "}"
+                "Translation = {"
+                    "Type = 'StaticTranslation',"
+                    "Position = {" + std::to_string(p.POSITIONX * parsecinmeter) + ", " + std::to_string(p.POSITIONY * parsecinmeter) + ", " + std::to_string(p.POSITIONZ * parsecinmeter) + "}"
+                "}"
             "}"
-            "}"
-            "}";
+        "}";
 
+        if (isnan(p.RSTAR))
+        {
+            p.RSTAR = 1.46046;
+        }
+        // radius of star and size of billboard should not be same? the light in the texture reaches furter than the actual size of the globe...
         const std::string luaTableStarGlare = "{"
             "Name = '" + starname + "Plane',"
             "Parent = '" + starname + "',"
             "Renderable = {"
-            "Type = 'RenderablePlaneImageLocal',"
-            "Size = " + std::to_string(p.RSTAR) + " * 6.95700*10e8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
-            "Billboard = true,"
-            "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/glare.png',"
-            "BlendMode = 'Additive'"
+                "Type = 'RenderablePlaneImageLocal',"
+                "Size = " + std::to_string(p.RSTAR) + " * 6.95700*10e8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+                "Billboard = true,"
+                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
+                "BlendMode = 'Additive'"
             "}"
-            "}";
+        "}";
 
         std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + ")";
 
         for (size_t i = 0; i < plsy.size(); i++)
         {
-            if (isnan(plsy[i].RSTAR))
-            {
-                plsy[i].RSTAR = 1.46046;
-            }
+            
             if (isnan(plsy[i].R))
             {
                 plsy[i].R = 0.320116;
@@ -212,7 +215,7 @@ int addNode(lua_State* L) {
             }
             else
                 sepoch = "2009-05-19T07:11:34.080";
-            
+
 
             const std::string luaTablePlanet = "{"
                 "Name = '" + plna[i] + "',"
@@ -240,7 +243,7 @@ int addNode(lua_State* L) {
                         "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
                         "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
                         "MeanAnomaly = 0.0,"
-                        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss  
+                        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
                         "Period = " + std::to_string(plsy[i].PER) + " * 86400" //PER. 86 400sec = 1 day.
                     "}"
                 "},"
@@ -249,10 +252,10 @@ int addNode(lua_State* L) {
             scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + ")";
 
         }
-        
+
         scriptParent += ";";
-        
-        
+
+
         OsEng.scriptEngine().queueScript(
             scriptParent,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
@@ -261,9 +264,9 @@ int addNode(lua_State* L) {
     }
     else
     {
-        printf("No star with that name or not enought data about it.");
+        printf("No star with that name or not enough data about it.");
     }
-    
+
     return 0;
 }
 
@@ -271,7 +274,7 @@ int removeNode(lua_State* L) {
     const int StringLocation = -1;
     const std::string starname = luaL_checkstring(L, StringLocation);
 
-    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lut.txt");
+    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lookup.txt");
     if (!lut.good()) {
         std::cout << "Failed to open exoplanets look-up table file";
     }
@@ -319,7 +322,7 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             &removeNode,
             {},
             "string",
-            "Removes the node with the name given in teh arguments."
+            "Removes the node with the name given in the arguments."
         }
 
     };
@@ -327,18 +330,18 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
     return res;
 }
 
-//void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
-    //auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    //ghoul_assert(fRenderable, "No renderable factory existed");
+void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
+    
+    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
+}
 
-    //fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
-//}
-
-//std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
-    //return {
-        //RenderableDebugPlane::Documentation()
-    //};
-//}
+std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
+    return {
+        ExoplanetsCsvToBinTask::documentation()
+    };
+}
 
 
 } // namespace openspace
