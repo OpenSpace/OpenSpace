@@ -410,7 +410,7 @@ void RenderEngine::initialize() {
 #ifdef GHOUL_USE_STB_IMAGE
     ghoul::io::TextureReader::ref().addReader(
         std::make_shared<ghoul::io::TextureReaderSTB>()
-    );    
+    );
 #endif // GHOUL_USE_STB_IMAGE
 
     ghoul::io::TextureReader::ref().addReader(

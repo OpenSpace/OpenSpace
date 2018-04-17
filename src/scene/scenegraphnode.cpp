@@ -627,7 +627,7 @@ Scene* SceneGraphNode::scene() {
 
 void SceneGraphNode::setScene(Scene* scene) {
     // Unregister from previous scene, bottom up
-    traversePostOrder([scene](SceneGraphNode* node) {
+    traversePostOrder([](SceneGraphNode* node) {
         if (node->_scene) {
             node->_scene->unregisterNode(node);
         }

@@ -86,9 +86,10 @@ public:
 
     /// The key that stores the factory documentation values
     static constexpr const char* KeyFactoryDocumentation = "FactoryDocumentation";
-    /// The key that decides whether or not we should require incoming web socket connections
-    /// to authorize or not
-    static constexpr const char* KeyRequireSocketAuthentication = "RequireSocketAuthentication";
+    /// The key that decides whether or not we should require incoming web socket
+    /// connections to authorize or not
+    static constexpr const char* KeyRequireSocketAuthentication =
+                                                            "RequireSocketAuthentication";
 
     /// The key that stores the location of the asset file that is initially loaded
     static constexpr const char* KeyConfigAsset = "Asset";

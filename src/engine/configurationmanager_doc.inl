@@ -69,7 +69,6 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "in all other configuration files or scripts."
         },
         {
-            
             ConfigurationManager::KeyCachePath,
             new StringVerifier,
             Optional::No,
@@ -205,21 +204,21 @@ documentation::Documentation ConfigurationManager::Documentation() {
             ConfigurationManager::KeyRequireSocketAuthentication,
             new BoolVerifier,
             Optional::Yes,
-            "If socket connections should be authenticated or not before they are allowed to "
-            "get or set information. Defaults to `true`."
+            "If socket connections should be authenticated or not before they are "
+            "allowed to get or set information. Defaults to 'true'."
         },
         {
             ConfigurationManager::KeyServerPasskey,
-                new StringVerifier,
-                Optional::Yes,
-                "Passkey to limit server access. Used to authorize incoming connections."
+            new StringVerifier,
+            Optional::Yes,
+            "Passkey to limit server access. Used to authorize incoming connections."
         },
         {
             ConfigurationManager::KeyServerClientAddressWhitelist,
-                new StringVerifier,
-                Optional::Yes,
-                "String containing white listed client IP addresses that won't need to be"
-                "authorized with the server. Space separated"
+            new StringVerifier,
+            Optional::Yes,
+            "String containing white listed client IP addresses that won't need to be "
+            "authorized with the server. Space separated"
         },
         {
             ConfigurationManager::KeySceneLicenseDocumentation,
@@ -368,8 +367,8 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether the OpenGL debug callbacks are performed "
-                    "synchronously. If set to <True> the callbacks are in the same thread "
-                    "as the context and in the scope of the OpenGL function that "
+                    "synchronously. If set to <True> the callbacks are in the same "
+                    "thread as the context and in the scope of the OpenGL function that "
                     "triggered the message. The default value is <True>."
                 },
                 {

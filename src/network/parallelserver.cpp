@@ -52,7 +52,7 @@ void ParallelServer::start(
 }
 
 void ParallelServer::setDefaultHostAddress(std::string defaultHostAddress) {
-    std::lock_guard<std::mutex> lock(_hostInfoMutex); 
+    std::lock_guard<std::mutex> lock(_hostInfoMutex);
     _defaultHostAddress = std::move(defaultHostAddress);
 
 }
@@ -89,7 +89,7 @@ void ParallelServer::handleNewPeers() {
         });
     }
 }
-    
+
 std::shared_ptr<ParallelServer::Peer> ParallelServer::peer(size_t id) {
     std::lock_guard<std::mutex> lock(_peerListMutex);
     const auto& it = _peers.find(id);
@@ -142,7 +142,7 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
     }
 
     std::shared_ptr<Peer>& peer = it->second;
-    
+
     switch (messageType) {
         case ParallelConnection::MessageType::Authentication:
             handleAuthentication(peer, std::move(data));
@@ -165,7 +165,7 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
             break;
     }
 }
-    
+
 void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
                                           std::vector<char> message)
 {
@@ -219,7 +219,7 @@ void ParallelServer::handleAuthentication(std::shared_ptr<Peer> peer,
 
     setNConnections(nConnections() + 1);
 }
-    
+
 void ParallelServer::handleData(std::shared_ptr<Peer> peer, std::vector<char> data) {
     if (peer->id != _hostPeerId) {
         LINFO(fmt::format(
@@ -259,7 +259,7 @@ void ParallelServer::handleHostshipRequest(std::shared_ptr<Peer> peer,
     assignHost(peer);
     LINFO(fmt::format("Switched host from {} to {}.", oldHostPeerId, peer->id));
 }
-    
+
 void ParallelServer::handleHostshipResignation(std::shared_ptr<Peer> peer,
                                                std::vector<char> data)
 {
