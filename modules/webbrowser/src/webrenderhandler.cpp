@@ -54,7 +54,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
         0,
         GL_BGRA_EXT,
         GL_UNSIGNED_BYTE,
-        reinterpret_cast<unsigned char*>(buffer)
+        buffer
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

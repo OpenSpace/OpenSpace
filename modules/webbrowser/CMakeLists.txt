@@ -152,7 +152,7 @@ if(OS_MACOSX)
     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
-        )
+    )
 
     # Fix the framework rpath in the helper executable.
     FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
