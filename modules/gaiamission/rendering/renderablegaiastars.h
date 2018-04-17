@@ -120,6 +120,10 @@ private:
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboIdxBinding;
     std::unique_ptr<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboPosBinding;
+    std::unique_ptr<ghoul::opengl::BufferBinding<
+        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboColBinding;
+    std::unique_ptr<ghoul::opengl::BufferBinding<
+        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboVelBinding;
 
     std::vector<float> _fullData;
     std::vector<int> _accumulatedIndices;

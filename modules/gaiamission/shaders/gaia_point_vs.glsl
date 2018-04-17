@@ -41,13 +41,13 @@ layout (std430) buffer ssbo_pos_data {
   float positionData[];
 };
 
-/*layout (std430) buffer ssbo_col_data { 
+layout (std430) buffer ssbo_col_data { 
   float colorData[];
 };
 
 layout (std430) buffer ssbo_vel_data { 
   float velocityData[];
-};*/
+};
 
 in int gl_VertexID;
 
@@ -103,8 +103,8 @@ void main() {
     int starId = maxStarsPerNode * chunkId + placeInChunk;
 
     vec3 in_position = vec3(positionData[starId*3], positionData[starId*3 + 1], positionData[starId*3 + 2]);
-    vec2 in_brightness = vec2(0.0); //vec2(colorData[starId*2], colorData[starId*2 + 1]);
-    vec3 in_velocity = vec3(0.0); //vec3(velocityData[starId*3], velocityData[starId*3 + 1], velocityData[starId*3 + 2]);
+    vec2 in_brightness = vec2(colorData[starId*2], colorData[starId*2 + 1]);
+    vec3 in_velocity = vec3(velocityData[starId*3], velocityData[starId*3 + 1], velocityData[starId*3 + 2]);
     
     vs_brightness = in_brightness;
 
