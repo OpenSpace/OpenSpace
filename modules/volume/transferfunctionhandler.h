@@ -67,7 +67,6 @@ public:
     std::shared_ptr<openspace::TransferFunction> getTransferFunction();
 
 private:
-    bool useTxtTexture = true;
     properties::StringProperty _transferFunctionPath;
     properties::StringProperty _dataUnit;
     properties::StringProperty _minValue;

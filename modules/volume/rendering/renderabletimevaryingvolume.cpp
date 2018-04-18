@@ -278,7 +278,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         t.texture->uploadTexture();
     }
 
-    _transferFunctionHandler->initialize();
     _clipPlanes->initialize();
 
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunctionHandler, _clipPlanes);
@@ -360,6 +359,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);
+    // t.time = Time::convertTime("2012-07-01T00:00:00.001");
     t.inRam = false;
     t.onGpu = false;
 

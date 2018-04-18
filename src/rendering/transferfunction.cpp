@@ -87,13 +87,13 @@ void TransferFunction::setPath(const std::string& filepath) {
 
 ghoul::opengl::Texture& TransferFunction::getTexture() {
     ghoul_assert(_texture != nullptr, "Transfer function is null");
-    update();
+    updateTexture();
     return *_texture.get();
 }
 
-void TransferFunction::update() {
-  /*  if (_needsUpdate) {
-        if (hasExtension(_filepath, "txt")) {
+void TransferFunction::updateTexture() {
+    if (_needsUpdate) {
+        if (hasExtension(_filepath, "tf")) {
             setTextureFromTxt();
         } else {
             setTextureFromImage();
@@ -103,7 +103,7 @@ void TransferFunction::update() {
         if (_tfChangedCallback) {
             _tfChangedCallback(*this);
         }
-    }*/
+    }
 }
 
 void TransferFunction::setCallback(TfChangedCallback callback) {
@@ -131,7 +131,7 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
         std::string key;
         iss >> key;
 
-        if(key == "width") {
+        if(key == "width") { 
             iss >> width;
         } else if(key == "lower") {
             iss >> lower;
@@ -240,12 +240,12 @@ glm::vec4 TransferFunction::sample(size_t offset) {
 }
 
 size_t TransferFunction::width() {
-    update();
+    updateTexture();
     return _texture->width();
 }
 
 void TransferFunction::bind() {
-    update();
+    updateTexture();
     _texture->bind();
 }
 }

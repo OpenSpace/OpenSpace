@@ -463,7 +463,7 @@ void RenderableMultiresVolume::initializeGL() {
 
     success &= _atlasManager && _atlasManager->initialize();
 
-    _transferFunction->update();
+    _transferFunction->updateTexture();
 
     success &= isReady();
 

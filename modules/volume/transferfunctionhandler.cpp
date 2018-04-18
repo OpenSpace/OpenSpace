@@ -115,13 +115,13 @@ namespace openspace {
         }
 
         void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
+            // histogram->print();
             _histogramProperty.setValue(histogram->getBinaryData());
         }
 
         void TransferFunctionHandler::setTexture() {
             if (_transferFunctionProperty.value().createTexture(_texture)) {
                 uploadTexture();
-                useTxtTexture = false;
             }
         }
 
@@ -156,6 +156,7 @@ namespace openspace {
 
         void TransferFunctionHandler::setFilepath(const std::string& path) {
             _filePath = path;
+            _transferFunction->updateTexture();
         }
 
         ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {

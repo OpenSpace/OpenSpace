@@ -1,0 +1,21 @@
+-- This is the BATSRUS batch conversion example..
+
+path = "${DATA}/mas-sampledata/CORHEL_MAS/rawdata/";
+baseNames = {"3d__var_1_e20120714-060000-000.out", "3d__var_1_e20120714-061015-031.out"}
+
+tasks = {}
+
+for i=1,#baseNames do
+    tasks[#tasks+1] = {
+        Type = "KameleonVolumeToRawTask",
+        Input = path .. baseNames[i] .. ".cdf",
+        Variable = "T",
+        Dimensions = {129, 101, 101},
+        LowerDomainBound = {-224, -32, -32},
+        UpperDomainBound = {32, 32, 32}, 
+        RawVolumeOutput = path .. baseNames[i] .. ".rawvolume",
+        DictionaryOutput = path .. baseNames[i] .. ".dictionary"
+    }
+end
+
+return tasks;
