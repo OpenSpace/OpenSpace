@@ -109,7 +109,8 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
-        screenSize, psfTexture, time, colorTexture, nChunksToRender, maxStarsPerNode) _uniformCache;
+        screenSize, psfTexture, time, colorTexture, nChunksToRender, valuesPerStar, 
+        maxStarsPerNode) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize) _uniformCacheTM;
@@ -119,11 +120,7 @@ private:
     std::unique_ptr<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboIdxBinding;
     std::unique_ptr<ghoul::opengl::BufferBinding<
-        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboPosBinding;
-    std::unique_ptr<ghoul::opengl::BufferBinding<
-        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboColBinding;
-    std::unique_ptr<ghoul::opengl::BufferBinding<
-        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboVelBinding;
+        ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
     std::vector<float> _fullData;
     std::vector<int> _accumulatedIndices;
@@ -141,9 +138,7 @@ private:
     GLuint _vboCol;
     GLuint _vboVel;
     GLuint _ssboIdx;
-    GLuint _ssboPos;
-    GLuint _ssboCol;
-    GLuint _ssboVel;
+    GLuint _ssboData;
     GLuint _vaoQuad;
     GLuint _vboQuad;
     GLuint _fbo;

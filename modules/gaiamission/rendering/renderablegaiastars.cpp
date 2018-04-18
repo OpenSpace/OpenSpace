@@ -323,9 +323,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _vboCol(0)
     , _vboVel(0)
     , _ssboIdx(0)
-    , _ssboPos(0)
-    , _ssboCol(0)
-    , _ssboVel(0)
+    , _ssboData(0)
     , _vaoQuad(0)
     , _vboQuad(0)
     , _fbo(0)
@@ -528,6 +526,7 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.time = _program->uniformLocation("time");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
     _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+    _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
     _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
     _programTM = renderEngine.buildRenderProgram("ToneMapping",
@@ -563,12 +562,8 @@ void RenderableGaiaStars::deinitializeGL() {
     _vboVel = 0;
     glDeleteBuffers(1, &_ssboIdx);
     _ssboIdx = 0;
-    glDeleteBuffers(1, &_ssboPos);
-    _ssboPos = 0;
-    glDeleteBuffers(1, &_ssboCol);
-    _ssboCol = 0;
-    glDeleteBuffers(1, &_ssboVel);
-    _ssboVel = 0;
+    glDeleteBuffers(1, &_ssboData);
+    _ssboData = 0;
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vboQuad);
@@ -641,6 +636,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _accumulatedIndices[i + 1] += changeInValue;
         }
     }
+
+    // Fix number of stars rendered if it doesn't correspond to our buffers.
+    if (_accumulatedIndices.back() != nStars) {
+        _nRenderedStars.set(_accumulatedIndices.back());
+    }
+
     // Update SSBO Index (stars per chunk).
     glBufferData(
         GL_SHADER_STORAGE_BUFFER,
@@ -649,86 +650,28 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         GL_STREAM_DRAW
     );
 
-    // Use orphaning strategy for all SSBOs.
-    size_t posChunkSize = maxStarsPerNode * _posSize;
-    size_t posStreamingBudget = _octreeManager->totalNodes() * posChunkSize;
-    size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
-    size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
-    size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
-    size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
+    // Use orphaning strategy for data SSBO.
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
-    // Always use Position SSBO.
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
     glBufferData(
         GL_SHADER_STORAGE_BUFFER,
-        posStreamingBudget * sizeof(GLfloat),
+        _streamingBudget * sizeof(GLfloat),
         nullptr,
         GL_STREAM_DRAW
     );
 
-    // Use Color SSBO if render option is 'Color' or 'Motion'.
-    if (option != gaiamission::RenderOption::Static) {
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboCol);
-        glBufferData(
-            GL_SHADER_STORAGE_BUFFER,
-            colStreamingBudget * sizeof(GLfloat),
-            nullptr,
-            GL_STREAM_DRAW
-        );
-
-        // Use Velocity SSBO if specified.
-        if (option == gaiamission::RenderOption::Motion) {
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboVel);
-            glBufferData(
-                GL_SHADER_STORAGE_BUFFER,
-                velStreamingBudget * sizeof(GLfloat),
-                nullptr,
-                GL_STREAM_DRAW
-            );
-        }
-    }
-
-    // Update SSBOs with one insert per chunk/node. The key in map holds the offset index.
+    // Update SSBO with one insert per chunk/node. The key in map holds the offset index.
     for (auto &[offset, subData] : updateData) {
         // We don't need to fill chunk with zeros anymore! Just check if we have any values to update.
         if (!subData.empty()) {
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
-            int posDataSize = _posSize * (subData.size() / _nValuesInSlice);
-            std::vector<float> posData(subData.begin(), subData.begin() + posDataSize);
+            std::vector<float> vectorData(subData.begin(), subData.end());
+            int dataSize = vectorData.size();
             glBufferSubData(
                 GL_SHADER_STORAGE_BUFFER,
-                offset * posChunkSize * sizeof(GLfloat),
-                posDataSize * sizeof(GLfloat),
-                posData.data()
+                offset * _chunkSize * sizeof(GLfloat),
+                dataSize * sizeof(GLfloat),
+                vectorData.data()
             );
-
-            // Update Color SSBO if render option is 'Color' or 'Motion'.
-            if (option != gaiamission::RenderOption::Static) {
-                glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboCol);
-                auto itColBegin = subData.begin() + posDataSize;
-                int colDataSize = _colSize * (subData.size() / _nValuesInSlice);
-                std::vector<float> colData(itColBegin, itColBegin + colDataSize);
-                glBufferSubData(
-                    GL_SHADER_STORAGE_BUFFER,
-                    offset * colChunkSize * sizeof(GLfloat),
-                    colDataSize * sizeof(GLfloat),
-                    colData.data()
-                );
-
-                // Update Velocity SSBO if specified.
-                if (option == gaiamission::RenderOption::Motion) {
-                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboVel);
-                    auto itVelBegin = subData.begin() + posDataSize + colDataSize;
-                    int velDataSize = _velSize * (subData.size() / _nValuesInSlice);
-                    std::vector<float> velData(itVelBegin, subData.end());
-                    glBufferSubData(
-                        GL_SHADER_STORAGE_BUFFER,
-                        offset * velChunkSize * sizeof(GLfloat),
-                        velDataSize * sizeof(GLfloat),
-                        velData.data()
-                    );
-                }
-            }
         }
     }
 
@@ -883,8 +826,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Specify how many potential stars we have to render.
     GLsizei nStarsToRender = _nRenderedStars;
+    int valuesPerStar = _nValuesInSlice;
     //GLsizei maxStarsToRender = maxStarsPerNode * nChunksToRender;
     _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
+    _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
     _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
 
     // Render to FBO.
@@ -979,17 +924,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glGenBuffers(1, &_ssboIdx);
             LDEBUG(fmt::format("Generating Index Shader Storage Buffer Object id '{}'", _ssboIdx));
         }
-        if (_ssboPos == 0) {
-            glGenBuffers(1, &_ssboPos);
-            LDEBUG(fmt::format("Generating Position Shader Storage Buffer Object id '{}'", _ssboPos));
-        }
-        if (_ssboCol == 0) {
-            glGenBuffers(1, &_ssboCol);
-            LDEBUG(fmt::format("Generating Color Shader Storage Buffer Object id '{}'", _ssboCol));
-        }
-        if (_ssboVel == 0) {
-            glGenBuffers(1, &_ssboVel);
-            LDEBUG(fmt::format("Generating Velocity Shader Storage Buffer Object id '{}'", _ssboVel));
+        if (_ssboData == 0) {
+            glGenBuffers(1, &_ssboData);
+            LDEBUG(fmt::format("Generating Data Shader Storage Buffer Object id '{}'", _ssboData));
         }
         if (_vaoQuad == 0) {
             glGenVertexArrays(1, &_vaoQuad);
@@ -1023,29 +960,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboIdxBinding->bindingNumber(), _ssboIdx);
         _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
 
-        // Positions.
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboPos);
+        // Combined SSBO with all data.
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
-        _ssboPosBinding = std::make_unique<ghoul::opengl::BufferBinding<
+        _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
             ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboPosBinding->bindingNumber(), _ssboPos);
-        _program->setSsboBinding("ssbo_pos_data", _ssboPosBinding->bindingNumber());
-
-        // Color attributes.
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboCol);
-
-        _ssboColBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboColBinding->bindingNumber(), _ssboCol);
-        _program->setSsboBinding("ssbo_col_data", _ssboColBinding->bindingNumber());
-
-        // Velocities.
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboVel);
-
-        _ssboVelBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboVelBinding->bindingNumber(), _ssboVel);
-        _program->setSsboBinding("ssbo_vel_data", _ssboVelBinding->bindingNumber());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboDataBinding->bindingNumber(), _ssboData);
+        _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
         
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -1272,7 +1193,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.time = _program->uniformLocation("time");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
         _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+        _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
         _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
+
+        _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
+        _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
     }
 
     if (_programTM->isDirty()) {
