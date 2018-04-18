@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/volume/transferfunctionhandler.h>
-
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/opengl/texture.h>
