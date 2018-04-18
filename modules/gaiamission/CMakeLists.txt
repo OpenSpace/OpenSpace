@@ -48,14 +48,15 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_ge.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_star_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_vbo_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_ssbo_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_ge.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_ge.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_point_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_tonemapping_billboard_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

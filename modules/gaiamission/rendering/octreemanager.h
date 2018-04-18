@@ -61,7 +61,7 @@ public:
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
     std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
-        int& deltaStars, gaiamission::RenderOption option);
+        int& deltaStars, gaiamission::RenderOption option, bool useVBO);
     std::vector<float> getAllData(gaiamission::RenderOption option);
     void writeToFile(std::ofstream& outFileStream);
     void readFromFile(std::ifstream& inFileStream);
@@ -116,6 +116,7 @@ private:
     const size_t _velSize = 3;
     int _maxStackSize;
     bool _rebuildVBO;
+    bool _useVBO;
 
 }; // class OctreeManager
 

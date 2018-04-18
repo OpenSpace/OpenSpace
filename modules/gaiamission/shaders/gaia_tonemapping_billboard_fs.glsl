@@ -27,50 +27,23 @@
 in vec2 uv;
 
 uniform sampler2D renderedTexture;
-uniform vec2 screenSize;
 
-const float M_PI = 3.141592653589793238462;
 const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
-const int filterSize = 7;
-const float sigma = 1.0;
+
 
 Fragment getFragment() {
 
     vec4 color = vec4(0.0);
     
-    // GL_POINTS
-    // Get a [filterSize x filterSize] filter around our pixel. UV is [0, 1]
-    vec3 intensity = vec3(0.0);
-    vec2 pixelSize = 1.0 / screenSize;
-    int halfFilterSize = (filterSize - 1) / 2;
-    for (int y = -halfFilterSize; y <= halfFilterSize; y += 1) {
-        for (int x = -halfFilterSize; x <= halfFilterSize; x += 1) {
-            vec2 sPoint = uv + (pixelSize * vec2(x, y)); // + vec2(pixelSize / 2.0);
-            
-            // Don't sample outside of the FBO texture.
-            if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0)))) {
-                vec4 sIntensity = texture( renderedTexture, sPoint );
-
-                // Use normal distribution function for halo/bloom effect. 
-                float circleDist = sqrt(pow(x/1, 2.0) + pow(y/1, 2.0));
-                intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) * 
-                    exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
-            }
-        }
-    }
-    // Tonemap intensity to color!
-    intensity = 1.0 - 1.0 * exp(-25.0 * intensity);
-
-    
     // BILLBOARDS
     // Sample color. Tonemapping done in first shader pass.  
-    //vec4 intensity = texture( renderedTexture, uv );
+    vec4 intensity = texture( renderedTexture, uv );
     
 
     if (length(intensity) < 0.01) {
         discard;
     }
-    color = vec4(intensity, 1.0f);
+    color = intensity;
 
     // Use the following to check for any intensity at all.
     //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);

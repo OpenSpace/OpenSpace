@@ -46,11 +46,11 @@ out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
 
 uniform float viewScaling;
+uniform float cutOffThreshold;
 uniform float closeUpBoostDist;
 uniform float billboardSize;
 uniform vec2 screenSize;
 uniform int renderOption;
-uniform float cutOffThreshold;
 uniform float magnitudeBoost;
 
 const vec2 corners[4] = vec2[4]( 

@@ -29,6 +29,7 @@ local GaiaMission = {
         FileTypeOrigin = "fits", -- Either "speck" or "fits", speck files only works with preprocess
         FilePreprocessed = true, -- If 'true' then use: DR1_FITS_17col.bin or DR1_AMNH.bin, else use original
         RenderOption = "Static",
+        ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         LuminosityMultiplier = 1200,

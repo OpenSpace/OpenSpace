@@ -96,6 +96,16 @@ namespace {
         "only the position of the stars is used. 'Color' uses position + color parameters "
         "and 'Motion' uses pos, color as well as velocity for the stars."
     };
+
+    static const openspace::properties::Property::PropertyInfo ShaderOptionInfo = {
+        "ShaderOption",
+        "Shader Option",
+        "This value determines which shaders to use while rendering. If 'Point_*' is chosen "
+        "then gl_Points will be rendered and then spread out with a bloom filter. If 'Billboard_*' "
+        "is chosen then the geometry shaders will generate screen-faced billboards for all stars. "
+        "For '*_SSBO' the data will be stored in Shader Storage Buffer Objects will '*_VBO' uses "
+        "Vertex Buffer Objects for the streaming."
+    };
     
     static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
@@ -220,6 +230,14 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 RenderOptionInfo.description
             },
             {
+                ShaderOptionInfo.identifier,
+                new StringInListVerifier({
+                    "Point_SSBO", "Point_VBO", "Billboard_SSBO", "Billboard_VBO"
+                }),
+                Optional::Yes,
+                ShaderOptionInfo.description
+            },
+            {
                 PsfTextureInfo.identifier,
                 new StringVerifier,
                 Optional::No,
@@ -295,8 +313,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _fileTypeOrigin("")
     , _dataFile(nullptr)
     , _dataIsDirty(true)
+    , _buffersAreDirty(true)
+    , _shadersAreDirty(false)
     , _filePreprocessed(FilePreprocessedInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
     , _pointSpreadFunctionTexture(nullptr)
     , _pointSpreadFunctionTextureIsDirty(true)
@@ -313,6 +334,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _lastRow(LastRowInfo, 50000, 1, 2539913)
     , _columnNamesList(ColumnNamesInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2539913)
+    , _nStarsToRender(0)
     , _program(nullptr)
     , _programTM(nullptr)
     , _fboTexture(nullptr)
@@ -359,9 +381,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaiamission::RenderOption::Motion, "Motion" }
     });
     if (dictionary.hasKey(RenderOptionInfo.identifier)) {
-        const std::string renderOption = dictionary.value<std::string>(
-            RenderOptionInfo.identifier
-            );
+        const std::string renderOption = dictionary.value<std::string>(RenderOptionInfo.identifier);
         if (renderOption == "Static") {
             _renderOption = gaiamission::RenderOption::Static;
         }
@@ -372,8 +392,32 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             _renderOption = gaiamission::RenderOption::Motion;
         }
     }
-    _renderOption.onChange([&] { _dataIsDirty = true; });
+    _renderOption.onChange([&] { _dataIsDirty = true; }); // TODO: Shouldn't need to re-load file here!
     addProperty(_renderOption);
+
+    _shaderOption.addOptions({
+        { ShaderOption::Point_SSBO, "Point_SSBO" },
+        { ShaderOption::Point_VBO, "Point_VBO" },
+        { ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
+        { ShaderOption::Billboard_VBO, "Billboard_VBO" }
+        });
+    if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
+        const std::string shaderOption = dictionary.value<std::string>(ShaderOptionInfo.identifier);
+        if (shaderOption == "Point_SSBO") {
+            _shaderOption = ShaderOption::Point_SSBO;
+        }
+        else if (shaderOption == "Point_VBO") {
+            _shaderOption = ShaderOption::Point_VBO;
+        }
+        else if (shaderOption == "Billboard_SSBO") {
+            _shaderOption = ShaderOption::Billboard_SSBO;
+        }
+        else {
+            _shaderOption = ShaderOption::Billboard_VBO;
+        }
+    }
+    _shaderOption.onChange([&] { _buffersAreDirty = true; _shadersAreDirty = true; });
+    addProperty(_shaderOption);
 
     _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(
         PsfTextureInfo.identifier
@@ -501,40 +545,103 @@ bool RenderableGaiaStars::isReady() const {
 
 void RenderableGaiaStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = ghoul::opengl::ProgramObject::Build(
-        "GaiaStar",
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_vs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
-    );
     //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     //_program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
+    // Construct shader program depending on user-defined shader option.
+    const int option = _shaderOption;
+    switch (option) {
+    case ShaderOption::Point_SSBO: {
+        _program = ghoul::opengl::ProgramObject::Build(
+            "GaiaStar",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+        );
+        _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+        _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
+        _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
+
+        _programTM = renderEngine.buildRenderProgram("ToneMapping",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
+        );
+        _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+        break;
+    }
+    case ShaderOption::Point_VBO: {
+        _program = ghoul::opengl::ProgramObject::Build(
+            "GaiaStar",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+        );
+
+        _programTM = renderEngine.buildRenderProgram("ToneMapping",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
+        );
+        _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+        break;
+    }
+    case ShaderOption::Billboard_SSBO: {
+        _program = ghoul::opengl::ProgramObject::Build(
+            "GaiaStar",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+        );
+        _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+        _uniformCache.sharpness = _program->uniformLocation("sharpness");
+        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+        _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
+        _uniformCache.screenSize = _program->uniformLocation("screenSize");
+        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+
+        _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+        _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
+        _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
+
+        _programTM = renderEngine.buildRenderProgram("ToneMapping",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
+        );
+        break;
+    }
+    case ShaderOption::Billboard_VBO: {
+        _program = ghoul::opengl::ProgramObject::Build(
+            "GaiaStar",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+        );
+        _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+        _uniformCache.sharpness = _program->uniformLocation("sharpness");
+        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+        _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
+        _uniformCache.screenSize = _program->uniformLocation("screenSize");
+        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+
+        _programTM = renderEngine.buildRenderProgram("ToneMapping",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
+        );
+        break;
+    }
+    }
+
+    // Common uniforms for all shaders:
     _uniformCache.model = _program->uniformLocation("model");
     _uniformCache.view = _program->uniformLocation("view");
-    _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
     _uniformCache.projection = _program->uniformLocation("projection");
-    _uniformCache.renderOption = _program->uniformLocation("renderOption");
-    _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
-    _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
-    _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
-    _uniformCache.sharpness = _program->uniformLocation("sharpness");
-    _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
-    _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-    _uniformCache.screenSize = _program->uniformLocation("screenSize");
-    _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
     _uniformCache.time = _program->uniformLocation("time");
+    _uniformCache.renderOption = _program->uniformLocation("renderOption");
+    _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
+    _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
+    _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
-    _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
-    _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
-    _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
-    _programTM = renderEngine.buildRenderProgram("ToneMapping",
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-        absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_fs.glsl")
-    );
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
-    _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
 
     // Find out how much GPU memory this computer has (Nvidia cards).
     // TODO: use for streaming budget!
@@ -554,16 +661,24 @@ void RenderableGaiaStars::initializeGL() {
 }
 
 void RenderableGaiaStars::deinitializeGL() {
-    glDeleteBuffers(1, &_vboPos);
-    _vboPos = 0;
-    glDeleteBuffers(1, &_vboCol);
-    _vboCol = 0;
-    glDeleteBuffers(1, &_vboVel);
-    _vboVel = 0;
-    glDeleteBuffers(1, &_ssboIdx);
-    _ssboIdx = 0;
-    glDeleteBuffers(1, &_ssboData);
-    _ssboData = 0;
+    if (_vboPos != 0) {
+        glDeleteBuffers(1, &_vboPos);
+        _vboPos = 0;
+    }
+    if (_vboCol != 0) {
+        glDeleteBuffers(1, &_vboCol);
+        _vboCol = 0;
+    }
+    if (_vboVel != 0) {
+        glDeleteBuffers(1, &_vboVel);
+        _vboVel = 0;
+    }
+    if (_ssboIdx != 0) {
+        glDeleteBuffers(1, &_ssboIdx);
+        _ssboIdx = 0;
+        glDeleteBuffers(1, &_ssboData);
+        _ssboData = 0;
+    }
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vboQuad);
@@ -607,119 +722,97 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::mat4 modelViewProjMat = projection * view * model;
     glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
 
-
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide.
-    const int option = _renderOption;
+    const int renderOption = _renderOption;
     int deltaStars = 0;
     auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
-        gaiamission::RenderOption(option));
+        gaiamission::RenderOption(renderOption), _useVBO);
 
     // Update number of rendered stars.
-    int nStars = static_cast<int>(_nRenderedStars) + deltaStars;
-    _nRenderedStars.set(nStars);
-    
-    //-------------------- FUNCTIONING RENDERING WITH SSBOS ---------------------------
-    // Update SSBO Index array with accumulated stars in all chunks.
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
+    _nStarsToRender += deltaStars;
+    _nRenderedStars.set(_nStarsToRender);
+
     int nChunksToRender = _octreeManager->biggestChunkIndexInUse();
     int maxStarsPerNode = _octreeManager->maxStarsPerNode();
-    int lastValue = _accumulatedIndices.back();
-    _accumulatedIndices.resize(nChunksToRender + 1, lastValue);
-    
-    // Update vector with accumulated indices.
-    for (auto &[offset, subData] : updateData) {
-        int newValue = (subData.size() / _nValuesInSlice) + _accumulatedIndices[offset];
-        int changeInValue = newValue - _accumulatedIndices[offset + 1];
-        _accumulatedIndices[offset + 1] = newValue;
-        // Propagate change.
-        for (int i = offset + 1; i < nChunksToRender; ++i) {
-            _accumulatedIndices[i + 1] += changeInValue;
+    int valuesPerStar = _nValuesInSlice;
+
+    // Switch rendering technique depending on user-defined shader option.
+    const int shaderOption = _shaderOption;
+    if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
+
+        //------------------------ RENDER WITH SSBO ---------------------------
+        // Update SSBO Index array with accumulated stars in all chunks.
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
+        int lastValue = _accumulatedIndices.back();
+        _accumulatedIndices.resize(nChunksToRender + 1, lastValue);
+
+        // Update vector with accumulated indices.
+        for (auto &[offset, subData] : updateData) {
+            int newValue = (subData.size() / _nValuesInSlice) + _accumulatedIndices[offset];
+            int changeInValue = newValue - _accumulatedIndices[offset + 1];
+            _accumulatedIndices[offset + 1] = newValue;
+            // Propagate change.
+            for (int i = offset + 1; i < nChunksToRender; ++i) {
+                _accumulatedIndices[i + 1] += changeInValue;
+            }
         }
-    }
 
-    // Fix number of stars rendered if it doesn't correspond to our buffers.
-    if (_accumulatedIndices.back() != nStars) {
-        _nRenderedStars.set(_accumulatedIndices.back());
-    }
-
-    // Update SSBO Index (stars per chunk).
-    glBufferData(
-        GL_SHADER_STORAGE_BUFFER,
-        nChunksToRender * sizeof(GLint),
-        _accumulatedIndices.data(),
-        GL_STREAM_DRAW
-    );
-
-    // Use orphaning strategy for data SSBO.
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
-
-    glBufferData(
-        GL_SHADER_STORAGE_BUFFER,
-        _streamingBudget * sizeof(GLfloat),
-        nullptr,
-        GL_STREAM_DRAW
-    );
-
-    // Update SSBO with one insert per chunk/node. The key in map holds the offset index.
-    for (auto &[offset, subData] : updateData) {
-        // We don't need to fill chunk with zeros anymore! Just check if we have any values to update.
-        if (!subData.empty()) {
-            std::vector<float> vectorData(subData.begin(), subData.end());
-            int dataSize = vectorData.size();
-            glBufferSubData(
-                GL_SHADER_STORAGE_BUFFER,
-                offset * _chunkSize * sizeof(GLfloat),
-                dataSize * sizeof(GLfloat),
-                vectorData.data()
-            );
+        // Fix number of stars rendered if it doesn't correspond to our buffers.
+        if (_accumulatedIndices.back() != _nStarsToRender) {
+            _nStarsToRender = _accumulatedIndices.back();
+            _nRenderedStars.set(_nStarsToRender);
         }
-    }
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-
-    //------------------FUNCTIONING RENDERING WITH VBOS---------------------------
-    // Update VBOs with new nodes. 
-    // This will overwrite old data that's not visible anymore as well.
-    /*glBindVertexArray(_vao);
-
-    // Always update Position VBO.
-    glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
-    size_t posChunkSize = _octreeManager->maxStarsPerNode() * _posSize;
-    size_t posStreamingBudget = _octreeManager->totalNodes() * posChunkSize;
-
-    // Use buffer orphaning to update a subset of total data.
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        posStreamingBudget * sizeof(GLfloat),
-        nullptr,
-        GL_STREAM_DRAW
-    );
-
-    // Update buffer with one insert per chunk/node. The key in map holds the offset index.
-    for (auto & [offset, subData] : updateData) {
-        // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-        // Only required when removing nodes because chunks are filled up in octree fetch on add.
-        std::vector<float> vectorData(subData.begin(), subData.end());
-        vectorData.resize(posChunkSize, 0.f);
-        glBufferSubData(
-            GL_ARRAY_BUFFER,
-            offset * posChunkSize * sizeof(GLfloat),
-            posChunkSize * sizeof(GLfloat),
-            vectorData.data()
+        // Update SSBO Index (stars per chunk).
+        glBufferData(
+            GL_SHADER_STORAGE_BUFFER,
+            nChunksToRender * sizeof(GLint),
+            _accumulatedIndices.data(),
+            GL_STREAM_DRAW
         );
-    }
 
-    // Update Color VBO if render option is 'Color' or 'Motion'.
-    if (option != gaiamission::RenderOption::Static) {
-        glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
-        size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
-        size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
-        
+        // Use orphaning strategy for data SSBO.
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+
+        glBufferData(
+            GL_SHADER_STORAGE_BUFFER,
+            _streamingBudget * sizeof(GLfloat),
+            nullptr,
+            GL_STREAM_DRAW
+        );
+
+        // Update SSBO with one insert per chunk/node. The key in map holds the offset index.
+        for (auto &[offset, subData] : updateData) {
+            // We don't need to fill chunk with zeros anymore! Just check if we have any values to update.
+            if (!subData.empty()) {
+                std::vector<float> vectorData(subData.begin(), subData.end());
+                int dataSize = vectorData.size();
+                glBufferSubData(
+                    GL_SHADER_STORAGE_BUFFER,
+                    offset * _chunkSize * sizeof(GLfloat),
+                    dataSize * sizeof(GLfloat),
+                    vectorData.data()
+                );
+            }
+        }
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+    else {
+        //---------------------- RENDER WITH VBO -----------------------------
+        // Update VBOs with new nodes. 
+        // This will overwrite old data that's not visible anymore as well.
+        glBindVertexArray(_vao);
+
+        // Always update Position VBO.
+        glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+        size_t posChunkSize = _octreeManager->maxStarsPerNode() * _posSize;
+        size_t posStreamingBudget = _octreeManager->totalNodes() * posChunkSize;
+
         // Use buffer orphaning to update a subset of total data.
         glBufferData(
             GL_ARRAY_BUFFER,
-            colStreamingBudget * sizeof(GLfloat),
+            posStreamingBudget * sizeof(GLfloat),
             nullptr,
             GL_STREAM_DRAW
         );
@@ -727,26 +820,27 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         // Update buffer with one insert per chunk/node. The key in map holds the offset index.
         for (auto &[offset, subData] : updateData) {
             // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+            // Only required when removing nodes because chunks are filled up in octree fetch on add.
             std::vector<float> vectorData(subData.begin(), subData.end());
-            vectorData.resize(posChunkSize + colChunkSize, 0.f);
+            vectorData.resize(posChunkSize, 0.f);
             glBufferSubData(
                 GL_ARRAY_BUFFER,
-                offset * colChunkSize * sizeof(GLfloat),
-                colChunkSize * sizeof(GLfloat),
-                vectorData.data() + posChunkSize
+                offset * posChunkSize * sizeof(GLfloat),
+                posChunkSize * sizeof(GLfloat),
+                vectorData.data()
             );
         }
 
-        // Update Velocity VBO if specified.
-        if (option == gaiamission::RenderOption::Motion) {
-            glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
-            size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
-            size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
+        // Update Color VBO if render option is 'Color' or 'Motion'.
+        if (renderOption != gaiamission::RenderOption::Static) {
+            glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+            size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
+            size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
 
             // Use buffer orphaning to update a subset of total data.
             glBufferData(
                 GL_ARRAY_BUFFER,
-                velStreamingBudget * sizeof(GLfloat),
+                colStreamingBudget * sizeof(GLfloat),
                 nullptr,
                 GL_STREAM_DRAW
             );
@@ -755,19 +849,47 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             for (auto &[offset, subData] : updateData) {
                 // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
                 std::vector<float> vectorData(subData.begin(), subData.end());
-                vectorData.resize(_chunkSize, 0.f);
+                vectorData.resize(posChunkSize + colChunkSize, 0.f);
                 glBufferSubData(
                     GL_ARRAY_BUFFER,
-                    offset * velChunkSize * sizeof(GLfloat),
-                    velChunkSize * sizeof(GLfloat),
-                    vectorData.data() + posChunkSize + colChunkSize
+                    offset * colChunkSize * sizeof(GLfloat),
+                    colChunkSize * sizeof(GLfloat),
+                    vectorData.data() + posChunkSize
                 );
             }
+
+            // Update Velocity VBO if specified.
+            if (renderOption == gaiamission::RenderOption::Motion) {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
+                size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
+                size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
+
+                // Use buffer orphaning to update a subset of total data.
+                glBufferData(
+                    GL_ARRAY_BUFFER,
+                    velStreamingBudget * sizeof(GLfloat),
+                    nullptr,
+                    GL_STREAM_DRAW
+                );
+
+                // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+                for (auto &[offset, subData] : updateData) {
+                    // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+                    std::vector<float> vectorData(subData.begin(), subData.end());
+                    vectorData.resize(_chunkSize, 0.f);
+                    glBufferSubData(
+                        GL_ARRAY_BUFFER,
+                        offset * velChunkSize * sizeof(GLfloat),
+                        velChunkSize * sizeof(GLfloat),
+                        vectorData.data() + posChunkSize + colChunkSize
+                    );
+                }
+            }
         }
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
-    
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);*/
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -800,46 +922,81 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.model, model);
     _program->setUniform(_uniformCache.view, view);
-    _program->setUniform(_uniformCache.viewScaling, viewScaling);
     _program->setUniform(_uniformCache.projection, projection);
-    _program->setUniform(_uniformCache.renderOption, _renderOption);
-    _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
-    _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
-    _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
-    _program->setUniform(_uniformCache.sharpness, _sharpness);
-    _program->setUniform(_uniformCache.billboardSize, _billboardSize);
-    _program->setUniform(_uniformCache.closeUpBoostDist, 
-        _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
-    );
-    _program->setUniform(_uniformCache.screenSize, screenSize);
     _program->setUniform(_uniformCache.time, static_cast<float>(data.time.j2000Seconds()));
-
-    ghoul::opengl::TextureUnit psfUnit;
-    psfUnit.activate();
-    _pointSpreadFunctionTexture->bind();
-    _program->setUniform(_uniformCache.psfTexture, psfUnit);
+    _program->setUniform(_uniformCache.renderOption, _renderOption);
+    _program->setUniform(_uniformCache.viewScaling, viewScaling);
+    _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
+    _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
     _colorTexture->bind();
     _program->setUniform(_uniformCache.colorTexture, colorUnit);
 
-    // Specify how many potential stars we have to render.
-    GLsizei nStarsToRender = _nRenderedStars;
-    int valuesPerStar = _nValuesInSlice;
-    //GLsizei maxStarsToRender = maxStarsPerNode * nChunksToRender;
-    _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
-    _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
-    _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
+    // Specify how many stars we will render. (Will be overwritten if rendering billboards.)
+    GLsizei nShaderCalls = _nStarsToRender;
+
+    switch (shaderOption) {
+    case ShaderOption::Point_SSBO: {
+        _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
+        _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
+        _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
+        break;
+    }
+    case ShaderOption::Point_VBO: {
+        break;
+    }
+    case ShaderOption::Billboard_SSBO: {
+        _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
+        _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
+        _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
+
+        _program->setUniform(_uniformCache.closeUpBoostDist,
+            _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
+        );
+        _program->setUniform(_uniformCache.billboardSize, _billboardSize);
+        _program->setUniform(_uniformCache.screenSize, screenSize);
+        _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
+        _program->setUniform(_uniformCache.sharpness, _sharpness);
+
+        ghoul::opengl::TextureUnit psfUnit;
+        psfUnit.activate();
+        _pointSpreadFunctionTexture->bind();
+        _program->setUniform(_uniformCache.psfTexture, psfUnit);
+
+        // Specify how many potential stars we have to render.
+        nShaderCalls = maxStarsPerNode * nChunksToRender;
+        break;
+    }
+    case ShaderOption::Billboard_VBO: {
+        _program->setUniform(_uniformCache.closeUpBoostDist,
+            _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
+        );
+        _program->setUniform(_uniformCache.billboardSize, _billboardSize);
+        _program->setUniform(_uniformCache.screenSize, screenSize);
+        _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
+        _program->setUniform(_uniformCache.sharpness, _sharpness);
+
+        ghoul::opengl::TextureUnit psfUnit;
+        psfUnit.activate();
+        _pointSpreadFunctionTexture->bind();
+        _program->setUniform(_uniformCache.psfTexture, psfUnit);
+
+        // Specify how many potential stars we have to render.
+        nShaderCalls = maxStarsPerNode * nChunksToRender;
+        break;
+    }
+    }
 
     // Render to FBO.
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     //glEnable(GL_PROGRAM_POINT_SIZE);
-    // A non-zero named vao MUST be bound!
+    // A non-zero named vao MUST ALWAYS be bound!
     glBindVertexArray(_vao);
-    glDrawArrays(GL_POINTS, 0, nStarsToRender); //maxStarsToRender
+    glDrawArrays(GL_POINTS, 0, nShaderCalls);
     glBindVertexArray(0);
     //glDisable(GL_PROGRAM_POINT_SIZE);
     _program->deactivate();
@@ -854,7 +1011,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     fboTexUnit.activate();
     _fboTexture->bind();
     _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
-    _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
+
+    if (shaderOption == ShaderOption::Point_SSBO || shaderOption == ShaderOption::Point_VBO) {
+        _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
+    }
 
     glBindVertexArray(_vaoQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
@@ -891,42 +1051,29 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableGaiaStars::update(const UpdateData&) {
+    const int shaderOption = _shaderOption;
+    const int renderOption = _renderOption;
+
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
-        const int option = _renderOption;
-
         // Reload data file (as long as it's not the first initialization)!
         if (_vao != 0) { 
             // This will reconstruct the Octree as well!
-            bool success = readDataFile(gaiamission::RenderOption(option));
+            bool success = readDataFile(gaiamission::RenderOption(renderOption));
             if (!success) {
                 throw ghoul::RuntimeError("Error loading FITS data");
             }
         }
-
+        _dataIsDirty = false;
+        // Make sure we regenerate buffers if data has reloaded!
+        _buffersAreDirty = true;
+    }
+    
+    if (_buffersAreDirty) {
+        LDEBUG("Regenerating buffers");
         if (_vao == 0) {
             glGenVertexArrays(1, &_vao);
             LDEBUG(fmt::format("Generating Vertex Array id '{}'",  _vao));
-        }
-        if (_vboPos == 0) {
-            glGenBuffers(1, &_vboPos);
-            LDEBUG(fmt::format("Generating Position Vertex Buffer Object id '{}'", _vboPos));
-        }
-        if (_vboCol == 0) {
-            glGenBuffers(1, &_vboCol);
-            LDEBUG(fmt::format("Generating Color Vertex Buffer Object id '{}'", _vboCol));
-        }
-        if (_vboVel == 0) {
-            glGenBuffers(1, &_vboVel);
-            LDEBUG(fmt::format("Generating Velocity Vertex Buffer Object id '{}'", _vboVel));
-        }
-        if (_ssboIdx == 0) {
-            glGenBuffers(1, &_ssboIdx);
-            LDEBUG(fmt::format("Generating Index Shader Storage Buffer Object id '{}'", _ssboIdx));
-        }
-        if (_ssboData == 0) {
-            glGenBuffers(1, &_ssboData);
-            LDEBUG(fmt::format("Generating Data Shader Storage Buffer Object id '{}'", _ssboData));
         }
         if (_vaoQuad == 0) {
             glGenVertexArrays(1, &_vaoQuad);
@@ -951,120 +1098,149 @@ void RenderableGaiaStars::update(const UpdateData&) {
             LDEBUG("Generating Framebuffer Texture!");
         }
 
-        // Bind SSBO blocks to our shader positions.
-        // Number of stars per chunk (a.k.a. Index).
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
+        // ------------------ RENDER WITH SSBO -----------------------
+        if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
+            _useVBO = false;
+            // Generate SSBO Buffers and bind them. 
+            if (_ssboIdx == 0) {
+                glGenBuffers(1, &_ssboIdx);
+                LDEBUG(fmt::format("Generating Index Shader Storage Buffer Object id '{}'", _ssboIdx));
+            }
+            if (_ssboData == 0) {
+                glGenBuffers(1, &_ssboData);
+                LDEBUG(fmt::format("Generating Data Shader Storage Buffer Object id '{}'", _ssboData));
+            }
+
+            // Bind SSBO blocks to our shader positions.
+            // Number of stars per chunk (a.k.a. Index).
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
+
+            _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
+                ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboIdxBinding->bindingNumber(), _ssboIdx);
+            _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
+
+            // Combined SSBO with all data.
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+
+            _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
+                ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboDataBinding->bindingNumber(), _ssboData);
+            _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        }
+        else { // ------------------ RENDER WITH VBO -----------------------
+            _useVBO = true;
+            // Generate VBOs
+            if (_vboPos == 0) {
+                glGenBuffers(1, &_vboPos);
+                LDEBUG(fmt::format("Generating Position Vertex Buffer Object id '{}'", _vboPos));
+            }
+            if (_vboCol == 0) {
+                glGenBuffers(1, &_vboCol);
+                LDEBUG(fmt::format("Generating Color Vertex Buffer Object id '{}'", _vboCol));
+            }
+            if (_vboVel == 0) {
+                glGenBuffers(1, &_vboVel);
+                LDEBUG(fmt::format("Generating Velocity Vertex Buffer Object id '{}'", _vboVel));
+            }
+
+            // Bind our different VBOs to our vertex array layout. 
+            glBindVertexArray(_vao);
+
+            switch (renderOption) {
+            case gaiamission::RenderOption::Static: {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+                GLint positionAttrib = _program->attributeLocation("in_position");
+                glEnableVertexAttribArray(positionAttrib);
+
+                glVertexAttribPointer(
+                    positionAttrib,
+                    _posSize,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    nullptr
+                );
+
+                break;
+            }
+            case gaiamission::RenderOption::Color: {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+                GLint positionAttrib = _program->attributeLocation("in_position");
+                glEnableVertexAttribArray(positionAttrib);
+
+                glVertexAttribPointer(
+                    positionAttrib,
+                    _posSize,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    nullptr
+                );
+
+                glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+                GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+                glEnableVertexAttribArray(brightnessDataAttrib);
+
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    _colSize,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    nullptr
+                );
+                break;
+            }
+            case gaiamission::RenderOption::Motion: {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+                GLint positionAttrib = _program->attributeLocation("in_position");
+                glEnableVertexAttribArray(positionAttrib);
+
+                glVertexAttribPointer(
+                    positionAttrib,
+                    _posSize,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    nullptr
+                );
+
+                glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+                GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+                glEnableVertexAttribArray(brightnessDataAttrib);
+
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    _colSize,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    nullptr
+                );
+
+                glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
+                GLint velocityAttrib = _program->attributeLocation("in_velocity");
+                glEnableVertexAttribArray(velocityAttrib);
+
+                glVertexAttribPointer(
+                    velocityAttrib,
+                    _velSize,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    0,
+                    nullptr
+                );
+                break;
+            }
+            }
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
         
-        _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboIdxBinding->bindingNumber(), _ssboIdx);
-        _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
-
-        // Combined SSBO with all data.
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
-
-        _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
-            ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboDataBinding->bindingNumber(), _ssboData);
-        _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
-        
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        // Bind our different VBOs to our vertex array layout. 
-        /*glBindVertexArray(_vao);
-
-        switch (option) {
-        case gaiamission::RenderOption::Static: {
-            glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
-            GLint positionAttrib = _program->attributeLocation("in_position");
-            glEnableVertexAttribArray(positionAttrib);
-
-            glVertexAttribPointer(
-                positionAttrib,
-                _posSize,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
-
-            break;
-        } 
-        case gaiamission::RenderOption::Color: {
-            glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
-            GLint positionAttrib = _program->attributeLocation("in_position");
-            glEnableVertexAttribArray(positionAttrib);
-
-            glVertexAttribPointer(
-                positionAttrib,
-                _posSize,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
-
-            glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
-            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
-            glEnableVertexAttribArray(brightnessDataAttrib);
-
-            glVertexAttribPointer(
-                brightnessDataAttrib,
-                _colSize,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
-            break;
-        }
-        case gaiamission::RenderOption::Motion: {
-            glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
-            GLint positionAttrib = _program->attributeLocation("in_position");
-            glEnableVertexAttribArray(positionAttrib);
-
-            glVertexAttribPointer(
-                positionAttrib,
-                _posSize,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
-
-            glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
-            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
-            glEnableVertexAttribArray(brightnessDataAttrib);
-
-            glVertexAttribPointer(
-                brightnessDataAttrib,
-                _colSize,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr
-            );
-
-            glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
-            GLint velocityAttrib = _program->attributeLocation("in_velocity");
-            glEnableVertexAttribArray(velocityAttrib);
-
-            glVertexAttribPointer(
-                velocityAttrib,
-                _velSize,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                nullptr 
-            );
-            break;
-        }
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-        */
-
         // Bind VBO and VAO for Quad rendering.
         glBindVertexArray(_vaoQuad);
         glBindBuffer(GL_ARRAY_BUFFER, _vboQuad);
@@ -1119,7 +1295,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        _dataIsDirty = false;
+        _buffersAreDirty = false;
     }
 
     if (_pointSpreadFunctionTextureIsDirty) {
@@ -1174,36 +1350,132 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    if (_program->isDirty()) {
-        _program->rebuildFromFile();
+    if (_program->isDirty() || _shadersAreDirty) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        if (_program) {
+            renderEngine.removeRenderProgram(_program);
+            _program = nullptr;
+        }
+        switch (shaderOption) {
+        case ShaderOption::Point_SSBO: {
+            _program = ghoul::opengl::ProgramObject::Build(
+                "GaiaStar",
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+            );
+            _program->rebuildFromFile();
 
+            _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+            _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
+            _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
+
+            _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
+            _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
+            break;
+        }
+        case ShaderOption::Point_VBO: {
+            _program = ghoul::opengl::ProgramObject::Build(
+                "GaiaStar",
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+            );
+            _program->rebuildFromFile();
+            break;
+        }
+        case ShaderOption::Billboard_SSBO: {
+            _program = ghoul::opengl::ProgramObject::Build(
+                "GaiaStar",
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+            );
+            _program->rebuildFromFile();
+
+            _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+            _uniformCache.sharpness = _program->uniformLocation("sharpness");
+            _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+            _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
+            _uniformCache.screenSize = _program->uniformLocation("screenSize");
+            _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+
+            _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+            _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
+            _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
+
+            _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
+            _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
+            break;
+        }
+        case ShaderOption::Billboard_VBO: {
+            _program = ghoul::opengl::ProgramObject::Build(
+                "GaiaStar",
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+            );
+            _program->rebuildFromFile();
+
+            _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+            _uniformCache.sharpness = _program->uniformLocation("sharpness");
+            _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+            _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
+            _uniformCache.screenSize = _program->uniformLocation("screenSize");
+            _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+            break;
+        }
+        }
+
+        // Common uniforms for all shaders:
         _uniformCache.model = _program->uniformLocation("model");
         _uniformCache.view = _program->uniformLocation("view");
-        _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
         _uniformCache.projection = _program->uniformLocation("projection");
-        _uniformCache.renderOption = _program->uniformLocation("renderOption");
-        _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
-        _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
-        _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
-        _uniformCache.sharpness = _program->uniformLocation("sharpness");
-        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
-        _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
-        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
         _uniformCache.time = _program->uniformLocation("time");
+        _uniformCache.renderOption = _program->uniformLocation("renderOption");
+        _uniformCache.viewScaling = _program->uniformLocation("viewScaling");
+        _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
+        _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
-        _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
-        _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
-        _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
-        _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
-        _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
+        // Rebuild buffer data from scratch.
+        int maxNodesInStream = static_cast<int>(_streamingBudget / _chunkSize);
+        _octreeManager->initVBOIndexStack(maxNodesInStream);
+        _nStarsToRender = 0;
     }
 
-    if (_programTM->isDirty()) {
-        _programTM->rebuildFromFile();
+    if (_programTM->isDirty() || _shadersAreDirty) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        if (_programTM) {
+            renderEngine.removeRenderProgram(_programTM);
+            _programTM = nullptr;
+        }
+        switch (shaderOption) {
+        case ShaderOption::Point_SSBO:
+        case ShaderOption::Point_VBO: {
+            _programTM = renderEngine.buildRenderProgram("ToneMapping",
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
+            );
+            _programTM->rebuildFromFile();
+
+            _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+            break;
+        }
+        case ShaderOption::Billboard_SSBO:
+        case ShaderOption::Billboard_VBO: {
+            _programTM = renderEngine.buildRenderProgram("ToneMapping",
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
+            );
+            _programTM->rebuildFromFile();
+            break;
+        }
+        }
+        // Common uniforms:
         _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
-        _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+
+        _shadersAreDirty = false;
     }
 
     if (OsEng.windowWrapper().windowHasResized()) {
@@ -1409,7 +1681,7 @@ bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
         " Max Nodes in stream: " + std::to_string(maxNodesInStream));
 
     _octreeManager->initVBOIndexStack(maxNodesInStream);
-    _nRenderedStars.set(0);
+    _nStarsToRender = 0;
 
     //_octreeManager->printStarsPerNode();
    

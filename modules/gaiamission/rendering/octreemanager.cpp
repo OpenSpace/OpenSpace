@@ -97,6 +97,7 @@ void OctreeManager::initVBOIndexStack(int maxIndex) {
     // Clear stack if we've used it before.
     _biggestChunkIndexInUse = 0;
     _freeSpotsInVBO = std::stack<int>();
+    _rebuildVBO = true;
 
     // Build stack back-to-front.
     for (int idx = maxIndex - 1; idx >= 0; --idx) {
@@ -132,8 +133,8 @@ void OctreeManager::printStarsPerNode() const {
 // Builds render data structure by traversing the Octree and checking for intersection 
 // with view frustum. Every vector in map contains data for one node.  
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mvp, 
-    const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option) {
-
+    const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option, bool useVBO) {
+    _useVBO = useVBO;
     auto renderData = std::map<int, std::vector<float>>();
 
     // Reclaim indices from previous render call. 
@@ -682,15 +683,19 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
     // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
     // And more importantly so our attribute pointers knows where to read!
     auto insertData = std::vector<float>(node->posData.begin(), node->posData.end());
-    //insertData.resize(_posSize * MAX_STARS_PER_NODE, 0.f);
-
+    if (_useVBO) {
+        insertData.resize(_posSize * MAX_STARS_PER_NODE, 0.f);
+    }
     if (option != gaiamission::RenderOption::Static) {
         insertData.insert(insertData.end(), node->colData.begin(), node->colData.end());
-        //insertData.resize((_posSize + _colSize) * MAX_STARS_PER_NODE, 0.f);
-
+        if (_useVBO) {
+            insertData.resize((_posSize + _colSize) * MAX_STARS_PER_NODE, 0.f);
+        }
         if (option == gaiamission::RenderOption::Motion) {
             insertData.insert(insertData.end(), node->velData.begin(), node->velData.end());
-            //insertData.resize((_posSize + _colSize + _velSize) * MAX_STARS_PER_NODE, 0.f);
+            if (_useVBO) {
+                insertData.resize((_posSize + _colSize + _velSize) * MAX_STARS_PER_NODE, 0.f);
+            }
         }
     }
     return insertData;

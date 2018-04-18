@@ -67,6 +67,13 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    enum ShaderOption {
+        Point_SSBO = 0,
+        Point_VBO = 1,
+        Billboard_SSBO = 2,
+        Billboard_VBO = 3
+    };
+    
     bool readDataFile(gaiamission::RenderOption option);
     std::vector<float> sliceFitsValues(gaiamission::RenderOption option, 
         std::vector<float> starValues);
@@ -76,6 +83,8 @@ private:
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
     bool _dataIsDirty;
+    bool _buffersAreDirty;
+    bool _shadersAreDirty;
 
     std::string _fileTypeOrigin;
     const std::string FITS = "fits";
@@ -104,6 +113,7 @@ private:
     std::vector<std::string> _columnNames;
     properties::BoolProperty _filePreprocessed;
     properties::OptionProperty _renderOption;
+    properties::OptionProperty _shaderOption;
     properties::IntProperty _nRenderedStars;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
@@ -126,6 +136,8 @@ private:
     std::vector<int> _accumulatedIndices;
     size_t _nValuesPerStar;
     size_t _nValuesInSlice;
+    int _nStarsToRender;
+    bool _useVBO;
     const size_t _memoryBudgetInValues = 805306368; // 3GB in bytes / sizeof(GLfloat) *4B*
     size_t _streamingBudget;
     size_t _chunkSize;
