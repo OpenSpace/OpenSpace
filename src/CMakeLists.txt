@@ -31,8 +31,10 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
+    ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
+    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
+    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
@@ -200,7 +202,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationgenerator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/configuration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
