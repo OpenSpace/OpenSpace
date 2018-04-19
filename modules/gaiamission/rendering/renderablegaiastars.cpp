@@ -393,7 +393,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             _renderOption = gaiamission::RenderOption::Motion;
         }
     }
-    _renderOption.onChange([&] { _dataIsDirty = true; }); // TODO: Shouldn't need to re-load file here!
+    _renderOption.onChange([&] { _buffersAreDirty = true; });
     addProperty(_renderOption);
 
     _shaderOption.addOptions({
@@ -1207,6 +1207,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_buffersAreDirty) {
         LDEBUG("Regenerating buffers");
 
+        // Set values per star slice depending on render option.
+        if (renderOption == gaiamission::RenderOption::Static) {
+            _nValuesInSlice = _posSize;
+        }
+        else if (renderOption == gaiamission::RenderOption::Color) {
+            _nValuesInSlice = _posSize + _colSize;
+        }
+        else { // (renderOption == gaiamission::RenderOption::Motion)
+            _nValuesInSlice = _posSize + _colSize + _velSize;
+        }
+
         // Trigger a rebuild of buffer data from octree.
         _chunkSize = _octreeManager->maxStarsPerNode() * _nValuesInSlice;
         _streamingBudget = _octreeManager->totalNodes() * _chunkSize;
@@ -1550,16 +1561,6 @@ bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
             // Let's assume we've already contructed an Octree!
             _octreeManager->readFromFile(fileStream);
 
-            if (option == gaiamission::RenderOption::Static) {
-                _nValuesInSlice = 3;
-            }
-            else if (option == gaiamission::RenderOption::Color) {
-                _nValuesInSlice = 5;
-            }
-            else { // (option == gaiamission::RenderOption::Motion)
-                _nValuesInSlice = 8;
-            }
-
             // Else we're reading from a BIN file as before.
             /*else {
                 int32_t nValues = 0;
@@ -1589,7 +1590,7 @@ bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
                         LERROR("User did not specify correct origin of preprocessed file.");
                     }
 
-                    _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
+                    //_nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
                     _octreeManager->insert(slicedValues);
                 }
             }*/
@@ -1687,7 +1688,7 @@ bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
 
             // Slice star data and insert star into octree.
             auto slicedValues = sliceFitsValues(option, values); 
-            _nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
+            //_nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
 
             // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
             _octreeManager->insert(slicedValues);
