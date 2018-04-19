@@ -34,83 +34,85 @@
 namespace openspace {
 
 struct Configuration {
-    std::string windowConfiguration;
-    std::string asset;
+    std::string windowConfiguration = "${CONFIG}/single.xml";
+    std::string asset = "default";
     std::vector<std::string> globalCustomizationScripts;
     std::map<std::string, std::string> pathTokens;
     std::map<std::string, std::string> fonts;
 
     struct Logging {
-        std::string level;
-        std::string directory;
-        std::string performancePrefix;
-        bool forceImmediateFlush;
-        std::string capabilitiesVerbosity;
+        std::string level = "Info";
+        std::string directory = "${BASE}";
+        std::string performancePrefix = "PM-";
+        bool forceImmediateFlush = false;
+        std::string capabilitiesVerbosity = "Default";
         std::vector<ghoul::Dictionary> logs;
     };
     Logging logging;
 
-    std::string scriptLog;
+    std::string scriptLog = "";
 
     struct Documentation {
-        std::string lua;
-        std::string property;
-        std::string sceneProperty;
-        std::string keyboard;
-        std::string documentation;
-        std::string factory;
-        std::string license;
+        std::string lua = "";
+        std::string property = "";
+        std::string sceneProperty = "";
+        std::string keyboard = "";
+        std::string documentation = "";
+        std::string factory = "";
+        std::string license = "";
     };
     Documentation documentation;
 
-    bool useMultithreadedInitialization;
+    bool useMultithreadedInitialization = false;
 
     struct LoadingScreen {
-        bool isShowingMessages;
-        bool isShowingNodeNames;
-        bool isShowingProgressbar;
+        bool isShowingMessages = true;
+        bool isShowingNodeNames = true;
+        bool isShowingProgressbar = true;
     };
     LoadingScreen loadingScreen;
 
-    bool isCheckingOpenGLState;
-    bool isLoggingOpenGLCalls;
+    bool isCheckingOpenGLState = false;
+    bool isLoggingOpenGLCalls = false;
 
-    int shutdownCountdown;
+    float shutdownCountdown = 0.f;
 
-    bool shouldUseScreenshotDate;
+    bool shouldUseScreenshotDate = false;
 
-    std::string onScreenTextScaling;
+    std::string onScreenTextScaling = "window";
     bool usePerSceneCache;
     
-    bool isRenderingOnMasterDisabled;
-    bool isSceneOnMasterDisabled;
+    bool isRenderingOnMasterDisabled = false;
+    bool isSceneTranslationOnMasterDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
-    std::string renderingMethod;
+    std::string renderingMethod = "Framebuffer";
     
     struct OpenGLDebugContext {
-        bool isActive;
-        bool isSynchronous;
+        bool isActive = false;
+        bool isSynchronous = true;
         struct IdentifierFilter {
-            std::string type;
-            std::string source;
-            int identifier;
+            std::string type = "";
+            std::string source = "";
+            unsigned int identifier = 0;
         };
         std::vector<IdentifierFilter> identifierFilters;
         std::vector<std::string> severityFilters;
     };
     OpenGLDebugContext openGLDebugContext;
 
-    std::string serverPasskey;
-    bool doesRequireSocketAuthentication;
-    std::string clientAddressWhitelist;
+    std::string serverPasskey = "17308";
+    bool doesRequireSocketAuthentication = true;
+    std::vector<std::string> clientAddressWhitelist;
     std::string webHelperLocation;
     std::string cefWebGuiUrl;
 
     struct HTTPProxy {
+        bool usingHttpProxy = false;
         std::string address;
-        std::string port;
+        unsigned int port;
+        std::string authentication = "BASIC";
         std::string user;
         std::string password;
     };

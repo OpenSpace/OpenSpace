@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/engine/configuration.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -43,7 +44,6 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class AssetManager;
-class ConfigurationManager;
 class Dashboard;
 class DownloadManager;
 class GUI;
@@ -119,8 +119,9 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
+    const Configuration& configuration() const;
+
     // Guaranteed to return a valid pointer
-    ConfigurationManager& configurationManager();
     LuaConsole& console();
     AssetManager& assetManager();
     Dashboard& dashboard();
@@ -203,8 +204,9 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
+    Configuration _configuration;
+
     // Components
-    std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<Dashboard> _dashboard;

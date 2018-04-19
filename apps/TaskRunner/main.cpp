@@ -44,7 +44,6 @@
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/util/taskloader.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>

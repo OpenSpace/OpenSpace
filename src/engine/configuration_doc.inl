@@ -214,7 +214,7 @@ documentation::Documentation doc = {
         },
         {
             KeyClientAddressWhitelist,
-            new StringVerifier,
+            new StringListVerifier,
             Optional::Yes,
             "String containing white listed client IP addresses that won't need to be"
             "authorized with the server. Space separated"
@@ -297,6 +297,12 @@ documentation::Documentation doc = {
             KeyHttpProxy,
             new TableVerifier({
                 {
+                    KeyActivate,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "Determines whether the proxy is being used"
+                },
+                {
                     KeyAddress,
                     new StringVerifier,
                     Optional::No,
@@ -304,7 +310,7 @@ documentation::Documentation doc = {
                 },
                 {
                     KeyPort,
-                    new StringVerifier,
+                    new IntVerifier,
                     Optional::No,
                     "The port of the http proxy"
                 },

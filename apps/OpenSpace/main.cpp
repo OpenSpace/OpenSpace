@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configurationmanager.h>
+//#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
@@ -311,10 +311,10 @@ void mainInitFunc() {
 #endif // OPENSPACE_HAS_SPOUT
     }
 
-    std::string k = openspace::ConfigurationManager::KeyScreenshotUseDate;
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
-    if (OsEng.configurationManager().hasKey(k)) {
+    
+    if (OsEng.configuration().shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
         char mbstr[100];

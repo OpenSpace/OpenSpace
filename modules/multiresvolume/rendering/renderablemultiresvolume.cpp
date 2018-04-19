@@ -24,7 +24,6 @@
 
 #include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
 
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderengine.h>

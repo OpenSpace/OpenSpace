@@ -36,7 +36,6 @@ namespace {
     constexpr const char* InitialConfigHelper =
                                                "${BASE}/scripts/configuration_helper.lua";
 
-
     constexpr const char* KeySGCTConfig = "SGCTConfig";
     constexpr const char* KeyAsset = "Asset";
     constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
@@ -98,9 +97,10 @@ namespace {
 namespace openspace {
 
 void parseLuaState(Configuration& configuration) {
+    ghoul::lua::LuaState& s = configuration.state;
+
     // Load global table and apply documentation feature 
-
-
+    configuration.windowConfiguration = ghoul::lua::value<std::string>(s, KeySGCTConfig);
 }
 
 
@@ -140,23 +140,19 @@ Configuration loadConfigurationFromFile(const std::string& filename) {
     ghoul_assert(!filename.empty(), "Filename must not be empty");
     ghoul_assert(FileSys.fileExists(filename), "File must exist");
 
-    ghoul::lua::LuaState state;
+    Configuration result;
+
     // Register the base path as the directory where 'filename' lives
     std::string basePath = ghoul::filesystem::File(filename).directoryName();
     FileSys.registerPathToken(BasePathToken, basePath);
 
     // If there is an initial config helper file, load it into the state
     if (FileSys.fileExists(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(state, absPath(InitialConfigHelper));
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(state, filename);
-
-    // Now that we have all of the variables declared in the state, we can extract them
-    // and fill the configuration struct
-    Configuration result;
-    result.state = std::move(state);
+    ghoul::lua::runScriptFile(result.state, filename);
 
     parseLuaState(result);
 

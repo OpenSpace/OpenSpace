@@ -65,14 +65,7 @@ bool AuthorizationTopic::authorize(const std::string key) {
 }
 
 const std::string AuthorizationTopic::getKey() const {
-    const bool hasConfigPassword = OsEng.configurationManager().hasKeyAndValue<std::string>(
-        ConfigurationManager::KeyServerPasskey);
-    if (hasConfigPassword) {
-        return OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyServerPasskey);
-    }
-
-    return "17308";
+    return OsEng.configuration().serverPasskey;
 }
 
 nlohmann::json AuthorizationTopic::message(const std::string &message, StatusCode statusCode) {

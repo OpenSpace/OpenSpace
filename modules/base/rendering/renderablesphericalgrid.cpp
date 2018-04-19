@@ -25,7 +25,6 @@
 #include <modules/base/rendering/renderablesphericalgrid.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
