@@ -67,14 +67,6 @@ documentation::Documentation doc = {
             "in all other configuration files or scripts."
         },
         {
-            
-            KeyPathsCACHE,
-            new StringVerifier,
-            Optional::No,
-            "The path to be used as a cache folder. If per scene caching is enabled, the "
-            "name of the scene will be appended to this folder"
-        },
-        {
             KeyFonts,
             new StringListVerifier("Font paths loadable by FreeType"),
             Optional::Yes,
@@ -153,21 +145,6 @@ documentation::Documentation doc = {
             "other information."
         },
         {
-            KeyLuaDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The filename that will be created on startup containing the documentation "
-            "of available Lua functions that can be executed in scene files or per "
-            "console. Any existing file will be silently overwritten."
-        },
-        {
-            KeyPropertyDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing a list of all "
-            "properties in the scene. Any existing file will be silently overwritten."
-        },
-        {
             KeyScriptLog,
             new StringVerifier,
             Optional::Yes,
@@ -176,28 +153,61 @@ documentation::Documentation doc = {
             "the results from previous runs) will be silently overwritten."
         },
         {
-            KeyKeyboardShortcuts,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing the list of all "
-            "keyboard bindings with their respective Lua scripts. For each key, it "
-            "mentions which scripts will be executed in the current session."
-        },
-        {
             KeyDocumentation,
-            new StringVerifier,
+            new TableVerifier({
+                {
+                    KeyLuaDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The filename that will be created on startup containing the "
+                    "documentation of available Lua functions that can be executed in "
+                    "scene files or per console. Any existing file will be silently "
+                    "overwritten."
+                },
+                {
+                    KeyPropertyDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing a list of all "
+                    "properties in the scene. Any existing file will be silently "
+                    "overwritten."
+                },
+                {
+                    KeyKeyboardShortcuts,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing the list of all "
+                    "keyboard bindings with their respective Lua scripts. For each key, "
+                    "it mentions which scripts will be executed in the current session."
+                },
+                {
+                    KeyDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing this "
+                    "documentation. Any previous file in this location will be silently "
+                    "overwritten."
+                },
+                {
+                    KeyFactoryDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing the factory "
+                    "documentation which shows the different types of objects that can "
+                    "be created in the current application configuration. Any previous "
+                    "file in this location will be silently overritten."
+                },
+                {
+                    KeyLicenseDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing the scene "
+                    "license information. Any previous file in this location will be "
+                    "silently overwritten."
+                },
+            }),
             Optional::Yes,
-            "The file that will be created on startup containing this documentation. Any "
-            "previous file in this location will be silently overwritten."
-        },
-        {
-            KeyFactoryDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing the factory "
-            "documentation which shows the different types of objects that can be "
-            "created in the current application configuration. Any previous file in this "
-            "location will be silently overritten."
+            "All documentations that are generated at application startup."
         },
         {
             KeyRequireSocketAuthentication,
@@ -218,14 +228,6 @@ documentation::Documentation doc = {
             Optional::Yes,
             "String containing white listed client IP addresses that won't need to be"
             "authorized with the server. Space separated"
-        },
-        {
-            KeyLicenseDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing the scene license "
-            "information. Any previous file in this location will be silently "
-            "overwritten."
         },
         {
             KeyShutdownCountdown,

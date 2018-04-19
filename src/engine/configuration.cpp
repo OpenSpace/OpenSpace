@@ -26,9 +26,9 @@
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
-
 
 namespace {
     constexpr const char* BasePathToken = "${BASE}";
@@ -90,6 +90,141 @@ namespace {
     constexpr const char* KeyShowProgressbar = "ShowProgressbar";
     constexpr const char* KeyModuleConfigurations = "ModuleConfigurations";
 
+    template <typename T>
+    void getValue(ghoul::lua::LuaState& L, const char* name, T& value) {
+        using namespace openspace;
+
+        lua_getglobal(L, name);
+        if (lua_isnil(L, -1)) {
+            return;
+        }
+
+        if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            std::vector<std::string> res;
+            for (size_t i = 1; i <= d.size(); ++i) {
+                res.push_back(d.value<std::string>(std::to_string(i)));
+            }
+            value = res;
+        }
+        else if constexpr (std::is_same_v<T, std::map<std::string, std::string>>) {
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            std::map<std::string, std::string> res;
+            for (size_t i = 0; i < d.size(); ++i) {
+                std::string key = d.keys()[i];
+                std::string v = d.value<std::string>(key);
+                res[std::move(key)] = std::move(v);
+            }
+            value = res;
+        }
+        else if constexpr (std::is_same_v<T, std::map<std::string, ghoul::Dictionary>>) {
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+            std::map<std::string, ghoul::Dictionary> res;
+            for (size_t i = 0; i < d.size(); ++i) {
+                std::string key = d.keys()[i];
+                ghoul::Dictionary v = d.value<ghoul::Dictionary>(key);
+                res[std::move(key)] = std::move(v);
+            }
+            value = res;
+        }
+        else if constexpr (std::is_same_v<T, Configuration::Logging>) {
+            Configuration::Logging& v = static_cast<Configuration::Logging&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyLogLevel, v.level);
+            d.getValue(KeyLogDir, v.directory);
+            d.getValue(KeyPerformancePrefix, v.performancePrefix);
+            d.getValue(KeyImmediateFlush, v.forceImmediateFlush);
+            d.getValue(KeyCapabilitiesVerbosity, v.capabilitiesVerbosity);
+
+            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
+                ghoul::Dictionary l = d.value<ghoul::Dictionary>(KeyLogs);
+                std::vector<ghoul::Dictionary> res;
+                for (size_t i = 1; i <= l.size(); ++i) {
+                    res.push_back(l.value<ghoul::Dictionary>(std::to_string(i)));
+                }
+                v.logs = res;
+            }
+        }
+        else if constexpr (std::is_same_v<T, Configuration::Documentation>) {
+            Configuration::Documentation& v =
+                static_cast<Configuration::Documentation&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyLuaDocumentation, v.lua);
+            d.getValue(KeyPropertyDocumentation, v.property);
+            d.getValue("ScenePropertyDocumentation", v.sceneProperty);
+            d.getValue(KeyKeyboardShortcuts, v.keyboard);
+            d.getValue(KeyDocumentation, v.documentation);
+            d.getValue(KeyFactoryDocumentation, v.factory);
+            d.getValue(KeyLicenseDocumentation, v.license);
+        }
+        else if constexpr (std::is_same_v<T, Configuration::LoadingScreen>) {
+            Configuration::LoadingScreen& v =
+                static_cast<Configuration::LoadingScreen&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyShowMessage, v.isShowingMessages);
+            d.getValue(KeyShowNodeNames, v.isShowingNodeNames);
+            d.getValue(KeyShowProgressbar, v.isShowingProgressbar);
+        }
+        else if constexpr (std::is_same_v<T, Configuration::OpenGLDebugContext>) {
+            Configuration::OpenGLDebugContext& v = 
+                static_cast<Configuration::OpenGLDebugContext&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyActivate, v.isActive);
+            d.getValue(KeySynchronous, v.isSynchronous);
+
+            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterIdentifier)) {
+                ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterIdentifier);
+
+                std::vector<Configuration::OpenGLDebugContext::IdentifierFilter> res;
+                for (size_t i = 1; i <= f.size(); ++i) {
+                    Configuration::OpenGLDebugContext::IdentifierFilter filter;
+                    ghoul::Dictionary fi = f.value<ghoul::Dictionary>(std::to_string(i));
+
+                    double id = static_cast<double>(filter.identifier);
+                    fi.getValue(KeyIdentifier, id);
+                    filter.identifier = static_cast<unsigned int>(id);
+                    fi.getValue(KeySource, filter.source);
+                    fi.getValue(KeyType, filter.type);
+
+                    res.push_back(filter);
+                }
+
+                v.identifierFilters = res;
+            }
+
+            if (d.hasKeyAndValue<ghoul::Dictionary>(KeyFilterSeverity)) {
+                ghoul::Dictionary f = d.value<ghoul::Dictionary>(KeyFilterSeverity);
+
+                std::vector<std::string> res;
+                for (size_t i = 1; i <= f.size(); ++i) {
+                    res.push_back(f.value<std::string>(std::to_string(i)));
+                }
+                v.severityFilters = res;
+            }
+        }
+        else if constexpr (std::is_same_v<T, Configuration::HTTPProxy>) {
+            Configuration::HTTPProxy& v = static_cast<Configuration::HTTPProxy&>(value);
+            ghoul::Dictionary d = ghoul::lua::value<ghoul::Dictionary>(L);
+
+            d.getValue(KeyActivate, v.usingHttpProxy);
+            d.getValue(KeyAddress, v.address);
+            double p = static_cast<double>(v.port);
+            d.getValue(KeyPort, p);
+            v.port = static_cast<unsigned int>(p);
+            d.getValue(KeyAuthentication, v.authentication);
+            d.getValue(KeyUser, v.user);
+            d.getValue(KeyPassword, v.password);
+        }
+        else {
+            value = ghoul::lua::value<T>(L);
+        }
+    }
 } // namespace
 
 #include "configuration_doc.inl"
@@ -97,10 +232,42 @@ namespace {
 namespace openspace {
 
 void parseLuaState(Configuration& configuration) {
-    ghoul::lua::LuaState& s = configuration.state;
+    using namespace ghoul::lua;
 
-    // Load global table and apply documentation feature 
-    configuration.windowConfiguration = ghoul::lua::value<std::string>(s, KeySGCTConfig);
+    // Shorten the rest of this function
+    Configuration& c = configuration;
+    LuaState& s = c.state;
+
+    // @TODO(abock): Load global table and apply documentation feature 
+
+    getValue(s, KeySGCTConfig, c.windowConfiguration);
+    getValue(s, KeyAsset, c.asset);
+    getValue(s, KeyGlobalCustomizationScripts, c.globalCustomizationScripts);
+    getValue(s, KeyPaths, c.pathTokens);
+    getValue(s, KeyFonts, c.fonts);
+    getValue(s, KeyScriptLog, c.scriptLog);
+    getValue(s, KeyUseMultithreadedInitialization, c.useMultithreadedInitialization);
+    getValue(s, KeyCheckOpenGLState, c.isCheckingOpenGLState);
+    getValue(s, KeyLogEachOpenGLCall, c.isLoggingOpenGLCalls);
+    getValue(s, KeyShutdownCountdown, c.shutdownCountdown);
+    getValue(s, KeyScreenshotUseDate, c.shouldUseScreenshotDate);
+    getValue(s, KeyOnScreenTextScaling, c.onScreenTextScaling);
+    getValue(s, KeyPerSceneCache, c.usePerSceneCache);
+    getValue(s, KeyDisableRenderingOnMaster, c.isRenderingOnMasterDisabled);
+    getValue(s, KeyDisableSceneOnMaster, c.isSceneTranslationOnMasterDisabled);
+    getValue(s, KeyRenderingMethod, c.renderingMethod);
+    getValue(s, KeyServerPasskey, c.serverPasskey);
+    getValue(s, KeyRequireSocketAuthentication, c.doesRequireSocketAuthentication);
+    getValue(s, KeyClientAddressWhitelist, c.clientAddressWhitelist);
+    getValue(s, "WebHelperLocation", c.webHelperLocation);
+    getValue(s, "CefWebGuiUrl", c.cefWebGuiUrl);
+
+    getValue(s, KeyLogging, c.logging);
+    getValue(s, KeyDocumentation, c.documentation);
+    getValue(s, KeyLoadingScreen, c.loadingScreen);
+    getValue(s, KeyModuleConfigurations, c.moduleConfigurations);
+    getValue(s, KeyOpenGLDebugContext, c.openGLDebugContext);
+    getValue(s, KeyHttpProxy, c.httpProxy);
 }
 
 

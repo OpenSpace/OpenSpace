@@ -291,8 +291,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Parse commandline arguments
     std::vector<std::string> args(argv, argv + argc);
-    std::shared_ptr<const std::vector<std::string>> arguments =
-        _engine->_commandlineParser->setCommandLine(args);
+    std::vector<std::string> arg = _engine->_commandlineParser->setCommandLine(args);
 
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
@@ -300,7 +299,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
         requestClose = true;
         return;
     }
-    sgctArguments = *arguments;
+    sgctArguments = arg;
 
     // Find configuration
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
@@ -341,6 +340,36 @@ void OpenSpaceEngine::create(int argc, char** argv,
         LFATALC(e.component, e.message);
         throw;
     }
+
+
+    // Registering Path tokens. If the BASE path is set, it is the only one that will
+    // overwrite the default path of the cfg directory
+    for (const std::pair<std::string, std::string>& path :
+        _engine->_configuration.pathTokens)
+    {
+        std::string fullKey =
+            FileSystem::TokenOpeningBraces + path.first + FileSystem::TokenClosingBraces;
+        LDEBUGC(
+            "ConfigurationManager",
+            fmt::format("Registering path {}: {}", fullKey, path.second)
+        );
+
+        bool override = (fullKey == "${BASE}");
+        if (override) {
+            LINFOC(
+                "ConfigurationManager",
+                fmt::format("Overriding base path with '{}'", path.second)
+            );
+        }
+
+        using Override = ghoul::filesystem::FileSystem::Override;
+        FileSys.registerPathToken(
+            std::move(fullKey),
+            std::move(path.second),
+            override ? Override::Yes : Override::No
+        );
+    }
+
 
     const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
     const bool hasCacheConfig = _engine->_configuration.usePerSceneCache;
@@ -797,16 +826,17 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     OsEng.scriptEngine().initializeLuaState(state);
 
     for (const std::string& script : _configuration.globalCustomizationScripts) {
-        if (FileSys.fileExists(script)) {
+        std::string s = absPath(script);
+        if (FileSys.fileExists(s)) {
             try {
-                LINFO(fmt::format("Running global customization script: {}", script));
-                ghoul::lua::runScriptFile(state, script);
-            } catch (ghoul::RuntimeError& e) {
+                LINFO(fmt::format("Running global customization script: {}", s));
+                ghoul::lua::runScriptFile(state, s);
+            } catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
         else {
-            LDEBUG(fmt::format("Ignoring non-existing script file: {}", script));
+            LDEBUG(fmt::format("Ignoring non-existing script file: {}", s));
         }
     }
 }
@@ -852,6 +882,10 @@ void OpenSpaceEngine::loadFonts() {
 }
 
 void OpenSpaceEngine::configureLogging(bool consoleLog) {
+    // We previously initialized the LogManager with a console log to provide some logging
+    // until we know which logs should be added
+    LogManager::deinitialize();
+
     LogLevel level = ghoul::logging::levelFromString(_configuration.logging.level);
     bool immediateFlush = _configuration.logging.forceImmediateFlush;
 

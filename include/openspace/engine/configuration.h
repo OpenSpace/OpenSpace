@@ -80,7 +80,7 @@ struct Configuration {
     bool shouldUseScreenshotDate = false;
 
     std::string onScreenTextScaling = "window";
-    bool usePerSceneCache;
+    bool usePerSceneCache = false;
     
     bool isRenderingOnMasterDisabled = false;
     bool isSceneTranslationOnMasterDisabled = false;
@@ -104,21 +104,19 @@ struct Configuration {
 
     std::string serverPasskey = "17308";
     bool doesRequireSocketAuthentication = true;
-    std::vector<std::string> clientAddressWhitelist;
-    std::string webHelperLocation;
-    std::string cefWebGuiUrl;
+    std::vector<std::string> clientAddressWhitelist = {};
+    std::string webHelperLocation = "";
+    std::string cefWebGuiUrl = "";
 
     struct HTTPProxy {
         bool usingHttpProxy = false;
         std::string address;
-        unsigned int port;
+        unsigned int port = 0;
         std::string authentication = "BASIC";
         std::string user;
         std::string password;
     };
     HTTPProxy httpProxy;
-
-
 
 
     ghoul::lua::LuaState state;
