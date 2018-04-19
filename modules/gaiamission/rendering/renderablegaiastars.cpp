@@ -697,11 +697,11 @@ void RenderableGaiaStars::deinitializeGL() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
-        renderEngine.removeRenderProgram(_program);
+        renderEngine.removeRenderProgram(_program.get());
         _program = nullptr;
     }
     if (_programTM) {
-        renderEngine.removeRenderProgram(_programTM);
+        renderEngine.removeRenderProgram(_programTM.get());
         _programTM = nullptr;
     }
 }
@@ -1076,7 +1076,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_program->isDirty() || _shadersAreDirty) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_program) {
-            renderEngine.removeRenderProgram(_program);
+            renderEngine.removeRenderProgram(_program.get());
             _program = nullptr;
         }
         switch (shaderOption) {
@@ -1173,7 +1173,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_programTM->isDirty() || _shadersAreDirty) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         if (_programTM) {
-            renderEngine.removeRenderProgram(_programTM);
+            renderEngine.removeRenderProgram(_programTM.get());
             _programTM = nullptr;
         }
         switch (shaderOption) {
