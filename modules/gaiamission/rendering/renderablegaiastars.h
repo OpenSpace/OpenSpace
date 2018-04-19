@@ -146,6 +146,7 @@ private:
     const size_t _velSize = 3;
 
     GLuint _vao;
+    GLuint _vaoEmpty;
     GLuint _vboPos;
     GLuint _vboCol;
     GLuint _vboVel;

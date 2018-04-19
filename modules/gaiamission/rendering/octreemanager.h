@@ -49,7 +49,7 @@ public:
         float halfDimension;
         size_t numStars; // TODO: Use in LOD checks, else remove?
         bool isLeaf;
-        int vboIndex;
+        int bufferIndex;
         size_t lodInUse;
     };
 
@@ -57,7 +57,7 @@ public:
     ~OctreeManager();
 
     void initOctree();
-    void initVBOIndexStack(int maxIndex);
+    void initBufferIndexStack(int maxIndex);
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
     std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
@@ -101,11 +101,11 @@ private:
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
-    std::stack<int> _freeSpotsInVBO;
+    std::stack<int> _freeSpotsInBuffer;
     std::set<int> _removedKeysInPrevCall;
 
-    size_t _totalNodes;
-    size_t _numNodesPerFile;
+    size_t _totalNodes; // TODO: remove?
+    size_t _numNodesPerFile; // TODO: remove?
     size_t _totalDepth;
     size_t _numLeafNodes;
     size_t _numInnerNodes;
@@ -115,7 +115,7 @@ private:
     const size_t _colSize = 2;
     const size_t _velSize = 3;
     int _maxStackSize;
-    bool _rebuildVBO;
+    bool _rebuildBuffer;
     bool _useVBO;
 
 }; // class OctreeManager

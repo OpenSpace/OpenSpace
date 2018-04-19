@@ -45,7 +45,10 @@ OctreeManager::OctreeManager()
     , _numLeafNodes(0)
     , _numInnerNodes(0)
     , _biggestChunkIndexInUse(0)
-    , _rebuildVBO(false)
+    , _valuesPerStar(0)
+    , _maxStackSize(0)
+    , _rebuildBuffer(false)
+    , _useVBO(false)
 {   }
 
 OctreeManager::~OctreeManager() {   }
@@ -76,7 +79,7 @@ void OctreeManager::initOctree() {
         _root->Children[i]->colData = std::vector<float>();
         _root->Children[i]->velData = std::vector<float>();
         _root->Children[i]->isLeaf = true;
-        _root->Children[i]->vboIndex = DEFAULT_INDEX;
+        _root->Children[i]->bufferIndex = DEFAULT_INDEX;
         _root->Children[i]->lodInUse = 0;
         _root->Children[i]->numStars = 0;
         _root->Children[i]->halfDimension = MAX_DIST / 2.f;
@@ -92,18 +95,18 @@ void OctreeManager::initOctree() {
 }
 
 // Initialize a stack that keeps track of all free spot in VBO stream.
-void OctreeManager::initVBOIndexStack(int maxIndex) {
+void OctreeManager::initBufferIndexStack(int maxIndex) {
     
     // Clear stack if we've used it before.
     _biggestChunkIndexInUse = 0;
-    _freeSpotsInVBO = std::stack<int>();
-    _rebuildVBO = true;
+    _freeSpotsInBuffer = std::stack<int>();
+    _rebuildBuffer = true;
 
     // Build stack back-to-front.
     for (int idx = maxIndex - 1; idx >= 0; --idx) {
-        _freeSpotsInVBO.push(idx);
+        _freeSpotsInBuffer.push(idx);
     }
-    _maxStackSize = static_cast<int>(_freeSpotsInVBO.size());
+    _maxStackSize = static_cast<int>(_freeSpotsInBuffer.size());
     LINFO("StackSize: " + std::to_string(_maxStackSize) );
 }
 
@@ -134,8 +137,10 @@ void OctreeManager::printStarsPerNode() const {
 // with view frustum. Every vector in map contains data for one node.  
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mvp, 
     const glm::vec2 screenSize, int& deltaStars, gaiamission::RenderOption option, bool useVBO) {
-    _useVBO = useVBO;
+
     auto renderData = std::map<int, std::vector<float>>();
+    bool innerRebuild = false;
+    _useVBO = useVBO;
 
     // Reclaim indices from previous render call. 
     for (auto removedKey = _removedKeysInPrevCall.rbegin();
@@ -145,22 +150,22 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mv
         if (*removedKey == _biggestChunkIndexInUse - 1) {
             _biggestChunkIndexInUse = *removedKey;
             LINFO("Decreased size to: " + std::to_string(_biggestChunkIndexInUse) +
-                " FreeSpotsInVBO: " + std::to_string(_freeSpotsInVBO.size()));
+                " FreeSpotsInVBO: " + std::to_string(_freeSpotsInBuffer.size()));
         }
-        _freeSpotsInVBO.push(*removedKey);
+        _freeSpotsInBuffer.push(*removedKey);
     }
     // Clear cache of removed keys before next render call.
     _removedKeysInPrevCall.clear();
 
     // Rebuild VBO from scratch if we're not using most of it but have a high max index.
     if (_biggestChunkIndexInUse > _maxStackSize * 4 / 5 &&
-        _freeSpotsInVBO.size() > _maxStackSize * 5 / 6) {
+        _freeSpotsInBuffer.size() > _maxStackSize * 5 / 6) {
         LINFO("Rebuilding VBO! - Biggest Chunk: " + std::to_string(_biggestChunkIndexInUse) +
             " 4/5: " + std::to_string(_maxStackSize * 4 / 5) +
-            " FreeSpotsInVBO: " + std::to_string(_freeSpotsInVBO.size()) +
+            " FreeSpotsInVBO: " + std::to_string(_freeSpotsInBuffer.size()) +
             " 5/6: " + std::to_string(_maxStackSize * 5 / 6));
-        initVBOIndexStack(_maxStackSize);
-        _rebuildVBO = true;
+        initBufferIndexStack(_maxStackSize);
+        innerRebuild = true;
     }
 
     for (size_t i = 0; i < 8; ++i) {
@@ -171,20 +176,24 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mv
         renderData.insert(tmpData.begin(), tmpData.end());
     }
 
-    if (_rebuildVBO) {
-        // We need to overwrite bigger indices that had data before!
-        auto idxToRemove = std::map<int, std::vector<float>>();
-        for (size_t idx : _removedKeysInPrevCall) {
-            idxToRemove[idx] = std::vector<float>();
-        }
-        _removedKeysInPrevCall.clear();
+    if (_rebuildBuffer) {
+        if (_useVBO) {
+            // We need to overwrite bigger indices that had data before! No need for SSBO.
+            auto idxToRemove = std::map<int, std::vector<float>>();
+            for (size_t idx : _removedKeysInPrevCall) {
+                idxToRemove[idx] = std::vector<float>();
+            }
 
-        // This will only insert indices that doesn't already exist in map (i.e. > biggestIdx).
-        renderData.insert(idxToRemove.begin(), idxToRemove.end());
-        deltaStars = 0;
-        _rebuildVBO = false;
+            // This will only insert indices that doesn't already exist in map (i.e. > biggestIdx).
+            renderData.insert(idxToRemove.begin(), idxToRemove.end());
+        }
+        if (innerRebuild) { deltaStars = 0; }
+        
+        // Clear potential removed keys for both VBO and SSBO! 
+        _removedKeysInPrevCall.clear();
+        _rebuildBuffer = false;
         LINFO("After rebuild - Biggest Chunk: " + std::to_string(_biggestChunkIndexInUse) +
-            " _freeSpotsInVBO.size(): " + std::to_string(_freeSpotsInVBO.size()));
+            " _freeSpotsInBuffer.size(): " + std::to_string(_freeSpotsInBuffer.size()));
     }
 
     return renderData;
@@ -509,17 +518,17 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
         if (!lodData.empty()) {
             // Get correct insert index from stack if node didn't exist already. 
             // Otherwise we will overwrite the old data. Key merging is not a problem here. 
-            if (node->vboIndex == DEFAULT_INDEX || _rebuildVBO) {
-                if (node->vboIndex != DEFAULT_INDEX) {
-                    // If we're rebuilding VBO cache then store indices to overwrite later. 
-                    _removedKeysInPrevCall.insert(node->vboIndex);
+            if (node->bufferIndex == DEFAULT_INDEX || _rebuildBuffer) {
+                if (node->bufferIndex != DEFAULT_INDEX) {
+                    // If we're rebuilding Buffer Index Cache then store indices to overwrite later. 
+                    _removedKeysInPrevCall.insert(node->bufferIndex);
                 }
-                node->vboIndex = _freeSpotsInVBO.top();
-                _freeSpotsInVBO.pop();
+                node->bufferIndex = _freeSpotsInBuffer.top();
+                _freeSpotsInBuffer.pop();
 
                 // Keep track of how many chunks are in use (ceiling).
-                if (_freeSpotsInVBO.top() > _biggestChunkIndexInUse) {
-                    _biggestChunkIndexInUse = _freeSpotsInVBO.top();
+                if (_freeSpotsInBuffer.top() > _biggestChunkIndexInUse) {
+                    _biggestChunkIndexInUse = _freeSpotsInBuffer.top();
                 }
 
                 // We're in an inner node, remove indices from potential children in cache!
@@ -529,7 +538,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
                 }
 
                 // Insert data and adjust stars added in this frame.
-                fetchedData[node->vboIndex] = lodData;
+                fetchedData[node->bufferIndex] = lodData;
                 deltaStars += static_cast<int>(node->posData.size() / _posSize);
                 node->lodInUse = node->posData.size() / _posSize;
             }
@@ -538,7 +547,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
                 // TODO: This will never happen because we only have 1 LOD right now.
                 if (node->posData.size() / _posSize != node->lodInUse) {
                     // Insert data and adjust stars added in this frame.
-                    fetchedData[node->vboIndex] = lodData;
+                    fetchedData[node->bufferIndex] = lodData;
                     deltaStars += static_cast<int>(node->posData.size() / _posSize) -
                         static_cast<int>(node->lodInUse);
                     node->lodInUse = node->posData.size() / _posSize;
@@ -550,22 +559,22 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
     // Return node data if node is a leaf.
     else {
         // If node already is in cache then skip it, otherwise store it.
-        if (node->vboIndex == DEFAULT_INDEX || _rebuildVBO) {
-            if (node->vboIndex != DEFAULT_INDEX) {
-                // If we're rebuilding VBO cache then store indices to overwrite later. 
-                _removedKeysInPrevCall.insert(node->vboIndex);
+        if (node->bufferIndex == DEFAULT_INDEX || _rebuildBuffer) {
+            if (node->bufferIndex != DEFAULT_INDEX) {
+                // If we're rebuilding Buffer Index Cache then store indices to overwrite later. 
+                _removedKeysInPrevCall.insert(node->bufferIndex);
             }
             // Get correct insert index from stack.
-            node->vboIndex = _freeSpotsInVBO.top();
-            _freeSpotsInVBO.pop();
+            node->bufferIndex = _freeSpotsInBuffer.top();
+            _freeSpotsInBuffer.pop();
 
             // Keep track of how many chunks are in use (ceiling).
-            if (_freeSpotsInVBO.top() > _biggestChunkIndexInUse) {
-                _biggestChunkIndexInUse = _freeSpotsInVBO.top();
+            if (_freeSpotsInBuffer.top() > _biggestChunkIndexInUse) {
+                _biggestChunkIndexInUse = _freeSpotsInBuffer.top();
             }
 
             // Insert data and adjust stars added in this frame.
-            fetchedData[node->vboIndex] = constructInsertData(node, option);
+            fetchedData[node->bufferIndex] = constructInsertData(node, option);
             deltaStars += static_cast<int>(node->posData.size() / _posSize);
         }
         return fetchedData;
@@ -594,19 +603,19 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(std::shared
     auto keysToRemove = std::map<int, std::vector<float>>();
 
     // If we're in rebuilding mode then there is no need to remove any nodes.
-    if(_rebuildVBO) return keysToRemove;
+    if(_rebuildBuffer) return keysToRemove;
 
     // Check if this node was rendered == had a specified index.
-    if (node->vboIndex != DEFAULT_INDEX) {
+    if (node->bufferIndex != DEFAULT_INDEX) {
 
         // Reclaim that index. However we need to wait until next render call to use it again!
-        _removedKeysInPrevCall.insert(node->vboIndex);
+        _removedKeysInPrevCall.insert(node->bufferIndex);
 
         // Insert dummy node at offset index that should be removed from render.
-        keysToRemove[node->vboIndex] = std::vector<float>();
+        keysToRemove[node->bufferIndex] = std::vector<float>();
 
         // Reset index and adjust stars removed this frame. 
-        node->vboIndex = DEFAULT_INDEX;
+        node->bufferIndex = DEFAULT_INDEX;
         if (node->lodInUse > 0) {
             // If we're removing an inner node from cache then only decrease correct amount. 
             deltaStars -= static_cast<int>(node->lodInUse);
@@ -652,7 +661,7 @@ void OctreeManager::createNodeChildren(std::shared_ptr<OctreeNode> node) {
         _numLeafNodes++;
         node->Children[i] = std::make_unique<OctreeNode>();
         node->Children[i]->isLeaf = true;
-        node->Children[i]->vboIndex = DEFAULT_INDEX;
+        node->Children[i]->bufferIndex = DEFAULT_INDEX;
         node->Children[i]->lodInUse = 0;
         node->Children[i]->numStars = 0;
         node->Children[i]->posData = std::vector<float>();
