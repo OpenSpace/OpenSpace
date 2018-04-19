@@ -50,111 +50,112 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace {
-    // (x, y, z, w, s, t) * 6 = 36
-    const int PLANES_VERTEX_DATA_SIZE = 36;
 
-    namespace documentation { struct Documentation; }
+// (x, y, z, w, s, t) * 6 = 36
+const int PLANES_VERTEX_DATA_SIZE = 36;
 
-    class RenderablePlanesCloud : public Renderable {
-    public:
-        explicit RenderablePlanesCloud(const ghoul::Dictionary& dictionary);
-        ~RenderablePlanesCloud() = default;
+namespace documentation { struct Documentation; }
 
-        void initialize() override;
-        void initializeGL() override;
-        void deinitializeGL() override;
+class RenderablePlanesCloud : public Renderable {
+public:
+    explicit RenderablePlanesCloud(const ghoul::Dictionary& dictionary);
+    ~RenderablePlanesCloud() = default;
 
-        bool isReady() const override;
+    void initialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-        void render(const RenderData& data, RendererTasks& rendererTask) override;
-        void update(const UpdateData& data) override;
+    bool isReady() const override;
 
-        static documentation::Documentation Documentation();
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
-    private:
-        enum Unit {
-            Meter = 0,
-            Kilometer = 1,
-            Parsec = 2,
-            Kiloparsec = 3,
-            Megaparsec = 4,
-            Gigaparsec = 5,
+    static documentation::Documentation Documentation();
 
-            GigalightYears = 6
-        };
+private:
+    enum Unit {
+        Meter = 0,
+        Kilometer = 1,
+        Parsec = 2,
+        Kiloparsec = 3,
+        Megaparsec = 4,
+        Gigaparsec = 5,
 
-        struct RenderingPlane {
-            int planeIndex;
-            GLuint vao;
-            GLuint vbo;
-            GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
-        };
-
-        void deleteDataGPU();
-        void createPlanes();
-        void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
-            const glm::dmat4& projectionMatrix, float fadeInVariable);
-        void renderLabels(const RenderData& data,
-            const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
-            const glm::dvec3& orthoUp, float fadeInVarible);
-
-        bool loadData();
-        bool loadTextures();
-        bool readSpeckFile();
-        bool readLabelFile();
-        bool loadCachedFile(const std::string& file);
-        bool saveCachedFile(const std::string& file) const;
-
-        bool _hasSpeckFile;
-        bool _dataIsDirty;
-        bool _textColorIsDirty;
-        bool _hasLabel;
-        bool _labelDataIsDirty;
-
-        int _textMinSize;
-        int _textMaxSize;
-        int _planeStartingIndexPos;
-        int _textureVariableIndex;
-
-        properties::FloatProperty _alphaValue;
-        properties::FloatProperty _scaleFactor;
-        properties::Vec4Property _textColor;
-        properties::FloatProperty _textSize;
-        properties::BoolProperty _drawElements;
-        properties::OptionProperty _blendMode;
-        properties::Vec2Property _fadeInDistance;
-        properties::BoolProperty _disableFadeInDistance;
-        properties::FloatProperty _planeMinSize;
-
-        // DEBUG:
-        properties::OptionProperty _renderOption;
-
-        std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-        UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
-            galaxyTexture) _uniformCache;
-        std::shared_ptr<ghoul::fontrendering::Font> _font;
-        std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
-        std::unordered_map<int, std::string> _textureFileMap;
-
-        std::string _speckFile;
-        std::string _labelFile;
-        std::string _texturesPath;
-        std::string _luminosityVar;
-
-        Unit _unit;
-
-        std::vector<float> _fullData;
-        std::vector<std::pair<glm::vec3, std::string>> _labelData;
-        std::unordered_map<std::string, int> _variableDataPositionMap;
-
-        int _nValuesPerAstronomicalObject;
-
-        float _sluminosity;
-
-        glm::dmat4 _transformationMatrix;
-
-        std::vector<RenderingPlane> _renderingPlanesArray;
+        GigalightYears = 6
     };
+
+    struct RenderingPlane {
+        int planeIndex;
+        GLuint vao;
+        GLuint vbo;
+        GLfloat vertexData[PLANES_VERTEX_DATA_SIZE];
+    };
+
+    void deleteDataGPU();
+    void createPlanes();
+    void renderPlanes(const RenderData& data, const glm::dmat4& modelViewMatrix,
+        const glm::dmat4& projectionMatrix, float fadeInVariable);
+    void renderLabels(const RenderData& data,
+        const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
+        const glm::dvec3& orthoUp, float fadeInVarible);
+
+    bool loadData();
+    bool loadTextures();
+    bool readSpeckFile();
+    bool readLabelFile();
+    bool loadCachedFile(const std::string& file);
+    bool saveCachedFile(const std::string& file) const;
+
+    bool _hasSpeckFile;
+    bool _dataIsDirty;
+    bool _textColorIsDirty;
+    bool _hasLabel;
+    bool _labelDataIsDirty;
+
+    int _textMinSize;
+    int _textMaxSize;
+    int _planeStartingIndexPos;
+    int _textureVariableIndex;
+
+    properties::FloatProperty _alphaValue;
+    properties::FloatProperty _scaleFactor;
+    properties::Vec4Property _textColor;
+    properties::FloatProperty _textSize;
+    properties::BoolProperty _drawElements;
+    properties::OptionProperty _blendMode;
+    properties::Vec2Property _fadeInDistance;
+    properties::BoolProperty _disableFadeInDistance;
+    properties::FloatProperty _planeMinSize;
+
+    // DEBUG:
+    properties::OptionProperty _renderOption;
+
+    ghoul::opengl::ProgramObject* _program;
+    UniformCache(modelViewProjectionTransform, alphaValue, scaleFactor, fadeInValue,
+        galaxyTexture) _uniformCache;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::unordered_map<int, std::unique_ptr<ghoul::opengl::Texture>> _textureMap;
+    std::unordered_map<int, std::string> _textureFileMap;
+
+    std::string _speckFile;
+    std::string _labelFile;
+    std::string _texturesPath;
+    std::string _luminosityVar;
+
+    Unit _unit;
+
+    std::vector<float> _fullData;
+    std::vector<std::pair<glm::vec3, std::string>> _labelData;
+    std::unordered_map<std::string, int> _variableDataPositionMap;
+
+    int _nValuesPerAstronomicalObject;
+
+    float _sluminosity;
+
+    glm::dmat4 _transformationMatrix;
+
+    std::vector<RenderingPlane> _renderingPlanesArray;
+};
 
 
 } // namespace openspace

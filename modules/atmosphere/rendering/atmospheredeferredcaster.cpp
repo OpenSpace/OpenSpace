@@ -292,7 +292,13 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
 
             // Sun Position in Object Space
-            program.setUniform(_uniformCache2.sunDirectionObj, glm::normalize(glm::dvec3(sunPosObj)));
+            const double l = glm::length(glm::dvec3(sunPosObj));
+            program.setUniform(
+                _uniformCache2.sunDirectionObj,
+                l > 0.0 ?
+                glm::normalize(glm::dvec3(sunPosObj)) :
+                glm::dvec3(0.0)
+            );
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {

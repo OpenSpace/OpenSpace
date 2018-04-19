@@ -24,6 +24,7 @@
 
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
 
+#include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
@@ -48,6 +49,8 @@
 
 namespace {
     constexpr const char* _loggerCat        = "RenderableDUMeshes";
+    constexpr const char* ProgramObjectName = "RenderableDUMeshes";
+
     constexpr const char* KeyFile           = "File";
     constexpr const char* keyColor          = "Color";
     constexpr const char* keyUnit           = "Unit";
@@ -398,11 +401,15 @@ bool RenderableDUMeshes::isReady() const {
 }
 
 void RenderableDUMeshes::initializeGL() {
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _program = renderEngine.buildRenderProgram(
-        "RenderableDUMeshes",
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
-        absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
+    _program = DigitalUniverseModule::ProgramObjectManager.requestProgramObject(
+        ProgramObjectName,
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return OsEng.renderEngine().buildRenderProgram(
+                "RenderableDUMeshes",
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_vs.glsl"),
+                absPath("${MODULE_DIGITALUNIVERSE}/shaders/dumesh_fs.glsl")
+            );
+        }
     );
 
     _uniformCache.modelViewTransform = _program->uniformLocation("modelViewTransform");
@@ -439,11 +446,12 @@ void RenderableDUMeshes::deinitializeGL() {
         }
     }
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_program) {
-        renderEngine.removeRenderProgram(_program);
-        _program = nullptr;
-    }
+    DigitalUniverseModule::ProgramObjectManager.releaseProgramObject(
+        ProgramObjectName,
+        [](ghoul::opengl::ProgramObject* p) {
+            OsEng.renderEngine().removeRenderProgram(p);
+        }
+    );
 }
 
 void RenderableDUMeshes::renderMeshes(const RenderData&,

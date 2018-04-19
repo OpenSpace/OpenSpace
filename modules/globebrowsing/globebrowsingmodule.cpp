@@ -628,6 +628,11 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
     return res;
 }
 
+bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
+    return _urlList.find(globe) != _urlList.end();
+}
+
+
 #endif // GLOBEBROWSING_USE_GDAL
 
 } // namespace openspace

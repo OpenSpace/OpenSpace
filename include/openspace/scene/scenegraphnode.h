@@ -173,7 +173,7 @@ private:
     // Cached transform data
     glm::dvec3 _worldPositionCached;
     glm::dmat3 _worldRotationCached;
-    double _worldScaleCached;
+    double _worldScaleCached = 1.0;
 
     glm::dmat4 _modelTransformCached;
     glm::dmat4 _inverseModelTransformCached;

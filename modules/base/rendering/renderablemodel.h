@@ -73,7 +73,7 @@ private:
     properties::BoolProperty _performShading;
     properties::Mat3Property _modelTransform;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    ghoul::opengl::ProgramObject* _programObject;
     UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
         projectionTransform, performShading, texture) _uniformCache;
 

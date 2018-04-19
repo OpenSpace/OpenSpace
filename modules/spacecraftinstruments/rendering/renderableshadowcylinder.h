@@ -78,7 +78,7 @@ private:
     properties::StringProperty _bodyFrame;
     properties::OptionProperty _aberration;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    ghoul::opengl::ProgramObject* _shader;
     UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
 
     glm::dmat3 _stateMatrix;

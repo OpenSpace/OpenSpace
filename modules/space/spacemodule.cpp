@@ -45,6 +45,8 @@
 
 namespace openspace {
 
+ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+
 SpaceModule::SpaceModule() : OpenSpaceModule(Name) {}
 
 void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
@@ -78,6 +80,10 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary&) {
     auto fGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fGeometry, "Planet geometry factory was not created");
     fGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
+}
+
+void SpaceModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
