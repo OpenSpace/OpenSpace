@@ -145,7 +145,7 @@ int addNode(lua_State* L) {
     if (found && !isnan(p.POSITIONX) && !p.BINARY )
     {
         Time epoch;
-        double parsecinmeter = 3.08567758*10e16;
+        double parsec = 0.308567756E17;
 
         const std::string luaTableParent = "{"
             "Name = '" + starname + "',"
@@ -153,7 +153,7 @@ int addNode(lua_State* L) {
             "Transform = {"
                 "Translation = {"
                     "Type = 'StaticTranslation',"
-                    "Position = {" + std::to_string(p.POSITIONX * parsecinmeter) + ", " + std::to_string(p.POSITIONY * parsecinmeter) + ", " + std::to_string(p.POSITIONZ * parsecinmeter) + "}"
+                    "Position = {" + std::to_string(p.POSITIONX * parsec) + ", " + std::to_string(p.POSITIONY * parsec) + ", " + std::to_string(p.POSITIONZ * parsec) + "}"
                 "}"
             "}"
         "}";
@@ -175,7 +175,7 @@ int addNode(lua_State* L) {
             "}"
         "}";
 
-        std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + ")";
+        std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + ");";
 
         for (size_t i = 0; i < plsy.size(); i++)
         {
@@ -249,11 +249,9 @@ int addNode(lua_State* L) {
                 "},"
             "}";
 
-            scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + ")";
+            scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + ");";
 
         }
-
-        scriptParent += ";";
 
 
         OsEng.scriptEngine().queueScript(
