@@ -79,7 +79,7 @@ void GuiGlobeBrowsingComponent::render() {
         std::remove_if(
             nodes.begin(),
             nodes.end(),
-            [module](SceneGraphNode* n) {
+            [](SceneGraphNode* n) {
                 Renderable* r = n->renderable();
                 return !r || r->identifier() != "RenderableGlobe";
             }

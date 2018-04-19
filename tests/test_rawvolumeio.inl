@@ -64,7 +64,7 @@ TEST_F(RawVolumeIoTest, BasicInputOutput) {
 
     glm::uvec3 dims{ 2, 4, 8 };
     auto value = [dims](glm::uvec3 v) {
-        return v.z * 8 * 4 + v.y * 4 + v.x;
+        return v.z * dims.z * dims.y + v.y * dims.y + v.x;
     };
 
     RawVolume<float> vol(dims);

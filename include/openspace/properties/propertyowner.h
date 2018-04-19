@@ -83,8 +83,8 @@ public:
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
      * owner itself, the identifier must be globally unique. If the PropertyOwner has an
-     * owner, the identifier must be unique to the owner (including the owner's 
-     * properties). No uniqueness check will be preformed here, but rather in the 
+     * owner, the identifier must be unique to the owner (including the owner's
+     * properties). No uniqueness check will be preformed here, but rather in the
      * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
      *
      * \param identifier The identifier of this PropertyOwner. It must not contain any
@@ -102,7 +102,7 @@ public:
     std::string identifier() const;
 
     /**
-     * Sets the user-facing name of this PropertyOwner. This name does not have to be 
+     * Sets the user-facing name of this PropertyOwner. This name does not have to be
      * unique, but it is recommended to be.
      *
      * \param guiName The new user-facing name for this PropertyOwner

@@ -30,7 +30,6 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <utility>
 
 namespace ghoul::fontrendering { class Font; }

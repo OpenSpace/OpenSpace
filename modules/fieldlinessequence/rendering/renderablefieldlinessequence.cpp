@@ -452,7 +452,9 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     }
     else {
         LERROR(fmt::format(
-            "{}: FieldlinesSequence {} is not a valid directory", _identifier, sourceFolderPath
+            "{}: FieldlinesSequence {} is not a valid directory",
+            _identifier,
+            sourceFolderPath
         ));
         return false;
     }

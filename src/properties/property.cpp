@@ -191,8 +191,11 @@ const ghoul::Dictionary& Property::metaData() const {
 
 std::string Property::toJson() const {
     std::string result = "{";
-    result += "\"" + std::string(DescriptionKey) + "\": " + generateBaseJsonDescription() + ", ";
-    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
+    result +=
+        "\"" + std::string(DescriptionKey) + "\": " +
+        generateBaseJsonDescription() + ", ";
+    result +=
+        "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
     result += "}";
     return result;
 }
@@ -280,13 +283,15 @@ void Property::notifyDeleteListeners() {
 }
 
 std::string Property::generateBaseJsonDescription() const {
-    return 
+    return
         "{ \"" + std::string(TypeKey) + "\": \"" + className() + "\", " +
-        "\"" + std::string(IdentifierKey) + "\": \"" + fullyQualifiedIdentifier() + "\", " +
+        "\"" + std::string(IdentifierKey) + "\": \"" +
+            fullyQualifiedIdentifier() + "\", " +
         "\"" + std::string(NameKey) + "\": \"" + guiName() + "\", " +
-        "\"" + std::string(MetaDataKey) + "\": " + generateMetaDataJsonDescription() + ", " +
-        "\"" + std::string(AdditionalDataKey) + "\": " + generateAdditionalJsonDescription() +
-        " }";
+        "\"" + std::string(MetaDataKey) + "\": " +
+            generateMetaDataJsonDescription() + ", " +
+        "\"" + std::string(AdditionalDataKey) + "\": " +
+            generateAdditionalJsonDescription() + " }";
 }
 
 std::string Property::generateMetaDataJsonDescription() const {
@@ -306,9 +311,13 @@ std::string Property::generateMetaDataJsonDescription() const {
     }
 
     std::string result = "{ ";
-    result += "\"" + std::string(MetaDataKeyGroup) + "\": \"" + groupIdentifier() + "\", ";
-    result += "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
-    result += "\"" + std::string(MetaDataKeyReadOnly) + "\": " + (isReadOnly ? "true" : "false");
+    result +=
+        "\"" + std::string(MetaDataKeyGroup) + "\": \"" + groupIdentifier() + "\", ";
+    result +=
+        "\"" + std::string(MetaDataKeyVisibility) + "\": \"" + vis + "\", ";
+    result +=
+        "\"" + std::string(MetaDataKeyReadOnly) + "\": " +
+        (isReadOnly ? "true" : "false");
     result += " }";
     return result;
 }

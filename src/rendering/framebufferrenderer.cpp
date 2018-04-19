@@ -539,7 +539,7 @@ void FramebufferRenderer::updateDeferredcastData() {
                 absPath(vsPath),
                 absPath(deferredShaderPath),
                 deferredDict);
-            
+
             using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
             _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
                 IgnoreError::Yes
@@ -547,7 +547,7 @@ void FramebufferRenderer::updateDeferredcastData() {
             _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
                 IgnoreError::Yes
             );
-            
+
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
         }
         catch (ghoul::RuntimeError& e) {
