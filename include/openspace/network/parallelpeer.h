@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___PARALLELPEER___H__
 
 #include <openspace/network/parallelconnection.h>
+#include <openspace/interaction/externInteraction.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
@@ -127,6 +128,8 @@ private:
 
     std::unique_ptr<std::thread> _receiveThread;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
+
+    ExternInteraction _externInteract;
 
     ParallelConnection _connection;
 };

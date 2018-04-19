@@ -232,7 +232,7 @@ void ParallelPeer::handleMessage(const  ParallelConnection::Message& message) {
 
 double ParallelPeer::calculateBufferedKeyframeTime(double originalTime) {
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
-
+    
     double timeDiff = OsEng.windowWrapper().applicationTime() - originalTime;
     if (_latencyDiffs.size() == 0) {
         _initialTimeDiff = timeDiff;
@@ -245,6 +245,7 @@ double ParallelPeer::calculateBufferedKeyframeTime(double originalTime) {
 
     return originalTime + timeDiff + latencyDiff + _bufferTime;
 }
+
 
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
@@ -281,38 +282,21 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& messageContent) 
     case datamessagestructures::Type::CameraData: {
         datamessagestructures::CameraKeyframe kf(buffer);
         kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
-
         OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(kf._timestamp);
-        interaction::KeyframeNavigator::CameraPose pose;
-        pose.focusNode = kf._focusNode;
-        pose.position = kf._position;
-        pose.rotation = kf._rotation;
-        pose.followFocusNodeRotation = kf._followNodeRotation;
-
-        OsEng.navigationHandler().keyframeNavigator().addKeyframe(kf._timestamp, pose);
+        _externInteract.cameraInteraction(kf);
         break;
     }
     case datamessagestructures::Type::TimeData: {
         datamessagestructures::TimeKeyframe kf(buffer);
         kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
-
         OsEng.timeManager().removeKeyframesAfter(kf._timestamp);
-        Time time(kf._time);
-        time.setDeltaTime(kf._dt);
-        time.setPause(kf._paused);
-        time.setTimeJumped(kf._requiresTimeJump);
-
-        OsEng.timeManager().addKeyframe(kf._timestamp, time);
+        _externInteract.timeInteraction(kf);
         break;
     }
     case datamessagestructures::Type::ScriptData: {
         datamessagestructures::ScriptMessage sm;
         sm.deserialize(buffer);
-
-        OsEng.scriptEngine().queueScript(
-            sm._script,
-            scripting::ScriptEngine::RemoteScripting::No
-        );
+        _externInteract.scriptInteraction(sm);
         break;
     }
     default: {
