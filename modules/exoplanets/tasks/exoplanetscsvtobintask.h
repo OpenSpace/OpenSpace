@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSCSVTOBINTASK___H__
 
 #include <openspace/util/task.h>
+#include <openspace/properties/vector/vec3property.h>
 
 #include <string>
 
@@ -46,7 +47,7 @@ private:
     std::string _outputLUTPath;
 
     std::string getExplName(std::string csvName);
-    std::vector<float> getStarPosition(std::string starName);
+    glm::vec3 getStarPosition(std::string starName);
 
     struct Exoplanet {
     	float A;

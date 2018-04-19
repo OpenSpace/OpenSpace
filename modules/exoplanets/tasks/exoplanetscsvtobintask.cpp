@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
+#include <ghoul/glm.h>
 
 #include <fstream>
 
@@ -158,9 +159,9 @@ std::string ExoplanetsCsvToBinTask::getExplName(std::string csvName){
 	return explName;
 }
 
-std::vector<float> ExoplanetsCsvToBinTask::getStarPosition(std::string starName)
+glm::vec3 ExoplanetsCsvToBinTask::getStarPosition(std::string starName)
 {
-	std::vector<float> pos = std::vector<float>(3);
+    glm::vec3 pos;
 	pos[0] = NAN;
 	pos[1] = NAN;
 	pos[2] = NAN;
@@ -199,8 +200,14 @@ std::vector<float> ExoplanetsCsvToBinTask::getStarPosition(std::string starName)
 		}
 	}
 
+    //Apply transformation matrix to pos
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
+    glm::vec3 transformedPos = glm::vec3(
+        _transformationMatrix * glm::dvec4(pos, 1.0)
+    );
+
 	expl_file.close();
-	return pos;
+	return transformedPos;
 }
 
 void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallback) {
@@ -666,7 +673,7 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 		getline(lineStream, data_s, ','); // SPECURL
 		getline(lineStream, data_s, ','); // STAR
 		std::string starname = getExplName(data_s);
-		std::vector<float> pos = getStarPosition(starname);
+        glm::vec3 pos = getStarPosition(starname);
 		p.POSITIONX = pos[0];
 		p.POSITIONY = pos[1];
 		p.POSITIONZ = pos[2];
