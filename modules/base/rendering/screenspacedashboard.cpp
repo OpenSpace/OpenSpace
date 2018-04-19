@@ -42,8 +42,6 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",

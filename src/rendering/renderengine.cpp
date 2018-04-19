@@ -384,7 +384,7 @@ void RenderEngine::initialize() {
 #ifdef GHOUL_USE_STB_IMAGE
     ghoul::io::TextureReader::ref().addReader(
         std::make_shared<ghoul::io::TextureReaderSTB>()
-    );    
+    );
 #endif // GHOUL_USE_STB_IMAGE
 
     ghoul::io::TextureReader::ref().addReader(
@@ -565,8 +565,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
             _camera->sgctInternal.setSceneMatrix(sceneMatrix);
         }
+        _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     }
-    _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
     bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
     if (masterEnabled && !wrapper.isGuiWindow() && _globalBlackOutFactor > 0.f) {

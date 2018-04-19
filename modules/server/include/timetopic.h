@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__TIME_TOPIC_H
-#define OPENSPACE_MODULES_SERVER__TIME_TOPIC_H
+#ifndef __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
 
 #include <openspace/util/timemanager.h>
 #include "topic.h"
@@ -36,7 +36,8 @@ public:
     ~TimeTopic();
     void handleJson(nlohmann::json json);
     bool isDone();
-private: 
+
+private:
     nlohmann::json currentTime();
     nlohmann::json deltaTime();
 
@@ -45,6 +46,6 @@ private:
     std::chrono::system_clock::time_point _lastUpdateTime;
 };
 
-}
+} // namespace openspace
 
-#endif //OPENSPACE_MODULES_SERVER__TIME_TOPIC_H
+#endif // __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__

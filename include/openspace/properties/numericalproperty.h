@@ -70,7 +70,7 @@ public:
     void setInterpolationTarget(ghoul::any value) override;
     void setLuaInterpolationTarget(lua_State* state) override;
     void setStringInterpolationTarget(std::string value) override;
-    
+
     void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunc = nullptr) override;
 

@@ -78,6 +78,8 @@ NSArray* focusIdentifiers;
     - (NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
                         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
     {
+        // @TODO(abock):  Potential memory leak here by returning an alloc?
+
         // Remove the unused variable warning
         (void)touchBar;
 

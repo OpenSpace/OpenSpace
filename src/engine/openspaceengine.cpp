@@ -291,7 +291,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Parse commandline arguments
     std::vector<std::string> args(argv, argv + argc);
-    std::vector<std::string> arg = _engine->_commandlineParser->setCommandLine(args);
+    const std::vector<std::string>& arguments =
+        _engine->_commandlineParser->setCommandLine(args);
 
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
@@ -299,7 +300,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
         requestClose = true;
         return;
     }
-    sgctArguments = arg;
+    std::vector<std::string> argumentsCopy = arguments;
+    sgctArguments = std::move(argumentsCopy);
 
     // Find configuration
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
@@ -1359,7 +1361,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         if (consumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom. Accidentally
-            // moving the cursor over a UI window is easy to miss and leads to weird 
+            // moving the cursor over a UI window is easy to miss and leads to weird
             // continuing movement
             if (action == MouseAction::Release) {
                 break;

@@ -59,7 +59,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "Scene";
-    constexpr const char* KeyName = "Name";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
 } // namespace

@@ -396,8 +396,8 @@ public:
     const ghoul::Dictionary& metaData() const;
 
     /**
-     * Convert the Property into a string containing a JSON representation of the Property.
-     * Includes description of the object.
+     * Convert the Property into a string containing a JSON representation of the
+     * Property. Includes description of the object.
      * @return the JSON string
      */
     virtual std::string toJson() const;
@@ -412,7 +412,7 @@ public:
     virtual void setInterpolationTarget(ghoul::any value);
     virtual void setLuaInterpolationTarget(lua_State* state);
     virtual void setStringInterpolationTarget(std::string value);
-    
+
     virtual void interpolateValue(float t,
         ghoul::EasingFunc<float> easingFunction = nullptr);
 
