@@ -224,6 +224,7 @@ int addNode(lua_State* L) {
                     "Type = 'RenderableGlobe',"
                     "Radii = " + std::to_string(plsy[i].R) + " *7.1492*10e7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
                     "SegmentsPerPatch = 64,"
+                    "PerformShading = false,"
                     "Layers = {"
                         "ColorLayers = {"
                             "{"
@@ -244,12 +245,34 @@ int addNode(lua_State* L) {
                         "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
                         "MeanAnomaly = 0.0,"
                         "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                        "Period = " + std::to_string(plsy[i].PER) + " * 86400" //PER. 86 400sec = 1 day.
+                        "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
                     "}"
                 "},"
             "}";
 
-            scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + ");";
+            const std::string PlanetTrail = "{"
+                "Name = '" + plna[i] + "Trail',"
+                "Parent = '" + starname + "',"
+                "Renderable = {"
+                    "Type = 'RenderableTrailOrbit',"
+                    "Period = " + std::to_string(plsy[i].PER) + ","
+                    "Resolution = 100,"
+                    "Translation = {"
+                        "Type = 'KeplerTranslation',"
+                        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
+                        "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
+                        "Inclination = " + std::to_string(plsy[i].I) + "," //I
+                        "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
+                        "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
+                        "MeanAnomaly = 0.0,"
+                        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
+                        "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "},"
+                    "Color = { 1, 0, 0 }"
+                "},"
+            "}";
+
+            scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + "); openspace.addSceneGraphNode(" + PlanetTrail + ");";
 
         }
 
@@ -292,7 +315,7 @@ int removeNode(lua_State* L) {
     std::string scriptParent;
     for (size_t i = 0; i < plna.size(); i++)
     {
-        scriptParent += "openspace.removeSceneGraphNode('" + plna[i] + "');";
+        scriptParent += "openspace.removeSceneGraphNode('" + plna[i] + "Trail'); openspace.removeSceneGraphNode('" + plna[i] + "');";
     }
     scriptParent += " openspace.removeSceneGraphNode('" + starname + "Plane'); openspace.removeSceneGraphNode('" + starname + "');";
     OsEng.scriptEngine().queueScript(
