@@ -44,7 +44,7 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class AssetManager;
-class ConfigurationManager;
+struct Configuration;
 class Dashboard;
 class DownloadManager;
 class GUI;
@@ -121,8 +121,9 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
+    const Configuration& configuration() const;
+
     // Guaranteed to return a valid pointer
-    ConfigurationManager& configurationManager();
     LuaConsole& console();
     AssetManager& assetManager();
     Dashboard& dashboard();
@@ -205,8 +206,9 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
+    std::unique_ptr<Configuration> _configuration;
+
     // Components
-    std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<Dashboard> _dashboard;
