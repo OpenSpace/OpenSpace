@@ -54,15 +54,14 @@ Fragment getFragment() {
 
     fullColor.a *= fadeInValue * ta;
 
-    if (fullColor.a == 0.f || 
-        fullColor.rgb == vec3(0.0)) {
+    if (fullColor.a == 0.f) {
         discard;
     }
 
     Fragment frag;
     frag.color      = fullColor;
     frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vec4(-1e32, -1e32, -1e32, 1.0);
+    frag.gPosition  = vec4(1e32, 1e32, 1e32, 1.0);
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
 
 
