@@ -39,6 +39,7 @@
 
 //#define TOUCH_DEBUG_PROPERTIES
 #define CONST_TIME_DECAY
+#define SPEED_BRAKE
 
 namespace openspace {
 
@@ -188,7 +189,14 @@ private:
 #ifdef CONST_TIME_DECAY
     properties::FloatProperty _constTimeDecay_secs;
 #endif
+
+#ifdef SPEED_BRAKE
+    properties::FloatProperty _speedLimitFarVelocityDivider;
+    properties::FloatProperty _speedLimitNearVelocityDivider;
+    properties::FloatProperty _speedLimitDistanceThreshold;
+#else
     properties::FloatProperty _speedLimitDistanceFraction;
+#endif
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {

@@ -166,11 +166,31 @@ namespace {
     };
 #endif
 
+#ifdef SPEED_BRAKE
+    static const openspace::properties::Property::PropertyInfo SpeedLimitFarVelocityDividerInfo = {
+        "SpeedLimitFarVelocityDivider",
+        "Velocity is limited by dividing distance-to-focus-node by this value when at far distance",
+        ""
+    };
+
+    static const openspace::properties::Property::PropertyInfo SpeedLimitNearVelocityDividerInfo = {
+        "SpeedLimitNearVelocityDivider",
+        "Velocity is limited by dividing distance-to-focus-node by this value when at close distance",
+        ""
+    };
+
+    static const openspace::properties::Property::PropertyInfo SpeedLimitFarDistanceThresholdInfo = {
+        "SpeedLimitFarDistanceThreshold",
+        "Threshold for distance from camera to focus node where near velocity divider blends to far divider",
+        ""
+    };
+#else
     static const openspace::properties::Property::PropertyInfo SpeedLimitDistanceFractionInfo = {
         "SpeedLimitDistanceFraction",
         "Speed limiting factor as a fraction of distance to focus node",
         ""
     };
+#endif //#ifdef SPEED_BRAKE
 
     static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
@@ -272,7 +292,13 @@ TouchInteraction::TouchInteraction()
     )
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
+#ifdef SPEED_BRAKE
+    , _speedLimitFarVelocityDivider(SpeedLimitFarVelocityDividerInfo, 5.f, 1.f, 100.f)
+    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 500.f, 5000.f, 5.f)
+    , _speedLimitDistanceThreshold(SpeedLimitFarDistanceThresholdInfo, 1e12f, 1e9f, 1e15f)
+#else
     , _speedLimitDistanceFraction(SpeedLimitDistanceFractionInfo, 7.f, 0.1f, 20.0f)
+#endif
 #ifdef CONST_TIME_DECAY
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 2.0f, 0.1f, 2.5f)
 #endif
@@ -307,7 +333,13 @@ TouchInteraction::TouchInteraction()
     addProperty(_zoomSensitivity);
     addProperty(_zoomSensitivityDistanceThreshold);
     addProperty(_zoomBoundarySphereMultiplier);
+#ifdef SPEED_BRAKE
+    addProperty(_speedLimitFarVelocityDivider);
+    addProperty(_speedLimitNearVelocityDivider);
+    addProperty(_speedLimitDistanceThreshold);
+#else
     addProperty(_speedLimitDistanceFraction);
+#endif
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
     addProperty(_panEnabled);
@@ -1041,7 +1073,15 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
             //Speed Limit on zoom velocity
+#ifdef SPEED_BRAKE
+            double nearSpeedLimit = distanceFromFocusSurface/_speedLimitNearVelocityDivider;
+            double farSpeedLimit = distanceFromFocusSurface/_speedLimitFarVelocityDivider;
+            double velocityFraction = (distanceFromFocusSurface > _speedLimitDistanceThreshold) ?
+                1.0 : distanceFromFocusSurface / _speedLimitDistanceThreshold;
+            double speedLimit = farSpeedLimit * velocityFraction + nearSpeedLimit * (1 - velocityFraction);
+#else
             double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
+#endif
             if (std::abs(_vel.zoom) > 1e-7)
                 _vel.zoom = std::min(std::abs(speedLimit), std::abs(_vel.zoom)) * (_vel.zoom / std::abs(_vel.zoom));
             else
