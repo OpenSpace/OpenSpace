@@ -33,6 +33,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset = "default";
@@ -52,7 +54,7 @@ struct Configuration {
 
     std::string scriptLog = "";
 
-    struct Documentation {
+    struct DocumentationInfo {
         std::string lua = "";
         std::string property = "";
         std::string sceneProperty = "";
@@ -61,7 +63,7 @@ struct Configuration {
         std::string factory = "";
         std::string license = "";
     };
-    Documentation documentation;
+    DocumentationInfo documentation;
 
     bool useMultithreadedInitialization = false;
 
@@ -119,6 +121,7 @@ struct Configuration {
     HTTPProxy httpProxy;
 
 
+    static documentation::Documentation Documentation;
     ghoul::lua::LuaState state;
 };
 

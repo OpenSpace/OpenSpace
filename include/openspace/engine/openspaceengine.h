@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
-#include <openspace/engine/configuration.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -44,6 +43,7 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class AssetManager;
+struct Configuration;
 class Dashboard;
 class DownloadManager;
 class GUI;
@@ -204,7 +204,7 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
-    Configuration _configuration;
+    std::unique_ptr<Configuration> _configuration;
 
     // Components
     std::unique_ptr<Scene> _scene;

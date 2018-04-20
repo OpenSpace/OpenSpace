@@ -149,7 +149,8 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
-    : _scene(nullptr)
+    : _configuration(new Configuration)
+    , _scene(nullptr)
     , _dashboard(new Dashboard)
     , _downloadManager(nullptr)
     , _console(new LuaConsole)
@@ -321,7 +322,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Loading configuration from disk
     LDEBUG("Loading configuration from disk");
     try {
-        _engine->_configuration = loadConfigurationFromFile(configurationFilePath);
+        *_engine->_configuration = loadConfigurationFromFile(configurationFilePath);
     }
     catch (const documentation::SpecificationError& e) {
         LFATAL(fmt::format(
@@ -347,7 +348,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Registering Path tokens. If the BASE path is set, it is the only one that will
     // overwrite the default path of the cfg directory
     for (const std::pair<std::string, std::string>& path :
-        _engine->_configuration.pathTokens)
+        _engine->configuration().pathTokens)
     {
         std::string fullKey =
             FileSystem::TokenOpeningBraces + path.first + FileSystem::TokenClosingBraces;
@@ -374,14 +375,14 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
 
     const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
-    const bool hasCacheConfig = _engine->_configuration.usePerSceneCache;
+    const bool hasCacheConfig = _engine->configuration().usePerSceneCache;
     std::string cacheFolder = absPath("${CACHE}");
     if (hasCacheCommandline || hasCacheConfig) {
         if (hasCacheCommandline) {
             cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
         }
         if (hasCacheConfig) {
-            std::string scene = _engine->_configuration.asset;
+            std::string scene = _engine->configuration().asset;
             cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
         }
 
@@ -409,7 +410,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
     // Register modules
-    _engine->_moduleEngine->initialize(_engine->_configuration.moduleConfigurations);
+    _engine->_moduleEngine->initialize(_engine->configuration().moduleConfigurations);
 
     // After registering the modules, the documentations for the available classes
     // can be added as well
@@ -418,6 +419,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
             DocEng.addDocumentation(doc);
         }
     }
+
+    DocEng.addDocumentation(Configuration::Documentation);
 
     // Create the cachemanager
     try {
@@ -433,7 +436,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
-    std::string sgctConfigurationPath = _engine->_configuration.windowConfiguration;
+    std::string sgctConfigurationPath = _engine->configuration().windowConfiguration;
         
     if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
         LDEBUG(fmt::format(
@@ -529,7 +532,7 @@ void OpenSpaceEngine::initialize() {
         { "Full", Verbosity::Full }
     };
 
-    std::string v = _engine->_configuration.logging.capabilitiesVerbosity;
+    std::string v = _engine->configuration().logging.capabilitiesVerbosity;
     ghoul_assert(
         VerbosityMap.find(v) != VerbosityMap.end(),
         "Missing check for syscaps verbosity in openspace.cfg documentation"
@@ -572,10 +575,10 @@ void OpenSpaceEngine::initialize() {
 
     writeStaticDocumentation();
     
-    _shutdown.waitTime = _engine->_configuration.shutdownCountdown;
+    _shutdown.waitTime = _engine->configuration().shutdownCountdown;
 
     if (!commandlineArgumentPlaceholders.sceneName.empty()) {
-        _engine->_configuration.asset = commandlineArgumentPlaceholders.sceneName;
+        _engine->_configuration->asset = commandlineArgumentPlaceholders.sceneName;
     }
 
     // Initialize the NavigationHandler
@@ -593,7 +596,7 @@ void OpenSpaceEngine::initialize() {
         func();
     }
 
-    std::string assetPath = _engine->_configuration.asset;
+    std::string assetPath = _engine->configuration().asset;
     _engine->_assetManager->initialize();
     scheduleLoadSingleAsset(assetPath);
 
@@ -606,9 +609,9 @@ void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
 }
 
 std::unique_ptr<LoadingScreen> OpenSpaceEngine::createLoadingScreen() {
-    bool showMessage = _configuration.loadingScreen.isShowingMessages;
-    bool showNodeNames = _configuration.loadingScreen.isShowingNodeNames;
-    bool showProgressbar = _configuration.loadingScreen.isShowingProgressbar;
+    bool showMessage = configuration().loadingScreen.isShowingMessages;
+    bool showNodeNames = configuration().loadingScreen.isShowingNodeNames;
+    bool showProgressbar = configuration().loadingScreen.isShowingProgressbar;
 
     return std::make_unique<LoadingScreen>(
         LoadingScreen::ShowMessage(showMessage),
@@ -640,7 +643,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
         _rootPropertyOwner->removePropertySubOwner(_scene.get());
     }
 
-    bool multiThreadedInitialization = _configuration.useMultithreadedInitialization;
+    bool multiThreadedInitialization = configuration().useMultithreadedInitialization;
         
     std::unique_ptr<SceneInitializer> sceneInitializer;
     if (multiThreadedInitialization) {
@@ -776,20 +779,19 @@ void OpenSpaceEngine::deinitialize() {
 
 void OpenSpaceEngine::writeStaticDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now
-    if (!_configuration.documentation.lua.empty()) {
-        _scriptEngine->writeDocumentation(absPath(_configuration.documentation.lua));
+    if (!configuration().documentation.lua.empty()) {
+        _scriptEngine->writeDocumentation(absPath(configuration().documentation.lua));
     }
 
     // If a general documentation was specified, generate it now
-    if (!_configuration.documentation.documentation.empty()) {
-        DocEng.writeDocumentation(absPath(_configuration.documentation.documentation));
+    if (!configuration().documentation.documentation.empty()) {
+        DocEng.writeDocumentation(absPath(configuration().documentation.documentation));
     }
 
-    if (!_configuration.documentation.factory.empty()) {
+    if (!configuration().documentation.factory.empty()) {
         FactoryManager::ref().writeDocumentation(
-            absPath(_configuration.documentation.factory)
+            absPath(configuration().documentation.factory)
         );
-
     }
 }
 
@@ -827,7 +829,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     ghoul::lua::LuaState state;
     OsEng.scriptEngine().initializeLuaState(state);
 
-    for (const std::string& script : _configuration.globalCustomizationScripts) {
+    for (const std::string& script : configuration().globalCustomizationScripts) {
         std::string s = absPath(script);
         if (FileSys.fileExists(s)) {
             try {
@@ -846,7 +848,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
 void OpenSpaceEngine::loadFonts() {
     _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(FontAtlasSize);
 
-    for (const std::pair<std::string, std::string>& font : _configuration.fonts) {
+    for (const std::pair<std::string, std::string>& font : configuration().fonts) {
         std::string key = font.first;
         std::string fontName = absPath(font.second);
 
@@ -888,8 +890,8 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
     // until we know which logs should be added
     LogManager::deinitialize();
 
-    LogLevel level = ghoul::logging::levelFromString(_configuration.logging.level);
-    bool immediateFlush = _configuration.logging.forceImmediateFlush;
+    LogLevel level = ghoul::logging::levelFromString(configuration().logging.level);
+    bool immediateFlush = configuration().logging.forceImmediateFlush;
 
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
     LogManager::initialize(
@@ -900,7 +902,7 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
         LogMgr.addLog(std::make_unique<ConsoleLog>());
     }
 
-    for (const ghoul::Dictionary& log : _configuration.logging.logs) {
+    for (const ghoul::Dictionary& log : configuration().logging.logs) {
         try {
             LogMgr.addLog(createLog(log));
         }
@@ -931,25 +933,25 @@ void OpenSpaceEngine::configureLogging(bool consoleLog) {
 
 void OpenSpaceEngine::writeSceneDocumentation() {
     // Write keyboard documentation.
-    if (!_configuration.documentation.keyboard.empty()) {
+    if (!configuration().documentation.keyboard.empty()) {
         keyBindingManager().writeDocumentation(
-            absPath(_configuration.documentation.keyboard)
+            absPath(configuration().documentation.keyboard)
         );
     }
 
-    if (!_configuration.documentation.license.empty()) {
+    if (!configuration().documentation.license.empty()) {
         _scene->writeSceneLicenseDocumentation(
-            absPath(_configuration.documentation.license)
+            absPath(configuration().documentation.license)
         );
     }
 
-    if (!_configuration.documentation.sceneProperty.empty()) {
-        _scene->writeDocumentation(absPath(_configuration.documentation.sceneProperty));
+    if (!configuration().documentation.sceneProperty.empty()) {
+        _scene->writeDocumentation(absPath(configuration().documentation.sceneProperty));
     }
 
-    if (!_configuration.documentation.property.empty()) {
+    if (!configuration().documentation.property.empty()) {
         _rootPropertyOwner->writeDocumentation(
-            absPath(_configuration.documentation.property)
+            absPath(configuration().documentation.property)
         );
     }
 }
@@ -968,7 +970,7 @@ void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
 
     LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
-    bool debugActive = _configuration.openGLDebugContext.isActive;
+    bool debugActive = configuration().openGLDebugContext.isActive;
 
     // Debug output is not available before 4.3
     const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
@@ -980,11 +982,11 @@ void OpenSpaceEngine::initializeGL() {
     if (debugActive) {
         using namespace ghoul::opengl::debug;
 
-        bool synchronous = _configuration.openGLDebugContext.isSynchronous;
+        bool synchronous = configuration().openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
 
         using IdFilter = Configuration::OpenGLDebugContext::IdentifierFilter;
-        for (const IdFilter&f : _configuration.openGLDebugContext.identifierFilters) {
+        for (const IdFilter&f : configuration().openGLDebugContext.identifierFilters) {
             setDebugMessageControl(
                 ghoul::from_string<Source>(f.source),
                 ghoul::from_string<Type>(f.type),
@@ -994,7 +996,8 @@ void OpenSpaceEngine::initializeGL() {
 
         }
 
-        for (const std::string& sev : _configuration.openGLDebugContext.severityFilters) {
+        for (const std::string& sev : configuration().openGLDebugContext.severityFilters)
+        {
             setDebugMessageControl(
                 Source::DontCare,
                 Type::DontCare,
@@ -1036,7 +1039,7 @@ void OpenSpaceEngine::initializeGL() {
     // the callback mask in glbinding is stateful for each context, and since
     // KeyLogEachOpenGLCall is more specific, we want it to be able to overwrite the
     // state from KeyCheckOpenGLState
-    if (_configuration.isCheckingOpenGLState) {
+    if (configuration().isCheckingOpenGLState) {
         using namespace glbinding;
         // Infinite loop -- welcome to the danger zone
         setCallbackMaskExcept(CallbackMask::After, { "glGetError" });
@@ -1087,7 +1090,7 @@ void OpenSpaceEngine::initializeGL() {
         });
     }
 
-    if (_configuration.isLoggingOpenGLCalls) {
+    if (configuration().isLoggingOpenGLCalls) {
         using namespace glbinding;
         setCallbackMask(CallbackMask::After | CallbackMask::ParametersAndReturnValue);
         glbinding::setAfterCallback([](const glbinding::FunctionCall& call) {
@@ -1564,7 +1567,7 @@ void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
 }
 
 const Configuration& OpenSpaceEngine::configuration() const {
-    return _configuration;
+    return *_configuration;
 }
 
 LuaConsole& OpenSpaceEngine::console() {

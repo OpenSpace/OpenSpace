@@ -24,15 +24,18 @@
 
 #include "include/authorizationtopic.h"
 
+#include <openspace/engine/configuration.h>
+
 namespace {
-std::string _loggerCat = "AuthorizationTopic";
-}
+    constexpr const char* _loggerCat = "AuthorizationTopic";
+} // namespace
 
 namespace openspace {
 
-    AuthorizationTopic::AuthorizationTopic()
-        : Topic()
-        , _isAuthenticated(false) {};
+AuthorizationTopic::AuthorizationTopic()
+    : Topic()
+    , _isAuthenticated(false)
+{};
 
 bool AuthorizationTopic::isDone() {
     return _isAuthenticated;

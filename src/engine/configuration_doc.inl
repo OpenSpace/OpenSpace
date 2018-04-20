@@ -26,12 +26,12 @@
 #include <openspace/documentation/verifier.h>
 
 namespace openspace {
-using namespace documentation;
 
-documentation::Documentation doc = {
-        "OpenSpace Configuration",
-        "openspace_configuraion",
-        {
+using namespace documentation;
+documentation::Documentation Configuration::Documentation = {
+    "OpenSpace Configuration",
+    "openspace_configuraion",
+    {
         {
             KeySGCTConfig,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
@@ -481,6 +481,5 @@ documentation::Documentation doc = {
         }
     }
 };
-
 
 } // namespace openspace

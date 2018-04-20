@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
