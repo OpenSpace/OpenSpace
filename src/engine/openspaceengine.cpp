@@ -303,7 +303,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
         return;
     }
 
-
     sgctArguments = std::move(arguments);
 
     // Find configuration
@@ -1478,7 +1477,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         if (consumed) {
             // If the mouse was released, we still want to forward it to the navigation
             // handler in order to reliably terminate a rotation or zoom. Accidentally
-            // moving the cursor over a UI window is easy to miss and leads to weird 
+            // moving the cursor over a UI window is easy to miss and leads to weird
             // continuing movement
             if (action == MouseAction::Release) {
                 break;

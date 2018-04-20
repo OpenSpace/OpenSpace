@@ -28,7 +28,9 @@
 
 namespace openspace {
 
-VirtualPropertyManager::VirtualPropertyManager() : properties::PropertyOwner({ "VirtualPropertyManager" }) {}
+VirtualPropertyManager::VirtualPropertyManager()
+    : properties::PropertyOwner({ "VirtualPropertyManager" })
+{}
 
 void VirtualPropertyManager::addProperty(std::unique_ptr<properties::Property> prop) {
     // PropertyOwner does not take the ownership of the pointer

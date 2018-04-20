@@ -335,7 +335,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         _attachedNode = sceneGraphNode(_attachedObject);
     });
 
-    auto setPropertyVisibility = [this](Axis& axis) {
+    auto setPropertyVisibility = [](Axis& axis) {
         using Visibility = properties::Property::Visibility;
         switch (axis.type) {
             case Axis::Type::Object:

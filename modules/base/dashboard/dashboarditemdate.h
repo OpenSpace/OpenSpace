@@ -30,9 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
