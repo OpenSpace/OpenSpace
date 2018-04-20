@@ -172,7 +172,9 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     std::string transferFunctionPath;
     if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
-        _transferFunctionHandler = std::make_shared<volume::TransferFunctionHandler>(_transferFunctionPath);
+        _transferFunctionHandler = std::make_shared<volume::TransferFunctionHandler>(
+            _transferFunctionPath
+        );
     }
 
     std::string sourcePath;
@@ -263,7 +265,11 @@ void RenderableKameleonVolume::initializeGL() {
     _volumeTexture->uploadTexture();
     _transferFunctionHandler->initialize();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(_volumeTexture, _transferFunctionHandler, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        _volumeTexture,
+        _transferFunctionHandler,
+        _clipPlanes
+    );
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {

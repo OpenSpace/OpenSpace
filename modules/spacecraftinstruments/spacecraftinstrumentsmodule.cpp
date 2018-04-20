@@ -45,6 +45,8 @@
 
 namespace openspace {
 
+ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectManager;
+
 SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
@@ -77,6 +79,10 @@ void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
 
 void SpacecraftInstrumentsModule::internalDeinitialize() {
     ImageSequencer::deinitialize();
+}
+
+void SpacecraftInstrumentsModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation>

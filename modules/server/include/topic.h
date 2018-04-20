@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
-#define OPENSPACE_MODULES_SERVER__TOPIC_H
+#ifndef __OPENSPACE_MODULE_SERVER___TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___TOPIC___H__
 
 #include <ext/json/json.hpp>
 
@@ -34,10 +34,12 @@ class Connection;
 class Topic {
 public:
     Topic() {};
-    virtual ~Topic() {};
+    virtual ~Topic() = default;
+
     void initialize(Connection* connection, size_t topicId);
     nlohmann::json wrappedPayload(const nlohmann::json &payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request.", int code = 500);
+    nlohmann::json wrappedError(std::string message = "Could not complete request.",
+        int code = 500);
     virtual void handleJson(nlohmann::json json) = 0;
     virtual bool isDone() = 0;
 
@@ -54,6 +56,6 @@ public:
     bool isDone() { return false; }
 };
 
-}
+} // namespace openspace
 
-#endif //OPENSPACE_MODULES_SERVER__TOPIC_H
+#endif // __OPENSPACE_MODULE_SERVER___TOPIC___H__

@@ -37,8 +37,6 @@
 #include <ghoul/opengl/textureconversion.h>
 
 namespace {
-    const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture path",

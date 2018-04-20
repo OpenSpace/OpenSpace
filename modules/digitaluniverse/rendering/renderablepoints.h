@@ -98,7 +98,7 @@ namespace openspace {
 
         std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
         std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+        ghoul::opengl::ProgramObject* _program;
         UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
             spriteTexture, hasColorMap) _uniformCache;
 

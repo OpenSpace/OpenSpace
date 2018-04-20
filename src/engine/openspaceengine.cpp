@@ -293,7 +293,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Parse commandline arguments
     std::vector<std::string> args(argv, argv + argc);
-    std::shared_ptr<const std::vector<std::string>> arguments =
+    const std::vector<std::string>& arguments =
         _engine->_commandlineParser->setCommandLine(args);
 
     bool showHelp = _engine->_commandlineParser->execute();
@@ -302,7 +302,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
         requestClose = true;
         return;
     }
-    sgctArguments = *arguments;
+    std::vector<std::string> argumentsCopy = arguments;
+    sgctArguments = std::move(argumentsCopy);
 
     // Find configuration
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
@@ -464,6 +465,7 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_renderEngine->deinitializeGL();
 
+    _engine->_moduleEngine->deinitializeGL();
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 
@@ -1228,6 +1230,8 @@ void OpenSpaceEngine::initializeGL() {
     LDEBUG("Initializing Rendering Engine");
     _renderEngine->initializeGL();
 
+    _moduleEngine->initializeGL();
+
     for (const auto& func : _moduleCallbacks.initializeGL) {
         func();
     }
@@ -1471,7 +1475,16 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
     for (const auto& func : _moduleCallbacks.mouseButton) {
         bool consumed = func(button, action);
         if (consumed) {
-            return;
+            // If the mouse was released, we still want to forward it to the navigation
+            // handler in order to reliably terminate a rotation or zoom. Accidentally
+            // moving the cursor over a UI window is easy to miss and leads to weird
+            // continuing movement
+            if (action == MouseAction::Release) {
+                break;
+            }
+            else {
+                return;
+            }
         }
     }
 

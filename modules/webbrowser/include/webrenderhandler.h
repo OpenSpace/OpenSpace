@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,8 +47,8 @@ public:
     void reshape(int, int);
 
     bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void *buffer,
-                 int width, int height) override;
+    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
+        const RectList &dirtyRects, const void* buffer, int width, int height) override;
     bool hasContent(int x, int y);
 
 protected:
@@ -73,4 +73,4 @@ protected:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
+#endif // __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H

@@ -22,13 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
-#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
 
 #include <ghoul/misc/exception.h>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 enum class VolumeGridType : int {
     Cartesian = 0,
@@ -36,13 +35,12 @@ enum class VolumeGridType : int {
 };
 
 struct InvalidGridTypeError : public ghoul::RuntimeError {
-	explicit InvalidGridTypeError(std::string gridType);
-	std::string gridType;
+    explicit InvalidGridTypeError(std::string gridType);
+    std::string gridType;
 };
 
 VolumeGridType parseGridType(const std::string& gridType);
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
-#endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
+#endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__

@@ -80,7 +80,8 @@ public:
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunctionHandler(std::shared_ptr<TransferFunctionHandler> transferFunctionHandler);
+    void setTransferFunctionHandler(
+        std::shared_ptr<TransferFunctionHandler> transferFunctionHandler);
 
     void setStepSize(float stepSize);
     float opacity() const;

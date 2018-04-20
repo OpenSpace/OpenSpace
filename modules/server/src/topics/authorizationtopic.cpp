@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,9 +52,13 @@ void AuthorizationTopic::handleJson(nlohmann::json json) {
                 _connection->sendJson(message("Invalid key", StatusCode::NotAcceptable));
             }
         } catch (const std::out_of_range& e) {
-            _connection->sendJson(message("Invalid request, key must be provided.", StatusCode::BadRequest));
+            _connection->sendJson(
+                message("Invalid request, key must be provided.", StatusCode::BadRequest)
+            );
         } catch (const std::domain_error& e) {
-            _connection->sendJson(message("Invalid request, invalid key format.", StatusCode::BadRequest));
+            _connection->sendJson(
+                message("Invalid request, invalid key format.", StatusCode::BadRequest)
+            );
         }
     }
 };
@@ -65,7 +69,7 @@ bool AuthorizationTopic::authorize(const std::string key) {
 }
 
 const std::string AuthorizationTopic::getKey() const {
-    const bool hasConfigPassword = OsEng.configurationManager().hasKeyAndValue<std::string>(
+    bool hasConfigPassword = OsEng.configurationManager().hasKeyAndValue<std::string>(
         ConfigurationManager::KeyServerPasskey);
     if (hasConfigPassword) {
         return OsEng.configurationManager().value<std::string>(
@@ -75,9 +79,13 @@ const std::string AuthorizationTopic::getKey() const {
     return "17308";
 }
 
-nlohmann::json AuthorizationTopic::message(const std::string &message, StatusCode statusCode) {
-    nlohmann::json error = {{"message", message}, {"code", static_cast<int>(statusCode)}};
-    return error;
+nlohmann::json AuthorizationTopic::message(const std::string& message,
+                                           StatusCode statusCode)
+{
+    return {
+        { "message", message },
+        { "code", static_cast<int>(statusCode) }
+    };
 }
 
-}
+} // namespace openspace
