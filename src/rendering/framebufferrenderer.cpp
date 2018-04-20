@@ -259,11 +259,9 @@ namespace openspace {
         _dirtyRaycastData = true;
     }
 
-    void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster,
-        isAttached isAttached)
+    void FramebufferRenderer::deferredcastersChanged(Deferredcaster& /*deferredcaster*/,
+        isAttached /*isAttached*/)
     {
-        (void)deferredcaster;
-        (void)isAttached;
         _dirtyDeferredcastData = true;
     }
 
@@ -284,7 +282,7 @@ namespace openspace {
             _uniformCache.nAaSamples = _resolveProgram->uniformLocation("nAaSamples");
         }
 
-        for (auto& program : _exitPrograms) {
+        for (RaycasterProgObjMap::value_type & program : _exitPrograms) {
             if (program.second->isDirty()) {
                 try {
                     program.second->rebuildFromFile();
@@ -295,7 +293,7 @@ namespace openspace {
             }
         }
 
-        for (auto& program : _raycastPrograms) {
+        for (RaycasterProgObjMap::value_type & program : _raycastPrograms) {
             if (program.second->isDirty()) {
                 try {
                     program.second->rebuildFromFile();
@@ -306,7 +304,7 @@ namespace openspace {
             }
         }
 
-        for (auto& program : _insideRaycastPrograms) {
+        for (RaycasterProgObjMap::value_type & program : _insideRaycastPrograms) {
             if (program.second->isDirty()) {
                 try {
                     program.second->rebuildFromFile();
@@ -317,7 +315,7 @@ namespace openspace {
             }
         }
 
-        for (auto &program : _deferredcastPrograms) {
+        for (DeferredcasterProgObjMap::value_type &program : _deferredcastPrograms) {
             if (program.second && program.second->isDirty()) {
                 try {
                     program.second->rebuildFromFile();
@@ -433,7 +431,7 @@ namespace openspace {
         const std::vector<VolumeRaycaster*>& raycasters =
             OsEng.renderEngine().raycasterManager().raycasters();
         int nextId = 0;
-        for (auto& raycaster : raycasters) {
+        for (VolumeRaycaster* raycaster : raycasters) {
             RaycastData data;
             data.id = nextId++;
             data.namespaceName = "HELPER";
@@ -503,7 +501,7 @@ namespace openspace {
         const std::vector<Deferredcaster*>& deferredcasters =
             OsEng.renderEngine().deferredcasterManager().deferredcasters();
         int nextId = 0;
-        for (auto& caster : deferredcasters) {
+        for (Deferredcaster * caster : deferredcasters) {
             DeferredcastData data;
             data.id = nextId++;
             data.namespaceName = "HELPER";
@@ -518,7 +516,7 @@ namespace openspace {
             dict.setValue("id", data.id);
             std::string helperPath = caster->helperPath();
             ghoul::Dictionary helpersDict;
-            if (helperPath != "") {
+            if (!helperPath.empty()) {
                 helpersDict.setValue("0", helperPath);
             }
             dict.setValue("helperPaths", helpersDict);
@@ -552,28 +550,23 @@ namespace openspace {
     }
 
     void FramebufferRenderer::updateHDRData() {
-        try {
-            _hdrBackGroundProgram = ghoul::opengl::ProgramObject::Build(
-                "HDR Background Control",
-                absPath("${SHADERS}/framebuffer/hdrBackground.vert"),
-                absPath("${SHADERS}/framebuffer/hdrBackground.frag")
-            );
-            using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-            _hdrBackGroundProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-            _hdrBackGroundProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
+        _hdrBackGroundProgram = ghoul::opengl::ProgramObject::Build(
+            "HDR Background Control",
+            absPath("${SHADERS}/framebuffer/hdrBackground.vert"),
+            absPath("${SHADERS}/framebuffer/hdrBackground.frag")
+        );
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _hdrBackGroundProgram->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _hdrBackGroundProgram->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
     void FramebufferRenderer::updateMSAASamplingPattern() {
         LDEBUG("Updating MSAA Sampling Pattern");
 
         const int GRIDSIZE = 32;
-        GLfloat step = 2.0f / static_cast<GLfloat>(GRIDSIZE);
-        GLfloat sizeX = -1.0f,
-            sizeY = 1.0f;
+        GLfloat step = 2.f / static_cast<GLfloat>(GRIDSIZE);
+        GLfloat sizeX = -1.f,
+            sizeY = 1.f;
 
         const int NVERTEX = 4 * 6;
         // openPixelSizeVertexData
@@ -613,7 +606,7 @@ namespace openspace {
 
                 sizeX += step;
             }
-            sizeX = -1.0f;
+            sizeX = -1.f;
             sizeY -= step;
         }
 
@@ -682,7 +675,7 @@ namespace openspace {
         GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, textureBuffers);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -846,16 +839,11 @@ namespace openspace {
         glViewport(0, 0, _nAaSamples, ONEPIXEL);
 
         std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram = nullptr;
-        try {
-            nOneStripProgram = ghoul::opengl::ProgramObject::Build(
-                "OneStrip MSAA",
-                absPath("${SHADERS}/framebuffer/nOneStripMSAA.vert"),
-                absPath("${SHADERS}/framebuffer/nOneStripMSAA.frag")
-            );
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
+        nOneStripProgram = ghoul::opengl::ProgramObject::Build(
+            "OneStrip MSAA",
+            absPath("${SHADERS}/framebuffer/nOneStripMSAA.vert"),
+            absPath("${SHADERS}/framebuffer/nOneStripMSAA.frag")
+        );
 
         nOneStripProgram->activate();
 
