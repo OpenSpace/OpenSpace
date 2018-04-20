@@ -122,6 +122,11 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     });
 }
 
+void SyncModule::internalDeinitialize() {
+    _torrentClient.deinitialize();
+}
+
+
 std::string SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
 }

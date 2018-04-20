@@ -203,7 +203,7 @@ void UrlSynchronization::start() {
                 // If we are forcing the override, we download to a temporary file first,
                 // so when we are done here, we need to rename the file to the original
                 // name
-                
+
                 const std::string& tempName = d->destination();
                 std::string originalName = tempName.substr(
                     0,
@@ -265,7 +265,7 @@ bool UrlSynchronization::nTotalBytesIsKnown() {
 void UrlSynchronization::createSyncFile() {
     std::string dir = directory();
     std::string filepath = dir + ".ossync";
-    FileSys.createDirectory(dir, ghoul::filesystem::Directory::Recursive::Yes);
+    FileSys.createDirectory(dir, ghoul::filesystem::FileSystem::Recursive::Yes);
     std::ofstream syncFile(filepath, std::ofstream::out);
     syncFile << "Synchronized";
     syncFile.close();

@@ -42,8 +42,6 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
@@ -120,7 +118,7 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
         return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
     }
 
-    dash->dashboard().removeDashboardItems();
+    dash->dashboard().clearDashboardItems();
     return 0;
 }
 

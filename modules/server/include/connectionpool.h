@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <ghoul/io/socket/socketserver.h>
 
-
 #include <memory>
 #include <thread>
 #include <mutex>
@@ -36,25 +35,25 @@
 #include <vector>
 #include <atomic>
 
-
 namespace openspace {
 
 class ConnectionPool {
 public:
-    ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket);
+    ConnectionPool(
+        std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket);
     ~ConnectionPool();
+
     void addServer(std::shared_ptr<ghoul::io::SocketServer> server);
     void removeServer(ghoul::io::SocketServer* server);
     void clearServers();
     void updateConnections();
-    
-private:
 
+private:
     void disconnectAllConnections();
     std::mutex _connectionMutex;
     void removeDisconnectedSockets();
     void acceptNewSockets();
-    
+
     std::function<void(std::shared_ptr<ghoul::io::Socket>)> _handleSocket;
     std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
     std::vector<std::shared_ptr<ghoul::io::Socket>> _sockets;

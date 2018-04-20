@@ -410,7 +410,7 @@ void RenderEngine::initialize() {
 #ifdef GHOUL_USE_STB_IMAGE
     ghoul::io::TextureReader::ref().addReader(
         std::make_shared<ghoul::io::TextureReaderSTB>()
-    );    
+    );
 #endif // GHOUL_USE_STB_IMAGE
 
     ghoul::io::TextureReader::ref().addReader(
@@ -596,8 +596,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
             _camera->sgctInternal.setSceneMatrix(sceneMatrix);
         }
+        _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     }
-    _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
     bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
     if (masterEnabled && !wrapper.isGuiWindow() && _globalBlackOutFactor > 0.f) {
@@ -780,7 +780,6 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name, std::string vsPath,
     std::string fsPath, const ghoul::Dictionary& data)
 {
-
     ghoul::Dictionary dict = data;
 
     // set path to the current renderer's main fragment shader
@@ -835,9 +834,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     return program;
 }
 
-void RenderEngine::removeRenderProgram(
-    const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
-{
+void RenderEngine::removeRenderProgram(ghoul::opengl::ProgramObject* program) {
     if (!program) {
         return;
     }
@@ -845,7 +842,7 @@ void RenderEngine::removeRenderProgram(
     auto it = std::find(
         _programs.begin(),
         _programs.end(),
-        program.get()
+        program
     );
 
     if (it != _programs.end()) {

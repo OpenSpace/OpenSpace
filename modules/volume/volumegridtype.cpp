@@ -26,8 +26,7 @@
 
 #include <string>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Cartesian") {
@@ -44,5 +43,4 @@ InvalidGridTypeError::InvalidGridTypeError(std::string gt)
     , gridType(std::move(gt))
 {}
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

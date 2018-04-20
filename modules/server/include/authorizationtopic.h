@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
-#define OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
+#ifndef __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
 
 #include <ctime>
 #include <ext/json/json.hpp>
@@ -38,7 +38,6 @@ namespace openspace {
 class AuthorizationTopic : public Topic {
 public:
     AuthorizationTopic();
-    ~AuthorizationTopic() {};
     void handleJson(nlohmann::json json);
     bool isDone();
 
@@ -53,14 +52,16 @@ public:
 
         NotImplemented = 501
     };
+
 private:
     bool _isAuthenticated;
 
     const std::string getKey() const;
     bool authorize(const std::string key);
-    nlohmann::json message(const std::string &message, StatusCode statusCode = StatusCode::NotImplemented);
+    nlohmann::json message(const std::string &message,
+        StatusCode statusCode = StatusCode::NotImplemented);
 };
 
-}
+} // namespace openspace
 
-#endif //OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
+#endif // __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__

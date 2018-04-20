@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__SETPROPERTYTOPIC_H
-#define OPENSPACE_MODULES_SERVER__SETPROPERTYTOPIC_H
+#ifndef __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
 
 #include <ext/json/json.hpp>
 #include <modules/server/include/topic.h>
@@ -41,6 +41,6 @@ private:
     void setTime(const std::string& value);
 };
 
-}
+} // namespace
 
-#endif //OPENSPACE_MODULES_SERVER__SETPROPERTYTOPIC_H
+#endif // __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__

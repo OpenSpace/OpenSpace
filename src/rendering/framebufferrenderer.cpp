@@ -261,7 +261,7 @@ namespace openspace {
     }
 
     void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster,
-        ghoul::Boolean isAttached)
+        isAttached isAttached)
     {
         (void)deferredcaster;
         (void)isAttached;

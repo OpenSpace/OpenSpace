@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <ghoul/opengl/programobjectmanager.h>
+
 namespace openspace {
 
 class DigitalUniverseModule : public OpenSpaceModule {
@@ -37,8 +39,11 @@ public:
     virtual ~DigitalUniverseModule() = default;
     std::vector<documentation::Documentation> documentations() const override;
 
+    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitializeGL() override;
 };
 
 } // namespace openspace

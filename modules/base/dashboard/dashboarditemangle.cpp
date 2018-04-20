@@ -32,15 +32,14 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
+    constexpr const char* KeyFontMono = "Mono";
 
-    const float DefaultFontSize = 10.f;
+    constexpr const float DefaultFontSize = 10.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -106,6 +105,7 @@ namespace openspace {
 
 documentation::Documentation DashboardItemAngle::Documentation() {
     using namespace documentation;
+
     return {
         "DashboardItem Angle",
         "base_dashboarditem_angle",
@@ -174,7 +174,7 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 }
 
 DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
-    : DashboardItem("Angle")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{

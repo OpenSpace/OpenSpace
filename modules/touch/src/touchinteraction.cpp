@@ -607,7 +607,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
     _lmSuccess = levmarq(
         nDOF,
         par.data(),
-        screenPoints.size(),
+        static_cast<int>(screenPoints.size()),
         nullptr,
         distToMinimize,
         gradient,
@@ -905,11 +905,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         return ROT;
     }
     else {
-        float avgDistance = static_cast<float>(
-            std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
-        );
+        float avgDistance = std::abs(dist - lastDist) / list.at(0).getMotionSpeed();
         // if average distance between 3 fingers are constant we have panning
-        if (_panEnabled && (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < _interpretPan && list.size() == 3)) {
+        if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
             return PAN;
         }
 
@@ -917,9 +915,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         // centroid is over _rollAngleThreshold (_centroidStillThreshold is used to void
         // misinterpretations)
         else if (std::abs(minDiff) < _inputStillThreshold ||
-	        (std::abs(rollOn) < 100.0 &&
-		normalizedCentroidDistance < _centroidStillThreshold)) {
-
+                (std::abs(rollOn) < 100.0 &&
+                 normalizedCentroidDistance < _centroidStillThreshold))
+        {
             return ROLL;
         }
         else {
@@ -997,7 +995,10 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             pinchConsecZoomFactor += zoomFactor;
 #endif
             if ((length(currDistanceToFocusNode) / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
-                zoomFactor *= pow(distanceFromFocusSurface, (float)_zoomSensitivity);
+                zoomFactor *= pow(
+                    distanceFromFocusSurface,
+                    static_cast<float>(_zoomSensitivity)
+                );
             }
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);

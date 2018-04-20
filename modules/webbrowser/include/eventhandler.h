@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
 
@@ -37,8 +36,6 @@ namespace openspace {
 
 class EventHandler {
 public:
-    EventHandler() : _mousePosition(0, 0), _browserInstance(nullptr), _lastClickPosition(0, 0) {};
-
     void initialize();
     void setBrowser(const CefRefPtr<CefBrowser> &browser);
     void setBrowserInstance(const std::shared_ptr<BrowserInstance> & browserInstance);
@@ -62,8 +59,9 @@ private:
 
     bool _leftMouseDown = false;
 
-    std::shared_ptr<BrowserInstance> _browserInstance;
-    glm::vec2 _mousePosition, _lastClickPosition;
+    std::shared_ptr<BrowserInstance> _browserInstance = nullptr;
+    glm::vec2 _mousePosition = { 0.f, 0.f };
+    glm::vec2 _lastClickPosition = { 0.f, 0.f };
     std::chrono::high_resolution_clock::time_point _lastClickTime;
 
     /**
@@ -73,19 +71,21 @@ private:
     bool isDoubleClick() const;
 
     /**
-     * get the number of milliseconds that is allowed between two clicks for it to count as a double click
+     * get the number of milliseconds that is allowed between two clicks for it to count
+     * as a double click
      * @return
      */
     static int doubleClickTime();
 
     /**
-     * get the rectangle width around the first click in a double click that the second click has to be _within_
+     * get the rectangle width around the first click in a double click that the second
+     * click has to be _within_
      * @return
      */
     static int maxDoubleClickDistance();
 };
 
 
-}
+} // namespace openspace
 
-#endif //__OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__
+#endif // __OPENSPACE_MODULE_WEBBROWSER___EVENT_HANDLER___H__

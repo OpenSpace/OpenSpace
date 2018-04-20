@@ -2,6 +2,8 @@
 -- example:
 -- asset.require('../scene/solarsystem/planets/mars/mars')
 
+local CreateFocusNodes = false
+
 -- Add folders to this list that contain .info files describing patches
 -- OBS: Even on Windows, you have to use forward slashes (/) or double backslashes (\\)
 --      rather than single backslashes (\) as they are otherwise interpreted as escape
@@ -34,6 +36,10 @@ asset.onInitialize(function ()
     for obj, list in pairs(vrt_folders) do
         for _, dir in pairs(list) do
             openspace.globebrowsing.addBlendingLayersFromDirectory(dir, obj)
+
+            if CreateFocusNodes then
+                openspace.globebrowsing.addFocusNodesFromDirectory(dir, obj)
+            end
         end
     end
 end)

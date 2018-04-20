@@ -45,7 +45,7 @@ class SpiceManager : public ghoul::Singleton<SpiceManager> {
     friend class ghoul::Singleton<SpiceManager>;
 public:
     using TransformMatrix = std::array<double, 36>;
-    using UseException = ghoul::Boolean;
+    BooleanType(UseException);
     using KernelHandle = unsigned int;
 
     struct SpiceException : public ghoul::RuntimeError {

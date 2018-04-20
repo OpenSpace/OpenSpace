@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,23 +32,23 @@
 #include <modules/server/include/triggerpropertytopic.h>
 
 namespace {
-const char* _loggerCat = "ServerModule: Connection";
+    constexpr const char* _loggerCat = "ServerModule: Connection";
 
-const char* MessageKeyType = "type";
-const char* MessageKeyPayload = "payload";
-const char* MessageKeyTopic = "topic";
+    constexpr const char* MessageKeyType = "type";
+    constexpr const char* MessageKeyPayload = "payload";
+    constexpr const char* MessageKeyTopic = "topic";
 
-const char* AuthenticationTopicKey = "authorize";
-const char* GetPropertyTopicKey = "get";
-const char* LuaScriptTopicKey = "luascript";
-const char* SetPropertyTopicKey = "set";
-const char* SubscriptionTopicKey = "subscribe";
-const char* TimeTopicKey = "time";
-const char* TriggerPropertyTopicKey = "trigger";
-const char* BounceTopicKey = "bounce";
+    constexpr const char* AuthenticationTopicKey = "authorize";
+    constexpr const char* GetPropertyTopicKey = "get";
+    constexpr const char* LuaScriptTopicKey = "luascript";
+    constexpr const char* SetPropertyTopicKey = "set";
+    constexpr const char* SubscriptionTopicKey = "subscribe";
+    constexpr const char* TimeTopicKey = "time";
+    constexpr const char* TriggerPropertyTopicKey = "trigger";
+    constexpr const char* BounceTopicKey = "bounce";
 
-const int ThrottleMessageWaitInMs = 100;
-}
+    constexpr const int ThrottleMessageWaitInMs = 100;
+} // namespace
 
 namespace openspace {
 
@@ -67,9 +67,10 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
-    const bool hasAuthenticationConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
-            ConfigurationManager::KeyRequireSocketAuthentication);
-    if (hasAuthenticationConfiguration) {
+    const bool hasAuthConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
+        ConfigurationManager::KeyRequireSocketAuthentication
+    );
+    if (hasAuthConfiguration) {
         _requireAuthorization = OsEng.configurationManager().value<bool>(
                 ConfigurationManager::KeyRequireSocketAuthentication);
     } else {

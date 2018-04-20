@@ -71,8 +71,16 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
     internalInitialize(configuration);
 }
 
+void OpenSpaceModule::initializeGL() {
+    internalInitializeGL();
+}
+
 void OpenSpaceModule::deinitialize() {
     internalDeinitialize();
+}
+
+void OpenSpaceModule::deinitializeGL() {
+    internalDeinitializeGL();
 }
 
 std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
@@ -126,6 +134,10 @@ const ModuleEngine* OpenSpaceModule::moduleEngine() const {
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
 
+void OpenSpaceModule::internalInitializeGL() {}
+
 void OpenSpaceModule::internalDeinitialize() {}
+
+void OpenSpaceModule::internalDeinitializeGL() {}
 
 } // namespace openspace

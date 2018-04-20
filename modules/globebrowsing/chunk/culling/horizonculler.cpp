@@ -85,13 +85,21 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
                                double objectBoundingSphereRadius,
                                double minimumGlobeRadius)
 {
-    double distanceToHorizon =
-        sqrt(pow(length(cameraPosition - globePosition), 2) -
-        pow(minimumGlobeRadius, 2));
+    const double objectP = pow(length(objectPosition - globePosition), 2);
+    const double horizonP = pow(minimumGlobeRadius - objectBoundingSphereRadius, 2);
+    if (objectP < horizonP) {
+        return false;
+    }
 
-    double minimumAllowedDistanceToObjectFromHorizon = sqrt(
-        pow(length(objectPosition - globePosition), 2) -
-        pow(minimumGlobeRadius - objectBoundingSphereRadius, 2));
+    const double cameraP = pow(length(cameraPosition - globePosition), 2);
+    const double minR = pow(minimumGlobeRadius, 2);
+    if (cameraP < minR) {
+        return false;
+    }
+
+
+    double minimumAllowedDistanceToObjectFromHorizon = sqrt(objectP - horizonP);
+    double distanceToHorizon = sqrt(cameraP - minR);
 
     // Minimum allowed for the object to be occluded
     double minimumAllowedDistanceToObjectSquared =

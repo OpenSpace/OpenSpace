@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,10 @@ CefHost::CefHost(std::string helperLocation) {
     CefMainArgs args;
     CefSettings settings;
 
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) helperLocation.c_str());
+    CefString(&settings.browser_subprocess_path).FromASCII(
+        // This is bad as it casts away the const
+        (char*) helperLocation.c_str()
+    );
     attachDebugSettings(settings);
 
 #ifdef WIN32
@@ -55,7 +58,10 @@ CefHost::~CefHost() {
 
 void CefHost::attachDebugSettings(CefSettings &settings) {
     settings.remote_debugging_port = 8088;
-    LDEBUG(fmt::format("Remote WebBrowser debugging available on http://localhost:{}", settings.remote_debugging_port));
+    LDEBUG(fmt::format(
+        "Remote WebBrowser debugging available on http://localhost:{}",
+        settings.remote_debugging_port
+    ));
 //    settings.single_process = true;
 }
 

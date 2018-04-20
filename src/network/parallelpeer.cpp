@@ -205,7 +205,10 @@ void ParallelPeer::sendAuthentication() {
     buffer.insert(buffer.end(), name.begin(), name.end());
 
     // Send message
-    _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::Authentication, buffer));
+    _connection.sendMessage(ParallelConnection::Message(
+        ParallelConnection::MessageType::Authentication,
+        buffer
+    ));
 }
 
 void ParallelPeer::queueInMessage(const ParallelConnection::Message& message) {
@@ -415,12 +418,18 @@ void ParallelPeer::requestHostship() {
         reinterpret_cast<char*>(&passwordHash),
         reinterpret_cast<char*>(&passwordHash) + sizeof(uint64_t)
     );
-    _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipRequest, buffer));
+    _connection.sendMessage(ParallelConnection::Message(
+        ParallelConnection::MessageType::HostshipRequest,
+        buffer
+    ));
 }
 
 void ParallelPeer::resignHostship() {
     std::vector<char> buffer;
-    _connection.sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::HostshipResignation, buffer));
+    _connection.sendMessage(ParallelConnection::Message(
+        ParallelConnection::MessageType::HostshipResignation,
+        buffer
+    ));
 }
 
 void ParallelPeer::setPassword(std::string pwd) {
@@ -442,7 +451,10 @@ void ParallelPeer::sendScript(std::string script) {
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    ParallelConnection::DataMessage message(datamessagestructures::Type::ScriptData, buffer);
+    ParallelConnection::DataMessage message(
+        datamessagestructures::Type::ScriptData,
+        buffer
+    );
     _connection.sendDataMessage(message);
 }
 
@@ -552,7 +564,10 @@ void ParallelPeer::sendCameraKeyframe() {
     kf.serialize(buffer);
 
     // Send message
-    _connection.sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::CameraData, buffer));
+    _connection.sendDataMessage(ParallelConnection::DataMessage(
+        datamessagestructures::Type::CameraData,
+        buffer
+    ));
 }
 
 void ParallelPeer::sendTimeKeyframe() {
@@ -576,7 +591,10 @@ void ParallelPeer::sendTimeKeyframe() {
     kf.serialize(buffer);
 
     // Send message
-    _connection.sendDataMessage(ParallelConnection::DataMessage(datamessagestructures::Type::TimeData, buffer));
+    _connection.sendDataMessage(ParallelConnection::DataMessage(
+        datamessagestructures::Type::TimeData,
+        buffer
+    ));
     _timeJumped = false;
 }
 

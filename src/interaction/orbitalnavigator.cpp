@@ -471,7 +471,24 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
                                                       const glm::dquat& localCameraRotation)
 {
-    if (!_rotateToFocusNodeInterpolator.isInterpolating()) {
+    if (_rotateToFocusNodeInterpolator.isInterpolating()) {
+        double t = _rotateToFocusNodeInterpolator.value();
+        _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+        _rotateToFocusNodeInterpolator.step();
+        glm::dquat result = glm::slerp(
+            localCameraRotation,
+            glm::dquat(glm::dvec3(0.0)),
+            glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0));
+
+        // Retrieving the angle of a quaternion uses acos on the w component, which can
+        // have numerical instability for values close to 1.0
+        constexpr double Epsilon = 1.0e-13;
+        if (abs((abs(result.w) - 1.0)) < Epsilon || angle(result) < 0.01) {
+            _rotateToFocusNodeInterpolator.end();
+        }
+        return result;
+    }
+    else {
         return localCameraRotation;
     }
     double t = _rotateToFocusNodeInterpolator.value();
