@@ -64,7 +64,10 @@ Fragment getFragment() {
 
 
     // G-Buffer
-    frag.gPosition  = vs_gPosition;
+    //frag.gPosition  = vs_gPosition;
+    // JCC: We need to fix the precision here.
+    frag.gPosition = vs_gPosition + vec4(0.0, 0.0, 100.0, 0.0);
+
     // There is no normal here
     // TODO: Add the correct normal if necessary (JCC)
     frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
