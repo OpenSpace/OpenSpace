@@ -35,9 +35,8 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/luaconsole.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 
@@ -46,6 +45,7 @@
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/loadingscreen.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
@@ -293,7 +293,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Parse commandline arguments
     std::vector<std::string> args(argv, argv + argc);
-    const std::vector<std::string>& arguments =
+    std::vector<std::string> arguments =
         _engine->_commandlineParser->setCommandLine(args);
 
     bool showHelp = _engine->_commandlineParser->execute();
@@ -302,8 +302,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
         requestClose = true;
         return;
     }
-    std::vector<std::string> argumentsCopy = arguments;
-    sgctArguments = std::move(argumentsCopy);
+
+    sgctArguments = std::move(arguments);
 
     // Find configuration
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
@@ -1283,7 +1283,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         _renderEngine->updateScene();
-        _navigationHandler->updateCamera(dt);
+        //_navigationHandler->updateCamera(dt);
 
         Camera* camera = _renderEngine->camera();
         if (camera) {
@@ -1508,6 +1508,10 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY) {
     }
 
     _navigationHandler->mouseScrollWheelCallback(posY);
+}
+
+void OpenSpaceEngine::setJoystickInputStates(interaction::JoystickInputStates& states) {
+    _navigationHandler->setJoystickInputStates(states);
 }
 
 void OpenSpaceEngine::encode() {

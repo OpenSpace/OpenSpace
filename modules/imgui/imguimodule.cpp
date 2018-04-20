@@ -31,9 +31,9 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
