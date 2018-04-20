@@ -699,8 +699,11 @@ bool RenderableStars::readSpeckFile() {
     } while (!file.eof());
 
     // Normalize Luminosity:
+    int luminosityVarColumnPos = 4;
     for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-        _fullData[i + 4] = (_fullData[i + 4] - minLumValue) / (maxLumValue - minLumValue);
+        _fullData[i + luminosityVarColumnPos] = 
+            (_fullData[i + luminosityVarColumnPos] - minLumValue) / 
+            (maxLumValue - minLumValue);
     }
 
     return true;

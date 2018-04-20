@@ -345,8 +345,7 @@ void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double d
 }
 
 glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(
-    const glm::dvec3& camPos,
-    const glm::dvec3& centerPos,
+    const glm::dvec3& camPos, const glm::dvec3& centerPos,
     const SurfacePositionHandle& posHandle)
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
@@ -491,16 +490,21 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     else {
         return localCameraRotation;
     }
+    
     double t = _rotateToFocusNodeInterpolator.value();
     _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _rotateToFocusNodeInterpolator.step();
+    
     glm::dquat result = glm::slerp(
         localCameraRotation,
         glm::dquat(glm::dvec3(0.0)),
-        glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0));
+        glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0)
+    );
+
     if (angle(result) < 0.01) {
         _rotateToFocusNodeInterpolator.end();
     }
+    
     return result;
 }
 
@@ -520,7 +524,8 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
     double result = glm::exp(glm::mix(
         glm::log(currentDistance),
         glm::log(targetDistance),
-        glm::min(t * _cameraToSurfaceDistanceInterpolator.deltaTimeScaled(), 1.0)));
+        glm::min(t * _cameraToSurfaceDistanceInterpolator.deltaTimeScaled(), 1.0))
+    );
 
     double ratio = currentDistance / targetDistance;
     if (glm::abs(ratio - 1.0) < 0.000001) {

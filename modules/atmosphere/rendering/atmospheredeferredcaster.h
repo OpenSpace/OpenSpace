@@ -100,10 +100,9 @@ private:
     void deleteUnusedComputationTextures();
     void executeCalculations(GLuint quadCalcVAO, GLenum drawBuffers[1],
         GLsizei vertexSize);
-    void resetAtmosphereTextures();
     void createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size);
     void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
-        int layer, bool doCalc = true);
+        int layer, bool doCalculation = true);
     void checkFrameBufferState(const std::string& codePosition) const;
     void loadAtmosphereDataIntoShaderProgram(
         std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg

@@ -102,7 +102,6 @@ namespace {
 } // namespace
 
 namespace openspace {
-
     AtmosphereDeferredcaster::AtmosphereDeferredcaster()
         : _transmittanceProgramObject(nullptr)
         , _irradianceProgramObject(nullptr)
@@ -1275,8 +1274,6 @@ namespace openspace {
         LDEBUG("Ended precalculations for Atmosphere effects...");
     }
 
-    void AtmosphereDeferredcaster::resetAtmosphereTextures() {}
-
     void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloat size) {
         glGenVertexArrays(1, vao);
         glGenBuffers(1, vbo);
@@ -1404,10 +1401,10 @@ namespace openspace {
 
     void AtmosphereDeferredcaster::step3DTexture(
         std::unique_ptr<ghoul::opengl::ProgramObject>& shaderProg,
-        int layer, bool doCalc)
+        int layer, bool doCalculation)
     {
         // See OpenGL redbook 8th Edition page 556 for Layered Rendering
-        if (doCalc) {
+        if (doCalculation) {
             float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
             float atm2 = _atmosphereRadius * _atmosphereRadius;
             float diff = atm2 - earth2;
