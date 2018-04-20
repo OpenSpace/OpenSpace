@@ -66,12 +66,11 @@ namespace {
 } // namespace
 
 namespace openspace {
-    void saveTextureToPPMFile(const GLenum color_buffer_attachment,
-        const std::string & fileName,
-        const int width, const int height);
+    void saveTextureToPPMFile(GLenum color_buffer_attachment,
+        const std::string & fileName, int width, int height);
 
-    void saveTextureToMemory(const GLenum color_buffer_attachment,
-        const int width, const int height, std::vector<double> & memory);
+    void saveTextureToMemory(GLenum color_buffer_attachment,
+        int width, int height, std::vector<double> & memory);
 
 
     FramebufferRenderer::FramebufferRenderer()
@@ -1262,8 +1261,8 @@ namespace openspace {
         OsEng.renderEngine().setRendererData(dict);
     }
 
-    void saveTextureToPPMFile(const GLenum color_buffer_attachment,
-        const std::string & fileName, const int width, const int height)
+    void saveTextureToPPMFile(GLenum color_buffer_attachment,
+        const std::string & fileName, int width, int height)
     {
         std::fstream ppmFile;
 
@@ -1295,7 +1294,6 @@ namespace openspace {
             ppmFile << width << " " << height << std::endl;
             ppmFile << "255" << std::endl;
 
-            std::cout << "\n\nFILE\n\n";
             int k = 0;
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
@@ -1312,30 +1310,26 @@ namespace openspace {
         }
     }
 
-    void saveTextureToMemory(const GLenum color_buffer_attachment,
-        const int width, const int height, std::vector<double> & memory) {
+    void saveTextureToMemory(GLenum color_buffer_attachment,
+        int width, int height, std::vector<double> & memory) {
 
-        if (!memory.empty()) {
-            memory.clear();
-        }
+        memory.clear();
         memory.resize(width * height * 3);
 
-        float *tempMemory = new float[width*height * 3];
+        std::vector<float> tempMemory(width*height * 3, 0.f);
 
         if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
             glReadBuffer(color_buffer_attachment);
-            glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
+            glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, &tempMemory[0]);
 
         }
         else {
-            glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
+            glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, &tempMemory[0]);
         }
 
         for (auto i = 0; i < width*height * 3; ++i) {
             memory[i] = static_cast<double>(tempMemory[i]);
         }
-
-        delete[] tempMemory;
     }
 
 } // namespace openspace

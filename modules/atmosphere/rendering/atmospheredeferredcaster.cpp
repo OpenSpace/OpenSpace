@@ -102,7 +102,7 @@ namespace {
 } // namespace
 
 namespace openspace {
-    AtmosphereDeferredcaster::AtmosphereDeferredcaster()
+    AtmosphereDeferredcaster::AtmosphereDeferredcaster() 
         : _transmittanceProgramObject(nullptr)
         , _irradianceProgramObject(nullptr)
         , _irradianceSupTermsProgramObject(nullptr)
