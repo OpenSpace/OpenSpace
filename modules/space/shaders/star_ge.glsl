@@ -157,14 +157,17 @@ void main() {
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
     } else {
-        if (width < 2.0f) {
-            float maxVar = 2.0f;
-            float minVar = 1.0f;
-            float var    = (height + width);    
-            float ta = ( (var - minVar)/(maxVar - minVar) );
-            if (ta == 0.0f)
-                return;
-        }            
+        // if (width < 2.0f) {
+        //     float maxVar = 2.0f;
+        //     float minVar = 1.0f;
+        //     float var    = (height + width);    
+        //     float ta = ( (var - minVar)/(maxVar - minVar) );
+        //     if (ta == 0.0f)
+        //         return;
+        // }  
+        // float minSize = 30.f; 
+        // if ((width < minSize) || (height < minSize))
+        //     return;         
         bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
