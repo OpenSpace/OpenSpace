@@ -104,6 +104,8 @@ local unbindRoll = function(axis)
 end
 
 asset.onInitialize(function()
+    -- Set the controller to the connected controller
+    -- Currently:  XBoxController  or  PS4Controller
     local controller = XBoxController;
 
     openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[1], 0.05)
