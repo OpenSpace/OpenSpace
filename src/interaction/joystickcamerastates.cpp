@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/scripting/scriptengine.h>
+#include <utility>
 
 namespace openspace::interaction {
 
@@ -37,12 +38,11 @@ JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocitySc
 void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
                                                 double deltaTime)
 {
-    glm::dvec2 globalRotation;
-    double zoom = 0.0;
-    //glm::dvec2 truckMovement;
-    glm::dvec2 localRoll;
-    glm::dvec2 globalRoll;
-    glm::dvec2 localRotation;
+    std::pair<bool, glm::dvec2> globalRotation = { false, glm::dvec2(0.0) };
+    std::pair<bool, double> zoom = { false, 0.0 };
+    std::pair<bool, glm::dvec2> localRoll = { false, glm::dvec2(0.0) };
+    std::pair<bool, glm::dvec2> globalRoll = { false, glm::dvec2(0.0) };
+    std::pair<bool, glm::dvec2> localRotation = { false, glm::dvec2(0.0) };
 
     for (int i = 0; i < JoystickInputState::MaxAxes; ++i) {
         AxisInformation t = _axisMapping[i];
@@ -50,10 +50,12 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             continue;
         }
 
+        bool hasValue = true;
         float value = inputState.joystickAxis(i);
 
         if (abs(value) <= t.deadzone) {
             value = 0.f;
+            hasValue = false;
         }
         
         if (t.normalize) {
@@ -70,44 +72,84 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             case AxisType::None:
                 break;
             case AxisType::OrbitX:
-                globalRotation.x = value;
+                globalRotation.first = hasValue;
+                globalRotation.second.x = value;
                 break;
             case AxisType::OrbitY:
-                globalRotation.y = value;
+                globalRotation.first = hasValue;
+                globalRotation.second.y = value;
                 break;
             case AxisType::ZoomIn:
-                zoom += value;
+                zoom.first = hasValue;
+                zoom.second += value;
                 break;
             case AxisType::ZoomOut:
-                zoom -= value;
+                zoom.first = hasValue;
+                zoom.second -= value;
                 break;
             case AxisType::LocalRollX:
-                localRoll.x = value;
+                localRoll.first = hasValue;
+                localRoll.second.x = value;
                 break;
             case AxisType::LocalRollY:
-                localRoll.y = value;
+                localRoll.first = hasValue;
+                localRoll.second.y = value;
                 break;
             case AxisType::GlobalRollX:
-                globalRoll.x = value;
+                globalRoll.first = hasValue;
+                globalRoll.second.x = value;
                 break;
             case AxisType::GlobalRollY:
-                globalRoll.y = value;
+                globalRoll.first = hasValue;
+                globalRoll.second.y = value;
                 break;
             case AxisType::PanX:
-                localRotation.x = value;
+                localRotation.first = hasValue;
+                localRotation.second.x = value;
                 break;
             case AxisType::PanY:
-                localRotation.y = value;
+                localRotation.first = hasValue;
+                localRotation.second.y = value;
                 break;
         }
     }
 
-    _globalRotationState.velocity.set(globalRotation, deltaTime);
-    _truckMovementState.velocity.set(glm::dvec2(zoom), deltaTime);
-    _localRollState.velocity.set(localRoll, deltaTime);
-    _globalRollState.velocity.set(globalRoll, deltaTime);
-    _localRotationState.velocity.set(localRotation, deltaTime);
+    if (globalRotation.first) {
+        _globalRotationState.velocity.set(globalRotation.second, deltaTime);
+    }
+    else {
+        _globalRotationState.velocity.decelerate(deltaTime);
+    }
 
+    if (zoom.first) {
+        _truckMovementState.velocity.set(glm::dvec2(zoom.second), deltaTime);
+    }
+    else {
+        _truckMovementState.velocity.decelerate(deltaTime);
+    }
+
+    if (localRoll.first) {
+        _localRollState.velocity.set(localRoll.second, deltaTime);
+    }
+    else {
+        _localRollState.velocity.decelerate(deltaTime);
+    }
+
+    if (globalRoll.first) {
+        _globalRollState.velocity.set(globalRoll.second, deltaTime);
+    }
+    else {
+        _globalRollState.velocity.decelerate(deltaTime);
+    }
+
+    if (localRotation.first) {
+        _localRotationState.velocity.set(localRotation.second, deltaTime);
+    }
+    else {
+        _localRotationState.velocity.decelerate(deltaTime);
+    }
+    
+   
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         auto itRange = _buttonMapping.equal_range(i);
         for (auto it = itRange.first; it != itRange.second; ++it) {

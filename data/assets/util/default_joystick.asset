@@ -106,6 +106,13 @@ end
 asset.onInitialize(function()
     local controller = XBoxController;
 
+    openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[1], 0.05)
+    openspace.navigation.setAxisDeadZone(controller.LeftThumbStick[2], 0.05)
+    openspace.navigation.setAxisDeadZone(controller.RightThumbStick[1], 0.05)
+    openspace.navigation.setAxisDeadZone(controller.RightThumbStick[2], 0.05)
+    openspace.navigation.setAxisDeadZone(controller.LeftTrigger, 0.05)
+    openspace.navigation.setAxisDeadZone(controller.RightTrigger, 0.05)
+
     openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[1], "Orbit X");
     openspace.navigation.bindJoystickAxis(controller.LeftThumbStick[2], "Orbit Y", true);
     openspace.navigation.bindJoystickAxis(controller.RightThumbStick[1], "Pan X", true);
