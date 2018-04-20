@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -60,9 +61,9 @@ class VirtualPropertyManager;
 class WindowWrapper;
 
 namespace interaction {
-    class NavigationHandler;
     class KeyBindingManager;
-}
+    class NavigationHandler;
+} // namespace interaction
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -111,6 +112,7 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
+    void setJoystickInputStates(interaction::JoystickInputStates& states);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();

@@ -44,15 +44,16 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/interaction/mousestate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
@@ -130,6 +131,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
@@ -211,16 +213,17 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousestate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
@@ -307,6 +310,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/luaconsole.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
