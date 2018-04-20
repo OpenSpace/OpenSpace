@@ -293,7 +293,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     // Parse commandline arguments
     std::vector<std::string> args(argv, argv + argc);
-    std::shared_ptr<const std::vector<std::string>> arguments =
+    std::vector<std::string> arguments =
         _engine->_commandlineParser->setCommandLine(args);
 
     bool showHelp = _engine->_commandlineParser->execute();
@@ -302,7 +302,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
         requestClose = true;
         return;
     }
-    sgctArguments = *arguments;
+
+
+    sgctArguments = std::move(arguments);
 
     // Find configuration
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
