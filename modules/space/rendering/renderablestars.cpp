@@ -691,8 +691,8 @@ bool RenderableStars::readSpeckFile() {
                 break;
             }
         }
-        minLumValue = values[4] < minLumValue ? values[4] : minLumValue;
-        maxLumValue = values[4] > maxLumValue ? values[4] : maxLumValue;
+        minLumValue = std::min(values[4], minLumValue);
+        maxLumValue = std::max(values[4], minLumValue);
         if (!nullArray) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }

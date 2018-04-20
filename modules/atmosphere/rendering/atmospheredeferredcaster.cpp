@@ -89,8 +89,8 @@
 
 
 namespace {
-    const char* _loggerCat = "AtmosphereDeferredcaster";
-    const char* GlslDeferredcastPath =
+    constexpr const char* _loggerCat = "AtmosphereDeferredcaster";
+    constexpr const char* GlslDeferredcastPath =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
     constexpr const char* GlslDeferredcastFSPath =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
@@ -183,8 +183,7 @@ namespace openspace {
     }
 
     void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
-        const DeferredcastData&,
-        ghoul::opengl::ProgramObject& program)
+        const DeferredcastData&, ghoul::opengl::ProgramObject& program)
     {
         // Atmosphere Frustum Culling
         glm::dvec3 tPlanetPosWorld = glm::dvec3(
@@ -257,16 +256,12 @@ namespace openspace {
 
                 // SGCT Projection to World Space
                 glm::dmat4 dSgctProjectionToWorldTransformMatrix(dProjectionToTmpRotTransformMatrix);
-                double *mSource = (double*)glm::value_ptr(dSgctProjectionToWorldTransformMatrix);
+                double *mSource = reinterpret_cast<double *>(glm::value_ptr(dSgctProjectionToWorldTransformMatrix));
 
                 mSource[12] += renderData.camera.eyePositionVec3().x;
                 mSource[13] += renderData.camera.eyePositionVec3().y;
                 mSource[14] += renderData.camera.eyePositionVec3().z;
-                /*
-                mSource[12] += renderData.camera.positionVec3().x;
-                mSource[13] += renderData.camera.positionVec3().y;
-                mSource[14] += renderData.camera.positionVec3().z;
-                */
+                
                 mSource[15] = 1.0;
 
 
@@ -311,7 +306,7 @@ namespace openspace {
                     std::vector<ShadowRenderingStruct> shadowDataArray;
                     shadowDataArray.reserve(_shadowConfArray.size());
 
-                    for (const auto & shadowConf : _shadowConfArray) {
+                    for (const ShadowConfiguration & shadowConf : _shadowConfArray) {
                         // TO REMEMBER: all distances and lengths in world coordinates are in
                         // meters!!! We need to move this to view space...
                         // Getting source and caster:
@@ -372,7 +367,7 @@ namespace openspace {
 
                     const std::string uniformVarName("shadowDataArray[");
                     unsigned int counter = 0;
-                    for (const auto & sd : shadowDataArray) {
+                    for (const ShadowRenderingStruct & sd : shadowDataArray) {
                         std::stringstream ss;
                         ss << uniformVarName << counter << "].isShadowing";
                         program.setUniform(ss.str(), sd.isShadowing);
@@ -383,9 +378,9 @@ namespace openspace {
                             ss.str(std::string());
                             ss << uniformVarName << counter << "].xu";
                             program.setUniform(ss.str(), sd.xu);
-                            /*ss.str(std::string());
-                            ss << uniformVarName << counter << "].rs";
-                            program.setUniform(ss.str(), sd.rs);*/
+                            // ss.str(std::string());
+                            // ss << uniformVarName << counter << "].rs";
+                            // program.setUniform(ss.str(), sd.rs);
                             ss.str(std::string());
                             ss << uniformVarName << counter << "].rc";
                             program.setUniform(ss.str(), sd.rc);
@@ -416,8 +411,7 @@ namespace openspace {
     }
 
     void AtmosphereDeferredcaster::postRaycast(const RenderData&,
-        const DeferredcastData&,
-        ghoul::opengl::ProgramObject&)
+        const DeferredcastData&, ghoul::opengl::ProgramObject&)
     {
         // Deactivate the texture units
         _transmittanceTableTextureUnit.deactivate();
@@ -595,7 +589,8 @@ namespace openspace {
             _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
                 "transmittanceCalcProgram",
                 absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl"),
-                absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl"));
+                absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
+            );
         }
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _transmittanceProgramObject->setIgnoreSubroutineUniformLocationError(
@@ -1060,10 +1055,10 @@ namespace openspace {
                 step3DTexture(_deltaJProgramObject, layer);
                 renderQuadForCalc(quadCalcVAO, vertexSize);
             }
-            std::stringstream sst;
             if (_saveCalculationTextures) {
-                sst << "deltaJ_texture-scattering_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
+                    fmt::format("deltaJ_texture-scattering_order-{}.ppm", 
+                        scatteringOrder),
                     _mu_s_samples * _nu_samples, _mu_samples);
             }
             _deltaJProgramObject->deactivate();
@@ -1111,9 +1106,9 @@ namespace openspace {
             loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);
             renderQuadForCalc(quadCalcVAO, vertexSize);
             if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "deltaE_texture-scattering_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
+                    fmt::format("deltaE_texture-scattering_order-{}.ppm", 
+                        scatteringOrder),
                     _delta_e_table_width, _delta_e_table_height);
             }
             _irradianceSupTermsProgramObject->deactivate();
@@ -1146,11 +1141,9 @@ namespace openspace {
                 renderQuadForCalc(quadCalcVAO, vertexSize);
             }
             if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "deltaS_texture-scattering_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(
-                    GL_COLOR_ATTACHMENT0,
-                    sst.str(),
+                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
+                    fmt::format("deltaS_texture-scattering_order-{}.ppm", 
+                        scatteringOrder),
                     _mu_s_samples * _nu_samples,
                     _mu_samples
                 );
@@ -1180,9 +1173,9 @@ namespace openspace {
             loadAtmosphereDataIntoShaderProgram(_irradianceFinalProgramObject);
             renderQuadForCalc(quadCalcVAO, vertexSize);
             if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "irradianceTable_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
+                    fmt::format("irradianceTable_order-{}.ppm",
+                        scatteringOrder),
                     _delta_e_table_width, _delta_e_table_height);
             }
             _irradianceFinalProgramObject->deactivate();
@@ -1209,9 +1202,9 @@ namespace openspace {
                 renderQuadForCalc(quadCalcVAO, vertexSize);
             }
             if (_saveCalculationTextures) {
-                sst.str(std::string());
-                sst << "inscatteringTable_order-" << scatteringOrder << ".ppm";
-                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+                saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
+                    fmt::format("inscatteringTable_order-{}.ppm",
+                        scatteringOrder),
                     _mu_s_samples * _nu_samples, _mu_samples);
             }
             _deltaSSupTermsProgramObject->deactivate();
