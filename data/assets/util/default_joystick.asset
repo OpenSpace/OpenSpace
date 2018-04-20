@@ -39,6 +39,28 @@ local XBoxController = {
     }
 }
 
+local PS4Controller = {
+    LeftThumbStick = { 0 , 1 },
+    RightThumbStick = { 2, 5 },
+    LeftTrigger = 3,
+    RightTrigger = 4,
+    A = 3, -- Triangle
+    B = 0, -- Square
+    X = 2, -- Circle
+    Y = 1, -- Cross
+    LB = 4,
+    RB = 5,
+    Select = 9, -- options
+    Start = 12, -- PS button
+    LeftStick = 10,
+    RightStick = 11,
+    DPad = {
+        Up = 14,
+        Right = 15,
+        Down = 16,
+        Left = 17
+    }
+}
 
 -- Variables to store the state of the joystick between frames
 Joystick = {}

@@ -30,7 +30,7 @@
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/interaction/joystickstate.h>
+#include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -91,6 +91,9 @@ public:
     );
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
+
+    void setJoystickAxisDeadzone(int axis, float deadzone);
+    float joystickAxisDeadzone(int axis) const;
 
     void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
         JoystickCameraStates::ButtonCommandRemote remote);

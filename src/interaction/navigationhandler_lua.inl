@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/joystickstate.h>
+#include <openspace/interaction/joystickcamerastates.h>
 #include <numeric>
 
 namespace openspace::luascriptfunctions {
@@ -132,6 +132,28 @@ int joystickAxis(lua_State* L) {
     lua_pushboolean(L, info.normalize);
 
     return 3;
+}
+
+int setJoystickAxisDeadzone(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setJoystickAxisDeadzone");
+
+    int axis = static_cast<int>(lua_tointeger(L, 1));
+    float deadzone = static_cast<float>(lua_tonumber(L, 2));
+
+    OsEng.navigationHandler().setJoystickAxisDeadzone(axis, deadzone);
+
+    return 0;
+}
+
+int joystickAxisDeadzone(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setJoystickAxisDeadzone");
+
+    int axis = static_cast<int>(lua_tointeger(L, 1));
+
+    float deadzone = OsEng.navigationHandler().joystickAxisDeadzone(axis);
+
+    lua_pushnumber(L, deadzone);
+    return 1;
 }
 
 int bindJoystickButton(lua_State* L) {

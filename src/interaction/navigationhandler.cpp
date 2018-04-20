@@ -313,6 +313,14 @@ JoystickCameraStates::AxisInformation NavigationHandler::joystickAxisMapping(int
     return _orbitalNavigator->joystickStates().axisMapping(axis);
 }
 
+void NavigationHandler::setJoystickAxisDeadzone(int axis, float deadzone) {
+    _orbitalNavigator->joystickStates().setDeadzone(axis, deadzone);
+}
+
+float NavigationHandler::joystickAxisDeadzone(int axis) const {
+    return _orbitalNavigator->joystickStates().deadzone(axis);
+}
+
 void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
                                                   JoystickAction action,
                                                 JoystickCameraStates::ButtonCommandRemote remote)
@@ -386,6 +394,14 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
                 "information that is returned is the current axis binding as a string, "
                 "whether the values are inverted as bool, and whether the value are "
                 "normalized as a bool"
+            },
+            {
+                "setAxisDeadZone",
+                &luascriptfunctions::setJoystickAxisDeadzone,
+                {},
+                "int, float",
+                "Sets the deadzone for a particular joystick axis which means that any "
+                "input less than this value is completely ignored."
             },
             {
                 "bindJoystickButton",

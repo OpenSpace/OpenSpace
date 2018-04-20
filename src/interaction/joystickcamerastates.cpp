@@ -51,6 +51,10 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
         }
 
         float value = inputState.joystickAxis(i);
+
+        if (abs(value) <= t.deadzone) {
+            value = 0.f;
+        }
         
         if (t.normalize) {
             value = (value + 1.f) / 2.f;
@@ -130,6 +134,14 @@ void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(int axis) const {
     return _axisMapping[axis];
+}
+
+void JoystickCameraStates::setDeadzone(int axis, float deadzone) {
+    _axisMapping[axis].deadzone = deadzone;
+}
+
+float JoystickCameraStates::deadzone(int axis) const {
+    return _axisMapping[axis].deadzone;
 }
 
 void JoystickCameraStates::bindButtonCommand(int button, std::string command,

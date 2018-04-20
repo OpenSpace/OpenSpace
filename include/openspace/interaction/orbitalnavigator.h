@@ -28,7 +28,7 @@
 #include <openspace/interaction/delayedvariable.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interpolator.h>
-#include <openspace/interaction/joystickstate.h>
+#include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
 
 #include <openspace/properties/propertyowner.h>

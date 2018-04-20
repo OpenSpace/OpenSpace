@@ -59,6 +59,8 @@ public:
         AxisType type = AxisType::None;
         AxisInvert invert = AxisInvert::No;
         AxisNormalize normalize = AxisNormalize::No;
+
+        float deadzone = 0.f;
     };
 
 
@@ -74,6 +76,10 @@ public:
     );
 
     AxisInformation axisMapping(int axis) const;
+
+    void setDeadzone(int axis, float deadzone);
+    float deadzone(int axis) const;
+
 
     void bindButtonCommand(int button, std::string command, JoystickAction action,
         ButtonCommandRemote local);
