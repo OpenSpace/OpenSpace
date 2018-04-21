@@ -806,7 +806,9 @@ void OpenSpaceEngine::gatherCommandlineArguments() {
         "evaluated after the configuration file has been loaded but before the other "
         "commandline arguments are triggered. This can be used to manipulate the "
         "configuration file without editing the file on disk, for example in a "
-        "planetarium environment."
+        "planetarium environment. Please not that the Lua script must not contain any - "
+        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
+        "evaluated before it is passed to OpenSpace."
     ));
 }
 
