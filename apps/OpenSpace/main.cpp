@@ -315,7 +315,7 @@ void mainInitFunc() {
 
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
-    
+
     if (OsEng.configuration().shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
