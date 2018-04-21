@@ -127,6 +127,7 @@ namespace openspace {
         properties::FloatProperty _textMaxSize;
         properties::BoolProperty _drawElements;
         properties::BoolProperty _drawLabels;
+        properties::BoolProperty _pixelSizeControl;
         properties::OptionProperty _colorOption;
         properties::Vec2Property _fadeInDistance;
         properties::BoolProperty _disableFadeInDistance;
@@ -145,11 +146,14 @@ namespace openspace {
         //std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         ghoul::opengl::ProgramObject* _program;
         ghoul::opengl::ProgramObject* _renderToPolygonProgram;
-        UniformCache(modelViewMatrix, projectionMatrix, cameraViewProjectionMatrix,
-            modelMatrix, cameraPos, cameraLookup, renderOption,
-            minBillboardSize, maxBillboardSize, color, sides, alphaValue,
-            scaleFactor, up, right, fadeInValue, screenSize,
-            spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
+        UniformCache(
+            modelViewMatrix, projectionMatrix, cameraViewProjectionMatrix,
+            modelMatrix, cameraPos, cameraLookup, renderOption, minBillboardSize, 
+            maxBillboardSize, correctionSizeEndDistance, correctionSizeFactor, 
+            color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
+            spriteTexture, polygonTexture, hasPolygon, hasColormap, 
+            enabledRectSizeControl
+        ) _uniformCache;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 
         std::string _speckFile;

@@ -208,15 +208,20 @@ namespace {
     };
 
     static const openspace::properties::Property::PropertyInfo CorrectionSizeEndDistanceInfo = {
-        "CorrectionSizeEndDistanceInfo",
+        "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting.",
         "Distance in 10^X meters where correction size stops acting."
     };
 
     static const openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
-        "CorrectionSizeFactorInfo",
+        "CorrectionSizeFactor",
         "Control variable for distance size.",
         ""
+    };
+    static const openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
+        "EnablePixelSizeControl",
+        "Enable pixel size control.",
+        "Enable pixel size control for rectangular projections."
     };
 }  // namespace
 
@@ -365,6 +370,12 @@ namespace openspace {
                 new DoubleVerifier,
                 Optional::Yes,
                 CorrectionSizeFactorInfo.description
+            },
+            {
+                PixelSizeControlInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                PixelSizeControlInfo.description
             }
         }
         };
@@ -404,6 +415,7 @@ namespace openspace {
         , _textMaxSize(LabelMaxSizeInfo, 500.0, 0.0, 1000.0)
         , _drawElements(DrawElementsInfo, true)
         , _drawLabels(DrawLabelInfo, false)
+        , _pixelSizeControl(PixelSizeControlInfo, false)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _fadeInDistance(
             FadeInDistancesInfo,
@@ -414,8 +426,8 @@ namespace openspace {
         , _disableFadeInDistance(DisableFadeInInfo, true)
         , _billboardMaxSize(BillboardMaxSizeInfo, 400.0, 0.0, 1000.0)
         , _billboardMinSize(BillboardMinSizeInfo, 0.0, 0.0, 100.0)
-        , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17, 0.0, 30)
-        , _correctionSizeFactor(CorrectionSizeFactorInfo, 8, 0.0, 15)
+        , _correctionSizeEndDistance(CorrectionSizeEndDistanceInfo, 17.0, 12.0, 25.0)
+        , _correctionSizeFactor(CorrectionSizeFactorInfo, 8, 0.0, 20.0)
         , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _polygonTexture(nullptr)
         , _spriteTexture(nullptr)
@@ -647,6 +659,11 @@ namespace openspace {
                 );
         }
         addProperty(_correctionSizeFactor);
+
+        if (dictionary.hasKey(PixelSizeControlInfo.identifier)) {
+            _pixelSizeControl = dictionary.value<bool>(PixelSizeControlInfo.identifier);
+        }
+        addProperty(_pixelSizeControl);
     }
 
     bool RenderableBillboardsCloud::isReady() const {
@@ -708,22 +725,25 @@ namespace openspace {
             "modelMatrix"
         );
 
-        _uniformCache.cameraPos        = _program->uniformLocation("cameraPosition");
-        _uniformCache.cameraLookup     = _program->uniformLocation("cameraLookUp");
-        _uniformCache.renderOption     = _program->uniformLocation("renderOption");
-        _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
-        _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
-        _uniformCache.color            = _program->uniformLocation("color");
-        _uniformCache.alphaValue       = _program->uniformLocation("alphaValue");
-        _uniformCache.scaleFactor      = _program->uniformLocation("scaleFactor");
-        _uniformCache.up               = _program->uniformLocation("up");
-        _uniformCache.right            = _program->uniformLocation("right");
-        _uniformCache.fadeInValue      = _program->uniformLocation("fadeInValue");
-        _uniformCache.screenSize       = _program->uniformLocation("screenSize");
-        _uniformCache.spriteTexture    = _program->uniformLocation("spriteTexture");
-        _uniformCache.polygonTexture   = _program->uniformLocation("polygonTexture");
-        _uniformCache.hasPolygon       = _program->uniformLocation("hasPolygon");
-        _uniformCache.hasColormap      = _program->uniformLocation("hasColorMap");
+        _uniformCache.cameraPos                 = _program->uniformLocation("cameraPosition");
+        _uniformCache.cameraLookup              = _program->uniformLocation("cameraLookUp");
+        _uniformCache.renderOption              = _program->uniformLocation("renderOption");
+        _uniformCache.minBillboardSize          = _program->uniformLocation("minBillboardSize");
+        _uniformCache.maxBillboardSize          = _program->uniformLocation("maxBillboardSize");
+        _uniformCache.correctionSizeEndDistance = _program->uniformLocation("correctionSizeEndDistance");
+        _uniformCache.correctionSizeFactor      = _program->uniformLocation("correctionSizeFactor");
+        _uniformCache.color                     = _program->uniformLocation("color");
+        _uniformCache.alphaValue                = _program->uniformLocation("alphaValue");
+        _uniformCache.scaleFactor               = _program->uniformLocation("scaleFactor");
+        _uniformCache.up                        = _program->uniformLocation("up");
+        _uniformCache.right                     = _program->uniformLocation("right");
+        _uniformCache.fadeInValue               = _program->uniformLocation("fadeInValue");
+        _uniformCache.screenSize                = _program->uniformLocation("screenSize");
+        _uniformCache.spriteTexture             = _program->uniformLocation("spriteTexture");
+        _uniformCache.polygonTexture            = _program->uniformLocation("polygonTexture");
+        _uniformCache.hasPolygon                = _program->uniformLocation("hasPolygon");
+        _uniformCache.hasColormap               = _program->uniformLocation("hasColorMap");
+        _uniformCache.enabledRectSizeControl    = _program->uniformLocation("enabledRectSizeControl");
 
         if (_hasPolygon) {
             createPolygonTexture();
@@ -824,8 +844,10 @@ namespace openspace {
         _program->setUniform(_uniformCache.right, orthoRight);
         _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
-        _program->setUniform("correctionSizeEndDistance", _correctionSizeEndDistance);
-        _program->setUniform("correctionSizeFactor", _correctionSizeFactor);
+        _program->setUniform(_uniformCache.correctionSizeEndDistance, _correctionSizeEndDistance);
+        _program->setUniform(_uniformCache.correctionSizeFactor, _correctionSizeFactor);
+
+        _program->setUniform(_uniformCache.enabledRectSizeControl, _pixelSizeControl);
 
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);

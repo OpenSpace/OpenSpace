@@ -47,6 +47,8 @@ uniform dmat4 modelMatrix;
 uniform float correctionSizeFactor;
 uniform float correctionSizeEndDistance;
 
+uniform bool enabledRectSizeControl;
+
 in vec4 colorMap[];
 
 out vec4 gs_colorMap;
@@ -102,50 +104,54 @@ void main() {
         dvec3 newRight = normalize(cross(cameraLookUp, normal));
         dvec3 newUp    = cross(normal, newRight);
 
-        double distCamera = length(cameraPosition - dpos.xyz);
-        float expVar = float(-distCamera) / pow(10.f, correctionSizeEndDistance);
-        double factorVar = double(pow(10, correctionSizeFactor));
-        scaleMultiply *= 1.0 / (1.0 + factorVar * double(exp(expVar)));
-        
+        if (!enabledRectSizeControl) {
+            double distCamera = length(cameraPosition - dpos.xyz);
+            float expVar = float(-distCamera) / pow(10.f, correctionSizeEndDistance);
+            double factorVar = double(pow(10, correctionSizeFactor));
+            scaleMultiply *= 1.0 / (1.0 + factorVar * double(exp(expVar)));
+        }
+
         scaledRight    = scaleMultiply * newRight * 0.5f;
         scaledUp       = scaleMultiply * newUp * 0.5f;
     }
     
-    initialPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
+    if (enabledRectSizeControl) {
+        initialPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-    vs_screenSpaceDepth = initialPosition.w;
-    crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
-    
-    // Testing size for rectangular viewport:
-    vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
-    vec2 topRight = crossCorner.xy/crossCorner.w;
-    vec2 bottomLeft = initialPosition.xy/initialPosition.w;
-    
-    // width and height
-    vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
-    
-    bool rectangularViewPort = false;
-    if (rectangularViewPort && ((sizes.y > maxBillboardSize) ||
-        (sizes.x > maxBillboardSize))) {        
-        //Set maximum size as Carter's instructions
-        float correctionScale = sizes.y > maxBillboardSize ? maxBillboardSize / sizes.y :
-                                                             maxBillboardSize / sizes.x;
+        vs_screenSpaceDepth = initialPosition.w;
+        crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
+                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w)));
         
-        scaledRight *= correctionScale;
-        scaledUp    *= correctionScale;
-    
-    } else {            
-        if (sizes.x < 2.0f * minBillboardSize) {
-            float maxVar = 2.0f * minBillboardSize;
-            float minVar = minBillboardSize;
-            float var    = (sizes.y + sizes.x);    
-            ta = ( (var - minVar)/(maxVar - minVar) );
-            if (ta == 0.0f)
-                return;
+        // Testing size for rectangular viewport:
+        vec2 halfViewSize = vec2(screenSize.x, screenSize.y) * 0.5f;
+        vec2 topRight = crossCorner.xy/crossCorner.w;
+        vec2 bottomLeft = initialPosition.xy/initialPosition.w;
+        
+        // width and height
+        vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
+        
+        bool rectangularViewPort = false;
+        if (rectangularViewPort && ((sizes.y > maxBillboardSize) ||
+            (sizes.x > maxBillboardSize))) {        
+            //Set maximum size as Carter's instructions
+            float correctionScale = sizes.y > maxBillboardSize ? maxBillboardSize / sizes.y :
+                                                                maxBillboardSize / sizes.x;
+            
+            scaledRight *= correctionScale;
+            scaledUp    *= correctionScale;
+        
+        } else {            
+            if (sizes.x < 2.0f * minBillboardSize) {
+                float maxVar = 2.0f * minBillboardSize;
+                float minVar = minBillboardSize;
+                float var    = (sizes.y + sizes.x);    
+                ta = ( (var - minVar)/(maxVar - minVar) );
+                if (ta == 0.0f)
+                    return;
+            }
         }
     }
-
+    
     initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
