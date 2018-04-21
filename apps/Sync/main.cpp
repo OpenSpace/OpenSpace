@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/factorymanager.h>

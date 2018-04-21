@@ -38,8 +38,6 @@
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/geometry/angle.h>
 
-#include <openspace/engine/configurationmanager.h>
-
 #include <float.h>
 #include <sstream>
 #include <algorithm>

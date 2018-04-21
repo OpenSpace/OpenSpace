@@ -34,7 +34,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 #include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/engine/configurationmanager.h>
 
 #include "topic.h"
 

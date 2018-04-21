@@ -22,68 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
-#define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#ifndef __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#define __OPENSPACE_CORE___INPUTDEVICESTATES___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/misc/boolean.h>
-
-namespace openspace {
-    class Camera;
-    class SceneGraphNode;
-} // namespace
+#include <openspace/interaction/delayedvariable.h>
+#include <ghoul/glm.h>
 
 namespace openspace::interaction {
 
-class KeyBindingManager : public DocumentationGenerator {
-public:
-    BooleanType(IsLocalBind);
-    BooleanType(IsSynchronized);
+class InputState;
 
-    struct KeyInformation {
-        std::string command;
-        IsSynchronized synchronization;
-        std::string documentation;
+class CameraInteractionStates {
+public:
+    /**
+     * \param sensitivity
+     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
+     * interaction. Lower value will make it harder to move the camera.
+     */
+    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
+    virtual ~CameraInteractionStates() = default;
+
+    virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
+    
+    void setRotationalFriction(double friction);
+    void setHorizontalFriction(double friction);
+    void setVerticalFriction(double friction);
+    void setSensitivity(double sensitivity);
+    void setVelocityScaleFactor(double scaleFactor);
+
+    glm::dvec2 globalRotationVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    glm::dvec2 truckMovementVelocity() const;
+    glm::dvec2 localRollVelocity() const;
+    glm::dvec2 globalRollVelocity() const;
+
+protected:
+    struct InteractionState {
+        InteractionState(double scaleFactor);
+        void setFriction(double friction);
+        void setVelocityScaleFactor(double scaleFactor);
+
+        glm::dvec2 previousPosition;
+        DelayedVariable<glm::dvec2, double> velocity;
     };
 
-    KeyBindingManager();
-    ~KeyBindingManager() = default;
 
-    void resetKeyBindings();
+    double _sensitivity;
 
-    void bindKeyLocal(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
-
-    void bindKey(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
-
-    void removeKeyBinding(const std::string& key);
-
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> keyBinding(
-        const std::string& key) const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-private:
-    std::string generateJson() const override;
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
+    InteractionState _globalRotationState;
+    InteractionState _localRotationState;
+    InteractionState _truckMovementState;
+    InteractionState _localRollState;
+    InteractionState _globalRollState;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
+#endif // __OPENSPACE_CORE___INPUTDEVICESTATES___H__

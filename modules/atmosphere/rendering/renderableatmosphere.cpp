@@ -42,7 +42,6 @@
 
 #include <openspace/rendering/deferredcastermanager.h>
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderer.h>
