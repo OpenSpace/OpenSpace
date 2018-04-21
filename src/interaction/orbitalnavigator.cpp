@@ -363,9 +363,8 @@ void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaT
     }
 }
 
-glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(
-    const glm::dvec3& camPos, const glm::dvec3& centerPos,
-    const SurfacePositionHandle& posHandle)
+glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& camPos,
+    const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle)
 {
     glm::dmat4 modelTransform = _focusNode->modelTransform();
     glm::dvec3 posDiff = camPos - centerPos;
