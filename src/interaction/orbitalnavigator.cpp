@@ -456,7 +456,7 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
         -_mouseStates.globalRotationVelocity().y * deltaTime,
         -_mouseStates.globalRotationVelocity().x * deltaTime,
         0) * speedScale);
-    
+
     glm::dquat joystickRotationDiffCamSpace = glm::dquat(glm::dvec3(
         -_joystickStates.globalRotationVelocity().y * deltaTime,
         -_joystickStates.globalRotationVelocity().x * deltaTime,

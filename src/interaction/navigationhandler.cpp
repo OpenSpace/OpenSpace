@@ -297,9 +297,10 @@ void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) 
     }
 }
 
-void NavigationHandler::setJoystickAxisMapping(int axis, JoystickCameraStates::AxisType mapping,
-                                               JoystickCameraStates::AxisInvert shouldInvert,
-                                            JoystickCameraStates::AxisNormalize shouldNormalize)
+void NavigationHandler::setJoystickAxisMapping(int axis,
+                                                   JoystickCameraStates::AxisType mapping,
+                                            JoystickCameraStates::AxisInvert shouldInvert,
+                                      JoystickCameraStates::AxisNormalize shouldNormalize)
 {
     _orbitalNavigator->joystickStates().setAxisMapping(
         axis,
@@ -309,7 +310,9 @@ void NavigationHandler::setJoystickAxisMapping(int axis, JoystickCameraStates::A
     );
 }
 
-JoystickCameraStates::AxisInformation NavigationHandler::joystickAxisMapping(int axis) const {
+JoystickCameraStates::AxisInformation
+NavigationHandler::joystickAxisMapping(int axis) const
+{
     return _orbitalNavigator->joystickStates().axisMapping(axis);
 }
 
@@ -323,7 +326,7 @@ float NavigationHandler::joystickAxisDeadzone(int axis) const {
 
 void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
                                                   JoystickAction action,
-                                                JoystickCameraStates::ButtonCommandRemote remote)
+                                         JoystickCameraStates::ButtonCommandRemote remote)
 {
     _orbitalNavigator->joystickStates().bindButtonCommand(
         button,

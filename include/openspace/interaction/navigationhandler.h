@@ -86,8 +86,10 @@ public:
     void setJoystickAxisMapping(
         int axis,
         JoystickCameraStates::AxisType mapping,
-        JoystickCameraStates::AxisInvert shouldInvert = JoystickCameraStates::AxisInvert::No,
-        JoystickCameraStates::AxisNormalize shouldNormalize = JoystickCameraStates::AxisNormalize::No
+        JoystickCameraStates::AxisInvert shouldInvert =
+            JoystickCameraStates::AxisInvert::No,
+        JoystickCameraStates::AxisNormalize shouldNormalize =
+            JoystickCameraStates::AxisNormalize::No
     );
 
     JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;

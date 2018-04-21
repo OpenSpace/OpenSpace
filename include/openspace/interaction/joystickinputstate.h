@@ -123,4 +123,4 @@ openspace::interaction::JoystickAction from_string(const std::string& str);
 
 } // namespace ghoul
 
-#endif // __OPENSPACE_CORE___JOYSTICKSTATE___H__
+#endif // __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__

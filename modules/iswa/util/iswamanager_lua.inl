@@ -89,10 +89,10 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
         d.setValue("Type", "ScreenSpaceCygnet");
         d.setValue("UpdateInterval", static_cast<float>(updateInterval));
 
-        std::shared_ptr<ScreenSpaceRenderable> s(
+        std::unique_ptr<ScreenSpaceRenderable> s(
             ScreenSpaceRenderable::createFromDictionary(d)
         );
-        OsEng.renderEngine().addScreenSpaceRenderable(s);
+        OsEng.renderEngine().addScreenSpaceRenderable(std::move(s));
     }
     return 0;
 }
