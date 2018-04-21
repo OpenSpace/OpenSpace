@@ -57,7 +57,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             value = 0.f;
             hasValue = false;
         }
-        
+
         if (t.normalize) {
             value = (value + 1.f) / 2.f;
         }
@@ -148,8 +148,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
     else {
         _localRotationState.velocity.decelerate(deltaTime);
     }
-    
-   
+
     for (int i = 0; i < JoystickInputState::MaxButtons; ++i) {
         auto itRange = _buttonMapping.equal_range(i);
         for (auto it = itRange.first; it != itRange.second; ++it) {
@@ -251,7 +250,7 @@ openspace::interaction::JoystickCameraStates::AxisType from_string(
                                                                 const std::string& string)
 {
     using T = openspace::interaction::JoystickCameraStates::AxisType;
-    
+
     static const std::map<std::string, T> Map = {
         { "None",         T::None },
         { "Orbit X",      T::OrbitX },

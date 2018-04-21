@@ -85,14 +85,14 @@ struct Configuration {
 
     std::string onScreenTextScaling = "window";
     bool usePerSceneCache = false;
-    
+
     bool isRenderingOnMasterDisabled = false;
     bool isSceneTranslationOnMasterDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
     std::string renderingMethod = "Framebuffer";
-    
+
     struct OpenGLDebugContext {
         bool isActive = false;
         bool isSynchronous = true;

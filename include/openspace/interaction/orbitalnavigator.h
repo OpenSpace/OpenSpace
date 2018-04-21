@@ -86,7 +86,7 @@ private:
 
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
-    
+
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
 

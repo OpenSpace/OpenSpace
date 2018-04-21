@@ -421,7 +421,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
     std::string sgctConfigurationPath = _engine->_configuration->windowConfiguration;
-        
+
     if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
         LDEBUG(fmt::format(
             "Overwriting SGCT configuration file with commandline argument: {}",
@@ -543,7 +543,7 @@ void OpenSpaceEngine::initialize() {
     scriptEngine().initialize();
 
     writeStaticDocumentation();
-    
+
     _shutdown.waitTime = _engine->_configuration->shutdownCountdown;
 
     if (!commandlineArgumentPlaceholders.sceneName.empty()) {
@@ -597,7 +597,7 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     if (_scene) {
         _syncEngine->removeSyncables(_timeManager->getSyncables());
         if (_scene && _scene->camera()) {
-            _syncEngine->removeSyncables(_scene->camera()->getSyncables());            
+            _syncEngine->removeSyncables(_scene->camera()->getSyncables());
         }
         _renderEngine->setScene(nullptr);
         _renderEngine->setCamera(nullptr);
@@ -828,7 +828,7 @@ void OpenSpaceEngine::loadFonts() {
             ));
         }
     }
-    
+
     try {
         bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
         if (!initSuccess) {

@@ -101,7 +101,7 @@ int bindJoystickAxis(lua_State* L) {
     if (n > 2) {
         shouldInvert = lua_toboolean(L, 3);
     }
-    
+
     bool shouldNormalize = false;
     if (n > 3) {
         shouldNormalize = lua_toboolean(L, 4);
@@ -178,7 +178,7 @@ int bindJoystickButton(lua_State* L) {
         action,
         interaction::JoystickCameraStates::ButtonCommandRemote(isRemote)
     );
-    
+
     lua_settop(L, 0);
     return 0;
 }

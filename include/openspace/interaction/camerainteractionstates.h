@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTDEVICESTATES___H__
-#define __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
 
 #include <openspace/interaction/delayedvariable.h>
 #include <ghoul/glm.h>
@@ -43,7 +43,7 @@ public:
     virtual ~CameraInteractionStates() = default;
 
     virtual void updateStateFromInput(const InputState& inputState, double deltaTime) = 0;
-    
+
     void setRotationalFriction(double friction);
     void setHorizontalFriction(double friction);
     void setVerticalFriction(double friction);
@@ -78,4 +78,4 @@ protected:
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___INPUTDEVICESTATES___H__
+#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
