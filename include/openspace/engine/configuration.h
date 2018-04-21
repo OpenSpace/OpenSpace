@@ -131,6 +131,8 @@ std::string findConfiguration(const std::string& filename = "openspace.cfg");
 
 Configuration loadConfigurationFromFile(const std::string& filename);
 
+void parseLuaState(Configuration& configuration);
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___CONFIGURATION___H__

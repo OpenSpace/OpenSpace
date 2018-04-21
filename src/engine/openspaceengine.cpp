@@ -116,6 +116,7 @@ namespace {
         std::string sgctConfigurationName;
         std::string sceneName;
         std::string cacheFolder;
+        std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
 
     static const openspace::properties::Property::PropertyInfo VersionInfo = {
@@ -308,6 +309,18 @@ void OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Loading configuration from disk");
     try {
         *_engine->_configuration = loadConfigurationFromFile(configurationFilePath);
+
+        // If the user requested a commandline-based configuation script that should
+        // overwrite some of the values, this is the time to do it
+        if (!commandlineArgumentPlaceholders.configurationOverwrite.empty()) {
+            LDEBUG("Executing Lua script passed through the commandline:");
+            LDEBUG(commandlineArgumentPlaceholders.configurationOverwrite);
+            ghoul::lua::runScript(
+                _engine->_configuration->state,
+                commandlineArgumentPlaceholders.configurationOverwrite
+            );
+            parseLuaState(*_engine->_configuration);
+        }
     }
     catch (const documentation::SpecificationError& e) {
         LFATAL(fmt::format(
@@ -421,6 +434,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
     std::string sgctConfigurationPath = _engine->_configuration->windowConfiguration;
+    LDEBUG(fmt::format("SGCT Configuration file: {}", sgctConfigurationPath));
 
     if (!commandlineArgumentPlaceholders.sgctConfigurationName.empty()) {
         LDEBUG(fmt::format(
@@ -762,27 +776,39 @@ void OpenSpaceEngine::gatherCommandlineArguments() {
     commandlineArgumentPlaceholders.configurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
         commandlineArgumentPlaceholders.configurationName, "--config", "-c",
-        "Provides the path to the OpenSpace configuration file"
+        "Provides the path to the OpenSpace configuration file."
     ));
 
     commandlineArgumentPlaceholders.sgctConfigurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
         commandlineArgumentPlaceholders.sgctConfigurationName, "--sgct", "-s",
         "Provides the path to the SGCT configuration file, overriding the value set in "
-        "the OpenSpace configuration file"
+        "the OpenSpace configuration file."
     ));
 
     commandlineArgumentPlaceholders.sceneName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
         commandlineArgumentPlaceholders.sceneName, "--scene", "", "Provides the path to "
-        "the scene file, overriding the value set in the OpenSpace configuration file"
+        "the scene file, overriding the value set in the OpenSpace configuration file."
     ));
 
     commandlineArgumentPlaceholders.cacheFolder = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
         commandlineArgumentPlaceholders.cacheFolder, "--cacheDir", "", "Provides the "
         "path to a cache file, overriding the value set in the OpenSpace configuration "
-        "file"
+        "file."
+    ));
+
+    commandlineArgumentPlaceholders.configurationOverwrite = "";
+    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
+        commandlineArgumentPlaceholders.configurationOverwrite, "--lua", "-l",
+        "Provides the ability to pass arbitrary Lua code to the application that will be "
+        "evaluated after the configuration file has been loaded but before the other "
+        "commandline arguments are triggered. This can be used to manipulate the "
+        "configuration file without editing the file on disk, for example in a "
+        "planetarium environment. Please not that the Lua script must not contain any - "
+        "or they will be interpreted as a new command. Similar, in Bash, ${...} will be "
+        "evaluated before it is passed to OpenSpace."
     ));
 }
 
