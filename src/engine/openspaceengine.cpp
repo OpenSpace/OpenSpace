@@ -178,6 +178,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _rootPropertyOwner->addPropertySubOwner(_renderEngine.get());
     _rootPropertyOwner->addPropertySubOwner(_renderEngine->screenSpaceOwner());
 
+    // The virtual property manager is not part of the rootProperty owner since it cannot
+    // have an identifier or the "regex as identifier" trick would not work
+    //_rootPropertyOwner->addPropertySubOwner(_virtualPropertyManager.get());
+
     if (_windowWrapper) {
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
