@@ -555,7 +555,7 @@ namespace openspace {
     void AtmosphereDeferredcaster::setShadowConfigArray(
         const std::vector<ShadowConfiguration>& shadowConfigArray)
     {
-        _shadowConfArray = shadowConfigArray;
+        _shadowConfArray = std::move(shadowConfigArray);
     }
 
     void AtmosphereDeferredcaster::enableSunFollowing(bool enable) {
