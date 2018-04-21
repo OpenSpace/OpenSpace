@@ -121,6 +121,9 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
+    // On purpose, there is no function that returns a non-const reference to
+    // Configuration;  that guards us against anyone in the program changing the
+    // configuration values underneath our feet
     const Configuration& configuration() const;
 
     // Guaranteed to return a valid pointer
