@@ -524,28 +524,28 @@ namespace openspace {
     void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(
         const glm::vec3& rayScattCoeff)
     {
-        _rayleighScatteringCoeff = rayScattCoeff;
+        _rayleighScatteringCoeff = std::move(rayScattCoeff);
     }
 
     void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(
         const glm::vec3& ozoneExtCoeff)
     {
-        _ozoneExtinctionCoeff = ozoneExtCoeff;
+        _ozoneExtinctionCoeff = std::move(ozoneExtCoeff);
     }
 
     void AtmosphereDeferredcaster::setMieScatteringCoefficients(
         const glm::vec3& mieScattCoeff)
     {
-        _mieScatteringCoeff = mieScattCoeff;
+        _mieScatteringCoeff = std::move(mieScattCoeff);
     }
 
     void AtmosphereDeferredcaster::setMieExtinctionCoefficients(const glm::vec3& mieExtCoeff)
     {
-        _mieExtinctionCoeff = mieExtCoeff;
+        _mieExtinctionCoeff = std::move(mieExtCoeff);
     }
 
     void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3& radii) {
-        _ellipsoidRadii = radii;
+        _ellipsoidRadii = std::move(radii);
     }
 
     void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
