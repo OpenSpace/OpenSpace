@@ -76,14 +76,13 @@ int addDashboardItemToScreenSpace(lua_State* L) {
             return 0;
         }
 
-        std::shared_ptr<ScreenSpaceRenderable> ssr =
-            OsEng.renderEngine().screenSpaceRenderable(name);
+        ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
         if (!ssr) {
             return luaL_error(L, "Provided name is not a ScreenSpace item");
         }
 
-        ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
+        ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
         if (!dash) {
             return luaL_error(
                 L,
@@ -106,14 +105,13 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
     std::string name = ghoul::lua::checkStringAndPop(L);
-    std::shared_ptr<ScreenSpaceRenderable> ssr =
-        OsEng.renderEngine().screenSpaceRenderable(name);
+    ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
         return luaL_error(L, "Provided name is not a ScreenSpace item");
     }
 
-    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
+    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
         return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
     }

@@ -184,7 +184,7 @@ int bindJoystickButton(lua_State* L) {
 }
 
 int clearJoystickButton(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
 
     int button = static_cast<int>(lua_tonumber(L, 1));
 
@@ -195,7 +195,7 @@ int clearJoystickButton(lua_State* L) {
 }
 
 int joystickButton(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
 
     int button = static_cast<int>(lua_tonumber(L, 1));
 

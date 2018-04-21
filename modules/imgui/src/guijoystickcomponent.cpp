@@ -53,13 +53,13 @@ void GuiJoystickComponent::render() {
     const JoystickInputStates& states =
         OsEng.navigationHandler().inputState().joystickInputStates();
 
-    for (int i = 0; i < states.size(); ++i) {
+    for (size_t i = 0; i < states.size(); ++i) {
         const JoystickInputState& state = states[i];
         if (!state.isConnected) {
             continue;
         }
 
-        ImGui::Text("%s [%i]", state.name.c_str(), i);
+        ImGui::Text("%s [%i]", state.name.c_str(), static_cast<int>(i));
         ImGui::Text("%s", "Axes");
         for (int j = 0; j < state.nAxes; ++j) {
             float f = state.axes[j];
