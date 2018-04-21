@@ -90,6 +90,8 @@ public:
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
 
+    bool mouseActivationCallback(const glm::dvec2& mousePosition) const;
+
     void renderOverlays(const ShutdownInformation& shutdownInfo);
     void postDraw();
 
@@ -216,6 +218,12 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
+
+    struct {
+        glm::ivec4 rotation;
+        glm::ivec4 zoom;
+        glm::ivec4 roll;
+    } _cameraButtonLocations;
 };
 
 } // namespace openspace

@@ -584,6 +584,52 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     LTRACE("RenderEngine::render(end)");
 }
 
+bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) const {
+    auto intersects = [](const glm::dvec2& mousePos, const glm::ivec4& bbox) {
+        return mousePos.x >= bbox.x && mousePos.x <= bbox.x + bbox.z &&
+               mousePos.y <= bbox.y && mousePos.y >= bbox.y - bbox.w;
+    };
+
+
+    if (intersects(mousePosition, _cameraButtonLocations.rotation)) {
+        constexpr const char* ToggleRotationFrictionScript = R"(
+            local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
+            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+
+        OsEng.scriptEngine().queueScript(
+            ToggleRotationFrictionScript,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        return true;
+    }
+
+    if (intersects(mousePosition, _cameraButtonLocations.zoom)) {
+        constexpr const char* ToggleZoomFrictionScript = R"(
+            local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
+            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+
+        OsEng.scriptEngine().queueScript(
+            ToggleZoomFrictionScript,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        return true;
+    }
+
+    if (intersects(mousePosition, _cameraButtonLocations.roll)) {
+        constexpr const char* ToggleRollFrictionScript = R"(
+            local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
+            openspace.setPropertyValue(f, not openspace.getPropertyValue(f));)";
+
+        OsEng.scriptEngine().queueScript(
+            ToggleRollFrictionScript,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
+        return true;
+    }
+
+    return false;
+}
+
 void RenderEngine::renderOverlays(const ShutdownInformation& info) {
     const bool isMaster = OsEng.windowWrapper().isMaster();
     if (isMaster || _showOverlayOnSlaves) {
@@ -1030,6 +1076,12 @@ void RenderEngine::renderCameraInformation() {
 
     interaction::OrbitalNavigator nav = OsEng.navigationHandler().orbitalNavigator();
 
+    _cameraButtonLocations.rotation = {
+        fontResolution().x - rotationBox.boundingBox.x - XSeparation,
+        fontResolution().y - penPosY,
+        rotationBox.boundingBox.x,
+        rotationBox.boundingBox.y
+    };
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(fontResolution().x - rotationBox.boundingBox.x - XSeparation, penPosY),
@@ -1045,6 +1097,12 @@ void RenderEngine::renderCameraInformation() {
         "Zoom"
     );
 
+    _cameraButtonLocations.zoom = {
+        fontResolution().x - zoomBox.boundingBox.x - XSeparation,
+        fontResolution().y - penPosY,
+        zoomBox.boundingBox.x,
+        zoomBox.boundingBox.y
+    };
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(fontResolution().x - zoomBox.boundingBox.x - XSeparation, penPosY),
@@ -1060,6 +1118,12 @@ void RenderEngine::renderCameraInformation() {
         "Roll"
     );
 
+    _cameraButtonLocations.roll = {
+        fontResolution().x - rollBox.boundingBox.x - XSeparation,
+        fontResolution().y - penPosY,
+        rollBox.boundingBox.x,
+        rollBox.boundingBox.y
+    };
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(fontResolution().x - rollBox.boundingBox.x - XSeparation, penPosY),
