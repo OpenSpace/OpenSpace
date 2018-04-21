@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
 #include <openspace/util/keys.h>
@@ -73,6 +73,8 @@ namespace {
 
 constexpr const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
+
+openspace::interaction::JoystickInputStates joystickInputStates;
 
 constexpr const char* OpenVRTag = "OpenVR";
 constexpr const char* SpoutTag = "Spout";
@@ -311,10 +313,10 @@ void mainInitFunc() {
 #endif // OPENSPACE_HAS_SPOUT
     }
 
-    std::string k = openspace::ConfigurationManager::KeyScreenshotUseDate;
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
-    if (OsEng.configurationManager().hasKey(k)) {
+    
+    if (OsEng.configuration().shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
         char mbstr[100];
@@ -345,12 +347,99 @@ void mainInitFunc() {
         }
     }
 
+    OsEng.setJoystickInputStates(joystickInputStates);
+
     LTRACE("main::mainInitFunc(end)");
 }
 
 void mainPreSyncFunc() {
     LTRACE("main::mainPreSyncFunc(begin)");
     OsEng.preSynchronization();
+
+    // Query joystick status
+    using namespace openspace::interaction;
+
+    for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        JoystickInputState& state = joystickInputStates[i];
+
+        int present = glfwJoystickPresent(i);
+        if (present == GLFW_TRUE) {
+            if (!state.isConnected) {
+                // Joystick was added
+                state.isConnected = true;
+                state.name = SgctEngine->getJoystickName(i);
+
+                std::fill(state.axes.begin(), state.axes.end(), 0.f);
+                std::fill(
+                    state.buttons.begin(),
+                    state.buttons.end(),
+                    JoystickAction::Idle
+                );
+            }
+
+            const float* axes = SgctEngine->getJoystickAxes(i, &state.nAxes);
+            if (state.nAxes > JoystickInputState::MaxAxes) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} axes, but only {} axes are supported. "
+                    "All excess axes are ignored",
+                    state.name,
+                    state.nAxes,
+                    JoystickInputState::MaxAxes
+                ));
+                state.nAxes = JoystickInputState::MaxAxes;
+            }
+            std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+
+            const unsigned char* buttons = SgctEngine->getJoystickButtons(
+                i,
+                &state.nButtons
+            );
+
+            if (state.nButtons > JoystickInputState::MaxButtons) {
+                LWARNING(fmt::format(
+                    "Joystick/Gamepad {} has {} buttons, but only {} buttons are "
+                    "supported. All excess buttons are ignored",
+                    state.name,
+                    state.nButtons,
+                    JoystickInputState::MaxButtons
+                ));
+                state.nButtons = JoystickInputState::MaxButtons;
+            }
+
+            for (int j = 0; j < state.nButtons; ++j) {
+                bool currentlyPressed = buttons[j] == GLFW_PRESS;
+
+                if (currentlyPressed) {
+                    switch (state.buttons[j]) {
+                        case JoystickAction::Idle:
+                        case JoystickAction::Release:
+                            state.buttons[j] = JoystickAction::Press;
+                            break;
+                        case JoystickAction::Press:
+                        case JoystickAction::Repeat:
+                            state.buttons[j] = JoystickAction::Repeat;
+                            break;
+                    }
+                }
+                else {
+                    switch (state.buttons[j]) {
+                        case JoystickAction::Idle:
+                        case JoystickAction::Release:
+                            state.buttons[j] = JoystickAction::Idle;
+                            break;
+                        case JoystickAction::Press:
+                        case JoystickAction::Repeat:
+                            state.buttons[j] = JoystickAction::Release;
+                            break;
+                    }
+                }
+            }
+        }
+        else {
+            state.isConnected = false;
+        }
+    }
+
     LTRACE("main::mainPreSyncFunc(end)");
 }
 

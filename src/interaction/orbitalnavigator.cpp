@@ -58,11 +58,18 @@ namespace {
         "disabled, the camera will zoom in or out forever."
     };
 
-    static const openspace::properties::Property::PropertyInfo SensitivityInfo = {
-        "Sensitivity",
-        "Sensitivity",
-        "Determines the sensitivity of the camera motion. The lower the sensitivity is "
-        "the less impact a mouse mothion will have."
+    static const openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
+        "MouseSensitivity",
+        "Mouse Sensitivity",
+        "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
+        "the sensitivity is the less impact a mouse motion will have."
+    };
+
+    static const openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
+        "JoystickSensitivity",
+        "Joystick Sensitivity",
+        "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
+        "the sensitivity is the less impact a joystick motion will have."
     };
 
     static const openspace::properties::Property::PropertyInfo FrictionInfo = {
@@ -148,8 +155,10 @@ OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner({ "OrbitalNavigator" })
     , _followFocusNodeRotationDistance(FollowFocusNodeInfo, 5.0f, 0.0f, 20.f)
     , _minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
-    , _sensitivity(SensitivityInfo, 15.0f, 1.0f, 50.f)
-    , _mouseStates(_sensitivity * pow(10.0, -4), 1 / (_friction.friction + 0.0000001))
+    , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
+    , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
+    , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
+    , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
@@ -187,26 +196,33 @@ OrbitalNavigator::OrbitalNavigator()
     // Define callback functions for changed properties
     _friction.roll.onChange([&]() {
         _mouseStates.setRotationalFriction(_friction.roll);
+        _joystickStates.setRotationalFriction(_friction.roll);
     });
     _friction.rotational.onChange([&]() {
         _mouseStates.setHorizontalFriction(_friction.rotational);
+        _joystickStates.setHorizontalFriction(_friction.rotational);
     });
     _friction.zoom.onChange([&]() {
         _mouseStates.setVerticalFriction(_friction.zoom);
+        _joystickStates.setVerticalFriction(_friction.zoom);
     });
     _friction.friction.onChange([&]() {
         _mouseStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
+        _joystickStates.setVelocityScaleFactor(1 / (_friction.friction + 0.0000001));
     });
 
-    _sensitivity.onChange([&]() {
-        _mouseStates.setSensitivity(_sensitivity * pow(10.0,-4));
+    _mouseSensitivity.onChange([&]() {
+        _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
     });
+    _joystickSensitivity.onChange([&]() {
+        _joystickStates.setSensitivity(_joystickSensitivity * pow(10.0, -4));
+    });
+
 
     addPropertySubOwner(_friction);
 
     addProperty(_followFocusNodeRotationDistance);
     addProperty(_minimumAllowedDistance);
-    addProperty(_sensitivity);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -214,17 +230,20 @@ OrbitalNavigator::OrbitalNavigator()
 
     addProperty(_rotateToFocusInterpolationTime);
     addProperty(_stereoInterpolationTime);
+    addProperty(_mouseSensitivity);
+    addProperty(_joystickSensitivity);
 }
 
 OrbitalNavigator::~OrbitalNavigator() {}
 
-void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState,
+void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
                                                   double deltaTime)
 {
-    _mouseStates.updateMouseStatesFromInput(inputState, deltaTime);
+    _mouseStates.updateStateFromInput(inputState, deltaTime);
+    _joystickStates.updateStateFromInput(inputState, deltaTime);
 }
 
-void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double deltaTime){
+void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaTime){
     if (_focusNode) {
         // Read the current state of the camera
         glm::dvec3 camPos = camera.positionVec3();
@@ -448,23 +467,31 @@ OrbitalNavigator::CameraRotationDecomposition
 glm::dquat OrbitalNavigator::roll(double deltaTime,
                                   const glm::dquat& localCameraRotation) const
 {
-    glm::dquat rollQuat = glm::angleAxis(
-        _mouseStates.localRollMouseVelocity().x * deltaTime,
+    glm::dquat mouseRollQuat = glm::angleAxis(
+        _mouseStates.localRollVelocity().x * deltaTime +
+        _joystickStates.localRollVelocity().x * deltaTime,
         glm::dvec3(0.0, 0.0, 1.0)
     );
-    return localCameraRotation * rollQuat;
+    return localCameraRotation * mouseRollQuat;
 }
 
 glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
                                            const glm::dquat& localCameraRotation) const
 {
-    glm::dvec3 eulerAngles(
-        _mouseStates.localRotationMouseVelocity().y,
-        _mouseStates.localRotationMouseVelocity().x,
+    glm::dquat mouseRotationDiff = glm::dquat(glm::dvec3(
+        _mouseStates.localRotationVelocity().y,
+        _mouseStates.localRotationVelocity().x,
         0.0
-    );
-    glm::dquat rotationDiff = glm::dquat(eulerAngles * deltaTime);
-    return localCameraRotation * rotationDiff;
+    ) * deltaTime);
+
+    glm::dquat joystickRotationDiff = glm::dquat(glm::dvec3(
+        _joystickStates.localRotationVelocity().y,
+        _joystickStates.localRotationVelocity().x,
+        0.0
+    ) * deltaTime);
+
+
+    return localCameraRotation * joystickRotationDiff * mouseRotationDiff;
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
@@ -569,16 +596,21 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
         1.0;
 
     // Get rotation in camera space
-    glm::dvec3 eulerAngles = glm::dvec3(
-        -_mouseStates.globalRotationMouseVelocity().y * deltaTime,
-        -_mouseStates.globalRotationMouseVelocity().x * deltaTime,
-        0) * speedScale;
-    glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
+    glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
+        -_mouseStates.globalRotationVelocity().y * deltaTime,
+        -_mouseStates.globalRotationVelocity().x * deltaTime,
+        0) * speedScale);
+    
+    glm::dquat joystickRotationDiffCamSpace = glm::dquat(glm::dvec3(
+        -_joystickStates.globalRotationVelocity().y * deltaTime,
+        -_joystickStates.globalRotationVelocity().x * deltaTime,
+        0) * speedScale);
 
     // Transform to world space
     glm::dquat rotationDiffWorldSpace =
         globalCameraRotation *
-        rotationDiffCamSpace *
+        joystickRotationDiffCamSpace *
+        mouseRotationDiffCamSpace *
         glm::inverse(globalCameraRotation);
 
     // Rotate and find the difference vector
@@ -645,8 +677,12 @@ glm::dvec3 OrbitalNavigator::translateVertically(
         glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
     glm::dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
 
+    const double totalVelocity =
+        _joystickStates.truckMovementVelocity().y +
+        _mouseStates.truckMovementVelocity().y;
+
     return cameraPosition -
-        actualSurfaceToCamera * _mouseStates.truckMovementMouseVelocity().y * deltaTime;
+        actualSurfaceToCamera * totalVelocity * deltaTime;
 }
 
 glm::dquat OrbitalNavigator::rotateHorizontally(
@@ -662,12 +698,12 @@ glm::dquat OrbitalNavigator::rotateHorizontally(
     glm::dvec3 directionFromSurfaceToCamera =
       glm::normalize(glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
 
-    glm::dquat cameraRollRotation =
-        glm::angleAxis(
-            _mouseStates.globalRollMouseVelocity().x *
-            deltaTime, directionFromSurfaceToCamera
-        );
-    return cameraRollRotation * globalCameraRotation;
+    glm::dquat mouseCameraRollRotation = glm::angleAxis(
+        _mouseStates.globalRollVelocity().x * deltaTime +
+        _joystickStates.globalRollVelocity().x * deltaTime,
+        directionFromSurfaceToCamera
+    );
+    return mouseCameraRollRotation * globalCameraRotation;
 }
 
 glm::dvec3 OrbitalNavigator::pushToSurface(
@@ -740,5 +776,10 @@ SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
         _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
     return posHandle;
 }
+
+JoystickCameraStates& OrbitalNavigator::joystickStates() {
+    return _joystickStates;
+}
+
 
 } // namespace openspace::interaction

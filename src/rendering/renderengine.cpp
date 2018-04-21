@@ -27,19 +27,19 @@
 #include <openspace/util/syncdata.h>
 
 #include <openspace/openspace.h>
-#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -261,22 +261,9 @@ RenderEngine::RenderEngine()
     _doPerformanceMeasurements.onChange([this](){
         if (_doPerformanceMeasurements) {
             if (!_performanceManager) {
-                std::string loggingDir = "${BASE}";
-                constexpr const char* KeyDir = ConfigurationManager::LoggingDirectory;
-                if (OsEng.configurationManager().hasKey(KeyDir)) {
-                    loggingDir = OsEng.configurationManager().value<std::string>(KeyDir);
-                }
-
-                std::string prefix = "PM-";
-                constexpr const char* KeyPrefix =
-                                           ConfigurationManager::LoggingPerformancePrefix;
-                if (OsEng.configurationManager().hasKey(KeyPrefix)) {
-                    prefix = OsEng.configurationManager().value<std::string>(KeyPrefix);
-                }
-
                 _performanceManager = std::make_shared<performance::PerformanceManager>(
-                    loggingDir,
-                    prefix
+                    OsEng.configuration().logging.directory,
+                    OsEng.configuration().logging.performancePrefix
                 );
             }
         }
@@ -352,14 +339,9 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 
 void RenderEngine::initialize() {
     _frameNumber = 0;
-    std::string renderingMethod = DefaultRenderingMethod;
 
-    // If the user specified a rendering method that he would like to use, use that
-    ConfigurationManager& confManager = OsEng.configurationManager();
-    if (confManager.hasKeyAndValue<std::string>(KeyRenderingMethod)) {
-        renderingMethod = confManager.value<std::string>(KeyRenderingMethod);
-    }
-    else {
+    std::string renderingMethod = OsEng.configuration().renderingMethod;
+    if (renderingMethod == "ABuffer") {
         using Version = ghoul::systemcapabilities::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
@@ -370,17 +352,9 @@ void RenderEngine::initialize() {
         }
     }
 
-    if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
-        _disableMasterRendering = confManager.value<bool>(
-            ConfigurationManager::KeyDisableMasterRendering
-            );
-    }
-
-    if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
-        _disableSceneTranslationOnMaster = confManager.value<bool>(
-            ConfigurationManager::KeyDisableSceneOnMaster
-            );
-    }
+    _disableMasterRendering = OsEng.configuration().isRenderingOnMasterDisabled;
+    _disableSceneTranslationOnMaster =
+        OsEng.configuration().isSceneTranslationOnMasterDisabled;
 
     _raycasterManager = std::make_unique<RaycasterManager>();
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
@@ -531,17 +505,12 @@ glm::ivec2 RenderEngine::renderingResolution() const {
 }
 
 glm::ivec2 RenderEngine::fontResolution() const {
-    std::string value;
-    bool hasValue = OsEng.configurationManager().getValue(
-        ConfigurationManager::KeyOnScreenTextScaling,
-        value
-    );
-    if (hasValue && value == "framebuffer") {
+    const std::string& value = OsEng.configuration().onScreenTextScaling;
+    if (value == "framebuffer") {
         return OsEng.windowWrapper().getCurrentViewportSize();
         //return OsEng.windowWrapper().currentWindowResolution();
     }
     else {
-        // The default is to use the window size
         return OsEng.windowWrapper().currentWindowSize();
     }
 }

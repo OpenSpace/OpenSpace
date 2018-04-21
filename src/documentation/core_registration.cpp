@@ -25,7 +25,6 @@
 #include <openspace/documentation/core_registration.h>
 
 #include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
@@ -52,7 +51,6 @@
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
-    engine.addDocumentation(ConfigurationManager::Documentation());
     engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());

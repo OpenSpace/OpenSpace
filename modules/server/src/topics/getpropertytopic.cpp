@@ -24,7 +24,7 @@
 
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/properties/property.h>
-#include <openspace/interaction/luaconsole.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>

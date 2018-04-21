@@ -22,56 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MOUSESTATE___H__
-#define __OPENSPACE_CORE___MOUSESTATE___H__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIJOYSTICKCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIJOYSTICKCOMPONENT___H__
 
-#include <openspace/interaction/delayedvariable.h>
-#include <openspace/interaction/inputstate.h>
+#include <modules/imgui/include/guicomponent.h>
 
-#include <ghoul/glm.h>
+namespace openspace::gui {
 
-namespace openspace::interaction {
-
-struct MouseState {
-    MouseState(double scaleFactor);
-    void setFriction(double friction);
-    void setVelocityScaleFactor(double scaleFactor);
-
-    glm::dvec2 previousPosition;
-    DelayedVariable<glm::dvec2, double> velocity;
-};
-
-class MouseStates {
+class GuiJoystickComponent : public GuiComponent {
 public:
-    /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
-     */
-    MouseStates(double sensitivity, double velocityScaleFactor);
-    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
+    GuiJoystickComponent();
 
-    glm::dvec2 globalRotationMouseVelocity() const;
-    glm::dvec2 localRotationMouseVelocity() const;
-    glm::dvec2 truckMovementMouseVelocity() const;
-    glm::dvec2 localRollMouseVelocity() const;
-    glm::dvec2 globalRollMouseVelocity() const;
-
-private:
-    double _sensitivity;
-
-    MouseState _globalRotationMouseState;
-    MouseState _localRotationMouseState;
-    MouseState _truckMovementMouseState;
-    MouseState _localRollMouseState;
-    MouseState _globalRollMouseState;
+    void render() override;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace::gui
 
-#endif // __OPENSPACE_CORE___MOUSESTATE___H__
+#endif // __OPENSPACE_MODULE_IMGUI___GUIJOYSTICKCOMPONENT___H__

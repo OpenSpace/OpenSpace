@@ -28,7 +28,8 @@
 #include <openspace/interaction/delayedvariable.h>
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interpolator.h>
-#include <openspace/interaction/mousestate.h>
+#include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/mousecamerastates.h>
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -50,10 +51,13 @@ public:
     OrbitalNavigator();
     ~OrbitalNavigator();
 
-    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    void updateStatesFromInput(const InputState& inputState, double deltaTime);
+    void updateCameraStateFromStates(Camera& camera, double deltaTime);
+
     void setFocusNode(SceneGraphNode* focusNode);
     void startInterpolateCameraDirection(const Camera& camera);
+
+    JoystickCameraStates& joystickStates();
 
     bool followingNodeRotation() const;
     SceneGraphNode* focusNode() const;
@@ -82,7 +86,9 @@ private:
 
     properties::FloatProperty _followFocusNodeRotationDistance;
     properties::FloatProperty _minimumAllowedDistance;
-    properties::FloatProperty _sensitivity;
+    
+    properties::FloatProperty _mouseSensitivity;
+    properties::FloatProperty _joystickSensitivity;
 
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
@@ -91,7 +97,8 @@ private:
     properties::FloatProperty _rotateToFocusInterpolationTime;
     properties::FloatProperty _stereoInterpolationTime;
 
-    MouseStates _mouseStates;
+    MouseCameraStates _mouseStates;
+    JoystickCameraStates _joystickStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
@@ -126,14 +133,14 @@ private:
      * \returns a local camera rotation modified with two degrees of freedom.
      */
     glm::dquat rotateLocally(double deltaTime,
-                             const glm::dquat& localCameraRotation) const;
+        const glm::dquat& localCameraRotation) const;
 
     /**
      * Interpolates the local rotation towards a 0 rotation.
      * \returns a modified local rotation interpolated towards 0.
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
-                                        const glm::dquat& localCameraRotation);
+        const glm::dquat& localCameraRotation);
 
 
     double interpolateCameraToSurfaceDistance(double deltaTime,
@@ -147,10 +154,9 @@ private:
      * \returns a position vector adjusted in the horizontal direction.
      */
     glm::dvec3 translateHorizontally(double deltaTime, const glm::dvec3& cameraPosition,
-                                     const glm::dvec3& objectPosition,
-                                     const glm::dquat& focusNodeRotationDiff,
-                                     const glm::dquat& globalCameraRotation,
-                                     const SurfacePositionHandle& positionHandle) const;
+        const glm::dvec3& objectPosition, const glm::dquat& focusNodeRotationDiff,
+        const glm::dquat& globalCameraRotation,
+        const SurfacePositionHandle& positionHandle) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the focus
@@ -158,35 +164,32 @@ private:
      * \returns a position updated with the rotation defined by focusNodeRotationDiff
      */
     glm::dvec3 followFocusNodeRotation(const glm::dvec3& cameraPosition,
-                                       const glm::dvec3& objectPosition,
-                                       const glm::dquat& focusNodeRotationDiff) const;
+        const glm::dvec3& objectPosition, const glm::dquat& focusNodeRotationDiff) const;
 
     /**
      * Updates the global rotation so that it points towards the focus node.
      * \returns a global rotation quaternion defining a rotation towards the focus node.
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
-                              const glm::dvec3& objectPosition,
-                              const glm::dquat& focusNodeRotationDiff,
-                              const glm::dvec3& cameraPosition,
-                              const SurfacePositionHandle& positionHandle) const;
+        const glm::dvec3& objectPosition, const glm::dquat& focusNodeRotationDiff,
+        const glm::dvec3& cameraPosition,
+        const SurfacePositionHandle& positionHandle) const;
 
     /**
      * Translates the camera position towards or away from the focus node.
      * \returns a position vector adjusted in the vertical direction.
      */
     glm::dvec3 translateVertically(double deltaTime, const glm::dvec3& cameraPosition,
-                                   const glm::dvec3& objectPosition,
-                                   const SurfacePositionHandle& positionHandle) const;
+        const glm::dvec3& objectPosition,
+        const SurfacePositionHandle& positionHandle) const;
 
     /**
      * Rotates the camera around the out vector of the surface.
      * \returns a quaternion adjusted to rotate around the out vector of the surface.
      */
     glm::dquat rotateHorizontally(double deltaTime,
-                                  const glm::dquat& globalCameraRotation,
-                                  const glm::dvec3& cameraPosition,
-                                  const SurfacePositionHandle& positionHandle) const;
+        const glm::dquat& globalCameraRotation, const glm::dvec3& cameraPosition,
+        const SurfacePositionHandle& positionHandle) const;
 
     /**
      * Push the camera out to the surface of the object.
@@ -194,19 +197,16 @@ private:
      * above the actual surface of the object
      */
     glm::dvec3 pushToSurface(double minHeightAboveGround,
-                             const glm::dvec3& cameraPosition,
-                             const glm::dvec3& objectPosition,
-                             const SurfacePositionHandle& positionHandle) const;
+        const glm::dvec3& cameraPosition, const glm::dvec3& objectPosition,
+        const SurfacePositionHandle& positionHandle) const;
 
     /**
      * Interpolates between rotationDiff and a 0 rotation.
      */
-    glm::dquat interpolateRotationDifferential(
-                                             double deltaTime, double interpolationTime,
-                                             const glm::dquat& rotationDiff,
-                                             const glm::dvec3& objectPosition,
-                                             const glm::dvec3& cameraPosition,
-                                             const SurfacePositionHandle& positionHandle);
+    glm::dquat interpolateRotationDifferential(double deltaTime,
+        double interpolationTime, const glm::dquat& rotationDiff,
+        const glm::dvec3& objectPosition, const glm::dvec3& cameraPosition,
+        const SurfacePositionHandle& positionHandle);
 
     /**
      * Get the vector from the camera to the surface of the focus object in world space.
