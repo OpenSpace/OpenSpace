@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -43,7 +44,7 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class AssetManager;
-class ConfigurationManager;
+struct Configuration;
 class Dashboard;
 class DownloadManager;
 class GUI;
@@ -60,9 +61,9 @@ class VirtualPropertyManager;
 class WindowWrapper;
 
 namespace interaction {
-    class NavigationHandler;
     class KeyBindingManager;
-}
+    class NavigationHandler;
+} // namespace interaction
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -111,6 +112,7 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
+    void setJoystickInputStates(interaction::JoystickInputStates& states);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
@@ -119,8 +121,9 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
+    const Configuration& configuration() const;
+
     // Guaranteed to return a valid pointer
-    ConfigurationManager& configurationManager();
     LuaConsole& console();
     AssetManager& assetManager();
     Dashboard& dashboard();
@@ -203,8 +206,9 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
+    std::unique_ptr<Configuration> _configuration;
+
     // Components
-    std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<Dashboard> _dashboard;

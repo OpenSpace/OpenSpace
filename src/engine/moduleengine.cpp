@@ -46,12 +46,15 @@ ModuleEngine::ModuleEngine()
     : properties::PropertyOwner({"Modules"})
 {}
 
-void ModuleEngine::initialize(const ghoul::Dictionary& moduleConfigurations) {
+void ModuleEngine::initialize(
+                     const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
+{
     for (OpenSpaceModule* m : AllModules()) {
         const std::string identifier = m->identifier();
+        auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
-        if (moduleConfigurations.hasKey(identifier)) {
-            moduleConfigurations.getValue(identifier, configuration);
+        if (it != moduleConfigurations.end()) {
+            configuration = it->second;
         }
         registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
     }

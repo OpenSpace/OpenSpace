@@ -22,59 +22,79 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
-#define __OPENSPACE_CORE___INPUTSTATE___H__
-
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
+
 #include <ghoul/glm.h>
-#include <list>
+#include <ghoul/misc/invariants.h>
+#include <algorithm>
+#include <map>
+#include <numeric>
 
 namespace openspace::interaction {
 
-// This class represents the global input state of interaction devices
-class InputState {
-public:
-    InputState() = default;
-    ~InputState() = default;
+float JoystickInputStates::axis(int axis) const {
+    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
+    float res = std::accumulate(
+        begin(),
+        end(),
+        0.f,
+        [axis](float value, const JoystickInputState& state) {
+            if (state.isConnected) {
+                value += state.axes[axis];
+            }
+            return value;
+        }
+    );
 
-    void setJoystickInputStates(JoystickInputStates& states);
+    // If multiple joysticks are connected, we might get values outside the -1,1 range by
+    // summing them up
+    glm::clamp(res, -1.f, 1.f);
+    return res;
+}
 
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& pressedKeys() const;
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
-    bool isKeyPressed(Key key) const;
+bool JoystickInputStates::button(int button, JoystickAction action) const {
+    ghoul_precondition(button >= 0, "button must be 0 or positive");
 
-    const std::list<MouseButton>& pressedMouseButtons() const;
-    glm::dvec2 mousePosition() const;
-    double mouseScrollDelta() const;
-    bool isMouseButtonPressed(MouseButton mouseButton) const;
-
-    const JoystickInputStates& joystickInputStates() const;
-    float joystickAxis(int i) const;
-    bool joystickButton(int i) const;
-
-private:
-    // Input from keyboard
-    std::list<std::pair<Key, KeyModifier>> _keysDown;
-
-    // Input from mouse
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
-
-    // Input from joysticks
-    // The memory is owned by the outer most main (apps/OpenSpace/main.cpp right now)
-    JoystickInputStates* _joystickInputStates = nullptr;
-};
+    bool res = std::any_of(
+        begin(),
+        end(),
+        [button, action](const JoystickInputState& state) {
+            return state.isConnected ? (state.buttons[button] == action) : false;
+        }
+    );
+    return res;
+}
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___INPUTSTATE___H__
+namespace std {
+
+std::string to_string(openspace::interaction::JoystickAction action) {
+    switch (action) {
+        case openspace::interaction::JoystickAction::Idle:    return "Idle";
+        case openspace::interaction::JoystickAction::Press:   return "Press";
+        case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
+        case openspace::interaction::JoystickAction::Release: return "Release";
+        default:                                              return "";
+    }
+}
+
+} // namespace std
+
+namespace ghoul {
+
+template <>
+openspace::interaction::JoystickAction from_string(const std::string& string) {
+    static const std::map<std::string, openspace::interaction::JoystickAction> Map = {
+        { "Idle",    openspace::interaction::JoystickAction::Idle },
+        { "Press",   openspace::interaction::JoystickAction::Press },
+        { "Repeat",  openspace::interaction::JoystickAction::Repeat },
+        { "Release", openspace::interaction::JoystickAction::Release }
+    };
+
+    return Map.at(string);
+
+}
+
+} // namespace ghoul

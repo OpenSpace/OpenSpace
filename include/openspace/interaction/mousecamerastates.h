@@ -22,30 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CONTROLLER___H__
-#define __OPENSPACE_CORE___CONTROLLER___H__
+#ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
+#define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
 
-#include <openspace/scene/scenegraphnode.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtx/vector_angle.hpp>
+#include <openspace/interaction/camerainteractionstates.h>
 
 namespace openspace::interaction {
 
-class NavigationHandler;
-
-class Controller {
+class MouseCameraStates : public CameraInteractionStates {
 public:
-    Controller() :
-        _handler(nullptr)
-    {}
+    MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void setHandler(NavigationHandler* handler);
-
-protected:
-    NavigationHandler* _handler;
+    void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___CONTROLLER___H__
+#endif // __OPENSPACE_CORE___MOUSECAMERASTATES___H__

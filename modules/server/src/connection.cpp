@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/server/include/connection.h>
+
 #include <modules/server/include/authorizationtopic.h>
 #include <modules/server/include/getpropertytopic.h>
 #include <modules/server/include/luascripttopic.h>
@@ -30,6 +31,7 @@
 #include <modules/server/include/subscriptiontopic.h>
 #include <modules/server/include/timetopic.h>
 #include <modules/server/include/triggerpropertytopic.h>
+#include <openspace/engine/configuration.h>
 
 namespace {
     constexpr const char* _loggerCat = "ServerModule: Connection";
@@ -67,15 +69,7 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
-    const bool hasAuthConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
-        ConfigurationManager::KeyRequireSocketAuthentication
-    );
-    if (hasAuthConfiguration) {
-        _requireAuthorization = OsEng.configurationManager().value<bool>(
-                ConfigurationManager::KeyRequireSocketAuthentication);
-    } else {
-        _requireAuthorization = true;
-    }
+    _requireAuthorization = OsEng.configuration().doesRequireSocketAuthentication;
 }
 
 void Connection::handleMessage(std::string message) {
@@ -186,16 +180,8 @@ void Connection::setAuthorized(const bool status) {
 }
 
 bool Connection::isWhitelisted() {
-    const bool hasWhitelist = OsEng.configurationManager().hasKeyAndValue<std::string>(
-        ConfigurationManager::KeyServerClientAddressWhitelist);
-
-    if (!hasWhitelist) {
-        return false;
-    }
-
-    const auto whitelist = OsEng.configurationManager().value<std::string>(
-        ConfigurationManager::KeyServerClientAddressWhitelist);
-    return whitelist.find(_address) != std::string::npos;
+    const std::vector<std::string>& wl = OsEng.configuration().clientAddressWhitelist;
+    return std::find(wl.begin(), wl.end(), _address) != wl.end();
 }
 
 } // namespace openspace
