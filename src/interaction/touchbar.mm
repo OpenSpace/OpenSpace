@@ -30,6 +30,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/timemanager.h>
 
+// Apple uses 'defer' as named arguments in some functions, so unfortunately, we have to
+// undef our defer macro from ghoul/misc/defer.h
+#undef defer
 #import <AppKit/NSButton.h>
 #import <AppKit/NSCustomTouchBarItem.h>
 #import <AppKit/NSTouchBar.h>

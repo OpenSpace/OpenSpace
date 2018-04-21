@@ -70,7 +70,8 @@ int toggleFade(lua_State* L) {
 int fadeIn(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeIn");
 
-    double t = luaL_checknumber(L, -1);
+    double t = luaL_checknumber(L, 1);
+    lua_pop(L, 1);
 
     OsEng.renderEngine().startFading(1, static_cast<float>(t));
 
@@ -85,7 +86,8 @@ int fadeIn(lua_State* L) {
 int fadeOut(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeOut");
 
-    double t = luaL_checknumber(L, -1);
+    double t = luaL_checknumber(L, 1);
+    lua_pop(L, 1);
 
     OsEng.renderEngine().startFading(-1, static_cast<float>(t));
 
@@ -108,10 +110,10 @@ int addScreenSpaceRenderable(lua_State* L) {
         return 0;
     }
 
-    std::shared_ptr<ScreenSpaceRenderable> s(
+    std::unique_ptr<ScreenSpaceRenderable> s(
         ScreenSpaceRenderable::createFromDictionary(d)
     );
-    OsEng.renderEngine().addScreenSpaceRenderable(s);
+    OsEng.renderEngine().addScreenSpaceRenderable(std::move(s));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -123,22 +125,7 @@ int removeScreenSpaceRenderable(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     std::string name = ghoul::lua::checkStringAndPop(L);
-
-    std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(
-        name
-    );
-    if (!s) {
-        LERRORC(
-            "removeScreenSpaceRenderable",
-            fmt::format(
-                "{}: Could not find ScreenSpaceRenderable '{}'",  errorLocation(L), name
-            )
-        );
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-
-    OsEng.renderEngine().removeScreenSpaceRenderable(s);
+    OsEng.renderEngine().removeScreenSpaceRenderable(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

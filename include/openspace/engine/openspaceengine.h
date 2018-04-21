@@ -76,12 +76,12 @@ namespace scripting {
 struct ShutdownInformation {
     // Whether the application is currently in shutdown mode (i.e. counting down the
     // timer and closing it at '0'
-    bool inShutdown;
+    bool inShutdown = false;
     // Total amount of time the application will wait before actually shutting down
-    float waitTime;
+    float waitTime = 0.f;
     // Current state of the countdown; if it reaches '0', the application will
     // close
-    float timer;
+    float timer = 0.f;
 };
 
 class OpenSpaceEngine {
@@ -95,7 +95,7 @@ public:
     static OpenSpaceEngine& ref();
     static bool isCreated();
 
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() = default;
 
     // callbacks
     void initialize();
@@ -121,6 +121,9 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
+    // On purpose, there is no function that returns a non-const reference to
+    // Configuration;  that guards us against anyone in the program changing the
+    // configuration values underneath our feet
     const Configuration& configuration() const;
 
     // Guaranteed to return a valid pointer
@@ -196,7 +199,6 @@ private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
 
-    std::unique_ptr<LoadingScreen> createLoadingScreen();
     void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();
@@ -241,7 +243,7 @@ private:
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
 
-    bool _hasScheduledAssetLoading;
+    bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
 
     struct {
@@ -269,7 +271,7 @@ private:
 
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
-    bool _isFirstRenderingFirstFrame;
+    bool _isFirstRenderingFirstFrame = true;
 
     static OpenSpaceEngine* _engine;
 };

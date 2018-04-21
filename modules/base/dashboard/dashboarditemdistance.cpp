@@ -406,7 +406,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
                 "focus"
             };
         case Type::Camera:
-            return { OsEng.renderEngine().camera()->positionVec3(), "camera" };
+            return { OsEng.renderEngine().scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
