@@ -576,33 +576,33 @@ namespace openspace {
             for (int x = 0; x < GRIDSIZE; ++x) {
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX] = sizeX;
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 1] = sizeY - step;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 2] = 0.0f;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 3] = 1.0f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 2] = 0.f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 3] = 1.f;
 
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 4] = sizeX + step;
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 5] = sizeY;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 6] = 0.0f;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 7] = 1.0f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 6] = 0.f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 7] = 1.f;
 
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 8] = sizeX;
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 9] = sizeY;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 10] = 0.0f;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 11] = 1.0f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 10] = 0.f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 11] = 1.f;
 
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 12] = sizeX;
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 13] = sizeY - step;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 14] = 0.0f;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 15] = 1.0f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 14] = 0.f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 15] = 1.f;
 
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 16] = sizeX + step;
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 17] = sizeY - step;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 18] = 0.0f;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 19] = 1.0f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 18] = 0.f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 19] = 1.f;
 
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 20] = sizeX + step;
                 vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 21] = sizeY;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 22] = 0.0f;
-                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 23] = 1.0f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 22] = 0.f;
+                vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 23] = 1.f;
 
                 sizeX += step;
             }
@@ -718,53 +718,53 @@ namespace openspace {
         GLuint nOneStripVBO = 0;
         GLuint nOneStripTexture = 0;
 
-        sizeX = -1.0f;
-        step = 2.0f / static_cast<GLfloat>(_nAaSamples);
+        sizeX = -1.f;
+        step = 2.f / static_cast<GLfloat>(_nAaSamples);
 
         GLfloat * nOneStripVertexData = new GLfloat[_nAaSamples * (NVERTEX + 12)];
 
         for (int x = 0; x < _nAaSamples; ++x) {
             nOneStripVertexData[x * (NVERTEX + 12)] = sizeX;
-            nOneStripVertexData[x * (NVERTEX + 12) + 1] = -1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 2] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 3] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 4] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 5] = 0.0f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 1] = -1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 2] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 3] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 4] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 5] = 0.f;
 
             nOneStripVertexData[x * (NVERTEX + 12) + 6] = sizeX + step;
-            nOneStripVertexData[x * (NVERTEX + 12) + 7] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 8] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 9] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 10] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 11] = 1.0f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 7] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 8] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 9] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 10] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 11] = 1.f;
 
             nOneStripVertexData[x * (NVERTEX + 12) + 12] = sizeX;
-            nOneStripVertexData[x * (NVERTEX + 12) + 13] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 14] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 15] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 16] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 17] = 0.0f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 13] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 14] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 15] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 16] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 17] = 0.f;
 
             nOneStripVertexData[x * (NVERTEX + 12) + 18] = sizeX;
-            nOneStripVertexData[x * (NVERTEX + 12) + 19] = -1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 20] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 21] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 22] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 23] = 0.0f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 19] = -1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 20] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 21] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 22] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 23] = 0.f;
 
             nOneStripVertexData[x * (NVERTEX + 12) + 24] = sizeX + step;
-            nOneStripVertexData[x * (NVERTEX + 12) + 25] = -1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 26] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 27] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 28] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 29] = 1.0f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 25] = -1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 26] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 27] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 28] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 29] = 1.f;
 
             nOneStripVertexData[x * (NVERTEX + 12) + 30] = sizeX + step;
-            nOneStripVertexData[x * (NVERTEX + 12) + 31] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 32] = 0.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 33] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 34] = 1.0f;
-            nOneStripVertexData[x * (NVERTEX + 12) + 35] = 1.0f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 31] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 32] = 0.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 33] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 34] = 1.f;
+            nOneStripVertexData[x * (NVERTEX + 12) + 35] = 1.f;
 
             sizeX += step;
         }
@@ -855,7 +855,7 @@ namespace openspace {
         // render strip
         glDrawBuffers(1, textureBuffers);
 
-        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+        glClearColor(0.f, 1.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(nOneStripVAO);
         glDisable(GL_DEPTH_TEST);

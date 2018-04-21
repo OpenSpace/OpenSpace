@@ -199,7 +199,7 @@ namespace openspace {
             ) * renderData.camera.combinedViewMatrix();
 
             if (!isAtmosphereInFrustum(
-                glm::value_ptr(MV),
+                MV,
                 tPlanetPosWorld,
                 (_atmosphereRadius + ATM_EPS)*KM_TO_M)
                 )
@@ -1477,16 +1477,21 @@ namespace openspace {
         }
     }
 
-    bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const double* MVMatrix,
+    bool AtmosphereDeferredcaster::isAtmosphereInFrustum(const glm::dmat4& MVMatrix,
         const glm::dvec3& position,
         double radius) const
     {
 
         // Frustum Planes
-        glm::dvec3 col1(MVMatrix[0], MVMatrix[4], MVMatrix[8]);
-        glm::dvec3 col2(MVMatrix[1], MVMatrix[5], MVMatrix[9]);
-        glm::dvec3 col3(MVMatrix[2], MVMatrix[6], MVMatrix[10]);
-        glm::dvec3 col4(MVMatrix[3], MVMatrix[7], MVMatrix[11]);
+        //glm::dvec3 col1(MVMatrix[0], MVMatrix[4], MVMatrix[8]);
+        //glm::dvec3 col2(MVMatrix[1], MVMatrix[5], MVMatrix[9]);
+        //glm::dvec3 col3(MVMatrix[2], MVMatrix[6], MVMatrix[10]);
+        //glm::dvec3 col4(MVMatrix[3], MVMatrix[7], MVMatrix[11]);
+
+        glm::dvec3 col1(MVMatrix[0][0], MVMatrix[1][0], MVMatrix[2][0]);
+        glm::dvec3 col2(MVMatrix[0][1], MVMatrix[1][1], MVMatrix[2][1]);
+        glm::dvec3 col3(MVMatrix[0][2], MVMatrix[1][2], MVMatrix[2][2]);
+        glm::dvec3 col4(MVMatrix[0][3], MVMatrix[1][3], MVMatrix[2][3]);
 
         glm::dvec3 leftNormal = col4 + col1;
         glm::dvec3 rightNormal = col4 - col1;
@@ -1496,12 +1501,19 @@ namespace openspace {
         glm::dvec3 farNormal = col4 - col3;
 
         // Plane Distances
-        double leftDistance = MVMatrix[15] + MVMatrix[12];
-        double rightDistance = MVMatrix[15] - MVMatrix[12];
-        double bottomDistance = MVMatrix[15] + MVMatrix[13];
-        double topDistance = MVMatrix[15] - MVMatrix[13];
-        double nearDistance = MVMatrix[15] + MVMatrix[14];
-        double farDistance = MVMatrix[15] - MVMatrix[14];
+        //double leftDistance = MVMatrix[15] + MVMatrix[12];
+        //double rightDistance = MVMatrix[15] - MVMatrix[12];
+        //double bottomDistance = MVMatrix[15] + MVMatrix[13];
+        //double topDistance = MVMatrix[15] - MVMatrix[13];
+        //double nearDistance = MVMatrix[15] + MVMatrix[14];
+        //double farDistance = MVMatrix[15] - MVMatrix[14];
+
+        double leftDistance = MVMatrix[3][3] + MVMatrix[3][0];
+        double rightDistance = MVMatrix[3][3] - MVMatrix[3][0];
+        double bottomDistance = MVMatrix[3][3] + MVMatrix[3][1];
+        double topDistance = MVMatrix[3][3] - MVMatrix[3][1];
+        double nearDistance = MVMatrix[3][3] + MVMatrix[3][2];
+        double farDistance = MVMatrix[3][3] - MVMatrix[3][2];
 
         // Normalize Planes
         double invMag = 1.0 / glm::length(leftNormal);

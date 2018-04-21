@@ -110,7 +110,7 @@ private:
     void renderQuadForCalc(GLuint vao, GLsizei numberOfVertices);
     void saveTextureToPPMFile(GLenum color_buffer_attachment, const std::string& fileName,
         int width, int height) const;
-    bool isAtmosphereInFrustum(const double* MVMatrix, const glm::dvec3& position,
+    bool isAtmosphereInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position,
         double radius) const;
 
     const double DISTANCE_CULLING = 1e10;
