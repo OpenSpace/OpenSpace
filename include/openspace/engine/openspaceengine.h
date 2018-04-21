@@ -273,6 +273,8 @@ private:
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
     bool _isFirstRenderingFirstFrame = true;
 
+    glm::dvec2 _mousePosition;
+
     static OpenSpaceEngine* _engine;
 };
 
