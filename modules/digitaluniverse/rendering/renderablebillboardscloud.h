@@ -147,12 +147,11 @@ namespace openspace {
         ghoul::opengl::ProgramObject* _program;
         ghoul::opengl::ProgramObject* _renderToPolygonProgram;
         UniformCache(
-            modelViewMatrix, projectionMatrix, cameraViewProjectionMatrix,
-            modelMatrix, cameraPos, cameraLookup, renderOption, minBillboardSize, 
-            maxBillboardSize, correctionSizeEndDistance, correctionSizeFactor, 
-            color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
-            spriteTexture, polygonTexture, hasPolygon, hasColormap, 
-            enabledRectSizeControl
+            cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup, 
+            renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
+            correctionSizeFactor, color, sides, alphaValue, scaleFactor, up, right, 
+            fadeInValue, screenSize, spriteTexture, polygonTexture, hasPolygon, 
+            hasColormap, enabledRectSizeControl
         ) _uniformCache;
         std::shared_ptr<ghoul::fontrendering::Font> _font;
 

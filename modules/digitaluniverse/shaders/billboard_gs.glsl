@@ -39,8 +39,6 @@ uniform vec2 screenSize;
 uniform float maxBillboardSize;
 uniform float minBillboardSize;
 
-uniform dmat4 modelViewMatrix;
-uniform dmat4 projectionMatrix;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
@@ -130,12 +128,12 @@ void main() {
         // width and height
         vec2 sizes = abs(halfViewSize * (topRight - bottomLeft));
         
-        bool rectangularViewPort = false;
-        if (rectangularViewPort && ((sizes.y > maxBillboardSize) ||
+        if (enabledRectSizeControl && ((sizes.y > maxBillboardSize) ||
             (sizes.x > maxBillboardSize))) {        
             //Set maximum size as Carter's instructions
-            float correctionScale = sizes.y > maxBillboardSize ? maxBillboardSize / sizes.y :
-                                                                maxBillboardSize / sizes.x;
+            float correctionScale = 
+                sizes.y > maxBillboardSize ? maxBillboardSize / sizes.y :
+                                             maxBillboardSize / sizes.x;
             
             scaledRight *= correctionScale;
             scaledUp    *= correctionScale;

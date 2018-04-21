@@ -709,14 +709,6 @@ namespace openspace {
         }
         );
 
-        _uniformCache.modelViewMatrix = _program->uniformLocation(
-            "modelViewMatrix"
-        );
-
-        _uniformCache.projectionMatrix = _program->uniformLocation(
-            "projectionMatrix"
-        );
-
         _uniformCache.cameraViewProjectionMatrix = _program->uniformLocation(
             "cameraViewProjectionMatrix"
         );
@@ -830,8 +822,6 @@ namespace openspace {
         _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
         _program->setUniform(_uniformCache.cameraLookup, data.camera.lookUpVectorWorldSpace());
         _program->setUniform(_uniformCache.renderOption, _renderOption.value());
-        _program->setUniform(_uniformCache.modelViewMatrix, data.camera.combinedViewMatrix() * modelMatrix);
-        _program->setUniform(_uniformCache.projectionMatrix, glm::dmat4(data.camera.projectionMatrix()));
         _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
         _program->setUniform(_uniformCache.cameraViewProjectionMatrix,
             glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix());
