@@ -30,7 +30,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 uniform float scaleFactor;
-uniform dvec3 up;            
+uniform dvec3 up;
 uniform dvec3 right;
 uniform dvec3 cameraPosition; // in world space (no SGCT View was considered)
 uniform dvec3 cameraLookUp;   // in world space (no SGCT View was considered)
@@ -83,6 +83,7 @@ void main() {
     } else if (pos.w == 5.f) {
         unit = 1E9 * PARSEC;
     } else if (pos.w == 6.f) {
+        // Convertion factor from Parsecs to GigalightYears
         unit = 306391534.73091 * PARSEC;
     }
 
@@ -152,6 +153,7 @@ void main() {
     
     initialPosition = z_normalization(vec4(cameraViewProjectionMatrix *
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    vs_screenSpaceDepth = initialPosition.w;                        
     secondPosition = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
     crossCorner = z_normalization(vec4(cameraViewProjectionMatrix * 
@@ -173,6 +175,5 @@ void main() {
     texCoord    = corners[1];
     gl_Position = secondPosition;
     EmitVertex();
-    EndPrimitive();     
-
+    EndPrimitive();
 }
