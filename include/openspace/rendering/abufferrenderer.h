@@ -45,7 +45,7 @@ namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-} // namespace opengl
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -61,8 +61,6 @@ public:
     void initialize() override;
     void deinitialize() override;
 
-    void setCamera(Camera* camera) override;
-    void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
@@ -79,7 +77,8 @@ public:
     void postRaycast(const RaycasterTask& raycasterTask);
 
     void update() override;
-    void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    void render(Scene* scene, Camera* camera, float blackoutFactor,
+        bool doPerformanceMeasurements) override;
 
     /**
      * Update render data
@@ -97,8 +96,6 @@ private:
     void saveTextureToMemory(const GLenum color_buffer_attachment,
         const int width, const int height, std::vector<double> & memory) const;
 
-    Camera* _camera;
-    Scene* _scene;
     glm::ivec2 _resolution;
 
     bool _dirtyResolution;
