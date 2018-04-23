@@ -194,11 +194,11 @@ int addNode(lua_State* L) {
             }
             if (isnan(plsy[i].I))
             {
-                plsy[i].I = 86.6873;
+                plsy[i].I = 90.00;
             }
             if (isnan(plsy[i].BIGOM))
             {
-                plsy[i].BIGOM = 44.705;
+                plsy[i].BIGOM = 45;
             }
             if (isnan(plsy[i].OM))
             {
