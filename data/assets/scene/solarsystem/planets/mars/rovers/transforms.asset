@@ -3,99 +3,18 @@ local kernels = asset.require('./kernels')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
 
--- rotate x-axis -180
-local RotationMatrix_X2 = {
-    1, 0, 0,
-    0, -1, 0,
-    0, 0, -1
-}
 
--- rotate x-axis 90
-local RotationMatrix_X = {
-    1, 0, 0,
-    0, 0, -1,
-    0, 1, 0
-}
-
--- rotate x-axis -90
-local RotationMatrix_X_invert = {
-    1, 0, 0,
-    0, 0, 1,
-    0, -1, 0
-}
-
--- rotate x-axis 45
-local RotationMatrix_X_45 = {
-    1, 0, 0,
-    0, 0.7, -0.7,
-    0, 0.7, 0.7
-}
-
-
--- rotate y-axis -90
-local RotationMatrix_Y_invert = {
-    0, 0, -1,
-    0, 1, 0,
-    1, 0, 0
-}
-
--- rotate y-axis 90
-local RotationMatrix_Y = {
-    0, 0, 1,
-    0, 1, 0,
-    -1, 0, 0
-}
--- rotate z-axis 90
-local RotationMatrix_Z = {
-    0, -1, 0,
-    1, 0, 0,
-    0, 0, 1
-}
-
-local RotationMatrix_Z_invert = {
-    0, 1, 0,
-    -1, 0, 0,
-    0, 0, 1
-}
-
--- rotate z-axis 45
-local RotationMatrix_Z_45 = {
-    0.7, -0.7, 0,
-    0.7, 0.7, 0,
-    0, 0, 1
-}
-
--- rotate z-axis -45
-local RotationMatrix_Z_45_invert = {
-    -0.7, -0.7, 0,
-    0.7, -0.7, 0,
-    0, 0, 1
-}
-
--- rotate y-axis 45
-local RotationMatrix_Y_45_invert = {
-    -0.7, 0, -0.7,
-    0, 1, 0,
-    0.7, 0, -0.7
-}
-
--- rotate y-axis 45
-local RotationMatrix_Y_45 = {
-    0.7, 0, 0.7,
-    0, 1, 0,
-    -0.7, 0, 0.7
-}
 
 local CuriosityPosition = {
     Name = "CuriosityPosition",
     Parent = "MarsBarycenter",
     Transform = {
-        --Translation = {
-        --    Type = "SpiceTranslation",
-        --    Target = "MSL_ROVER",
-        --    Observer = "MARS BARYCENTER",
-        --    Kernels = kernels.CuriosityKernels
-        --},
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MSL_ROVER",
+            Observer = "MARS BARYCENTER",
+            Kernels = kernels.CuriosityKernels
+        },
         --Rotation = {
         --    Type = "SpiceRotation",
         --    SourceFrame = "MSL_ROVER",
@@ -128,10 +47,8 @@ local RA_Base_Location = {
     Parent = RoverLocation.Name,
     Transform = {   
         Translation = {
-            Type = "SpiceTranslation",
-            Target = "MSL_RA_BASE",
-            Observer = "MSL_ROVER",
-            Kernels = kernels.CuriosityKernels
+            Type = "StaticTranslation",
+            Position = { 1.111, -0.4525, -0.106 }
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
@@ -142,150 +59,71 @@ local RA_Shoulder_AZ_Location = {
     Name = "RA_Shoulder_AZ_Location",
     Parent = RA_Base_Location.Name,
     Transform = {   
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MSL_RA_SHOULDER_AZ",
-            Observer = "MSL_RA_BASE",
-            Kernels = kernels.CuriosityKernels
-        }
-        --Translation = {
-        --    Type = "StaticTranslation",
-        --    -- (x, y, z)
-        --    Position = {1.1, -0.45, -0.11}
-        --}
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-local RA_Shoulder_AZ_SpiceRotation = {
-    Name = "RA_Shoulder_AZ_SpiceRotation",
-    Parent = RA_Shoulder_AZ_Location.Name,
-    Transform = {     
-        --Rotation = {
-        --    Type = "SpiceRotation",
-        --    SourceFrame = "MSL_RA_SHOULDER_AZ",
-        --    DestinationFrame = "MSL_RA_BASE",
-        --    Kernels = kernels.CuriosityKernels
-        --}
         Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "MSL_RA_BASE",
-            DestinationFrame = "MSL_RA_SHOLDER_AZ",
+            DestinationFrame = "MSL_RA_SHOULDER_AZ",
             Kernels = kernels.CuriosityKernels
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-
-local RA_Shoulder_AZ_ChangeCoordinates = {
-    Name = "RA_Shoulder_AZ_ChangeCoordinates",
-    Parent = RA_Shoulder_AZ_SpiceRotation.Name,
-    Transform = {
-        --Rotation = {
-        --    Type = "StaticRotation",
-        --    Rotation = RotationMatrix_Z
-        --}
-    }
 }
 
 
 local RA_Shoulder_EL_Location = {
     Name = "RA_Shoulder_EL_Location",
-    Parent = RA_Shoulder_AZ_SpiceRotation.Name,
+    Parent = RA_Shoulder_AZ_Location.Name,
     Transform = {
-        --Translation = {
-        --    Type = "StaticTranslation",
-        --    Position = {-0.12, 0.06, -0.26}
-        --}
-        --Rotation = {
-        --    Type = "StaticRotation",
-        --    Rotation = RotationMatrix_Z
-        --},
-        --Rotation = {
-        --    Type = "SpiceRotation",
-        --    SourceFrame = "MSL_RA_SHOULDER_AZ",
-        --    DestinationFrame = "MSL_RA_SHOULDER_EL",
-        --    Kernels = kernels.CuriosityKernels
-        --},
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MSL_RA_SHOULDER_AZ",
-            Observer = "MSL_RA_SHOULDER_EL",
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RA_SHOULDER_AZ",
+            DestinationFrame = "MSL_RA_SHOULDER_EL",
             Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            -- Position = {-0.12, 0.06, -0.26}
+            Position = {0.15, 0.25, 0.0}
         }
     }
 }
-
-local RA_Shoulder_EL_SpiceRotation = {
-    Name = "RA_Shoulder_EL_SpiceRotation",
+    
+local RA_Elbow_Location = {
+    Name = "RA_Elbow_Location",
     Parent = RA_Shoulder_EL_Location.Name,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "MSL_RA_SHOULDER_EL",
-            DestinationFrame = "MSL_RA_SHOULDER_AZ",
-            Kernels = kernels.CuriosityKernels
-        }
-        --Rotation = {
-        --    Type = "SpiceRotation",
-        --    SourceFrame = "MSL_RA_SHOULDER_AZ",
-        --    DestinationFrame = "MSL_RA_SHOULDER_EL",
-        --    Kernels = kernels.CuriosityKernels
-        --}
-        --Rotation = {
-        --    Type = "StaticRotation",
-        --    Rotation = RotationMatrix_X
-        --}
-    },
-
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-    
-local RA_Elbow_Location = {
-    Name = "RA_Elbow_Location",
-    Parent = RA_Shoulder_EL_SpiceRotation.Name,
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = RotationMatrix_X_invert
-        },
-        --Translation = {
-        --    Type = "StaticTranslation",
-        --    -- (height, deep, left)
-        --    Position = {0.3, -0.7, -0.45 }
-        --}
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MSL_RA_ELBOW",
-            Observer = "MSL_RA_SHOULDER_EL",
-            Kernels = kernels.CuriosityKernels
-        }
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-
-local RA_Elbow_SpiceRotation = {
-    Name = "RA_Elbow_SpiceRotation",
-    Parent = RA_Elbow_Location.Name,
-    Transform = {
-        --Rotation = {
-        --    Type = "SpiceRotation",
-        --    SourceFrame = "MSL_RA_ELBOW",
-        --    DestinationFrame = "MSL_RA_SHOULDER_EL",
-        --    Kernels = kernels.CuriosityKernels
-        --}
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "MSL_RA_SHOULDER_EL",
             DestinationFrame = "MSL_RA_ELBOW",
             Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            -- (height, deep, left)
+            Position = {0.83, -0.2, 0.0 }
         }
-    }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
+--local RA_Wrist_Location = {
+--    Name = "RA_Wrist_Location",
+--    Parent = RA_Elbow_Location.Name,
+--    Transform = {
+--        --Rotation = {
+--        --    Type = "SpiceRotation",
+--        --    SourceFrame = "RA_Elbow_Location",
+--        --    DestinationFrame = "MSL_ROVER",
+--        --    Kernels = kernels.CuriosityKernels
+--        --},
+--        --Translation = {
+--        --    Type = "StaticTranslation",
+--        --    Position = {-0.18, 0.7, 0}
+--        --}
+--    },
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+--}
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
@@ -293,14 +131,8 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RoverLocation,
     RA_Base_Location,
     RA_Shoulder_AZ_Location,
-    RA_Shoulder_AZ_SpiceRotation,
-    RA_Shoulder_AZ_ChangeCoordinates,
     RA_Shoulder_EL_Location,
-    RA_Shoulder_EL_SpiceRotation,
-    RA_Elbow_Location,
-    RA_Elbow_SpiceRotation
-    --RA_Elbow_SpiceRotation,
-    --RA_Elbow_Location
+    RA_Elbow_Location
     --RA_Wrist_Location
     -- RSM_AZ_Orientation,
     -- RSM_EL_Orientation,
@@ -318,68 +150,6 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---local RA_Wrist_Location = {
---    Name = "RA_Wrist_Location",
---    Parent = RA_Elbow_Location.Name,
---    Transform = {
---        --Rotation = {
---        --    Type = "SpiceRotation",
---        --    SourceFrame = "RA_Elbow_Location",
---        --    DestinationFrame = "MSL_ROVER",
---        --    Kernels = kernels.CuriosityKernels
---        --},
---        --Translation = {
---        --    Type = "SpiceTranslation",
---        --    Target = "MSL_ROVER",
---        --    Observer = "MSL_RA_WRIST",
---        --    Kernels = kernels.CuriosityKernels
---        --}
---        Translation = {
---            Type = "StaticTranslation",
---            Position = {-0.18, 0.7, 0}
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---
-
-
---local RAelbowLocation = {
---    Name = "ra_arm1_location",
---    Parent = RAshoulderLocation.Name,
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RA_SHOULDER_AZ",
---            DestinationFrame = "MSL_AR_BASE"
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
 
 
 -- MastCam
@@ -412,80 +182,4 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 --    },
 --    GuiPath = "/Solar System/Planets/Mars/Curiosity "
 --}
---
----- Robot Arm
---local RA_Orientation = {
---    Name = "RA_Orientation",
---    Parent = CuriosityPosition.Name,
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_ROVER", 
---            DestinationFrame = "MSL_RA_BASE",
---            Kernel = kernels.CuriosityKernels 
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---
---local RA_SHOULDER_AZ_Orientation = {
---    Name = "RA_SHOULDER_AZ_Orientation",
---    Parent = RA_Orientation.Name,
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RA_BASE", 
---            DestinationFrame = "MSL_RA_SHOULDER_AZ",
---            Kernel = kernels.CuriosityKernels  
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---
---local RA_SHOULDER_EL_Orientation = {
---    Name = "RA_SHOULDER_EL_Orientation",
---    Parent = RA_SHOULDER_AZ_Orientation.Name,
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RA_SHOULDER_AZ", 
---            DestinationFrame = "MSL_RA_SHOULDER_EL" ,
---            Kernel = kernels.CuriosityKernels 
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---local RA_ELBOW_Orientation = {
---    Name = "RA_ELBOW_Orientation",
---    Parent = RA_SHOULDER_EL_Orientation.Name,
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RA_ELBOW", 
---            DestinationFrame = "MSL_RA_SHOULDER_EL" ,
---            Kernel = kernels.CuriosityKernels 
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---local RA_WRIST_Orientation = {
---    Name = "RA_WRIST_Orientation",
---    Parent = RA_ELBOW_Orientation.Name,
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RA_WRIST", 
---            DestinationFrame = "MSL_RA_ELBOW" ,
---            Kernel = kernels.CuriosityKernels 
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
-
-
-
 

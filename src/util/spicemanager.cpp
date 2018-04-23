@@ -769,8 +769,99 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     if (!success)
         result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
 
+
+    const std::string key_base = "MSL_RA_BASE";
+    const std::string key_az = "MSL_RA_SHOULDER_AZ";
+    const std::string key_el = "MSL_RA_SHOULDER_EL";
+    const std::string key_elbow = "MSL_RA_ELBOW";
+    const std::string key_wrist = "MSL_RA_WRIST";
+    const std::string key_turret = "MSL_RA_TURRET";
+
+
+    if(  fromFrame == key_base || fromFrame == key_az || fromFrame == key_el || fromFrame == key_elbow || fromFrame == key_wrist )
+    {   
+        //PXFORM( 'MSL_RA_BASE', 'MSL_RA_SHOULDER_AZ', ET, M )
+        //M2EUL( M, 3, 2, 1, ROTZ, ROTY, ROTX )
+        //ANGLE = ROTZ
+        // M = result
+        // ET = ephemerisTime
+        /*
+        void pxform_c ( ConstSpiceChar   * from,
+                        ConstSpiceChar   * to,
+                        SpiceDouble        et,
+                        SpiceDouble        rotate[3][3] )
+
+
+        m2eul_c ( ConstSpiceDouble    r[3][3],
+                  SpiceInt            axis3,
+                  SpiceInt            axis2,
+                  SpiceInt            axis1,
+                  SpiceDouble       * angle3,
+                  SpiceDouble       * angle2,
+                  SpiceDouble       * angle1  )*/
+
+        SpiceDouble rot_x;
+        SpiceDouble rot_y;
+        SpiceDouble rot_z;
+        
+        //Compute Gimbal Angles
+        m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(result)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
+
+        SpiceDouble angle = rot_z;
+        
+        //EL correct elbow
+        if (fromFrame == key_base || fromFrame == key_az || fromFrame == key_el)
+        { 
+            /*
+            result = glm::dmat3( 1.0,       0.0,    0.0, 
+                                 0.0, glm::cos(angle) , -glm::sin(angle), 
+                                 0.0, glm::sin(angle),   glm::cos(angle) );*/
+            /*
+            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
+                                    0.0,          1.0 ,     0.0, 
+                                 glm::sin(angle), 0.0, glm::cos(angle) );
+            */
+                
+            //Rotation for AZ
+            if (fromFrame == key_base) 
+            {
+                //LERROR(fmt::format("CAROLINE: '{}'", result ));
+                result = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
+                                    -glm::sin(angle),  glm::cos(angle), 0.0, 
+                                        0.0,             0.0,           1.0 );
+                return result;
+            }
+
+
+            //Rotation for RA-EL
+            else if (fromFrame == key_az) 
+            {
+                glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
+                                                           0.0,        1.0 ,     0.0, 
+                                                     -glm::sin(angle), 0.0,  glm::cos(angle) );
+
+                // FIX: problem, don't know exactly what angle is needed for correct modification of angle, lookup!!
+                glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(90.0), 0.0, glm::sin(90.0), 
+                                                                0.0,      1.0,      0.0, 
+                                                         -glm::sin(90.0), 0.0,  glm::cos(90.0) );
+
+                result = MSL_rotation * matrixCorrection;
+            }
+
+            //Rotation for RA-ELBOW
+            else if (fromFrame == key_el) 
+            {
+                result = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
+                                          0.0,        1.0 ,     0.0, 
+                                    -glm::sin(angle), 0.0,  glm::cos(angle) );
+
+            }
+
+        }
+    }
     return glm::transpose(result);
 }
+
 
 glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     const std::string& toFrame, double ephemerisTimeFrom, double ephemerisTimeTo) const
@@ -792,6 +883,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         "at time '{}'",
         fromFrame, ephemerisTimeFrom, toFrame, ephemerisTimeTo
     ));
+
     return glm::transpose(result);
 }
 
@@ -1047,7 +1139,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     glm::dvec3 pos;
     if (coveredTimes.lower_bound(ephemerisTime) == coveredTimes.begin()) {
         // coverage later, fetch first position
-        spkpos_c(
+          (
             target.c_str(),
             *(coveredTimes.begin()),
             referenceFrame.c_str(),
@@ -1141,7 +1233,18 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
 
     std::set<double> coveredTimes = _ckCoverageTimes.find(idFrame)->second;
 
+
+    // CAROLINE: Check if the two CK files provide identical data (same strucure)
+    // for example, different coordinate systems
+
+    //std::string val;
+    //getValue(toFrame, val, time);
+
     if (coveredTimes.lower_bound(time) == coveredTimes.begin()) {
+        
+
+
+
         // coverage later, fetch first transform
         pxform_c(
             fromFrame.c_str(),

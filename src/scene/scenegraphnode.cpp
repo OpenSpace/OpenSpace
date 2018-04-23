@@ -65,12 +65,15 @@ namespace {
 
 namespace openspace {
 
-// Constants used outside of this file
+ // Constants used outside of this file
 const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 const std::string SceneGraphNode::KeyTag = "Tag";
+
+
+bool coordinateSystem = false;
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -86,12 +89,16 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     std::string name = dictionary.value<std::string>(KeyName);
     result->setName(name);
 
+    //Caroline
+
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
         result->_transform.translation = Translation::createFromDictionary(
             translationDictionary
         );
+
+
         if (result->_transform.translation == nullptr) {
             LERROR(fmt::format(
                 "Failed to create ephemeris for SceneGraphNode '{}'", result->name()
@@ -108,6 +115,8 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary rotationDictionary;
         dictionary.getValue(keyTransformRotation, rotationDictionary);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
+
+
         if (result->_transform.rotation == nullptr) {
             LERROR(fmt::format(
                 "Failed to create rotation for SceneGraphNode '{}'", result->name()
@@ -247,6 +256,7 @@ void SceneGraphNode::traversePostOrder(std::function<void(SceneGraphNode*)> fn) 
     for (std::unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
+
     fn(this);
 }
 
@@ -573,12 +583,15 @@ const std::string& SceneGraphNode::guiPath() const {
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
+        glm::dmat3 inverseMatrix = glm::mat3( -1.0, -1.0, -1.0, 
+                                              -1.0, -1.0, -1.0, 
+                                              -1.0, -1.0, -1.0 );
         return
             _parent->calculateWorldPosition() +
             _parent->worldRotationMatrix() *
             _parent->worldScale() *
             position();
-    }
+    } 
     else {
         return position();
     }
@@ -586,8 +599,27 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
+                       
     if (_parent) {
-        return rotationMatrix() * _parent->calculateWorldRotation();
+        //Caroline
+        if (_parent->name() == "RA_Shoulder_AZ_Location")
+        {
+            //LERROR(fmt::format("Parent location AZ: '{}'", _parent->name()));
+            //LERROR(fmt::format("Parent rotations matrix '{}'", _parent->worldRotationMatrix() ));
+        }   
+
+        if (this->name() == "RA_Shoulder_EL_Location")
+        {
+            glm::dmat3 change = glm::dmat3( 
+                -1.0, -1.0, 1.0, 
+                -1.0, -1.0, 1.0, 
+                 1.0,  1.0, 1.0
+            );
+
+            glm::dmat3 changeDirection = _parent->calculateWorldRotation() * change;
+            //return rotationMatrix() * changeDirection;   
+        } 
+        return _parent->calculateWorldRotation() * rotationMatrix();
     }
     else {
         return rotationMatrix();

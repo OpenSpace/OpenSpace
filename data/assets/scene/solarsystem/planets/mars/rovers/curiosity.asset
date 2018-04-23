@@ -1,9 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 
---local testTexture = asset.require("../../../../../test3.jpg")
-local texturePath2 = asset.localResource("./test2.jpg")
-
 local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
     Type = "HttpSynchronization",
@@ -15,16 +12,8 @@ local models = asset.syncedResource({
     Name = "Mars Curiosity Model Old",
     Type = "HttpSynchronization",
     Identifier = "marscuriosity_model",
-    Version = 4
+    Version = 6
 })
-
-
---local models = asset.syncedResource({
---    Name = "Mars Curiosity Model",
---    Type = "HttpSynchronization",
---    Identifier = "marscuriosity_model",
---    Version = 6
---})
 
 
 -- Curiosity Model --
@@ -36,37 +25,8 @@ local Curiosity = {
     GuiPath = "Solar System/Planets/Mars/Curiosity"
 }
 
-
--- Test plane --
-
---local TestPlane {
---    Name = "TestPlane",
---    Parent = "Root",
---    Renderable = {
---        Type = "RenderablePlane",
---        Size = 1, 
---        Billboard = false, 
---        Texture = testTexture 
---    }
---}
-
-
-
-
 local CuriosityModel = {
     Name = "CuriosityModel",
-    Parent = Curiosity.Name,
-    GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
-}
-
-local CuriosityRA = {
-    Name = "CuriosityRA",
-    Parent = Curiosity.Name,
-    GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
-}
-
-local CuriosityMastCam = {
-    Name = "CuriosityMastCam",
     Parent = Curiosity.Name,
     GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
 }
@@ -94,7 +54,7 @@ local Body = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/test_body_origo.obj"
+          GeometryFile = models .. "/MSL_BODY.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -109,7 +69,7 @@ local Body_staticParts = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/test_static_parts_origo.obj"
+          GeometryFile = models .. "/MSL_BODY_STATICPARTS.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -118,20 +78,17 @@ local Body_staticParts = {
 
 
 
-
-
-
 -- RA 
 
 local RA_Shoulder_AZ = {
     Name = "RA_Shoulder_AZ",
-    Parent = transforms.RA_Shoulder_AZ_SpiceRotation.Name,
+    Parent = transforms.RA_Shoulder_AZ_Location.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/root_test_origo.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_AZ.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -141,30 +98,29 @@ local RA_Shoulder_AZ = {
 -- EL
 local RA_Shoulder_EL = {
     Name = "RA_Shoulder_EL",
-    Parent = transforms.RA_Shoulder_EL_SpiceRotation.Name,
+    Parent = transforms.RA_Shoulder_EL_Location.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          -- GeometryFile = models .. "/MSL_RA_arm_1.obj"
-          GeometryFile = models .. "/test_arm_1_origo.obj"
+          GeometryFile = models .. "/MSL_RA_SHOULDER_EL.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
-
+-- ELBOW
 local RA_Elbow = {
     Name = "RA_Elbow",
-    Parent = transforms.RA_Elbow_SpiceRotation.Name,
+    Parent = transforms.RA_Elbow_Location.Name,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/test_arm_2_origo.obj"
+            GeometryFile = models .. "/MSL_RA_ELBOW.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -187,20 +143,7 @@ local RA_Elbow = {
 --    GuiPath = "/Solar System/Planets/Mars/Curiosity"
 --}
 
---local RA_aaaaarm = {
---    Name = "ra_aaaarm",
---    Parent = transforms.RA_Arm1_Location.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = models .. "/Origo_RA_arm_1.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
+
 
 -- MastCam
 --
@@ -219,9 +162,6 @@ local RA_Elbow = {
 --    GuiPath = "/Solar System/Planets/Mars/Curiosity"
 --}
 --
-
-
-
 
 
 
@@ -251,8 +191,8 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Body_staticParts,
 
     RA_Shoulder_AZ,
-    RA_Shoulder_EL
-    --RA_Elbow
+    RA_Shoulder_EL,
+    RA_Elbow
     --RA_Wrist
 
     -- Wheels_All
