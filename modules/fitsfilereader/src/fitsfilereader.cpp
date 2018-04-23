@@ -130,18 +130,24 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
 
             ExtHDU& table = _infile->extension(hduIdx);
             int numCols = columnNames.size();
+            int numRowsInTable = table.rows();
             std::unordered_map<string, std::vector<T>> contents;
+            LINFO("Read file: " + table.name());
+
+            int firstRow = startRow < 1 ? 1 : startRow;
+
+            if (endRow < firstRow) { endRow = numRowsInTable; }
 
             for (int i = 0; i < numCols; ++i) {
                 std::vector<T> columnData;
-                LINFO("Read column: " + columnNames[i]);
-                table.column(columnNames[i]).read(columnData, startRow, endRow);
+                //LINFO("Read column: " + columnNames[i]);
+                table.column(columnNames[i]).read(columnData, firstRow, endRow);
                 contents[columnNames[i]] = columnData;
             }
 
             // Create TableData object of table contents.
             TableData<T> loadedTable = {
-                std::move(contents), table.getRowsize(), table.name()
+                std::move(contents), table.rows(), table.getRowsize(), table.name()
             };
 
             return std::make_shared<TableData<T>>(loadedTable);

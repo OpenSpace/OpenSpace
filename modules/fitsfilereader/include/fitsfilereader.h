@@ -46,6 +46,7 @@ struct ImageData {
 template<typename T>
 struct TableData {
     std::unordered_map<string, std::vector<T>> contents;
+    int readRows;
     long int optimalRowsize;
     string name;
 };

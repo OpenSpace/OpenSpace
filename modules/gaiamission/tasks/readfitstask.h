@@ -42,8 +42,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::string _inFilePath;
-    std::string _outFilePath;
+    const size_t MAX_SIZE_BEFORE_WRITE = 3200000; // 100.000 stars ~3MB
+    std::string _inFolderPath;
+    std::string _outFolderPath;
     int _firstRow;
     int _lastRow;
     std::vector<std::string> _columnNames;
