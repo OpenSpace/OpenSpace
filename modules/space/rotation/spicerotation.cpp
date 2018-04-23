@@ -31,6 +31,9 @@
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 
+#include <iostream>
+#include <string>
+
 namespace {
     const char* KeyKernels = "Kernels";
 
@@ -42,6 +45,12 @@ namespace {
     };
 
     static const openspace::properties::Property::PropertyInfo DestinationInfo = {
+        "DestinationFrame",
+        "Destination",
+        "This value specifies the destination frame that is used for the coordinate "
+        "transformation. This has to be a valid SPICE name."
+    };
+    static const openspace::properties::Property::PropertyInfo InstrumentCoordinateSystemInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
@@ -74,6 +83,12 @@ documentation::Documentation SpiceRotation::Documentation() {
                 Optional::No,
                 DestinationInfo.description
             },
+            /*{
+                InstrumentCoordinateSystemInfo.identifier,
+                new StringAnnotationVerifier("COORDINATE SYSTEM"),
+                Optional::No,
+                InstrumentCoordinateSystemInfo.description
+            },*/
             {
                 KeyKernels,
                 new OrVerifier(
@@ -92,6 +107,7 @@ documentation::Documentation SpiceRotation::Documentation() {
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo) // @TODO Missing documentation
     , _destinationFrame(DestinationInfo)
+    , _InstrumentCoordinateSystem(InstrumentCoordinateSystemInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -101,6 +117,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
     _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
+
+    _InstrumentCoordinateSystem = dictionary.value<std::string>(InstrumentCoordinateSystemInfo.identifier);
 
     if (dictionary.hasKeyAndValue<std::string>(KeyKernels)) {
         SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));
@@ -119,6 +137,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
+    addProperty(_InstrumentCoordinateSystem);
 
     auto update = [this]() {
         requireUpdate();
@@ -126,15 +145,43 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame.onChange(update);
     _destinationFrame.onChange(update);
+    _InstrumentCoordinateSystem.onChange(update);
 }
 
 glm::dmat3 SpiceRotation::matrix(const Time& time) const {
     try {
-        return SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            time.j2000Seconds()
-        );
+        //multiplicate _sourceframe and _destinationframe with the right rotation matrix before sending it to spicemanager!!!!!!!!
+        glm::dmat3 result;
+       /* glm::dmat3 rotationMatrixY;
+
+        std::string hej = "MSL_RA_SHOULDER_AZ";
+        */
+        /*if (hej.compare(std::string(_destinationFrame)) != 0) {
+
+            rotationMatrixY = { 
+                0.0, 0.0, 1.0,
+                0.0, 1.0, 0.0,
+                -1.0, 0.0, 0.0, 
+            };
+
+            result = SpiceManager::ref().positionTransformMatrix(
+                _sourceFrame,
+                _destinationFrame,
+                time.j2000Seconds()
+            );
+
+            return rotationMatrixY * result;
+        }
+        else {*/
+            result = SpiceManager::ref().positionTransformMatrix(
+                _sourceFrame,
+                _destinationFrame,
+                time.j2000Seconds()
+            );
+            return result;
+        //}
+        
+
     }
     catch (const SpiceManager::SpiceException&) {
         return glm::dmat3(1.0);

@@ -27,6 +27,7 @@
 
 #include <openspace/scene/rotation.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 
@@ -41,6 +42,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+
+	properties::StringProperty _InstrumentCoordinateSystem;
+
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
 };
