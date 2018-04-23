@@ -42,10 +42,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::string _inFolderPath;
-    std::string _outFolderPath;
+    void constructOctreeFromSingleFile(const Task::ProgressCallback& progressCallback);
+    void constructOctreeFromFolder(const Task::ProgressCallback& progressCallback);
+    
+    std::string _inFileOrFolderPath;
+    std::string _outFileOrFolderPath;
+    bool _singleFileInput;
 
-    //std::shared_ptr<OctreeManager> _octreeManager;
+    std::shared_ptr<OctreeManager> _octreeManager;
     std::unique_ptr<OctreeManager> _indexOctreeManager;
 };
 
