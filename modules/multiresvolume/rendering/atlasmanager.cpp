@@ -62,6 +62,7 @@ bool AtlasManager::initialize() {
 
     _freeAtlasCoords = std::vector<unsigned int>(_nBricksInAtlas, 0);
 
+    //LDEBUG(fmt::format("Padded Brick Dim: {}\n\t_nBrickValues: {}\n\t_brickSize {}", _paddedBrickDim, _nBrickVals, _brickSize));
     for (unsigned int i = 0; i < _nBricksInAtlas; i++) {
         _freeAtlasCoords[i] = i;
     }
@@ -165,11 +166,11 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* ma
     while (_brickMap.count(lastBrickIndex) && lastBrickIndex >= firstBrickIndex) lastBrickIndex--;
     if (lastBrickIndex < firstBrickIndex) return;
 
-    int sequenceLength = lastBrickIndex - firstBrickIndex + 1;
+    const size_t sequenceLength = lastBrickIndex - firstBrickIndex + 1;
     float* sequenceBuffer = new float[sequenceLength*_nBrickVals];
-    size_t bufferSize = sequenceLength * _brickSize;
+    const size_t bufferSize = sequenceLength * _brickSize;
 
-    long long offset = TSP::dataPosition() + static_cast<long long>(firstBrickIndex) * static_cast<long long>(_brickSize);
+    const size_t offset = TSP::dataPosition() + firstBrickIndex * _brickSize;
     _tsp->file().seekg(offset);
     _tsp->file().read(reinterpret_cast<char*>(sequenceBuffer), bufferSize);
     _nDiskReads++;
@@ -183,12 +184,12 @@ void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex, float* ma
             unsigned int atlasData = (level << 28) + atlasCoords;
             _brickMap.insert(std::pair<unsigned int, unsigned int>(brickIndex, atlasData));
             _nStreamedBricks++;
-            fillVolume(&sequenceBuffer[_nBrickVals*(brickIndex - firstBrickIndex)], mappedBuffer, atlasCoords);
-            const auto a = _nBrickVals * (brickIndex - firstBrickIndex);
-            LDEBUG( fmt::format( "Brick, loc, value ({}, {}, {})", brickIndex, a, *(&sequenceBuffer[a]) ) );
+            const auto sequenceIndex = _nBrickVals * (brickIndex - firstBrickIndex);
+            fillVolume(&sequenceBuffer[sequenceIndex], mappedBuffer, atlasCoords);
+            //LDEBUG( fmt::format( "Brick, loc, value ({}, {}, {})", brickIndex, sequenceIndex, *(&sequenceBuffer[sequenceIndex]) ) );
         }
     }
-
+    
     delete[] sequenceBuffer;
 }
 
@@ -200,28 +201,27 @@ void AtlasManager::removeFromAtlas(int brickIndex) {
 }
 
 void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoords) {
-    int x = linearAtlasCoords % _nBricksPerDim;
-    int y = (linearAtlasCoords / _nBricksPerDim) % _nBricksPerDim;
-    int z = linearAtlasCoords / _nBricksPerDim / _nBricksPerDim;
+    const int x = linearAtlasCoords % _nBricksPerDim;
+    const int y = (linearAtlasCoords / _nBricksPerDim) % _nBricksPerDim;
+    const int z = linearAtlasCoords / _nBricksPerDim / _nBricksPerDim;
 
-    unsigned int xMin = x*_paddedBrickDim;
-    unsigned int yMin = y*_paddedBrickDim;
-    unsigned int zMin = z*_paddedBrickDim;
-    unsigned int xMax = xMin + _paddedBrickDim;
-    unsigned int yMax = yMin + _paddedBrickDim;
-    unsigned int zMax = zMin + _paddedBrickDim;
+    const unsigned int xMin = x*_paddedBrickDim;
+    const unsigned int yMin = y*_paddedBrickDim;
+    const unsigned int zMin = z*_paddedBrickDim;
+    const unsigned int xMax = xMin + _paddedBrickDim;
+    const unsigned int yMax = yMin + _paddedBrickDim;
+    const unsigned int zMax = zMin + _paddedBrickDim;
 
     unsigned int from = 0;
     for (unsigned int zValCoord = zMin; zValCoord<zMax; ++zValCoord) {
         for (unsigned int yValCoord = yMin; yValCoord<yMax; ++yValCoord) {
             for (unsigned int xValCoord = xMin; xValCoord<xMax; ++xValCoord) {
-                unsigned int idx =
+                const unsigned int idx =
                     xValCoord +
                     yValCoord*_atlasDim +
                     zValCoord*_atlasDim*_atlasDim;
 
                 out[idx] = in[from];
-                //LDEBUG(fmt::format("fillVolume: in {} {}, out {} {}, idx {}, from {}", *in, in[from], *out, out[idx], idx, from));
                 from++;
             }
         }

@@ -9,6 +9,7 @@ local enlil = asset.require('scene/multires/enlil/enlil')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
@@ -18,7 +19,6 @@ asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
     openspace.navigation.setCameraState({

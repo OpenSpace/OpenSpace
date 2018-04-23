@@ -181,7 +181,7 @@ bool TSP::readHeader() {
         _header.yNumBricks_,
         _header.zNumBricks_
     ));
-
+      
     paddedBrickDim_ = _header.xBrickDim_ + 2 * paddingWidth_;
     // paddedBrickDim_ = _header.xBrickDim_;
     // TODO support dimensions of different size
@@ -189,7 +189,8 @@ bool TSP::readHeader() {
     numOTNodes_ = static_cast<unsigned int>((pow(8, numOTLevels_) - 1) / 7);
     numBSTLevels_ = static_cast<unsigned int>(log((int)_header.numTimesteps_) / log(2) + 1);
     numBSTNodes_ = static_cast<unsigned int>(_header.numTimesteps_ * 2 - 1);
-    offsetBSTLeaves_ = numOTNodes_ * (numBSTLevels_ - 1);
+    offsetBSTLeaves_ = numOTNodes_ * (std::pow(2, (numBSTLevels_ - 1)) - 1 );
+    LDEBUG(fmt::format("{} {} {} {}", numOTNodes_, numBSTLevels_, std::pow(2, (numBSTLevels_ - 1)) - 1, offsetBSTLeaves_));
     numTotalNodes_ = numOTNodes_ * numBSTNodes_;
 
     LDEBUG(fmt::format("Num OT levels: {}", numOTLevels_));
