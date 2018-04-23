@@ -26,6 +26,7 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/externInteraction.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/orbitalnavigator.h>
@@ -420,7 +421,7 @@ void ParallelPeer::sendScript(std::string script) {
     }
 
     datamessagestructures::ScriptMessage sm;
-    sm._script = std::move(script);
+    _externInteract.generateScriptMessage(sm, script);
 
     std::vector<char> buffer;
     sm.serialize(buffer);
@@ -510,22 +511,8 @@ void ParallelPeer::sendCameraKeyframe() {
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
-
-    kf._followNodeRotation =
-        OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
-    if (kf._followNodeRotation) {
-        kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
-    }
-    else {
-        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
-    }
-
-    kf._focusNode = focusNode->identifier();
-
-    // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+    // Populate the camera keyframe with current camera properties
+    _externInteract.generateCameraKeyframe(kf);
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;
@@ -540,16 +527,8 @@ void ParallelPeer::sendCameraKeyframe() {
 void ParallelPeer::sendTimeKeyframe() {
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::TimeKeyframe kf;
-
-    Time& time = OsEng.timeManager().time();
-
-    kf._dt = time.deltaTime();
-    kf._paused = time.paused();
-    kf._requiresTimeJump = _timeJumped;
-    kf._time = time.j2000Seconds();
-
-    // Timestamp as current runtime of OpenSpace instance
-    kf._timestamp = OsEng.windowWrapper().applicationTime();
+    // Populate the time keyframe with current time properties
+    _externInteract.generateTimeKeyframe(kf);
 
     // Create a buffer for the keyframe
     std::vector<char> buffer;

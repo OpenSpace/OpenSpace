@@ -129,6 +129,7 @@ public:
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelPeer& parallelPeer();
+    SessionRecorder& sessionRecording();
     RenderEngine& renderEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
@@ -213,6 +214,7 @@ private:
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelPeer> _parallelPeer;
+    std::unique_ptr<SessionRecording> _sessionRecorder;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;

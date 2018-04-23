@@ -113,5 +113,47 @@ void ExternInteraction::scriptInteraction(datamessagestructures::ScriptMessage s
         scripting::ScriptEngine::RemoteScripting::No
     );
 }
+    
+void ExternInteraction::generateCameraKeyframe(datamessagestructures::CameraKeyframe& kf) {
+    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
+    if (!focusNode) {
+        return;
+    }
+    
+    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
+    
+    kf._followNodeRotation =
+    OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
+    if (kf._followNodeRotation) {
+        kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
+        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
+    }
+    else {
+        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
+    }
+    
+    kf._focusNode = focusNode->identifier();
+    
+    // Timestamp as current runtime of OpenSpace instance
+    kf._timestamp = OsEng.windowWrapper().applicationTime();
+}
+    
+void ExternInteraction::generateTimeKeyframe(datamessagestructures::TimeKeyframe& kf) {
+    Time& time = OsEng.timeManager().time();
+    
+    kf._dt = time.deltaTime();
+    kf._paused = time.paused();
+    kf._requiresTimeJump = _timeJumped;
+    kf._time = time.j2000Seconds();
+    
+    // Timestamp as current runtime of OpenSpace instance
+    kf._timestamp = OsEng.windowWrapper().applicationTime();
+}
+    
+void ExternInteraction::generateScriptMessage(datamessagestructures::ScriptMessage& sm,
+                                              std::string script) {
+    sm._script = std::move(script);
+}
+
 
 } // namespace openspace

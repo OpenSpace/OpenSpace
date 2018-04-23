@@ -37,12 +37,14 @@ namespace openspace {
 class ExternInteraction  {
 public:
     ExternInteraction();
-    cameraInteraction(datamessagestructures::CameraKeyframe kf);
-    timeInteraction(datamessagestructures::TimeKeyframe kf);
-    scriptInteraction(datamessagestructures::ScriptMessage sm);
-
+    void cameraInteraction(datamessagestructures::CameraKeyframe kf);
+    void timeInteraction(datamessagestructures::TimeKeyframe kf);
+    void scriptInteraction(datamessagestructures::ScriptMessage sm);
+    void generateCameraKeyframe(datamessagestructures::CameraKeyframe& kf);
+    void generateTimeKeyframe(datamessagestructures::TimeKeyframe& kf);
+    void generateScriptMessage(datamessagestructures::ScriptMessage& sm,
+                               std::string script);
 private:
-    calculateBufferedKeyframeTime(double originalTime);
 };
 
 } // namespace openspace

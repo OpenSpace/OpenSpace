@@ -38,6 +38,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
+#include <openspace/interaction/sessionRecording.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelpeer.h>
 
@@ -158,6 +159,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _moduleEngine(new ModuleEngine)
     , _networkEngine(new NetworkEngine)
     , _parallelPeer(new ParallelPeer)
+    , _sessionRecorder(new SessionRecording)
     , _renderEngine(new RenderEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -194,6 +196,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         _rootPropertyOwner->addPropertySubOwner(_windowWrapper.get());
     }
     _rootPropertyOwner->addPropertySubOwner(_parallelPeer.get());
+    _rootPropertyOwner->addPropertySubOwner(_sessionRecorder.get());
     _rootPropertyOwner->addPropertySubOwner(_console.get());
     _rootPropertyOwner->addPropertySubOwner(_dashboard.get());
 
@@ -1288,6 +1291,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
         _parallelPeer->preSynchronization();
     }
+    _sessionRecorder->preSynchronization();
 
     for (const auto& func : _moduleCallbacks.preSync) {
         func();
@@ -1699,6 +1703,11 @@ ModuleEngine& OpenSpaceEngine::moduleEngine() {
 ParallelPeer& OpenSpaceEngine::parallelPeer() {
     ghoul_assert(_parallelPeer, "ParallelPeer must not be nullptr");
     return *_parallelPeer;
+}
+    
+SessionRecording& OpenSpaceEngine::sessionRecording() {
+    ghoul_assert(_sessionRecorder, "SessionRecording must not be nullptr");
+    return *_sessionRecorder();
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine() {

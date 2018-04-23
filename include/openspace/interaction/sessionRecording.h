@@ -31,18 +31,35 @@
 #include <ghoul/io/socket/tcpsocket.h>
 
 #include <vector>
+#include <fstream>
 
 namespace openspace {
-
+    
 class SessionRecording  {
 public:
+    enum {
+        idle,
+        recording,
+        playback
+    } sessionState;
     SessionRecording();
-    recordCamera();
-    recordTimeChange();
-    recordScript();
-
+    void startRecording();
+    void stopRecording();
+    void recordCamera();
+    void recordTimeChange();
+    void recordScript();
+    void saveScript(std::string scriptToSave);
+    bool isRecording();
+    
 private:
-    externInteraction _externInteract;
+    ExternInteraction _externInteract;
+    bool _isRecording = false;
+    double _timestampRecordStarted;
+    void saveKeyframeToFile(std::string entry);
+    sessionState _state = idle;
+    std::ifstream _playbackFile;
+    std::ofstream _recordFile;
+    int _playbackLineNum = 1;
 };
 
 } // namespace openspace

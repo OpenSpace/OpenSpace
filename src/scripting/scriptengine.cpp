@@ -649,6 +649,9 @@ void ScriptEngine::presync(bool isMaster) {
         if (OsEng.parallelPeer().isHost() && remoteScripting) {
             OsEng.parallelPeer().sendScript(_currentSyncedScript);
         }
+        if (OsEng.sessionRecording().isRecording()) {
+            OsEng.sessionRecording().saveScript(_currentSyncedScript);
+        }
     }
     _mutex.unlock();
 }

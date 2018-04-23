@@ -613,7 +613,13 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
     }
 
-    ++_frameNumber;
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
+    if( sgct_core::Engine::instance()->getCurrentFrustumMode == sgct_core::Frustum::StereoRightEye ) {
+        ++_frameNumber;
+        
+    }
+    
 
     for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
         if (ssr->isEnabled() && ssr->isReady()) {
