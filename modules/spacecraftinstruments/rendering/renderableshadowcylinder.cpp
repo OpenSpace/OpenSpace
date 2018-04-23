@@ -297,7 +297,7 @@ void RenderableShadowCylinder::deinitializeGL() {
         }
     );
     _shader = nullptr;
- 
+
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
     glDeleteBuffers(1, &_vbo);

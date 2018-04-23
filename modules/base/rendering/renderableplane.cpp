@@ -176,7 +176,7 @@ void RenderablePlane::initializeGL() {
                 absPath("${MODULE_BASE}/shaders/plane_fs.glsl")
             );
         }
-    ); 
+    );
 }
 
 void RenderablePlane::deinitializeGL() {

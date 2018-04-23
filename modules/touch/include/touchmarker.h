@@ -70,7 +70,6 @@ private:
     std::vector<GLfloat> _vertexData;
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
-    int _numFingers = 0;
 };
 
 } // openspace namespace

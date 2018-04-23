@@ -33,6 +33,7 @@
 
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <map>
 
 namespace ghoul::systemcapabilities { struct Version; }
 
@@ -59,7 +60,7 @@ public:
      * \throw ghoul::RuntimeError If two modules in the default modules have the same
      * name
     */
-    void initialize(const ghoul::Dictionary& moduleConfigurations);
+    void initialize(const std::map<std::string, ghoul::Dictionary>& moduleConfigurations);
 
     /**
      * Calls the initializeGL functions of all registered OpenSpaceModule%s.

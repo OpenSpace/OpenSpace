@@ -172,7 +172,7 @@ int clearKey(lua_State* L) {
         // The user provided a list of keys
         ghoul::Dictionary d;
         ghoul::lua::luaDictionaryFromState(L, d);
-        for (int i = 1; i <= d.size(); ++i) {
+        for (size_t i = 1; i <= d.size(); ++i) {
             std::string k = d.value<std::string>(std::to_string(i));
             OsEng.keyBindingManager().removeKeyBinding(k);
         }

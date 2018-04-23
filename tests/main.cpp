@@ -49,7 +49,6 @@
 #define GHL_THROW_ON_ASSERT
 #endif // GHL_THROW_ON_ASSERTGHL_THROW_ON_ASSERT
 
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/factorymanager.h>

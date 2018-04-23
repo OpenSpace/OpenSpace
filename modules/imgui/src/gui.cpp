@@ -160,60 +160,6 @@ static void RenderDrawLists(ImDrawData* drawData) {
         }
     }
 
-
-    //// Grow our buffer according to what we need
-    //size_t totalVertexCount = 0;
-    //for (int i = 0; i < nCommandLists; ++i)
-    //    totalVertexCount += commandLists[i]->vtx_buffer.size();
-
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    //size_t neededBufferSize = totalVertexCount * sizeof(ImDrawVert);
-    //if (neededBufferSize > vboMaxSize) {
-    //    // Grow buffer
-    //    vboMaxSize = neededBufferSize * 1.25f;
-    //    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_STREAM_DRAW);
-    //}
-
-    //// Copy and convert all vertices into a single contiguous buffer
-    //unsigned char* bufferData = reinterpret_cast<unsigned char*>(
-    //    glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY)
-    //    );
-
-    //if (!bufferData) {
-    //    LFATAL("Error mapping ImGui buffer");
-    //    return;
-    //}
-
-    //for (int i = 0; i < nCommandLists; ++i) {
-    //    const ImDrawList* cmd_list = commandLists[i];
-    //    memcpy(
-    //        bufferData,
-    //        &cmd_list->vtx_buffer[0],
-    //        cmd_list->vtx_buffer.size() * sizeof(ImDrawVert)
-    //    );
-    //    bufferData += (cmd_list->vtx_buffer.size() * sizeof(ImDrawVert));
-    //}
-    //glUnmapBuffer(GL_ARRAY_BUFFER);
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindVertexArray(vao);
-
-    //int cmdOffset = 0;
-    //for (int i = 0; i < nCommandLists; ++i) {
-    //    const ImDrawList* cmd_list = commandLists[i];
-    //    int vtxOffset = cmdOffset;
-    //    for (const auto& pcmd : cmd_list->commands) {
-    //        glScissor(
-    //            static_cast<int>(pcmd.clip_rect.x),
-    //            static_cast<int>(height - pcmd.clip_rect.w),
-    //            static_cast<int>(pcmd.clip_rect.z - pcmd.clip_rect.x),
-    //            static_cast<int>(pcmd.clip_rect.w - pcmd.clip_rect.y)
-    //        );
-    //        glDrawArrays(GL_TRIANGLES, vtxOffset, pcmd.vtx_count);
-    //        vtxOffset += pcmd.vtx_count;
-    //    }
-    //    cmdOffset = vtxOffset;
-    //}
-
     glBindVertexArray(0);
     _program->deactivate();
     glDisable(GL_SCISSOR_TEST);
@@ -310,6 +256,7 @@ GUI::GUI()
 #ifdef GLOBEBROWSING_USE_GDAL
     addPropertySubOwner(_globeBrowsing);
 #endif // GLOBEBROWSING_USE_GDAL
+    addPropertySubOwner(_joystick);
     addPropertySubOwner(_filePath);
     addPropertySubOwner(_asset);
     _spaceTime.setEnabled(true);
@@ -337,6 +284,7 @@ GUI::GUI()
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
             _iswa.setShowHelpTooltip(_showHelpText);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _joystick.setShowHelpTooltip(_showHelpText);
             _parallel.setShowHelpTooltip(_showHelpText);
             _featuredProperties.setShowHelpTooltip(_showHelpText);
         };
@@ -363,6 +311,7 @@ GUI::GUI()
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
             _iswa.setShowHelpTooltipDelay(_helpTextDelay);
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+            _joystick.setShowHelpTooltipDelay(_helpTextDelay);
             _parallel.setShowHelpTooltipDelay(_helpTextDelay);
             _featuredProperties.setShowHelpTooltipDelay(_helpTextDelay);
         };
@@ -502,6 +451,7 @@ void GUI::initialize() {
 #ifdef GLOBEBROWSING_USE_GDAL
     _globeBrowsing.initialize();
 #endif // GLOBEBROWSING_USE_GDAL
+    _joystick.initialize();
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
@@ -525,6 +475,7 @@ void GUI::deinitialize() {
     _mission.deinitialize();
     _parallel.deinitialize();
     _help.deinitialize();
+    _joystick.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
     _moduleProperty.deinitialize();
@@ -629,6 +580,7 @@ void GUI::initializeGL() {
     _globalProperty.initializeGL();
     _moduleProperty.initializeGL();
     _featuredProperties.initializeGL();
+    _joystick.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -667,6 +619,7 @@ void GUI::deinitializeGL() {
     _performance.deinitializeGL();
     _featuredProperties.deinitializeGL();
     _globalProperty.deinitializeGL();
+    _joystick.deinitializeGL();
     _moduleProperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
 #ifdef GLOBEBROWSING_USE_GDAL
@@ -744,6 +697,11 @@ void GUI::endFrame() {
             _iswa.render();
         }
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+
+        if (_joystick.isEnabled()) {
+            _joystick.render();
+        }
+
         if (_filePath.isEnabled()) {
             _filePath.render();
         }
@@ -882,6 +840,10 @@ void GUI::render() {
     bool mission = _mission.isEnabled();
     ImGui::Checkbox("Mission Information", &mission);
     _mission.setEnabled(mission);
+
+    bool joystick = _joystick.isEnabled();
+    ImGui::Checkbox("Joystick Information", &joystick);
+    _joystick.setEnabled(joystick);
 
     bool filePath = _filePath.isEnabled();
     ImGui::Checkbox("File Paths", &filePath);

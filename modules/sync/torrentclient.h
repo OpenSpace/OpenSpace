@@ -41,6 +41,10 @@
 #pragma warning (disable : 4996)
 #endif // _MSC_VER
 
+// libtorrent defines a class with the name 'defer', which messes with out #define of the
+// defer macro in ghoul/misc/defer.h
+#undef defer
+
 #include <libtorrent/torrent_handle.hpp>
 #include <libtorrent/session.hpp>
 

@@ -113,8 +113,6 @@ void main() {
 
 
     for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
-
-
         while (sampleIndex < nAaSamples && currentDepth + nextStepSize * jitterFactor > raycastDepths[sampleIndex]) {
             sampleIndex++;
             aaOpacity -= opacityDecay;
@@ -131,7 +129,6 @@ void main() {
         float jitteredStepSize = currentStepSize * jitterFactor;
         vec3 jitteredPosition = position + direction*jitteredStepSize;
         position += direction * currentStepSize;
-
 
         sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
 

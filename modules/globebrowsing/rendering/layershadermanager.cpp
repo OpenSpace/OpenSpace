@@ -219,7 +219,10 @@ void LayerShaderManager::recompileShaderProgram(
 
     ghoul::Dictionary layerGroupNames;
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        layerGroupNames.setValue(std::to_string(i), layergroupid::LAYER_GROUP_IDENTIFIERS[i]);
+        layerGroupNames.setValue(
+            std::to_string(i),
+            layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+        );
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
 

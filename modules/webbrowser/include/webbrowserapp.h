@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__WEBBROWSERAPP_H
-#define __OPENSPACE_MODULE_WEBBROWSER__WEBBROWSERAPP_H
+#ifndef __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERAPP___H__
+#define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERAPP___H__
 
 #include <include/cef_app.h>
 #include <include/wrapper/cef_helpers.h>
@@ -39,11 +39,13 @@ public:
     WebBrowserApp();
 
     CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override;
-    void OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>, CefRefPtr<CefV8Context>) override;
+    void OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
+        CefRefPtr<CefV8Context>) override;
 
 private:
     IMPLEMENT_REFCOUNTING(WebBrowserApp);
 };
 
-};
-#endif // __OPENSPACE_MODULE_WEBBROWSER__WEBBROWSERAPP_H
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERAPP___H__

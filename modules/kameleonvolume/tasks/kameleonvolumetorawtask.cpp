@@ -51,8 +51,6 @@ namespace {
     constexpr const char* KeyMaxValue = "MaxValue";
 
     constexpr const char* KeyVisUnit = "VisUnit";
-    constexpr const char* _loggerCat = "KameleonVolumeToRawTask";
-
 } // namespace
 
 namespace openspace {
