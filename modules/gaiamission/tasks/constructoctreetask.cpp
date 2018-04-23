@@ -29,14 +29,15 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/directory.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
 
 #include <fstream>
 
 namespace {
-    const char* KeyInFilePath = "InFilePath";
-    const char* KeyOutFilePath = "OutFilePath";
+    const char* KeyInFolderPath = "InFolderPath";
+    const char* KeyOutFolderPath = "OutFolderPath";
 
     constexpr const char* _loggerCat = "ConstructOctreeTask";
 } // namespace
@@ -51,75 +52,115 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
         "ConstructOctreeTask"
     );
 
-    _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
-    _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
+    _inFolderPath = absPath(dictionary.value<std::string>(KeyInFolderPath));
+    _outFolderPath = absPath(dictionary.value<std::string>(KeyOutFolderPath));
 
-    _octreeManager = std::make_shared<OctreeManager>();
+    //_octreeManager = std::make_shared<OctreeManager>();
+    _indexOctreeManager = std::make_unique<OctreeManager>();
 }
 
 ConstructOctreeTask::~ConstructOctreeTask() {}
 
 std::string ConstructOctreeTask::description() {
-    return "Read bin file: " + _inFilePath + "\n and write octree data into: "
-        + _outFilePath + "\n";
+    return "Read bin files in folder: " + _inFolderPath + "\n and write octree data files into: "
+        + _outFolderPath + "\n";
 }
 
 void ConstructOctreeTask::perform(const Task::ProgressCallback& progressCallback) {
     std::vector<float> fullData;
     int32_t nValues = 0;
     int32_t nValuesPerStar = 0;
+
+    ghoul::filesystem::Directory currentDir(_inFolderPath);
+    std::vector<std::string> allInputFiles = currentDir.readFiles();
+    std::vector<float> starData(8, 0.f);
     
-    _octreeManager->initOctree();
+    _indexOctreeManager->initOctree();
 
     progressCallback(0.0f);
-    LINFO("Reading data file.");
 
-    std::ifstream inFileStream(_inFilePath, std::ifstream::binary);
-    if (inFileStream.good()) {
+    float processOneFile = 1.f / allInputFiles.size();
 
-        inFileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
+    // TODO: Parallelize!
+    for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
+        
+        std::string inFilePath = allInputFiles[idx];
 
-        fullData.resize(nValues);
-        inFileStream.read(reinterpret_cast<char*>(&fullData[0]),
-            nValues * sizeof(fullData[0]));
+        LINFO("Reading data file: " + inFilePath);
 
-        progressCallback(0.3f);
-        LINFO("Constructing Octree.");
+        std::ifstream inFileStream(inFilePath, std::ifstream::binary);
+        if (inFileStream.good()) {
 
-        // TODO: Parallellize with ThreadPool!
-        // Insert star into octree. We assume the data already is in correct order.
-        for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
-            auto first = fullData.begin() + i;
-            auto last = fullData.begin() + i + nValuesPerStar;
-            std::vector<float> values(first, last);
+            inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
+            nValuesPerStar = 8;
 
-            _octreeManager->insert(values);
+            while (inFileStream.read(reinterpret_cast<char*>(&starData[0]), 
+                nValuesPerStar * sizeof(starData[0]))) {
+
+                // TODO: Filter by parameters!
+
+                _indexOctreeManager->insert(starData);
+                nValues += nValuesPerStar;
+            }
+
+            /*inFileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+            inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
+
+            fullData.resize(nValues);
+            inFileStream.read(reinterpret_cast<char*>(&fullData[0]),
+                nValues * sizeof(fullData[0]));
+
+            progressCallback(0.3f);
+            LINFO("Constructing Octree.");
+
+            // TODO: Parallellize with ThreadPool!
+            // Insert star into octree. We assume the data already is in correct order.
+            for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
+                auto first = fullData.begin() + i;
+                auto last = fullData.begin() + i + nValuesPerStar;
+                std::vector<float> values(first, last);
+
+                _octreeManager->insert(values);
+            }*/
+
+            inFileStream.close();
         }
-        inFileStream.close();
-    }
-    else {
-        LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
-            , _inFilePath));
+        else {
+            LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
+                , inFilePath));
+        }
+
+        progressCallback((idx+1) * processOneFile / 2.f);
+        LINFO(fmt::format("Writing {} values to octree files!", nValues));
+        LINFO("Number of leaf nodes: " + std::to_string(_indexOctreeManager->numLeafNodes()) + 
+            "\n Number of inner nodes: " + std::to_string(_indexOctreeManager->numInnerNodes()) + 
+            "\n Total depth of tree: " + std::to_string(_indexOctreeManager->totalDepth()));
+
+        // Write to several files! TODO: What happens if we don't use 8 files?
+        _indexOctreeManager->writeToMultipleFiles(_outFolderPath, idx);
+
+        // Remove all data from Octree structure.
+        LINFO("Clear all data from Octree!");
+        _indexOctreeManager->clearAllData(static_cast<int>(idx));
+
+        progressCallback((idx + 1) * processOneFile);
     }
 
-    progressCallback(0.9f);
-    LINFO("Writing octree file.");
+    LINFO("Writing index file!");
 
-    // TODO: Write to several files!
-    std::ofstream outFileStream(_outFilePath, std::ofstream::binary);
+    // Write index file of Octree structure.
+    std::string indexFileOutPath = _outFolderPath + "index.bin";
+    std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
     if (outFileStream.good()) {
 
-        if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file.");
-        }
-        _octreeManager->writeToFile(outFileStream);
+        _indexOctreeManager->writeStructureToFile(outFileStream);
 
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", _outFilePath));
+        LERROR(fmt::format("Error opening file: {} as index output file.", indexFileOutPath));
     }
+
 
     progressCallback(1.0f);
 }
@@ -136,16 +177,16 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 Optional::No
             },
             {
-                KeyInFilePath,
+                KeyInFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "The path to the BIN file with sorted raw data.",
+                "The path to the folder with BIN files with sorted raw data.",
             },
             {
-                KeyOutFilePath,
+                KeyOutFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "The path to the file which to save octree to.",
+                "The path to the folder which to save octree files to.",
             },
         }
     };

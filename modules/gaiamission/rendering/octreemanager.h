@@ -49,6 +49,7 @@ public:
         float halfDimension;
         size_t numStars; // TODO: Use in LOD checks, else remove?
         bool isLeaf;
+        bool isLoaded;
         int bufferIndex;
         size_t lodInUse;
     };
@@ -63,22 +64,32 @@ public:
     std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
         int& deltaStars, gaiamission::RenderOption option, bool useVBO);
     std::vector<float> getAllData(gaiamission::RenderOption option);
+    void clearAllData(int branchIndex = -1);
+
     void writeToFile(std::ofstream& outFileStream);
     void readFromFile(std::ifstream& inFileStream);
 
+    void writeToMultipleFiles(std::string outFolderPath, size_t branchIndex);
+
+    void writeStructureToFile(std::ofstream& outFileStream);
+    void readStructureFromFile(std::ifstream& inFileStream);
+
     size_t numLeafNodes() const;
+    size_t numInnerNodes() const;
+    size_t totalNodes() const;
+    size_t totalDepth() const;
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
-    size_t totalNodes() const;
 
 private:
-    const size_t MAX_DIST = 5; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
+    const size_t MAX_DIST = 10; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
-    size_t MAX_STARS_PER_NODE = 10000; 
+    size_t MAX_STARS_PER_NODE = 50000; 
     const int DEFAULT_INDEX = -1;
     const float MIN_TOTAL_PIXELS_LOD = 0.0; // Will be multiplied by depth.
     const int FIRST_LOD_DEPTH = 3; // No layer beneath this will not store any LOD cache.
+    const std::string BINARY_SUFFIX = ".bin"; 
 
     size_t getChildIndex(float posX, float posY, float posZ,
         float origX = 0.0, float origY = 0.0, float origZ = 0.0);
@@ -93,9 +104,18 @@ private:
     std::map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<OctreeNode> node, 
         int& deltaStars, bool recursive = true);
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, gaiamission::RenderOption option);
+    void clearNodeData(std::shared_ptr<OctreeNode> node);
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
+
     void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
     void readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);
+
+    void writeNodeToMultipleFiles(std::string outFilePrefix, std::shared_ptr<OctreeNode> node);
+    void fetchNodeDataFromFile(std::string inFilePrefix, std::shared_ptr<OctreeNode> node);
+
+    void writeNodeStructureToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
+    void readNodeStructureFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);
+
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
         gaiamission::RenderOption option);
 
@@ -104,8 +124,6 @@ private:
     std::stack<int> _freeSpotsInBuffer;
     std::set<int> _removedKeysInPrevCall;
 
-    size_t _totalNodes; // TODO: remove?
-    size_t _numNodesPerFile; // TODO: remove?
     size_t _totalDepth;
     size_t _numLeafNodes;
     size_t _numInnerNodes;

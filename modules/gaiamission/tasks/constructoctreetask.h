@@ -42,10 +42,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    std::string _inFilePath;
-    std::string _outFilePath;
+    std::string _inFolderPath;
+    std::string _outFolderPath;
 
-    std::shared_ptr<OctreeManager> _octreeManager;
+    //std::shared_ptr<OctreeManager> _octreeManager;
+    std::unique_ptr<OctreeManager> _indexOctreeManager;
 };
 
 } // namespace openspace
