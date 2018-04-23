@@ -27,7 +27,6 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -111,7 +110,7 @@ void RenderablePlaneProjection::initializeGL() {
 void RenderablePlaneProjection::deinitializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
+        renderEngine.removeRenderProgram(_shader.get());
         _shader = nullptr;
     }
 

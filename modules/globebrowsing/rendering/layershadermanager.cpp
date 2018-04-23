@@ -144,7 +144,7 @@ LayerShaderManager::LayerShaderManager(const std::string& shaderName,
 LayerShaderManager::~LayerShaderManager() {
     if (_programObject) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        renderEngine.removeRenderProgram(_programObject);
+        renderEngine.removeRenderProgram(_programObject.get());
         _programObject = nullptr;
     }
 }
@@ -219,7 +219,10 @@ void LayerShaderManager::recompileShaderProgram(
 
     ghoul::Dictionary layerGroupNames;
     for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
-        layerGroupNames.setValue(std::to_string(i), layergroupid::LAYER_GROUP_IDENTIFIERS[i]);
+        layerGroupNames.setValue(
+            std::to_string(i),
+            layergroupid::LAYER_GROUP_IDENTIFIERS[i]
+        );
     }
     shaderDictionary.setValue("layerGroups", layerGroupNames);
 
@@ -230,7 +233,7 @@ void LayerShaderManager::recompileShaderProgram(
     }
 
     // Remove old program
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    OsEng.renderEngine().removeRenderProgram(_programObject.get());
 
     _programObject = OsEng.renderEngine().buildRenderProgram(
         _shaderName,

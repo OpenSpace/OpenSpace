@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,11 @@
 #include "include/eventhandler.h"
 
 namespace {
-const std::string _loggerCat = "WebBrowser:EventHandler";
-}
+    const std::string _loggerCat = "WebBrowser:EventHandler";
+} // namespace
 
 namespace openspace {
+
 void EventHandler::initialize() {
     OsEng.registerModuleCharCallback(
             [this](unsigned int charCode, KeyModifier mod) -> bool {
@@ -108,7 +109,12 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
         _lastClickPosition = _mousePosition;
     }
 
-    return _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, !_leftMouseDown, clickCount);
+    return _browserInstance->sendMouseClickEvent(
+        mouseEvent(),
+        MBT_LEFT,
+        !_leftMouseDown,
+        clickCount
+    );
 }
 
 bool EventHandler::isDoubleClick() const {
@@ -171,7 +177,8 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
 }
 
 /**
- * Detect if there is a special event that should be caught by the GUI before it is sent to CEF
+ * Detect if there is a special event that should be caught by the GUI before it is sent
+ * to CEF.
  * @param key the pressed key
  * @return true if event found, false otherwise
  */
@@ -234,14 +241,18 @@ CefMouseEvent EventHandler::mouseEvent() {
     return event;
 }
 
-void EventHandler::setBrowserInstance(const std::shared_ptr<BrowserInstance> &browserInstance) {
+void EventHandler::setBrowserInstance(
+                                  const std::shared_ptr<BrowserInstance>& browserInstance)
+{
     LDEBUG("Setting browser instance.");
     _browserInstance = browserInstance;
 }
 
 void EventHandler::detachBrowser() {
     if (_browserInstance) {
-        LDEBUG(fmt::format("Detaching browser instance with use count {}", _browserInstance.use_count()));
+        LDEBUG(fmt::format(
+            "Detaching browser instance with use count {}", _browserInstance.use_count()
+        ));
     }
     _browserInstance = nullptr;
 }

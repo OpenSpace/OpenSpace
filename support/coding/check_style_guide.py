@@ -44,6 +44,7 @@ guards for correctness. At the moment this includes:
  * Checking whether a file as empty-only lines
  * Checking whether the default assert macros are used anywhere instead of the
    ghoul_assert macro
+ * Checking whether there are TABs in the file
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -58,6 +59,7 @@ import sys
 
 current_year = '2018'
 is_strict_mode = False
+is_silent_mode = False
 
 def get_ifndef_symbol(lines):
     index = [i for i,s in enumerate(lines) if '#ifndef ' in s]
@@ -332,6 +334,12 @@ def check_empty_character_at_end(lines):
         return ''
 
 
+def check_for_tab(lines):
+    index = [i + 1 for i, s in enumerate(lines) if '\t' in s]
+    if len(index) > 0:
+        return index
+    else:
+        return ''
 
 previousSymbols  = {}
 def check_header_file(file, component):
@@ -425,6 +433,10 @@ def check_header_file(file, component):
         if assert_usage:
             print(file, '\t', 'Wrong assert usage: ', assert_usage)
 
+        tabs = check_for_tab(lines)
+        if tabs:
+            print(file, '\t', 'TABs found: ', tabs)
+
 
 
 def check_inline_file(file, component):
@@ -479,6 +491,11 @@ def check_inline_file(file, component):
         if assert_usage:
             print(file, '\t', 'Wrong assert usage: ', assert_usage)
 
+        tabs = check_for_tab(lines)
+        if tabs:
+            print(file, '\t', 'TABs found: ', tabs)
+
+
 
 
 def check_source_file(file, component):
@@ -522,11 +539,23 @@ def check_source_file(file, component):
         if assert_usage:
             print(file, '\t', 'Wrong assert usage: ', assert_usage)
 
+        tabs = check_for_tab(lines)
+        if tabs:
+            print(file, '\t', 'TABs found: ', tabs)
+
+
 
 
 def check_files(positiveList, negativeList, component, check_function):
-    files = glob.glob(positiveList, recursive=True)
-    negativeFiles = glob.glob(negativeList, recursive=True)
+    files = []
+    for p in positiveList:
+        f = glob.glob(p, recursive=True)
+        files.extend(f)
+
+    negativeFiles = []
+    for n in negativeList:
+        f = glob.glob(n, recursive=True)
+        negativeFiles.extend(f)
 
     files = [f for f in files if f not in negativeFiles]
 
@@ -545,28 +574,106 @@ if len(sys.argv) > 1:
 for a in sys.argv:
     if a == "strict":
         is_strict_mode = True
+    if a == "silent":
+        is_silent_mode = True
+
 
 # Check header files
-print("Checking header files")
-print("=====================")
-check_files(basePath + 'include/**/*.h', '', 'openspace_core', check_header_file)
-check_files(basePath + 'apps/**/*.h', basePath + 'apps/**/ext/**/*.h', 'openspace_app', check_header_file)
-check_files(basePath + 'modules/**/*.h', basePath + 'modules/**/ext/**/*.h', 'openspace_module', check_header_file)
-check_files(basePath + 'ext/ghoul/include/**/*.h', '', 'ghoul', check_header_file)
-print("")
+if not is_silent_mode:
+    print("Checking header files")
+    print("=====================")
 
-print("Checking inline files")
-print("=====================")
-check_files(basePath + 'include/**/*.inl', '', 'openspace_core', check_inline_file)
-check_files(basePath + 'src/**/*.inl', '', 'openspace_core', check_inline_file)
-check_files(basePath + 'apps/**/*.inl', basePath + 'apps/**/ext/**/*.h', 'openspace_app', check_inline_file)
-check_files(basePath + 'modules/**/*.inl', basePath + 'modules/**/ext/**/*.h', 'openspace_module', check_inline_file)
-check_files(basePath + 'ext/ghoul/include/**/*.inl', '', 'ghoul', check_inline_file)
-print("")
+check_files(
+    [basePath + 'include/**/*.h'],
+    [],
+    'openspace_core',
+    check_header_file
+)
+check_files(
+    [basePath + 'apps/**/*.h'],
+    [basePath + 'apps/**/ext/**/*.h'],
+    'openspace_app',
+    check_header_file
+)
+check_files(
+    [basePath + 'modules/**/*.h'],
+    [
+        basePath + 'modules/**/ext/**/*.h',
+        basePath + 'modules/**/node_modules/**/*.h',
+        basePath + 'modules/webbrowser/resource.h'
+    ],
+    'openspace_module',
+    check_header_file
+)
+check_files(
+    [basePath + 'ext/ghoul/include/**/*.h'],
+    [],
+    'ghoul',
+    check_header_file
+)
 
-print("Checking source files")
-print("=====================")
-check_files(basePath + 'src/**/*.cpp', '', 'openspace_core', check_source_file)
-check_files(basePath + 'apps/**/*.cpp', basePath + 'apps/**/ext/**/*.cpp', 'openspace_app', check_source_file)
-check_files(basePath + 'modules/**/*.cpp', basePath + 'modules/**/ext/**/*.cpp', 'openspace_module', check_source_file)
-check_files(basePath + 'ext/ghoul/src/**/*.cpp', '', 'ghoul', check_source_file)
+if not is_silent_mode:
+    print("")
+    print("Checking inline files")
+    print("=====================")
+
+check_files(
+    [basePath + 'include/**/*.inl'],
+    [],
+    'openspace_core',
+    check_inline_file
+)
+check_files(
+    [basePath + 'src/**/*.inl'],
+    [],
+    'openspace_core',
+    check_inline_file
+)
+check_files(
+    [basePath + 'apps/**/*.inl'],
+    [basePath + 'apps/**/ext/**/*.h'],
+    'openspace_app',
+    check_inline_file
+)
+check_files(
+    [basePath + 'modules/**/*.inl'],
+    [basePath + 'modules/**/ext/**/*.h'],
+    'openspace_module',
+    check_inline_file
+)
+check_files(
+    [basePath + 'ext/ghoul/include/**/*.inl'],
+    [],
+    'ghoul',
+    check_inline_file
+)
+
+if not is_silent_mode:
+    print("")
+    print("Checking source files")
+    print("=====================")
+
+check_files(
+    [basePath + 'src/**/*.cpp'],
+    [],
+    'openspace_core',
+    check_source_file
+)
+check_files(
+    [basePath + 'apps/**/*.cpp'],
+    [basePath + 'apps/**/ext/**/*.cpp'],
+    'openspace_app',
+    check_source_file
+)
+check_files(
+    [basePath + 'modules/**/*.cpp'],
+    [basePath + 'modules/**/ext/**/*.cpp', basePath + 'modules/**/node_modules/**/*.cpp'],
+    'openspace_module',
+    check_source_file
+)
+check_files(
+    [basePath + 'ext/ghoul/src/**/*.cpp'],
+    [],
+    'ghoul',
+    check_source_file
+)

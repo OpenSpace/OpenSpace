@@ -362,7 +362,9 @@ bool HttpFileDownload::initDownload() {
 
             std::string message(Buffer, size);
 
-            LERROR(fmt::format("Cannot open file {}: {}", std::string(destinationFile), message));
+            LERROR(fmt::format(
+                "Cannot open file {}: {}", std::string(destinationFile), message)
+            );
 
             return false;
         }

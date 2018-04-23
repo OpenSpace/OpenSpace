@@ -139,7 +139,7 @@ private:
     // DEBUG:
     properties::OptionProperty _renderOption;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    ghoul::opengl::ProgramObject* _program;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,
         /*scaleFactor,*/ color) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font;

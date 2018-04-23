@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,10 +47,14 @@ public:
     void close(bool force = false);
 
     bool sendKeyEvent(const CefKeyEvent &event);
-    bool sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-                             bool mouseUp, int clickCount = SINGLE_CLICK);
-    bool sendTouchTapEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-                             int clickCount = SINGLE_CLICK);
+
+    bool sendTouchTapEvent(const CefMouseEvent &event,
+        CefBrowserHost::MouseButtonType button, int clickCount = SINGLE_CLICK);
+
+    bool sendMouseClickEvent(const CefMouseEvent &event,
+        CefBrowserHost::MouseButtonType button, bool mouseUp,
+        int clickCount = SINGLE_CLICK);
+
     bool sendMouseMoveEvent(const CefMouseEvent &event);
     bool sendMouseWheelEvent(const CefMouseEvent &event, glm::ivec2 delta);
     void reloadBrowser();
@@ -68,6 +72,6 @@ private:
     bool _isInitialized;
 };
 
-}
+} // namespace openspace
 
-#endif //__OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H
+#endif // __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H

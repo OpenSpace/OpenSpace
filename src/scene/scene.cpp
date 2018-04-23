@@ -25,7 +25,6 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/openspace.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -60,7 +59,6 @@
 
 namespace {
     constexpr const char* _loggerCat = "Scene";
-    constexpr const char* KeyName = "Name";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
     constexpr const char* StoryIdentifier = "Story.Basic";

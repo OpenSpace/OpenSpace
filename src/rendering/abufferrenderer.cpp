@@ -59,9 +59,7 @@ namespace {
 namespace openspace {
 
 ABufferRenderer::ABufferRenderer()
-    : _camera(nullptr)
-    , _scene(nullptr)
-    , _resolution(glm::ivec2(0))
+    : _resolution(glm::ivec2(0))
     , _dirtyResolution(true)
     , _dirtyRendererData(true)
     , _dirtyRaycastData(true)
@@ -76,15 +74,15 @@ ABufferRenderer::~ABufferRenderer() {}
 
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
-    const GLfloat size = 1.0f;
+    const GLfloat size = 1.f;
     const GLfloat vertex_data[] = {
         //      x      y     s     t
-        -size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f,
-        -size,  size, 0.0f, 1.0f,
-        -size, -size, 0.0f, 1.0f,
-        size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f,
+        -size, -size, 0.f, 1.f,
+        size,   size, 0.f, 1.f,
+        -size,  size, 0.f, 1.f,
+        -size, -size, 0.f, 1.f,
+        size,  -size, 0.f, 1.f,
+        size,   size, 0.f, 1.f,
     };
 
 
@@ -95,14 +93,7 @@ void ABufferRenderer::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, nullptr);
     glEnableVertexAttribArray(0);
 
     glGenTextures(1, &_anchorPointerTexture);
@@ -230,8 +221,9 @@ void ABufferRenderer::update() {
             LERRORC(error.component, error.message);
         }
     }
-
-    for (auto &program : _boundsPrograms) {
+    using K = VolumeRaycaster* const;
+    using V = std::unique_ptr<ghoul::opengl::ProgramObject>;
+    for (std::pair<K, V>& program : _boundsPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
@@ -243,57 +235,59 @@ void ABufferRenderer::update() {
 }
 
 void ABufferRenderer::updateMSAASamplingPattern() {
+    // @CLEANUP(abock): This should probably be merged with the same code from the
+    //                  framebuffer renderer?
     LINFO("Updating MSAA Sampling Pattern");
 
-    const int GRIDSIZE = 32;
-    GLfloat step = 2.0f / static_cast<GLfloat>(GRIDSIZE);
-    GLfloat sizeX = -1.0f,
-        sizeY = 1.0f;
+    constexpr const int GridSize = 32;
+    GLfloat step = 2.f / static_cast<GLfloat>(GridSize);
+    GLfloat sizeX = -1.0f;
+    GLfloat sizeY = 1.0f;
 
-    const int NVERTEX = 4 * 6;
+    constexpr const int NVertex = 4 * 6;
     // openPixelSizeVertexData
-    GLfloat vertexData[GRIDSIZE * GRIDSIZE * NVERTEX];
+    GLfloat vertexData[GridSize * GridSize * NVertex];
 
-    for (int y = 0; y < GRIDSIZE; ++y) {
-        for (int x = 0; x < GRIDSIZE; ++x) {
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX] = sizeX;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 1] = sizeY - step;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 2] = 0.0f;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 3] = 1.0f;
+    for (int y = 0; y < GridSize; ++y) {
+        for (int x = 0; x < GridSize; ++x) {
+            vertexData[y * GridSize * NVertex + x * NVertex] = sizeX;
+            vertexData[y * GridSize * NVertex + x * NVertex + 1] = sizeY - step;
+            vertexData[y * GridSize * NVertex + x * NVertex + 2] = 0.f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 3] = 1.f;
 
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 4] = sizeX + step;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 5] = sizeY;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 6] = 0.0f;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 7] = 1.0f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 4] = sizeX + step;
+            vertexData[y * GridSize * NVertex + x * NVertex + 5] = sizeY;
+            vertexData[y * GridSize * NVertex + x * NVertex + 6] = 0.f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 7] = 1.f;
 
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 8] = sizeX;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 9] = sizeY;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 10] = 0.0f;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 11] = 1.0f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 8] = sizeX;
+            vertexData[y * GridSize * NVertex + x * NVertex + 9] = sizeY;
+            vertexData[y * GridSize * NVertex + x * NVertex + 10] = 0.f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 11] = 1.f;
 
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 12] = sizeX;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 13] = sizeY - step;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 14] = 0.0f;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 15] = 1.0f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 12] = sizeX;
+            vertexData[y * GridSize * NVertex + x * NVertex + 13] = sizeY - step;
+            vertexData[y * GridSize * NVertex + x * NVertex + 14] = 0.f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 15] = 1.f;
 
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 16] = sizeX + step;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 17] = sizeY - step;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 18] = 0.0f;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 19] = 1.0f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 16] = sizeX + step;
+            vertexData[y * GridSize * NVertex + x * NVertex + 17] = sizeY - step;
+            vertexData[y * GridSize * NVertex + x * NVertex + 18] = 0.f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 19] = 1.f;
 
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 20] = sizeX + step;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 21] = sizeY;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 22] = 0.0f;
-            vertexData[y * GRIDSIZE * NVERTEX + x * NVERTEX + 23] = 1.0f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 20] = sizeX + step;
+            vertexData[y * GridSize * NVertex + x * NVertex + 21] = sizeY;
+            vertexData[y * GridSize * NVertex + x * NVertex + 22] = 0.f;
+            vertexData[y * GridSize * NVertex + x * NVertex + 23] = 1.f;
 
             sizeX += step;
         }
-        sizeX = -1.0f;
+        sizeX = -1.f;
         sizeY -= step;
     }
 
-    GLuint pixelSizeQuadVAO = 0,
-        pixelSizeQuadVBO = 0;
+    GLuint pixelSizeQuadVAO = 0;
+    GLuint pixelSizeQuadVBO = 0;
 
     glGenVertexArrays(1, &pixelSizeQuadVAO);
     glBindVertexArray(pixelSizeQuadVAO);
@@ -303,20 +297,13 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(GLfloat) * GRIDSIZE * GRIDSIZE * NVERTEX,
+        sizeof(GLfloat) * GridSize * GridSize * NVertex,
         vertexData,
         GL_STATIC_DRAW
     );
 
     // Position
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        nullptr
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     // Saves current state
@@ -366,17 +353,12 @@ void ABufferRenderer::updateMSAASamplingPattern() {
         return;
     }
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> pixelSizeProgram = nullptr;
-    try {
-        pixelSizeProgram = ghoul::opengl::ProgramObject::Build(
+    std::unique_ptr<ghoul::opengl::ProgramObject> pixelSizeProgram =
+        ghoul::opengl::ProgramObject::Build(
             "OnePixel MSAA",
             "${SHADERS}/framebuffer/pixelSizeMSAA.vert",
             "${SHADERS}/framebuffer/pixelSizeMSAA.frag"
         );
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-    }
 
     pixelSizeProgram->activate();
 
@@ -385,7 +367,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glBindVertexArray(pixelSizeQuadVAO);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(false);
-    glDrawArrays(GL_TRIANGLES, 0, GRIDSIZE * GRIDSIZE * 6);
+    glDrawArrays(GL_TRIANGLES, 0, GridSize * GridSize * 6);
     glBindVertexArray(0);
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
@@ -394,58 +376,58 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     pixelSizeProgram->deactivate();
 
     // Now we render the Nx1 quad strip
-    GLuint nOneStripFramebuffer = 0,
-        nOneStripVAO = 0,
-        nOneStripVBO = 0,
-        nOneStripTexture = 0;
+    GLuint nOneStripFramebuffer = 0;
+    GLuint nOneStripVAO = 0;
+    GLuint nOneStripVBO = 0;
+    GLuint nOneStripTexture = 0;
 
-    sizeX = -1.0f;
-    step = 2.0f / static_cast<GLfloat>(_nAaSamples);
+    sizeX = -1.f;
+    step = 2.f / static_cast<GLfloat>(_nAaSamples);
 
-    GLfloat * nOneStripVertexData = new GLfloat[_nAaSamples * (NVERTEX + 12)];
+    std::vector<GLfloat> nOneStripVertexData(_nAaSamples * (NVertex + 12));
 
     for (int x = 0; x < _nAaSamples; ++x) {
-        nOneStripVertexData[x * (NVERTEX + 12)] = sizeX;
-        nOneStripVertexData[x * (NVERTEX + 12) + 1] = -1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 2] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 3] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 4] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 5] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12)] = sizeX;
+        nOneStripVertexData[x * (NVertex + 12) + 1] = -1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 2] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 3] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 4] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 5] = 0.0f;
 
-        nOneStripVertexData[x * (NVERTEX + 12) + 6] = sizeX + step;
-        nOneStripVertexData[x * (NVERTEX + 12) + 7] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 8] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 9] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 10] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 11] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 6] = sizeX + step;
+        nOneStripVertexData[x * (NVertex + 12) + 7] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 8] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 9] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 10] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 11] = 1.0f;
 
-        nOneStripVertexData[x * (NVERTEX + 12) + 12] = sizeX;
-        nOneStripVertexData[x * (NVERTEX + 12) + 13] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 14] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 15] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 16] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 17] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 12] = sizeX;
+        nOneStripVertexData[x * (NVertex + 12) + 13] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 14] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 15] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 16] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 17] = 0.0f;
 
-        nOneStripVertexData[x * (NVERTEX + 12) + 18] = sizeX;
-        nOneStripVertexData[x * (NVERTEX + 12) + 19] = -1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 20] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 21] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 22] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 23] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 18] = sizeX;
+        nOneStripVertexData[x * (NVertex + 12) + 19] = -1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 20] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 21] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 22] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 23] = 0.0f;
 
-        nOneStripVertexData[x * (NVERTEX + 12) + 24] = sizeX + step;
-        nOneStripVertexData[x * (NVERTEX + 12) + 25] = -1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 26] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 27] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 28] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 29] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 24] = sizeX + step;
+        nOneStripVertexData[x * (NVertex + 12) + 25] = -1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 26] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 27] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 28] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 29] = 1.0f;
 
-        nOneStripVertexData[x * (NVERTEX + 12) + 30] = sizeX + step;
-        nOneStripVertexData[x * (NVERTEX + 12) + 31] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 32] = 0.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 33] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 34] = 1.0f;
-        nOneStripVertexData[x * (NVERTEX + 12) + 35] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 30] = sizeX + step;
+        nOneStripVertexData[x * (NVertex + 12) + 31] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 32] = 0.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 33] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 34] = 1.0f;
+        nOneStripVertexData[x * (NVertex + 12) + 35] = 1.0f;
 
         sizeX += step;
     }
@@ -456,8 +438,8 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glBindBuffer(GL_ARRAY_BUFFER, nOneStripVBO);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(GLfloat) * _nAaSamples * (NVERTEX + 12),
-        nOneStripVertexData,
+        sizeof(GLfloat) * _nAaSamples * (NVertex + 12),
+        nOneStripVertexData.data(),
         GL_STATIC_DRAW
     );
 
@@ -482,7 +464,6 @@ void ABufferRenderer::updateMSAASamplingPattern() {
         reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 4)
     );
     glEnableVertexAttribArray(1);
-    delete[] nOneStripVertexData;
 
     // fbo texture buffer
     glGenTextures(1, &nOneStripTexture);
@@ -519,17 +500,12 @@ void ABufferRenderer::updateMSAASamplingPattern() {
 
     glViewport(0, 0, _nAaSamples, ONEPIXEL);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram = nullptr;
-    try {
-        nOneStripProgram = ghoul::opengl::ProgramObject::Build(
+    std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram =
+        ghoul::opengl::ProgramObject::Build(
             "OneStrip MSAA",
             "${SHADERS}/framebuffer/nOneStripMSAA.vert",
             "${SHADERS}/framebuffer/nOneStripMSAA.frag"
         );
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-    }
 
     nOneStripProgram->activate();
 
@@ -541,7 +517,7 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     // render strip
     glDrawBuffers(1, textureBuffers);
 
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(0.f, 1.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(nOneStripVAO);
     glDisable(GL_DEPTH_TEST);
@@ -584,10 +560,12 @@ void ABufferRenderer::updateMSAASamplingPattern() {
     glDeleteVertexArrays(1, &nOneStripVAO);
 }
 
-void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
+void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
+                             bool doPerformanceMeasurements)
+{
     PerfMeasure("ABufferRenderer::render");
 
-    if (!_scene || !_camera) {
+    if (!scene || !camera) {
         return;
     }
 
@@ -626,7 +604,7 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
 
     Time time = OsEng.timeManager().time();
     RenderData data {
-        *_camera,
+        *camera,
         psc(),
         time,
         doPerformanceMeasurements,
@@ -634,7 +612,7 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         {}
     };
     RendererTasks tasks;
-    _scene->render(data, tasks);
+    scene->render(data, tasks);
     _blackoutFactor = blackoutFactor;
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -670,8 +648,8 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent)
         / std::log(10.f);
 
-    const float minLogDist = 15;
-    const float maxLogDist = 20;
+    const float minLogDist = 15.f;
+    const float maxLogDist = 20.f;
 
     float t = (logDistance - minLogDist) / (maxLogDist - minLogDist);
     t = glm::clamp(t, 0.0f, 1.0f);
@@ -703,7 +681,6 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     _mainDepthTextureUnit = nullptr;
 }
 
-
 void ABufferRenderer::preRaycast(const RaycasterTask& raycasterTask) {
     VolumeRaycaster& raycaster = *raycasterTask.raycaster;
     const RaycastData& raycastData = _raycastData[&raycaster];
@@ -733,17 +710,9 @@ void ABufferRenderer::postRaycast(const RaycasterTask& raycasterTask) {
     raycaster.postRaycast(raycastData, *_resolveProgram);
 }
 
-void ABufferRenderer::setScene(Scene* scene) {
-    _scene = scene;
-}
-
-void ABufferRenderer::setCamera(Camera* camera) {
-    _camera = camera;
-}
-
 void ABufferRenderer::setResolution(glm::ivec2 res) {
     if (res != _resolution) {
-        _resolution = res;
+        _resolution = std::move(res);
         _dirtyResolution = true;
     }
 }
@@ -893,8 +862,6 @@ void ABufferRenderer::updateResolution() {
     _dirtyResolution = false;
 }
 
-
-
 void ABufferRenderer::updateResolveDictionary() {
     ghoul::Dictionary dict;
     ghoul::Dictionary raycastersDict;
@@ -1026,29 +993,27 @@ void ABufferRenderer::updateRendererData() {
 }
 
 void ABufferRenderer::saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, std::vector<double> & memory) const {
+    const int width, const int height, std::vector<double>& memory) const {
 
     if (!memory.empty()) {
         memory.clear();
     }
 
     memory.reserve(width * height * 3);
-    float * tempMemory = new float[width * height * 3];
+    std::vector<float> tmpMemory(width * height * 3);
 
     if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
         glReadBuffer(color_buffer_attachment);
-        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
+        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tmpMemory.data());
 
     }
     else {
-        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
+        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tmpMemory.data());
     }
 
     for (auto i = 0; i < width*height * 3; ++i) {
-        memory[i] = static_cast<double>(tempMemory[i]);
+        memory[i] = static_cast<double>(tmpMemory[i]);
     }
-
-    delete[] tempMemory;
 }
 
-}
+} // namespace openspace

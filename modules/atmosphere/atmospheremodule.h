@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_ATMOSPHERE___ATMOSPHERE_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
 class AtmosphereModule : public OpenSpaceModule {
 public:
+    constexpr static const char* Name = "Atmosphere";
+
     AtmosphereModule();
 
 private:

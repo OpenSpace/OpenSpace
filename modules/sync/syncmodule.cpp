@@ -30,7 +30,6 @@
 #include <modules/sync/tasks/syncassettask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>

@@ -28,11 +28,11 @@ layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 texCoord;
 
 out vec2 vTexCoord;
-flat out vec3 vPosition;
+// flat out vec3 vPosition;
 
 void main() {
     vTexCoord = texCoord;
-    vPosition = position.xyz;
+    // vPosition = position.xyz;
 
     gl_Position = position;
 }

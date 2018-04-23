@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,11 +64,13 @@ void WebBrowserModule::internalDeinitialize() {
  * @return the absolute path to the file
  */
 std::string WebBrowserModule::findHelperExecutable() {
-    if (OsEng.configurationManager().hasKey(ConfigurationManager::KeyWebHelperLocation)) {
-        auto execLocation = absPath(OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation) + SUBPROCESS_ENDING);
+    if (!OsEng.configuration().webHelperLocation.empty()) {
+        auto execLocation = absPath(
+            OsEng.configuration().webHelperLocation + SUBPROCESS_ENDING);
         if (!FileSys.fileExists(execLocation)) {
-            LERROR(fmt::format("Could not find web helper executable at location: {}" , execLocation));
+            LERROR(fmt::format(
+                "Could not find web helper executable at location: {}" , execLocation
+            ));
         }
         return execLocation;
     }
@@ -79,18 +81,28 @@ std::string WebBrowserModule::findHelperExecutable() {
         auto subLength = (int)subprocessName.length();
 
         Directory binDir("${BASE}/bin/openspace", Directory::RawPath::No);
-        std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
+        std::vector<std::string> foundFiles = binDir.readFiles(
+            Directory::Recursive::Yes,
+            Directory::Sort::Yes
+        );
 
         // find files matching the given file name
         std::vector<std::string> matchingFiles;
-        std::copy_if(foundFiles.begin(), foundFiles.end(), std::back_inserter(matchingFiles),
+        std::copy_if(
+            foundFiles.begin(),
+            foundFiles.end(),
+            std::back_inserter(matchingFiles),
             [subprocessName, subLength](std::string s) {
-            s = s.substr(s.size() - subLength);
-            return s == subprocessName;
-        });
+                s = s.substr(s.size() - subLength);
+                return s == subprocessName;
+            }
+        );
 
         if (matchingFiles.empty()) {
-            LERROR(fmt::format("Could not find requested sub process executable file name: {}", subprocessName));
+            LERROR(fmt::format(
+                "Could not find requested sub process executable file name: {}",
+                subprocessName
+            ));
         }
 
         return matchingFiles.back();
@@ -125,7 +137,9 @@ void WebBrowserModule::removeBrowser(std::shared_ptr<BrowserInstance> browser) {
     LDEBUG(fmt::format("Number of browsers stored: {}", _browsers.size()));
 }
 
-void WebBrowserModule::attachEventHandler(std::shared_ptr<BrowserInstance> browserInstance) {
+void WebBrowserModule::attachEventHandler(
+                                         std::shared_ptr<BrowserInstance> browserInstance)
+{
     _eventHandler.setBrowserInstance(browserInstance);
 }
 

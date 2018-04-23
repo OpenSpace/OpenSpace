@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__JSON_CONVERTERS_INL
-#define OPENSPACE_MODULES_SERVER__JSON_CONVERTERS_INL
+#ifndef __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
+#define __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
 
 #include <openspace/properties/property.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -56,6 +56,6 @@ namespace glm {
 
 void to_json(json &j, const dvec3 &v);
 
-}
+} // namespace glm
 
-#endif
+#endif // __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__

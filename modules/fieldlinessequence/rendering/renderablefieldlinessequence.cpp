@@ -452,7 +452,9 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     }
     else {
         LERROR(fmt::format(
-            "{}: FieldlinesSequence {} is not a valid directory", _identifier, sourceFolderPath
+            "{}: FieldlinesSequence {} is not a valid directory",
+            _identifier,
+            sourceFolderPath
         ));
         return false;
     }
@@ -1003,7 +1005,7 @@ void RenderableFieldlinesSequence::deinitializeGL() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shaderProgram) {
-        renderEngine.removeRenderProgram(_shaderProgram);
+        renderEngine.removeRenderProgram(_shaderProgram.get());
         _shaderProgram = nullptr;
     }
 

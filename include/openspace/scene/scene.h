@@ -179,7 +179,7 @@ public:
      * Adds an interpolation request for the passed \p prop that will run for
      * \p durationSeconds seconds. Every time the #updateInterpolations method is called
      * the Property will be notified that it has to update itself using the stored
-     * interpolation values. If an interpolation record already exists for the passed 
+     * interpolation values. If an interpolation record already exists for the passed
      * \p prop, the previous record will be overwritten and the remaining time of the old
      * interpolation is ignored.
      *
@@ -189,7 +189,7 @@ public:
      *
      * \pre \p prop must not be \c nullptr
      * \pre \p durationSeconds must be positive and not 0
-     * \post A new interpolation record exists for \p that is not expired 
+     * \post A new interpolation record exists for \p that is not expired
      */
     void addInterpolation(properties::Property* prop, float durationSeconds,
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);

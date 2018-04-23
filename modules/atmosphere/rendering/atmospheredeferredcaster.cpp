@@ -59,14 +59,8 @@
  */
 
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <modules/atmosphere/rendering/renderableatmosphere.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
@@ -74,12 +68,17 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderer.h>
+#include <ghoul/glm.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtc/quaternion.hpp>
-
 #include <sstream>
 #include <fstream>
 
@@ -90,16 +89,16 @@
 
 
 namespace {
-    const char* _loggerCat             = "AtmosphereDeferredcaster";
-    const char* GlslDeferredcastPath   =
+    constexpr const char* _loggerCat             = "AtmosphereDeferredcaster";
+    constexpr const char* GlslDeferredcastPath   =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-    const char* GlslDeferredcastFSPath =
+    constexpr const char* GlslDeferredcastFSPath =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-    const char* GlslDeferredcastVsPath =
+    constexpr const char* GlslDeferredcastVsPath =
         "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 
-    const float ATM_EPS = 2.0;
-    const double KM_TO_M = 1000.0;
+    constexpr const float ATM_EPS = 2.f;
+    constexpr const float KM_TO_M = 1000.f;
 } // namespace
 
 namespace openspace {
@@ -292,7 +291,13 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
 
             // Sun Position in Object Space
-            program.setUniform(_uniformCache2.sunDirectionObj, glm::normalize(glm::dvec3(sunPosObj)));
+            const double l = glm::length(glm::dvec3(sunPosObj));
+            program.setUniform(
+                _uniformCache2.sunDirectionObj,
+                l > 0.0 ?
+                glm::normalize(glm::dvec3(sunPosObj)) :
+                glm::dvec3(0.0)
+            );
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/filesystem/directory.h>
-#include <include/openspace/engine/configurationmanager.h>
+#include <include/openspace/engine/configuration.h>
 #include <include/wrapper/cef_helpers.h>
 #include <include/cef_browser.h>
 #include "include/eventhandler.h"

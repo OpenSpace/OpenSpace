@@ -30,7 +30,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/exception.h>
 
-#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
@@ -587,16 +587,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
-        const bool hasFile = OsEng.configurationManager().hasKey(
-            ConfigurationManager::KeyScriptLog
-        );
-        if (hasFile) {
-            OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyScriptLog,
-                _logFilename
-            );
-
-            _logFilename = absPath(_logFilename);
+        if (!OsEng.configuration().scriptLog.empty()) {
+            _logFilename = absPath(OsEng.configuration().scriptLog);
             _logFileExists = true;
 
             LDEBUG(fmt::format(
