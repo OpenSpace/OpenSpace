@@ -43,11 +43,17 @@ public:
 
 private:
     const size_t MAX_SIZE_BEFORE_WRITE = 3200000; // 100.000 stars ~3MB
-    std::string _inFolderPath;
-    std::string _outFolderPath;
+
+    void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
+    void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
+
+    std::string _inFileOrFolderPath;
+    std::string _outFileOrFolderPath;
+    bool _singleFileProcess;
     int _firstRow;
     int _lastRow;
-    std::vector<std::string> _columnNames;
+    std::vector<std::string> _allColumnNames;
+    std::vector<std::string> _filterColumnNames;
 };
 
 } // namespace openspace
