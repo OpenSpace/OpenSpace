@@ -222,51 +222,65 @@ void OctreeManager::clearAllData(int branchIndex) {
     }
 }
 
-// Write entire Octree, including all data, to a file.
-void OctreeManager::writeToFile(std::ofstream& outFileStream) {
+// Write entire Octree structure to a file.
+// <writeData> defines if data should be included or if only structure should be written. 
+void OctreeManager::writeToFile(std::ofstream& outFileStream, bool writeData){
     
     outFileStream.write(reinterpret_cast<const char*>(&_valuesPerStar), sizeof(int32_t));
     outFileStream.write(reinterpret_cast<const char*>(&MAX_STARS_PER_NODE), sizeof(int32_t));
+    outFileStream.write(reinterpret_cast<const char*>(&MAX_DIST), sizeof(int32_t));
 
     // Use pre-traversal (Morton code / Z-order).
     for (size_t i = 0; i < 8; ++i) {
-        writeNodeToFile(outFileStream, _root->Children[i]);
+        writeNodeToFile(outFileStream, _root->Children[i], writeData);
     }
 }
 
-// Write a node, including its data, to outStream.
+// Write a node to outFileStream.
+// <writeData> defines if data should be included or if only structure should be written. 
 void OctreeManager::writeNodeToFile(std::ofstream& outFileStream, 
-    std::shared_ptr<OctreeNode> node) {
+    std::shared_ptr<OctreeNode> node, bool writeData) {
 
-    // Write node data.
+    // Write node structure.
     bool isLeaf = node->isLeaf;
     int32_t numStars = static_cast<int32_t>(node->numStars);
-    std::vector<float> nodeData = node->posData;
-    nodeData.insert(nodeData.end(), node->colData.begin(), node->colData.end());
-    nodeData.insert(nodeData.end(), node->velData.begin(), node->velData.end());
-    int32_t nDataSize = static_cast<int32_t>(nodeData.size());
-    size_t nBytes = nDataSize * sizeof(nodeData[0]);
     outFileStream.write(reinterpret_cast<const char*>(&isLeaf), sizeof(bool));
     outFileStream.write(reinterpret_cast<const char*>(&numStars), sizeof(int32_t));
-    outFileStream.write(reinterpret_cast<const char*>(&nDataSize), sizeof(int32_t));
-    if (nDataSize > 0) {
-        outFileStream.write(reinterpret_cast<const char*>(nodeData.data()), nBytes);
+
+    // Write node data if specified
+    if (writeData) {
+        std::vector<float> nodeData = node->posData;
+        nodeData.insert(nodeData.end(), node->colData.begin(), node->colData.end());
+        nodeData.insert(nodeData.end(), node->velData.begin(), node->velData.end());
+        int32_t nDataSize = static_cast<int32_t>(nodeData.size());
+        size_t nBytes = nDataSize * sizeof(nodeData[0]);
+
+        outFileStream.write(reinterpret_cast<const char*>(&nDataSize), sizeof(int32_t));
+        if (nDataSize > 0) {
+            outFileStream.write(reinterpret_cast<const char*>(nodeData.data()), nBytes);
+        }
     }
 
     // Write children to file (in Morton order) if we're in an inner node.
     if (!node->isLeaf) {
         for (size_t i = 0; i < 8; ++i) {
-            writeNodeToFile(outFileStream, node->Children[i]);
+            writeNodeToFile(outFileStream, node->Children[i], writeData);
         }
     }
 }
 
-// Read a constructed Octree, including all data, from a file. 
-void OctreeManager::readFromFile(std::ifstream& inFileStream) {
+
+// Read a constructed Octree from a file. 
+// <readData> defines if full data or only structure should be read. 
+void OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData) {
 
     _valuesPerStar = 0;
     inFileStream.read(reinterpret_cast<char*>(&_valuesPerStar), sizeof(int32_t));
     inFileStream.read(reinterpret_cast<char*>(&MAX_STARS_PER_NODE), sizeof(int32_t));
+    inFileStream.read(reinterpret_cast<char*>(&MAX_DIST), sizeof(int32_t));
+
+    LINFO("Max stars per node in read Octree: " + std::to_string(MAX_STARS_PER_NODE) + 
+        " - Radius of root layer: " + std::to_string(MAX_DIST));
 
     if (_valuesPerStar != (_posSize + _colSize + _velSize)) {
         LERROR("Read file doesn't have the same structure of render parameters!");
@@ -274,44 +288,52 @@ void OctreeManager::readFromFile(std::ifstream& inFileStream) {
 
     // Use the same technique to construct octree from file. 
     for (size_t i = 0; i < 8; ++i) {
-        readNodeFromFile(inFileStream, _root->Children[i]);
+        readNodeFromFile(inFileStream, _root->Children[i], readData);
     }
 }
 
-// Read a node, including its data, from file and its potential children.
+// Read a node from file and its potential children.
+// <readData> defines if full data or only structure should be read. 
 void OctreeManager::readNodeFromFile(std::ifstream& inFileStream, 
-    std::shared_ptr<OctreeNode> node) {
+    std::shared_ptr<OctreeNode> node, bool readData) {
 
-    // Read node data.
+    // Read node structure.
     bool isLeaf;
     int32_t numStars = 0;
-    int32_t nDataSize = 0;
 
     inFileStream.read(reinterpret_cast<char*>(&isLeaf), sizeof(bool));
     inFileStream.read(reinterpret_cast<char*>(&numStars), sizeof(int32_t));
-    inFileStream.read(reinterpret_cast<char*>(&nDataSize), sizeof(int32_t));
-
-    auto readData = std::vector<float>(nDataSize, 0.0f);
-    size_t nBytes = nDataSize * sizeof(readData[0]);
-    if (nDataSize > 0) {
-        inFileStream.read(reinterpret_cast<char*>(&readData[0]), nBytes);
-    }
 
     node->isLeaf = isLeaf;
     node->numStars = numStars;
-    int starsInNode = static_cast<int>(nDataSize / _valuesPerStar);
-    auto posEnd = readData.begin() + (starsInNode * _posSize);
-    auto colEnd = posEnd + (starsInNode * _colSize);
-    auto velEnd = colEnd + (starsInNode * _velSize);
-    node->posData = std::vector<float>(readData.begin(), posEnd);
-    node->colData = std::vector<float>(posEnd, colEnd);
-    node->velData = std::vector<float>(colEnd, velEnd);
+
+    // Read node data if specified. 
+    if (readData) {
+        int32_t nDataSize = 0;
+
+        inFileStream.read(reinterpret_cast<char*>(&nDataSize), sizeof(int32_t));
+
+        if (nDataSize > 0) {
+            auto fetchedData = std::vector<float>(nDataSize, 0.0f);
+            size_t nBytes = nDataSize * sizeof(fetchedData[0]);
+
+            inFileStream.read(reinterpret_cast<char*>(&fetchedData[0]), nBytes);
+
+            int starsInNode = static_cast<int>(nDataSize / _valuesPerStar);
+            auto posEnd = fetchedData.begin() + (starsInNode * _posSize);
+            auto colEnd = posEnd + (starsInNode * _colSize);
+            auto velEnd = colEnd + (starsInNode * _velSize);
+            node->posData = std::vector<float>(fetchedData.begin(), posEnd);
+            node->colData = std::vector<float>(posEnd, colEnd);
+            node->velData = std::vector<float>(colEnd, velEnd);
+        }
+    }
 
     // Create children if we're in an inner node and read from the corresponding nodes.
     if (!node->isLeaf) {
         createNodeChildren(node);
         for (size_t i = 0; i < 8; ++i) {
-            readNodeFromFile(inFileStream, node->Children[i]);
+            readNodeFromFile(inFileStream, node->Children[i], readData);
         }
     }
 }
@@ -394,74 +416,6 @@ void OctreeManager::fetchNodeDataFromFile(std::string inFilePrefix,
     }
     else {
         LERROR("Error opening node data file:" +  inFilePath);
-    }
-}
-
-// Write entire Octree structure, excluding data, to a file.
-void OctreeManager::writeStructureToFile(std::ofstream& outFileStream) {
-
-    outFileStream.write(reinterpret_cast<const char*>(&_valuesPerStar), sizeof(int32_t));
-    outFileStream.write(reinterpret_cast<const char*>(&MAX_STARS_PER_NODE), sizeof(int32_t));
-
-    for (size_t i = 0; i < 8; ++i) {
-        writeNodeStructureToFile(outFileStream, _root->Children[i]);
-    }
-}
-
-// Write a node information, excluding data, to outStream.
-void OctreeManager::writeNodeStructureToFile(std::ofstream& outFileStream,
-    std::shared_ptr<OctreeNode> node) {
-
-    // Write node data.
-    bool isLeaf = node->isLeaf;
-    int32_t numStars = static_cast<int32_t>(node->numStars);
-    outFileStream.write(reinterpret_cast<const char*>(&isLeaf), sizeof(bool));
-    outFileStream.write(reinterpret_cast<const char*>(&numStars), sizeof(int32_t));
-
-    // Write children to file if we're in an inner node.
-    if (!node->isLeaf) {
-        for (size_t i = 0; i < 8; ++i) {
-            writeNodeStructureToFile(outFileStream, node->Children[i]);
-        }
-    }
-}
-
-// Read the structure of a constructed Octree from a file, excluding data. 
-void OctreeManager::readStructureFromFile(std::ifstream& inFileStream) {
-
-    _valuesPerStar = 0;
-    inFileStream.read(reinterpret_cast<char*>(&_valuesPerStar), sizeof(int32_t));
-    inFileStream.read(reinterpret_cast<char*>(&MAX_STARS_PER_NODE), sizeof(int32_t));
-
-    if (_valuesPerStar != (_posSize + _colSize + _velSize)) {
-        LERROR("Read Octree file doesn't have the same structure of render parameters!");
-    }
-
-    for (size_t i = 0; i < 8; ++i) {
-        readNodeStructureFromFile(inFileStream, _root->Children[i]);
-    }
-}
-
-// Read structure of a node from file and its potential children.
-void OctreeManager::readNodeStructureFromFile(std::ifstream& inFileStream,
-    std::shared_ptr<OctreeNode> node) {
-
-    // Read node data.
-    bool isLeaf;
-    int32_t numStars = 0;
-
-    inFileStream.read(reinterpret_cast<char*>(&isLeaf), sizeof(bool));
-    inFileStream.read(reinterpret_cast<char*>(&numStars), sizeof(int32_t));
-
-    node->isLeaf = isLeaf;
-    node->numStars = numStars;
-
-    // Create children if we're in an inner node and read from the corresponding nodes.
-    if (!node->isLeaf) {
-        createNodeChildren(node);
-        for (size_t i = 0; i < 8; ++i) {
-            readNodeStructureFromFile(inFileStream, node->Children[i]);
-        }
     }
 }
 

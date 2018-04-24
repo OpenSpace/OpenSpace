@@ -159,13 +159,16 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     int nStars = table->readRows - _firstRow + 1;
 
-    int32_t nValuesPerStar = _allColumnNames.size() + 1; // +1 for B-V color value.
+   
     int nNullArr = 0;
-    size_t defaultCols = 18;
     int multiplier = 1;
-    if (nValuesPerStar != defaultCols) {
+    size_t nColumnsRead = _allColumnNames.size();
+    size_t defaultCols = 17; // Number of columns that are copied by predefined code.  
+    if (nColumnsRead != defaultCols) {
         LINFO("Additional columns will be read! Consider add column in code for significant speedup!");
     }
+    // Declare how many values to save per star
+    int32_t nValuesPerStar = nColumnsRead + 1; // +1 for B-V color value.
 
     // Copy columns to local variables.
     std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
@@ -236,7 +239,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
         values[idx++] = tycho_v_err[i%nStars];
 
         // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (size_t col = defaultCols; col < nValuesPerStar; ++col) {
+        for (size_t col = defaultCols; col < nColumnsRead; ++col) {
             std::vector<float> vecData = std::move(tableContent[_allColumnNames[col]]);
             values[idx++] = vecData[i];
         }
@@ -327,12 +330,16 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
 
         int nStars = table->readRows - _firstRow + 1;
 
-        int32_t nValuesPerStar = _allColumnNames.size() + 1; // +1 for B-V color value.
         int nNullArr = 0;
-        size_t defaultCols = 16;
-        if (nValuesPerStar != defaultCols) {
+        size_t nColumnsRead = _allColumnNames.size();
+        size_t defaultCols = 11; // Number of columns that are copied by predefined code. 
+        if (nColumnsRead != defaultCols) {
             LINFO("Additional columns will be read! Consider add column in code for significant speedup!");
         }
+
+        // Declare how many values to save for each star.
+        int32_t nValuesPerStar = 16;
+
 
         // Copy columns to local variables.
         std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
@@ -411,7 +418,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
             
 
             // Read extra columns, if any. This will slow down the sorting tremendously!
-            for (size_t col = defaultCols; col < nValuesPerStar; ++col) {
+            for (size_t col = defaultCols; col < nColumnsRead; ++col) {
                 std::vector<float> vecData = std::move(tableContent[_allColumnNames[col]]);
                 values[idx++] = vecData[i];
             }

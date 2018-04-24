@@ -1559,7 +1559,7 @@ bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
         if (fileStream.good()) {
 
             // Let's assume we've already contructed an Octree!
-            _octreeManager->readFromFile(fileStream);
+            _octreeManager->readFromFile(fileStream, true);
 
             // Else we're reading from a BIN file as before.
             /*else {
@@ -1691,7 +1691,7 @@ bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
             //_nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
 
             // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
-            _octreeManager->insert(slicedValues);
+            _octreeManager->insert(slicedValues); // TODO: Doesn't work anymore! (Octree expects 8 values!)
         }
         LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
             " read stars were nullArrays");

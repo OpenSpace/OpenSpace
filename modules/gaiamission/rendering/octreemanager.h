@@ -66,13 +66,10 @@ public:
     std::vector<float> getAllData(gaiamission::RenderOption option);
     void clearAllData(int branchIndex = -1);
 
-    void writeToFile(std::ofstream& outFileStream);
-    void readFromFile(std::ifstream& inFileStream);
+    void writeToFile(std::ofstream& outFileStream, bool writeData);
+    void readFromFile(std::ifstream& inFileStream, bool readData);
 
     void writeToMultipleFiles(std::string outFolderPath, size_t branchIndex);
-
-    void writeStructureToFile(std::ofstream& outFileStream);
-    void readStructureFromFile(std::ifstream& inFileStream);
 
     size_t numLeafNodes() const;
     size_t numInnerNodes() const;
@@ -82,7 +79,7 @@ public:
     size_t biggestChunkIndexInUse() const;
 
 private:
-    const size_t MAX_DIST = 10; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
+    size_t MAX_DIST = 10; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
     size_t MAX_STARS_PER_NODE = 50000; 
@@ -107,14 +104,13 @@ private:
     void clearNodeData(std::shared_ptr<OctreeNode> node);
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
 
-    void writeNodeToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
-    void readNodeFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);
+    void writeNodeToFile(std::ofstream& outFileStream, 
+        std::shared_ptr<OctreeNode> node, bool writeData);
+    void readNodeFromFile(std::ifstream& inFileStream, 
+        std::shared_ptr<OctreeNode> node, bool readData);
 
     void writeNodeToMultipleFiles(std::string outFilePrefix, std::shared_ptr<OctreeNode> node);
     void fetchNodeDataFromFile(std::string inFilePrefix, std::shared_ptr<OctreeNode> node);
-
-    void writeNodeStructureToFile(std::ofstream& outFileStream, std::shared_ptr<OctreeNode> node);
-    void readNodeStructureFromFile(std::ifstream& inFileStream, std::shared_ptr<OctreeNode> node);
 
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
         gaiamission::RenderOption option);

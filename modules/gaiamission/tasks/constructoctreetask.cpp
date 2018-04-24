@@ -140,7 +140,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file.");
         }
-        _octreeManager->writeToFile(outFileStream);
+        _octreeManager->writeToFile(outFileStream, true);
 
         outFileStream.close();
     }
@@ -226,7 +226,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     if (outFileStream.good()) {
 
         LINFO("Writing index file!");
-        _indexOctreeManager->writeStructureToFile(outFileStream);
+        _indexOctreeManager->writeToFile(outFileStream, false);
 
         outFileStream.close();
     }
