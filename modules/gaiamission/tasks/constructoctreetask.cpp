@@ -114,11 +114,17 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
-            std::vector<float> values(first, last);
+            std::vector<float> filterValues(first, last);
+            std::vector<float> renderValues(first, first + RENDER_VALUES);
 
-            // TODO: filter data! Obs! Make sure we only insert 8 values into Octree!
+            // TODO: Filter data by parameters!
+            bool passFilters = true;
 
-            _octreeManager->insert(values);
+            // If all filters passed then insert render values into Octree.
+            if (passFilters) {
+                _octreeManager->insert(renderValues);
+            }
+            
         }
         inFileStream.close();
     }
@@ -150,7 +156,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
 
     ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
     std::vector<std::string> allInputFiles = currentDir.readFiles();
-    std::vector<float> starData(8, 0.f);
+    std::vector<float> filterValues;
 
     _indexOctreeManager->initOctree();
 
@@ -160,6 +166,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
 
         std::string inFilePath = allInputFiles[idx];
+        int nStarsInfile = 0;
 
         LINFO("Reading data file: " + inFilePath);
 
@@ -167,15 +174,22 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         if (inFileStream.good()) {
 
             inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
+            filterValues.resize(nValuesPerStar, 0.f);
 
-            while (inFileStream.read(reinterpret_cast<char*>(&starData[0]),
-                nValuesPerStar * sizeof(starData[0]))) {
+            while (inFileStream.read(reinterpret_cast<char*>(&filterValues[0]),
+                nValuesPerStar * sizeof(filterValues[0]))) {
 
-                // TODO: Filter by parameters!
+                // TODO: Filter data by parameters!
+                bool passFilters = true;
 
-                // TODO: Make sure to only insert 8 parameters!
-                _indexOctreeManager->insert(starData);
-                nStars++;
+                // If all filters passed then insert render values into Octree.
+                if (passFilters) {
+                    std::vector<float> renderValues(filterValues.begin(),
+                        filterValues.begin() + RENDER_VALUES);
+
+                    _indexOctreeManager->insert(renderValues);
+                    nStarsInfile++;
+                }
             }
 
             inFileStream.close();
@@ -186,8 +200,9 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         }
 
         progressCallback((idx + 1) * processOneFile / 2.f);
+        nStars += nStarsInfile;
 
-        LINFO(fmt::format("Writing {} stars to octree files!", nStars));
+        LINFO(fmt::format("Writing {} stars to octree files!", nStarsInfile));
         LINFO("Number of leaf nodes: " + std::to_string(_indexOctreeManager->numLeafNodes()) +
             "\n Number of inner nodes: " + std::to_string(_indexOctreeManager->numInnerNodes()) +
             "\n Total depth of tree: " + std::to_string(_indexOctreeManager->totalDepth()));
@@ -202,13 +217,15 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         progressCallback((idx + 1) * processOneFile);
     }
 
-    LINFO("Writing index file!");
+    LINFO("A total of " + std::to_string(nStars) + " stars where read from files and distributed into "
+        + std::to_string(_indexOctreeManager->totalNodes() + " total nodes!"));
 
     // Write index file of Octree structure.
     std::string indexFileOutPath = _outFileOrFolderPath + "index.bin";
     std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
     if (outFileStream.good()) {
 
+        LINFO("Writing index file!");
         _indexOctreeManager->writeStructureToFile(outFileStream);
 
         outFileStream.close();

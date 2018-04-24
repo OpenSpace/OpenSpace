@@ -328,28 +328,30 @@ void OctreeManager::writeToMultipleFiles(std::string outFolderPath, size_t branc
 void OctreeManager::writeNodeToMultipleFiles(std::string outFilePrefix, 
     std::shared_ptr<OctreeNode> node) {
 
-    // Use Morton code to name file (placement in Octree). 
-    std::string outPath = outFilePrefix + BINARY_SUFFIX;
-    std::ofstream outFileStream(outPath, std::ofstream::binary);
-    if (outFileStream.good()) {
+    // Prepare node data, save nothing else.
+    std::vector<float> nodeData = node->posData;
+    nodeData.insert(nodeData.end(), node->colData.begin(), node->colData.end());
+    nodeData.insert(nodeData.end(), node->velData.begin(), node->velData.end());
+    int32_t nDataSize = static_cast<int32_t>(nodeData.size());
+    size_t nBytes = nDataSize * sizeof(nodeData[0]);
 
-        // Write node data, nothing else.
-        std::vector<float> nodeData = node->posData;
-        nodeData.insert(nodeData.end(), node->colData.begin(), node->colData.end());
-        nodeData.insert(nodeData.end(), node->velData.begin(), node->velData.end());
-        int32_t nDataSize = static_cast<int32_t>(nodeData.size());
-        size_t nBytes = nDataSize * sizeof(nodeData[0]);
+    // Only open output stream if we have any values to write.
+    if (nDataSize > 0) {
 
-        outFileStream.write(reinterpret_cast<const char*>(&nDataSize), sizeof(int32_t));
-        if (nDataSize > 0) {
-            LINFO("Write " + std::to_string(nDataSize) + " values to " + outPath);
+        // Use Morton code to name file (placement in Octree). 
+        std::string outPath = outFilePrefix + BINARY_SUFFIX;
+        std::ofstream outFileStream(outPath, std::ofstream::binary);
+        if (outFileStream.good()) {
+
+            //LINFO("Write " + std::to_string(nDataSize) + " values to " + outPath);
+            outFileStream.write(reinterpret_cast<const char*>(&nDataSize), sizeof(int32_t));
             outFileStream.write(reinterpret_cast<const char*>(nodeData.data()), nBytes);
-        }
 
-        outFileStream.close();
-    }
-    else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+            outFileStream.close();
+        }
+        else {
+            LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+        }
     }
 
     // Recursively write children to file (in Morton order) if we're in an inner node.
@@ -372,6 +374,8 @@ void OctreeManager::fetchNodeDataFromFile(std::string inFilePrefix,
     if (inFileStream.good()) {
         // Read node data.
         int32_t nDataSize = 0;
+
+        // Octree knows if we have any data in this node = it exists. Otherwise don't call it!
         inFileStream.read(reinterpret_cast<char*>(&nDataSize), sizeof(int32_t));
 
         auto readData = std::vector<float>(nDataSize, 0.0f);
@@ -550,7 +554,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             insertInNode(node->Children[index], tmpValues, depth);
             
             // Check if we should keep this star in LOD cache. 
-            //insertStarInLodCache(tmpLodNode, starValues); // TODO: Uncomment later!
+            //insertStarInLodCache(tmpLodNode, starValues); // TODO: Uncomment after fixing LOD!
         }
         
         // Copy LOD cache data from the first MAX_STARS_PER_NODE stars.
@@ -576,7 +580,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     // Determine if new star should be kept in our LOD cache. Don't add if chunk is full.
     // Don't use LOD cache for our more shallow layers.
     if (node->posData.size() / _posSize < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
-        insertStarInLodCache(node, starValues);
+        //insertStarInLodCache(node, starValues); // TODO: Uncomment after fixing LOD!
     }
 
     // Increase counter for inner node to keep track of total stars in all children as well.

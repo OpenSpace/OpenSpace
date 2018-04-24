@@ -42,6 +42,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    const int RENDER_VALUES = 8;
+
     void constructOctreeFromSingleFile(const Task::ProgressCallback& progressCallback);
     void constructOctreeFromFolder(const Task::ProgressCallback& progressCallback);
     

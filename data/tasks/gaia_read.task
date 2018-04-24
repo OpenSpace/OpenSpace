@@ -4,8 +4,6 @@ return {
         InFileOrFolderPath = "E:/GaiaDR1/gaia_source/fits",
         OutFileOrFolderPath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/DR1_full/",
         SingleFileProcess = false,
-        --FirstRow = 1,
-        --LastRow = 2539913, -- Max: 2539913
         FilterColumnNames = {
             "ra_error",
             "dec_error",
