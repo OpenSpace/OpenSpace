@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import MarkerInfo from './MarkerInfo';
 import { traverseTreeWithURI, jsonToLuaTable } from '../../utils/propertyTreeHelpers';
 import { startListening, stopListening } from '../../api/Actions';
-import {StoryKey} from "../../api/keys";
+import {infoIconKey, StoryKey} from "../../api/keys";
 
 class Markers extends Component {
   componentDidUpdate() {
@@ -41,12 +41,11 @@ class Markers extends Component {
 
   createInfoMarkers() {
     const {
-      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties, infoIcons
     } = this.props;
 
-    const markerInfo = nodes.map((node, i) => {
+    return(nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
-
       if (screenVisibilityProperties[i].Value === 'true') {
         // TODO Remove the magic numbers
         let size = (100000000000 / distFromCamToNodeProperties[i].Value);
@@ -54,17 +53,22 @@ class Markers extends Component {
         if (size >= 3) size = 3;
         if (size <= 1.5) size = 1.5;
 
+        let planetInfo;
+        if(infoIcons.data){
+          planetInfo = infoIcons.data.planets.find(planet => planet.planet === node.identifier)
+        }
+
         return (<MarkerInfo
           key={screenSpaceProperties[i].Description.Identifier}
           identifier={node.identifier}
           position={screenSpacePos}
           size={size}
           showInfo={showInfo}
+          planetInfo={planetInfo}
         />);
-      }
-    });
-    return markerInfo;
-  }
+       }
+      })
+    )}
 
   render() {
     return (
@@ -81,6 +85,7 @@ const mapStateToProps = (state) => {
   const screenSpaceProperties = [];
   const screenVisibilityProperties = [];
   const distFromCamToNodeProperties = [];
+  let infoIcons = {};
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
@@ -99,11 +104,17 @@ const mapStateToProps = (state) => {
       distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.DistanceFromCamToNode`));
     });
   }
+
+  if(state.fetchData.length > 0) {
+    const tmp = (state.fetchData.find(info => info.id === infoIconKey));
+    infoIcons = tmp.succeed ? tmp : {};
+  }
   return {
     nodes,
     screenSpaceProperties,
     screenVisibilityProperties,
     distFromCamToNodeProperties,
+    infoIcons,
   };
 };
 

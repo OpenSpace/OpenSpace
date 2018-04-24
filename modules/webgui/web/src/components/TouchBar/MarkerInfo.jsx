@@ -1,11 +1,16 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Icon from '../common/Icon/Icon';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
 import styles from './MarkerInfo.scss';
+import MakerInfoIcon from "./MakerInfoIcon";
 
-const MarkerInfo = (props) => {
-  const { position, size } = props;
+class MarkerInfo extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+render() {
+  const { position, size, showInfo, identifier } = this.props;
 
   const positionStyles = {
     MarkerInfo: {
@@ -24,17 +29,23 @@ const MarkerInfo = (props) => {
 
   return (
     <div className={styles.MarkerInfo} style={positionStyles.MarkerInfo}>
-      <Icon className={`${styles.icon} ${props.showInfo && styles.active}`} icon="info_outline" style={positionStyles.Icon} />
-      <SmallLabel style={positionStyles.Text}>{props.identifier}</SmallLabel>
+      {showInfo &&
+      <MakerInfoIcon
+        identifier={identifier}
+        positionStyles={positionStyles}
+        planetInfo={this.props.planetInfo}/>}
+      <SmallLabel style={positionStyles.Text}>{identifier}</SmallLabel>
     </div>
   );
-};
+}
+}
 
 MarkerInfo.propTypes = {
-  position: PropTypes.arrayOf(PropTypes.string).isRequired,
+  position: PropTypes.arrayOf(PropTypes.string),
   identifier: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
   showInfo: PropTypes.bool.isRequired,
+  planetInfo: PropTypes.objectOf(PropTypes.string),
 };
 
 export default MarkerInfo;
