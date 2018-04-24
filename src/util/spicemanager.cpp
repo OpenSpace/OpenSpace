@@ -770,21 +770,25 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
 
 
-    const std::string key_base = "MSL_RA_BASE";
-    const std::string key_az = "MSL_RA_SHOULDER_AZ";
-    const std::string key_el = "MSL_RA_SHOULDER_EL";
-    const std::string key_elbow = "MSL_RA_ELBOW";
-    const std::string key_wrist = "MSL_RA_WRIST";
-    const std::string key_turret = "MSL_RA_TURRET";
-    const std::string key_rsm_az_zero = "MSL_RSM_ZERO_AZ";
-    const std::string key_rsm_az = "MSL_RSM_AZ";
-    const std::string key_rsm_el_zero = "MSL_RSM_ZERO_EL";
+    const std::string ra_base = "MSL_RA_BASE";
+    const std::string ra_az = "MSL_RA_SHOULDER_AZ";
+    const std::string ra_el = "MSL_RA_SHOULDER_EL";
+    const std::string ra_elbow = "MSL_RA_ELBOW";
+    const std::string ra_wrist = "MSL_RA_WRIST";
+    const std::string ra_turret = "MSL_RA_TURRET";
+
+    const std::string rsm_az_zero = "MSL_RSM_ZERO_AZ";
+    const std::string rsm_el_zero = "MSL_RSM_ZERO_EL";
+
+    const std::string hga_az = "MSL_HGA_AZ";
+    const std::string hga_el = "MSL_HGA_EL";
 
 
-
-    if(fromFrame == key_base || fromFrame == key_az || fromFrame == key_el || fromFrame == key_elbow || fromFrame == key_wrist
-        || fromFrame == key_rsm_az || fromFrame == key_rsm_el_zero || fromFrame == key_rsm_az_zero)
+    if(fromFrame == ra_base || fromFrame == ra_az || fromFrame == ra_el || fromFrame == ra_elbow || fromFrame == ra_wrist
+        || fromFrame == rsm_el_zero || fromFrame == rsm_az_zero ||fromFrame == hga_az   || fromFrame == hga_el)
     {   
+        //ERROR(fmt::format("tihi: " ));
+   
         //PXFORM( 'MSL_RA_BASE', 'MSL_RA_SHOULDER_AZ', ET, M )
         //M2EUL( M, 3, 2, 1, ROTZ, ROTY, ROTX )
         //ANGLE = ROTZ
@@ -814,11 +818,9 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
         SpiceDouble angle = rot_z;
 
-        
-        
-        //EL correct elbow
-        if (fromFrame == key_base || fromFrame == key_az || fromFrame == key_el)
+        if (fromFrame == ra_base || fromFrame == ra_az || fromFrame == ra_el || fromFrame == ra_elbow)
         { 
+            //LERROR(fmt::format("FromFrame: '{}'", key_elbow ));
             /*
             result = glm::dmat3( 1.0,       0.0,    0.0, 
                                  0.0, glm::cos(angle) , -glm::sin(angle), 
@@ -830,9 +832,8 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             */
                 
             //Rotation for AZ
-            if (fromFrame == key_base) 
+            if (fromFrame == ra_base) 
             {
-            
                 result = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
                                     -glm::sin(angle),  glm::cos(angle), 0.0, 
                                         0.0,             0.0,           1.0 );
@@ -841,7 +842,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
 
             //Rotation for RA-EL
-            else if (fromFrame == key_az) 
+            else if (fromFrame == ra_az ) 
             {
                 glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
                                                            0.0,        1.0 ,     0.0, 
@@ -855,40 +856,43 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
                 result = MSL_rotation * matrixCorrection;
             }
 
-            //Rotation for RA-ELBOW
-            else if (fromFrame == key_el) 
+            //Rotation for RA-ELBOW &  RA-WRIST
+            else if (fromFrame == ra_el || fromFrame == ra_elbow) 
             {
                 result = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
                                           0.0,        1.0 ,     0.0, 
                                     -glm::sin(angle), 0.0,  glm::cos(angle) );
             }
         }
-        else if (fromFrame == key_rsm_az || fromFrame == key_rsm_el_zero ||fromFrame == key_rsm_az_zero) 
+
+
+        else if (fromFrame == rsm_az_zero) 
         {
 
-             //***********************************//
-            //Rotation for RSM AZ
-            if (fromFrame == key_rsm_az_zero) 
-            {
-                glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
-                                    -glm::sin(angle),  glm::cos(angle), 0.0, 
-                                        0.0,             0.0,           1.0 );
+            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
+                                    0.0,        1.0 ,     0.0, 
+                                glm::sin(angle), 0.0,  glm::cos(angle) );
+        }
 
-                result = MSL_rotation; 
-            }
 
-            else if (fromFrame == key_rsm_el_zero)
-            {
-                glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
-                                                    -glm::sin(angle),  glm::cos(angle), 0.0, 
-                                                    0.0,             0.0,           1.0 );
+        else if (fromFrame == rsm_el_zero)
+        {
+            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
+                                                       0.0,        1.0 ,     0.0, 
+                                                  glm::sin(angle), 0.0,  glm::cos(angle) );
+        }
 
-                // FIX: problem, don't know exactly what angle is needed for correct modification of angle, lookup!!
-                glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(90.0),  glm::sin(90.0), 0.0, 
-                                            -glm::sin(90.0),  glm::cos(90.0), 0.0, 
-                                            0.0,             0.0,           1.0 );
-                result =  MSL_rotation;// * matrixCorrection;
-            }
+
+        else if (fromFrame == hga_az) {
+            result = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
+                                 glm::sin(angle),  glm::cos(angle), 0.0, 
+                                    0.0,             0.0,           1.0 );
+        }
+        else if (fromFrame == hga_el ) 
+        {
+            glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
+                                                       0.0,        1.0 ,     0.0, 
+                                                  glm::sin(angle), 0.0,  glm::cos(angle) );
         }
 
     }

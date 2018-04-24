@@ -583,9 +583,6 @@ const std::string& SceneGraphNode::guiPath() const {
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        glm::dmat3 inverseMatrix = glm::mat3( -1.0, -1.0, -1.0, 
-                                              -1.0, -1.0, -1.0, 
-                                              -1.0, -1.0, -1.0 );
         return
             _parent->calculateWorldPosition() +
             _parent->worldRotationMatrix() *
@@ -598,27 +595,28 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
-    // recursive up the hierarchy if there are parents available
-                       
+    // recursive up the hierarchy if there are parents available                   
     if (_parent) {
-        //Caroline
-        if (_parent->name() == "RA_Shoulder_AZ_Location"  || _parent->name() == "RSM_AZ_Location")
-        {
+
+
+
+        //if (_parent->name() == "RA_Shoulder_AZ_Location")
+        //{
             //LERROR(fmt::format("Parent location AZ: '{}'", _parent->name()));
             //LERROR(fmt::format("Parent rotations matrix '{}'", _parent->worldRotationMatrix() ));
-        }   
+        //}   
 
-        if (this->name() == "RA_Shoulder_EL_Location" )//|| this->name() == "RSM_AZ_Location") // Kristin
-        {
-            glm::dmat3 change = glm::dmat3( 
-                -1.0, -1.0, 1.0, 
-                -1.0, -1.0, 1.0, 
-                 1.0,  1.0, 1.0
-            );
+        //if (this->name() == "RA_Shoulder_EL_Location")
+        //{
+            //glm::dmat3 directionTransform_Z = glm::dmat3( 
+            //    -1.0, -1.0, 1.0, 
+            //    -1.0, -1.0, 1.0, 
+            //     1.0,  1.0, 1.0
+            //);
+            //
+            //glm::dmat3 changeDirection = _parent->calculateWorldRotation() * directionTransform_Z;
+        //} 
 
-            glm::dmat3 changeDirection = _parent->calculateWorldRotation() * change;
-            //return rotationMatrix() * changeDirection;   
-        } 
         return _parent->calculateWorldRotation() * rotationMatrix();
     }
     else {

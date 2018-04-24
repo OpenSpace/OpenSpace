@@ -42,6 +42,9 @@ local RoverLocation = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
+
+---- ROBOTIC ARM RA ----
+
 local RA_Base_Location = {
     Name = "RA_Base_Location",
     Parent = RoverLocation.Name,
@@ -69,7 +72,7 @@ local RA_Shoulder_AZ_Location = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
-
+--EL
 local RA_Shoulder_EL_Location = {
     Name = "RA_Shoulder_EL_Location",
     Parent = RA_Shoulder_AZ_Location.Name,
@@ -82,12 +85,12 @@ local RA_Shoulder_EL_Location = {
         },
         Translation = {
             Type = "StaticTranslation",
-            -- Position = {-0.12, 0.06, -0.26}
-            Position = {0.15, 0.25, 0.0}
+            Position = {0.15, 0.2, 0.0}
         }
     }
 }
-    
+
+--ELBOW
 local RA_Elbow_Location = {
     Name = "RA_Elbow_Location",
     Parent = RA_Shoulder_EL_Location.Name,
@@ -100,108 +103,31 @@ local RA_Elbow_Location = {
         },
         Translation = {
             Type = "StaticTranslation",
-            -- (height, deep, left)
             Position = {0.83, -0.2, 0.0 }
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
-
--- MastCam
-
-
---Shall have a static rotation about rovers Z by 181 degrees
-local RSM_ZERO_AZ_Location = {
-    Name = "RSM_ZERO_AZ_Location",
-    Parent = RoverLocation.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-local RSM_AZ_Location = {
-    Name = "RSM_AZ_Location",
-    Parent = RSM_ZERO_AZ_Location.Name,
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = {0.743, 0.567, -0.562}
-        },
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = {1.0, 0.0, 0.0,
-                0.0,-0.598460,0.801153,
-                0.000000,-0.801153,-0.598460
-            }
-        },
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-local RSM_AZ_Rotation = {
-    Name = "RSM_AZ_Rotation",
-    Parent = RSM_AZ_Location.Name,
+--WRIST
+local RA_Wrist_Location = {
+    Name = "RA_Wrist_Location",
+    Parent = RA_Elbow_Location.Name,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
-            SourceFrame = "MSL_RSM_ZERO_AZ",
-            DestinationFrame = "MSL_RSM_AZ",
+            SourceFrame = "MSL_RA_ELBOW",
+            DestinationFrame = "MSL_RA_WRIST",
             Kernels = kernels.CuriosityKernels
-        }
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-
-
-
--- Shall have static rotation about rovers Y by -91 dregrees
-local RSM_ZERO_EL_Location = {
-    Name = "RSM_ZERO_EL_Location",
-    Parent = RSM_AZ_Rotation.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-local RSM_EL_Location = {
-    Name = "RSM_EL_Location",
-    Parent = RSM_ZERO_EL_Location.Name,
-    Transform = {
+        },
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.015, 0.0, -0.505}
+            Position = {0.77, 0.13, 0.035}
+
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
-
-local RSM_EL_Rotation = {
-    Name = "RSM_EL_Rotation",
-    Parent = RSM_EL_Location.Name,
-    Transform = {
-        --Rotation = {
-        --    Type = "SpiceRotation",
-        --    SourceFrame = "MSL_RSM_ZERO_EL",
-        --    DestinationFrame = "MSL_RSM_EL",
-        --    Kernels = kernels.CuriosityKernels
-        --}
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-local RSM_HEAD_Location = {
-    Name = "RSM_HEAD_Location",
-    Parent = RSM_EL_Rotation.Name,
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = {0.235, 0.0, -0.306}
-        }
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-
-
-
 
 
 
@@ -224,6 +150,137 @@ local RSM_HEAD_Location = {
 --}
 
 
+
+--TURRET
+local RA_Turret_Location = {
+    Name = "RA_Turret_Location",
+    Parent = RA_Wrist_Location.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+--MAHLI
+local RA_Mahli_Location = {
+    Name = "RA_Mahli_Location",
+    Parent = RA_Wrist_Location.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+---- MASTCAM RSM ----
+
+--Shall have a static rotation about rovers Z by 181 degrees
+local RSM_ZERO_AZ_Location = {
+    Name = "RSM_ZERO_AZ_Location",
+    Parent = RoverLocation.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_AZ_Location = {
+    Name = "RSM_AZ_Location",
+    Parent = RSM_ZERO_AZ_Location.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.743, 0.567, -0.562}
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RSM_ZERO_AZ",
+            DestinationFrame = "MSL_RSM_AZ",
+            Kernels = kernels.CuriosityKernels
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+
+
+-- Shall have static rotation about rovers Y by -91 dregrees
+local RSM_ZERO_EL_Location = {
+    Name = "RSM_ZERO_EL_Location",
+    Parent = RSM_AZ_Location.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_EL_Location = {
+    Name = "RSM_EL_Location",
+    Parent = RSM_ZERO_EL_Location.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.015, 0.0, -0.505}
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RSM_ZERO_EL",
+            DestinationFrame = "MSL_RSM_EL",
+            Kernels = kernels.CuriosityKernels
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+local RSM_HEAD_Location = {
+    Name = "RSM_HEAD_Location",
+    Parent = RSM_EL_Location.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.235, 0.0, -0.306}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+
+
+
+
+---- HIGH GAIN ANTENNA HGA ----
+
+local HGA_AZ_Location = {
+    Name = "HGA_AZ_Location",
+    Parent = RoverLocation.Name,
+    Transform = {   
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER",
+            DestinationFrame = "MSL_HGA_AZ",
+            Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {-0.46, -0.47, -0.55}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local HGA_EL_Location = {
+    Name = "HGA_EL_Location",
+    Parent = HGA_AZ_Location.Name,
+    Transform = {   
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_HGA_AZ",
+            DestinationFrame = "MSL_HGA_EL",
+            Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, -0.17}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+---- SAM ----
+
+---- CHEMIN ----
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     CuriosityPosition,
     RoverLocation,
@@ -231,23 +288,17 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Shoulder_AZ_Location,
     RA_Shoulder_EL_Location,
     RA_Elbow_Location,
-    --RA_Wrist_Location,
+    RA_Wrist_Location,
+    RA_Turret_Location,
+    RA_Mahli_Location,
+
     RSM_ZERO_AZ_Location,
     RSM_AZ_Location,
-    RSM_AZ_Rotation,
     RSM_ZERO_EL_Location,
     RSM_EL_Location,
-    RSM_EL_Rotation,
-    RSM_HEAD_Location
-    -- RA_Orientation,
-    -- RA_SHOULDER_AZ_Orientation,
-    -- RA_SHOULDER_EL_Orientation,
-    -- RA_ELBOW_Orientation,
-    -- RA_WRIST_Orientation
+    RSM_HEAD_Location,
+    HGA_AZ_Location,
+    HGA_EL_Location
 })
-
-
-
-
 
 
