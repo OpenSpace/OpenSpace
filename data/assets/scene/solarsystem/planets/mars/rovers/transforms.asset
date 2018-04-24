@@ -168,7 +168,6 @@ local RA_Mahli_Location = {
 
 ---- MASTCAM RSM ----
 
---Shall have a static rotation about rovers Z by 181 degrees
 local RSM_ZERO_AZ_Location = {
     Name = "RSM_ZERO_AZ_Location",
     Parent = RoverLocation.Name,
@@ -181,7 +180,7 @@ local RSM_AZ_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.743, 0.567, -0.562}
+            Position = {0.743, 0.567, -0.516}
         },
         Rotation = {
             Type = "SpiceRotation",
@@ -193,10 +192,6 @@ local RSM_AZ_Location = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
-
-
-
--- Shall have static rotation about rovers Y by -91 dregrees
 local RSM_ZERO_EL_Location = {
     Name = "RSM_ZERO_EL_Location",
     Parent = RSM_AZ_Location.Name,
@@ -209,7 +204,7 @@ local RSM_EL_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.015, 0.0, -0.505}
+            Position = {0.055, 0.0, 0.52}
         },
         Rotation = {
             Type = "SpiceRotation",
@@ -221,14 +216,13 @@ local RSM_EL_Location = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
-
 local RSM_HEAD_Location = {
     Name = "RSM_HEAD_Location",
     Parent = RSM_EL_Location.Name,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.235, 0.0, -0.306}
+            Position = {0.105, 0.0, 0.32}
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
