@@ -602,13 +602,13 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
                        
     if (_parent) {
         //Caroline
-        if (_parent->name() == "RA_Shoulder_AZ_Location")
+        if (_parent->name() == "RA_Shoulder_AZ_Location"  || _parent->name() == "RSM_AZ_Location")
         {
             //LERROR(fmt::format("Parent location AZ: '{}'", _parent->name()));
             //LERROR(fmt::format("Parent rotations matrix '{}'", _parent->worldRotationMatrix() ));
         }   
 
-        if (this->name() == "RA_Shoulder_EL_Location")
+        if (this->name() == "RA_Shoulder_EL_Location" )//|| this->name() == "RSM_AZ_Location") // Kristin
         {
             glm::dmat3 change = glm::dmat3( 
                 -1.0, -1.0, 1.0, 

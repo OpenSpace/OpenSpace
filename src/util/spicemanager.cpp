@@ -776,9 +776,14 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     const std::string key_elbow = "MSL_RA_ELBOW";
     const std::string key_wrist = "MSL_RA_WRIST";
     const std::string key_turret = "MSL_RA_TURRET";
+    const std::string key_rsm_az_zero = "MSL_RSM_ZERO_AZ";
+    const std::string key_rsm_az = "MSL_RSM_AZ";
+    const std::string key_rsm_el_zero = "MSL_RSM_ZERO_EL";
 
 
-    if(  fromFrame == key_base || fromFrame == key_az || fromFrame == key_el || fromFrame == key_elbow || fromFrame == key_wrist )
+
+    if(fromFrame == key_base || fromFrame == key_az || fromFrame == key_el || fromFrame == key_elbow || fromFrame == key_wrist
+        || fromFrame == key_rsm_az || fromFrame == key_rsm_el_zero || fromFrame == key_rsm_az_zero)
     {   
         //PXFORM( 'MSL_RA_BASE', 'MSL_RA_SHOULDER_AZ', ET, M )
         //M2EUL( M, 3, 2, 1, ROTZ, ROTY, ROTX )
@@ -808,6 +813,8 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(result)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
 
         SpiceDouble angle = rot_z;
+
+        
         
         //EL correct elbow
         if (fromFrame == key_base || fromFrame == key_az || fromFrame == key_el)
@@ -825,7 +832,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             //Rotation for AZ
             if (fromFrame == key_base) 
             {
-                //LERROR(fmt::format("CAROLINE: '{}'", result ));
+            
                 result = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
                                     -glm::sin(angle),  glm::cos(angle), 0.0, 
                                         0.0,             0.0,           1.0 );
@@ -854,10 +861,36 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
                 result = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
                                           0.0,        1.0 ,     0.0, 
                                     -glm::sin(angle), 0.0,  glm::cos(angle) );
+            }
+        }
+        else if (fromFrame == key_rsm_az || fromFrame == key_rsm_el_zero ||fromFrame == key_rsm_az_zero) 
+        {
 
+             //***********************************//
+            //Rotation for RSM AZ
+            if (fromFrame == key_rsm_az_zero) 
+            {
+                glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
+                                    -glm::sin(angle),  glm::cos(angle), 0.0, 
+                                        0.0,             0.0,           1.0 );
+
+                result = MSL_rotation; 
             }
 
+            else if (fromFrame == key_rsm_el_zero)
+            {
+                glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
+                                                    -glm::sin(angle),  glm::cos(angle), 0.0, 
+                                                    0.0,             0.0,           1.0 );
+
+                // FIX: problem, don't know exactly what angle is needed for correct modification of angle, lookup!!
+                glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(90.0),  glm::sin(90.0), 0.0, 
+                                            -glm::sin(90.0),  glm::cos(90.0), 0.0, 
+                                            0.0,             0.0,           1.0 );
+                result =  MSL_rotation;// * matrixCorrection;
+            }
         }
+
     }
     return glm::transpose(result);
 }

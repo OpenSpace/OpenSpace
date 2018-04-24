@@ -107,6 +107,104 @@ local RA_Elbow_Location = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
+
+-- MastCam
+
+
+--Shall have a static rotation about rovers Z by 181 degrees
+local RSM_ZERO_AZ_Location = {
+    Name = "RSM_ZERO_AZ_Location",
+    Parent = RoverLocation.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_AZ_Location = {
+    Name = "RSM_AZ_Location",
+    Parent = RSM_ZERO_AZ_Location.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.743, 0.567, -0.562}
+        },
+        Rotation = {
+            Type = "StaticRotation",
+            Rotation = {1.0, 0.0, 0.0,
+                0.0,-0.598460,0.801153,
+                0.000000,-0.801153,-0.598460
+            }
+        },
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_AZ_Rotation = {
+    Name = "RSM_AZ_Rotation",
+    Parent = RSM_AZ_Location.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RSM_ZERO_AZ",
+            DestinationFrame = "MSL_RSM_AZ",
+            Kernels = kernels.CuriosityKernels
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+
+
+-- Shall have static rotation about rovers Y by -91 dregrees
+local RSM_ZERO_EL_Location = {
+    Name = "RSM_ZERO_EL_Location",
+    Parent = RSM_AZ_Rotation.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_EL_Location = {
+    Name = "RSM_EL_Location",
+    Parent = RSM_ZERO_EL_Location.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.015, 0.0, -0.505}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_EL_Rotation = {
+    Name = "RSM_EL_Rotation",
+    Parent = RSM_EL_Location.Name,
+    Transform = {
+        --Rotation = {
+        --    Type = "SpiceRotation",
+        --    SourceFrame = "MSL_RSM_ZERO_EL",
+        --    DestinationFrame = "MSL_RSM_EL",
+        --    Kernels = kernels.CuriosityKernels
+        --}
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local RSM_HEAD_Location = {
+    Name = "RSM_HEAD_Location",
+    Parent = RSM_EL_Rotation.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.235, 0.0, -0.306}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+
+
+
+
+
 --local RA_Wrist_Location = {
 --    Name = "RA_Wrist_Location",
 --    Parent = RA_Elbow_Location.Name,
@@ -132,10 +230,15 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Base_Location,
     RA_Shoulder_AZ_Location,
     RA_Shoulder_EL_Location,
-    RA_Elbow_Location
-    --RA_Wrist_Location
-    -- RSM_AZ_Orientation,
-    -- RSM_EL_Orientation,
+    RA_Elbow_Location,
+    --RA_Wrist_Location,
+    RSM_ZERO_AZ_Location,
+    RSM_AZ_Location,
+    RSM_AZ_Rotation,
+    RSM_ZERO_EL_Location,
+    RSM_EL_Location,
+    RSM_EL_Rotation,
+    RSM_HEAD_Location
     -- RA_Orientation,
     -- RA_SHOULDER_AZ_Orientation,
     -- RA_SHOULDER_EL_Orientation,
@@ -147,39 +250,4 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
 
 
-
-
-
-
-
--- MastCam
-
---bottom
---local RSM_AZ_Orientation = {
---    Name = "RSM_AZ_Orientation",
---    Parent = "CuriosityPosition",
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "NH_SPACECRAFT",
---            DestinationFrame = "GALACTIC"
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---top
---local RSM_EL_Orientation = {
---    Name = "RSM_EL_Orientation",
---    Parent = "CuriosityPosition",
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RMS_EL", -- 
---            DestinationFrame = "GALACTIC",
---            Kernel = kernels.CuriosityKernels
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
 

@@ -145,23 +145,57 @@ local RA_Elbow = {
 
 
 
+
+
 -- MastCam
---
---local RSM_ = {
---    Name = "body",
---    Parent = CuriosityModel.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = modelsOld .. "/MSL_body.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
---
+
+local MSL_RSM_AZ = {
+    Name = "MSL_RSM_AZ",
+    Parent = transforms.RSM_AZ_Rotation.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MSL_RSM_AZ",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RSM_AZ.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+local MSL_RSM_EL = {
+    Name = "MSL_RSM_EL",
+    Parent = transforms.RSM_EL_Rotation.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MSL_RSM_EL",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RSM_EL.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+
+local MSL_RSM_HEAD = {
+    Name = "MSL_RSM_HEAD",
+    Parent = transforms.RSM_HEAD_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MSL_RSM_HEAD",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RSM_HEAD.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+
 
 
 
@@ -192,8 +226,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
 
     RA_Shoulder_AZ,
     RA_Shoulder_EL,
-    RA_Elbow
+    RA_Elbow,
     --RA_Wrist
 
+
+    MSL_RSM_AZ,
+    --MSL_RSM_EL,
+    --MSL_RSM_HEAD
     -- Wheels_All
 })
