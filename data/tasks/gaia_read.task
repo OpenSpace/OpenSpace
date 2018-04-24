@@ -2,7 +2,7 @@ return {
     {
         Type = "ReadFitsTask",
         InFileOrFolderPath = "E:/GaiaDR1/gaia_source/fits",
-        OutFileOrFolderPath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/DR1_full/",
+        OutFileOrFolderPath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/DR1_full_16col/",
         SingleFileProcess = false,
         FilterColumnNames = {
             "ra_error",

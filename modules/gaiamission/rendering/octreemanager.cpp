@@ -323,9 +323,9 @@ void OctreeManager::readNodeFromFile(std::ifstream& inFileStream,
             auto posEnd = fetchedData.begin() + (starsInNode * _posSize);
             auto colEnd = posEnd + (starsInNode * _colSize);
             auto velEnd = colEnd + (starsInNode * _velSize);
-            node->posData = std::vector<float>(fetchedData.begin(), posEnd);
-            node->colData = std::vector<float>(posEnd, colEnd);
-            node->velData = std::vector<float>(colEnd, velEnd);
+            node->posData = std::move(std::vector<float>(fetchedData.begin(), posEnd));
+            node->colData = std::move(std::vector<float>(posEnd, colEnd));
+            node->velData = std::move(std::vector<float>(colEnd, velEnd));
         }
     }
 
@@ -410,9 +410,9 @@ void OctreeManager::fetchNodeDataFromFile(std::string inFilePrefix,
         auto posEnd = readData.begin() + (starsInNode * _posSize);
         auto colEnd = posEnd + (starsInNode * _colSize);
         auto velEnd = colEnd + (starsInNode * _velSize);
-        node->posData = std::vector<float>(readData.begin(), posEnd);
-        node->colData = std::vector<float>(posEnd, colEnd);
-        node->velData = std::vector<float>(colEnd, velEnd);
+        node->posData = std::move(std::vector<float>(readData.begin(), posEnd));
+        node->colData = std::move(std::vector<float>(posEnd, colEnd));
+        node->velData = std::move(std::vector<float>(colEnd, velEnd));
     }
     else {
         LERROR("Error opening node data file:" +  inFilePath);
@@ -514,9 +514,9 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
         // Copy LOD cache data from the first MAX_STARS_PER_NODE stars.
         // Don't use LOD cache for our more shallow layers.
         if (depth > FIRST_LOD_DEPTH) {
-            node->posData = tmpLodNode->posData;
-            node->colData = tmpLodNode->colData;
-            node->velData = tmpLodNode->velData;
+            node->posData = std::move(tmpLodNode->posData);
+            node->colData = std::move(tmpLodNode->colData);
+            node->velData = std::move(tmpLodNode->velData);
         }
         else {
             node->posData = std::vector<float>();
@@ -551,9 +551,9 @@ void OctreeManager::constructLodCache(std::shared_ptr<OctreeNode> node) {
     insertData[0] = node->originX;
     insertData[1] = node->originY;
     insertData[2] = node->originZ;
-    node->posData = std::vector<float>(insertData.begin(), insertData.end());
-    node->colData = std::vector<float>(_colSize, 0.f);
-    node->velData = std::vector<float>(_velSize, 0.f);
+    node->posData = std::move(std::vector<float>(insertData.begin(), insertData.end()));
+    node->colData = std::move(std::vector<float>(_colSize, 0.f));
+    node->velData = std::move(std::vector<float>(_velSize, 0.f));
 }
 
 // Private help function for insertInNode(). Determines if star should be stored in LOD.
@@ -781,9 +781,13 @@ std::vector<float> OctreeManager::getNodeData(std::shared_ptr<OctreeNode> node,
 // Clear data from all nodes in Octree.
 void OctreeManager::clearNodeData(std::shared_ptr<OctreeNode> node) {
 
+    // Clear data and its allocated memory.
     node->posData.clear();
+    node->posData.shrink_to_fit();
     node->colData.clear();
+    node->colData.shrink_to_fit();
     node->velData.clear();
+    node->velData.shrink_to_fit();
 
     if (!node->isLeaf) {
         // Remove data from all children recursively.

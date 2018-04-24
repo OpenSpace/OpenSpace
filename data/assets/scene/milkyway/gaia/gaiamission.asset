@@ -25,7 +25,7 @@ local GaiaMission = {
     Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = stars .. "/DR1_Octree.bin", -- Original DR1: TIGS_v9.0.fits
+        File = stars .. "/TGAS_Octree_10kSPN.bin", -- Original DR1: TIGS_v9.0.fits
         FileTypeOrigin = "fits", -- Either "speck" or "fits", speck files only works with preprocess
         FilePreprocessed = true, -- If 'true' then use: DR1_FITS_17col.bin or DR1_AMNH.bin, else use original
         RenderOption = "Static",
@@ -66,7 +66,7 @@ local GaiaMission = {
     }
 }
 
--- Prepared asset from Vienna's DR1 file (2.1M stars) if user want to compare the datasets.
+-- Prepared asset from Vienna's DR1_TGAS file (2.1M stars) if user want to compare the datasets.
 local GaiaMissionFits = {
     Identifier = "GaiaMissionFits",
     Renderable = {

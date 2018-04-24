@@ -82,7 +82,7 @@ private:
     size_t MAX_DIST = 10; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
-    size_t MAX_STARS_PER_NODE = 50000; 
+    size_t MAX_STARS_PER_NODE = 10000; 
     const int DEFAULT_INDEX = -1;
     const float MIN_TOTAL_PIXELS_LOD = 0.0; // Will be multiplied by depth.
     const int FIRST_LOD_DEPTH = 3; // No layer beneath this will not store any LOD cache.
