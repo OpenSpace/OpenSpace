@@ -34,3 +34,7 @@ export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholde
 export const ApplyOverviewKey = 'NavigationHandler.OrbitalNavigator.ApplyOverview';
 // key for setting/getting the Story identifier
 export const StoryKey = 'Scene.StoryIdentifier';
+// key for json file with info for icons
+export const infoIconKey = 'info_icons';
+// key for endpoint for json files
+export const dataEndpointKey = 'https://openspace.github.io/sci/mastertheses/2018/info/solarsystem/';

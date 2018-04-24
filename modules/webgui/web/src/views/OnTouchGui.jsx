@@ -5,11 +5,11 @@ import '../styles/base.scss';
 
 import Error from '../components/common/Error/Error';
 import Overlay from '../components/common/Overlay/Overlay';
-import {changePropertyValue, startConnection} from '../api/Actions';
+import { changePropertyValue, startConnection, fetchData } from '../api/Actions';
 import TouchBar from '../components/TouchBar/TouchBar';
 import styles from './OnTouchGui.scss';
-import {traverseTreeWithURI} from "../utils/propertyTreeHelpers";
-import {StoryKey} from "../api/keys";
+import { traverseTreeWithURI } from "../utils/propertyTreeHelpers";
+import {infoIconKey, StoryKey} from "../api/keys";
 
 class OnTouchGui extends Component {
   constructor(props) {
@@ -19,6 +19,7 @@ class OnTouchGui extends Component {
   }
   componentDidMount() {
     this.props.StartConnection();
+    this.props.FetchData(infoIconKey);
   }
 
   changeStory(e){
@@ -65,6 +66,9 @@ const mapDispatchToProps = dispatch => ({
   StartConnection: () => {
     dispatch(startConnection());
   },
+  FetchData: (id) => {
+    dispatch(fetchData(id));
+  }
 });
 
 OnTouchGui = withRouter(connect(

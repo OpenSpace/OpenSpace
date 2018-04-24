@@ -17,6 +17,11 @@ export const actionTypes = {
   onCloseConnection: 'CONNECTION_ON_CLOSE',
   changeConnectionWait: 'CONNECTION_CHANGE_WAIT',
 
+  // action types for fetching data from json files
+  fetchData: 'FETCH_DATA',
+  fetchDataDone: 'FETCH_DATA_DONE',
+  fetchDataFailed: 'FETCH_DATA_FAILED',
+
   // action types for transfer function editor
   addTransferFunction: 'TRANSFERFUNCTION_ADD_TRANSFER_FUNCTION',
   addEnvelope: 'TRANSFERFUNCTION_ADD_ENVELOPE',

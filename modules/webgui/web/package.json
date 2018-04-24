@@ -27,6 +27,7 @@
   "homepage": "https://github.com/OpenSpace/OpenSpace#readme",
   "dependencies": {
     "lodash": "^4.17.4",
+    "node-fetch": "^2.1.2",
     "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-color": "^2.13.8",

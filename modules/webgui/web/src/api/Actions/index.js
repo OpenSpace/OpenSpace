@@ -67,3 +67,25 @@ export const changeConnectionWait = value => ({
     value,
   },
 });
+
+export const fetchData = id => ({
+  type: actionTypes.fetchData,
+  payload: {
+    id,
+  },
+});
+
+export const fetchDataDone = (data, id) => ({
+  type: actionTypes.fetchDataDone,
+  payload: {
+    data,
+    id,
+  },
+});
+
+export const fetchDataFailed = (id) => ({
+  type: actionTypes.fetchDataFailed,
+  payload: {
+    id,
+  }
+});
