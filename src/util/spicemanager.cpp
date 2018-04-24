@@ -770,15 +770,19 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
 
 
-    const std::string key_base = "MSL_RA_BASE";
-    const std::string key_az = "MSL_RA_SHOULDER_AZ";
-    const std::string key_el = "MSL_RA_SHOULDER_EL";
-    const std::string key_elbow = "MSL_RA_ELBOW";
-    const std::string key_wrist = "MSL_RA_WRIST";
-    const std::string key_turret = "MSL_RA_TURRET";
+    const std::string msl_base = "MSL_RA_BASE";
+    const std::string msl_az = "MSL_RA_SHOULDER_AZ";
+    const std::string msl_el = "MSL_RA_SHOULDER_EL";
+    const std::string msl_elbow = "MSL_RA_ELBOW";
+    const std::string msl_wrist = "MSL_RA_WRIST";
+    const std::string msl_turret = "MSL_RA_TURRET";
 
+    const std::string hga_az = "MSL_HGA_AZ";
+    const std::string hga_el = "MSL_HGA_EL";
 
-    if(  fromFrame == key_base || fromFrame == key_az || fromFrame == key_el || fromFrame == key_elbow || fromFrame == key_wrist )
+    // 
+    if( fromFrame == msl_base || fromFrame == msl_az || fromFrame == msl_el || fromFrame == msl_elbow || fromFrame == msl_wrist ||
+        fromFrame == hga_az   || fromFrame == hga_el )
     {   
         //ERROR(fmt::format("tihi: " ));
    
@@ -811,7 +815,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
         SpiceDouble angle = rot_z;
 
-        if (fromFrame == key_base || fromFrame == key_az || fromFrame == key_el || fromFrame == key_elbow)
+        if (fromFrame == msl_base || fromFrame == msl_az || fromFrame == msl_el || fromFrame == msl_elbow)
         { 
             //LERROR(fmt::format("FromFrame: '{}'", key_elbow ));
             /*
@@ -825,7 +829,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             */
                 
             //Rotation for AZ
-            if (fromFrame == key_base) 
+            if (fromFrame == msl_base) 
             {
                 result = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
                                     -glm::sin(angle),  glm::cos(angle), 0.0, 
@@ -835,7 +839,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
 
             //Rotation for RA-EL
-            else if (fromFrame == key_az ) 
+            else if (fromFrame == msl_az ) 
             {
                 glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
                                                            0.0,        1.0 ,     0.0, 
@@ -850,7 +854,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             }
 
             //Rotation for RA-ELBOW &  RA-WRIST
-            else if (fromFrame == key_el || fromFrame == key_elbow) 
+            else if (fromFrame == msl_el || fromFrame == msl_elbow) 
             {
                 result = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
                                           0.0,        1.0 ,     0.0, 
@@ -859,6 +863,20 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             }
 
             
+
+            else if (fromFrame == hga_az) {
+                result = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
+                                     glm::sin(angle),  glm::cos(angle), 0.0, 
+                                        0.0,             0.0,           1.0 );
+            }
+
+            else if (fromFrame == hga_el ) 
+            {
+                glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
+                                                           0.0,        1.0 ,     0.0, 
+                                                      glm::sin(angle), 0.0,  glm::cos(angle) );
+            }
+
             
         }
     }

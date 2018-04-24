@@ -147,6 +147,42 @@ local RA_Mahli_Location = {
 
 ---- HIGH GAIN ANTENNA HGA ----
 
+local HGA_AZ_Location = {
+    Name = "HGA_AZ_Location",
+    Parent = RoverLocation.Name,
+    Transform = {   
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER",
+            DestinationFrame = "MSL_HGA_AZ",
+            Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {-0.46, -0.47, -0.55}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local HGA_EL_Location = {
+    Name = "HGA_EL_Location",
+    Parent = HGA_AZ_Location.Name,
+    Transform = {   
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_HGA_AZ",
+            DestinationFrame = "MSL_HGA_EL",
+            Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, -0.17}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
 ---- SAM ----
 
 ---- CHEMIN ----
@@ -160,7 +196,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Elbow_Location,
     RA_Wrist_Location,
     RA_Turret_Location,
-    RA_Mahli_Location
+    RA_Mahli_Location,
+    HGA_AZ_Location,
+    HGA_EL_Location
 })
 
 

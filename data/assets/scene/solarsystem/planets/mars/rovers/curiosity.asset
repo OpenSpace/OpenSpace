@@ -190,6 +190,40 @@ local RA_Mahli = {
 }
 
 
+---- HGA ----
+
+local HGA_AZ = {
+    Name = "HGA_AZ",
+    Parent = transforms.HGA_AZ_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_HGA_AZ_0ANGLE.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+local HGA_EL = {
+    Name = "HGA_EL",
+    Parent = transforms.HGA_EL_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_HGA_EL.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     --renderTestMarsrover,
@@ -204,5 +238,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Elbow,
     RA_Wrist,
     RA_Turret,
-    RA_Mahli
+    RA_Mahli,
+    HGA_AZ,
+    HGA_EL
 })
