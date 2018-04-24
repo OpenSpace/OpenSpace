@@ -76,10 +76,25 @@ local Body_staticParts = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
+local Wheels_static = {
+    Name = "Wheels_static",
+    Parent = Body.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_WHEELS_STATIC.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
 
 
--- RA 
+---- RA ----
 
+-- RA AZ
 local RA_Shoulder_AZ = {
     Name = "RA_Shoulder_AZ",
     Parent = transforms.RA_Shoulder_AZ_Location.Name,
@@ -95,7 +110,7 @@ local RA_Shoulder_AZ = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
--- EL
+-- RA EL
 local RA_Shoulder_EL = {
     Name = "RA_Shoulder_EL",
     Parent = transforms.RA_Shoulder_EL_Location.Name,
@@ -111,7 +126,7 @@ local RA_Shoulder_EL = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
--- ELBOW
+-- RA ELBOW
 local RA_Elbow = {
     Name = "RA_Elbow",
     Parent = transforms.RA_Elbow_Location.Name,
@@ -126,60 +141,53 @@ local RA_Elbow = {
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
---
---local RA_Wrist = {
---    Name = "RA_Wrist",
---    Parent = transforms.RA_Wrist_Location.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          -- GeometryFile = models .. "/MSL_RA_arm_3.obj"
---          GeometryFile = models .. "/test_arm_3_origo.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
 
+-- RA WRIST
+local RA_Wrist = {
+    Name = "RA_Wrist",
+    Parent = transforms.RA_Wrist_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RA_WRIST.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
 
+-- RA TURRET
+local RA_Turret = {
+    Name = "RA_Turret",
+    Parent = transforms.RA_Turret_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RA_TURRET.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
 
--- MastCam
---
---local RSM_ = {
---    Name = "body",
---    Parent = CuriosityModel.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = modelsOld .. "/MSL_body.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
---
-
-
-
---local Wheels_All = {
---    Name = "wheels_all",
---    Parent = CuriosityModel.Name,
---    Renderable = {
---        Type = "RenderableModel",
---        Body = "MARS SCIENCE LABORATORY",
---        Geometry = {
---          Type = "MultiModelGeometry",
---          GeometryFile = modelsOld .. "/MSL_wheels_ALL.obj"
---        },
---        ColorTexture = textures .. "/MSLTextureTest.png"
---    },
---    Tag = {"planet_solarsystem", "planet_terrestrial"},
---    GuiPath = "/Solar System/Planets/Mars/Curiosity"
---}
+local RA_Mahli = {
+    Name = "RA_Mahli",
+    Parent = transforms.RA_Mahli_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RA_TURRET.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
 
 
 
@@ -189,11 +197,12 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     CuriosityModel, 
     Body,
     Body_staticParts,
+    Wheels_static,
 
     RA_Shoulder_AZ,
     RA_Shoulder_EL,
-    RA_Elbow
-    --RA_Wrist
-
-    -- Wheels_All
+    RA_Elbow,
+    RA_Wrist,
+    RA_Turret,
+    RA_Mahli
 })

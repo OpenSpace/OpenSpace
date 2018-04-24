@@ -42,6 +42,9 @@ local RoverLocation = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
+
+---- ROBOTIC ARM RA ----
+
 local RA_Base_Location = {
     Name = "RA_Base_Location",
     Parent = RoverLocation.Name,
@@ -69,7 +72,7 @@ local RA_Shoulder_AZ_Location = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
-
+--EL
 local RA_Shoulder_EL_Location = {
     Name = "RA_Shoulder_EL_Location",
     Parent = RA_Shoulder_AZ_Location.Name,
@@ -82,12 +85,12 @@ local RA_Shoulder_EL_Location = {
         },
         Translation = {
             Type = "StaticTranslation",
-            -- Position = {-0.12, 0.06, -0.26}
-            Position = {0.15, 0.25, 0.0}
+            Position = {0.15, 0.2, 0.0}
         }
     }
 }
-    
+
+--ELBOW
 local RA_Elbow_Location = {
     Name = "RA_Elbow_Location",
     Parent = RA_Shoulder_EL_Location.Name,
@@ -100,31 +103,53 @@ local RA_Elbow_Location = {
         },
         Translation = {
             Type = "StaticTranslation",
-            -- (height, deep, left)
             Position = {0.83, -0.2, 0.0 }
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
---local RA_Wrist_Location = {
---    Name = "RA_Wrist_Location",
---    Parent = RA_Elbow_Location.Name,
---    Transform = {
---        --Rotation = {
---        --    Type = "SpiceRotation",
---        --    SourceFrame = "RA_Elbow_Location",
---        --    DestinationFrame = "MSL_ROVER",
---        --    Kernels = kernels.CuriosityKernels
---        --},
---        --Translation = {
---        --    Type = "StaticTranslation",
---        --    Position = {-0.18, 0.7, 0}
---        --}
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
+--WRIST
+local RA_Wrist_Location = {
+    Name = "RA_Wrist_Location",
+    Parent = RA_Elbow_Location.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RA_ELBOW",
+            DestinationFrame = "MSL_RA_WRIST",
+            Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.77, 0.13, 0.035}
+        }
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
 
+--TURRET
+local RA_Turret_Location = {
+    Name = "RA_Turret_Location",
+    Parent = RA_Wrist_Location.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+--MAHLI
+local RA_Mahli_Location = {
+    Name = "RA_Mahli_Location",
+    Parent = RA_Wrist_Location.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+
+---- MASTCAM RSM ----
+
+---- HIGH GAIN ANTENNA HGA ----
+
+---- SAM ----
+
+---- CHEMIN ----
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     CuriosityPosition,
@@ -132,54 +157,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Base_Location,
     RA_Shoulder_AZ_Location,
     RA_Shoulder_EL_Location,
-    RA_Elbow_Location
-    --RA_Wrist_Location
-    -- RSM_AZ_Orientation,
-    -- RSM_EL_Orientation,
-    -- RA_Orientation,
-    -- RA_SHOULDER_AZ_Orientation,
-    -- RA_SHOULDER_EL_Orientation,
-    -- RA_ELBOW_Orientation,
-    -- RA_WRIST_Orientation
+    RA_Elbow_Location,
+    RA_Wrist_Location,
+    RA_Turret_Location,
+    RA_Mahli_Location
 })
 
-
-
-
-
-
-
-
-
-
--- MastCam
-
---bottom
---local RSM_AZ_Orientation = {
---    Name = "RSM_AZ_Orientation",
---    Parent = "CuriosityPosition",
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "NH_SPACECRAFT",
---            DestinationFrame = "GALACTIC"
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
---
---top
---local RSM_EL_Orientation = {
---    Name = "RSM_EL_Orientation",
---    Parent = "CuriosityPosition",
---    Transform = {
---        Rotation = {
---            Type = "SpiceRotation",
---            SourceFrame = "MSL_RMS_EL", -- 
---            DestinationFrame = "GALACTIC",
---            Kernel = kernels.CuriosityKernels
---        }
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
 
