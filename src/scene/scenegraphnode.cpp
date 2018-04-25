@@ -569,7 +569,7 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
          // If the object is not in the screen, we dont want to consider it at all
         if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0 && clipSpace.z > 0) {
             if (!_screenVisibility) {
-                _screenVisibility = true;
+                _screenVisibility.setValue(true);
             }
 
             WindowWrapper& wrapper = OsEng.windowWrapper();
@@ -588,17 +588,17 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
             double zoomThreshold = 0.5, moveThreshold = 1;
 
             if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
-                _distFromCamToNode = distFromCamToNode;
+                _distFromCamToNode.setValue(distFromCamToNode);
             }
             if (abs(static_cast<glm::ivec2>(_screenSpacePosition).x - screenSpacePosition.x) > moveThreshold ||
                     abs(static_cast<glm::ivec2>(_screenSpacePosition).y - screenSpacePosition.y) > moveThreshold) {
-                _screenSpacePosition = screenSpacePosition;
+                _screenSpacePosition.setValue(screenSpacePosition);
             }
         }
         // If not on the screen, we want to reset it or don't update it
         else {
             if(_screenVisibility) {
-                _screenVisibility = false;
+                _screenVisibility.setValue(false);
             }
         }
     }
