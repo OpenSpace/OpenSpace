@@ -151,7 +151,7 @@ local RA_Wrist = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_WRIST.obj"
+          GeometryFile = models .. "/MSL_RA_WRIST_test.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -167,7 +167,7 @@ local RA_Turret = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RA_TURRET.obj"
+          GeometryFile = models .. "/MSL_RA_TURRET_test.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
