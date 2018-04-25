@@ -1,6 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
+asset.require('util/default_dashboard')
+
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
@@ -10,23 +12,38 @@ assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
-asset.request('customization/globebrowsing')
+-- asset.request('customization/globebrowsing')
 
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+-- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local masAsset = asset.require('scene/solarsystem/model/mas/mas')
+
+local Keybindings = {
+    {
+        Key = "F7",
+        Command = "openspace.time.setTime('2012 JUL 01 00:00:00');",
+        Documentation = "Sets the focus of the camera on 'NewHorizons'.",
+        Local = false
+    },
+    {
+        Key = "F8",
+        Command = "openspace.time.setTime('2017 JUN 01 00:00:00');",
+        Documentation = "Sets the focus of the camera on 'NewHorizons'.",
+        Local = false
+    },
+}
 
 asset.onInitialize(function ()
     -- openspace.time.setTime("2017 JUN 01 00:00:00")
     openspace.time.setTime(openspace.time.currentWallTime())
+    sceneHelper.bindKeys(Keybindings)
 
-    openspace.setDefaultDashboard()
     openspace.setDefaultGuiSorting()
 
-    openspace.globebrowsing.loadWMSServersFromFile(
-        openspace.absPath("${DATA}/globebrowsing_servers.lua")
-    )
+    -- openspace.globebrowsing.loadWMSServersFromFile(
+    --     openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    -- )
 
     openspace.addVirtualProperty(
         "BoolProperty",
