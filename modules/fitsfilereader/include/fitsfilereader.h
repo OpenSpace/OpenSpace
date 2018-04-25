@@ -67,6 +67,11 @@ public:
     std::shared_ptr<TableData<T>> readTable(std::string& path, const std::vector<std::string>& columnNames,
         int startRow = 1, int endRow = 10, int hduIdx = 1, bool readAll = false);
 
+    std::vector<float> readFitsFile(std::string filePath, int& nValuesPerStar, int firstRow,
+        int lastRow, std::vector<std::string> filterColumnNames, int multiplier = 1);
+
+    std::vector<float> readSpeckFile(std::string filePath, int& nRenderValues);
+
 private:
     std::unique_ptr<CCfits::FITS> _infile;
     bool _verboseMode;

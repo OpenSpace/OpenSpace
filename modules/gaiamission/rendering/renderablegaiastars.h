@@ -67,6 +67,18 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    const size_t POS_SIZE = 3;
+    const size_t COL_SIZE = 2;
+    const size_t VEL_SIZE = 3;
+
+    enum FileReaderOption {
+        Fits = 0,
+        Speck = 1,
+        BinaryRaw = 2,
+        BinaryOctree = 3,
+        StreamOctree = 4
+    };
+    
     enum ShaderOption {
         Point_SSBO = 0,
         Point_VBO = 1,
@@ -74,21 +86,18 @@ private:
         Billboard_VBO = 3
     };
     
-    bool readDataFile(gaiamission::RenderOption option);
-    std::vector<float> sliceFitsValues(gaiamission::RenderOption option, 
-        std::vector<float> starValues);
-    std::vector<float> sliceSpeckStars(gaiamission::RenderOption option, 
-        std::vector<float> starValues);
+    bool readDataFile();
+    bool readFitsFile(std::string filePath);
+    bool readSpeckFile(std::string filePath);
+    bool readBinaryRawFile(std::string filePath);
+    bool readBinaryOctreeFile(std::string filePath);
+
 
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
     bool _dataIsDirty;
     bool _buffersAreDirty;
     bool _shadersAreDirty;
-
-    std::string _fileTypeOrigin;
-    const std::string FITS = "fits";
-    const std::string SPECK = "speck";
 
     properties::StringProperty _pointSpreadFunctionTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
@@ -111,7 +120,7 @@ private:
     properties::IntProperty _lastRow;
     properties::StringListProperty _columnNamesList;
     std::vector<std::string> _columnNames;
-    properties::BoolProperty _filePreprocessed;
+    properties::OptionProperty _fileReaderOption;
     properties::OptionProperty _renderOption;
     properties::OptionProperty _shaderOption;
     properties::IntProperty _nRenderedStars;
@@ -132,18 +141,13 @@ private:
     std::unique_ptr<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
-    std::vector<float> _fullData;
     std::vector<int> _accumulatedIndices;
-    size_t _nValuesPerStar;
-    size_t _nValuesInSlice;
+    size_t _nRenderValuesPerStar;
     int _nStarsToRender;
     bool _useVBO;
-    const size_t _memoryBudgetInValues = 805306368; // 3GB in bytes / sizeof(GLfloat) *4B*
+    size_t _gpuMemoryBudget;
     size_t _streamingBudget;
     size_t _chunkSize;
-    const size_t _posSize = 3;
-    const size_t _colSize = 2;
-    const size_t _velSize = 3;
 
     GLuint _vao;
     GLuint _vaoEmpty;

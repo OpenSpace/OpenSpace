@@ -121,144 +121,12 @@ void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
 }
 
 void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCallback) {
-    std::vector<float> fullData;
-    srand(1234567890);
-    if (_firstRow <= 0) _firstRow = 1;
-
-    // TODO: Move to function after DR2!?
-    // Define what columns to read. Append additional filter parameters to default rendering parameters.
-    _allColumnNames = std::vector<std::string>({
-        "Position_X", 
-        "Position_Y", 
-        "Position_Z", 
-        "Velocity_X",
-        "Velocity_Y",
-        "Velocity_Z",
-        "Gaia_Parallax",
-        "Gaia_G_Mag",
-        "Tycho_B_Mag",
-        "Tycho_V_Mag"
-    });
-    _allColumnNames.insert(_allColumnNames.end(), _filterColumnNames.begin(), _filterColumnNames.end());
-
-    std::string allNames = "Columns to read: \n";
-    for (auto colName : _allColumnNames) {
-        allNames += colName + "\n";
-    }
-    LINFO(allNames);
-
-    FitsFileReader fitsInFile(false);
-
-    // Read columns from FITS file. If rows aren't specified then full table will be read.
-    std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_inFileOrFolderPath,
-        _allColumnNames, _firstRow, _lastRow);
-
-    if (!table) {
-        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", _inFileOrFolderPath));
-    }
-
-    int nStars = table->readRows - _firstRow + 1;
-
-   
-    int nNullArr = 0;
-    int multiplier = 1;
-    size_t nColumnsRead = _allColumnNames.size();
-    size_t defaultCols = 17; // Number of columns that are copied by predefined code.  
-    if (nColumnsRead != defaultCols) {
-        LINFO("Additional columns will be read! Consider add column in code for significant speedup!");
-    }
-    // Declare how many values to save per star
-    int32_t nValuesPerStar = nColumnsRead + 1; // +1 for B-V color value.
-
-    // Copy columns to local variables.
-    std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
     
-    // Default render parameters! 
-    std::vector<float> posXcol = std::move(tableContent[_allColumnNames[0]]);
-    std::vector<float> posYcol = std::move(tableContent[_allColumnNames[1]]);
-    std::vector<float> posZcol = std::move(tableContent[_allColumnNames[2]]);
-    std::vector<float> velXcol = std::move(tableContent[_allColumnNames[3]]);
-    std::vector<float> velYcol = std::move(tableContent[_allColumnNames[4]]);
-    std::vector<float> velZcol = std::move(tableContent[_allColumnNames[5]]);
-    std::vector<float> parallax = std::move(tableContent[_allColumnNames[6]]);
-    std::vector<float> magCol = std::move(tableContent[_allColumnNames[7]]);
-    std::vector<float> tycho_b = std::move(tableContent[_allColumnNames[8]]);
-    std::vector<float> tycho_v = std::move(tableContent[_allColumnNames[9]]);
+    int32_t nValuesPerStar = 0;
 
-    // Default filter parameters - must follow the same order as Lua script!
-    // Additional filter parameters are handled as well but slows down reading tremendously!
-    std::vector<float> parallax_err = std::move(tableContent[_allColumnNames[10]]);
-    std::vector<float> pr_mot_ra = std::move(tableContent[_allColumnNames[11]]);
-    std::vector<float> pr_mot_ra_err = std::move(tableContent[_allColumnNames[12]]);
-    std::vector<float> pr_mot_dec = std::move(tableContent[_allColumnNames[13]]);
-    std::vector<float> pr_mot_dec_err = std::move(tableContent[_allColumnNames[14]]);
-    std::vector<float> tycho_b_err = std::move(tableContent[_allColumnNames[15]]);
-    std::vector<float> tycho_v_err = std::move(tableContent[_allColumnNames[16]]);
-
-    // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
-    for (int i = 0; i < nStars * multiplier; ++i) {
-        std::vector<float> values(nValuesPerStar);
-        size_t idx = 0;
-
-        // Default order for rendering:
-        // Position [X, Y, Z]
-        // Absolute Magnitude
-        // B-V Color
-        // Velocity [X, Y, Z]
-
-        // Store positions.
-        values[idx++] = posXcol[i%nStars];
-        values[idx++] = posYcol[i%nStars];
-        values[idx++] = posZcol[i%nStars];
-
-        // Return early if star doesn't have a measured position.
-        if (values[0] == -999 && values[1] == -999 && values[2] == -999) {
-            nNullArr++;
-            continue;
-        }
-
-        // Store color values.
-        values[idx++] = magCol[i%nStars];
-        values[idx++] = tycho_b[i%nStars] - tycho_v[i%nStars];
-
-        // Store velocity. Convert it to m/s with help by parallax.
-        values[idx++] = convertMasPerYearToMeterPerSecond(velXcol[i%nStars], parallax[i%nStars]);
-        values[idx++] = convertMasPerYearToMeterPerSecond(velYcol[i%nStars], parallax[i%nStars]);
-        values[idx++] = convertMasPerYearToMeterPerSecond(velZcol[i%nStars], parallax[i%nStars]);
-
-        // Store additional parameters to filter by.
-        values[idx++] = parallax[i%nStars];
-        values[idx++] = parallax_err[i%nStars];
-        values[idx++] = pr_mot_ra[i%nStars];
-        values[idx++] = pr_mot_ra_err[i%nStars];
-        values[idx++] = pr_mot_dec[i%nStars];
-        values[idx++] = pr_mot_dec_err[i%nStars];
-        values[idx++] = tycho_b[i%nStars];
-        values[idx++] = tycho_b_err[i%nStars];
-        values[idx++] = tycho_v[i%nStars];
-        values[idx++] = tycho_v_err[i%nStars];
-
-        // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (size_t col = defaultCols; col < nColumnsRead; ++col) {
-            std::vector<float> vecData = std::move(tableContent[_allColumnNames[col]]);
-            values[idx++] = vecData[i];
-        }
-
-        for (size_t j = 0; j < nValuesPerStar; ++j) {
-            // The astronomers in Vienna use -999 as default value. Change it to 0.
-            if (values[j] == -999) {
-                values[j] = 0.f;
-            }
-            else if (multiplier > 1) {
-                values[j] *= static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-            }
-        }
-
-        fullData.insert(fullData.end(), values.begin(), values.end());
-    }
-
-    LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) + " read stars were nullArrays.");
-    LINFO("Multiplier: " + std::to_string(multiplier));
+    FitsFileReader fileReader(false);
+    std::vector<float> fullData = fileReader.readFitsFile(_inFileOrFolderPath, nValuesPerStar, _firstRow,
+        _lastRow, _filterColumnNames);
 
     progressCallback(0.8f);
 
@@ -305,7 +173,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
         "phot_g_mean_mag"
         });
     _allColumnNames.insert(_allColumnNames.end(), _filterColumnNames.begin(), _filterColumnNames.end());
-    size_t nFilterColumns = _filterColumnNames.size();
+    //size_t nFilterColumns = _filterColumnNames.size();
 
     std::string allNames = "Columns to read: \n";
     for (auto colName : _allColumnNames) {
@@ -313,7 +181,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
     }
     LINFO(allNames);
 
-    FitsFileReader fitsInFile(false);
+    FitsFileReader fitsFileReader(false);
 
     // TODO: Divide into several threads!
     while (!allInputFiles.empty()) {
@@ -321,7 +189,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Read columns from FITS file. If rows aren't specified then full table will be read.
-        std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(fileToRead,
+        std::shared_ptr<TableData<float>> table = fitsFileReader.readTable<float>(fileToRead,
             _allColumnNames, _firstRow, _lastRow);
 
         if (!table) {

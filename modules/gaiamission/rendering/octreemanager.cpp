@@ -67,7 +67,7 @@ void OctreeManager::initOctree() {
     _numInnerNodes = 0;
     _numLeafNodes = 0;
     _totalDepth = 0;
-    _valuesPerStar = _posSize + _colSize + _velSize;
+    _valuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE;
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
@@ -282,7 +282,7 @@ void OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData) {
     LINFO("Max stars per node in read Octree: " + std::to_string(MAX_STARS_PER_NODE) + 
         " - Radius of root layer: " + std::to_string(MAX_DIST));
 
-    if (_valuesPerStar != (_posSize + _colSize + _velSize)) {
+    if (_valuesPerStar != (POS_SIZE + COL_SIZE + VEL_SIZE)) {
         LERROR("Read file doesn't have the same structure of render parameters!");
     }
 
@@ -320,9 +320,9 @@ void OctreeManager::readNodeFromFile(std::ifstream& inFileStream,
             inFileStream.read(reinterpret_cast<char*>(&fetchedData[0]), nBytes);
 
             int starsInNode = static_cast<int>(nDataSize / _valuesPerStar);
-            auto posEnd = fetchedData.begin() + (starsInNode * _posSize);
-            auto colEnd = posEnd + (starsInNode * _colSize);
-            auto velEnd = colEnd + (starsInNode * _velSize);
+            auto posEnd = fetchedData.begin() + (starsInNode * POS_SIZE);
+            auto colEnd = posEnd + (starsInNode * COL_SIZE);
+            auto velEnd = colEnd + (starsInNode * VEL_SIZE);
             node->posData = std::move(std::vector<float>(fetchedData.begin(), posEnd));
             node->colData = std::move(std::vector<float>(posEnd, colEnd));
             node->velData = std::move(std::vector<float>(colEnd, velEnd));
@@ -407,9 +407,9 @@ void OctreeManager::fetchNodeDataFromFile(std::string inFilePrefix,
         }
 
         int starsInNode = static_cast<int>(nDataSize / _valuesPerStar);
-        auto posEnd = readData.begin() + (starsInNode * _posSize);
-        auto colEnd = posEnd + (starsInNode * _colSize);
-        auto velEnd = colEnd + (starsInNode * _velSize);
+        auto posEnd = readData.begin() + (starsInNode * POS_SIZE);
+        auto colEnd = posEnd + (starsInNode * COL_SIZE);
+        auto velEnd = colEnd + (starsInNode * VEL_SIZE);
         node->posData = std::move(std::vector<float>(readData.begin(), posEnd));
         node->colData = std::move(std::vector<float>(posEnd, colEnd));
         node->velData = std::move(std::vector<float>(colEnd, velEnd));
@@ -468,8 +468,8 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     if (node->isLeaf && node->numStars < MAX_STARS_PER_NODE) {
         // Node is a leaf and it's not yet full -> insert star.
         node->numStars++;
-        auto posEnd = starValues.begin() + _posSize;
-        auto colEnd = posEnd + _colSize;
+        auto posEnd = starValues.begin() + POS_SIZE;
+        auto colEnd = posEnd + COL_SIZE;
         node->posData.insert(node->posData.end(), starValues.begin(), posEnd);
         node->colData.insert(node->colData.end(), posEnd, colEnd);
         node->velData.insert(node->velData.end(), colEnd, starValues.end());
@@ -491,16 +491,16 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
         // Distribute stars from parent node into children. 
         for (size_t n = 0; n < node->numStars; ++n) {
             // Position data.
-            auto posBegin = node->posData.begin() + n * _posSize;
-            auto posEnd = posBegin + _posSize;
+            auto posBegin = node->posData.begin() + n * POS_SIZE;
+            auto posEnd = posBegin + POS_SIZE;
             std::vector<float> tmpValues(posBegin, posEnd);
             // Color data.
-            auto colBegin = node->colData.begin() + n * _colSize;
-            auto colEnd = colBegin + _colSize;
+            auto colBegin = node->colData.begin() + n * COL_SIZE;
+            auto colEnd = colBegin + COL_SIZE;
             tmpValues.insert(tmpValues.end(), colBegin, colEnd);
             // Velocity data.
-            auto velBegin = node->velData.begin() + n * _velSize;
-            auto velEnd = velBegin + _velSize;
+            auto velBegin = node->velData.begin() + n * VEL_SIZE;
+            auto velEnd = velBegin + VEL_SIZE;
             tmpValues.insert(tmpValues.end(), velBegin, velEnd);
 
             size_t index = getChildIndex(tmpValues[0], tmpValues[1], tmpValues[2],
@@ -533,7 +533,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
 
     // Determine if new star should be kept in our LOD cache. Don't add if chunk is full.
     // Don't use LOD cache for our more shallow layers.
-    if (node->posData.size() / _posSize < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
+    if (node->posData.size() / POS_SIZE < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
         //insertStarInLodCache(node, starValues); // TODO: Uncomment after fixing LOD!
     }
 
@@ -547,13 +547,13 @@ void OctreeManager::constructLodCache(std::shared_ptr<OctreeNode> node) {
 
     // Add this node's origin as the only value. 
     // This will be used initially for comparisons in insertStarInLodCache().
-    std::vector<float> insertData(_posSize, 0.f);
+    std::vector<float> insertData(POS_SIZE, 0.f);
     insertData[0] = node->originX;
     insertData[1] = node->originY;
     insertData[2] = node->originZ;
     node->posData = std::move(std::vector<float>(insertData.begin(), insertData.end()));
-    node->colData = std::move(std::vector<float>(_colSize, 0.f));
-    node->velData = std::move(std::vector<float>(_velSize, 0.f));
+    node->colData = std::move(std::vector<float>(COL_SIZE, 0.f));
+    node->velData = std::move(std::vector<float>(VEL_SIZE, 0.f));
 }
 
 // Private help function for insertInNode(). Determines if star should be stored in LOD.
@@ -561,15 +561,15 @@ void OctreeManager::insertStarInLodCache(std::shared_ptr<OctreeNode> node,
     std::vector<float> starValues) {
     
     // Add star if it is further away from last inserted star with a set threshold.
-    std::vector<float> cachePosData(node->posData.end() - _posSize, node->posData.end());
+    std::vector<float> cachePosData(node->posData.end() - POS_SIZE, node->posData.end());
     glm::vec3 lastCachePos(cachePosData[0], cachePosData[1], cachePosData[2]);
     glm::vec3 starPos(starValues[0], starValues[1], starValues[2]);
     float dist = glm::distance(lastCachePos, starPos);
     
     // Add star if it's more than a quarter of node's size away.
     if (dist > node->halfDimension / 2.0) {
-        auto posEnd = starValues.begin() + _posSize;
-        auto colEnd = posEnd + _colSize;
+        auto posEnd = starValues.begin() + POS_SIZE;
+        auto colEnd = posEnd + COL_SIZE;
         node->posData.insert(node->posData.end(), starValues.begin(), posEnd);
         node->colData.insert(node->colData.end(), posEnd, colEnd);
         node->velData.insert(node->velData.end(), colEnd, starValues.end());
@@ -587,7 +587,7 @@ std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,
         return str + " - [Leaf] \n";
     }
     else {
-        str += " LOD: " + std::to_string(node->posData.size() / _posSize) + " - [Parent] \n";
+        str += " LOD: " + std::to_string(node->posData.size() / POS_SIZE) + " - [Parent] \n";
         for (int i = 0; i < 8; ++i) {
             auto pref = prefix + "->" + std::to_string(i);
             str += printStarsPerNode(node->Children[i], pref);
@@ -663,18 +663,18 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
 
                 // Insert data and adjust stars added in this frame.
                 fetchedData[node->bufferIndex] = lodData;
-                deltaStars += static_cast<int>(node->posData.size() / _posSize);
-                node->lodInUse = node->posData.size() / _posSize;
+                deltaStars += static_cast<int>(node->posData.size() / POS_SIZE);
+                node->lodInUse = node->posData.size() / POS_SIZE;
             }
             else {
                 // This node existed in cache before. Check if it was for the same level.
                 // TODO: This will never happen because we only have 1 LOD right now.
-                if (node->posData.size() / _posSize != node->lodInUse) {
+                if (node->posData.size() / POS_SIZE != node->lodInUse) {
                     // Insert data and adjust stars added in this frame.
                     fetchedData[node->bufferIndex] = lodData;
-                    deltaStars += static_cast<int>(node->posData.size() / _posSize) -
+                    deltaStars += static_cast<int>(node->posData.size() / POS_SIZE) -
                         static_cast<int>(node->lodInUse);
-                    node->lodInUse = node->posData.size() / _posSize;
+                    node->lodInUse = node->posData.size() / POS_SIZE;
                 }
             }
             return fetchedData;
@@ -699,7 +699,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
 
             // Insert data and adjust stars added in this frame.
             fetchedData[node->bufferIndex] = constructInsertData(node, option);
-            deltaStars += static_cast<int>(node->posData.size() / _posSize);
+            deltaStars += static_cast<int>(node->posData.size() / POS_SIZE);
         }
         return fetchedData;
     }
@@ -746,7 +746,7 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(std::shared
             node->lodInUse = 0;
         }
         else {
-            deltaStars -= static_cast<int>(node->posData.size() / _posSize);
+            deltaStars -= static_cast<int>(node->posData.size() / POS_SIZE);
         }
     }
 
@@ -838,17 +838,17 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
     // And more importantly so our attribute pointers knows where to read!
     auto insertData = std::vector<float>(node->posData.begin(), node->posData.end());
     if (_useVBO) {
-        insertData.resize(_posSize * MAX_STARS_PER_NODE, 0.f);
+        insertData.resize(POS_SIZE * MAX_STARS_PER_NODE, 0.f);
     }
     if (option != gaiamission::RenderOption::Static) {
         insertData.insert(insertData.end(), node->colData.begin(), node->colData.end());
         if (_useVBO) {
-            insertData.resize((_posSize + _colSize) * MAX_STARS_PER_NODE, 0.f);
+            insertData.resize((POS_SIZE + COL_SIZE) * MAX_STARS_PER_NODE, 0.f);
         }
         if (option == gaiamission::RenderOption::Motion) {
             insertData.insert(insertData.end(), node->velData.begin(), node->velData.end());
             if (_useVBO) {
-                insertData.resize((_posSize + _colSize + _velSize) * MAX_STARS_PER_NODE, 0.f);
+                insertData.resize((POS_SIZE + COL_SIZE + VEL_SIZE) * MAX_STARS_PER_NODE, 0.f);
             }
         }
     }

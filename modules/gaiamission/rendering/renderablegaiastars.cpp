@@ -43,6 +43,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/fmt.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 
 #include <array>
 #include <fstream>
@@ -51,42 +52,23 @@
 namespace {
     constexpr const char* _loggerCat = "RenderableGaiaStars";
 
-    struct StaticVBOLayout {
-        std::array<float, 3> position; // (x,y,z)
-    };
-
-    struct ColorVBOLayout {
-        std::array<float, 3> position; // (x,y,z)
-        float magnitude;
-        float bvColor;
-    };
-
-    struct MotionVBOLayout {
-        std::array<float, 3> position; // (x,y,z)
-        float magnitude;
-        float bvColor;
-        std::array<float, 3> velocity; // (x,y,z)
-    };
-
-    
-
     static const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "File",
         "File Path",
-        "The path to the FITS, SPECK or BIN file with data for the stars to be rendered."
+        "The path to the file with data for the stars to be rendered."
     }; 
 
-    static const openspace::properties::Property::PropertyInfo FileTypeOriginInfo = {
-        "FileTypeOrigin",
-        "File Type Origin",
-        "Specifies if preprocessed file is generated from a speck or a fits file."
-    };
-
-    static const openspace::properties::Property::PropertyInfo FilePreprocessedInfo = {
-        "FilePreprocessed",
-        "File Preprocessed",
-        "If true then use a preprocessed BIN file. "
-        "If false then a FITS file will be read."
+    static const openspace::properties::Property::PropertyInfo FileReaderOptionInfo = {
+        "FileReaderOption",
+        "File Reader Option",
+        "This value tells the renderable what format the input data file has. "
+        "'Fits' will read a FITS file, construct an Octree from it and render full data. "
+        "'Speck' will read a SPECK file, construct an Octree from it and render full data. "
+        "'BinaryRaw' will read a preprocessed binary file with ordered star data, construct "
+        "and Octree and render it. "
+        "'BinaryOctree' will read a constructed Octree from binary file and render full data. "
+        "'StreamOctree' will read an index file with full Octree structure and them stream nodes "
+        "during runtime. Suited for bigger datasets."
     };
 
     static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -210,16 +192,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 FilePathInfo.description
             },
             {
-                FileTypeOriginInfo.identifier,
-                new StringVerifier,
+                FileReaderOptionInfo.identifier,
+                new StringInListVerifier({
+                    "Fits", "Speck", "BinaryRaw", "BinaryOctree", "StreamOctree"
+                }),
                 Optional::No,
-                FileTypeOriginInfo.description
-            },
-            {
-                FilePreprocessedInfo.identifier,
-                new BoolVerifier,
-                Optional::No,
-                FilePreprocessedInfo.description
+                FileReaderOptionInfo.description
             },
             {
                 RenderOptionInfo.identifier,
@@ -310,12 +288,11 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _filePath(FilePathInfo)
-    , _fileTypeOrigin("")
     , _dataFile(nullptr)
     , _dataIsDirty(true)
     , _buffersAreDirty(true)
     , _shadersAreDirty(false)
-    , _filePreprocessed(FilePreprocessedInfo, false)
+    , _fileReaderOption(FileReaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
@@ -324,22 +301,21 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _luminosityMultiplier(LuminosityMultiplierInfo, 100.f, 1.f, 100000.f)
+    , _luminosityMultiplier(LuminosityMultiplierInfo, 1200.f, 1.f, 100000.f)
     , _magnitudeBoost(MagnitudeBoostInfo, 25.f, 0.f, 100.f)
     , _cutOffThreshold(CutOffThresholdInfo, 38.f, 0.f, 50.f)
     , _sharpness(SharpnessInfo, 1.45f, 0.f, 5.f)
     , _billboardSize(BillboardSizeInfo, 10.f, 1.f, 100.f)
     , _closeUpBoostDist(CloseUpBoostDistInfo, 300.f, 1.f, 1000.f)
-    , _firstRow(FirstRowInfo, 1, 1, 2539913) // DR1-max: 2539913
-    , _lastRow(LastRowInfo, 50000, 1, 2539913)
+    , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
+    , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2539913)
     , _nStarsToRender(0)
     , _program(nullptr)
     , _programTM(nullptr)
     , _fboTexture(nullptr)
-    , _nValuesPerStar(0)
-    , _nValuesInSlice(0)
+    , _nRenderValuesPerStar(0)
     , _vao(0)
     , _vaoEmpty(0)
     , _vboPos(0)
@@ -360,7 +336,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     );
 
     _octreeManager = std::make_shared<OctreeManager>();
-    _fullData = std::vector<float>();
     _accumulatedIndices = std::vector<int>(1, 0);
 
     _filePath = absPath(dictionary.value<std::string>(FilePathInfo.identifier));
@@ -374,7 +349,31 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     );
     addProperty(_filePath);
 
-    _fileTypeOrigin = dictionary.value<std::string>(FileTypeOriginInfo.identifier);
+    _fileReaderOption.addOptions({
+        { FileReaderOption::Fits, "Fits" },
+        { FileReaderOption::Speck, "Speck" },
+        { FileReaderOption::BinaryRaw, "BinaryRaw" },
+        { FileReaderOption::BinaryOctree, "BinaryOctree" },
+        { FileReaderOption::StreamOctree, "StreamOctree" }
+        });
+    if (dictionary.hasKey(FileReaderOptionInfo.identifier)) {
+        const std::string fileReaderOption = dictionary.value<std::string>(FileReaderOptionInfo.identifier);
+        if (fileReaderOption == "Fits") {
+            _fileReaderOption = FileReaderOption::Fits;
+        }
+        else if (fileReaderOption == "Speck") {
+            _fileReaderOption = FileReaderOption::Speck;
+        }
+        else if (fileReaderOption == "BinaryRaw") {
+            _fileReaderOption = FileReaderOption::BinaryRaw;
+        }
+        else if (fileReaderOption == "BinaryOctree") {
+            _fileReaderOption = FileReaderOption::BinaryOctree;
+        }
+        else {
+            _fileReaderOption = FileReaderOption::StreamOctree;
+        }
+    }
 
     _renderOption.addOptions({
         { gaiamission::RenderOption::Static, "Static" },
@@ -486,24 +485,16 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     }
     addProperty(_closeUpBoostDist);
 
-    if (dictionary.hasKey(FilePreprocessedInfo.identifier)) {
-        _filePreprocessed = dictionary.value<bool>(FilePreprocessedInfo.identifier);
-    }
-
-    // No need to add properties if file has been preprocessed.
-    if (!_filePreprocessed) {
+    // Only add properties correlated to fits files if we're actually reading from a fits file.
+    if (_fileReaderOption == FileReaderOption::Fits) {
         if (dictionary.hasKey(FirstRowInfo.identifier)) {
-            _firstRow = static_cast<int>(
-                dictionary.value<double>(FirstRowInfo.identifier)
-                );
+            _firstRow = static_cast<int>(dictionary.value<double>(FirstRowInfo.identifier));
         }
         _firstRow.onChange([&] { _dataIsDirty = true; });
         addProperty(_firstRow);
         
         if (dictionary.hasKey(LastRowInfo.identifier)) {
-            _lastRow = static_cast<int>(
-                dictionary.value<double>(LastRowInfo.identifier)
-                );
+            _lastRow = static_cast<int>(dictionary.value<double>(LastRowInfo.identifier));
         }
         _lastRow.onChange([&] { _dataIsDirty = true; });
         addProperty(_lastRow);
@@ -526,6 +517,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
             // Copy values to the StringListproperty to be shown in the Property list.
             _columnNamesList = _columnNames;
+            // OBS - This is not used atm!
         }
 
         if (_firstRow > _lastRow) {
@@ -645,14 +637,19 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
 
     // Find out how much GPU memory this computer has (Nvidia cards).
-    // TODO: use for streaming budget!
+    GLint nDedicatedVidMemoryInKB = 0;
+    glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedVidMemoryInKB);
     GLint nTotalMemoryInKB = 0;
     glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
-
     GLint nCurrentAvailMemoryInKB = 0;
     glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurrentAvailMemoryInKB);
-    LINFO("nTotalMemoryInKB: " + std::to_string(nTotalMemoryInKB) +
+    LINFO("nDedicatedVidMemoryInKB: " + std::to_string(nDedicatedVidMemoryInKB) + 
+        " - nTotalMemoryInKB: " + std::to_string(nTotalMemoryInKB) +
         " - nCurrentAvailMemoryInKB: " + std::to_string(nCurrentAvailMemoryInKB));
+    _gpuMemoryBudget = nCurrentAvailMemoryInKB * 1024;
+
+    // TODO: Use this!? 
+    //int halfCpuRam = CpuCap.installedMainMemory() * 1024 * 1024 * 0.5;
 }
 
 void RenderableGaiaStars::deinitializeGL() {
@@ -736,7 +733,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     int nChunksToRender = _octreeManager->biggestChunkIndexInUse();
     int maxStarsPerNode = _octreeManager->maxStarsPerNode();
-    int valuesPerStar = _nValuesInSlice;
+    int valuesPerStar = _nRenderValuesPerStar;
 
     // Switch rendering technique depending on user-defined shader option.
     const int shaderOption = _shaderOption;
@@ -750,7 +747,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Update vector with accumulated indices.
         for (auto &[offset, subData] : updateData) {
-            int newValue = (subData.size() / _nValuesInSlice) + _accumulatedIndices[offset];
+            int newValue = (subData.size() / _nRenderValuesPerStar) + _accumulatedIndices[offset];
             int changeInValue = newValue - _accumulatedIndices[offset + 1];
             _accumulatedIndices[offset + 1] = newValue;
             // Propagate change.
@@ -808,7 +805,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Always update Position VBO.
         glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
-        size_t posChunkSize = _octreeManager->maxStarsPerNode() * _posSize;
+        size_t posChunkSize = _octreeManager->maxStarsPerNode() * POS_SIZE;
         size_t posStreamingBudget = _octreeManager->totalNodes() * posChunkSize;
 
         // Use buffer orphaning to update a subset of total data.
@@ -836,7 +833,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         // Update Color VBO if render option is 'Color' or 'Motion'.
         if (renderOption != gaiamission::RenderOption::Static) {
             glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
-            size_t colChunkSize = _octreeManager->maxStarsPerNode() * _colSize;
+            size_t colChunkSize = _octreeManager->maxStarsPerNode() * COL_SIZE;
             size_t colStreamingBudget = _octreeManager->totalNodes() * colChunkSize;
 
             // Use buffer orphaning to update a subset of total data.
@@ -863,7 +860,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             // Update Velocity VBO if specified.
             if (renderOption == gaiamission::RenderOption::Motion) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
-                size_t velChunkSize = _octreeManager->maxStarsPerNode() * _velSize;
+                size_t velChunkSize = _octreeManager->maxStarsPerNode() * VEL_SIZE;
                 size_t velStreamingBudget = _octreeManager->totalNodes() * velChunkSize;
 
                 // Use buffer orphaning to update a subset of total data.
@@ -1063,8 +1060,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");
-        // Reload data file. This may reconstruct the Octree as well (If we're not reading binary octree)!
-        bool success = readDataFile(gaiamission::RenderOption(renderOption));
+        // Reload data file. This may reconstruct the Octree as well.
+        bool success = readDataFile();
         if (!success) {
             throw ghoul::RuntimeError("Error loading Gaia Star data");
         }
@@ -1209,19 +1206,19 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Set values per star slice depending on render option.
         if (renderOption == gaiamission::RenderOption::Static) {
-            _nValuesInSlice = _posSize;
+            _nRenderValuesPerStar = POS_SIZE;
         }
         else if (renderOption == gaiamission::RenderOption::Color) {
-            _nValuesInSlice = _posSize + _colSize;
+            _nRenderValuesPerStar = POS_SIZE + COL_SIZE;
         }
         else { // (renderOption == gaiamission::RenderOption::Motion)
-            _nValuesInSlice = _posSize + _colSize + _velSize;
+            _nRenderValuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE;
         }
 
         // Trigger a rebuild of buffer data from octree.
-        _chunkSize = _octreeManager->maxStarsPerNode() * _nValuesInSlice;
+        _chunkSize = _octreeManager->maxStarsPerNode() * _nRenderValuesPerStar;
         _streamingBudget = _octreeManager->totalNodes() * _chunkSize;
-        _streamingBudget = std::min(_streamingBudget, _memoryBudgetInValues);
+        _streamingBudget = std::min(_streamingBudget, _gpuMemoryBudget);
         int maxNodesInStream = static_cast<int>(_streamingBudget / _chunkSize);
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
@@ -1298,7 +1295,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                 glVertexAttribPointer(
                     positionAttrib,
-                    _posSize,
+                    POS_SIZE,
                     GL_FLOAT,
                     GL_FALSE,
                     0,
@@ -1314,7 +1311,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                 glVertexAttribPointer(
                     positionAttrib,
-                    _posSize,
+                    POS_SIZE,
                     GL_FLOAT,
                     GL_FALSE,
                     0,
@@ -1327,7 +1324,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                 glVertexAttribPointer(
                     brightnessDataAttrib,
-                    _colSize,
+                    COL_SIZE,
                     GL_FLOAT,
                     GL_FALSE,
                     0,
@@ -1342,7 +1339,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                 glVertexAttribPointer(
                     positionAttrib,
-                    _posSize,
+                    POS_SIZE,
                     GL_FLOAT,
                     GL_FALSE,
                     0,
@@ -1355,7 +1352,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                 glVertexAttribPointer(
                     brightnessDataAttrib,
-                    _colSize,
+                    COL_SIZE,
                     GL_FLOAT,
                     GL_FALSE,
                     0,
@@ -1368,7 +1365,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                 glVertexAttribPointer(
                     velocityAttrib,
-                    _velSize,
+                    VEL_SIZE,
                     GL_FLOAT,
                     GL_FALSE,
                     0,
@@ -1546,311 +1543,141 @@ void RenderableGaiaStars::update(const UpdateData&) {
     }
 }
 
-bool RenderableGaiaStars::readDataFile(gaiamission::RenderOption option) {
+bool RenderableGaiaStars::readDataFile() {
+
+    const int fileReaderOption = _fileReaderOption;
+    bool success = false;
+
     std::string _file = _filePath;
-    _fullData.clear();
     _octreeManager->initOctree();
 
     LINFO("Loading data file: " + _file);
 
-    // Read from binary if file has been preprocessed, else read from FITS file.
-    if (_filePreprocessed) {
-        std::ifstream fileStream(_file, std::ifstream::binary);
-        if (fileStream.good()) {
+    switch (fileReaderOption) {
+    case FileReaderOption::Fits: {
 
-            // Let's assume we've already contructed an Octree!
-            _octreeManager->readFromFile(fileStream, true);
-
-            // Else we're reading from a BIN file as before.
-            /*else {
-                int32_t nValues = 0;
-                fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-                fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
-
-                _fullData.resize(nValues);
-                fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
-                    nValues * sizeof(_fullData[0]));
-
-                // Slice star data and insert star into octree.
-                for (size_t i = 0; i < _fullData.size(); i += _nValuesPerStar) {
-                    auto first = _fullData.begin() + i;
-                    auto last = _fullData.begin() + i + _nValuesPerStar;
-                    std::vector<float> values(first, last);
-
-                    // TODO: This doesn't work anymore!!!! (Order already different!)
-                    // Data needs to be sliced differently depending on file origin.
-                    auto slicedValues = std::vector<float>();
-                    if (_fileTypeOrigin == FITS) {
-                        slicedValues = sliceFitsValues(option, values);
-                    }
-                    else if (_fileTypeOrigin == SPECK) {
-                        slicedValues = sliceSpeckStars(option, values);
-                    }
-                    else {
-                        LERROR("User did not specify correct origin of preprocessed file.");
-                    }
-
-                    //_nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
-                    _octreeManager->insert(slicedValues);
-                }
-            }*/
-        }
-        else {
-            LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
-                , _file));
-            return false;
-        }
+        // Read raw fits file and construct Octree.  
+        success = readFitsFile(_file);
+        break;
     }
-    else {
-        int nStars = _lastRow - _firstRow + 1;
+    case FileReaderOption::Speck: {
 
-        FitsFileReader fitsInFile(false);
-        std::shared_ptr<TableData<float>> table = fitsInFile.readTable<float>(_file, 
-            _columnNames, _firstRow, _lastRow);
-
-        if (!table) {
-            LERROR(fmt::format("Failed to open Fits file '{}'", _file));
-            return false;
-        }
-
-        _nValuesPerStar = _columnNames.size() + 1; // +1 for B-V color value.
-        int nNullArr = 0;
-        size_t defaultCols = 17; // Default: 8, Full: 17
-
-        std::unordered_map<string, std::vector<float>>& tableContent = table->contents;
-        std::vector<float> posXcol = tableContent[_columnNames[0]];
-        std::vector<float> posYcol = tableContent[_columnNames[1]];
-        std::vector<float> posZcol = tableContent[_columnNames[2]];
-        std::vector<float> velXcol = tableContent[_columnNames[3]];
-        std::vector<float> velYcol = tableContent[_columnNames[4]];
-        std::vector<float> velZcol = tableContent[_columnNames[5]];
-        std::vector<float> magCol = tableContent[_columnNames[6]];
-        std::vector<float> parallax = tableContent[_columnNames[7]];
-
-        std::vector<float> parallax_err = tableContent[_columnNames[8]];
-        std::vector<float> pr_mot_ra = tableContent[_columnNames[9]];
-        std::vector<float> pr_mot_ra_err = tableContent[_columnNames[10]];
-        std::vector<float> pr_mot_dec = tableContent[_columnNames[11]];
-        std::vector<float> pr_mot_dec_err = tableContent[_columnNames[12]];
-        std::vector<float> tycho_b = tableContent[_columnNames[13]];
-        std::vector<float> tycho_b_err = tableContent[_columnNames[14]];
-        std::vector<float> tycho_v = tableContent[_columnNames[15]];
-        std::vector<float> tycho_v_err = tableContent[_columnNames[16]];
-
-        for (int i = 0; i < nStars; ++i) {
-            std::vector<float> values(_nValuesPerStar);
-            size_t idx = 0;
-
-            // Store positions.
-            values[idx++] = posXcol[i];
-            values[idx++] = posYcol[i];
-            values[idx++] = posZcol[i];
-
-            // Return early if star doesn't have a measured position.
-            if (values[0] == -999 && values[1] == -999 && values[2] == -999) {
-                nNullArr++;
-                continue;
-            }
-
-            // Store color values.
-            values[idx++] = magCol[i];
-            values[idx++] = tycho_b[i] - tycho_v[i];
-
-            // Store velocity convert it with parallax.
-            values[idx++] = convertMasPerYearToMeterPerSecond(velXcol[i], parallax[i]);
-            values[idx++] = convertMasPerYearToMeterPerSecond(velYcol[i], parallax[i]);
-            values[idx++] = convertMasPerYearToMeterPerSecond(velZcol[i], parallax[i]);
-
-            // Store additional parameters to filter by.
-            values[idx++] = parallax[i];
-            values[idx++] = parallax_err[i];
-            values[idx++] = pr_mot_ra[i];
-            values[idx++] = pr_mot_ra_err[i];
-            values[idx++] = pr_mot_dec[i];
-            values[idx++] = pr_mot_dec_err[i];
-            values[idx++] = tycho_b[i];
-            values[idx++] = tycho_b_err[i];
-            values[idx++] = tycho_v[i];
-            values[idx++] = tycho_v_err[i];
-
-            // Read extra columns, if any. This will slow down the sorting tremendously!
-            for (size_t col = defaultCols; col < _nValuesPerStar; ++col) {
-                std::vector<float> vecData = tableContent[_columnNames[col]];
-                values[idx++] = vecData[i];
-            }
-
-            for (size_t j = 0; j < _nValuesPerStar; ++j) {
-                // The astronomers in Vienna use -999 as default value. Change it to 0.
-                if (values[j] == -999) {
-                    values[j] = 0.f;
-                }
-            }
-
-            // Slice star data and insert star into octree.
-            auto slicedValues = sliceFitsValues(option, values); 
-            //_nValuesInSlice = slicedValues.size(); // Unnecessary to do for every star.
-
-            // TODO: Insert into correct subfile & sort in Morton order (z-order)!?
-            _octreeManager->insert(slicedValues); // TODO: Doesn't work anymore! (Octree expects 8 values!)
-        }
-        LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) +
-            " read stars were nullArrays");
+        // Read raw speck file and construct Octree. 
+        success = readSpeckFile(_file);
+        break;
     }
+    case FileReaderOption::BinaryRaw: {
+
+        // Stars are stored in an ordered binary file.
+        success = readBinaryRawFile(_file);
+        break;
+    }
+    case FileReaderOption::BinaryOctree: {
+
+        // Octree already constructed and stored as a binary file. 
+        success = readBinaryOctreeFile(_file);
+        break;
+    }
+    case FileReaderOption::StreamOctree: {
+
+        // TODO!
+        success = false;
+        break;
+    }
+    default:
+        LERROR("Wrong FileReaderOption - no data file loaded!");
+        success = false;
+        break;
+    }
+
     //_octreeManager->printStarsPerNode();
    
+    return success;
+}
+
+bool RenderableGaiaStars::readFitsFile(std::string filePath) {
+    int nReadValuesPerStar = 0;
+
+    FitsFileReader fitsFileReader(false);
+    std::vector<float> fullData = fitsFileReader.readFitsFile(filePath, nReadValuesPerStar, _firstRow, 
+        _lastRow, _columnNames);
+
+    // Insert stars into octree.
+    for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
+        auto first = fullData.begin() + i;
+        auto last = fullData.begin() + i + nReadValuesPerStar;
+        std::vector<float> starValues(first, last);
+
+        _octreeManager->insert(starValues);
+    }
     return true;
 }
 
-// Slices every star seperately, from FITS file, before they are inserted into Octree. 
-// Conversion of position is done in vertex shader to simplify calculations in Octree.
-std::vector<float> RenderableGaiaStars::sliceFitsValues(gaiamission::RenderOption option,
-    std::vector<float> starValues) {
+bool RenderableGaiaStars::readSpeckFile(std::string filePath) {
+    int nReadValuesPerStar = 0;
 
-    auto tmpData = std::vector<float>();
+    FitsFileReader fileReader(false);
+    std::vector<float> fullData = fileReader.readSpeckFile(filePath, nReadValuesPerStar);
 
-    // Conversion kiloparsecs -> meter is done in vertex shader.
-    glm::vec3 position = glm::vec3(starValues[0], starValues[1], starValues[2]);
-    //position *= 1000 * static_cast<float>(distanceconstants::Parsec);
+    // Insert stars into octree.
+    for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
+        auto first = fullData.begin() + i;
+        auto last = fullData.begin() + i + nReadValuesPerStar;
+        std::vector<float> starValues(first, last);
 
-    // Convert milliarcseconds/year to m/s
-    float parallax = starValues[7];
-    glm::vec3 velocity = glm::vec3(
-        convertMasPerYearToMeterPerSecond(starValues[3], parallax),
-        convertMasPerYearToMeterPerSecond(starValues[4], parallax),
-        convertMasPerYearToMeterPerSecond(starValues[5], parallax));
-
-    switch (option) {
-    case gaiamission::RenderOption::Static: {
-        union {
-            StaticVBOLayout value;
-            std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
-        } layout;
-
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
-
-        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
-        break;
+        _octreeManager->insert(starValues);
     }
-    case gaiamission::RenderOption::Color: {
-        union {
-            ColorVBOLayout value;
-            std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
-        } layout;
-
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
-        layout.value.magnitude = starValues[6];
-
-        // B-V color is Blue minus Visible filter magnitudes
-        layout.value.bvColor = starValues[13] - starValues[15];
-
-        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
-        break;
-    }
-    case gaiamission::RenderOption::Motion: {
-        union {
-            MotionVBOLayout value;
-            std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;
-        } layout;
-
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
-
-        layout.value.magnitude = starValues[6];
-
-        // B-V color is Blue minus Visible filter magnitudes
-        layout.value.bvColor = starValues[13] - starValues[15];
-
-        layout.value.velocity = { {
-                velocity[0], velocity[1], velocity[2]
-            } };
-
-        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
-        break;
-    }
-    }
-    return tmpData;
+    return true;
 }
 
-// Slices every star seperately, from SPECK file, before they are inserted into Octree. 
-// Conversion of position is done in vertex shader to simplify calculations in Octree.
-std::vector<float> RenderableGaiaStars::sliceSpeckStars(gaiamission::RenderOption option,
-    std::vector<float> starValues) {
+bool RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
 
-    auto tmpData = std::vector<float>();
+    std::vector<float> fullData;
 
-    // Conversion kiloparsecs -> meter is done in vertex shader.
-    glm::vec3 position = glm::vec3(starValues[0], starValues[1], starValues[2]);
-    //position *= 1000 * static_cast<float>(distanceconstants::Parsec);
-
-    // TODO: Unclear which columns are velocity (and what unit in that case)!'
-    // Right now we're using [U,V,W] from speck file. 
-    glm::vec3 velocity = glm::vec3(starValues[9], starValues[10], starValues[11]);
-
-    switch (option) {
-    case gaiamission::RenderOption::Static: {
-        union {
-            StaticVBOLayout value;
-            std::array<float, sizeof(StaticVBOLayout) / sizeof(float)> data;
-        } layout;
-
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
-
-        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
-        break;
-    }
-    case gaiamission::RenderOption::Color: {
-        union {
-            ColorVBOLayout value;
-            std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
-        } layout;
-
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
+    std::ifstream fileStream(filePath, std::ifstream::binary);
+    if (fileStream.good()) {
         
-        // Luminosity is in starValues[4].
-        // However, we're already doing those computations in the shader from magnitude.
-        layout.value.magnitude = starValues[5];
-        // B-V color is Blue minus Visible filter magnitudes.
-        // Already computed in speck file. 
-        layout.value.bvColor = starValues[3];
+        int32_t nValues = 0;
+        int32_t nReadValuesPerStar = 0;
+        int renderValues = 8;
+        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+        fileStream.read(reinterpret_cast<char*>(&nReadValuesPerStar), sizeof(int32_t));
 
-        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
-        break;
+        fullData.resize(nValues);
+        fileStream.read(reinterpret_cast<char*>(&fullData[0]), nValues * sizeof(fullData[0]));
+
+        // Insert stars into octree.
+        for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
+            auto first = fullData.begin() + i;
+            auto last = fullData.begin() + i + renderValues;
+            std::vector<float> starValues(first, last);
+
+            //TODO: Filter?
+            _octreeManager->insert(starValues);
+        }
+
+        fileStream.close();
     }
-    case gaiamission::RenderOption::Motion: {
-        union {
-            MotionVBOLayout value;
-            std::array<float, sizeof(MotionVBOLayout) / sizeof(float)> data;
-        } layout;
-
-        layout.value.position = { {
-                position[0], position[1], position[2]
-            } };
-
-        // Luminosity is in starValues[4].
-        // However, we're already doing those computations in the shader from magnitude.
-        layout.value.magnitude = starValues[5];
-        // B-V color is Blue minus Visible filter magnitudes.
-        // Already computed in speck file. 
-        layout.value.bvColor = starValues[3];
-
-        layout.value.velocity = { {
-                velocity[0], velocity[1], velocity[2]
-            } };
-
-        tmpData.insert(tmpData.end(), layout.data.begin(), layout.data.end());
-        break;
+    else {
+        LERROR(fmt::format("Error opening file '{}' for loading raw binary file!", filePath));
+        return false;
     }
+    return true;
+}
+
+bool RenderableGaiaStars::readBinaryOctreeFile(std::string filePath) {
+
+    std::ifstream fileStream(filePath, std::ifstream::binary);
+    if (fileStream.good()) {
+        _octreeManager->readFromFile(fileStream, true);
+
+        fileStream.close();
     }
-    return tmpData;
+    else {
+        LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!", filePath));
+        return false;
+    }
+    return true;
 }
 
 } // namespace openspace

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GAIAMISSION___READSPECKTASK___H__
 
 #include <openspace/util/task.h>
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
 namespace openspace {
 

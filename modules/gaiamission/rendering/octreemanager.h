@@ -79,6 +79,10 @@ public:
     size_t biggestChunkIndexInUse() const;
 
 private:
+    const size_t POS_SIZE = 3;
+    const size_t COL_SIZE = 2;
+    const size_t VEL_SIZE = 3;
+
     size_t MAX_DIST = 10; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
@@ -125,9 +129,7 @@ private:
     size_t _numInnerNodes;
     size_t _biggestChunkIndexInUse;
     size_t _valuesPerStar;
-    const size_t _posSize = 3;
-    const size_t _colSize = 2;
-    const size_t _velSize = 3;
+    
     int _maxStackSize;
     bool _rebuildBuffer;
     bool _useVBO;
