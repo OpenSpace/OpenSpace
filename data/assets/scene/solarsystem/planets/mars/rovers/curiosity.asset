@@ -194,53 +194,53 @@ local RA_Mahli = {
 
 -- MastCam--
 
-local MSL_RSM_AZ = {
-    Name = "MSL_RSM_AZ",
-    Parent = transforms.RSM_AZ_Location.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_AZ",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_AZ.obj"
-
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-local MSL_RSM_EL = {
-    Name = "MSL_RSM_EL",
-    Parent = transforms.RSM_EL_Location.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_EL",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_EL.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-local MSL_RSM_HEAD = {
-    Name = "MSL_RSM_HEAD",
-    Parent = transforms.RSM_HEAD_Location.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_HEAD",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_HEAD.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
+--local MSL_RSM_AZ = {
+--    Name = "MSL_RSM_AZ",
+--    Parent = transforms.RSM_AZ_Location.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MSL_RSM_AZ",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_RSM_AZ.obj"
+--
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
+--
+--
+--local MSL_RSM_EL = {
+--    Name = "MSL_RSM_EL",
+--    Parent = transforms.RSM_EL_Location.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MSL_RSM_EL",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_RSM_EL.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
+--
+--
+--local MSL_RSM_HEAD = {
+--    Name = "MSL_RSM_HEAD",
+--    Parent = transforms.RSM_HEAD_Location.Name,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MSL_RSM_HEAD",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_RSM_HEAD.obj"
+--        },
+--        ColorTexture = textures .. "/MSLTextureTest.png"
+--    },
+--    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+--}
 
 
 
@@ -276,6 +276,52 @@ local HGA_EL = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity"
 }
 
+---- SAM & CHEMIN ----
+
+local SAM_Cover_1 = {
+    Name = "SAM_Cover_1",
+    Parent = transforms.SAM_Cover_1_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_SAM_FIXED_COVER_1.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+local SAM_Cover_2 = {
+    Name = "SAM_Cover_2",
+    Parent = transforms.SAM_Cover_2_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_SAM_FIXED_COVER_2.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+local CHEMIN_Bottom = {
+    Name = "CHEMIN_Bottom",
+    Parent = transforms.CHEMIN_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_CHEMIN.obj"
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
 
 
 
@@ -294,10 +340,14 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Turret,
     RA_Mahli,
 
-    MSL_RSM_AZ,
-    MSL_RSM_EL,
-    MSL_RSM_HEAD,
+    --MSL_RSM_AZ,
+    --MSL_RSM_EL,
+    --MSL_RSM_HEAD,
     HGA_AZ,
-    HGA_EL
+    HGA_EL,
+
+    SAM_Cover_1,
+    SAM_Cover_2,
+    CHEMIN_Bottom
 
 })
