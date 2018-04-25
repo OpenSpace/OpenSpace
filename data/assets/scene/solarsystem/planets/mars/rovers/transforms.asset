@@ -180,7 +180,7 @@ local RSM_AZ_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.743, 0.567, -0.516}
+            Position = {0.728, 0.573, -0.586}
         },
         Rotation = {
             Type = "SpiceRotation",
@@ -204,7 +204,7 @@ local RSM_EL_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.055, 0.0, 0.52}
+            Position = {-0.03, -0.02, 0.51}
         },
         Rotation = {
             Type = "SpiceRotation",
@@ -222,7 +222,7 @@ local RSM_HEAD_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.105, 0.0, 0.32}
+            Position = {-0.08, 0.0, 0.35}
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "

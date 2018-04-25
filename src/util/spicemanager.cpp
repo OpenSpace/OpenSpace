@@ -853,6 +853,12 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
                                                                 0.0,      1.0,      0.0, 
                                                          -glm::sin(90.0), 0.0,  glm::cos(90.0) );
 
+
+                glm::dmat3 matrixCorrection2 = glm::dmat3( glm::cos(1.57079632), 0.0, glm::sin(1.57079632), 
+                                                                0.0,      1.0,      0.0, 
+                                                         -glm::sin(1.57079632), 0.0,  glm::cos(1.57079632) );
+
+
                 result = MSL_rotation * matrixCorrection;
             }
 
@@ -868,16 +874,15 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
         else if (fromFrame == rsm_az_zero) 
         {
-            glm::dmat3 matrixCorrection = glm::dmat3( 1.0,       0.0,    0.0, 
-                                 0.0, glm::cos(30.0) , -glm::sin(30.0), 
-                                 0.0, glm::sin(30.0),   glm::cos(30.0) );
+            glm::dmat3 matrixCorrection = glm::dmat3(glm::cos(0.45378560552), glm::sin(0.45378560552), 0.0, 
+                                                      -glm::sin(0.45378560552),  glm::cos(0.45378560552), 0.0, 
+                                                      0.0,             0.0,           1.0 );
 
-            //spice rotation
             glm::dmat3 MSL_rotation = glm::dmat3( 1.0,       0.0,    0.0, 
-                                 0.0, glm::cos(150.0) , -glm::sin(150.0), 
-                                 0.0, glm::sin(150.0),   glm::cos(150.0) );
+                                0.0, glm::cos(angle) , -glm::sin(angle), 
+                                0.0, glm::sin(angle),   glm::cos(angle) );
 
-            result = matrixCorrection * MSL_rotation;
+            result = MSL_rotation * matrixCorrection;
         }
 
 
