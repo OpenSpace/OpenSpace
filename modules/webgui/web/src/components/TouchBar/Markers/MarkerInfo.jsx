@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import SmallLabel from '../common/SmallLabel/SmallLabel';
+import SmallLabel from '../../common/SmallLabel/SmallLabel';
 import styles from './MarkerInfo.scss';
 import MakerInfoIcon from "./MakerInfoIcon";
 
@@ -10,14 +10,15 @@ class MarkerInfo extends Component {
   }
 
 render() {
-  const { position, size, showInfo, identifier } = this.props;
+  const { position, size, showInfo, identifier, showLabel } = this.props;
 
   const positionStyles = {
     MarkerInfo: {
+      width: '200px',
       left: `${position[0]}px`,
       bottom: `${position[1]}px`,
       marginBottom: `-${size}em`,
-      marginLeft: `-${size}em`,
+      marginLeft: '-100px',
     },
     Icon: {
       fontSize: `${size}em`,
@@ -34,7 +35,11 @@ render() {
         identifier={identifier}
         positionStyles={positionStyles}
         planetInfo={this.props.planetInfo}/>}
-      <SmallLabel style={positionStyles.Text}>{identifier}</SmallLabel>
+      {showLabel &&
+      <SmallLabel
+        style={positionStyles.Text}>
+        {identifier}
+      </SmallLabel>}
     </div>
   );
 }

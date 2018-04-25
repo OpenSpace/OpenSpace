@@ -1,14 +1,14 @@
 import React from 'react';
 import HelpButton from './HelpButton';
-import ResetButton from './ResetButton';
+import HomeButton from './HomeButton';
 import TimeController from './TimeController';
 
 import styles from './UtilitiesMenu.scss';
 
 const UtilitiesMenu = () => (
   <div className={styles.UtilitiesMenu}>
+    <HomeButton />
     <HelpButton />
-    <ResetButton />
     <TimeController />
   </div>
 );

@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import MarkerInfo from './MarkerInfo';
-import { traverseTreeWithURI, jsonToLuaTable } from '../../utils/propertyTreeHelpers';
-import { startListening, stopListening } from '../../api/Actions';
-import {infoIconKey, StoryKey} from "../../api/keys";
+import { traverseTreeWithURI, jsonToLuaTable } from '../../../utils/propertyTreeHelpers';
+import { startListening, stopListening } from '../../../api/Actions/index';
+import {infoIconKey, StoryKey} from "../../../api/keys";
 
 class Markers extends Component {
   componentDidUpdate() {
@@ -50,6 +50,8 @@ class Markers extends Component {
         // TODO Remove the magic numbers
         let size = (100000000000 / distFromCamToNodeProperties[i].Value);
         const showInfo = size > 100;
+        const showLabel = size > 0.04;
+
         if (size >= 3) size = 3;
         if (size <= 1.5) size = 1.5;
 
@@ -65,6 +67,7 @@ class Markers extends Component {
           size={size}
           showInfo={showInfo}
           planetInfo={planetInfo}
+          showLabel={showLabel}
         />);
        }
       })

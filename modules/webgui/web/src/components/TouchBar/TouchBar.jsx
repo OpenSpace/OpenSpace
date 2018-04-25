@@ -1,7 +1,7 @@
 import React from 'react';
 import FocusMenu from './FocusMenu/FocusMenu';
 import UtilitiesMenu from './UtilitiesMenu/UtilitiesMenu';
-import Markers from './Markers';
+import Markers from './Markers/Markers';
 import styles from './TouchBar.scss';
 
 const TouchBar = () => (
