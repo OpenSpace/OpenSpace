@@ -834,6 +834,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             //Rotation for AZ
             if (fromFrame == ra_base) 
             {
+
                 result = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
                                     -glm::sin(angle),  glm::cos(angle), 0.0, 
                                         0.0,             0.0,           1.0 );
@@ -844,14 +845,16 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             //Rotation for RA-EL
             else if (fromFrame == ra_az ) 
             {
+                double degrees_90 = 3.14/9.0;
                 glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, glm::sin(angle), 
                                                            0.0,        1.0 ,     0.0, 
                                                      -glm::sin(angle), 0.0,  glm::cos(angle) );
 
                 // FIX: problem, don't know exactly what angle is needed for correct modification of angle, lookup!!
-                glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(90.0), 0.0, glm::sin(90.0), 
+                //90 degrees = pi/9
+                glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(degrees_90), 0.0, glm::sin(degrees_90), 
                                                                 0.0,      1.0,      0.0, 
-                                                         -glm::sin(90.0), 0.0,  glm::cos(90.0) );
+                                                         -glm::sin(degrees_90), 0.0,  glm::cos(degrees_90) );
 
 
                 glm::dmat3 matrixCorrection2 = glm::dmat3( glm::cos(1.57079632), 0.0, glm::sin(1.57079632), 

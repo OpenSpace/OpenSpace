@@ -130,27 +130,6 @@ local RA_Wrist_Location = {
 }
 
 
-
---local RA_Wrist_Location = {
---    Name = "RA_Wrist_Location",
---    Parent = RA_Elbow_Location.Name,
---    Transform = {
---        --Rotation = {
---        --    Type = "SpiceRotation",
---        --    SourceFrame = "RA_Elbow_Location",
---        --    DestinationFrame = "MSL_ROVER",
---        --    Kernels = kernels.CuriosityKernels
---        --},
---        --Translation = {
---        --    Type = "StaticTranslation",
---        --    Position = {-0.18, 0.7, 0}
---        --}
---    },
---    GuiPath = "/Solar System/Planets/Mars/Curiosity "
---}
-
-
-
 --TURRET
 local RA_Turret_Location = {
     Name = "RA_Turret_Location",
@@ -232,7 +211,6 @@ local RSM_HEAD_Location = {
 
 
 
-
 ---- HIGH GAIN ANTENNA HGA ----
 
 local HGA_AZ_Location = {
@@ -271,9 +249,26 @@ local HGA_EL_Location = {
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
----- SAM ----
+---- SAM & HEMIN ----
 
----- CHEMIN ----
+local SAM_Cover_1_Location = {
+    Name = "SAM_Cover_1_Location",
+    Parent = RoverLocation.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local SAM_Cover_2_Location = {
+    Name = "SAM_Cover_2_Location",
+    Parent = RoverLocation.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
+local CHEMIN_Location = {
+    Name = "CHEMIN_Location",
+    Parent = RoverLocation.Name,
+    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+}
+
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     CuriosityPosition,
@@ -292,7 +287,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RSM_EL_Location,
     RSM_HEAD_Location,
     HGA_AZ_Location,
-    HGA_EL_Location
+    HGA_EL_Location,
+    SAM_Cover_1_Location,
+    SAM_Cover_2_Location,
+    CHEMIN_Location
 })
 
 
