@@ -50,13 +50,7 @@ bool LeafBrickSelector::initialize() {
 void LeafBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
 
     const std::list<unsigned int> leaves = _tsp->getLeaves(timestep);
-    std::string s;
-    for (std::list<unsigned int>::const_iterator it = leaves.begin();
-        it != leaves.end();
-        ++it) {
-        bricks[std::distance(leaves.begin(), it)] = *it;
-        s += std::to_string(*it) + " ";
-    }
+    bricks.assign(leaves.begin(), leaves.end());
 }
 
 } // namespace openspace
