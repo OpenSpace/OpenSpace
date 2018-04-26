@@ -123,7 +123,6 @@ local RA_Wrist_Location = {
         Translation = {
             Type = "StaticTranslation",
             Position = {0.77, 0.13, 0.035}
-
         }
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
@@ -134,13 +133,25 @@ local RA_Wrist_Location = {
 local RA_Turret_Location = {
     Name = "RA_Turret_Location",
     Parent = RA_Wrist_Location.Name,
+    Transform = {
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_RA_TURRET",
+            DestinationFrame = "MSL_MAHLI_REF",
+            Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.04, -0.15}
+        }
+    },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
 --MAHLI
 local RA_Mahli_Location = {
     Name = "RA_Mahli_Location",
-    Parent = RA_Wrist_Location.Name,
+    Parent = RA_Turret_Location.Name,
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
