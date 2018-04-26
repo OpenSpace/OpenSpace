@@ -47,27 +47,29 @@ public:
         float originY;
         float originZ;
         float halfDimension;
-        size_t numStars; // TODO: Use in LOD checks, else remove?
+        size_t numStars;
         bool isLeaf;
         bool isLoaded;
         int bufferIndex;
-        size_t lodInUse;
+        std::string OctreePositionIndex;
     };
 
     OctreeManager();
     ~OctreeManager();
 
-    void initOctree();
-    void initBufferIndexStack(int maxIndex);
+    void initOctree(long long cpuRamBudget = 0);
+    void initBufferIndexStack(long long maxStarsOrNodes, bool useVBO);
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
     std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
-        int& deltaStars, gaiamission::RenderOption option, bool useVBO);
+        int& deltaStars, gaiamission::RenderOption option);
+
     std::vector<float> getAllData(gaiamission::RenderOption option);
     void clearAllData(int branchIndex = -1);
 
     void writeToFile(std::ofstream& outFileStream, bool writeData);
-    void readFromFile(std::ifstream& inFileStream, bool readData);
+    int readFromFile(std::ifstream& inFileStream, bool readData, 
+        std::string folderPath = std::string());
 
     void writeToMultipleFiles(std::string outFolderPath, size_t branchIndex);
 
@@ -107,17 +109,18 @@ private:
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, gaiamission::RenderOption option);
     void clearNodeData(std::shared_ptr<OctreeNode> node);
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
+    bool updateBufferIndex(std::shared_ptr<OctreeNode> node);
 
     void writeNodeToFile(std::ofstream& outFileStream, 
         std::shared_ptr<OctreeNode> node, bool writeData);
-    void readNodeFromFile(std::ifstream& inFileStream, 
+    int readNodeFromFile(std::ifstream& inFileStream, 
         std::shared_ptr<OctreeNode> node, bool readData);
 
     void writeNodeToMultipleFiles(std::string outFilePrefix, std::shared_ptr<OctreeNode> node);
-    void fetchNodeDataFromFile(std::string inFilePrefix, std::shared_ptr<OctreeNode> node);
+    void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
 
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
-        gaiamission::RenderOption option);
+        gaiamission::RenderOption option, int& deltaStars);
 
     std::unique_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
@@ -130,9 +133,13 @@ private:
     size_t _biggestChunkIndexInUse;
     size_t _valuesPerStar;
     
-    int _maxStackSize;
+    size_t _maxStackSize;
     bool _rebuildBuffer;
     bool _useVBO;
+    bool _streamOctree;
+    long long _cpuRamBudget;
+    long long _ssboStarStreamBudget;
+    std::string _streamFolderPath;
 
 }; // class OctreeManager
 

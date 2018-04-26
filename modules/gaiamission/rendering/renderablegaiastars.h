@@ -70,7 +70,8 @@ private:
     const size_t POS_SIZE = 3;
     const size_t COL_SIZE = 2;
     const size_t VEL_SIZE = 3;
-    const float MAX_GPU_MEMORY_PERCENT = 0.8;
+    const float MAX_GPU_MEMORY_PERCENT = 0.8f;
+    const float MAX_CPU_RAM_PERCENT = 0.5f;
 
     enum FileReaderOption {
         Fits = 0,
@@ -88,11 +89,11 @@ private:
     };
     
     bool readDataFile();
-    bool readFitsFile(std::string filePath);
-    bool readSpeckFile(std::string filePath);
-    bool readBinaryRawFile(std::string filePath);
-    bool readBinaryOctreeFile(std::string filePath);
-    bool readBinaryOctreeStructureFile(std::string folderPath);
+    int readFitsFile(std::string filePath);
+    int readSpeckFile(std::string filePath);
+    int readBinaryRawFile(std::string filePath);
+    int readBinaryOctreeFile(std::string filePath);
+    int readBinaryOctreeStructureFile(std::string folderPath);
 
 
     properties::StringProperty _filePath;
@@ -147,8 +148,9 @@ private:
     size_t _nRenderValuesPerStar;
     int _nStarsToRender;
     bool _useVBO;
-    size_t _gpuMemoryBudgetInBytes;
-    size_t _maxMemoryBudgetInBytes;
+    long long _cpuRamBudget;
+    long long _gpuMemoryBudgetInBytes;
+    long long _maxMemoryBudgetInBytes;
     size_t _chunkSize;
 
     GLuint _vao;

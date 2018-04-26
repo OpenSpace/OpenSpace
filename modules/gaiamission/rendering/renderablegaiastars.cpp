@@ -310,12 +310,17 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
-    , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2539913)
+    , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _nStarsToRender(0)
     , _program(nullptr)
     , _programTM(nullptr)
     , _fboTexture(nullptr)
     , _nRenderValuesPerStar(0)
+    , _useVBO(false)
+    , _cpuRamBudget(0)
+    , _gpuMemoryBudgetInBytes(0)
+    , _maxMemoryBudgetInBytes(0)
+    , _chunkSize(0)
     , _vao(0)
     , _vaoEmpty(0)
     , _vboPos(0)
@@ -636,6 +641,7 @@ void RenderableGaiaStars::initializeGL() {
 
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
 
+
     // Find out how much GPU memory this computer has (Nvidia cards).
     GLint nDedicatedVidMemoryInKB = 0;
     glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedVidMemoryInKB);
@@ -643,12 +649,21 @@ void RenderableGaiaStars::initializeGL() {
     glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
     GLint nCurrentAvailMemoryInKB = 0;
     glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurrentAvailMemoryInKB);
+
     LINFO("nDedicatedVidMemoryInKB: " + std::to_string(nDedicatedVidMemoryInKB) + 
         " - nTotalMemoryInKB: " + std::to_string(nTotalMemoryInKB) +
         " - nCurrentAvailMemoryInKB: " + std::to_string(nCurrentAvailMemoryInKB));
     
     // Set ceiling for video memory to use in streaming.
-    _gpuMemoryBudgetInBytes = nCurrentAvailMemoryInKB * 1024 * MAX_GPU_MEMORY_PERCENT;
+    float currentVidMem = static_cast<float>(static_cast<long long>(nCurrentAvailMemoryInKB) * 1024);
+    _gpuMemoryBudgetInBytes = static_cast<long long>(currentVidMem * MAX_GPU_MEMORY_PERCENT);
+
+    // Set ceiling for how much of the installed CPU RAM to use for streaming. 
+    long long installedRam = static_cast<long long>(CpuCap.installedMainMemory()) * 1024 * 1024;
+    _cpuRamBudget = static_cast<long long>(static_cast<float>(installedRam) * MAX_CPU_RAM_PERCENT);
+
+    LINFO("GPU Memory Budget {bytes}: " + std::to_string(_gpuMemoryBudgetInBytes) +
+        " - CPU RAM Budget {bytes}: " + std::to_string(_cpuRamBudget));
 }
 
 void RenderableGaiaStars::deinitializeGL() {
@@ -724,7 +739,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     const int renderOption = _renderOption;
     int deltaStars = 0;
     auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
-        gaiamission::RenderOption(renderOption), _useVBO);
+        gaiamission::RenderOption(renderOption));
 
     // Update number of rendered stars.
     _nStarsToRender += deltaStars;
@@ -775,9 +790,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
         // Keep streaming memeory size to a minimum.
-        //size_t memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
-        //size_t streamingBudgetInBytes = std::min(memoryQuery, _maxMemoryBudgetInBytes - indexBufferSize);
-        size_t streamingBudgetInBytes = _maxMemoryBudgetInBytes;
+        //long long memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
+        //long long streamingBudgetInBytes = std::min(memoryQuery, _maxMemoryBudgetInBytes - indexBufferSize);
+        long long streamingBudgetInBytes = _maxMemoryBudgetInBytes;
 
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
@@ -813,8 +828,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
         float posMemoryShare = static_cast<float>(POS_SIZE) / _nRenderValuesPerStar;
         int posChunkSize = maxStarsPerNode * POS_SIZE;
-        //int posMemoryQuery = nChunksToRender * posChunkSize * sizeof(GLfloat);
-        GLsizeiptr posStreamingBudget = static_cast<int>(_maxMemoryBudgetInBytes * posMemoryShare);
+        //long long posMemoryQuery = nChunksToRender * posChunkSize * sizeof(GLfloat);
+        long long posStreamingBudget = static_cast<long long>(_maxMemoryBudgetInBytes * posMemoryShare);
 
         // Use buffer orphaning to update a subset of total data.
         glBufferData(
@@ -843,8 +858,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
             float colMemoryShare = static_cast<float>(COL_SIZE) / _nRenderValuesPerStar;
             int colChunkSize = maxStarsPerNode * COL_SIZE;
-            //int colMemoryQuery = nChunksToRender * colChunkSize * sizeof(GLfloat);
-            int colStreamingBudget = static_cast<int>(_maxMemoryBudgetInBytes * colMemoryShare);
+            //long long colMemoryQuery = nChunksToRender * colChunkSize * sizeof(GLfloat);
+            long long colStreamingBudget = static_cast<long long>(
+                _maxMemoryBudgetInBytes * colMemoryShare);
 
             // Use buffer orphaning to update a subset of total data.
             glBufferData(
@@ -872,8 +888,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
                 float velMemoryShare = static_cast<float>(VEL_SIZE) / _nRenderValuesPerStar;
                 int velChunkSize = maxStarsPerNode * VEL_SIZE;
-                //int velMemoryQuery = nChunksToRender * velChunkSize * sizeof(GLfloat);
-                int velStreamingBudget = static_cast<int>(_maxMemoryBudgetInBytes * velMemoryShare);
+                //long long velMemoryQuery = nChunksToRender * velChunkSize * sizeof(GLfloat);
+                long long velStreamingBudget = static_cast<long long>(
+                    _maxMemoryBudgetInBytes * velMemoryShare);
 
                 // Use buffer orphaning to update a subset of total data.
                 glBufferData(
@@ -1229,21 +1246,28 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Calculate memory budgets. 
         _chunkSize = _octreeManager->maxStarsPerNode() * _nRenderValuesPerStar;
-        size_t totalStreamingCostInBytes = _octreeManager->totalNodes() * _chunkSize * sizeof(GLfloat);
-        _maxMemoryBudgetInBytes = std::min(totalStreamingCostInBytes, _gpuMemoryBudgetInBytes);
-        int maxNodesInStream = static_cast<int>(_maxMemoryBudgetInBytes / (_chunkSize * sizeof(GLfloat)));
+        long long totalChunkSizeInBytes = _octreeManager->totalNodes() * _chunkSize * sizeof(GLfloat);
+        _maxMemoryBudgetInBytes = std::min(totalChunkSizeInBytes, _gpuMemoryBudgetInBytes);
+        long long maxNodesInStream = _maxMemoryBudgetInBytes / (_chunkSize * sizeof(GLfloat));
+        
+        // TODO: Figure out how to use properly! (Re-building fucked up)
+        //long long maxStarsInStream = _gpuMemoryBudgetInBytes / (_nRenderValuesPerStar * sizeof(GLfloat));
+        long long maxStarsInStream = maxNodesInStream;
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
-            " Max streaming budget (in bytes): " + std::to_string(_maxMemoryBudgetInBytes) +
-            " Max nodes in stream: " + std::to_string(maxNodesInStream));
+            " - Max streaming budget (in bytes): " + std::to_string(_maxMemoryBudgetInBytes) +
+            " - Max stars in stream: " + std::to_string(maxStarsInStream) +
+            " - Max nodes in stream: " + std::to_string(maxNodesInStream));
 
-        // Trigger a rebuild of buffer data from octree.
-        _octreeManager->initBufferIndexStack(maxNodesInStream);
-        _nStarsToRender = 0;
         
         // ------------------ RENDER WITH SSBO -----------------------
         if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
             _useVBO = false;
+
+            // Trigger a rebuild of buffer data from octree. With VBO we will fill the chunks.
+            _octreeManager->initBufferIndexStack(maxStarsInStream, _useVBO);
+            _nStarsToRender = 0;
+
             // Generate SSBO Buffers and bind them. 
             if (_vaoEmpty == 0) {
                 glGenVertexArrays(1, &_vaoEmpty);
@@ -1279,6 +1303,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         else { // ------------------ RENDER WITH VBO -----------------------
             _useVBO = true;
+
+            // Trigger a rebuild of buffer data from octree. With VBO we will fill the chunks.
+            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO);
+            _nStarsToRender = 0;
+
             // Generate VAO and VBOs
             if (_vao == 0) {
                 glGenVertexArrays(1, &_vao);
@@ -1559,10 +1588,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
 bool RenderableGaiaStars::readDataFile() {
 
     const int fileReaderOption = _fileReaderOption;
-    bool success = false;
+    int nReadStars = 0;
 
     std::string _file = _filePath;
-    _octreeManager->initOctree();
+    _octreeManager->initOctree(_cpuRamBudget);
 
     LINFO("Loading data file: " + _file);
 
@@ -1570,45 +1599,46 @@ bool RenderableGaiaStars::readDataFile() {
     case FileReaderOption::Fits: {
 
         // Read raw fits file and construct Octree.  
-        success = readFitsFile(_file);
+        nReadStars = readFitsFile(_file);
         break;
     }
     case FileReaderOption::Speck: {
 
         // Read raw speck file and construct Octree. 
-        success = readSpeckFile(_file);
+        nReadStars = readSpeckFile(_file);
         break;
     }
     case FileReaderOption::BinaryRaw: {
 
         // Stars are stored in an ordered binary file.
-        success = readBinaryRawFile(_file);
+        nReadStars = readBinaryRawFile(_file);
         break;
     }
     case FileReaderOption::BinaryOctree: {
 
         // Octree already constructed and stored as a binary file. 
-        success = readBinaryOctreeFile(_file);
+        nReadStars = readBinaryOctreeFile(_file);
         break;
     }
     case FileReaderOption::StreamOctree: {
 
         // Read Octree structure from file, without data.
-        success = readBinaryOctreeStructureFile(_file);
+        nReadStars = readBinaryOctreeStructureFile(_file);
         break;
     }
     default:
         LERROR("Wrong FileReaderOption - no data file loaded!");
-        success = false;
         break;
     }
 
     //_octreeManager->printStarsPerNode();
-   
-    return success;
+    _nRenderedStars.setMaxValue(nReadStars);
+    
+    if (nReadStars > 0) return true;
+    else return false;
 }
 
-bool RenderableGaiaStars::readFitsFile(std::string filePath) {
+int RenderableGaiaStars::readFitsFile(std::string filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fitsFileReader(false);
@@ -1623,10 +1653,10 @@ bool RenderableGaiaStars::readFitsFile(std::string filePath) {
 
         _octreeManager->insert(starValues);
     }
-    return true;
+    return fullData.size() / nReadValuesPerStar;
 }
 
-bool RenderableGaiaStars::readSpeckFile(std::string filePath) {
+int RenderableGaiaStars::readSpeckFile(std::string filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
@@ -1640,12 +1670,13 @@ bool RenderableGaiaStars::readSpeckFile(std::string filePath) {
 
         _octreeManager->insert(starValues);
     }
-    return true;
+    return fullData.size() / nReadValuesPerStar;
 }
 
-bool RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
+int RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
 
     std::vector<float> fullData;
+    int nReadStars = 0;
 
     std::ifstream fileStream(filePath, std::ifstream::binary);
     if (fileStream.good()) {
@@ -1669,44 +1700,47 @@ bool RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
             _octreeManager->insert(starValues);
         }
 
+        nReadStars = nValues / nReadValuesPerStar;
         fileStream.close();
     }
     else {
         LERROR(fmt::format("Error opening file '{}' for loading raw binary file!", filePath));
-        return false;
+        return nReadStars;
     }
-    return true;
+    return nReadStars;
 }
 
-bool RenderableGaiaStars::readBinaryOctreeFile(std::string filePath) {
+int RenderableGaiaStars::readBinaryOctreeFile(std::string filePath) {
+    int nReadStars = 0;
 
     std::ifstream fileStream(filePath, std::ifstream::binary);
     if (fileStream.good()) {
-        _octreeManager->readFromFile(fileStream, true);
+        nReadStars = _octreeManager->readFromFile(fileStream, true);
 
         fileStream.close();
     }
     else {
         LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!", filePath));
-        return false;
+        return nReadStars;
     }
-    return true;
+    return nReadStars;
 }
 
-bool RenderableGaiaStars::readBinaryOctreeStructureFile(std::string folderPath) {
+int RenderableGaiaStars::readBinaryOctreeStructureFile(std::string folderPath) {
+    int nReadStars = 0;
     std::string indexFile = folderPath + "index.bin";
 
     std::ifstream fileStream(indexFile, std::ifstream::binary);
     if (fileStream.good()) {
-        _octreeManager->readFromFile(fileStream, false);
+        nReadStars = _octreeManager->readFromFile(fileStream, false, folderPath);
 
         fileStream.close();
     }
     else {
         LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!", indexFile));
-        return false;
+        return nReadStars;
     }
-    return true;
+    return nReadStars;
 }
 
 } // namespace openspace
