@@ -1,8 +1,0 @@
-<OGRVRTDataSource>
-  <OGRVRTLayer name="rover_locations">
-    <SrcDataSource relativeToVRT="1">C:/Users/Rickard Lindstedt/Documents/dbf</SrcDataSource>
-    <SrcLayer>rover_locations</SrcLayer>
-    <GeometryType>wkbPoint</GeometryType>
-    <LayerSRS>WGS84</LayerSRS>
-  </OGRVRTLayer>
-</OGRVRTDataSource>

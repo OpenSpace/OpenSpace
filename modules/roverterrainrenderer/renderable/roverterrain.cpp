@@ -116,7 +116,7 @@ namespace openspace {
         dictionary.getValue("TexturePath", _texturePath);
         dictionary.getValue("RoverLocationPath", _roverLocationPath);
 
-        ghoul_assert(_modelPath && _texturePath && _roverLocationPath, "Missing either model or texture path");
+        //ghoul_assert(_modelPath && _texturePath && _roverLocationPath, "Missing either model or texture path");
         
         std::replace(_modelPath.begin(), _modelPath.end(), '\\', '/');
         std::replace(_texturePath.begin(), _texturePath.end(), '\\', '/');

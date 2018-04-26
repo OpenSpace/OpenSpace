@@ -16,44 +16,44 @@ asset.require('util/default_keybindings')
 asset.request('customization/globebrowsing')
 
 -- Keybindings that are specific for this scene
-local Keybindings = {
-    {
-        Key = "s",
-        Command = sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
-        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
-        Local = false
-    },
-    {
-        Key = "b",
-        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
-                  sceneHelper.property.invert('Stars.renderable.Enabled'),
-        Documentation = "Toggle background (Stars and Milkyway).",
-        Local = false
-    },
-    {
-        Key = "g",
-        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
-                  sceneHelper.property.invert('Stars.renderable.Enabled') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
-                  sceneHelper.property.invert('Mars.RenderableGlobe.PerformShading') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
-                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
-                  sceneHelper.property.invert('Moon.RenderableGlobe.Enabled') ..
-                  sceneHelper.property.invert('Sun.renderable.Enabled'),
-        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
-        Local = false
-    },
-    {
-        Key = "h",
-        Command = "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
-        Documentation = "Disables visibility of the trails",
-        Local = false
-    },
-}
+--local Keybindings = {
+--    {
+--        Key = "s",
+--        Command = sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled'),
+--        Documentation = "Toggle night texture, shading, atmosphere, and water for Earth.",
+--        Local = false
+--    },
+--    {
+--        Key = "b",
+--        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
+--                  sceneHelper.property.invert('Stars.renderable.Enabled'),
+--        Documentation = "Toggle background (Stars and Milkyway).",
+--        Local = false
+--    },
+--    {
+--        Key = "g",
+--        Command = sceneHelper.property.invert('MilkyWay.renderable.Enabled') ..
+--                  sceneHelper.property.invert('Stars.renderable.Enabled') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.Enabled') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.PerformShading') ..
+--                  sceneHelper.property.invert('Mars.RenderableGlobe.PerformShading') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.Atmosphere') ..
+--                  sceneHelper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.Enabled') ..
+--                  sceneHelper.property.invert('Moon.RenderableGlobe.Enabled') ..
+--                  sceneHelper.property.invert('Sun.renderable.Enabled'),
+--        Documentation = "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun",
+--        Local = false
+--    },
+--    {
+--        Key = "h",
+--        Command = "openspace.setPropertyValue('*Trail.renderable.Enabled', false)",
+--        Documentation = "Disables visibility of the trails",
+--        Local = false
+--    },
+--}
 
 local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
@@ -90,7 +90,11 @@ asset.onInitialize(function ()
     })
 
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+       -- //for zooming into roverpath
+   -- //openspace.globebrowsing.goToGeo(-4.6682, 137.37, 20000000);
 end)
+
+
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)

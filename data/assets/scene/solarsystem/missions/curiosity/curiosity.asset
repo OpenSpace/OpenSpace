@@ -4,13 +4,14 @@ local transforms = asset.require('scene/solarsystem/planets/mars/transforms')
 local dataPath = asset.localResource("data")
 
 local Curiosity = {
-    Name = "RoverSite",
-    Parent = transforms.MarsBarycenter.Name,
+    Identifier = "RoverSite",
+    Parent = "Mars",
     Renderable = {
         Type = "RoverTerrain",
         RoverLocationPath = dataPath .. "/path/rover_locations.shp",
-        ModelPath = dataPath .. "/models/",
-        TexturePath = dataPath .. "/textures/"
+        --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
+        ModelPath = "F:/RoverTerrain-Models&Textures/modelsEasy/",    
+        TexturePath = "F:/RoverTerrain-Models&Textures/texturesEasy/",
     },
     GuiPath = "/Solar System/Curiosity"
 }
