@@ -599,7 +599,6 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     if (_parent) {
 
 
-
         //if (_parent->name() == "RA_Shoulder_AZ_Location")
         //{
             //LERROR(fmt::format("Parent location AZ: '{}'", _parent->name()));

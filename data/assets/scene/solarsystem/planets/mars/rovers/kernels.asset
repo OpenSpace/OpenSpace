@@ -83,7 +83,7 @@ local CuriosityKernels = {
     kernels .. "/CK/msl_surf_rsm_tlmres.bc",
     
 
-    kernels .. "/CK/msl_surf_rover_tlm.bc",
+    kernels .. "/CK/msl_surf_rover_tlm_spanned.bc",
 
     -------- PCK -------- 
     kernels .. "/PCK/pck00008.tpc",

@@ -775,7 +775,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     const std::string ra_el = "MSL_RA_SHOULDER_EL";
     const std::string ra_elbow = "MSL_RA_ELBOW";
     const std::string ra_wrist = "MSL_RA_WRIST";
-    const std::string ra_turret = "MSL_PADS";
+    const std::string ra_turret = "MSL_RA_TURRET";
 
     const std::string rsm_az = "MSL_RSM_ZERO_AZ";
     const std::string rsm_el = "MSL_RSM_ZERO_EL";
@@ -784,7 +784,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     const std::string hga_el = "MSL_HGA_EL";
 
 
-    if( fromFrame == ra_base || fromFrame == ra_az  || fromFrame == ra_el || fromFrame == ra_elbow || fromFrame == ra_wrist || 
+    if( fromFrame == ra_base || fromFrame == ra_az  || fromFrame == ra_el || fromFrame == ra_elbow || fromFrame == ra_wrist || fromFrame == ra_turret ||
         fromFrame == rsm_el  || fromFrame == rsm_az ||
         fromFrame == hga_az  || fromFrame == hga_el )
     {   
@@ -818,11 +818,6 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(result)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
 
         SpiceDouble angle = rot_z;
-        LERROR(fmt::format("fromFrame: '{}'", fromFrame ));
-
-        //if (fromFrame == ra_base || fromFrame == ra_az || fromFrame == ra_el || fromFrame == ra_elbow || fromFrame == ra_wrist)
-        //{ 
-        LERROR(fmt::format("fromFrame: '{}'", fromFrame ));
             
         //Rotation for AZ
         if (fromFrame == ra_base) 
@@ -833,20 +828,19 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
             return result;
         }
 
-
         //Rotation for RA-EL
         else if (fromFrame == ra_az ) 
         {
-            double rad_180 = 3.14;///9.0;
+            //double rad_180 = 3.14;///9.0;
             glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
                                                        0.0,        1.0 ,     0.0, 
                                                   glm::sin(angle), 0.0,  glm::cos(angle) );
 
             // FIX: problem, don't know exactly what angle is needed for correct modification of angle, lookup!!
             //90 degrees = pi/9
-            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_180), 0.0, glm::sin(rad_180), 
-                                                               0.0,      1.0,      0.0, 
-                                                     -glm::sin(rad_180), 0.0,  glm::cos(rad_180) );
+            //glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_180), 0.0, glm::sin(rad_180), 
+            //                                                   0.0,      1.0,      0.0, 
+            //                                         -glm::sin(rad_180), 0.0,  glm::cos(rad_180) );
 
             result = MSL_rotation;// * matrixCorrection;
         }
@@ -868,16 +862,16 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
                                                   glm::sin(angle), 0.0,  glm::cos(angle) );
 
             glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_90), 0.0, glm::sin(rad_90), 
-                                                            0.0,      1.0,      0.0, 
+                                                            0.0,        1.0,      0.0, 
                                                      -glm::sin(rad_90), 0.0,  glm::cos(rad_90) );
 
             result = MSL_rotation * matrixCorrection;
         }
 
         //Rotation RA-turret
-        else if (fromFrame == ra_wrist) 
+        else if (fromFrame == ra_turret) 
         {
-            double rad_60 = (60.535*3.14)/180.0;
+            double rad_60 = (50.535*3.14)/180.0;
             glm::dmat3 MSL_rotation = glm::dmat3( 1.0,        0.0,           0.0,
                                                   0.0, glm::cos(angle), -glm::sin(angle), 
                                                   0.0, glm::sin(angle),  glm::cos(angle) );
@@ -893,16 +887,15 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         //RSM
         else if (fromFrame == rsm_az) 
         {
-            glm::dmat3 matrixCorrection = glm::dmat3( 1.0,       0.0,    0.0, 
-                                 0.0, glm::cos(30.0) , -glm::sin(30.0), 
-                                 0.0, glm::sin(30.0),   glm::cos(30.0) );
+            glm::dmat3 matrixCorrection = glm::dmat3(  glm::cos(0.45378560552), glm::sin(0.45378560552), 0.0, 
+                                                      -glm::sin(0.45378560552), glm::cos(0.45378560552), 0.0, 
+                                                      0.0,             0.0,           1.0 );
 
-            //spice rotation
             glm::dmat3 MSL_rotation = glm::dmat3( 1.0,       0.0,    0.0, 
-                                 0.0, glm::cos(150.0) , -glm::sin(150.0), 
-                                 0.0, glm::sin(150.0),   glm::cos(150.0) );
+                                0.0, glm::cos(angle) , -glm::sin(angle), 
+                                0.0, glm::sin(angle),   glm::cos(angle) );
 
-            result = matrixCorrection * MSL_rotation;
+            result = MSL_rotation * matrixCorrection;
         }
 
 
