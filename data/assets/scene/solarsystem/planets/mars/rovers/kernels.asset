@@ -79,7 +79,7 @@ local CuriosityKernels = {
     kernels .. "/CK/msl_surf_ra_tlmres.bc",
     
     -- MastCam
-    kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
+    --kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
     kernels .. "/CK/msl_surf_rsm_tlmres.bc",
     
 

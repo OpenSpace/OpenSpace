@@ -777,15 +777,15 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     const std::string ra_wrist = "MSL_RA_WRIST";
     const std::string ra_turret = "MSL_RA_TURRET";
 
-    const std::string rsm_az_zero = "MSL_RSM_ZERO_AZ";
-    const std::string rsm_el_zero = "MSL_RSM_ZERO_EL";
+    const std::string rsm_az = "MSL_RSM_ZERO_AZ";
+    const std::string rsm_el = "MSL_RSM_ZERO_EL";
 
     const std::string hga_az = "MSL_HGA_AZ";
     const std::string hga_el = "MSL_HGA_EL";
 
 
     if(fromFrame == ra_base || fromFrame == ra_az || fromFrame == ra_el || fromFrame == ra_elbow || fromFrame == ra_wrist
-        || fromFrame == rsm_el_zero || fromFrame == rsm_az_zero ||fromFrame == hga_az   || fromFrame == hga_el)
+        || fromFrame == rsm_el || fromFrame == rsm_az ||fromFrame == hga_az   || fromFrame == hga_el)
     {   
         //ERROR(fmt::format("tihi: " ));
    
@@ -853,13 +853,8 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
                 // FIX: problem, don't know exactly what angle is needed for correct modification of angle, lookup!!
                 //90 degrees = pi/9
                 glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(degrees_90), 0.0, glm::sin(degrees_90), 
-                                                                0.0,      1.0,      0.0, 
+                                                                      0.0,      1.0,      0.0, 
                                                          -glm::sin(degrees_90), 0.0,  glm::cos(degrees_90) );
-
-
-                glm::dmat3 matrixCorrection2 = glm::dmat3( glm::cos(1.57079632), 0.0, glm::sin(1.57079632), 
-                                                                0.0,      1.0,      0.0, 
-                                                         -glm::sin(1.57079632), 0.0,  glm::cos(1.57079632) );
 
 
                 result = MSL_rotation * matrixCorrection;
@@ -875,38 +870,35 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         }
 
 
-        else if (fromFrame == rsm_az_zero) 
-        {
-            glm::dmat3 matrixCorrection = glm::dmat3(glm::cos(0.45378560552), glm::sin(0.45378560552), 0.0, 
-                                                      -glm::sin(0.45378560552),  glm::cos(0.45378560552), 0.0, 
-                                                      0.0,             0.0,           1.0 );
-
-            glm::dmat3 MSL_rotation = glm::dmat3( 1.0,       0.0,    0.0, 
-                                0.0, glm::cos(angle) , -glm::sin(angle), 
-                                0.0, glm::sin(angle),   glm::cos(angle) );
-
-            result = MSL_rotation * matrixCorrection;
-        }
-
-
-        else if (fromFrame == rsm_el_zero)
+        else if (fromFrame == rsm_az) 
         {
             result = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
                                  glm::sin(angle),  glm::cos(angle), 0.0, 
-                                    0.0,             0.0,           1.0 );
+                                    0.0,             0.0,           1.0 ); 
+        }
+
+        else if (fromFrame == rsm_el)
+        {
+            double degrees_90 = 3.14/9.0;
+            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(degrees_90), 0.0, glm::sin(degrees_90), 
+                                                                  0.0,      1.0,      0.0, 
+                                                      -glm::sin(degrees_90), 0.0,  glm::cos(degrees_90) );
+
+            result = matrixCorrection * result;
         }
 
 
-        else if (fromFrame == hga_az) {
+        else if (fromFrame == hga_az) 
+        {
             result = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
                                  glm::sin(angle),  glm::cos(angle), 0.0, 
                                     0.0,             0.0,           1.0 );
         }
         else if (fromFrame == hga_el ) 
         {
-            glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
-                                                       0.0,        1.0 ,     0.0, 
-                                                  glm::sin(angle), 0.0,  glm::cos(angle) );
+            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
+                                      0.0,        1.0,     0.0, 
+                                 glm::sin(angle), 0.0,  glm::cos(angle) );
         }
 
     }

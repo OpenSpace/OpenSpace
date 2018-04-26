@@ -194,16 +194,32 @@ local RA_Mahli = {
 
 -- MastCam--
 
-local MSL_RSM_AZ = {
-    Name = "MSL_RSM_AZ",
+local RSM_root = {
+    Name = "RSM_root",
+    Parent = transforms.RSM_ZERO_AZ_Location.Name,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_RSM_ROOT.obj"
+
+        },
+        ColorTexture = textures .. "/MSLTextureTest.png"
+    },
+    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+}
+
+
+local RSM_AZ = {
+    Name = "RSM_AZ",
     Parent = transforms.RSM_AZ_Location.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MSL_RSM_AZ",
+        Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_AZ.obj"
-
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -211,31 +227,15 @@ local MSL_RSM_AZ = {
 }
 
 
-local MSL_RSM_EL = {
-    Name = "MSL_RSM_EL",
+local RSM_EL = {
+    Name = "RSM_EL",
     Parent = transforms.RSM_EL_Location.Name,
     Renderable = {
         Type = "RenderableModel",
-        Body = "MSL_RSM_EL",
+        Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_EL.obj"
-        },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
-}
-
-
-local MSL_RSM_HEAD = {
-    Name = "MSL_RSM_HEAD",
-    Parent = transforms.RSM_HEAD_Location.Name,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MSL_RSM_HEAD",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_RSM_HEAD.obj"
         },
         ColorTexture = textures .. "/MSLTextureTest.png"
     },
@@ -340,10 +340,10 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Turret,
     RA_Mahli,
 
-    MSL_RSM_AZ,
-    MSL_RSM_EL,
-    MSL_RSM_HEAD,
-    
+    RSM_root,
+    RSM_AZ,
+    RSM_EL,
+
     HGA_AZ,
     HGA_EL,
 

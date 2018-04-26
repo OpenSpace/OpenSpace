@@ -150,6 +150,12 @@ local RA_Mahli_Location = {
 local RSM_ZERO_AZ_Location = {
     Name = "RSM_ZERO_AZ_Location",
     Parent = RoverLocation.Name,
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.702, 0.575, -0.526}
+        }
+    },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
 
@@ -157,10 +163,6 @@ local RSM_AZ_Location = {
     Name = "RSM_AZ_Location",
     Parent = RSM_ZERO_AZ_Location.Name,
     Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = {0.728, 0.573, -0.586}
-        },
         Rotation = {
             Type = "SpiceRotation",
             SourceFrame = "MSL_RSM_ZERO_AZ",
@@ -183,7 +185,7 @@ local RSM_EL_Location = {
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.03, -0.02, 0.51}
+            Position = {0.0, 0.0, -0.664}
         },
         Rotation = {
             Type = "SpiceRotation",
@@ -194,20 +196,6 @@ local RSM_EL_Location = {
     },
     GuiPath = "/Solar System/Planets/Mars/Curiosity "
 }
-
-local RSM_HEAD_Location = {
-    Name = "RSM_HEAD_Location",
-    Parent = RSM_EL_Location.Name,
-    Transform = {
-        Translation = {
-            Type = "StaticTranslation",
-            Position = {-0.08, 0.0, 0.35}
-        }
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
-}
-
-
 
 
 
@@ -285,7 +273,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RSM_AZ_Location,
     RSM_ZERO_EL_Location,
     RSM_EL_Location,
-    RSM_HEAD_Location,
+
     HGA_AZ_Location,
     HGA_EL_Location,
     SAM_Cover_1_Location,
