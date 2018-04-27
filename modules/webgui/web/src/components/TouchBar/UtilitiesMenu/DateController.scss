@@ -1,0 +1,21 @@
+.dateController {
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+  width: 100%;
+}
+
+.date {
+  float:left;
+  width: 60px;
+  margin-right: 20px;
+}
+
+.label {
+  float: left;
+}
+
+.dateButton {
+  min-width: 100px;
+  display: flex;
+}

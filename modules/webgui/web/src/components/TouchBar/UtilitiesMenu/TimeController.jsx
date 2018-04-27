@@ -84,8 +84,8 @@ class TimeController extends Component {
           </Button>
         </div>
         <div className={styles.SimulationIncrement}>
-        <div className={styles.TimeText}>
-          { this.time }
+          <div className={styles.TimeText}>
+            {new Date(this.time).toLocaleString()}
           </div>
           <ScaleInput
             defaultValue={0}

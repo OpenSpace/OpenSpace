@@ -37,4 +37,6 @@ export const UpdateDeltaTimeNow = (value) => {
   DataManager.runScript(script);
 };
 
-
+export const sortDates = (dateList) => {
+  dateList.sort((date1, date2) => (new Date(date1.date) - (new Date(date2.date))));
+};
