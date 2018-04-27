@@ -2,6 +2,7 @@ import React from 'react';
 import HelpButton from './HelpButton';
 import HomeButton from './HomeButton';
 import TimeController from './TimeController';
+import SightsController from './SightsController';
 
 import styles from './UtilitiesMenu.scss';
 import DateController from './DateController';
@@ -12,6 +13,7 @@ const UtilitiesMenu = () => (
     <HelpButton />
     <TimeController />
     <DateController />
+    <SightsController />
   </div>
 );
 
