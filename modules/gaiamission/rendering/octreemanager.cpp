@@ -288,6 +288,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream,
 // <readData> defines if full data or only structure should be read. 
 int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData, std::string folderPath) {
     int nStarsRead = 0;
+    int oldMaxdist = MAX_DIST;
 
     // If we're not reading data then we need to stream from files later on.
     _streamOctree = !readData;
@@ -300,6 +301,19 @@ int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData, std:
 
     LINFO("Max stars per node in read Octree: " + std::to_string(MAX_STARS_PER_NODE) + 
         " - Radius of root layer: " + std::to_string(MAX_DIST));
+
+    // Octree Manager root halfDistance must be updated before any nodes are created!
+    if (MAX_DIST != oldMaxdist) {
+        for (size_t i = 0; i < 8; ++i) {
+            _root->Children[i]->halfDimension = MAX_DIST / 2.f;
+            _root->Children[i]->originX = (i % 2 == 0) ? _root->Children[i]->halfDimension
+                : -_root->Children[i]->halfDimension;
+            _root->Children[i]->originY = (i % 4 < 2) ? _root->Children[i]->halfDimension
+                : -_root->Children[i]->halfDimension;
+            _root->Children[i]->originZ = (i < 4) ? _root->Children[i]->halfDimension
+                : -_root->Children[i]->halfDimension;
+        }
+    }
 
     if (_valuesPerStar != (POS_SIZE + COL_SIZE + VEL_SIZE)) {
         LERROR("Read file doesn't have the same structure of render parameters!");
@@ -649,8 +663,8 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
     if (!(_culler->isVisible(corners, mvp))) {
         // Check if this node or any of its children existed in cache previously. 
         // If so, then remove them from cache and add those indices to stack.
-        //fetchedData = removeNodeFromCache(node, deltaStars);
-        //return fetchedData;
+        fetchedData = removeNodeFromCache(node, deltaStars);
+        return fetchedData;
     }
 
     // Take care of inner nodes.
