@@ -316,6 +316,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _programTM(nullptr)
     , _fboTexture(nullptr)
     , _nRenderValuesPerStar(0)
+    , _firstDrawCalls(true)
+    , _initialDataFilesLoaded(true)
     , _useVBO(false)
     , _cpuRamBudget(0)
     , _gpuMemoryBudgetInBytes(0)
@@ -342,6 +344,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     _octreeManager = std::make_shared<OctreeManager>();
     _accumulatedIndices = std::vector<int>(1, 0);
+    _previousCameraRotation = glm::dquat();
 
     _filePath = absPath(dictionary.value<std::string>(FilePathInfo.identifier));
     _dataFile = std::make_unique<File>(_filePath);
@@ -538,7 +541,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 RenderableGaiaStars::~RenderableGaiaStars() {}
 
 bool RenderableGaiaStars::isReady() const {
-    return (_program != nullptr) && (_programTM != nullptr) && (_octreeManager != nullptr);
+    return _program && _programTM && _octreeManager && _initialDataFilesLoaded;
 }
 
 void RenderableGaiaStars::initializeGL() {
@@ -735,11 +738,22 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::mat4 modelViewProjMat = projection * view * model;
     glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
 
+    // Wait until camera has stabilized before we traverse the Octree/stream from files.
+    float rotationDiff = abs(length(_previousCameraRotation) - length(data.camera.rotationQuaternion()));
+    if (_firstDrawCalls && rotationDiff > 1e-10) {
+        _previousCameraRotation = data.camera.rotationQuaternion();
+        return;
+    } 
+    else _firstDrawCalls = false;
+
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide.
     const int renderOption = _renderOption;
     int deltaStars = 0;
     auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
         gaiamission::RenderOption(renderOption));
+
+    // TODO: Use this to declare when all files have been loaded and we can start to render stars!
+    //_initialDataFilesLoaded = true;
 
     // Update number of rendered stars.
     _nStarsToRender += deltaStars;
@@ -1589,6 +1603,7 @@ bool RenderableGaiaStars::readDataFile() {
 
     const int fileReaderOption = _fileReaderOption;
     int nReadStars = 0;
+    _initialDataFilesLoaded = false;
 
     std::string _file = _filePath;
     _octreeManager->initOctree(_cpuRamBudget);
@@ -1634,8 +1649,8 @@ bool RenderableGaiaStars::readDataFile() {
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
     
-    if (nReadStars > 0) return true;
-    else return false;
+    if (nReadStars > 0) _initialDataFilesLoaded = true;
+    return _initialDataFilesLoaded;
 }
 
 int RenderableGaiaStars::readFitsFile(std::string filePath) {

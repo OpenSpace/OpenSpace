@@ -164,7 +164,9 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mv
         _freeSpotsInBuffer.push(*removedKey);
     }
     // Clear cache of removed keys before next render call.
-    _removedKeysInPrevCall.clear();
+    if (!_removedKeysInPrevCall.empty()) {
+        _removedKeysInPrevCall.clear();
+    }
 
     // Rebuild VBO from scratch if we're not using most of it but have a high max index.
     if (_biggestChunkIndexInUse > _maxStackSize * 4 / 5 &&

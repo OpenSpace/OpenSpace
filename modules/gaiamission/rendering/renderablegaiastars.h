@@ -147,6 +147,9 @@ private:
     std::vector<int> _accumulatedIndices;
     size_t _nRenderValuesPerStar;
     int _nStarsToRender;
+    bool _firstDrawCalls;
+    glm::dquat _previousCameraRotation;
+    bool _initialDataFilesLoaded;
     bool _useVBO;
     long long _cpuRamBudget;
     long long _gpuMemoryBudgetInBytes;
