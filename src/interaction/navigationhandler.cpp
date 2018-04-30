@@ -326,13 +326,15 @@ float NavigationHandler::joystickAxisDeadzone(int axis) const {
 
 void NavigationHandler::bindJoystickButtonCommand(int button, std::string command,
                                                   JoystickAction action,
-                                         JoystickCameraStates::ButtonCommandRemote remote)
+                                         JoystickCameraStates::ButtonCommandRemote remote,
+                                                  std::string documentation)
 {
     _orbitalNavigator->joystickStates().bindButtonCommand(
         button,
         std::move(command),
         action,
-        remote
+        remote,
+        std::move(documentation)
     );
 }
 
@@ -343,8 +345,6 @@ void NavigationHandler::clearJoystickButtonCommand(int button) {
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
     return _orbitalNavigator->joystickStates().buttonCommand(button);
 }
-
-
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return {

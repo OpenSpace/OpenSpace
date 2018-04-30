@@ -122,15 +122,53 @@ asset.onInitialize(function()
     openspace.navigation.bindJoystickAxis(controller.LeftTrigger, "Zoom Out", false, true);
     openspace.navigation.bindJoystickAxis(controller.RightTrigger, "Zoom In", false, true);
 
-    openspace.navigation.bindJoystickButton(controller.LB, bindLocalRoll(controller.RightThumbStick[1]))
-    openspace.navigation.bindJoystickButton(controller.LB, unbindRoll(controller.RightThumbStick[1]), "Release")
-    openspace.navigation.bindJoystickButton(controller.RB, bindGlobalRoll(controller.RightThumbStick[1]))
-    openspace.navigation.bindJoystickButton(controller.RB, unbindRoll(controller.RightThumbStick[1]), "Release")
+    openspace.navigation.bindJoystickButton(
+        controller.LB,
+        bindLocalRoll(controller.RightThumbStick[1]),
+        "Switch to local roll mode"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.LB,
+        unbindRoll(controller.RightThumbStick[1]),
+        "Switch back to normal mode",
+        "Release"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.RB,
+        bindGlobalRoll(controller.RightThumbStick[1]),
+        "Switch to global roll mode"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.RB,
+        unbindRoll(controller.RightThumbStick[1]),
+        "Switch back to normal mode",
+        "Release"
+    )
 
-    openspace.navigation.bindJoystickButton(controller.A, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'))
-    openspace.navigation.bindJoystickButton(controller.B, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'))
-    openspace.navigation.bindJoystickButton(controller.DPad.Left, propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'))
+    openspace.navigation.bindJoystickButton(
+        controller.A,
+        propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.ZoomFriction'),
+        "Toggle zoom friction"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.B,
+        propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RotationalFriction'),
+        "Toggle rotational friction"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.DPad.Left,
+        propertyHelper.invert('NavigationHandler.OrbitalNavigator.Friction.RollFriction'),
+        "Toggle roll friction"
+    )
 
-    openspace.navigation.bindJoystickButton(controller.X, "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')")
-    openspace.navigation.bindJoystickButton(controller.Y, "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')")
+    openspace.navigation.bindJoystickButton(
+        controller.X,
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')",
+        "Switch target to Earth"
+    )
+    openspace.navigation.bindJoystickButton(
+        controller.Y,
+        "openspace.setPropertyValue('NavigationHandler.Origin', 'Mars')",
+        "Switch target to Mars"
+    )
 end)

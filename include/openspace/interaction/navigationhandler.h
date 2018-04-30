@@ -98,7 +98,7 @@ public:
     float joystickAxisDeadzone(int axis) const;
 
     void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
-        JoystickCameraStates::ButtonCommandRemote remote);
+        JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
 
     void clearJoystickButtonCommand(int button);
     std::vector<std::string> joystickButtonCommand(int button) const;

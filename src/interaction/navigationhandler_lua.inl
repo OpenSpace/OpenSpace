@@ -161,27 +161,29 @@ int joystickAxisDeadzone(lua_State* L) {
 int bindJoystickButton(lua_State* L) {
     const int n = ghoul::lua::checkArgumentsAndThrow(
         L,
-        { 2, 4 },
+        { 3, 5 },
         "lua::bindJoystickButton"
     );
 
     const int button = ghoul::lua::value<int>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
+    const std::string& documentation = ghoul::lua::value<std::string>(L, 3);
 
     interaction::JoystickAction action = interaction::JoystickAction::Press;
-    if (n >= 3) {
-        const std::string& actionStr = ghoul::lua::value<std::string>(L, 3);
+    if (n >= 4) {
+        const std::string& actionStr = ghoul::lua::value<std::string>(L, 4);
         action = ghoul::from_string<interaction::JoystickAction>(actionStr);
     }
 
-    const bool isRemote = n == 4 ? ghoul::lua::value<bool>(L, 4) : true;
+    const bool isRemote = n == 5 ? ghoul::lua::value<bool>(L, 5) : true;
     lua_settop(L, 0);
 
     OsEng.navigationHandler().bindJoystickButtonCommand(
         button,
         std::move(command),
         action,
-        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote)
+        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote),
+        std::move(documentation)
     );
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

@@ -187,11 +187,12 @@ float JoystickCameraStates::deadzone(int axis) const {
 
 void JoystickCameraStates::bindButtonCommand(int button, std::string command,
                                              JoystickAction action,
-                                             ButtonCommandRemote remote)
+                                             ButtonCommandRemote remote,
+                                             std::string documentation)
 {
     _buttonMapping.insert({
         button,
-        { std::move(command), action, remote }
+        { std::move(command), action, remote, std::move(documentation) }
     });
 }
 
