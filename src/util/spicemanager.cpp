@@ -886,19 +886,27 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
         else if (fromFrame == rsm_az) 
         {
-            result = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
-                                 glm::sin(angle),  glm::cos(angle), 0.0, 
-                                    0.0,             0.0,           1.0 ); 
+            double rad_180 = 3.1590;
+            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_180), -glm::sin(rad_180), 0.0, 
+                                                      glm::sin(rad_180),  glm::cos(rad_180), 0.0, 
+                                                             0.0,             0.0,           1.0 ); 
+
+
+            glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
+                                                  glm::sin(angle),  glm::cos(angle), 0.0, 
+                                                     0.0,             0.0,           1.0 ); 
+
+            result = result * matrixCorrection;
         }
 
         else if (fromFrame == rsm_el)
-        {
-            double degrees_90 = 3.14/9.0;
-            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(degrees_90), 0.0, glm::sin(degrees_90), 
-                                                                  0.0,      1.0,      0.0, 
-                                                      -glm::sin(degrees_90), 0.0,  glm::cos(degrees_90) );
+        {   
+            double rad_90 = 3.14/2.0;
+            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_90), 0.0, glm::sin(rad_90), 
+                                                              0.0,      1.0,      0.0, 
+                                                     -glm::sin(rad_90), 0.0,  glm::cos(rad_90) );
 
-            result = matrixCorrection * result;
+            result = result * matrixCorrection;
         }
 
         //HGA
