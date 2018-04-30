@@ -106,7 +106,6 @@ void TransferFunctionHandler::initialize() {
     }
 
     _transferFunctionProperty.onChange([this]() { setTexture(); });
-
     _saveTransferFunction.onChange([this]() { saveEnvelopes(); });
 }
 
