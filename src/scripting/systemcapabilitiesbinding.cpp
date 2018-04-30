@@ -84,7 +84,9 @@ namespace luascripting::opengl {
 int hasOpenGLVersion(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasOpenGLVersion");
 
-    std::vector<std::string> v = ghoul::tokenizeString(ghoul::lua::checkStringAndPop(L));
+    std::vector<std::string> v = ghoul::tokenizeString(
+        ghoul::lua::value<std::string>(L, 1, ghoul::lua::PopValue::Yes)
+    );
     if (v.size() != 2 && v.size() != 3) {
         LERRORC(
             "hasVersion",
@@ -148,7 +150,11 @@ int extensions(lua_State* L) {
 int isExtensionSupported(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasExtension");
 
-    std::string extension = ghoul::lua::checkStringAndPop(L);
+    std::string extension = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     lua_pushboolean(L, OpenGLCap.isExtensionSupported(extension));
     return 1;

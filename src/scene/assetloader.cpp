@@ -502,7 +502,7 @@ void AssetLoader::callOnInitialize(Asset* asset) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When initializing " + asset->assetFilePath() + ": " +
-                ghoul::lua::checkStringAndPop(*_luaState)
+                ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -517,7 +517,7 @@ void AssetLoader::callOnDeinitialize(Asset * asset) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When deinitializing " + asset->assetFilePath() + ": " +
-                ghoul::lua::checkStringAndPop(*_luaState)
+                ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -531,7 +531,8 @@ void AssetLoader::callOnDependencyInitialize(Asset* asset, Asset* dependant) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When initializing dependency " + dependant->assetFilePath() + " -> " +
-                asset->assetFilePath() + ": " + ghoul::lua::checkStringAndPop(*_luaState)
+                asset->assetFilePath() + ": " +
+                ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -549,7 +550,8 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
             throw ghoul::lua::LuaRuntimeException(
                 "When deinitializing dependency " + dependant->assetFilePath() + " -> " +
-                asset->assetFilePath() + ": " + ghoul::lua::checkStringAndPop(*_luaState)
+                asset->assetFilePath() + ": " +
+                ghoul::lua::value<std::string>(*_luaState, -1, ghoul::lua::PopValue::Yes)
             );
         }
         // Clean up lua stack, in case the pcall left anything there.
@@ -560,7 +562,11 @@ void AssetLoader::callOnDependencyDeinitialize(Asset* asset, Asset* dependant) {
 int AssetLoader::localResourceLua(Asset* asset) {
     ghoul::lua::checkArgumentsAndThrow(*_luaState, 1, "lua::localResourceLua");
 
-    std::string resourceName = ghoul::lua::checkStringAndPop(*_luaState);
+    std::string resourceName = ghoul::lua::value<std::string>(
+        *_luaState,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     std::string resolved = asset->resolveLocalResource(resourceName);
 
     lua_pushstring(*_luaState, resolved.c_str());

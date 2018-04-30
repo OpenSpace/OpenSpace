@@ -34,10 +34,11 @@ template <typename Func>
 int walkCommon(lua_State* L, Func func) {
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, { 1, 3 }, "lua::walkCommon");
 
+    const std::string& path = ghoul::lua::value<std::string>(L, 1);
+
     std::vector<std::string> result;
     if (nArguments == 1) {
         // Only the path was passed
-        const std::string path = luaL_checkstring(L, -1);
         result = std::invoke(
             func,
             ghoul::filesystem::Directory(path),
@@ -47,8 +48,7 @@ int walkCommon(lua_State* L, Func func) {
     }
     else if (nArguments == 2) {
         // The path and the recursive value were passed
-        const std::string path = luaL_checkstring(L, -2);
-        const bool recursive = lua_toboolean(L, -1) != 0;
+        const bool recursive = ghoul::lua::value<bool>(L, 2);
         result = std::invoke(
             func,
             ghoul::filesystem::Directory(path),
@@ -58,9 +58,8 @@ int walkCommon(lua_State* L, Func func) {
     }
     else if (nArguments == 3) {
         // All three arguments were passed
-        const std::string path = luaL_checkstring(L, -3);
-        const bool recursive = lua_toboolean(L, -2) != 0;
-        const bool sorted = lua_toboolean(L, -1) != 0;
+        const bool recursive = ghoul::lua::value<bool>(L, 2);
+        const bool sorted = ghoul::lua::value<bool>(L, 3);
         result = std::invoke(
             func,
             ghoul::filesystem::Directory(path),
@@ -89,7 +88,7 @@ int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
 
     using ghoul::lua::luaTypeToString;
 
-    const int type = lua_type(L, -1);
+    const int type = lua_type(L, 1);
     switch (type) {
         case LUA_TNONE:
         case LUA_TLIGHTUSERDATA:
@@ -106,16 +105,18 @@ int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
         case LUA_TNIL:
             break;
         case LUA_TBOOLEAN:
-            log(level, "print", fmt::format("{}", lua_toboolean(L, -1)));
+            log(level, "print", std::to_string(ghoul::lua::value<bool>(L, 1)));
             break;
         case LUA_TNUMBER:
-            log(level, "print", fmt::format("{}", lua_tonumber(L, -1)));
+            log(level, "print", std::to_string(ghoul::lua::value<double>(L, 1)));
             break;
         case LUA_TSTRING:
-            log(level, "print", lua_tostring(L, -1));
+            log(level, "print", ghoul::lua::value<std::string>(L, 1));
             break;
     }
-    lua_settop(L, 0);
+    lua_pop(L, 1);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -192,13 +193,15 @@ int printFatal(lua_State* L) {
  * tokens and returns the absolute path.
  */
 int absolutePath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::absolutePath");
+    using namespace ghoul::lua;
 
-    std::string path = ghoul::lua::checkStringAndPop(L);
+    checkArgumentsAndThrow(L, 1, "lua::absolutePath");
 
-    path = absPath(path);
-    //path = FileSys.convertPathSeparator(path, '/');
-    lua_pushstring(L, path.c_str());
+    const std::string& path = value<std::string>(L, 1, PopValue::Yes);
+
+    push(L, absPath(path));
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -211,15 +214,17 @@ int absolutePath(lua_State* L) {
 int setPathToken(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setPathToken");
 
-    const std::string path = ghoul::lua::checkStringAndPop(L);
-    const std::string pathToken = ghoul::lua::checkStringAndPop(L);
+    std::string pathToken = ghoul::lua::value<std::string>(L, 1);
+    std::string path = ghoul::lua::value<std::string>(L, 2);
 
     FileSys.registerPathToken(
-        pathToken,
-        path,
+        std::move(pathToken),
+        std::move(path),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
+    lua_pop(L, 2);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
@@ -229,13 +234,16 @@ int setPathToken(lua_State* L) {
  * Checks whether the provided file exists
  */
 int fileExists(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileExists");
+    using namespace ghoul::lua;
 
-    const std::string file = ghoul::lua::checkStringAndPop(L);
+    checkArgumentsAndThrow(L, 1, "lua::fileExists");
+
+    const std::string& file = value<std::string>(L, 1, PopValue::Yes);
     const bool e = FileSys.fileExists(absPath(file));
 
-    lua_pushboolean(L, (e ? 1 : 0));
+    push(L, e);
 
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -245,13 +253,16 @@ int fileExists(lua_State* L) {
 * Checks whether the provided file exists
 */
 int directoryExists(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
+    using namespace ghoul::lua;
 
+    checkArgumentsAndThrow(L, 1, "lua::directoryExists");
 
-    const std::string file = ghoul::lua::checkStringAndPop(L);
+    const std::string& file = value<std::string>(L, 1, PopValue::Yes);
     const bool e = FileSys.directoryExists(absPath(file));
 
-    lua_pushboolean(L, (e ? 1 : 0));
+    push(L, e);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
@@ -304,13 +315,16 @@ int walkDirectoryFolder(lua_State* L) {
  * 'C:\\OpenSpace\\foobar'."
  */
 int directoryForPath(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
+    using namespace ghoul::lua;
 
-    const std::string file = ghoul::lua::checkStringAndPop(L);
-    const std::string path = ghoul::filesystem::File(file).directoryName();
+    checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
 
-    lua_pushstring(L, path.c_str());
+    std::string file = value<std::string>(L, 1, PopValue::Yes);
+    std::string path = ghoul::filesystem::File(std::move(file)).directoryName();
 
+    push(L, path);
+
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

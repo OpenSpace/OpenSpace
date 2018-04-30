@@ -30,14 +30,17 @@ namespace openspace::luascriptfunctions {
 * Set renderer
 */
 int setRenderer(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setRenderer");
+    using namespace ghoul::lua;
+
+    checkArgumentsAndThrow(L, 1, "lua::setRenderer");
 
     const int type = lua_type(L, -1);
     if (type != LUA_TSTRING) {
         return luaL_error(L, "Expected argument of type 'string'");
     }
-    std::string r = lua_tostring(L, -1);
-    OsEng.renderEngine().setRendererFromString(r);
+
+    const std::string& renderer = value<std::string>(L, 1, PopValue::Yes);
+    OsEng.renderEngine().setRendererFromString(renderer);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -51,10 +54,10 @@ int setRenderer(lua_State* L) {
 int toggleFade(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::toggleFade");
 
-    double t = luaL_checknumber(L, -1);
+    const float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
 
-    float fadedIn = 1.0;
-    int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
+    constexpr const float fadedIn = 1.f;
+    const int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
 
     OsEng.renderEngine().startFading(direction, static_cast<float>(t));
 
@@ -70,10 +73,9 @@ int toggleFade(lua_State* L) {
 int fadeIn(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeIn");
 
-    double t = luaL_checknumber(L, 1);
-    lua_pop(L, 1);
+    const float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
 
-    OsEng.renderEngine().startFading(1, static_cast<float>(t));
+    OsEng.renderEngine().startFading(1, t);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -86,10 +88,9 @@ int fadeIn(lua_State* L) {
 int fadeOut(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fadeOut");
 
-    double t = luaL_checknumber(L, 1);
-    lua_pop(L, 1);
+    float t = ghoul::lua::value<float>(L, 1, ghoul::lua::PopValue::Yes);
 
-    OsEng.renderEngine().startFading(-1, static_cast<float>(t));
+    OsEng.renderEngine().startFading(-1, t);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -107,12 +108,13 @@ int addScreenSpaceRenderable(lua_State* L) {
     }
     catch (const ghoul::lua::LuaFormatException& e) {
         LERRORC("addScreenSpaceRenderable", e.what());
+        lua_settop(L, 0);
         return 0;
     }
 
-    std::unique_ptr<ScreenSpaceRenderable> s(
-        ScreenSpaceRenderable::createFromDictionary(d)
-    );
+    std::unique_ptr<ScreenSpaceRenderable> s = 
+        ScreenSpaceRenderable::createFromDictionary(d);
+
     OsEng.renderEngine().addScreenSpaceRenderable(std::move(s));
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -120,11 +122,11 @@ int addScreenSpaceRenderable(lua_State* L) {
 }
 
 int removeScreenSpaceRenderable(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
+    using namespace ghoul::lua;
 
-    using ghoul::lua::errorLocation;
+    checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
 
-    std::string name = ghoul::lua::checkStringAndPop(L);
+    const std::string& name = value<std::string>(L, 1, PopValue::Yes);
     OsEng.renderEngine().removeScreenSpaceRenderable(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

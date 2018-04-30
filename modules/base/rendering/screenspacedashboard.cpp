@@ -104,7 +104,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
 int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
-    std::string name = ghoul::lua::checkStringAndPop(L);
+    std::string name = ghoul::lua::value<std::string>(L, 1);
     ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {

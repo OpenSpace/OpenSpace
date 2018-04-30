@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
+#include <ghoul/misc/boolean.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
-
 #include <functional>
+#include <future>
 #include <memory>
 #include <string>
 #include <vector>
-#include <future>
 
 namespace openspace {
 
@@ -66,6 +66,11 @@ public:
         bool corrupted;
     };
 
+    BooleanType(UseMultipleThreads);
+    BooleanType(OverrideFile);
+    BooleanType(FailOnError);
+
+
     using DownloadProgressCallback = std::function<void(const FileFuture&)>;
     using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
 
@@ -82,7 +87,7 @@ public:
     static bool futureReady(std::future<R> const& f)
     { return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
 
-    DownloadManager(bool useMultithreadedDownload = true);
+    DownloadManager(UseMultipleThreads useMultipleThreads = UseMultipleThreads::Yes);
 
     //downloadFile
     // url - specifies the target of the download
@@ -94,8 +99,8 @@ public:
     // progressCallback - callback for status during (happens on different thread)
     std::shared_ptr<FileFuture> downloadFile(const std::string& url,
         const ghoul::filesystem::File& file,
-        bool overrideFile = true,
-        bool failOnError = false,
+        OverrideFile overrideFile = OverrideFile::Yes,
+        FailOnError failOnError = FailOnError::No,
         unsigned int timeout_secs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()

@@ -25,9 +25,11 @@
 namespace openspace::luascriptfunctions {
 
 int loadFile(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadFile");
+    using namespace ghoul::lua;
 
-    std::string missionFileName = ghoul::lua::checkStringAndPop(L);
+    checkArgumentsAndThrow(L, 1, "lua::loadFile");
+
+    const std::string& missionFileName = value<std::string>(L, 1, PopValue::Yes);
     if (missionFileName.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
@@ -41,50 +43,56 @@ int loadFile(lua_State* L) {
 }
 
 int loadScheduledScript(lua_State* L) {
-    int nArguments = ghoul::lua::checkArgumentsAndThrow(
-        L,
-        { 2, 4 },
-        "lua::loadScheduledScript"
-    );
+    using namespace ghoul::lua;
+
+    int nArguments = checkArgumentsAndThrow(L, { 2, 4 }, "lua::loadScheduledScript");
+
+    std::string time = value<std::string>(L, 1);
+    std::string forwardScript = value<std::string>(L, 2);
 
     if (nArguments == 2) {
         OsEng.scriptScheduler().loadScripts({
             {
                 "1",
                 ghoul::Dictionary {
-                    { KeyTime, std::string(luaL_checkstring(L, -2)) },
-                    { KeyForwardScript, std::string(luaL_checkstring(L, -1)) }
+                    { KeyTime, std::move(time) },
+                    { KeyForwardScript, std::move(forwardScript) }
                 }
             }
         });
     }
     else if (nArguments == 3) {
+        std::string backwardScript = value<std::string>(L, 3);
         OsEng.scriptScheduler().loadScripts({
             {
                 "1",
                 ghoul::Dictionary {
-                    { KeyTime, std::string(luaL_checkstring(L, -3)) },
-                    { KeyForwardScript, std::string(luaL_checkstring(L, -2)) },
-                    { KeyBackwardScript, std::string(luaL_checkstring(L, -1)) }
+                    { KeyTime, std::move(time) },
+                    { KeyForwardScript, std::move(forwardScript) },
+                    { KeyBackwardScript, std::move(backwardScript) }
                 }
             }
         });
     }
     else if (nArguments == 4) {
+        std::string backwardScript = value<std::string>(L, 3);
+        std::string universalScript = value<std::string>(L, 4);
+
         OsEng.scriptScheduler().loadScripts({
             {
                 "1",
                 ghoul::Dictionary {
-                    { KeyTime, std::string(luaL_checkstring(L, -4)) },
-                    { KeyForwardScript, std::string(luaL_checkstring(L, -3)) },
-                    { KeyBackwardScript, std::string(luaL_checkstring(L, -2)) },
-                    { KeyUniversalScript, std::string(luaL_checkstring(L, -1)) }
+                    { KeyTime, std::move(time) },
+                    { KeyForwardScript, std::move(forwardScript) },
+                    { KeyBackwardScript, std::move(backwardScript) },
+                    { KeyUniversalScript, std::move(universalScript) }
                 }
             }
         });
     }
 
     lua_settop(L, 0);
+
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }

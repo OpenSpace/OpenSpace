@@ -44,7 +44,11 @@ int loadKernel(lua_State* L) {
         return 0;
     }
 
-    std::string argument = ghoul::lua::checkStringAndPop(L);
+    std::string argument = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     if (!FileSys.fileExists(argument)) {
         return luaL_error(L, "Kernel file '%s' did not exist", argument.c_str());
     }

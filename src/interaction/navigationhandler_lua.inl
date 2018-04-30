@@ -30,9 +30,11 @@ namespace openspace::luascriptfunctions {
 int restoreCameraStateFromFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::restoreCameraStateFromFile");
 
-    using ghoul::lua::luaTypeToString;
-
-    std::string cameraStateFilePath = ghoul::lua::checkStringAndPop(L);
+    const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     if (cameraStateFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
@@ -66,9 +68,11 @@ int setCameraState(lua_State* L) {
 int saveCameraStateToFile(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::saveCameraStateToFile");
 
-    using ghoul::lua::luaTypeToString;
-
-    std::string cameraStateFilePath = ghoul::lua::checkStringAndPop(L);
+    const std::string& cameraStateFilePath = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     if (cameraStateFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
@@ -83,8 +87,6 @@ int saveCameraStateToFile(lua_State* L) {
 int resetCameraDirection(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::resetCameraDirection");
 
-    using ghoul::lua::luaTypeToString;
-
     OsEng.navigationHandler().resetCameraDirection();
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -92,20 +94,15 @@ int resetCameraDirection(lua_State* L) {
 }
 
 int bindJoystickAxis(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindJoystickAxis");
+    using namespace ghoul::lua;
 
-    int axis = static_cast<int>(lua_tonumber(L, 1));
-    std::string axisType = lua_tostring(L, 2);
+    const int n = checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindJoystickAxis");
 
-    bool shouldInvert = false;
-    if (n > 2) {
-        shouldInvert = lua_toboolean(L, 3);
-    }
+    const int axis = ghoul::lua::value<int>(L, 1);
+    const std::string& axisType = ghoul::lua::value<std::string>(L, 2);
 
-    bool shouldNormalize = false;
-    if (n > 3) {
-        shouldNormalize = lua_toboolean(L, 4);
-    }
+    const bool shouldInvert = n > 2 ? ghoul::lua::value<bool>(L, 3) : false;
+    const bool shouldNormalize = n > 3 ? ghoul::lua::value<bool>(L, 4) : false;
 
     OsEng.navigationHandler().setJoystickAxisMapping(
         axis,
@@ -114,63 +111,71 @@ int bindJoystickAxis(lua_State* L) {
         interaction::JoystickCameraStates::AxisNormalize(shouldNormalize)
     );
 
-
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int joystickAxis(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::joystickAxis");
 
-    int axis = static_cast<int>(lua_tonumber(L, 1));
+    const int axis = ghoul::lua::value<int>(L, 1);
 
     using AI = interaction::JoystickCameraStates::AxisInformation;
     AI info = OsEng.navigationHandler().joystickAxisMapping(axis);
 
     lua_settop(L, 0);
-    lua_pushstring(L, std::to_string(info.type).c_str());
-    lua_pushboolean(L, info.invert);
-    lua_pushboolean(L, info.normalize);
+    const bool invert = info.invert;
+    const bool normalize = info.normalize;
+    ghoul::lua::push(L, std::to_string(info.type), invert, normalize);
 
+    ghoul_assert(lua_gettop(L) == 3, "Incorrect number of items left on stack");
     return 3;
 }
 
 int setJoystickAxisDeadzone(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setJoystickAxisDeadzone");
 
-    int axis = static_cast<int>(lua_tointeger(L, 1));
-    float deadzone = static_cast<float>(lua_tonumber(L, 2));
+    const int axis = ghoul::lua::value<int>(L, 1);
+    const float deadzone = ghoul::lua::value<float>(L, 2);
+    lua_settop(L, 0);
 
     OsEng.navigationHandler().setJoystickAxisDeadzone(axis, deadzone);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int joystickAxisDeadzone(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setJoystickAxisDeadzone");
 
-    int axis = static_cast<int>(lua_tointeger(L, 1));
+    const int axis = ghoul::lua::value<int>(L, 1, ghoul::lua::PopValue::Yes);
 
-    float deadzone = OsEng.navigationHandler().joystickAxisDeadzone(axis);
+    const float deadzone = OsEng.navigationHandler().joystickAxisDeadzone(axis);
 
-    lua_pushnumber(L, deadzone);
+    ghoul::lua::push(L, deadzone);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 
 int bindJoystickButton(lua_State* L) {
-    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindJoystickButton");
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 4 },
+        "lua::bindJoystickButton"
+    );
 
-    int button = static_cast<int>(lua_tonumber(L, 1));
-    std::string command = lua_tostring(L, 2);
+    const int button = ghoul::lua::value<int>(L, 1);
+    const std::string& command = ghoul::lua::value<std::string>(L, 2);
 
     interaction::JoystickAction action = interaction::JoystickAction::Press;
     if (n >= 3) {
-        action = ghoul::from_string<interaction::JoystickAction>(lua_tostring(L, 3));
+        const std::string& actionStr = ghoul::lua::value<std::string>(L, 3);
+        action = ghoul::from_string<interaction::JoystickAction>(actionStr);
     }
 
-    bool isRemote = true;
-    if (n == 4) {
-        isRemote = lua_toboolean(L, 4);
-    }
+    const bool isRemote = n == 4 ? ghoul::lua::value<bool>(L, 4) : true;
+    lua_settop(L, 0);
 
     OsEng.navigationHandler().bindJoystickButtonCommand(
         button,
@@ -179,29 +184,28 @@ int bindJoystickButton(lua_State* L) {
         interaction::JoystickCameraStates::ButtonCommandRemote(isRemote)
     );
 
-    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int clearJoystickButton(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
 
-    int button = static_cast<int>(lua_tonumber(L, 1));
+    const int button = ghoul::lua::value<int>(L, 1, ghoul::lua::PopValue::Yes);
 
     OsEng.navigationHandler().clearJoystickButtonCommand(button);
 
-    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int joystickButton(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
 
-    int button = static_cast<int>(lua_tonumber(L, 1));
+    const int button = ghoul::lua::value<int>(L, 1, ghoul::lua::PopValue::Yes);
 
-    std::vector<std::string> cmds = OsEng.navigationHandler().joystickButtonCommand(
-        button
-    );
+    const std::vector<std::string>& cmds =
+        OsEng.navigationHandler().joystickButtonCommand(button);
 
     std::string cmd = std::accumulate(
         cmds.begin(),
@@ -212,8 +216,8 @@ int joystickButton(lua_State* L) {
         }
     );
 
-    lua_settop(L, 0);
-    lua_pushstring(L, cmd.c_str());
+    ghoul::lua::push(L, cmd);
+    ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
 

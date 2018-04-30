@@ -36,28 +36,26 @@ int bindKey(lua_State* L) {
 
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKey");
 
-    int KeyLocation = nArguments == 3 ? -3 : -2;
-    int CommandLocation = nArguments == 3 ? -2 : -1;
-    int DocumentationLocation = -1;
-
-    std::string key = luaL_checkstring(L, KeyLocation);
-    std::string command = luaL_checkstring(L, CommandLocation);
+    const std::string& key = ghoul::lua::value<std::string>(L, 1);
+    const std::string& command = ghoul::lua::value<std::string>(L, 2);
 
     if (command.empty()) {
+        lua_settop(L, 0);
         return luaL_error(L, "Command string is empty");
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERRORC("lua.bindKey", fmt::format("Could not find key '{}'", key));
-        return 0;
+        std::string error = fmt::format("Could not find key '{}'", key);
+        LERRORC("lua.bindKey", error);
+        lua_settop(L, 0);
+        return luaL_error(L, error.c_str());
     }
 
-    std::string documentation;
-    if (nArguments == 3) {
-        documentation = luaL_checkstring(L, DocumentationLocation);
-    }
+    std::string documentation = nArguments == 3 ?
+        ghoul::lua::value<std::string>(L, 3) :
+        "";
 
     OsEng.keyBindingManager().bindKey(
         iKey.key,
@@ -66,7 +64,7 @@ int bindKey(lua_State* L) {
         std::move(documentation)
     );
 
-    lua_pop(L, nArguments);
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -81,29 +79,25 @@ int bindKeyLocal(lua_State* L) {
 
     int nArguments = ghoul::lua::checkArgumentsAndThrow(L, 2, 3, "lua::bindKeyLocal");
 
-
-    int KeyLocation = nArguments == 3 ? -3 : -2;
-    int CommandLocation = nArguments == 3 ? -2 : -1;
-    int DocumentationLocation = -1;
-
-    std::string key = luaL_checkstring(L, KeyLocation);
-    std::string command = luaL_checkstring(L, CommandLocation);
+    const std::string& key = ghoul::lua::value<std::string>(L, 1);
+    const std::string& command = ghoul::lua::value<std::string>(L, 2);
 
 
-    if (command.empty())
+    if (command.empty()) {
         return luaL_error(L, "Command string is empty");
+    }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERRORC("lua.bindKey", fmt::format("Could not find key '{}'", key));
-        return 0;
+        std::string error = fmt::format("Could not find key '{}'", key);
+        LERRORC("lua.bindKey", error);
+        return luaL_error(L, error.c_str());
     }
 
-    std::string documentation;
-    if (nArguments == 3) {
-        documentation = luaL_checkstring(L, DocumentationLocation);
-    }
+    std::string documentation = nArguments == 3 ?
+        ghoul::lua::value<std::string>(L, 3) :
+        "";
 
     OsEng.keyBindingManager().bindKeyLocal(
         iKey.key,
@@ -112,7 +106,7 @@ int bindKeyLocal(lua_State* L) {
         std::move(documentation)
     );
 
-    lua_pop(L, nArguments);
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -126,16 +120,20 @@ int bindKeyLocal(lua_State* L) {
 int getKeyBindings(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::getKeyBindings");
 
-    std::string key = ghoul::lua::checkStringAndPop(L);
+    const std::string& key = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
-    using KeyInformation = interaction::KeyBindingManager::KeyInformation;
+    using K = KeyWithModifier;
+    using V = interaction::KeyBindingManager::KeyInformation;
 
-    std::vector<std::pair<KeyWithModifier, KeyInformation>> info =
-        OsEng.keyBindingManager().keyBinding(key);
+    const std::vector<std::pair<K, V>>& info = OsEng.keyBindingManager().keyBinding(key);
 
     lua_createtable(L, static_cast<int>(info.size()), 0);
     int i = 1;
-    for (const std::pair<KeyWithModifier, KeyInformation>& it : info) {
+    for (const std::pair<K, V>& it : info) {
         lua_pushnumber(L, i);
 
         lua_createtable(L, 2, 0);
@@ -162,10 +160,10 @@ int getKeyBindings(lua_State* L) {
 int clearKey(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::clearKey");
 
-    int t = lua_type(L, 1);
+    const int t = lua_type(L, 1);
     if (t == LUA_TSTRING) {
         // The user provided a single key
-        std::string key = ghoul::lua::checkStringAndPop(L);
+        const std::string& key = ghoul::lua::value<std::string>(L, 1);
         OsEng.keyBindingManager().removeKeyBinding(key);
     }
     else {
@@ -173,12 +171,13 @@ int clearKey(lua_State* L) {
         ghoul::Dictionary d;
         ghoul::lua::luaDictionaryFromState(L, d);
         for (size_t i = 1; i <= d.size(); ++i) {
-            std::string k = d.value<std::string>(std::to_string(i));
+            const std::string& k = d.value<std::string>(std::to_string(i));
             OsEng.keyBindingManager().removeKeyBinding(k);
         }
         lua_pop(L, 1);
     }
 
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }

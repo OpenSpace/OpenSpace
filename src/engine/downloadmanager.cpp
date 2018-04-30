@@ -142,15 +142,15 @@ DownloadManager::FileFuture::FileFuture(std::string file)
     , abortDownload(false)
 {}
 
-DownloadManager::DownloadManager(bool useMultithreadedDownload)
-    : _useMultithreadedDownload(useMultithreadedDownload)
+DownloadManager::DownloadManager(UseMultipleThreads useMultipleThreads)
+    : _useMultithreadedDownload(useMultipleThreads)
 {
     curl_global_init(CURL_GLOBAL_ALL);
 }
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
-    const std::string& url, const ghoul::filesystem::File& file, bool overrideFile,
-    bool failOnError, unsigned int timeout_secs,
+    const std::string& url, const ghoul::filesystem::File& file,
+    OverrideFile overrideFile, FailOnError failOnError, unsigned int timeout_secs,
     DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
 {
     if (!overrideFile && FileSys.fileExists(file)) {
