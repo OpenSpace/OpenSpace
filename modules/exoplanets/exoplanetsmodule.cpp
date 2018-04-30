@@ -53,6 +53,7 @@ struct Exoplanet {
     float BIGOMLOWER;
     float UBIGOM;
     bool BINARY;
+    float BMV;
     float ECC;
     float ECCUPPER;
     float ECCLOWER;
@@ -78,10 +79,10 @@ struct Exoplanet {
     float RSTARUPPER;
     float RSTARLOWER;
     float URSTAR;
-    float TEFF;
-    float TEFFUPPER;
-    float TEFFLOWER;
-    float UTEFF;
+    //float TEFF;
+    //float TEFFUPPER;
+    //float TEFFLOWER;
+    //float UTEFF;
     double TT;
     float TTUPPER;
     float TTLOWER;
@@ -162,16 +163,29 @@ int addNode(lua_State* L) {
         {
             p.RSTAR = 1.46046;
         }
-        // radius of star and size of billboard should not be same? the light in the texture reaches furter than the actual size of the globe...
+        
         const std::string luaTableStarGlare = "{"
             "Name = '" + starname + "Plane',"
             "Parent = '" + starname + "',"
             "Renderable = {"
-                "Type = 'RenderablePlaneImageLocal',"
-                "Size = " + std::to_string(p.RSTAR) + " * 6.95700*10e8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
-                "Billboard = true,"
-                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
-                "BlendMode = 'Additive'"
+                "Type = 'RenderableGlobe',"
+                "Radii = " + std::to_string(p.RSTAR) + " * 6.957E8,"
+                "SegmentsPerPatch = 64,"
+                "PerformShading = false,"
+                "Layers = {"
+                    "ColorLayers = {"
+                        "{"
+                        "Name = 'Star Texture',"
+                        "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
+                        "Enabled = true"
+                        "}"
+                    "}"
+                "}"
+                //"Type = 'RenderablePlaneImageLocal',"
+                //"Size = " + std::to_string(p.RSTAR) + " * 6.95700E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+                //"Billboard = true,"
+                //"Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
+                //"BlendMode = 'Additive'"
             "}"
         "}";
 
@@ -222,7 +236,7 @@ int addNode(lua_State* L) {
                 "Parent = '" + starname + "',"
                 "Renderable = {"
                     "Type = 'RenderableGlobe',"
-                    "Radii = " + std::to_string(plsy[i].R) + " *7.1492*10e7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
+                    "Radii = " + std::to_string(plsy[i].R) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
                     "SegmentsPerPatch = 64,"
                     "PerformShading = false,"
                     "Layers = {"

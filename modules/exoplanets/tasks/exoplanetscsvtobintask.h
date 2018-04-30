@@ -59,6 +59,7 @@ private:
     	float BIGOMLOWER;
     	float UBIGOM;
     	int BINARY; //  **one or more stars**
+        float BMV;
     	float ECC;
     	float ECCUPPER;
     	float ECCLOWER;
@@ -84,10 +85,10 @@ private:
     	float RSTARUPPER;
     	float RSTARLOWER;
     	float URSTAR;
-    	float TEFF;
-    	float TEFFUPPER;
-    	float TEFFLOWER;
-    	float UTEFF;
+    	//float TEFF;
+    	//float TEFFUPPER;
+    	//float TEFFLOWER;
+    	//float UTEFF;
     	double TT;
     	float TTUPPER;
     	float TTLOWER;

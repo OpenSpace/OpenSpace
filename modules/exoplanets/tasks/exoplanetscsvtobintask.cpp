@@ -221,6 +221,8 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 	std::ofstream bin_file(_outputBINPath, std::ios::out | std::ios::binary);
     std::ofstream lut_file(_outputLUTPath);
 
+    std::ofstream bmv_file("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/bmv.txt");
+
 	int version = 1;
 	bin_file.write((char *)&version, sizeof(int));
 
@@ -302,6 +304,10 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 		getline(lineStream, data_s, ','); // BINARYREF
 		getline(lineStream, data_s, ','); // BINARYURL
 		getline(lineStream, data_s, ','); // BMV
+        if (!data_s.empty())
+            p.BMV = std::stof(data_s.c_str(), nullptr);
+        else
+            p.BMV = NAN;
 		getline(lineStream, data_s, ','); // CHI2
 		getline(lineStream, data_s, ','); // COMP
 		getline(lineStream, data_s, ','); // DATE
@@ -692,28 +698,29 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 		getline(lineStream, data_s, ','); // T14REF
 		getline(lineStream, data_s, ','); // T14URL
 		getline(lineStream, data_s, ','); // TEFF
+        float teff;
 		if (!data_s.empty())
-			p.TEFF = std::stof(data_s.c_str(), nullptr);
+			teff = std::stof(data_s.c_str(), nullptr);
 		else
-			p.TEFF = NAN;
+			teff = NAN;
 
 		getline(lineStream, data_s, ','); // TEFFUPPER
-		if (!data_s.empty())
+		/*if (!data_s.empty())
 			p.TEFFUPPER = std::stof(data_s.c_str(), nullptr);
 		else
-			p.TEFFUPPER = NAN;
+			p.TEFFUPPER = NAN;*/
 
 		getline(lineStream, data_s, ','); // TEFFLOWER
-		if (!data_s.empty())
+		/*if (!data_s.empty())
 			p.TEFFLOWER = std::stof(data_s.c_str(), nullptr);
 		else
-			p.TEFFLOWER = NAN;
+			p.TEFFLOWER = NAN;*/
 
 		getline(lineStream, data_s, ','); // UTEFF
-		if (!data_s.empty())
+		/*if (!data_s.empty())
 			p.UTEFF = std::stof(data_s.c_str(), nullptr);
 		else
-			p.UTEFF = NAN;
+			p.UTEFF = NAN;*/
 
 		getline(lineStream, data_s, ','); // TEFFREF
 		getline(lineStream, data_s, ','); // TEFFURL
@@ -763,15 +770,70 @@ void ExoplanetsCsvToBinTask::perform(const Task::ProgressCallback& progressCallb
 		getline(lineStream, data_s); // KDE
 
 		if (!iskeplerobject) {
+
+            // calculate B-V from Teff if not exsisting
+            if (std::isnan(p.BMV) )
+            {
+                if (!std::isnan(teff))
+                {
+       
+                    float teff_current, teff_upper, teff_lower, BV, bv_upper, bv_lower = 0;
+
+                    std::ifstream teff_bv("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/teff_bv.txt");
+                    if (!teff_bv.good()) {
+                        LERROR(fmt::format("Failed to open teff_bv.txt file"));
+                        return;
+                    }
+
+                    std::string row, teff_string, bv_string;
+                    while (getline(teff_bv, row)) {
+                        std::istringstream lineStream(row);
+                        getline(lineStream, teff_string, ',');
+                        getline(lineStream, bv_string);
+
+                        teff_current= std::stof(teff_string.c_str(), nullptr);
+                        
+                        if (teff > teff_current)
+                        {
+                            teff_lower = teff_current;
+                            bv_lower = std::stof(bv_string.c_str(), nullptr);
+                        }
+                        else
+                        {
+
+                            teff_upper = teff_current;
+                            bv_upper = std::stof(bv_string.c_str(), nullptr);
+                            if (bv_lower == 0)
+                            {
+                                BV = 1.45;
+                            }
+                            else
+                                BV = (((bv_upper - bv_lower)*(teff - teff_lower)) / (teff_upper - teff_lower)) + bv_lower;
+
+                            break;
+                        }
+                    }
+
+                    teff_bv.close();
+                    p.BMV = BV;
+
+                }
+                else
+                    p.BMV = NAN;
+            }
+
 			long pos = bin_file.tellp();
 			lut_file << planetname << "," << pos << std::endl;
 			bin_file.write((char *)&p, sizeof(struct Exoplanet));
+
+            bmv_file << planetname << "     " << teff << "      " << p.BMV << std::endl;
 		}
 	}
 
 	csv_file.close();
 	bin_file.close();
 	lut_file.close();
+    bmv_file.close();
 
     progressCallback(1.0f);
 }
