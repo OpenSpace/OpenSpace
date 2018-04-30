@@ -22,16 +22,16 @@ local masAsset = asset.require('scene/solarsystem/model/mas/mas')
 local Keybindings = {
     {
         Key = "F7",
-        Command = "openspace.time.setTime('2012 JUL 01 00:00:00');",
-        Documentation = "Sets the focus of the camera on 'NewHorizons'.",
+        Command = "openspace.time.setTime('2017 AUG 20 00:00:00');",
+        Documentation = "Set time with margin to when eclipse data starts",
         Local = false
     },
     {
         Key = "F8",
-        Command = "openspace.time.setTime('2017 JUN 01 00:00:00');",
-        Documentation = "Sets the focus of the camera on 'NewHorizons'.",
+        Command = "openspace.time.setTime('2017 AUG 21 17:00:00');",
+        Documentation = "Set time to when eclipse data starts",
         Local = false
-    },
+    }
 }
 
 asset.onInitialize(function ()
