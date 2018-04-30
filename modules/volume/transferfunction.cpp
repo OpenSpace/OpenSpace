@@ -63,7 +63,6 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
         while (lua_next(state, -2)) {
             Envelope env;
             std::vector<EnvelopePoint> tmpVec;
-
             /*lua_pushnil(state);
             while (lua_next(state, -2)) {
                 lua_pushnil(state);
@@ -74,7 +73,6 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
                     lua_pushnil(state);
                     lua_next(state, -2);
                     float x_value = static_cast<float>(lua_tonumber(state, -1));
-
                     lua_pop(state, 1);
                     lua_next(state, -2);
                     float y_value = static_cast<float>(lua_tonumber(state, -1));
@@ -142,7 +140,6 @@ void TransferFunction::saveEnvelopesToFile(const std::string& path) {
     ghoul::Dictionary dictionary;
     lua_State* state = luaL_newstate();
     envelopesToLua(state);
-
     ghoul::lua::luaDictionaryFromState(state, dictionary);
     ghoul::DictionaryLuaFormatter formatter;
     std::ofstream tfFile;
@@ -224,4 +221,3 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
 }
 
 } // namespace openspace::volume
-
