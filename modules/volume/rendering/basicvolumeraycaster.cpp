@@ -27,6 +27,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <sstream>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -112,6 +113,9 @@ void BasicVolumeRaycaster::preRaycast(
     const RaycastData& data,
     ghoul::opengl::ProgramObject& program)
 {
+    // TODO this makes more sense but the volume package texture is never initialized
+    // if (!_volumeTexture || !_transferFunctionHandler->hasTexture()) {
+
     if (!_volumeTexture || !_transferFunctionHandler) {
         return;
     }
@@ -123,7 +127,13 @@ void BasicVolumeRaycaster::preRaycast(
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunctionHandler->getTexture().bind();
+
+    // TODO use volume package tf representation
+    // debug core package texture
+    // _transferFunctionHandler->getTexture().bind();
+    _transferFunctionHandler->getTransferFunction()->bind();
+    // LINFOC("PRERAYCAST", "hello");
+
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();

@@ -24,6 +24,7 @@
 
 #include <modules/volume/transferfunctionhandler.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/logging/logmanager.h>
 #include <openspace/properties/scalarproperty.h>
 #include <iostream>
 #include <fstream>
@@ -84,6 +85,7 @@ TransferFunctionHandler::TransferFunctionHandler(const properties::StringPropert
     _saveTransferFunction(SaveTransferFunctionInfo)
 {
     _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
+    LINFOC("TF_HANDLER", "handler constructor called");
 }
 
 void TransferFunctionHandler::initialize() {
@@ -111,6 +113,11 @@ void TransferFunctionHandler::initialize() {
     _saveTransferFunction.onChange([this]() {
         saveEnvelopes();
     });
+
+    // Use core package tf as well
+    _transferFunction->updateTexture();
+
+    LINFOC("TF_HANDLER", "handler initialized");
 }
 
 void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
@@ -155,7 +162,7 @@ void TransferFunctionHandler::saveEnvelopes() {
 
 void TransferFunctionHandler::setFilepath(const std::string& path) {
     _filePath = path;
-    _transferFunction->updateTexture();
+    // _transferFunction->updateTexture();
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {
