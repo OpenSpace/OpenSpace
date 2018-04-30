@@ -67,115 +67,113 @@ static const openspace::properties::Property::PropertyInfo SaveTransferFunctionI
     "Save your transfer function"
 };
 
-namespace openspace {
-    namespace volume {
+namespace openspace::volume {
 
-        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-
-        
-        TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
-            : properties::PropertyOwner({ "TransferFunctionHandler" }),
-            _transferFunctionPath(prop),
-            _transferFunctionProperty(TransferFunctionInfo),
-            _dataUnit(DataUnitInfo),
-            _minValue(MinValueInfo),
-            _maxValue(MaxValueInfo),
-            _histogramProperty(HistogramInfo),
-            _saveTransferFunction(SaveTransferFunctionInfo)
-        {
-            _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
-        }
-
-        void TransferFunctionHandler::initialize() {
-            addProperty(_transferFunctionPath);
-            addProperty(_transferFunctionProperty);
-            addProperty(_histogramProperty);
-            addProperty(_dataUnit);
-            addProperty(_minValue);
-            addProperty(_maxValue);
-            addProperty(_saveTransferFunction);
-
-            this->addTag("TF");
-            _texture = std::make_shared<ghoul::opengl::Texture>(
-                glm::size3_t(1024, 1, 1), ghoul::opengl::Texture::Format::RGBA,
-                GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
-
-            if (_filePath != "") {
-                loadStoredEnvelopes();
-            }
-
-            _transferFunctionProperty.onChange([this]() {
-                setTexture();
-            });
-
-            _saveTransferFunction.onChange([this]() {
-                saveEnvelopes();
-            });
-        }
-
-        void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
-            // histogram->print();
-            _histogramProperty.setValue(histogram->getBinaryData());
-        }
-
-        void TransferFunctionHandler::setTexture() {
-            if (_transferFunctionProperty.value().createTexture(_texture)) {
-                uploadTexture();
-            }
-        }
-
-        void TransferFunctionHandler::setUnit(const std::string& unit) {
-            _dataUnit.set(unit);
-        }
-
-        void TransferFunctionHandler::setMinAndMaxValue(const float& min, const float& max) {
-            std::stringstream s_min;
-            s_min << min;
-            std::string s = s_min.str();
-            _minValue.set(s);
-            std::stringstream s_max;
-            s_max << max;
-            std::string t = s_max.str();
-            _maxValue.set(t);
-        }
+ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
 
-        void TransferFunctionHandler::loadStoredEnvelopes() {
-            TransferFunction tf;
-            tf.loadEnvelopesFromFile(_filePath);
-            if (tf.hasEnvelopes()) {
-                _transferFunctionProperty.setValue(tf);
-                setTexture();
-            }
-        }
+TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
+    : properties::PropertyOwner({ "TransferFunctionHandler" }),
+    _transferFunctionPath(prop),
+    _transferFunctionProperty(TransferFunctionInfo),
+    _dataUnit(DataUnitInfo),
+    _minValue(MinValueInfo),
+    _maxValue(MaxValueInfo),
+    _histogramProperty(HistogramInfo),
+    _saveTransferFunction(SaveTransferFunctionInfo)
+{
+    _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
+}
 
-        void TransferFunctionHandler::saveEnvelopes() {
-            _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
-        }
+void TransferFunctionHandler::initialize() {
+    addProperty(_transferFunctionPath);
+    addProperty(_transferFunctionProperty);
+    addProperty(_histogramProperty);
+    addProperty(_dataUnit);
+    addProperty(_minValue);
+    addProperty(_maxValue);
+    addProperty(_saveTransferFunction);
 
-        void TransferFunctionHandler::setFilepath(const std::string& path) {
-            _filePath = path;
-            _transferFunction->updateTexture();
-        }
+    this->addTag("TF");
+    _texture = std::make_shared<ghoul::opengl::Texture>(
+        glm::size3_t(1024, 1, 1), ghoul::opengl::Texture::Format::RGBA,
+        GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
 
-        ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {
-            return *_texture.get();
-        }
+    if (_filePath != "") {
+        loadStoredEnvelopes();
+    }
 
-        void TransferFunctionHandler::uploadTexture() {
-            _texture->uploadTexture();
-        }
+    _transferFunctionProperty.onChange([this]() {
+        setTexture();
+    });
 
-        bool TransferFunctionHandler::hasTexture() {
-            if (_texture == nullptr)
-                return false;
-            return true;
-        }
+    _saveTransferFunction.onChange([this]() {
+        saveEnvelopes();
+    });
+}
 
-        std::shared_ptr<openspace::TransferFunction> TransferFunctionHandler::getTransferFunction() {
-            return _transferFunction;
-        }
+void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
+    // histogram->print();
+    _histogramProperty.setValue(histogram->getBinaryData());
+}
 
-    } //namespace volume
-} // namespace openspace
+void TransferFunctionHandler::setTexture() {
+    if (_transferFunctionProperty.value().createTexture(_texture)) {
+        uploadTexture();
+    }
+}
+
+void TransferFunctionHandler::setUnit(const std::string& unit) {
+    _dataUnit.set(unit);
+}
+
+void TransferFunctionHandler::setMinAndMaxValue(const float& min, const float& max) {
+    std::stringstream s_min;
+    s_min << min;
+    std::string s = s_min.str();
+    _minValue.set(s);
+    std::stringstream s_max;
+    s_max << max;
+    std::string t = s_max.str();
+    _maxValue.set(t);
+}
+
+
+void TransferFunctionHandler::loadStoredEnvelopes() {
+    TransferFunction tf;
+    tf.loadEnvelopesFromFile(_filePath);
+    if (tf.hasEnvelopes()) {
+        _transferFunctionProperty.setValue(tf);
+        setTexture();
+    }
+}
+
+void TransferFunctionHandler::saveEnvelopes() {
+    _transferFunctionProperty.value().saveEnvelopesToFile(_filePath);
+}
+
+void TransferFunctionHandler::setFilepath(const std::string& path) {
+    _filePath = path;
+    _transferFunction->updateTexture();
+}
+
+ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {
+    return *_texture.get();
+}
+
+void TransferFunctionHandler::uploadTexture() {
+    _texture->uploadTexture();
+}
+
+bool TransferFunctionHandler::hasTexture() {
+    if (_texture == nullptr)
+        return false;
+    return true;
+}
+
+std::shared_ptr<openspace::TransferFunction> TransferFunctionHandler::getTransferFunction() {
+    return _transferFunction;
+}
+
+} // namespace openspace::volume
