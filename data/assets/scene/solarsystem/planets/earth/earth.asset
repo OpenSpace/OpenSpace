@@ -228,6 +228,7 @@ local Earth = {
                     TilePixelSize = 64,
                     Fallback = {
                         Name = "Earth Bluemarble Height",
+                        Identifier = "Earth_Bluemarble_Height",
                         FilePath = texturesPath .. "/earth_bluemarble_height.jpg",
                         Enabled = true
                     }
