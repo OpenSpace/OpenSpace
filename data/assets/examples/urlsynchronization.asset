@@ -40,3 +40,11 @@ asset.syncedResource({
     Type = "UrlSynchronization",
     Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
 })
+
+asset.syncedResource({
+    Name = "Example No Hash",
+    Type = "UrlSynchronization",
+    Identifier = "no_hash",
+    Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
+    UseHash = false
+})
