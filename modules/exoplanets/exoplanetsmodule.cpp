@@ -92,6 +92,34 @@ struct Exoplanet {
     float POSITIONZ;
 };
 
+std::string getStarColor(float bv){
+    std::string colorString;
+
+    std::ifstream colormap("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/colorbv.cmap", std::ios::in);
+    if (!colormap.good()) {
+        std::cout << "Failed to open colormap data file";
+    }
+
+    int t = round(((bv + 0.4) / (2.0 + 0.4))*255);
+
+    std::string color;
+    for (size_t i = 0; i < t+12; i++)
+    {
+        getline(colormap, color);
+    }
+
+    std::istringstream colorstream(color);
+    std::string r, g, b;
+    getline(colorstream, r, ' ');
+    getline(colorstream, g, ' ');
+    getline(colorstream, b, ' ');
+    colorString = "{" + r + ", " + g + ", " + b + "}";
+
+    colormap.close();
+
+    return colorString;
+}
+
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
@@ -143,7 +171,7 @@ int addNode(lua_State* L) {
     lut.close();
 
 
-    if (found && !isnan(p.POSITIONX) && !p.BINARY )
+    if (found && !isnan(p.POSITIONX) && !p.BINARY)
     {
         Time epoch;
         double parsec = 0.308567756E17;
@@ -152,18 +180,19 @@ int addNode(lua_State* L) {
             "Name = '" + starname + "',"
             "Parent = 'SolarSystemBarycenter',"
             "Transform = {"
-                "Translation = {"
-                    "Type = 'StaticTranslation',"
-                    "Position = {" + std::to_string(p.POSITIONX * parsec) + ", " + std::to_string(p.POSITIONY * parsec) + ", " + std::to_string(p.POSITIONZ * parsec) + "}"
-                "}"
+            "Translation = {"
+            "Type = 'StaticTranslation',"
+            "Position = {" + std::to_string(p.POSITIONX * parsec) + ", " + std::to_string(p.POSITIONY * parsec) + ", " + std::to_string(p.POSITIONZ * parsec) + "}"
             "}"
-        "}";
+            "}"
+            "}";
 
         if (isnan(p.RSTAR))
         {
             p.RSTAR = 1.46046;
         }
-        
+
+        std::string color = getStarColor(p.BMV);
         const std::string luaTableStarGlare = "{"
             "Name = '" + starname + "Plane',"
             "Parent = '" + starname + "',"
@@ -175,12 +204,28 @@ int addNode(lua_State* L) {
                 "Layers = {"
                     "ColorLayers = {"
                         "{"
-                        "Name = 'Star Texture',"
-                        "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
-                        "Enabled = true"
+                            "Name = 'Star Texture',"
+                            "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"//'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
+                            "BlendMode = 'Color',"
+                            "Enabled = true"
+                        "},"
+                        "{"
+                            "Name = 'Star Color',"
+                            "Type = 'SolidColor',"
+                            "Color = " + color + ","
+                            "BlendMode = 'Multiply',"
+                            "Enabled = true"
                         "}"
                     "}"
                 "}"
+
+            /*"Name = '" + starname + "Plane',"
+            "Parent = '" + starname + "',"
+            "Renderable = {"
+                "Type = 'RenderableSphere',"
+                "Size = " + std::to_string(p.RSTAR) + " * 6.957E8,"//solar radii to m
+                "Segments = 40,"
+                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg'"*/
                 //"Type = 'RenderablePlaneImageLocal',"
                 //"Size = " + std::to_string(p.RSTAR) + " * 6.95700E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
                 //"Billboard = true,"
