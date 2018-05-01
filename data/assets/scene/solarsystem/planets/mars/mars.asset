@@ -19,8 +19,8 @@ local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local color_layers = {
     {
-        Identifier = "MOC_WA_AMNH_Color",
-        Name = "MOC WA AMNH Color",
+        Identifier = "MOC_WA_Color_Utah",
+        Name = "MOC WA Color [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/Mars_Color.wms",
         Enabled = true,
         Fallback =  {
@@ -30,19 +30,14 @@ local color_layers = {
         }
     },
     {
-        Identifier = "Viking_MDIM",
-        Name = "Viking MDIM",
-        FilePath = mapServiceConfigs .. "/MARS_Viking_MDIM21.wms"
-    },
-    {
-        Identifier = "MOLA_Pseudo_Color",
-        Name = "MOLA Pseudo Color",
-        FilePath = mapServiceConfigs .. "/Utah/Mola_PseudoColor.wms"
-    },
-    {
-        Identifier = "MOLA_HRSC",
-        Name = "MOLA HRSC",
-        FilePath = mapServiceConfigs .. "/Utah/Mola_HRSC.wms"
+        Identifier = "MOC_WA_Color_LiU",
+        Name = "MOC WA Color [LiU]",
+        FilePath = mapServiceConfigs .. "/LiU/Color.wms",
+        Fallback =  {
+            Name = "Mars Texture",
+            FilePath = textures .. "/mars.jpg",
+            Enabled = true
+        }
     },
     {
         Identifier = "Viking_MDIM_Utah",
@@ -50,9 +45,24 @@ local color_layers = {
         FilePath = mapServiceConfigs .. "/Utah/Mdim.wms"
     },
     {
+        Identifier = "Viking_MDIM_Sweden",
+        Name = "Viking MDIM [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/MDIM.wms"
+    },
+    {
         Identifier = "Viking_MDIM_AWS",
         Name = "Viking MDIM [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/Mdim.wms"
+    },
+    {
+        Identifier = "MOLA_Pseudo_Color_Utah",
+        Name = "MOLA Pseudo Color [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/Mola_PseudoColor.wms"
+    },
+    {
+        Identifier = "MOLA_Pseudo_Color_Sweden",
+        Name = "MOLA Pseudo Color [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Mola_PseudoColor.wms"
     },
     {
         Identifier = "MOLA_Pseudo_Color_AWS",
@@ -60,15 +70,25 @@ local color_layers = {
         FilePath = mapServiceConfigs .. "/AWS/Mola_PseudoColor.wms"
     },
     {
-        Identifier = "CTX_Mosaic_LiU",
-        Name = "CTX Mosaic [LiU]",
-        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
-        BlendMode = "Color"
+        Identifier = "MOLA_HRSC_Utah",
+        Name = "MOLA HRSC [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/Mola_HRSC.wms"
+    },
+    {
+        Identifier = "MOLA_HRSC_Sweden",
+        Name = "MOLA HRSC [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Mola_HRSC.wms"
     },
     {
         Identifier = "CTX_Mosaic_Utah",
         Name = "CTX Mosaic [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/CTX.wms",
+        BlendMode = "Color"
+    },
+    {
+        Identifier = "CTX_Mosaic_Sweden",
+        Name = "CTX Mosaic [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/CTX.wms",
         BlendMode = "Color"
     },
     {
@@ -84,15 +104,27 @@ local color_layers = {
         BlendMode = "Color"
     },
     {
+        Identifier = "Themis_IR_Day_Sweden",
+        Name = "Themis IR Day [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Themis_IR_Day.wms",
+        BlendMode = "Color"
+    },
+    {
+        Identifier = "Themis_IR_Day_AWS",
+        Name = "Themis IR Day [AWS]",
+        FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Day.wms",
+        BlendMode = "Color"
+    },
+    {
         Identifier = "Themis_IR_Night_Utah",
         Name = "Themis IR Night [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/Themis_IR_Night.wms",
         BlendMode = "Color"
     },
     {
-        Identifier = "Themis_IR_Day_AWS_",
-        Name = "Themis IR Day [AWS]",
-        FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Day.wms",
+        Identifier = "Themis_IR_Night_Sweden",
+        Name = "Themis IR Night [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Themis_IR_Night.wms",
         BlendMode = "Color"
     },
     {
@@ -127,13 +159,13 @@ local height_layers = {
         Identifier = "Mola_Europe",
         Name = "Mola Elevation [Europe]",
         FilePath = mapServiceConfigs .. "/LiU/Mola_Elevation.wms",
-        Enabled = true,
         TilePixelSize = 90
     },
     {
         Identifier = "Mola_Utah",
         Name = "Mola Elevation [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/Mola_Elevation.wms",
+        Enabled = true,
         TilePixelSize = 90
     },
     {

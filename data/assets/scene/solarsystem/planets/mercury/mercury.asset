@@ -8,7 +8,6 @@ asset.request('./trail')
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local color_layers = {
-    -- Utah based servers
     {
         Identifier = "Messenger_MDIS_Utah",
         Name = "Messenger MDIS [Utah]",
@@ -16,15 +15,24 @@ local color_layers = {
         Enabled = true
     },
     {
-        Identifier = "Messenger_Mosaic_Utah",
-        Name = "Messenger Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+        Identifier = "Messenger_MDIS_Sweden",
+        Name = "Messenger MDIS [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_MDIS.wms",
     },
-    -- AWS based servers
     {
         Identifier = "Messenger_MDIS_AWS",
         Name = "Messenger MDIS [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
+    },
+    {
+        Identifier = "Messenger_Mosaic_Utah",
+        Name = "Messenger Mosaic [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+    },
+    {
+        Identifier = "Messenger_Mosaic_Sweden",
+        Name = "Messenger Mosaic [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic.wms"
     },
     {
         Identifier = "Messenger_Mosaic_AWS",
