@@ -186,6 +186,7 @@ private:
     properties::IVec2Property _screenSpacePosition;
     properties::BoolProperty _screenVisibility;
     properties::DoubleProperty _distFromCamToNode;
+    properties::DoubleProperty _screenSizeRadius;
 };
 
 } // namespace openspace
