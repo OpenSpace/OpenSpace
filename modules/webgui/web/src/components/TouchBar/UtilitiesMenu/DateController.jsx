@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import SmallLabel from '../../common/SmallLabel/SmallLabel';
 import Icon from '../../common/Icon/Icon';
 import Popover from '../../common/Popover/Popover';
@@ -8,14 +9,6 @@ import * as timeHelpers from '../../../utils/timeHelpers';
 
 import buttonStyle from './UtilitiesButtons.scss';
 import styles from './DateController.scss';
-
-// TODO Remove and replace with input from API
-const dateList = [
-  { date: '2015-07-14', info: 'Cool Space event' },
-  { date: '2019-07-14', info: 'Awesome Space event' },
-  { date: '2018-07-04', info: 'Great Space event' },
-  { date: '2014-08-04', info: 'Whoho Space event' },
-];
 
 class DateController extends Component {
   constructor(props) {
@@ -44,8 +37,8 @@ class DateController extends Component {
   }
 
   get dateButtons() {
-    timeHelpers.sortDates(dateList);
-    return (dateList.map(date => (
+    timeHelpers.sortDates(this.props.dateList);
+    return (this.props.dateList.map(date => (
       <Button
         className={styles.dateButton}
         id={date.date}
@@ -58,7 +51,7 @@ class DateController extends Component {
           {new Date(date.date).toLocaleDateString()}
         </span>
         <SmallLabel className={styles.label} id={date.date}>
-          {date.info}
+          {date.planet},{date.info}
         </SmallLabel>
       </Button>
     ))
@@ -68,6 +61,8 @@ class DateController extends Component {
   pickDate(e) {
     this.togglePopover();
     timeHelpers.setDate(new Date(e.target.id));
+    const selectedDate = this.props.dateList.find(date => date.date === e.target.id);
+    this.props.onChangeSight(selectedDate);
   }
 
   togglePopover() {
@@ -87,5 +82,19 @@ class DateController extends Component {
   }
 }
 
+DateController.propTypes = {
+  onChangeSight: PropTypes.func,
+  dateList: PropTypes.arrayOf(
+    PropTypes.shape({
+      place: PropTypes.string,
+      planet: PropTypes.string,
+      location: PropTypes.object,
+    }),
+  ).isRequired,
+};
+
+DateController.defaultProps = {
+  onChangeSight: () => {},
+};
 
 export default DateController;
