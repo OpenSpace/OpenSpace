@@ -218,7 +218,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     }
 
     LINFO("A total of " + std::to_string(nStars) + " stars where read from files and distributed into "
-        + std::to_string(_indexOctreeManager->totalNodes() + " total nodes!"));
+        + std::to_string(_indexOctreeManager->totalNodes()) + " total nodes!");
 
     // Write index file of Octree structure.
     std::string indexFileOutPath = _outFileOrFolderPath + "index.bin";

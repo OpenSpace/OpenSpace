@@ -162,18 +162,30 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
     ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
     std::vector<std::string> allInputFiles = currentDir.readFiles();
 
-    // TODO: Move to function after DR2!?
     // Define what columns to read. Append additional filter parameters to default rendering parameters.
-    _allColumnNames = std::vector<std::string>({
+    _allColumnNames = std::vector<std::string>();
+    auto defaultColumnNames = std::vector<std::string>({
         "l",
         "b",
         "parallax",
+        "phot_g_mean_mag",
+        "phot_bp_mean_mag",
+        "phot_rp_mean_mag",
+        "bp_rp",
+        "bp_g",
+        "g_rp",
         "pmra",
         "pmdec",
-        "phot_g_mean_mag"
+        "radial_velocity",
+        "ra_error",
+        "dec_error",
+        "parallax_error",
+        "pmra_error",
+        "pmdec_error",
+        "radial_velocity_error",
         });
+    _allColumnNames.insert(_allColumnNames.end(), defaultColumnNames.begin(), defaultColumnNames.end());
     _allColumnNames.insert(_allColumnNames.end(), _filterColumnNames.begin(), _filterColumnNames.end());
-    //size_t nFilterColumns = _filterColumnNames.size();
 
     std::string allNames = "Columns to read: \n";
     for (auto colName : _allColumnNames) {
@@ -200,14 +212,10 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
 
         int nNullArr = 0;
         size_t nColumnsRead = _allColumnNames.size();
-        size_t defaultCols = 11; // Number of columns that are copied by predefined code. 
+        size_t defaultCols = defaultColumnNames.size();
         if (nColumnsRead != defaultCols) {
             LINFO("Additional columns will be read! Consider add column in code for significant speedup!");
         }
-
-        // Declare how many values to save for each star.
-        int32_t nValuesPerStar = 16;
-
 
         // Copy columns to local variables.
         std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
@@ -216,17 +224,26 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
         std::vector<float> l_longitude = std::move(tableContent[_allColumnNames[0]]);
         std::vector<float> b_latitude = std::move(tableContent[_allColumnNames[1]]);
         std::vector<float> parallax = std::move(tableContent[_allColumnNames[2]]);
-        std::vector<float> pr_mot_ra = std::move(tableContent[_allColumnNames[3]]);
-        std::vector<float> pr_mot_dec = std::move(tableContent[_allColumnNames[4]]);
-        std::vector<float> magCol = std::move(tableContent[_allColumnNames[5]]);
+        std::vector<float> meanMagG = std::move(tableContent[_allColumnNames[3]]);
+        std::vector<float> meanMagBp = std::move(tableContent[_allColumnNames[4]]);
+        std::vector<float> meanMagRp = std::move(tableContent[_allColumnNames[5]]);
+        std::vector<float> bp_rp = std::move(tableContent[_allColumnNames[6]]);
+        std::vector<float> bp_g = std::move(tableContent[_allColumnNames[7]]);
+        std::vector<float> g_rp = std::move(tableContent[_allColumnNames[8]]);
+        std::vector<float> pmra = std::move(tableContent[_allColumnNames[9]]);
+        std::vector<float> pmdec = std::move(tableContent[_allColumnNames[10]]);
+        std::vector<float> radial_vel = std::move(tableContent[_allColumnNames[11]]);
 
         // Default filter parameters
-        std::vector<float> ra_err = std::move(tableContent[_allColumnNames[6]]);
-        std::vector<float> dec_err = std::move(tableContent[_allColumnNames[7]]);
-        std::vector<float> parallax_err = std::move(tableContent[_allColumnNames[8]]);
-        std::vector<float> pr_mot_ra_err = std::move(tableContent[_allColumnNames[9]]);
-        std::vector<float> pr_mot_dec_err = std::move(tableContent[_allColumnNames[10]]);
+        std::vector<float> ra_err = std::move(tableContent[_allColumnNames[12]]);
+        std::vector<float> dec_err = std::move(tableContent[_allColumnNames[13]]);
+        std::vector<float> parallax_err = std::move(tableContent[_allColumnNames[14]]);
+        std::vector<float> pmra_err = std::move(tableContent[_allColumnNames[15]]);
+        std::vector<float> pmdec_err = std::move(tableContent[_allColumnNames[16]]);
+        std::vector<float> radial_vel_err = std::move(tableContent[_allColumnNames[17]]);
 
+        // Declare how many values to save for each star.
+        int32_t nValuesPerStar = 18;
 
         // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
         for (int i = 0; i < nStars; ++i) {
@@ -235,8 +252,12 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
 
             // Default order for rendering:
             // Position [X, Y, Z]
-            // Absolute Magnitude
-            // B-V Color
+            // Mean G-band Magnitude
+            // -- Mean Bp-band Magnitude
+            // -- Mean Rp-band Magnitude
+            // Bp-Rp Color
+            // -- Bp-G Color
+            // -- G-Rp Color
             // Velocity [X, Y, Z]
 
             // Return early if star doesn't have a measured position.
@@ -245,57 +266,79 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
                 continue;
             }
 
-            // Store positions.
+            // Store positions. Set to a default distance if parallax doesn't exist.
             float radiusInKiloParsec = 9.0;
             if (!std::isnan(parallax[i])) {
+                // Parallax is in milliArcseconds -> distance in kiloParsecs
+                // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
                 //LINFO("Parallax: " + std::to_string(parallax[i]));
                 radiusInKiloParsec = 1.0 / parallax[i];
             }
             // Convert to Galactic Coordinates from Galactic Lon & Lat.
-            values[idx++] = radiusInKiloParsec * sin(b_latitude[i]) * cos(l_longitude[i]); // Pos X
-            values[idx++] = radiusInKiloParsec * sin(b_latitude[i]) * sin(l_longitude[i]); // Pos Y
-            values[idx++] = radiusInKiloParsec * cos(b_latitude[i]); // Pos Z
+            // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+            values[idx++] = radiusInKiloParsec * cos(b_latitude[i]) * cos(l_longitude[i]); // Pos X
+            values[idx++] = radiusInKiloParsec * cos(b_latitude[i]) * sin(l_longitude[i]); // Pos Y
+            values[idx++] = radiusInKiloParsec * sin(b_latitude[i]); // Pos Z
 
+
+            // Store magnitude values.
+            values[idx++] = std::isnan(meanMagG[i]) ? 0.f : meanMagG[i]; // Mean G-band Magnitude
+            //values[idx++] = std::isnan(meanMagBp[i]) ? 0.f : meanMagBp[i]; // Mean Bp-band Magnitude
+            //values[idx++] = std::isnan(meanMagRp[i]) ? 0.f : meanMagRp[i]; // Mean Rp-band Magnitude
 
             // Store color values.
-            values[idx++] = std::isnan(magCol[i]) ? 0.f : magCol[i]; // AbsMag
-            values[idx++] = std::isnan(magCol[i]) ? 0.f : magCol[i]; // B-V color TODO!
+            values[idx++] = std::isnan(bp_rp[i]) ? 0.f : bp_rp[i]; // Bp-Rp Color
+            //values[idx++] = std::isnan(bp_g[i]) ? 0.f : bp_g[i]; // Bp-G Color 
+            //values[idx++] = std::isnan(g_rp[i]) ? 0.f : g_rp[i]; // G-Rp Color
 
 
             // Store velocity. 
-            if (std::isnan(pr_mot_ra[i])) pr_mot_ra[i] = 0.f;
-            if (std::isnan(pr_mot_dec[i])) pr_mot_dec[i] = 0.f;
-            // Convert to mas/year from Proper Motion
-            float velXcol = radiusInKiloParsec * sin(pr_mot_ra[i]) * cos(pr_mot_dec[i]);
-            float velYcol = radiusInKiloParsec * sin(pr_mot_ra[i]) * sin(pr_mot_dec[i]);
-            float velZcol = radiusInKiloParsec * cos(pr_mot_ra[i]);
-            // Convert it to m / s with parallax.
-            values[idx++] = convertMasPerYearToMeterPerSecond(velXcol, parallax[i]); // Vel X
-            values[idx++] = convertMasPerYearToMeterPerSecond(velYcol, parallax[i]); // Vel Y
-            values[idx++] = convertMasPerYearToMeterPerSecond(velZcol, parallax[i]); // Vel Z
+            if (std::isnan(pmra[i])) pmra[i] = 0.f;
+            if (std::isnan(pmdec[i])) pmdec[i] = 0.f;
+
+            // Observe: We should probably convert ICRS [Ra,Dec] to Galactic [l,b] here!
+
+            // Convert to Tangential vector [km/s] from Proper Motion
+            float tanVelX = 4.74 * radiusInKiloParsec * cos(pmdec[i]) * cos(pmra[i]);
+            float tanVelY = 4.74 * radiusInKiloParsec * cos(pmdec[i]) * sin(pmra[i]);
+            float tanVelZ = 4.74 * radiusInKiloParsec * sin(pmdec[i]);
+
+            // Calculate True Space Velocity [km/s] if we have the radial velocity
+            if (!std::isnan(radial_vel[i])) {
+                // Calculate Radial Velocity [km/s] in the direction of the star.
+                float radVelX = radial_vel[i] * cos(b_latitude[i]) * cos(l_longitude[i]);
+                float radVelY = radial_vel[i] * cos(b_latitude[i]) * sin(l_longitude[i]);
+                float radVelZ = radial_vel[i] * sin(b_latitude[i]);
+
+                // Use Pythagoras theorem for the final Space Velocity. 
+                values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]
+                values[idx++] = sqrt(pow(radVelY, 2) + pow(tanVelY, 2)); // Vel Y [V]
+                values[idx++] = sqrt(pow(radVelZ, 2) + pow(tanVelZ, 2)); // Vel Z [W]
+            }
+            // Otherwise use the vector we got from proper motion. 
+            else {
+                radial_vel[i] = 0.f;
+                values[idx++] = tanVelX; // Vel X [U]
+                values[idx++] = tanVelY; // Vel Y [V]
+                values[idx++] = tanVelZ; // Vel Z [W]
+            }
 
             // Store additional parameters to filter by.
-            values[idx++] = ra_err[i];
-            values[idx++] = dec_err[i];
-            values[idx++] = parallax[i];
-            values[idx++] = parallax_err[i];
-            values[idx++] = pr_mot_ra[i];
-            values[idx++] = pr_mot_ra_err[i];
-            values[idx++] = pr_mot_dec[i];
-            values[idx++] = pr_mot_dec_err[i];
-            
+            values[idx++] = std::isnan(ra_err[i]) ? 0.f : ra_err[i];
+            values[idx++] = std::isnan(dec_err[i]) ? 0.f : dec_err[i];
+            values[idx++] = std::isnan(parallax[i]) ? 0.f : parallax[i];
+            values[idx++] = std::isnan(parallax_err[i]) ? 0.f : parallax_err[i];
+            values[idx++] = pmra[i];
+            values[idx++] = std::isnan(pmra_err[i]) ? 0.f : pmra_err[i];
+            values[idx++] = pmdec[i];
+            values[idx++] = std::isnan(pmdec_err[i]) ? 0.f : pmdec_err[i];
+            values[idx++] = radial_vel[i];
+            values[idx++] = std::isnan(radial_vel_err[i]) ? 0.f : radial_vel_err[i];
 
             // Read extra columns, if any. This will slow down the sorting tremendously!
             for (size_t col = defaultCols; col < nColumnsRead; ++col) {
                 std::vector<float> vecData = std::move(tableContent[_allColumnNames[col]]);
-                values[idx++] = vecData[i];
-            }
-
-            for (size_t j = 0; j < nValuesPerStar; ++j) {
-                // Change NaNs to to 0.0 floats.
-                if (std::isnan(values[j])) {
-                    values[j] = 0.f;
-                }
+                values[idx++] = std::isnan(vecData[col]) ? 0.f : vecData[col];
             }
 
             size_t index = 0;
