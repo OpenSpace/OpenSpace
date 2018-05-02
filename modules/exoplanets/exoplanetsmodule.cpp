@@ -99,7 +99,7 @@ std::string getStarColor(float bv){
     if (!colormap.good()) {
         std::cout << "Failed to open colormap data file";
     }
-
+    
     int t = round(((bv + 0.4) / (2.0 + 0.4))*255);
 
     std::string color;
@@ -176,7 +176,7 @@ int addNode(lua_State* L) {
         Time epoch;
         double parsec = 0.308567756E17;
 
-        const std::string luaTableParent = "{"
+        const std::string starParent = "{"
             "Name = '" + starname + "',"
             "Parent = 'SolarSystemBarycenter',"
             "Transform = {"
@@ -193,8 +193,8 @@ int addNode(lua_State* L) {
         }
 
         std::string color = getStarColor(p.BMV);
-        const std::string luaTableStarGlare = "{"
-            "Name = '" + starname + "Plane',"
+       const std::string starGlobe = "{"
+            "Name = '" + starname + "Globe',"
             "Parent = '" + starname + "',"
             "Renderable = {"
                 "Type = 'RenderableGlobe',"
@@ -203,39 +203,44 @@ int addNode(lua_State* L) {
                 "PerformShading = false,"
                 "Layers = {"
                     "ColorLayers = {"
+                        
+                        "{"
+                            "Name = 'Star Color',"
+                            "Type = 'SolidColor',"
+                            "Color = " + color + ","
+                            "BlendMode = 'Normal',"
+                            "Enabled = true"
+                        "},"
                         "{"
                             "Name = 'Star Texture',"
                             "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"//'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
                             "BlendMode = 'Color',"
                             "Enabled = true"
-                        "},"
-                        "{"
-                            "Name = 'Star Color',"
-                            "Type = 'SolidColor',"
-                            "Color = " + color + ","
-                            "BlendMode = 'Multiply',"
-                            "Enabled = true"
                         "}"
                     "}"
                 "}"
-
-            /*"Name = '" + starname + "Plane',"
+            "}"
+        "}";
+        const std::string starGlare = "{"
+            "Name = '" + starname + "Glare',"
             "Parent = '" + starname + "',"
             "Renderable = {"
-                "Type = 'RenderableSphere',"
-                "Size = " + std::to_string(p.RSTAR) + " * 6.957E8,"//solar radii to m
-                "Segments = 40,"
-                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg'"*/
-                //"Type = 'RenderablePlaneImageLocal',"
-                //"Size = " + std::to_string(p.RSTAR) + " * 6.95700E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
-                //"Billboard = true,"
-                //"Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
-                //"BlendMode = 'Additive'"
+                "Type = 'RenderablePlaneImageLocal',"
+                "Size = " + std::to_string(p.RSTAR) + " *(1.3*10^10.5)," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+                "Billboard = true,"
+                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
+                "BlendMode = 'Additive'"
             "}"
         "}";
 
-        std::string scriptParent = "openspace.addSceneGraphNode(" + luaTableParent + "); openspace.addSceneGraphNode(" + luaTableStarGlare + ");";
+        std::string scriptParent = "openspace.addSceneGraphNode(" + starParent + ");openspace.addSceneGraphNode(" + starGlare + "); openspace.addSceneGraphNode(" + starGlobe + ");";
 
+        OsEng.scriptEngine().queueScript(
+            scriptParent,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
+        scriptParent = "";
         for (size_t i = 0; i < plsy.size(); i++)
         {
             
