@@ -9,7 +9,11 @@ import { changePropertyValue, startConnection, fetchData } from '../api/Actions'
 import TouchBar from '../components/TouchBar/TouchBar';
 import styles from './OnTouchGui.scss';
 import { traverseTreeWithURI } from "../utils/propertyTreeHelpers";
-import {infoIconKey, StoryKey} from "../api/keys";
+import { infoIconKey, SetGoToGeoScript, StoryKey, ValuePlaceholder } from '../api/keys';
+import DataManager from '../api/DataManager';
+
+// TODO Remove and replace with input from API
+const startPosition = { location: { lat: '58.5877', long: '16.1924', att: '20000000' } };
 
 class OnTouchGui extends Component {
   constructor(props) {
@@ -20,6 +24,9 @@ class OnTouchGui extends Component {
   componentDidMount() {
     this.props.StartConnection();
     this.props.FetchData(infoIconKey);
+
+    const script = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.location.lat}, ${startPosition.location.long}, ${startPosition.location.att}`);
+    DataManager.runScript(script);
   }
 
   changeStory(e){

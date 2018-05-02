@@ -38,3 +38,5 @@ export const StoryKey = 'Scene.StoryIdentifier';
 export const infoIconKey = 'info_icons';
 // key for endpoint for json files
 export const dataEndpointKey = 'https://openspace.github.io/sci/mastertheses/2018/info/solarsystem/';
+// script for setting goToGeo
+export const SetGoToGeoScript = `openspace.globebrowsing.goToGeo(${ValuePlaceholder})`;

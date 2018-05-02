@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Picker from '../../BottomBar/Picker';
 import Icon from '../../common/Icon/Icon';
 import SmallLabel from '../../common/SmallLabel/SmallLabel';
@@ -8,8 +9,6 @@ import styles from './SightsController.scss';
 import Popover from '../../common/Popover/Popover';
 import Button from '../../common/Input/Button/Button';
 
-// TODO Remove and replace with input from API
-const sightsList = ['Stockholm', 'Salt Lake City', 'New York'];
 
 class SightsController extends Component {
   constructor(props) {
@@ -36,16 +35,16 @@ class SightsController extends Component {
   }
 
   get sightsButtons() {
-    return (sightsList.map(sight => (
+    return (this.props.sightsList.map(sight => (
       <Button
-        key={sight}
+        key={sight.place}
         smalltext
         block
         onClick={this.selectSight}
-        id={sight}
+        id={sight.place}
       >
-        <SmallLabel id={sight} style={{ float: 'left' }}>
-          {sight}
+        <SmallLabel id={sight.place} style={{ float: 'left' }}>
+          {sight.planet},{sight.place}
         </SmallLabel>
       </Button>
     )));
@@ -53,7 +52,8 @@ class SightsController extends Component {
 
   selectSight(e) {
     this.togglePopover();
-    // console.log('Select Sight', e.target.id);
+    const selectedSight = this.props.sightsList.find(sight => sight.place === e.target.id);
+    this.props.onChangeSight(selectedSight);
   }
 
   togglePopover() {
@@ -72,5 +72,21 @@ class SightsController extends Component {
     );
   }
 }
+
+SightsController.propTypes = {
+  onChangeSight: PropTypes.func,
+  sightsList: PropTypes.arrayOf(
+    PropTypes.shape({
+      place: PropTypes.string,
+      planet: PropTypes.string,
+      location: PropTypes.object,
+    }),
+  ).isRequired,
+};
+
+SightsController.defaultProps = {
+  onChangeSight: () => {},
+};
+
 
 export default SightsController;

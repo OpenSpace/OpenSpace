@@ -85,6 +85,11 @@ namespace {
         "StoryIdentifier",
         "" // @TODO Missing documentation
     };
+    static const openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
+        "ScreenSizeRadius",
+        "ScreenSizeRadius",
+        "" // @TODO Missing documentation
+    };
 
 } // namespace
 
@@ -223,10 +228,12 @@ SceneGraphNode::SceneGraphNode()
     , _screenSpacePosition(properties::IVec2Property(ScreenSpacePositionInfo, glm::ivec2(-1,-1)))
     ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
     , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
+    ,_screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
 {
     addProperty(_screenSpacePosition);
     addProperty(_screenVisibility);
     addProperty(_distFromCamToNode);
+    addProperty(_screenSizeRadius);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -582,11 +589,22 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
             glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) * centerToActualSurfaceModelSpace;
             double planetRadius = length(centerToActualSurface);
 
+            // Calculate the planet radius to screensize pixels
+            glm::dvec3 radiusPos = worldPos + (planetRadius * normalize(cam.lookUpVectorWorldSpace()));
+            glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
+            glm::dvec3 ndc2 = clipSpaceRadius / clipSpaceRadius.w;
+            glm::ivec2 radiusScreenSpacePosition = glm::ivec2((ndc2.x + 1) * res.x / 2, (ndc2.y + 1) * res.y / 2);
+            glm::dvec2 radiusInScreenSpace = screenSpacePosition - radiusScreenSpacePosition;
+            double screenSpaceRadius = length(radiusInScreenSpace);
+
             // Distance from the camera to the node
             double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
 
-            double zoomThreshold = 0.5, moveThreshold = 1;
+            double zoomThreshold = 0.5, moveThreshold = 1, radiusThreshold= 1.5;
 
+            if (abs(_screenSizeRadius - screenSpaceRadius) > radiusThreshold) {
+                _screenSizeRadius.setValue(screenSpaceRadius);
+            }
             if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
                 _distFromCamToNode.setValue(distFromCamToNode);
             }

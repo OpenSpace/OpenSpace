@@ -2,8 +2,11 @@
 
 .MarkerInfo {
     display: flex;
-    flex-direction: column;
+    flex-direction: row-reverse;
     position: absolute;
-    text-align: center;
+    align-self: center;
+    justify-content: center;
     color: white;
+    width: 200px;
+    margin-left: -100px;
 }

@@ -4,12 +4,13 @@ import PropTypes from 'prop-types';
 import MarkerInfo from './MarkerInfo';
 import { traverseTreeWithURI, jsonToLuaTable } from '../../../utils/propertyTreeHelpers';
 import { startListening, stopListening } from '../../../api/Actions/index';
-import {infoIconKey, StoryKey} from "../../../api/keys";
+import { infoIconKey, StoryKey } from '../../../api/keys';
 
 class Markers extends Component {
   componentDidUpdate() {
     const {
-      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+      nodes, screenSpaceProperties, screenVisibilityProperties,
+      distFromCamToNodeProperties, screenSpaceRadius,
     } = this.props;
 
     if (nodes.length > 0) {
@@ -22,6 +23,9 @@ class Markers extends Component {
         }
         if (distFromCamToNodeProperties[i].listeners === 0) {
           this.props.StartListening(distFromCamToNodeProperties[i].Description.Identifier);
+        }
+        if (screenSpaceRadius[i].listeners === 0) {
+          this.props.StartListening(screenSpaceRadius[i].Description.Identifier);
         }
       });
     }
@@ -41,23 +45,27 @@ class Markers extends Component {
 
   createInfoMarkers() {
     const {
-      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties, infoIcons
+      nodes, screenSpaceProperties, screenVisibilityProperties,
+      distFromCamToNodeProperties, infoIcons, screenSpaceRadius,
     } = this.props;
 
-    return(nodes.map((node, i) => {
+    return (nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
       if (screenVisibilityProperties[i].Value === 'true') {
         // TODO Remove the magic numbers
-        let size = (100000000000 / distFromCamToNodeProperties[i].Value);
-        const showInfo = size > 100;
-        const showLabel = size > 0.04;
+        const distanceFromCam = (100000000000 / distFromCamToNodeProperties[i].Value);
+        const showLabel = distanceFromCam > 0.04;
+
+        const planetRadius = Number(screenSpaceRadius[i].Value);
+        let size = planetRadius * 0.1;
+        const showInfo = planetRadius > 25;
 
         if (size >= 3) size = 3;
         if (size <= 1.5) size = 1.5;
 
         let planetInfo;
-        if(infoIcons.data){
-          planetInfo = infoIcons.data.planets.find(planet => planet.planet === node.identifier)
+        if (infoIcons.data) {
+          planetInfo = infoIcons.data.planets.find(planet => planet.planet === node.identifier);
         }
 
         return (<MarkerInfo
@@ -68,10 +76,12 @@ class Markers extends Component {
           showInfo={showInfo}
           planetInfo={planetInfo}
           showLabel={showLabel}
+          planetRadius={planetRadius}
         />);
-       }
-      })
-    )}
+      }
+    })
+    );
+  }
 
   render() {
     return (
@@ -89,6 +99,7 @@ const mapStateToProps = (state) => {
   const screenVisibilityProperties = [];
   const distFromCamToNodeProperties = [];
   let infoIcons = {};
+  const screenSpaceRadius = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
@@ -105,10 +116,11 @@ const mapStateToProps = (state) => {
       screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSpacePosition`));
       screenVisibilityProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenVisibility`));
       distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.DistanceFromCamToNode`));
+      screenSpaceRadius.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSizeRadius`));
     });
   }
 
-  if(state.fetchData.length > 0) {
+  if (state.fetchData.length > 0) {
     const tmp = (state.fetchData.find(info => info.id === infoIconKey));
     infoIcons = tmp.succeed ? tmp : {};
   }
@@ -118,6 +130,7 @@ const mapStateToProps = (state) => {
     screenVisibilityProperties,
     distFromCamToNodeProperties,
     infoIcons,
+    screenSpaceRadius,
   };
 };
 
@@ -148,6 +161,14 @@ Markers.propTypes = {
     Description: PropTypes.string,
     Value: PropTypes.string,
   })),
+  screenSpaceRadius: PropTypes.arrayOf(PropTypes.shape({
+    Description: PropTypes.string,
+    Value: PropTypes.string,
+  })),
+  infoIcons: PropTypes.arrayOf(PropTypes.shape({
+    planet: PropTypes.string,
+    info: PropTypes.string,
+  })),
   nodes: PropTypes.arrayOf(PropTypes.shape({})),
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,
@@ -158,6 +179,8 @@ Markers.defaultProps = {
   screenSpaceProperties: [],
   distFromCamToNodeProperties: [],
   screenVisibilityProperties: [],
+  screenSpaceRadius: [],
+  infoIcons: [],
   Description: [],
   Value: '',
   StopListening: null,
