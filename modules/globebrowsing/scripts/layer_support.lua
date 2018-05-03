@@ -182,6 +182,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     if ColorFile then
         color = {
             Identifier = Identifier,
+            Name = Name or Identifier,
             Description = Description or "",
             FilePath = dir .. '/' .. ColorFile,
             BlendMode = "Color"
@@ -192,6 +193,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     if HeightFile then
         height = {
             Identifier = Identifier,
+            Name = Name or Identifier,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
             TilePixelSize = 90
