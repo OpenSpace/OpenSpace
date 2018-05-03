@@ -171,10 +171,11 @@ int addNode(lua_State* L) {
     lut.close();
 
 
-    if (found && !isnan(p.POSITIONX) && !p.BINARY)
+    if (found && !isnan(p.POSITIONX) && !p.BINARY && !isnan(p.A) && !isnan(p.PER))
     {
         Time epoch;
         double parsec = 0.308567756E17;
+        std::string scriptParent;
 
         const std::string starParent = "{"
             "Name = '" + starname + "',"
@@ -186,91 +187,79 @@ int addNode(lua_State* L) {
             "}"
             "}"
             "}";
+        scriptParent = "openspace.addSceneGraphNode(" + starParent + ");";
 
-        if (isnan(p.RSTAR))
+        if (!isnan(p.RSTAR))
         {
-            p.RSTAR = 1.46046;
-        }
-
-        std::string color = getStarColor(p.BMV);
-       const std::string starGlobe = "{"
-            "Name = '" + starname + "Globe',"
-            "Parent = '" + starname + "',"
-            "Renderable = {"
+            std::string color = getStarColor(p.BMV);
+            const std::string starGlobe = "{"
+                "Name = '" + starname + "Globe',"
+                "Parent = '" + starname + "',"
+                "Renderable = {"
                 "Type = 'RenderableGlobe',"
                 "Radii = " + std::to_string(p.RSTAR) + " * 6.957E8,"
                 "SegmentsPerPatch = 64,"
                 "PerformShading = false,"
                 "Layers = {"
-                    "ColorLayers = {"
-                        
-                        "{"
-                            "Name = 'Star Color',"
-                            "Type = 'SolidColor',"
-                            "Color = " + color + ","
-                            "BlendMode = 'Normal',"
-                            "Enabled = true"
-                        "},"
-                        "{"
-                            "Name = 'Star Texture',"
-                            "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"//'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
-                            "BlendMode = 'Color',"
-                            "Enabled = true"
-                        "}"
-                    "}"
+                "ColorLayers = {"
+
+                "{"
+                "Name = 'Star Color',"
+                "Type = 'SolidColor',"
+                "Color = " + color + ","
+                "BlendMode = 'Normal',"
+                "Enabled = true"
+                "},"
+                "{"
+                "Name = 'Star Texture',"
+                "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"//'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
+                "BlendMode = 'Color',"
+                "Enabled = true"
                 "}"
-            "}"
-        "}";
-        const std::string starGlare = "{"
-            "Name = '" + starname + "Glare',"
-            "Parent = '" + starname + "',"
-            "Renderable = {"
+                "}"
+                "}"
+                "}"
+                "}";
+            const std::string starGlare = "{"
+                "Name = '" + starname + "Glare',"
+                "Parent = '" + starname + "',"
+                "Renderable = {"
                 "Type = 'RenderablePlaneImageLocal',"
                 "Size = " + std::to_string(p.RSTAR) + " *(1.3*10^10.5)," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
                 "Billboard = true,"
                 "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
                 "BlendMode = 'Additive'"
-            "}"
-        "}";
+                "}"
+                "}";
 
-        std::string scriptParent = "openspace.addSceneGraphNode(" + starParent + ");openspace.addSceneGraphNode(" + starGlare + "); openspace.addSceneGraphNode(" + starGlobe + ");";
+            scriptParent += "openspace.addSceneGraphNode(" + starGlare + "); openspace.addSceneGraphNode(" + starGlobe + ");";
+        }
 
         OsEng.scriptEngine().queueScript(
             scriptParent,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
+        
 
-        scriptParent = "";
         for (size_t i = 0; i < plsy.size(); i++)
         {
-            
-            if (isnan(plsy[i].R))
-            {
-                plsy[i].R = 0.320116;
-            }
+            scriptParent = "";
+
             if (isnan(plsy[i].ECC))
             {
-                plsy[i].ECC = 0.0585235;
-            }
-            if (isnan(plsy[i].A))
-            {
-                plsy[i].A = 0.435568;
+                plsy[i].ECC = 0;
             }
             if (isnan(plsy[i].I))
             {
-                plsy[i].I = 90.00;
+                plsy[i].I = 90;
             }
             if (isnan(plsy[i].BIGOM))
             {
-                plsy[i].BIGOM = 45;
+                plsy[i].BIGOM = 0;
             }
             if (isnan(plsy[i].OM))
             {
                 plsy[i].OM = 90;
-            }
-            if (isnan(plsy[i].PER))
-            {
-                plsy[i].PER = 358.802;
             }
             std::string sepoch;
             if (!isnan(plsy[i].TT)) {
@@ -280,39 +269,45 @@ int addNode(lua_State* L) {
             else
                 sepoch = "2009-05-19T07:11:34.080";
 
-
-            const std::string luaTablePlanet = "{"
-                "Name = '" + plna[i] + "',"
-                "Parent = '" + starname + "',"
-                "Renderable = {"
+            if (!isnan(plsy[i].R))
+            {
+                const std::string luaTablePlanet = "{"
+                    "Name = '" + plna[i] + "',"
+                    "Parent = '" + starname + "',"
+                    "Renderable = {"
                     "Type = 'RenderableGlobe',"
                     "Radii = " + std::to_string(plsy[i].R) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
                     "SegmentsPerPatch = 64,"
                     "PerformShading = false,"
                     "Layers = {"
-                        "ColorLayers = {"
-                            "{"
-                                "Name = 'Exoplanet Texture',"
-                                "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
-                                "Enabled = true"
-                            "}"
-                        "}"
+                    "ColorLayers = {"
+                    "{"
+                    "Name = 'Exoplanet Texture',"
+                    "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
+                    "Enabled = true"
                     "}"
-                "},"
-                "Transform = {"
+                    "}"
+                    "}"
+                    "},"
+                    "Transform = {"
                     "Translation = {"
-                        "Type = 'KeplerTranslation',"
-                        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
-                        "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
-                        "Inclination = " + std::to_string(plsy[i].I) + "," //I
-                        "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
-                        "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
-                        "MeanAnomaly = 0.0,"
-                        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                        "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "Type = 'KeplerTranslation',"
+                    "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
+                    "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
+                    "Inclination = " + std::to_string(plsy[i].I) + "," //I
+                    "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
+                    "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
+                    "MeanAnomaly = 0.0,"
+                    "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
+                    "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
                     "}"
-                "},"
-            "}";
+                    "},"
+                    "}";
+
+                scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + ");";
+
+            }
+            
 
             const std::string PlanetTrail = "{"
                 "Name = '" + plna[i] + "Trail',"
@@ -336,15 +331,17 @@ int addNode(lua_State* L) {
                 "},"
             "}";
 
-            scriptParent += "openspace.addSceneGraphNode(" + luaTablePlanet + "); openspace.addSceneGraphNode(" + PlanetTrail + ");";
+            scriptParent += " openspace.addSceneGraphNode(" + PlanetTrail + ");";
+
+            OsEng.scriptEngine().queueScript(
+                scriptParent,
+                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            );
 
         }
 
 
-        OsEng.scriptEngine().queueScript(
-            scriptParent,
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
-        );
+        
 
     }
     else
@@ -359,7 +356,7 @@ int removeNode(lua_State* L) {
     const int StringLocation = -1;
     const std::string starname = luaL_checkstring(L, StringLocation);
 
-    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lookup.txt");
+    /*std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lookup.txt");
     if (!lut.good()) {
         std::cout << "Failed to open exoplanets look-up table file";
     }
@@ -374,14 +371,15 @@ int removeNode(lua_State* L) {
         if (planetname.compare(0, planetname.length() - 2, starname) == 0) {
             plna.push_back(planetname);
         }
-    }
+    }*/
 
-    std::string scriptParent;
+    /*std::string scriptParent;
     for (size_t i = 0; i < plna.size(); i++)
     {
         scriptParent += "openspace.removeSceneGraphNode('" + plna[i] + "Trail'); openspace.removeSceneGraphNode('" + plna[i] + "');";
     }
-    scriptParent += " openspace.removeSceneGraphNode('" + starname + "Plane'); openspace.removeSceneGraphNode('" + starname + "');";
+    scriptParent += " openspace.removeSceneGraphNode('" + starname + "Plane'); openspace.removeSceneGraphNode('" + starname + "');";*/
+    std::string scriptParent = "openspace.removeSceneGraphNode('" + starname + "');";
     OsEng.scriptEngine().queueScript(
         scriptParent,
         openspace::scripting::ScriptEngine::RemoteScripting::Yes
