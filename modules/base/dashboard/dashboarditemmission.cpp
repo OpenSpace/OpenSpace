@@ -171,7 +171,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                     penPosition,
                     missionProgressColor,
                     fmt::format(
-                        "{.0f} s {:s} {:.1f} %",
+                        "{:.0f} s {:s} {:.1f} %",
                         remaining,
                         progress,
                         t * 100

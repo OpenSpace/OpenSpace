@@ -1221,7 +1221,7 @@ void RenderEngine::renderScreenLog() {
             glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
             white,
             fmt::format(
-                "{:-14s} {:s}{:s}",
+                "{:<20s} {}{}",
                 e->timeString,
                 e->category.substr(0, CategoryLength),
                 e->category.length() > 20 ? "..." : ""

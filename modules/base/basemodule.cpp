@@ -145,6 +145,7 @@ void BaseModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        DashboardItemAngle::Documentation(),
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),

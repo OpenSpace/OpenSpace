@@ -259,7 +259,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 penPosition,
                 targetColor,
                 fmt::format(
-                    "Next image: [{:02i}:{:02i}:{:02i}]",
+                    "Next image: [{:02d}:{:02d}:{:02d}]",
                     tlh.count(), tlm.count(), tls.count()
                 )
             );
