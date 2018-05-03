@@ -1179,7 +1179,7 @@ void RenderEngine::renderScreenLog() {
     _log->removeExpiredEntries();
 
     constexpr const int MaxNumberMessages = 10;
-    constexpr const int CategoryLength = 20;
+    constexpr const int CategoryLength = 30;
     constexpr const int MessageLength = 140;
     constexpr const std::chrono::seconds FadeTime(5);
 
@@ -1221,10 +1221,10 @@ void RenderEngine::renderScreenLog() {
             glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
             white,
             fmt::format(
-                "{:<20s} {}{}",
+                "{:<15} {}{}",
                 e->timeString,
                 e->category.substr(0, CategoryLength),
-                e->category.length() > 20 ? "..." : ""
+                e->category.length() > CategoryLength ? "..." : ""
             )
         );
 
@@ -1249,14 +1249,14 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10 + 39 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 30 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             color,
             lvl
         );
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10 + 53 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 37 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             white,
             message
         );
