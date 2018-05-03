@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Icon from '../../common/Icon/Icon';
 import SmallLabel from '../../common/SmallLabel/SmallLabel';
 import styles from './FocusButton.scss';
-import { iconsFolderKey } from '../../../api/keys';
 
 // Import all files from a given directory path
 function importAll(r) {

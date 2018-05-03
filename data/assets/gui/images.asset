@@ -16,4 +16,5 @@ asset.syncedResource({
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/uranus.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/venus.png",
     },
+    UseHash = false
 })
