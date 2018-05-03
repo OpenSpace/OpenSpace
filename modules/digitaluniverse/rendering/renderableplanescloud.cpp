@@ -727,7 +727,6 @@ void RenderablePlanesCloud::renderLabels(const RenderData& data,
             data.camera.positionVec3(),
             data.camera.lookUpVectorWorldSpace(),
             _renderOption.value(),
-            "%s",
             pair.second.c_str());
     }
 }

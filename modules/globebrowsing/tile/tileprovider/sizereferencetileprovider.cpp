@@ -81,8 +81,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
         *_font,
         textPosition,
         color,
-        " %.0f %s",
-        tileLongitudalLength, unit.c_str()
+        fmt::format(" {:.0f} {:s}", tileLongitudalLength, unit.c_str())
     );
 }
 

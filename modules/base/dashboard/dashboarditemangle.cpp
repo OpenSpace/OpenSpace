@@ -407,10 +407,12 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            "Could not compute angle at %s between %s and %s",
-            sourceInfo.second.c_str(),
-            destinationInfo.second.c_str(),
-            referenceInfo.second.c_str()
+            fmt::format(
+                "Could not compute angle at {} between {} and {}",
+                sourceInfo.second,
+                destinationInfo.second,
+                referenceInfo.second
+            )
         );
     }
     else {
@@ -422,11 +424,13 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            "Angle at %s between %s and %s: %f degrees",
-            sourceInfo.second.c_str(),
-            destinationInfo.second.c_str(),
-            referenceInfo.second.c_str(),
-            angle
+            fmt::format(
+                "Angle at {} between {} and {}: {} degrees",
+                sourceInfo.second,
+                destinationInfo.second,
+                referenceInfo.second,
+                angle
+            )
         );
     }
 }
@@ -436,8 +440,7 @@ glm::vec2 DashboardItemAngle::size() const {
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Angle: %f %s",
-        angle
+        fmt::format("Angle: {}", angle)
     ).boundingBox;
 }
 

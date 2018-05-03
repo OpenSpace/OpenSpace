@@ -163,8 +163,9 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                "Avg. Frametime: %.5f",
-                OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. Frametime: {:.5f}", OsEng.windowWrapper().averageDeltaTime()
+                )
             );
             break;
         case FrametimeType::FPS:
@@ -172,8 +173,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                "FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().deltaTime()
+                fmt::format("FPS: {:3.2f}", 1.0 / OsEng.windowWrapper().deltaTime())
             );
             break;
         case FrametimeType::FPSAvg:
@@ -181,8 +181,9 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                "Avg. FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. FPS: {:3.2f}", 1.0 / OsEng.windowWrapper().averageDeltaTime()
+                )
             );
             break;
         case FrametimeType::None:
@@ -196,20 +197,23 @@ glm::vec2 DashboardItemFramerate::size() const {
         case FrametimeType::DtTimeAvg:
             return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                 *_font,
-                "Avg. Frametime: %.5f",
-                OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. Frametime: {:.5f}", OsEng.windowWrapper().averageDeltaTime()
+                )
             ).boundingBox;
         case FrametimeType::FPS:
             return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                 *_font,
-                "FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().deltaTime()
+                fmt::format(
+                    "FPS: {:3.2f}", 1.0 / OsEng.windowWrapper().deltaTime()
+                )
             ).boundingBox;
         case FrametimeType::FPSAvg:
             return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                 *_font,
-                "Avg. FPS: %3.2f",
-                1.0 / OsEng.windowWrapper().averageDeltaTime()
+                fmt::format(
+                    "Avg. FPS: %3.2f", 1.0 / OsEng.windowWrapper().averageDeltaTime()
+                )
             ).boundingBox;
         case FrametimeType::None:
             return { 0.f, 0.f };

@@ -197,9 +197,11 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        "Simulation increment: %.1f %s / second",
-        deltaTime.first,
-        deltaTime.second.c_str()
+        fmt::format(
+            "Simulation increment: {:.1f} {:s} / second",
+            deltaTime.first,
+            deltaTime.second
+        )
     );
 }
 
@@ -217,9 +219,11 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Simulation increment: %.1f %s / second",
-        deltaTime.first,
-        deltaTime.second.c_str()
+        fmt::format(
+            "Simulation increment: {:.1f} {:s} / second",
+            deltaTime.first,
+            deltaTime.second
+        )
     ).boundingBox;
 }
 

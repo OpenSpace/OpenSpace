@@ -201,10 +201,10 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         );
 
         if (remaining > 0) {
-            RenderFontCr(*_font,
+            RenderFontCr(
+                *_font,
                 penPosition,
                 glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-                //active * t + brigther_active,
                 "Next instrument activity:"
             );
 
@@ -220,12 +220,15 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFontCr(*_font,
                 penPosition,
                 glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-                "%4.0f %s |%s>%s| %.1f %%",
-                remainingConv.first,
-                remainingConv.second.c_str(),
-                std::string(p, '-').c_str(),
-                std::string(Size - p, ' ').c_str(),
-                t * 100
+                fmt::format(
+                    "{:4.0f} {:s} |{:s}>{:s}| {:.1f} %",
+                // "%4.0f %s |%s>%s| %.1f %%",
+                    remainingConv.first,
+                    remainingConv.second.c_str(),
+                    std::string(p, '-').c_str(),
+                    std::string(Size - p, ' ').c_str(),
+                    t * 100
+                )
             );
 
             std::string str = SpiceManager::ref().dateFromEphemerisTime(
@@ -236,8 +239,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFontCr(*_font,
                 penPosition,
                 glm::vec4(_activeColor.value(), 1.f),
-                "Data acquisition time: %s",
-                str.c_str()
+                fmt::format("Data acquisition time: {}", str)
             );
         }
         std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
@@ -256,8 +258,10 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             RenderFontCr(*_font,
                 penPosition,
                 targetColor,
-                "Next image: [%02i:%02i:%02i]",
-                tlh.count(), tlm.count(), tls.count()
+                fmt::format(
+                    "Next image: [{:02i}:{:02i}:{:02i}]",
+                    tlh.count(), tlm.count(), tls.count()
+                )
             );
 
             penPosition.y -= _font->height();
@@ -283,8 +287,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                     RenderFontCr(*_font,
                         penPosition,
                         glm::vec4(0.3, 0.3, 0.3, 1),
-                        "    %5s",
-                        m.first.c_str()
+                        fmt::format("    {:5s}", m.first)
                     );
 
                 }
@@ -309,8 +312,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                     RenderFontCr(*_font,
                         penPosition,
                         glm::vec4(_activeColor.value(), 1.f),
-                        "    %5s",
-                        m.first.c_str()
+                        fmt::format("    {:5s}", m.first)
                     );
                 }
             }
@@ -355,8 +357,7 @@ glm::vec2 DashboardItemInstruments::size() const {
                     size,
                     ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                         *_font,
-                        "Distance to Pluto: % .1f (KM)",
-                        distToSurf
+                        fmt::format("Distance to Pluto: {:.1f} (KM)", distToSurf)
                     ).boundingBox
                 );
             }
@@ -393,8 +394,11 @@ glm::vec2 DashboardItemInstruments::size() const {
                 size,
                 ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                     *_font,
-                    "%.0f s %s %.1f %%",
-                    remaining, progress.c_str(), t * 100
+                    fmt::format(
+                        "{:.0f} s {:s} {:.1f} %",
+                        remaining,
+                        progress.c_str(), t * 100
+                    )
                 ).boundingBox
             );
 
@@ -402,8 +406,7 @@ glm::vec2 DashboardItemInstruments::size() const {
                 size,
                 ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                     *_font,
-                    "Data acquisition time: %s",
-                    str.c_str()
+                    fmt::format("Data acquisition time: {}", str)
                 ).boundingBox
             );
         }
@@ -436,8 +439,12 @@ glm::vec2 DashboardItemInstruments::size() const {
                 size,
                 ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
                     *_font,
-                    "Data acquisition adjacency: [%s:%s:%s]",
-                    hh.c_str(), mm.c_str(), ss.c_str()
+                    fmt::format(
+                        "Data acquisition adjacency: [{}:{}:{}]",
+                        hh.c_str(), mm.c_str(), ss.c_str()
+                    )
+
+
                 ).boundingBox
             );
 

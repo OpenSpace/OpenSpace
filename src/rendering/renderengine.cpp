@@ -547,6 +547,12 @@ void RenderEngine::updateFade() {
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
+    RenderFont(
+        *_fontDate,
+        glm::vec2(400, 400),
+        "sdfjklksdf\njsdfllkjsfd"
+    );
+
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
     if (_camera) {
@@ -576,7 +582,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
             fontResolution().y / 3
         );
 
-        RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
+        RenderFont(*_fontBig, penPosition, std::to_string(_frameNumber))
+        ;
     }
 
     ++_frameNumber;
@@ -659,9 +666,7 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 
     auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_fontDate,
-        "Shutdown in: %.2fs/%.2fs",
-        timer,
-        fullTime
+        fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
     glm::vec2 penPosition = glm::vec2(
@@ -672,15 +677,12 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     RenderFontCr(
         *_fontDate,
         penPosition,
-        "Shutdown in: %.2fs/%.2fs",
-        timer,
-        fullTime
+        fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
 
     RenderFontCr(
         *_fontDate,
         penPosition,
-        "%s",
         // Important: length of this string is the same as the shutdown time text
         // to make them align
         "Press ESC again to abort"
@@ -1062,7 +1064,6 @@ void RenderEngine::renderCameraInformation() {
 
     FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        "%s",
         "Rotation"
     );
 
@@ -1083,14 +1084,12 @@ void RenderEngine::renderCameraInformation() {
         *_fontInfo,
         glm::vec2(fontResolution().x - rotationBox.boundingBox.x - XSeparation, penPosY),
         nav.hasRotationalFriction() ? EnabledColor : DisabledColor,
-        "%s",
         "Rotation"
     );
     penPosY -= rotationBox.boundingBox.y + YSeparation;
 
     FR::BoundingBoxInformation zoomBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        "%s",
         "Zoom"
     );
 
@@ -1104,14 +1103,12 @@ void RenderEngine::renderCameraInformation() {
         *_fontInfo,
         glm::vec2(fontResolution().x - zoomBox.boundingBox.x - XSeparation, penPosY),
         nav.hasZoomFriction() ? EnabledColor : DisabledColor,
-        "%s",
         "Zoom"
     );
     penPosY -= zoomBox.boundingBox.y + YSeparation;
 
     FR::BoundingBoxInformation rollBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        "%s",
         "Roll"
     );
 
@@ -1125,7 +1122,6 @@ void RenderEngine::renderCameraInformation() {
         *_fontInfo,
         glm::vec2(fontResolution().x - rollBox.boundingBox.x - XSeparation, penPosY),
         nav.hasRollFriction() ? EnabledColor : DisabledColor,
-        "%s",
         "Roll"
     );
 }
@@ -1139,15 +1135,12 @@ void RenderEngine::renderVersionInformation() {
 
     FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        "%s",
         OPENSPACE_VERSION_STRING_FULL
     );
 
     FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
-        "%s@%s",
-        OPENSPACE_GIT_BRANCH,
-        OPENSPACE_GIT_COMMIT
+        fmt::format("{}@{}", OPENSPACE_GIT_BRANCH, OPENSPACE_GIT_COMMIT)
     );
 
     FR::defaultRenderer().render(
@@ -1157,7 +1150,6 @@ void RenderEngine::renderVersionInformation() {
             5.f
         ),
         glm::vec4(0.5, 0.5, 0.5, 1.f),
-        "%s",
         OPENSPACE_VERSION_STRING_FULL
     );
 
@@ -1174,7 +1166,6 @@ void RenderEngine::renderVersionInformation() {
                 versionBox.boundingBox.y + 5.f
             ),
             glm::vec4(0.5, 0.5, 0.5, 1.f),
-            "%s",
             OPENSPACE_GIT_FULL
         );
     }
@@ -1229,10 +1220,13 @@ void RenderEngine::renderScreenLog() {
             *_fontLog,
             glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
             white,
-            "%-14s %s%s",
-            e->timeString.c_str(),
-            e->category.substr(0, CategoryLength).c_str(),
-            e->category.length() > 20 ? "..." : "");
+            fmt::format(
+                "{:-14s} {:s}{:s}",
+                e->timeString,
+                e->category.substr(0, CategoryLength),
+                e->category.length() > 20 ? "..." : ""
+            )
+        );
 
         glm::vec4 color(glm::uninitialize);
         switch (e->level) {
@@ -1257,16 +1251,14 @@ void RenderEngine::renderScreenLog() {
             *_fontLog,
             glm::vec2(10 + 39 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             color,
-            "%s",
-            lvl.c_str()
+            lvl
         );
 
         RenderFont(
             *_fontLog,
             glm::vec2(10 + 53 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             white,
-            "%s",
-            message.c_str()
+            message
         );
         ++nr;
     }

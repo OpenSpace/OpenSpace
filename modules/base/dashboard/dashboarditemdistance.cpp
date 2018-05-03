@@ -437,11 +437,13 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        "Distance from %s to %s: %f %s",
-        sourceInfo.second.c_str(),
-        destinationInfo.second.c_str(),
-        dist.first,
-        dist.second.c_str()
+        fmt::format(
+            "Distance from {} to {}: {} {}",
+            sourceInfo.second,
+            destinationInfo.second,
+            dist.first,
+            dist.second
+        )
     );
 }
 
@@ -459,9 +461,7 @@ glm::vec2 DashboardItemDistance::size() const {
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Distance from focus: %f %s",
-        dist.first,
-        dist.second.c_str()
+        fmt::format("Distance from focus: {} {}", dist.first, dist.second)
     ).boundingBox;
 }
 

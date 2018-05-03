@@ -423,8 +423,7 @@ void LoadingScreen::render() {
     // pleasing
     FR::BoundingBoxInformation bbox = renderer.boundingBox(
         *_loadingFont,
-        "%s",
-        headline.substr(0, headline.size() - 2).c_str()
+        headline.substr(0, headline.size() - 2)
     );
 
     glm::vec2 loadingLl = glm::vec2(
@@ -437,8 +436,7 @@ void LoadingScreen::render() {
         *_loadingFont,
         loadingLl,
         glm::vec4(1.f, 1.f, 1.f, 1.f),
-        "%s",
-        headline.c_str()
+        headline
     );
 
     glm::vec2 messageLl;
@@ -448,8 +446,7 @@ void LoadingScreen::render() {
 
         FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
             *_messageFont,
-            "%s",
-            _message.c_str()
+            _message
         );
 
         messageLl = glm::vec2(
@@ -463,8 +460,7 @@ void LoadingScreen::render() {
             *_messageFont,
             messageLl,
             glm::vec4(1.f, 1.f, 1.f, 1.f),
-            "%s",
-            _message.c_str()
+            _message
         );
     }
 
@@ -479,8 +475,7 @@ void LoadingScreen::render() {
 
                 FR::BoundingBoxInformation b = renderer.boundingBox(
                     *_itemFont,
-                    "%s",
-                    (item.name + " 100%").c_str()
+                    (item.name + " 100%")
                 );
 
                 // The maximum count is in here since we can't control the amount of
@@ -604,8 +599,7 @@ void LoadingScreen::render() {
                 *_itemFont,
                 item.ll,
                 color,
-                "%s",
-                text.c_str()
+                text
             );
         }
 

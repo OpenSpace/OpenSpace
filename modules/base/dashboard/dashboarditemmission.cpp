@@ -166,8 +166,17 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 );
                 std::string progress = progressToStr(25, t);
                 penPosition.y -= _font->height();
-                RenderFont(*_font, penPosition, missionProgressColor,
-                   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+                RenderFont(
+                    *_font,
+                    penPosition,
+                    missionProgressColor,
+                    fmt::format(
+                        "{.0f} s {:s} {:.1f} %",
+                        remaining,
+                        progress,
+                        t * 100
+                    )
+                );
             }
             else {
                 penPosition.y -= _font->height();
@@ -179,8 +188,12 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 );
                 double remaining = mission.timeRange().start - currentTime;
                 penPosition.y -= _font->height();
-                RenderFont(*_font, penPosition, nextMissionColor,
-                    "%.0f s", remaining);
+                RenderFont(
+                    *_font,
+                    penPosition,
+                    nextMissionColor,
+                    fmt::format("{:.0f} s", remaining)
+                );
             }
 
             bool showAllPhases = false;
@@ -204,12 +217,17 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                     );
                     std::string progress = progressToStr(25, t);
                     penPosition.y -= _font->height();
-                    RenderFont(*_font, penPosition, currentMissionColor,
-                        "%s  %s %.1f %%",
-                        phase->name().c_str(),
-                        progress.c_str(),
-                        t * 100
-                        );
+                    RenderFont(
+                        *_font,
+                        penPosition,
+                        currentMissionColor,
+                        fmt::format(
+                            "{:s}  {:s} {:.1f} %",
+                            phase->name(),
+                            progress,
+                            t * 100
+                        )
+                    );
                 }
                 else {
                     if (!phase->name().empty()) {
@@ -218,7 +236,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                             *_font,
                             penPosition,
                             nonCurrentMissionColor,
-                            phase->name().c_str()
+                            phase->name()
                         );
                     }
                 }

@@ -117,16 +117,14 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        "Date: %s",
-        OsEng.timeManager().time().UTC().c_str()
+        fmt::format("Date: {}", OsEng.timeManager().time().UTC().c_str())
     );
 }
 
 glm::vec2 DashboardItemDate::size() const {
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Date: %s",
-        OsEng.timeManager().time().UTC().c_str()
+        fmt::format("Date: {}", OsEng.timeManager().time().UTC().c_str())
     ).boundingBox;
 }
 

@@ -743,8 +743,7 @@ void LuaConsole::render() {
         // Compute the current width of the string and console prefix.
         const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
             *_font,
-            "> %s",
-            currentCommand.c_str()
+            "> " + currentCommand
         ).boundingBox.x + inputLocation.x;
 
         // Compute the overflow in pixels
@@ -801,8 +800,7 @@ void LuaConsole::render() {
         *_font,
         inputLocation,
         _entryTextColor,
-        "> %s",
-        currentCommand.c_str()
+        "> " + currentCommand
     );
 
     // Just offset the ^ marker slightly for a nicer look
@@ -838,8 +836,7 @@ void LuaConsole::render() {
             *_historyFont,
             historyInputLocation,
             _historyTextColor,
-            "%s",
-            cmd.c_str()
+            cmd
         );
     }
 
