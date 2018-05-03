@@ -29,6 +29,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfilejob.h 
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.h 
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/constructoctreetask.h 
@@ -41,6 +42,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegaiastars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreemanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/octreeculler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfilejob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readfitstask.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/readspecktask.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/constructoctreetask.cpp

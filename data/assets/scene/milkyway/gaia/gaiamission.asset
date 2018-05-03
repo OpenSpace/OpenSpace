@@ -14,19 +14,20 @@ local colorLUT = asset.syncedResource({
     Version = 1
 })
 
-local stars = asset.syncedResource({
-    Name = "Gaia Stars Data File",
-    Type = "HttpSynchronization",
-    Identifier = "gaia_stars",
-    Version = 1
-})
+--local stars = asset.syncedResource({
+--    Name = "Gaia Stars Data File",
+--    Type = "HttpSynchronization",
+--    Identifier = "gaia_stars",
+--    Version = 1
+--})
+local stars = "E:/gaia_sync_data"
 
 local GaiaMission = {
     Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = stars .. "/DR1_full_octree_50kSPN/" -- "/TGAS_Octree_10kSPN.bin",
-        FileReaderOption = "StreamOctree", -- "BinaryOctree",
+        File = stars .. "/TGAS_Octree_10kSPN.bin", -- /TGAS_Octree_10kSPN.bin
+        FileReaderOption = "BinaryOctree", -- BinaryOctree, StreamOctree
         RenderOption = "Static",
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
@@ -37,15 +38,6 @@ local GaiaMission = {
         BillboardSize = 10,
         CloseUpBoostDist = 300,
         Sharpness = 1.45,
-        ColumnNames = {
-            "Gaia_Parallax_Err",
-            "Gaia_Proper_Motion_RA",
-            "Gaia_Proper_Motion_RA_Err",
-            "Gaia_Proper_Motion_Dec",
-            "Gaia_Proper_Motion_Dec_Err",
-            "Tycho_B_Mag_Err",
-            "Tycho_V_Mag_Err",
-        }
     },
     GUI = {
         Name = "Gaia Mission",

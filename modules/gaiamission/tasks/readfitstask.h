@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_GAIAMISSION___READFITSTASK___H__
 
 #include <openspace/util/task.h>
+#include <openspace/util/threadpool.h>
+#include <openspace/util/concurrentjobmanager.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
 namespace openspace {
@@ -42,14 +44,16 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    const size_t MAX_SIZE_BEFORE_WRITE = 3200000; // 100.000 stars ~3MB
+    const size_t MAX_SIZE_BEFORE_WRITE = 36000000; // ~34MB -> 500.000 stars with 18 values
 
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
+    void writeOctantToFile(std::vector<float> data, int index, bool isFirstWrite, int nValuesPerStar);
 
     std::string _inFileOrFolderPath;
     std::string _outFileOrFolderPath;
     bool _singleFileProcess;
+    size_t _threadsToUse;
     int _firstRow;
     int _lastRow;
     std::vector<std::string> _allColumnNames;

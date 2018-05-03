@@ -22,53 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
-#define __OPENSPACE_CORE___THREAD_POOL___H__
+#ifndef __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__
+#define __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__
 
-#include <condition_variable>
-#include <functional>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
-#include <atomic>
+#include <openspace/util/concurrentjobmanager.h>
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
-// Implementation based on http://progsch.net/wordpress/?p=81
+namespace openspace::gaiamission {
 
-namespace openspace {
 
-class ThreadPool;
+struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
 
-class Worker {
-public:
-    Worker(ThreadPool& pool);
-    void operator()();
-private:
-    ThreadPool& pool;
-};
+    ReadFileJob(std::string filePath, std::vector<std::string> allColumns, int firstRow, int lastRow,
+        size_t nDefaultCols, int nValuesPerStar, std::shared_ptr<FitsFileReader> fitsReader);
 
-class ThreadPool {
-public:
-    ThreadPool(size_t numThreads);
-    ThreadPool(const ThreadPool& toCopy);
-    ~ThreadPool();
+    ~ReadFileJob();
 
-    void enqueue(std::function<void()> f);
-    void clearTasks();
+    void execute() override;
+
+    std::shared_ptr<std::vector<std::vector<float>>> product() override;
 
 private:
-    friend class Worker;
+    std::string _inFilePath;
+    int _firstRow;
+    int _lastRow;
+    size_t _nDefaultCols;
+    int _nValuesPerStar;
+    std::vector<std::string> _allColumns;
 
-    std::vector<std::thread> workers;
-
-    std::deque<std::function<void()>> tasks;
-
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-
-    bool stop;
+    std::shared_ptr<FitsFileReader> _fitsFileReader;
+    std::shared_ptr<std::vector<std::vector<float>>> _octants;
 };
 
-} // namespace openspace
+} // namespace openspace::gaiamission
 
-#endif // __OPENSPACE_CORE___THREAD_POOL___H__
+#endif // __OPENSPACE_MODULE_GAIAMISSION___READFILEJOB___H__

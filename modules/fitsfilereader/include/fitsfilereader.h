@@ -28,6 +28,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <mutex>
 #include <unordered_map>
 #include <CCfits>
 
@@ -81,6 +82,8 @@ private:
     const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
     template<typename T>
     const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
+
+    mutable std::mutex _mutex;
 };
 
 } // namespace openspace

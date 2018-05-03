@@ -1,16 +1,11 @@
 return {
     {
         Type = "ReadFitsTask",
-        InFileOrFolderPath = "E:/GaiaDR1/gaia_source/fits",
-        OutFileOrFolderPath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/DR1_full_16col/",
+        InFileOrFolderPath = "K:/GaiaDR2/gaia_source/fits-subset/",
+        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_subset_18col/",
         SingleFileProcess = false,
+        ThreadsToUse = 16,
         FilterColumnNames = {
-            "ra_error",
-            "dec_error",
-            "parallax_error",
-            "pmra_error",
-            "pmdec_error",
-
             --"Gaia_Parallax_Err",
             --"Gaia_Proper_Motion_RA",
             --"Gaia_Proper_Motion_RA_Err",
@@ -19,10 +14,17 @@ return {
             --"Tycho_B_Mag_Err",
             --"Tycho_V_Mag_Err"
         }
-    }
+    },
+    --{
+    --    Type = "ConstructOctreeTask",
+    --    InFileOrFolderPath = "E:/gaia_sync_data/DR2_subset_18col/",
+    --    OutFileOrFolderPath = "E:/gaia_sync_data/DR2_subset_Octree[10kSPN,100dist,noLOD]/",
+    --    SingleFileInput = false,
+    --    -- TODO: Specify filter thresholds 
+    --}
     --{
     --    Type = "ReadSpeckTask",
-    --    InFilePath = "C:/Users/openspace/Documents/adaal265/data/DR1_AMNH.speck",
-    --    OutFilePath = "C:/Users/openspace/Documents/adaal265/develop/OpenSpace/sync/http/gaia_stars/1/DR1_AMNH.bin",
+    --    InFilePath = "E:/gaia_sync_data/DR1_AMNH.speck",
+    --    OutFilePath = "E:/gaia_sync_data/DR1_AMNH_8col.bin",
     --}
 }

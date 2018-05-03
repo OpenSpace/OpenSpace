@@ -127,8 +127,11 @@ template<typename T>
 std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
     const std::vector<std::string>& columnNames, int startRow, int endRow, 
     int hduIdx, bool readAll) {
-    try {
 
+    // We need to lock reading when using multithreads because CCfits can't handle multiple I/O drivers.
+    _mutex.lock();
+
+    try {
         _infile = std::make_unique<FITS>(path, Read, readAll);
 
         // Make sure FITS file is not a Primary HDU Object (aka an image).
@@ -138,7 +141,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
             int numCols = columnNames.size();
             int numRowsInTable = table.rows();
             std::unordered_map<string, std::vector<T>> contents;
-            LINFO("Read file: " + table.name());
+            LINFO("Read file: " + _infile->name());
 
             int firstRow = startRow < 1 ? 1 : startRow;
 
@@ -156,14 +159,14 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
                 std::move(contents), table.rows(), table.getRowsize(), table.name()
             };
 
+            _mutex.unlock();
             return std::make_shared<TableData<T>>(loadedTable);
         }
     }
     catch (FitsException& e) {
-        LERROR("Could not read FITS table from file. Make sure it's not an image file." 
+        LERROR("Could not read FITS table from file. Make sure it's not an image file. " 
             + e.message() );
     }
-
     return nullptr;
 }
 
