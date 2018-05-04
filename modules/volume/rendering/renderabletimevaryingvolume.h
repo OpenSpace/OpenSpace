@@ -32,7 +32,6 @@
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <openspace/rendering/transferfunction.h>
 
-
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -94,6 +93,8 @@ private:
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
+    properties::FloatProperty _lowerValueBound;
+    properties::FloatProperty _upperValueBound;
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;

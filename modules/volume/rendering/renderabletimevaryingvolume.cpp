@@ -53,6 +53,8 @@ namespace {
     const char* KeySourceDirectory = "SourceDirectory";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
+    const char* KeyLowerValueBound = "LowerValueBound";
+    const char* KeyUpperValueBound = "UpperValueBound";
     const char* KeyClipPlanes = "ClipPlanes";
     const char* KeySecondsBefore = "SecondsBefore";
     const char* KeySecondsAfter = "SecondsAfter";
@@ -164,12 +166,13 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
+    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
+    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
-
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -178,6 +181,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     );
 
     _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
+    _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
+    _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
@@ -319,6 +324,8 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_opacity);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
+    addProperty(_lowerValueBound);
+    addProperty(_upperValueBound);
 
     _raycaster->setGridType(
         (_gridType.value() == 1) ?
@@ -458,6 +465,19 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
+
+            // Remap volume value to that TF value 0 is sampled for lowerValueBound, and 1
+            // is sampled for upperLowerBound.
+            // This means that volume values = 0 need to be remapped to how localMin
+            // relates to the global range.
+            float zeroMap = (t->minValue - _lowerValueBound) /
+                            (_upperValueBound - _lowerValueBound);
+
+            // Volume values = 1 are mapped to how localMax relates to the global range.
+            float oneMap = (t->maxValue - _lowerValueBound) /
+                           (_upperValueBound - _lowerValueBound);
+            _raycaster->setValueRemapping(zeroMap, oneMap);
+
             /*_transferFunctionHandler->setUnit(t->unit);
             _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
             _transferFunctionHandler->setHistogramProperty(t->histogram);*/
