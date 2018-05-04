@@ -168,7 +168,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
     , _raycaster(nullptr)
-    , _transferFunctionHandler(nullptr)
+    , _transferFunction(nullptr)
 
 {
     documentation::testSpecificationAndThrow(
@@ -179,7 +179,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
-    _transferFunctionHandler = std::make_shared<TransferFunctionHandler>(_transferFunctionPath);
+    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
 
     _gridType.addOptions({
@@ -233,9 +233,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
         if (extension == "dictionary") {
             loadTimestepMetadata(path);
         }
-        if (extension == "tf") {
+        /*if (extension == "tf") {
             _transferFunctionHandler->setFilepath(path);
-        }
+        }*/
     }
 
 
@@ -280,7 +280,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     _clipPlanes->initialize();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunctionHandler, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunction, _clipPlanes);
 
     _raycaster->initialize();
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
@@ -334,9 +334,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
     });
 
     _transferFunctionPath.onChange([this] {
-        _transferFunctionHandler =
-            std::make_shared<TransferFunctionHandler>(_transferFunctionPath);
-        _raycaster->setTransferFunctionHandler(_transferFunctionHandler);
+        _transferFunction =
+            std::make_shared<TransferFunction>(_transferFunctionPath);
+        _raycaster->setTransferFunction(_transferFunction);
     });
 }
 
@@ -434,6 +434,8 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData&) {
+    _transferFunction->update();
+
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
@@ -456,9 +458,9 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
-            _transferFunctionHandler->setUnit(t->unit);
+            /*_transferFunctionHandler->setUnit(t->unit);
             _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
-            _transferFunctionHandler->setHistogramProperty(t->histogram);
+            _transferFunctionHandler->setHistogramProperty(t->histogram);*/
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }

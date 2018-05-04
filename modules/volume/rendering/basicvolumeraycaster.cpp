@@ -46,10 +46,10 @@ namespace openspace::volume {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-    std::shared_ptr<TransferFunctionHandler> transferFunctionHandler,
+    std::shared_ptr<TransferFunction> transferFunction,
     std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _volumeTexture(volumeTexture)
-    , _transferFunctionHandler(transferFunctionHandler)
+    , _transferFunction(transferFunction)
     , _clipPlanes(clipPlanes)
     , _boundingBox(glm::vec3(1.0))
     , _opacity(20.0)
@@ -113,10 +113,8 @@ void BasicVolumeRaycaster::preRaycast(
     const RaycastData& data,
     ghoul::opengl::ProgramObject& program)
 {
-    // TODO this makes more sense but the volume package texture is never initialized
-    // if (!_volumeTexture || !_transferFunctionHandler->hasTexture()) {
 
-    if (!_volumeTexture || !_transferFunctionHandler) {
+    if (!_volumeTexture || !_transferFunction) {
         return;
     }
 
@@ -128,10 +126,7 @@ void BasicVolumeRaycaster::preRaycast(
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
 
-    // TODO use volume package tf representation
-    // debug core package texture
-    // _transferFunctionHandler->getTexture().bind();
-    _transferFunctionHandler->getTransferFunction()->bind();
+    _transferFunction->getTexture()->bind();
     // LINFOC("PRERAYCAST", "hello");
 
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
@@ -192,10 +187,10 @@ std::string BasicVolumeRaycaster::getHelperPath() const {
 }
 
 
-void BasicVolumeRaycaster::setTransferFunctionHandler(
-    std::shared_ptr<TransferFunctionHandler> transferFunctionHandler)
+void BasicVolumeRaycaster::setTransferFunction(
+    std::shared_ptr<TransferFunction> transferFunction)
 {
-    _transferFunctionHandler = transferFunctionHandler;
+    _transferFunction = transferFunction;
 }
 
 void BasicVolumeRaycaster::setVolumeTexture(

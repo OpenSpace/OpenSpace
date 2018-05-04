@@ -30,7 +30,7 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
+#include <openspace/rendering/transferfunction.h>
 
 
 #include <openspace/properties/vectorproperty.h>
@@ -102,7 +102,7 @@ private:
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
+    std::shared_ptr<TransferFunction> _transferFunction;
 
 };
 
