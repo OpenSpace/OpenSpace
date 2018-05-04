@@ -25,13 +25,10 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
-#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/assert.h>
-
 #include <functional>
 #include <memory>
 #include <string>
@@ -61,6 +58,7 @@ class VirtualPropertyManager;
 class WindowWrapper;
 
 namespace interaction {
+    struct JoystickInputStates;
     class KeyBindingManager;
     class NavigationHandler;
 } // namespace interaction
@@ -86,11 +84,11 @@ struct ShutdownInformation {
 
 class OpenSpaceEngine {
 public:
-
     static void create(int argc, char** argv,
         std::unique_ptr<WindowWrapper> windowWrapper,
-        std::vector<std::string>& sgctArguments,
-        bool& requestClose, bool consoleLog = true);
+        std::vector<std::string>& sgctArguments, bool& requestClose,
+        bool consoleLog = true);
+
     static void destroy();
     static OpenSpaceEngine& ref();
     static bool isCreated();
@@ -187,7 +185,6 @@ public:
 
     void writeSceneDocumentation();
     void writeStaticDocumentation();
-
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the

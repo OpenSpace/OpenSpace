@@ -90,9 +90,9 @@ int addVirtualProperty(lua_State* L) {
         );
     }
     else if (type == "FloatProperty") {
-        const int v = ghoul::lua::value<int>(L, 5);
-        const int min = ghoul::lua::value<int>(L, 6);
-        const int max = ghoul::lua::value<int>(L, 7);
+        const float v = ghoul::lua::value<float>(L, 5);
+        const float min = ghoul::lua::value<float>(L, 6);
+        const float max = ghoul::lua::value<float>(L, 7);
 
         prop = std::make_unique<properties::FloatProperty>(
             properties::Property::PropertyInfo{ identifier, name, description },

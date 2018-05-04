@@ -25,19 +25,18 @@
 #ifndef __OPENSPACE_CORE___MODULEENGINE___H__
 #define __OPENSPACE_CORE___MODULEENGINE___H__
 
+#include <openspace/properties/propertyowner.h>
+
+#include <map>
 #include <memory>
 #include <vector>
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/util/openspacemodule.h>
-
-#include <ghoul/misc/assert.h>
-#include <algorithm>
-#include <map>
-
+namespace ghoul { class Dictionary; }
 namespace ghoul::systemcapabilities { struct Version; }
 
 namespace openspace {
+
+class OpenSpaceModule;
 
 namespace scripting { struct LuaLibrary; }
 
@@ -87,7 +86,7 @@ public:
      * \pre \p module must not be nullptr
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module,
-                        const ghoul::Dictionary& configuration);
+        const ghoul::Dictionary& configuration);
 
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with

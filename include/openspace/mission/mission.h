@@ -63,25 +63,25 @@ public:
      * Returns the name of the MissionPhase.
      * \return The name of the MissionPhase
      */
-    std::string name() const;
+    const std::string& name() const;
 
     /**
      * Returns the TimeRange of the MissionPhase.
      * \return The TimeRange of the MissionPhase
      */
-    TimeRange timeRange() const;
+    const TimeRange& timeRange() const;
 
     /**
      * Returns the description of the MissionPhase.
      * \return The description of the MissionPhase
      */
-    std::string description() const;
+    const std::string& description() const;
 
     /**
      * Returns all subphases sorted by start time.
      * \return All subphases sorted by start time
      */
-    std::vector<MissionPhase> phases() const;
+    const std::vector<MissionPhase>& phases() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 

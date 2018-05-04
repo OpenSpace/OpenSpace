@@ -46,14 +46,14 @@ struct PerformanceLayout {
         float updateScaling[NumberValues];
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
-    int16_t nScaleGraphEntries;
+    int16_t nScaleGraphEntries = 0;
 
     struct FunctionPerformanceLayout {
         char name[LengthName];
         float time[NumberValues];
     };
     FunctionPerformanceLayout functionEntries[MaxValues];
-    int16_t nFunctionEntries;
+    int16_t nFunctionEntries = 0;
 };
 
 } // namespace openspace::performance

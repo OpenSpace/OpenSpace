@@ -40,11 +40,10 @@ namespace openspace {
 
 class ParallelServer {
 public:
-    void start(int port,
-        const std::string& password,
+    void start(int port, const std::string& password,
         const std::string& changeHostPassword);
 
-    void setDefaultHostAddress(std::string);
+    void setDefaultHostAddress(std::string hostAddress);
 
     std::string defaultHostAddress() const;
 

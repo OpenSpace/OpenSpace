@@ -25,19 +25,16 @@
 #ifndef __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
 #define __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
 
-#include <openspace/performance/performancelayout.h>
-
-#include <ghoul/misc/sharedmemory.h>
-
 #include <map>
 #include <memory>
 #include <vector>
 
 namespace ghoul { class SharedMemory; }
-
 namespace openspace { class SceneGraphNode; }
 
 namespace openspace::performance {
+
+struct PerformanceLayout;
 
 class PerformanceManager {
 public:
@@ -51,8 +48,6 @@ public:
 
     void resetPerformanceMeasurements();
 
-    bool isMeasuringPerformance() const;
-
     void storeIndividualPerformanceMeasurement(std::string identifier,
         long long nanoseconds);
     void storeScenePerformanceMeasurements(
@@ -65,9 +60,9 @@ public:
     std::string formatLogName(std::string nodeName);
 
     void logDir(std::string dir);
-    std::string logDir() const;
+    const std::string& logDir() const;
     void prefix(std::string prefix);
-    std::string prefix() const;
+    const std::string& prefix() const;
 
     void enableLogging();
     void disableLogging();
@@ -78,19 +73,17 @@ public:
     PerformanceLayout* performanceData();
 
 private:
-    bool _doPerformanceMeasurements;
-    bool _loggingEnabled;
+    bool _loggingEnabled = false;
 
     std::string _logDir;
     std::string _prefix;
-    std::string _suffix;
-    std::string _ext;
+    std::string _ext = "log";
 
     std::map<std::string, size_t> individualPerformanceLocations;
 
-    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
+    std::unique_ptr<ghoul::SharedMemory> _performanceMemory = nullptr;
 
-    size_t _tick;
+    size_t _currentTick = 0;
 
     void tick();
     bool createLogDir();

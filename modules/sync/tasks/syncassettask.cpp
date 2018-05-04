@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/util/synchronizationwatcher.h>
 #include <openspace/scripting/scriptengine.h>
 

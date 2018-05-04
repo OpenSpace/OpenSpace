@@ -33,10 +33,10 @@
 #include <algorithm>
 
 namespace {
-    const char* KeyName = "Name";
-    const char* KeyDescription = "Description";
-    const char* KeyPhases = "Phases";
-    const char* KeyTimeRange = "TimeRange";
+    constexpr const char* KeyName = "Name";
+    constexpr const char* KeyDescription = "Description";
+    constexpr const char* KeyPhases = "Phases";
+    constexpr const char* KeyTimeRange = "TimeRange";
 } // namespace
 
 namespace openspace {
@@ -145,19 +145,19 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
 }
 
-std::string MissionPhase::name() const {
+const std::string& MissionPhase::name() const {
     return _name;
 }
 
-TimeRange MissionPhase::timeRange() const {
+const TimeRange& MissionPhase::timeRange() const {
     return _timeRange;
 }
 
-std::string MissionPhase::description() const {
+const std::string& MissionPhase::description() const {
     return _description;
 }
 
-std::vector<MissionPhase> MissionPhase::phases() const {
+const std::vector<MissionPhase>& MissionPhase::phases() const {
     return _subphases;
 }
 

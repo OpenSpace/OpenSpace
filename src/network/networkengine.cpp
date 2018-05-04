@@ -49,11 +49,7 @@ namespace {
 
 namespace openspace {
 
-NetworkEngine::NetworkEngine()
-    // -1 is okay as we assign one identifier in this ctor
-    : _lastAssignedIdentifier(MessageIdentifier(-1))
-    , _shouldPublishStatusMessage(true)
-{
+NetworkEngine::NetworkEngine() {
     static_assert(
         sizeof(MessageIdentifier) == 2,
         "MessageIdentifier has to be 2 bytes or dependent applications will break"
@@ -86,7 +82,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
         default:
             LERROR(fmt::format("Unknown type '{}'", type));
             return false;
-        }
+    }
 }
 
 void NetworkEngine::publishStatusMessage() {
@@ -205,7 +201,7 @@ void NetworkEngine::sendMessages() {
 }
 
 void NetworkEngine::sendInitialInformation() {
-    static const int SleepTime = 250;
+    constexpr const int SleepTime = 250;
     _shouldPublishStatusMessage = false;
     for (const Message& m : _initialConnectionMessages) {
         union {

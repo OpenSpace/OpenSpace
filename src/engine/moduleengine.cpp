@@ -27,11 +27,9 @@
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/assert.h>
-
 #include <algorithm>
 
 #include "moduleengine_lua.inl"
@@ -42,15 +40,13 @@ namespace {
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine()
-    : properties::PropertyOwner({"Modules"})
-{}
+ModuleEngine::ModuleEngine() : properties::PropertyOwner({"Modules"}) {}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
     for (OpenSpaceModule* m : AllModules()) {
-        const std::string identifier = m->identifier();
+        const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
         if (it != moduleConfigurations.end()) {
@@ -125,6 +121,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> m,
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     std::vector<OpenSpaceModule*> result;
+    result.reserve(_modules.size());
     for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         result.push_back(m.get());
     }
