@@ -168,6 +168,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
     std::vector<std::vector<float>> octants(8);
     std::vector<bool> isFirstWrite(8, true);
     size_t finishedJobs = 0;
+    int totalStars = 0;
 
     if (_firstRow <= 0) _firstRow = 1;
 
@@ -245,17 +246,18 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
                 if (octants[i].size() > MAX_SIZE_BEFORE_WRITE || finishedJobs == nInputFiles) {
 
                     // Write to file!
-                    writeOctantToFile(octants[i], i, isFirstWrite[i], nValuesPerStar);
+                    totalStars += writeOctantToFile(octants[i], i, isFirstWrite, nValuesPerStar);
 
                     octants[i].clear();
                 }
             }
         }
     }
+    LINFO(fmt::format("A total of {} stars were written to binary files.", totalStars));
 }
 
-void ReadFitsTask::writeOctantToFile(std::vector<float> octantData, int index, bool isFirstWrite
-    , int nValuesPerStar) {
+int ReadFitsTask::writeOctantToFile(std::vector<float> octantData, int index, 
+    std::vector<bool>& isFirstWrite, int nValuesPerStar) {
 
     std::string outPath = _outFileOrFolderPath + "octant_" + std::to_string(index) + ".bin";
     std::ofstream fileStream(outPath, std::ofstream::binary | std::ofstream::app);
@@ -268,19 +270,23 @@ void ReadFitsTask::writeOctantToFile(std::vector<float> octantData, int index, b
             LERROR("Error writing file - No values were read from file.");
         }
         // If this is the first write then write number of values per star!
-        if (isFirstWrite) {
+        if (isFirstWrite[index]) {
             LINFO("First write for Octant_" + std::to_string(index));
             fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
-            isFirstWrite = false;
+            isFirstWrite[index] = false;
         }
 
         size_t nBytes = nValues * sizeof(octantData[0]);
         fileStream.write(reinterpret_cast<const char*>(octantData.data()), nBytes);
 
         fileStream.close();
+
+        // Return number of stars written.
+        return nValues / nValuesPerStar;
     }
     else {
         LERROR(fmt::format("Error opening file: {} as output data file.", outPath));
+        return 0;
     }
 }
 

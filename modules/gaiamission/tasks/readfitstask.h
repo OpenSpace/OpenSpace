@@ -44,11 +44,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    const size_t MAX_SIZE_BEFORE_WRITE = 36000000; // ~34MB -> 500.000 stars with 18 values
+    const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 500.000 stars with 18 values
 
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
-    void writeOctantToFile(std::vector<float> data, int index, bool isFirstWrite, int nValuesPerStar);
+    int writeOctantToFile(std::vector<float> data, int index, std::vector<bool>& isFirstWrite, 
+        int nValuesPerStar);
 
     std::string _inFileOrFolderPath;
     std::string _outFileOrFolderPath;

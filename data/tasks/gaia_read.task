@@ -1,10 +1,10 @@
 return {
     {
         Type = "ReadFitsTask",
-        InFileOrFolderPath = "K:/GaiaDR2/gaia_source/fits-subset/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_subset_18col/",
+        InFileOrFolderPath = "K:/GaiaDR2/gaia_source_with_rv/fits/",
+        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_18col/",
         SingleFileProcess = false,
-        ThreadsToUse = 16,
+        ThreadsToUse = 8,
         FilterColumnNames = {
             --"Gaia_Parallax_Err",
             --"Gaia_Proper_Motion_RA",
@@ -17,8 +17,8 @@ return {
     },
     --{
     --    Type = "ConstructOctreeTask",
-    --    InFileOrFolderPath = "E:/gaia_sync_data/DR2_subset_18col/",
-    --    OutFileOrFolderPath = "E:/gaia_sync_data/DR2_subset_Octree[10kSPN,100dist,noLOD]/",
+    --    InFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_18col/",
+    --    OutFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_Octree[10kSPN,20dist]/",
     --    SingleFileInput = false,
     --    -- TODO: Specify filter thresholds 
     --}
