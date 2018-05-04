@@ -22,31 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/tasks/generaterawvolumetask.h>
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
 
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
-#include <openspace/util/factorymanager.h>
 
-#include <ghoul/misc/assert.h>
+#include <ghoul/glm.h>
+
+#include <string>
 
 namespace openspace {
+namespace volume {
 
-using namespace volume;
+class GenerateRawVolumeTask : public Task {
+public:
+    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 
-VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
+private:
+    std::string _rawVolumeOutputPath;
+    std::string  _dictionaryOutputPath;
+    std::string _time;
 
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    auto rFactory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
-    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
+    glm::uvec3 _dimensions;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
 
-    auto tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
+    std::string _valueFunctionLua;
+};
 
-}
-
+} // namespace volume
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__

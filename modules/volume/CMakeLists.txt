@@ -47,6 +47,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generaterawvolumetask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -66,7 +67,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/generaterawvolumetask.cpp
 )
+
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
