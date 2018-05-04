@@ -87,11 +87,11 @@ void TransferFunction::setPath(const std::string& filepath) {
 
 ghoul::opengl::Texture& TransferFunction::getTexture() {
     ghoul_assert(_texture != nullptr, "Transfer function is null");
-    updateTexture();
+    update();
     return *_texture.get();
 }
 
-void TransferFunction::updateTexture() {
+void TransferFunction::update() {
     if (_needsUpdate) {
         if (hasExtension(_filepath, "tf")) {
             setTextureFromTxt();
@@ -240,12 +240,12 @@ glm::vec4 TransferFunction::sample(size_t offset) {
 }
 
 size_t TransferFunction::width() {
-    updateTexture();
+    update();
     return _texture->width();
 }
 
 void TransferFunction::bind() {
-    updateTexture();
+    update();
     _texture->bind();
 }
 }

@@ -113,11 +113,6 @@ void TransferFunctionHandler::initialize() {
     _saveTransferFunction.onChange([this]() {
         saveEnvelopes();
     });
-
-    // Use core package tf as well
-    _transferFunction->updateTexture();
-
-    LINFOC("TF_HANDLER", "handler initialized");
 }
 
 void TransferFunctionHandler::setHistogramProperty(std::shared_ptr<openspace::Histogram> histogram) {
@@ -162,7 +157,7 @@ void TransferFunctionHandler::saveEnvelopes() {
 
 void TransferFunctionHandler::setFilepath(const std::string& path) {
     _filePath = path;
-    // _transferFunction->updateTexture();
+    // _transferFunction->update();
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::getTexture() {

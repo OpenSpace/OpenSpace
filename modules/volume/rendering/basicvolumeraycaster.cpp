@@ -28,6 +28,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/consolelog.h>
 #include <sstream>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -56,7 +57,6 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
     , _rNormalization(0.0)
     , _rUpperBound(1.0)
 {}
-
 
 BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
 
@@ -126,7 +126,7 @@ void BasicVolumeRaycaster::preRaycast(
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
 
-    _transferFunction->getTexture()->bind();
+    _transferFunction->getTexture().bind();
     // LINFOC("PRERAYCAST", "hello");
 
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());

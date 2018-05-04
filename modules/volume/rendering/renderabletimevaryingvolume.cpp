@@ -311,7 +311,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());
-    addPropertySubOwner(_transferFunctionHandler.get());
+    // addPropertySubOwner(_transferFunctionHandler.get());
 
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
