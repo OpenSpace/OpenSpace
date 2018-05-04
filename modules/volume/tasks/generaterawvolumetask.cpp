@@ -223,7 +223,6 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
                 KeyLowerDomainBound,
                 new DoubleVector3Verifier,
                 Optional::No,
-
                 "A vector representing the lower bound of the domain"
             },
             {
