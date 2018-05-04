@@ -294,7 +294,7 @@ TouchInteraction::TouchInteraction()
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
 #ifdef SPEED_BRAKE
     , _speedLimitFarVelocityDivider(SpeedLimitFarVelocityDividerInfo, 5.f, 1.f, 100.f)
-    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 500.f, 5000.f, 5.f)
+    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 20.f, 1.f, 500.f)
     , _speedLimitDistanceThreshold(SpeedLimitFarDistanceThresholdInfo, 1e12f, 1e9f, 1e15f)
 #else
     , _speedLimitDistanceFraction(SpeedLimitDistanceFractionInfo, 7.f, 0.1f, 20.0f)
@@ -987,6 +987,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
     const int action = interpretInteraction(list, lastProcessed);
 #ifdef CONST_TIME_DECAY
     double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.getAvgFrameTime();
+    const double postDecayVelocityTarget = 1e-6;
 #endif
 
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -1016,11 +1017,10 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             /*double orbitVelocityAvg = (cursor.getXSpeed() * _sensitivity.orbit.x
                 + cursor.getYSpeed() * _sensitivity.orbit.y) / 2.0;*/
             double orbitVelocityAvg = glm::distance(_vel.orbit.x, _vel.orbit.y);
-            if( stepsToDecay > 0.0 )
-                _constTimeDecayCoeff.orbit = std::pow((1e-6 / std::abs(orbitVelocityAvg)), (1.0 / stepsToDecay));
+            if( stepsToDecay > 0.0 && orbitVelocityAvg > 0.0 )
+                _constTimeDecayCoeff.orbit = std::pow((postDecayVelocityTarget / std::abs(orbitVelocityAvg)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.orbit = 1.0;
-//LINFO("Orbit coeff " << _constTimeDecayCoeff.orbit << " with velocity " << orbitVelocityAvg);
 #endif
             break;
         }
@@ -1062,8 +1062,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 #endif
 
 #ifdef CONST_TIME_DECAY
-            if( stepsToDecay > 0.0 && std::abs(_vel.zoom) > 1e-6)
-                _constTimeDecayCoeff.zoom = std::pow((1e-6 / std::abs(_vel.zoom)), (1.0 / stepsToDecay));
+            if( stepsToDecay > 0.0 && std::abs(_vel.zoom) > 0.0 )
+                _constTimeDecayCoeff.zoom = std::pow((postDecayVelocityTarget / std::abs(_vel.zoom)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.zoom = 1.0;
 #endif
@@ -1076,14 +1076,14 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 #ifdef SPEED_BRAKE
             double nearSpeedLimit = distanceFromFocusSurface/_speedLimitNearVelocityDivider;
             double farSpeedLimit = distanceFromFocusSurface/_speedLimitFarVelocityDivider;
-            double velocityFraction = (distanceFromFocusSurface > _speedLimitDistanceThreshold) ?
-                1.0 : distanceFromFocusSurface / _speedLimitDistanceThreshold;
-            double speedLimit = farSpeedLimit * velocityFraction + nearSpeedLimit * (1 - velocityFraction);
+            double velocityFraction = (distanceFromFocusSurface > (double)_speedLimitDistanceThreshold) ?
+                1.0 : distanceFromFocusSurface / (double)_speedLimitDistanceThreshold;
+            double speedLimit = farSpeedLimit * velocityFraction + nearSpeedLimit * (1.0 - velocityFraction);
 #else
             double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
 #endif
             if (std::abs(_vel.zoom) > 1e-7)
-                _vel.zoom = std::min(std::abs(speedLimit), std::abs(_vel.zoom)) * (_vel.zoom / std::abs(_vel.zoom));
+                _vel.zoom = (std::min(std::abs(speedLimit), std::abs(_vel.zoom))) * (_vel.zoom > 0.0 ? 1.0 : -1.0);
             else
                 _vel.zoom = 0.0;
             break;
@@ -1125,8 +1125,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 
             _vel.roll += -rollFactor * _sensitivity.roll;
 #ifdef CONST_TIME_DECAY
-            if( stepsToDecay > 0.0 )
-                _constTimeDecayCoeff.roll = std::pow((1e-6 / std::abs(_vel.roll)), (1.0 / stepsToDecay));
+            if( stepsToDecay > 0.0 && _vel.roll > 0.0 )
+                _constTimeDecayCoeff.roll = std::pow((postDecayVelocityTarget / std::abs(_vel.roll)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.roll = 1.0;
 #endif
@@ -1140,8 +1140,8 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             /*double panVelocityAvg = (cursor.getXSpeed() * _sensitivity.pan.x
                 + cursor.getYSpeed() * _sensitivity.pan.y) / 2.0;*/
             double panVelocityAvg = glm::distance(_vel.pan.x, _vel.pan.y);
-            if( stepsToDecay > 0.0 )
-                _constTimeDecayCoeff.pan = std::pow((1e-6 / std::abs(panVelocityAvg)), (1.0 / stepsToDecay));
+            if( stepsToDecay > 0.0 && panVelocityAvg > 0.0 )
+                _constTimeDecayCoeff.pan = std::pow((postDecayVelocityTarget / std::abs(panVelocityAvg)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.pan = 1.0;
 #endif
@@ -1385,8 +1385,6 @@ void TouchInteraction::decelerate(double dt) {
             _vel.zoom = 0.0;
         }
     }
-//if(std::abs(_vel.zoom) > 10000)  LINFO("Decelerate:velocity= " << _vel.zoom << " from " << times << " times using coeff " << _constTimeDecayCoeff.zoom);
-
 #else
     double frequency = 1.0 / _deceleratesPerSecond;
     // Number of times velocities should decelerate, depending on chosen frequency and
