@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__
 
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -103,7 +102,6 @@ private:
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
-
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
