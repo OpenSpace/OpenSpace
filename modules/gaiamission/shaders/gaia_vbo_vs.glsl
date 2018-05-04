@@ -57,6 +57,7 @@ void main() {
 
     // Add velocity if we've read any.
     if ( renderOption == RENDEROPTION_MOTION ) {
+        // Velocity is already in [m/s].
         modelPosition.xyz += time * in_velocity;
     }
 

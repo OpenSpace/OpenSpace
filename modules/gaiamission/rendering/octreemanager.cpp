@@ -550,7 +550,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             insertInNode(node->Children[index], tmpValues, depth);
             
             // Check if we should keep this star in LOD cache. 
-            //insertStarInLodCache(tmpLodNode, starValues); // TODO: Uncomment after fixing LOD!
+            insertStarInLodCache(tmpLodNode, starValues);
         }
         
         // Copy LOD cache data from the first MAX_STARS_PER_NODE stars.
@@ -576,7 +576,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     // Determine if new star should be kept in our LOD cache. Don't add if chunk is full.
     // Don't use LOD cache for our more shallow layers.
     if (node->posData.size() / POS_SIZE < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
-        //insertStarInLodCache(node, starValues); // TODO: Uncomment after fixing LOD!
+        insertStarInLodCache(node, starValues);
     }
 
     // Increase counter for inner node to keep track of total stars in all children as well.
@@ -676,7 +676,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(std::shar
 
         // Check if we should return any LOD cache data. 
         // Multiply MinPixels with depth for smoother culling. 
-        // Improve LOD checks and construction! Use numStars?
+        // TODO: Improve LOD checks and construction! Use numStars?
         if (totalPixels < MIN_TOTAL_PIXELS_LOD * depth) {
 
             // Get correct insert index from stack if node didn't exist already. 

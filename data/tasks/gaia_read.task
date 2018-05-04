@@ -1,7 +1,7 @@
 return {
     {
         Type = "ReadFitsTask",
-        InFileOrFolderPath = "K:/GaiaDR2/gaia_source_with_rv/fits/",
+        InFileOrFolderPath = "L:/Gaia_DR2/gaia_source_with_rv/fits/",
         OutFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_18col/",
         SingleFileProcess = false,
         ThreadsToUse = 8,
@@ -15,13 +15,13 @@ return {
             --"Tycho_V_Mag_Err"
         }
     },
-    --{
-    --    Type = "ConstructOctreeTask",
-    --    InFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_18col/",
-    --    OutFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_Octree[10kSPN,20dist]/",
-    --    SingleFileInput = false,
-    --    -- TODO: Specify filter thresholds 
-    --}
+    {
+        Type = "ConstructOctreeTask",
+        InFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_18col/",
+        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_Octree[10kSPN,20dist]/",
+        SingleFileInput = false,
+        -- TODO: Specify filter thresholds 
+    }
     --{
     --    Type = "ReadSpeckTask",
     --    InFilePath = "E:/gaia_sync_data/DR1_AMNH.speck",

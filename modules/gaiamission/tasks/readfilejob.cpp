@@ -125,9 +125,11 @@ void ReadFileJob::execute() {
         }
         // Convert to Galactic Coordinates from Galactic Lon & Lat.
         // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-        values[idx++] = radiusInKiloParsec * cos(b_latitude[i]) * cos(l_longitude[i]); // Pos X
-        values[idx++] = radiusInKiloParsec * cos(b_latitude[i]) * sin(l_longitude[i]); // Pos Y
-        values[idx++] = radiusInKiloParsec * sin(b_latitude[i]); // Pos Z
+        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) * 
+            cos(glm::radians(l_longitude[i])); // Pos X
+        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) * 
+            sin(glm::radians(l_longitude[i])); // Pos Y
+        values[idx++] = radiusInKiloParsec * sin(glm::radians(b_latitude[i])); // Pos Z
 
 
         // Store magnitude values.
@@ -147,24 +149,29 @@ void ReadFileJob::execute() {
 
         // Observe: We should probably convert ICRS [Ra,Dec] to Galactic [l,b] here!
         
-        // Convert to Tangential vector [km/s] from Proper Motion
-        float tanVelX = 4.74 * radiusInKiloParsec * cos(pmdec[i]) * cos(pmra[i]); 
-        float tanVelY = 4.74 * radiusInKiloParsec * cos(pmdec[i]) * sin(pmra[i]);
-        float tanVelZ = 4.74 * radiusInKiloParsec * sin(pmdec[i]);
+        // Convert to Tangential vector [m/s] from Proper Motion
+        float tanVelX = 1000.0 * 4.74 * radiusInKiloParsec * cos(glm::radians(pmdec[i])) * 
+            cos(glm::radians(pmra[i]));
+        float tanVelY = 1000.0 * 4.74 * radiusInKiloParsec * cos(glm::radians(pmdec[i])) * 
+            sin(glm::radians(pmra[i]));
+        float tanVelZ = 1000.0 * 4.74 * radiusInKiloParsec * sin(glm::radians(pmdec[i]));
 
-        // Calculate True Space Velocity [km/s] if we have the radial velocity
+        // Calculate True Space Velocity [m/s] if we have the radial velocity
         if (!std::isnan(radial_vel[i])) {
-            // Calculate Radial Velocity [km/s] in the direction of the star.
-            float radVelX = radial_vel[i] * cos(b_latitude[i]) * cos(l_longitude[i]);
-            float radVelY = radial_vel[i] * cos(b_latitude[i]) * sin(l_longitude[i]);
-            float radVelZ = radial_vel[i] * sin(b_latitude[i]);
+            // Calculate Radial Velocity in the direction of the star.
+            // radial_vel is given in [km/s] -> convert to [m/s].
+            float radVelX = 1000.0 * radial_vel[i] * cos(glm::radians(b_latitude[i])) * 
+                cos(glm::radians(l_longitude[i]));
+            float radVelY = 1000.0 * radial_vel[i] * cos(glm::radians(b_latitude[i])) *
+                sin(glm::radians(l_longitude[i]));
+            float radVelZ = 1000.0 * radial_vel[i] * sin(glm::radians(b_latitude[i]));
 
-            // Use Pythagoras theorem for the final Space Velocity. 
+            // Use Pythagoras theorem for the final Space Velocity [m/s]. 
             values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]
             values[idx++] = sqrt(pow(radVelY, 2) + pow(tanVelY, 2)); // Vel Y [V]
             values[idx++] = sqrt(pow(radVelZ, 2) + pow(tanVelZ, 2)); // Vel Z [W]
         }
-        // Otherwise use the vector we got from proper motion. 
+        // Otherwise use the vector [m/s] we got from proper motion. 
         else {
             radial_vel[i] = 0.f;
             values[idx++] = tanVelX; // Vel X [U]

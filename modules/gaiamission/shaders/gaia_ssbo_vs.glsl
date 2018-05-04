@@ -117,7 +117,7 @@ void main() {
     // Convert kiloParsec to meter.
     vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
-    // Add velocity if we've read any.
+    // Add velocity [m/s] if we've read any.
     modelPosition.xyz += time * in_velocity;
 
     // Apply camera transforms.

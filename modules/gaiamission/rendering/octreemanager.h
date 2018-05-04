@@ -85,7 +85,7 @@ private:
     const size_t COL_SIZE = 2;
     const size_t VEL_SIZE = 3;
 
-    size_t MAX_DIST = 10; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
+    size_t MAX_DIST = 20; // [kPc] Radius of Gaia DR1 is ~100 kParsec.
     // Stars/node depend on max_dist because it needs to be big enough to hold all stars
     // that falls outside of the biggest nodes, otherwise it causes a stack overflow.
     size_t MAX_STARS_PER_NODE = 10000; 
