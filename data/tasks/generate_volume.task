@@ -1,0 +1,10 @@
+return {{
+    Type = "GenerateRawVolumeTask",
+    Dimensions = {32, 32, 32},
+    LowerDomainBound = {-0.5, -0.5, -0.5},
+    UpperDomainBound = {0.5, 0.5, 0.5},
+    ValueFunction = "return function (x, y, z) return math.sqrt((x + 0.5)^2 + (y + 0.5)^2 + (z + 0.5)^2) end",
+    Time = "2018-05-04T00:00:00",
+    RawVolumeOutput = "${DATA}/assets/examples/generatedvolume.raw",
+    DictionaryOutput = "${DATA}/assets/examples/generatedvolume.dictionary"
+}}

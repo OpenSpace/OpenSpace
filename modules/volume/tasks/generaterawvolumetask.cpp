@@ -50,7 +50,6 @@ namespace {
     constexpr const char* KeyValueFunction = "ValueFunction";
     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-
     constexpr const char* KeyMinValue = "MinValue";
     constexpr const char* KeyMaxValue = "MaxValue";
 } // namespace
@@ -115,7 +114,6 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     ghoul::lua::verifyStackSize(state, 0);
 
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
-
 
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
@@ -225,6 +223,7 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
                 KeyLowerDomainBound,
                 new DoubleVector3Verifier,
                 Optional::No,
+
                 "A vector representing the lower bound of the domain"
             },
             {

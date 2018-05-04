@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumemodule.h>
-
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <openspace/rendering/renderable.h>
