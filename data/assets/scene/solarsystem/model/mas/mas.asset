@@ -9,9 +9,11 @@ local Mas = {
         Parent = sunTransforms.SolarSystemBarycenter.Identifier,
         Renderable = {
             Type = "RenderableTimeVaryingVolume",
+            -- Type = "RenderableKameleonVolume",
             Dimensions = {100, 100, 128},
-            StepSize = 0.000001,
+            StepSize = 0.0001,
             TransferFunction = "${DATA}/mas/mas_transfer_function.tf",
+            -- SourcePath = "${DATA}/mas/mas_merged_step_101.cdf",
             SourceDirectory = "${DATA}/mas/raw",
             LowerValueBound = 0.01,
             UpperValueBound = 2.0,
@@ -22,6 +24,7 @@ local Mas = {
             SecondsAfter = 24*60*60,
             Time = "2012-07-01T00:00:00.001",
             VisUnit = "amu/cm^3",
+            -- VisUnit = "rho",
         },
         Transform = {
             Translation = {
@@ -33,7 +36,7 @@ local Mas = {
         GUI = {
             Path = "/Solar System/Mas",
             Hidden = true
-        },
+        }
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, {Mas})
