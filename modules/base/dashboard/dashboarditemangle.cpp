@@ -175,8 +175,6 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 
 DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
     : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, KeyFontMono)
-    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _source{
         properties::OptionProperty(
             SourceTypeInfo,
@@ -201,6 +199,8 @@ DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
         properties::StringProperty(DestinationNodeNameInfo),
         nullptr
     }
+    , _fontName(FontNameInfo, KeyFontMono)
+    , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -440,7 +440,7 @@ glm::vec2 DashboardItemAngle::size() const {
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        fmt::format("Angle: {}", angle)
+        "Angle: " + std::to_string(angle)
     ).boundingBox;
 }
 

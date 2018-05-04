@@ -38,8 +38,8 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 10.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 10.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -85,7 +85,7 @@ documentation::Documentation DashboardItemParallelConnection::Documentation() {
 }
 
 DashboardItemParallelConnection::DashboardItemParallelConnection(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -126,13 +126,13 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
         nClients--;
-        if (nClients == 1) {
-            connectionInfo = "Hosting session with 1 client";
-        }
-        else {
-            connectionInfo =
-                "Hosting session with " + std::to_string(nClients) + " clients";
-        }
+        constexpr const char* Singular = "Hosting session with {} client";
+        constexpr const char* Plural = "Hosting session with {} clients";
+
+        connectionInfo =
+            (nClients == 1) ?
+            fmt::format(Singular, nClients) :
+            fmt::format(Plural, nClients);
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
         nClients--;
@@ -143,15 +143,18 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
     }
 
     if (status == ParallelConnection::Status::ClientWithHost ||
-        status == ParallelConnection::Status::ClientWithoutHost) {
+        status == ParallelConnection::Status::ClientWithoutHost)
+    {
+        constexpr const char* Singular = "You and {} more client are tuned in";
+        constexpr const char* Plural = "You and {} more clients are tuned in";
+
         connectionInfo += "\n";
+
         if (nClients > 2) {
-            std::string c = std::to_string(nClients - 1);
-            connectionInfo += "You and " + c + " more clients are tuned in";
+            connectionInfo += fmt::format(Plural, nClients - 1);
         }
         else if (nClients == 2) {
-            std::string c = std::to_string(nClients - 1);
-            connectionInfo += "You and " + c + " more client are tuned in";
+            connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
             connectionInfo += "You are the only client";
@@ -160,11 +163,7 @@ void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
 
     if (!connectionInfo.empty()) {
         penPosition.y -= _font->height();
-        RenderFont(
-            *_font,
-            penPosition,
-            connectionInfo.c_str()
-        );
+        RenderFont(*_font, penPosition, connectionInfo);
     }
 }
 
@@ -181,8 +180,7 @@ glm::vec2 DashboardItemParallelConnection::size() const {
             connectionInfo = "Hosting session with 1 client";
         }
         else {
-            connectionInfo =
-                "Hosting session with " + std::to_string(nClients) + " clients";
+            connectionInfo = fmt::format("Hosting session with {} clients", nClients);
         }
     }
     else if (status == ParallelConnection::Status::ClientWithHost) {
@@ -194,15 +192,19 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     }
 
     if (status == ParallelConnection::Status::ClientWithHost ||
-        status == ParallelConnection::Status::ClientWithoutHost) {
+        status == ParallelConnection::Status::ClientWithoutHost)
+    {
+        constexpr const char* Singular = "You and {} more client are tuned in";
+        constexpr const char* Plural = "You and {} more clients are tuned in";
+
         connectionInfo += "\n";
         if (nClients > 2) {
             std::string c = std::to_string(nClients - 1);
-            connectionInfo += "You and " + c + " more clients are tuned in";
+            connectionInfo += fmt::format(Plural, nClients);
         }
         else if (nClients == 2) {
             std::string c = std::to_string(nClients - 1);
-            connectionInfo += "You and " + c + " more client are tuned in";
+            connectionInfo += fmt::format(Singular, nClients - 1);
         }
         else if (nClients == 1) {
             connectionInfo += "You are the only client";
@@ -212,7 +214,7 @@ glm::vec2 DashboardItemParallelConnection::size() const {
     if (!connectionInfo.empty()) {
         return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
             *_font,
-            connectionInfo.c_str()
+            connectionInfo
         ).boundingBox;
     }
     else {

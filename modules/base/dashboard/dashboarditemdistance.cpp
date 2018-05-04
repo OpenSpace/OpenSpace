@@ -39,9 +39,9 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
+    constexpr const char* KeyFontMono = "Mono";
 
-    const float DefaultFontSize = 10.f;
+    constexpr const float DefaultFontSize = 10.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -244,7 +244,10 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         );
     });
     if (dictionary.hasKey(SourceTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(SourceTypeInfo.identifier);
+        const std::string& value = dictionary.value<std::string>(
+            SourceTypeInfo.identifier
+        );
+
         if (value == "Node") {
             _source.type = Type::Node;
         }
@@ -263,9 +266,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     }
     addProperty(_source.type);
 
-    _source.nodeName.onChange([this]() {
-        _source.node = nullptr;
-    });
+    _source.nodeName.onChange([this]() { _source.node = nullptr; });
     if (_source.type == Type::Node || _source.type == Type::NodeSurface) {
         if (dictionary.hasKey(SourceNodeNameInfo.identifier)) {
             _source.nodeName = dictionary.value<std::string>(
@@ -295,7 +296,9 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         );
     });
     if (dictionary.hasKey(DestinationTypeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(DestinationTypeInfo.identifier);
+        const std::string& value = dictionary.value<std::string>(
+            DestinationTypeInfo.identifier
+        );
         if (value == "Node") {
             _destination.type = Type::Node;
         }
@@ -313,9 +316,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         _destination.type = Type::Focus;
     }
     addProperty(_destination.type);
-    _destination.nodeName.onChange([this]() {
-        _destination.node = nullptr;
-    });
+    _destination.nodeName.onChange([this]() { _destination.node = nullptr; });
     if (_destination.type == Type::Node || _destination.type == Type::NodeSurface) {
         if (dictionary.hasKey(DestinationNodeNameInfo.identifier)) {
             _destination.nodeName = dictionary.value<std::string>(
@@ -335,12 +336,11 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
     }
     _doSimplification.onChange([this]() {
-        if (_doSimplification) {
-            _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
-        }
-        else {
-            _requestedUnit.setVisibility(properties::Property::Visibility::User);
-        }
+        _requestedUnit.setVisibility(
+            _doSimplification ?
+            properties::Property::Visibility::Hidden :
+            properties::Property::Visibility::User
+        );
     });
     addProperty(_doSimplification);
 
@@ -349,7 +349,9 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
+        const std::string& value = dictionary.value<std::string>(
+            RequestedUnitInfo.identifier
+        );
         DistanceUnit unit = distanceUnitFromString(value.c_str());
         _requestedUnit = static_cast<int>(unit);
     }
@@ -360,10 +362,10 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
 }
 
 std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
-                                                    Component& mainComp,
-                                                    Component& otherComp) const
+                                                                      Component& mainComp,
+                                                               Component& otherComp) const
 {
-    if (mainComp.type == Type::Node || mainComp.type == Type::NodeSurface) {
+    if ((mainComp.type == Type::Node) || (mainComp.type == Type::NodeSurface)) {
         if (!mainComp.node) {
             mainComp.node = OsEng.renderEngine().scene()->sceneGraphNode(
                 mainComp.nodeName

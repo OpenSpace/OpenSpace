@@ -94,12 +94,12 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
     auto factory = FactoryManager::ref().factory<DashboardItem>();
     ghoul_assert(factory, "DashboardItem factory did not exist");
 
-    std::string dashboardType = dictionary.value<std::string>(KeyType);
+    const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
     return factory->create(dashboardType, dictionary);
 }
 
-DashboardItem::DashboardItem(ghoul::Dictionary dictionary)
+DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "" })
     , _isEnabled(EnabledInfo, true)
 {
@@ -109,14 +109,12 @@ DashboardItem::DashboardItem(ghoul::Dictionary dictionary)
         "DashboardItem"
     );
 
-    const std::string identifier =
-        dictionary.value<std::string>(IdentifierInfo.identifier);
+    std::string identifier = dictionary.value<std::string>(IdentifierInfo.identifier);
+    setIdentifier(std::move(identifier));
 
-    const std::string guiName =
-        dictionary.value<std::string>(GuiNameInfo.identifier);
+    std::string guiName = dictionary.value<std::string>(GuiNameInfo.identifier);
+    setGuiName(std::move(guiName));
 
-    setIdentifier(identifier);
-    setGuiName(guiName);
     addProperty(_isEnabled);
 }
 

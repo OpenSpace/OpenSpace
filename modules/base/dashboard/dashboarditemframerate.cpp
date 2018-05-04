@@ -34,8 +34,8 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 10.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 10.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -61,6 +61,7 @@ namespace openspace {
 
 documentation::Documentation DashboardItemFramerate::Documentation() {
     using namespace documentation;
+
     return {
         "DashboardItem Framerate",
         "base_dashboarditem_framerate",
@@ -95,7 +96,7 @@ documentation::Documentation DashboardItemFramerate::Documentation() {
     };
 }
 
-DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
+DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -133,14 +134,14 @@ DashboardItemFramerate::DashboardItemFramerate(ghoul::Dictionary dictionary)
     });
 
     if (dictionary.hasKey(FrametimeInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(FrametimeInfo.identifier);
-        if (value == "Average Deltatime") {
+        const std::string& v = dictionary.value<std::string>(FrametimeInfo.identifier);
+        if (v == "Average Deltatime") {
             _frametimeType = static_cast<int>(FrametimeType::DtTimeAvg);
         }
-        else if (value == "Frames per second") {
+        else if (v == "Frames per second") {
             _frametimeType = static_cast<int>(FrametimeType::FPS);
         }
-        else if (value == "Average frames per second") {
+        else if (v == "Average frames per second") {
             _frametimeType = static_cast<int>(FrametimeType::FPSAvg);
         }
         else {

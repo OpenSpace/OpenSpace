@@ -31,7 +31,6 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <utility>
 
 namespace ghoul::fontrendering { class Font; }
@@ -74,8 +73,6 @@ private:
     properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
-
-
 
     Component _source;
     Component _destination;

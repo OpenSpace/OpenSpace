@@ -66,12 +66,12 @@ private:
 
     std::pair<glm::dvec3, std::string> positionAndLabel(Component& mainComp) const;
 
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
-
     Component _source;
     Component _reference;
     Component _destination;
+
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };

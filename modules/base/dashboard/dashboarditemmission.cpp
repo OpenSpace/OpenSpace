@@ -38,8 +38,8 @@
 #include <stack>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 15.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 15.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -100,7 +100,7 @@ documentation::Documentation DashboardItemMission::Documentation() {
     };
 }
 
-DashboardItemMission::DashboardItemMission(ghoul::Dictionary dictionary)
+DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -138,12 +138,10 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         const Mission& mission = MissionManager::ref().currentMission();
 
         if (mission.phases().size() > 0) {
-            static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
-            //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
-            static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+            static const glm::vec4 nextMissionColor(0.7f, 0.3f, 0.3f, 1.f);
+            static const glm::vec4 currentMissionColor(0.f, 0.5f, 0.5f, 1.f);
             static const glm::vec4 missionProgressColor = currentMissionColor;
-           // static const glm::vec4 currentLeafMissionColor = missionProgressColor;
-            static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
+            static const glm::vec4 nonCurrentMissionColor(0.3f, 0.3f, 0.3f, 1.f);
 
             // Add spacing
             RenderFont(
@@ -204,9 +202,10 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 
             bool showAllPhases = false;
 
-            typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+            using PhaseWithDepth = std::pair<const MissionPhase*, int>;
             std::stack<PhaseWithDepth> S;
-            int pixelIndentation = 20;
+            
+            constexpr const int PixelIndentation = 20;
             S.push({ &mission, 0 });
             while (!S.empty()) {
                 const MissionPhase* phase = S.top().first;
@@ -215,7 +214,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 
                 bool isCurrentPhase = phase->timeRange().includes(currentTime);
 
-                penPosition.x += depth * pixelIndentation;
+                penPosition.x += depth * PixelIndentation;
                 if (isCurrentPhase) {
                     double remaining = phase->timeRange().end - currentTime;
                     float t = static_cast<float>(
@@ -246,7 +245,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                         );
                     }
                 }
-                penPosition.x -= depth * pixelIndentation;
+                penPosition.x -= depth * PixelIndentation;
 
                 if (isCurrentPhase || showAllPhases) {
                     // phases are sorted increasingly by start time, and will be

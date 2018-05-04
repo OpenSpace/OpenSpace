@@ -35,8 +35,8 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 10.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 10.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -122,7 +122,7 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -144,9 +144,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
         _font = OsEng.fontManager().font(_fontName, _fontSize);

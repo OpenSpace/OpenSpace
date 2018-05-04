@@ -34,8 +34,8 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 15.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 15.f;
 
     static const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
@@ -117,14 +117,14 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        fmt::format("Date: {}", OsEng.timeManager().time().UTC().c_str())
+        "Date: " + OsEng.timeManager().time().UTC()
     );
 }
 
 glm::vec2 DashboardItemDate::size() const {
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        fmt::format("Date: {}", OsEng.timeManager().time().UTC().c_str())
+        "Date: " + OsEng.timeManager().time().UTC()
     ).boundingBox;
 }
 
