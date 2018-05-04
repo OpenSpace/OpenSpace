@@ -432,12 +432,7 @@ void LoadingScreen::render() {
     );
     glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
 
-    renderer.render(
-        *_loadingFont,
-        loadingLl,
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        headline
-    );
+    renderer.render(*_loadingFont, loadingLl, headline);
 
     glm::vec2 messageLl;
     glm::vec2 messageUr;
@@ -456,12 +451,7 @@ void LoadingScreen::render() {
         messageUr = messageLl + bboxMessage.boundingBox;
 
 
-        renderer.render(
-            *_messageFont,
-            messageLl,
-            glm::vec4(1.f, 1.f, 1.f, 1.f),
-            _message
-        );
+        renderer.render(*_messageFont, messageLl, _message);
     }
 
     if (_showNodeNames) {
@@ -595,12 +585,7 @@ void LoadingScreen::render() {
                     "%";
             }
 
-            renderer.render(
-                *_itemFont,
-                item.ll,
-                color,
-                text
-            );
+            renderer.render(*_itemFont, item.ll, text, color);
         }
 
         _items.erase(

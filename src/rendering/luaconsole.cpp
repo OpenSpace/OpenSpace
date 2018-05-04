@@ -796,11 +796,12 @@ void LuaConsole::render() {
         );
     }
 
-    RenderFontCr(
+    RenderFont(
         *_font,
         inputLocation,
+        "> " + currentCommand,
         _entryTextColor,
-        "> " + currentCommand
+        ghoul::fontrendering::CrDirection::Down
     );
 
     // Just offset the ^ marker slightly for a nicer look
@@ -810,8 +811,8 @@ void LuaConsole::render() {
     RenderFont(
         *_font,
         inputLocation,
-        _entryTextColor,
-        (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^").c_str()
+        (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^"),
+        _entryTextColor
     );
 
     glm::vec2 historyInputLocation = glm::vec2(
@@ -832,11 +833,12 @@ void LuaConsole::render() {
     }
 
     for (const std::string& cmd : commandSubset) {
-        RenderFontCr(
+        RenderFont(
             *_historyFont,
             historyInputLocation,
+            cmd,
             _historyTextColor,
-            cmd
+            ghoul::fontrendering::CrDirection::Down
         );
     }
 
@@ -873,13 +875,13 @@ void LuaConsole::render() {
             "Broadcasting script to " + std::to_string(nClients) + " clients";
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
-        RenderFont(*_font, loc, red, nClientsText.c_str());
+        RenderFont(*_font, loc, nClientsText, red);
     } else if (OsEng.parallelPeer().isHost()) {
         const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
 
         const std::string localExecutionText = "Local script execution";
         const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);
-        RenderFont(*_font, loc, lightBlue, localExecutionText.c_str());
+        RenderFont(*_font, loc, localExecutionText, lightBlue);
     }
 }
 

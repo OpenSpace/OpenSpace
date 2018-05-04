@@ -868,6 +868,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             scaledPos,
+            pair.second,
             textColor,
             pow(10.0, _textSize.value()),
             _textMinSize,
@@ -877,8 +878,7 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             orthoUp,
             data.camera.positionVec3(),
             data.camera.lookUpVectorWorldSpace(),
-            _renderOption.value(),
-            pair.second.c_str()
+            _renderOption.value()
         );
     }
 }

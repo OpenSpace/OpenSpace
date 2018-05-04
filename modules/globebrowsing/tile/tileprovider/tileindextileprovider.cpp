@@ -46,9 +46,9 @@ void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
             _initData.dimensions().x / 4 -
                 (_initData.dimensions().x / 32) * log10(1 << tileIndex.level),
             _initData.dimensions().y / 2 + _fontSize),
-        glm::vec4(1.0, 1.0, 1.0, 1.0),
-        glm::vec4(1.0, 1.0, 1.0, 1.0),
-        fmt::format("level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y)
+        fmt::format("level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y),
+        glm::vec4(1.0),
+        glm::vec4(1.0)
     );
 }
 

@@ -146,7 +146,13 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
             static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
             // Add spacing
-            RenderFontCr(*_font, penPosition, nonCurrentMissionColor, " ");
+            RenderFont(
+                *_font,
+                penPosition,
+                " ",
+                nonCurrentMissionColor,
+                ghoul::fontrendering::CrDirection::Down
+            );
 
             auto phaseTrace = mission.phaseTrace(currentTime);
 
@@ -157,8 +163,8 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 RenderFont(
                     *_font,
                     penPosition,
-                    missionProgressColor,
-                    title.c_str()
+                    title,
+                    missionProgressColor
                 );
                 double remaining = phase.timeRange().end - currentTime;
                 float t = static_cast<float>(
@@ -169,13 +175,13 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 RenderFont(
                     *_font,
                     penPosition,
-                    missionProgressColor,
                     fmt::format(
                         "{:.0f} s {:s} {:.1f} %",
                         remaining,
                         progress,
                         t * 100
-                    )
+                    ),
+                    missionProgressColor
                 );
             }
             else {
@@ -183,16 +189,16 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 RenderFont(
                     *_font,
                     penPosition,
-                    nextMissionColor,
-                    "Next Mission:"
+                    "Next Mission:",
+                    nextMissionColor
                 );
                 double remaining = mission.timeRange().start - currentTime;
                 penPosition.y -= _font->height();
                 RenderFont(
                     *_font,
                     penPosition,
-                    nextMissionColor,
-                    fmt::format("{:.0f} s", remaining)
+                    fmt::format("{:.0f} s", remaining),
+                    nextMissionColor
                 );
             }
 
@@ -220,13 +226,13 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                     RenderFont(
                         *_font,
                         penPosition,
-                        currentMissionColor,
                         fmt::format(
                             "{:s}  {:s} {:.1f} %",
                             phase->name(),
                             progress,
                             t * 100
-                        )
+                        ),
+                        currentMissionColor
                     );
                 }
                 else {
@@ -235,8 +241,8 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                         RenderFont(
                             *_font,
                             penPosition,
-                            nonCurrentMissionColor,
-                            phase->name()
+                            phase->name(),
+                            nonCurrentMissionColor
                         );
                     }
                 }

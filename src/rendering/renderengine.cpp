@@ -547,12 +547,6 @@ void RenderEngine::updateFade() {
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
-    RenderFont(
-        *_fontDate,
-        glm::vec2(400, 400),
-        "sdfjklksdf\njsdfllkjsfd"
-    );
-
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
     if (_camera) {
@@ -577,13 +571,12 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (_showFrameNumber) {
-        const glm::vec2 penPosition = glm::vec2(
+        glm::vec2 penPosition = glm::vec2(
             fontResolution().x / 2 - 50,
             fontResolution().y / 3
         );
 
-        RenderFont(*_fontBig, penPosition, std::to_string(_frameNumber))
-        ;
+        RenderFont(*_fontBig, penPosition, std::to_string(_frameNumber));
     }
 
     ++_frameNumber;
@@ -674,18 +667,20 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
         fontResolution().y - size.boundingBox.y
     );
 
-    RenderFontCr(
+    RenderFont(
         *_fontDate,
         penPosition,
-        fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
+        fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime),
+        ghoul::fontrendering::CrDirection::Down
     );
 
-    RenderFontCr(
+    RenderFont(
         *_fontDate,
         penPosition,
         // Important: length of this string is the same as the shutdown time text
         // to make them align
-        "Press ESC again to abort"
+        "Press ESC again to abort",
+        ghoul::fontrendering::CrDirection::Down
     );
 }
 
@@ -1083,8 +1078,8 @@ void RenderEngine::renderCameraInformation() {
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(fontResolution().x - rotationBox.boundingBox.x - XSeparation, penPosY),
-        nav.hasRotationalFriction() ? EnabledColor : DisabledColor,
-        "Rotation"
+        "Rotation",
+        nav.hasRotationalFriction() ? EnabledColor : DisabledColor
     );
     penPosY -= rotationBox.boundingBox.y + YSeparation;
 
@@ -1102,8 +1097,8 @@ void RenderEngine::renderCameraInformation() {
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(fontResolution().x - zoomBox.boundingBox.x - XSeparation, penPosY),
-        nav.hasZoomFriction() ? EnabledColor : DisabledColor,
-        "Zoom"
+        "Zoom",
+        nav.hasZoomFriction() ? EnabledColor : DisabledColor
     );
     penPosY -= zoomBox.boundingBox.y + YSeparation;
 
@@ -1121,8 +1116,8 @@ void RenderEngine::renderCameraInformation() {
     FR::defaultRenderer().render(
         *_fontInfo,
         glm::vec2(fontResolution().x - rollBox.boundingBox.x - XSeparation, penPosY),
-        nav.hasRollFriction() ? EnabledColor : DisabledColor,
-        "Roll"
+        "Roll",
+        nav.hasRollFriction() ? EnabledColor : DisabledColor
     );
 }
 
@@ -1149,8 +1144,8 @@ void RenderEngine::renderVersionInformation() {
             fontResolution().x - versionBox.boundingBox.x - 10.f,
             5.f
         ),
-        glm::vec4(0.5, 0.5, 0.5, 1.f),
-        OPENSPACE_VERSION_STRING_FULL
+        OPENSPACE_VERSION_STRING_FULL,
+        glm::vec4(0.5, 0.5, 0.5, 1.f)
     );
 
     // If a developer hasn't placed the Git command in the path, this variable will be
@@ -1165,8 +1160,8 @@ void RenderEngine::renderVersionInformation() {
                 fontResolution().x - commitBox.boundingBox.x - 10.f,
                 versionBox.boundingBox.y + 5.f
             ),
-            glm::vec4(0.5, 0.5, 0.5, 1.f),
-            OPENSPACE_GIT_FULL
+            OPENSPACE_GIT_FULL,
+            glm::vec4(0.5, 0.5, 0.5, 1.f)
         );
     }
 }
@@ -1219,13 +1214,13 @@ void RenderEngine::renderScreenLog() {
         RenderFont(
             *_fontLog,
             glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
-            white,
             fmt::format(
                 "{:<15} {}{}",
                 e->timeString,
                 e->category.substr(0, CategoryLength),
                 e->category.length() > CategoryLength ? "..." : ""
-            )
+            ),
+            white
         );
 
         glm::vec4 color(glm::uninitialize);
@@ -1250,15 +1245,15 @@ void RenderEngine::renderScreenLog() {
         RenderFont(
             *_fontLog,
             glm::vec2(10 + 30 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
-            color,
-            lvl
+            lvl,
+            color
         );
 
         RenderFont(
             *_fontLog,
             glm::vec2(10 + 37 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
-            white,
-            message
+            message,
+            white
         );
         ++nr;
     }

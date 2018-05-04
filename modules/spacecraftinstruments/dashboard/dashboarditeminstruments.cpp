@@ -201,11 +201,12 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
         );
 
         if (remaining > 0) {
-            RenderFontCr(
+            RenderFont(
                 *_font,
                 penPosition,
+                "Next instrument activity:",
                 glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
-                "Next instrument activity:"
+                ghoul::fontrendering::CrDirection::Down
             );
 
             std::pair<double, std::string> remainingConv = simplifyTime(remaining);
@@ -217,18 +218,19 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
 
             const int Size = 25;
             int p = std::max(static_cast<int>((t * (Size - 1)) + 1), 0);
-            RenderFontCr(*_font,
+            RenderFont(
+                *_font,
                 penPosition,
-                glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
                 fmt::format(
                     "{:4.0f} {:s} |{:s}>{:s}| {:.1f} %",
-                // "%4.0f %s |%s>%s| %.1f %%",
                     remainingConv.first,
                     remainingConv.second.c_str(),
                     std::string(p, '-').c_str(),
                     std::string(Size - p, ' ').c_str(),
                     t * 100
-                )
+                ),
+                glm::vec4(glm::mix(_activeColor.value(), _activeFlash.value(), t), 1.f),
+                ghoul::fontrendering::CrDirection::Down
             );
 
             std::string str = SpiceManager::ref().dateFromEphemerisTime(
@@ -236,10 +238,12 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
                 "YYYY MON DD HR:MN:SC"
             );
 
-            RenderFontCr(*_font,
+            RenderFont(
+                *_font,
                 penPosition,
+                fmt::format("Data acquisition time: {}", str),
                 glm::vec4(_activeColor.value(), 1.f),
-                fmt::format("Data acquisition time: {}", str)
+                ghoul::fontrendering::CrDirection::Down
             );
         }
         std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
@@ -255,13 +259,15 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             minutes tlm = duration_cast<minutes>(tls);
             tls -= tlm;
 
-            RenderFontCr(*_font,
+            RenderFont(
+                *_font,
                 penPosition,
-                targetColor,
                 fmt::format(
                     "Next image: [{:02d}:{:02d}:{:02d}]",
                     tlh.count(), tlm.count(), tls.count()
-                )
+                ),
+                targetColor,
+                ghoul::fontrendering::CrDirection::Down
             );
 
             penPosition.y -= _font->height();
@@ -271,48 +277,55 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
             glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 
-            RenderFontCr(*_font,
+            RenderFont(
+                *_font,
                 penPosition,
+                "Active Instruments:",
                 glm::vec4(_activeColor.value(), 1.f),
-                "Active Instruments:"
+                ghoul::fontrendering::CrDirection::Down
             );
 
             for (auto m : activeMap) {
                 if (m.second == false) {
-                    RenderFont(*_font,
+                    RenderFont(
+                        *_font,
                         penPosition,
-                        glm::vec4(0.3, 0.3, 0.3, 1),
-                        "| |"
+                        "| |",
+                        glm::vec4(0.3, 0.3, 0.3, 1)
                     );
-                    RenderFontCr(*_font,
+                    RenderFont(
+                        *_font,
                         penPosition,
+                        fmt::format("    {:5s}", m.first),
                         glm::vec4(0.3, 0.3, 0.3, 1),
-                        fmt::format("    {:5s}", m.first)
+                        ghoul::fontrendering::CrDirection::Down
                     );
 
                 }
                 else {
                     RenderFont(*_font,
                         penPosition,
-                        glm::vec4(0.3, 0.3, 0.3, 1),
-                        "|"
+                        "|",
+                        glm::vec4(0.3, 0.3, 0.3, 1)
                     );
                     if (m.first == "NH_LORRI") {
-                        RenderFont(*_font,
+                        RenderFont(
+                            *_font,
                             penPosition,
-                            firing,
-                            " + "
+                            " + ",
+                            firing
                         );
                     }
                     RenderFont(*_font,
                         penPosition,
-                        glm::vec4(0.3, 0.3, 0.3, 1),
-                        "  |"
+                        "  |",
+                        glm::vec4(0.3, 0.3, 0.3, 1)
                     );
-                    RenderFontCr(*_font,
+                    RenderFont(*_font,
                         penPosition,
+                        fmt::format("    {:5s}", m.first),
                         glm::vec4(_activeColor.value(), 1.f),
-                        fmt::format("    {:5s}", m.first)
+                        ghoul::fontrendering::CrDirection::Down
                     );
                 }
             }
