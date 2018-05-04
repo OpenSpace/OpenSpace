@@ -211,13 +211,13 @@ documentation::Documentation GenerateRawVolumeTask::documentation() {
             {
                 KeyLowerDomainBound,
                 new DoubleVector3Verifier,
-                Optional::Yes,
+                Optional::No,
                 "A vector representing the lower bound of the domain"
             },
             {
                 KeyUpperDomainBound,
                 new DoubleVector3Verifier,
-                Optional::Yes,
+                Optional::No,
                 "A vector representing the upper bound of the domain"
             }
         }
