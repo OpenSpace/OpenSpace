@@ -88,6 +88,7 @@ public:
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
     void setRUpperBound(float rNormalization);
+    // void setValueRemapping(float mapZeroTo, float mapOneTo);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(glm::mat4 transform);

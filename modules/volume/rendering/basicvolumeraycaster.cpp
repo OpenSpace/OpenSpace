@@ -222,6 +222,10 @@ float BasicVolumeRaycaster::rUpperBound() const {
     return _rUpperBound;
 }
 
+// void BasicVolumeRaycaster::setValueRemapping(float mapZeroTo, float mapOneTo) {
+//     _valueRemapping = glm::vec2(mapZeroTo, mapOneTo);
+// }
+
 VolumeGridType BasicVolumeRaycaster::gridType() const {
     return _gridType;
 }
