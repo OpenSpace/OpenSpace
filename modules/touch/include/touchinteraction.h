@@ -193,7 +193,7 @@ private:
 #ifdef SPEED_BRAKE
     properties::FloatProperty _speedLimitFarVelocityDivider;
     properties::FloatProperty _speedLimitNearVelocityDivider;
-    properties::FloatProperty _speedLimitDistanceThreshold;
+    properties::IntProperty _speedLimitDistanceThresholdExp;
 #else
     properties::FloatProperty _speedLimitDistanceFraction;
 #endif

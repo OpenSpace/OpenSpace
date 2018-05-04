@@ -169,19 +169,19 @@ namespace {
 #ifdef SPEED_BRAKE
     static const openspace::properties::Property::PropertyInfo SpeedLimitFarVelocityDividerInfo = {
         "SpeedLimitFarVelocityDivider",
-        "Velocity is limited by dividing distance-to-focus-node by this value when at far distance",
+        "At far distance, velocity is limited by dividing distance-to-focus-node by this value",
         ""
     };
 
     static const openspace::properties::Property::PropertyInfo SpeedLimitNearVelocityDividerInfo = {
         "SpeedLimitNearVelocityDivider",
-        "Velocity is limited by dividing distance-to-focus-node by this value when at close distance",
+        "At close distance, velocity is limited by dividing distance-to-focus-node by this value",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo SpeedLimitFarDistanceThresholdInfo = {
+    static const openspace::properties::Property::PropertyInfo SpeedLimitFarDistanceThresholdExpInfo = {
         "SpeedLimitFarDistanceThreshold",
-        "Threshold for distance from camera to focus node where near velocity divider blends to far divider",
+        "Threshold for distance (exponent for 10^) from camera to focus node where near velocity divider blends to far divider",
         ""
     };
 #else
@@ -293,14 +293,14 @@ TouchInteraction::TouchInteraction()
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
 #ifdef SPEED_BRAKE
-    , _speedLimitFarVelocityDivider(SpeedLimitFarVelocityDividerInfo, 5.f, 1.f, 100.f)
-    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 20.f, 1.f, 500.f)
-    , _speedLimitDistanceThreshold(SpeedLimitFarDistanceThresholdInfo, 1e12f, 1e9f, 1e15f)
+    , _speedLimitFarVelocityDivider(SpeedLimitFarVelocityDividerInfo, 0.8f, 0.01f, 10.f)
+    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 1.5f, 0.01f, 10.f)
+    , _speedLimitDistanceThresholdExp(SpeedLimitFarDistanceThresholdExpInfo, 8, 5, 15)
 #else
     , _speedLimitDistanceFraction(SpeedLimitDistanceFractionInfo, 7.f, 0.1f, 20.0f)
 #endif
 #ifdef CONST_TIME_DECAY
-    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 2.0f, 0.1f, 2.5f)
+    , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
 #endif
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
@@ -336,9 +336,12 @@ TouchInteraction::TouchInteraction()
 #ifdef SPEED_BRAKE
     addProperty(_speedLimitFarVelocityDivider);
     addProperty(_speedLimitNearVelocityDivider);
-    addProperty(_speedLimitDistanceThreshold);
+    addProperty(_speedLimitDistanceThresholdExp);
 #else
     addProperty(_speedLimitDistanceFraction);
+#endif
+#ifdef CONST_TIME_DECAY
+    addProperty(_constTimeDecay_secs);
 #endif
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
@@ -1017,7 +1020,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             /*double orbitVelocityAvg = (cursor.getXSpeed() * _sensitivity.orbit.x
                 + cursor.getYSpeed() * _sensitivity.orbit.y) / 2.0;*/
             double orbitVelocityAvg = glm::distance(_vel.orbit.x, _vel.orbit.y);
-            if( stepsToDecay > 0.0 && orbitVelocityAvg > 0.0 )
+            if( stepsToDecay > 0.0 && std::abs(orbitVelocityAvg) > 0.0 )
                 _constTimeDecayCoeff.orbit = std::pow((postDecayVelocityTarget / std::abs(orbitVelocityAvg)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.orbit = 1.0;
@@ -1076,8 +1079,9 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 #ifdef SPEED_BRAKE
             double nearSpeedLimit = distanceFromFocusSurface/_speedLimitNearVelocityDivider;
             double farSpeedLimit = distanceFromFocusSurface/_speedLimitFarVelocityDivider;
-            double velocityFraction = (distanceFromFocusSurface > (double)_speedLimitDistanceThreshold) ?
-                1.0 : distanceFromFocusSurface / (double)_speedLimitDistanceThreshold;
+            double distanceThreshold = std::pow((double)10.0, _speedLimitDistanceThresholdExp);
+            double velocityFraction = (distanceFromFocusSurface > distanceThreshold) ?
+                1.0 : distanceFromFocusSurface / distanceThreshold;
             double speedLimit = farSpeedLimit * velocityFraction + nearSpeedLimit * (1.0 - velocityFraction);
 #else
             double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
@@ -1125,7 +1129,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 
             _vel.roll += -rollFactor * _sensitivity.roll;
 #ifdef CONST_TIME_DECAY
-            if( stepsToDecay > 0.0 && _vel.roll > 0.0 )
+            if( stepsToDecay > 0.0 && std::abs(_vel.roll) > 0.0 )
                 _constTimeDecayCoeff.roll = std::pow((postDecayVelocityTarget / std::abs(_vel.roll)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.roll = 1.0;
@@ -1140,7 +1144,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             /*double panVelocityAvg = (cursor.getXSpeed() * _sensitivity.pan.x
                 + cursor.getYSpeed() * _sensitivity.pan.y) / 2.0;*/
             double panVelocityAvg = glm::distance(_vel.pan.x, _vel.pan.y);
-            if( stepsToDecay > 0.0 && panVelocityAvg > 0.0 )
+            if( stepsToDecay > 0.0 && std::abs(panVelocityAvg) > 0.0 )
                 _constTimeDecayCoeff.pan = std::pow((postDecayVelocityTarget / std::abs(panVelocityAvg)), (1.0 / stepsToDecay));
             else
                 _constTimeDecayCoeff.pan = 1.0;
