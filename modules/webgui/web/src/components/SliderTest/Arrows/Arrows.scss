@@ -1,0 +1,40 @@
+@import "../../../styles/all";
+
+.RightArrow, .LeftArrow {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $ui-background;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform ease-in .1s;
+
+  &:hover {
+    transition: transform ease-in .1s;
+    transform: scale(1.1)
+  }
+}
+
+.RightArrow {
+  position: absolute;
+  top: 50%;
+  right: 25px;
+  z-index: 999;
+  color: #fff;
+}
+
+.LeftArrow {
+  position: absolute;
+  top: 50%;
+  left: 25px;
+  z-index: 999;
+  color: #fff;
+}
+
+$icon-size: 40px;
+
+.Icon {
+  font-size: $icon-size;
+}

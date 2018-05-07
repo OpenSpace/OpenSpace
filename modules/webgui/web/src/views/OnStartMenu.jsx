@@ -9,7 +9,6 @@ import { startConnection } from '../api/Actions';
 
 import styles from './OnStartMenu.scss';
 import Slider from '../components/SliderTest/Slider';
-// import Slider from '../components/StorySlider/Slider';
 
 class OnStartMenu extends Component {
   constructor(props) {
