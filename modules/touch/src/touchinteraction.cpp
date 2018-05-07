@@ -167,12 +167,6 @@ namespace {
 #endif
 
 #ifdef SPEED_BRAKE
-    static const openspace::properties::Property::PropertyInfo SpeedLimitFarVelocityDividerInfo = {
-        "SpeedLimitFarVelocityDivider",
-        "At far distance, velocity is limited by dividing distance-to-focus-node by this value",
-        ""
-    };
-
     static const openspace::properties::Property::PropertyInfo SpeedLimitNearVelocityDividerInfo = {
         "SpeedLimitNearVelocityDivider",
         "At close distance, velocity is limited by dividing distance-to-focus-node by this value",
@@ -191,6 +185,12 @@ namespace {
         ""
     };
 #endif //#ifdef SPEED_BRAKE
+
+    static const openspace::properties::Property::PropertyInfo ZoomSpeedAsymmetryGainInfo = {
+        "ZoomSpeedAsymmetryGain",
+        "At close distance to focus node, zooming-out velocity is this much faster (gain) than zooming-in velocity",
+        ""
+    };
 
     static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
@@ -293,15 +293,15 @@ TouchInteraction::TouchInteraction()
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 4.0, 2.75, glm::dvec2(0.08, 0.045) }
 #ifdef SPEED_BRAKE
-    , _speedLimitFarVelocityDivider(SpeedLimitFarVelocityDividerInfo, 0.8f, 0.01f, 10.f)
-    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 1.5f, 0.01f, 10.f)
-    , _speedLimitDistanceThresholdExp(SpeedLimitFarDistanceThresholdExpInfo, 8, 5, 15)
+    , _speedLimitNearVelocityDivider(SpeedLimitNearVelocityDividerInfo, 0.7f, 0.01f, 3.f)
+    , _speedLimitDistanceThresholdExp(SpeedLimitFarDistanceThresholdExpInfo, 8.6, 7.0, 10.0)
 #else
     , _speedLimitDistanceFraction(SpeedLimitDistanceFractionInfo, 7.f, 0.1f, 20.0f)
 #endif
 #ifdef CONST_TIME_DECAY
     , _constTimeDecay_secs(ConstantTimeDecaySecsInfo, 1.75f, 0.1f, 4.0f)
 #endif
+    , _zoomSpeedAsymmetryGain(ZoomSpeedAsymmetryGainInfo, 15.f, 1.f, 100.f)
     // calculated with two vectors with known diff in length, then
     // projDiffLength/diffLength.
     , _projectionScaleFactor(1.000004)
@@ -334,7 +334,6 @@ TouchInteraction::TouchInteraction()
     addProperty(_zoomSensitivityDistanceThreshold);
     addProperty(_zoomBoundarySphereMultiplier);
 #ifdef SPEED_BRAKE
-    addProperty(_speedLimitFarVelocityDivider);
     addProperty(_speedLimitNearVelocityDivider);
     addProperty(_speedLimitDistanceThresholdExp);
 #else
@@ -343,6 +342,7 @@ TouchInteraction::TouchInteraction()
 #ifdef CONST_TIME_DECAY
     addProperty(_constTimeDecay_secs);
 #endif
+    addProperty(_zoomSpeedAsymmetryGain);
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
     addProperty(_panEnabled);
@@ -1066,30 +1066,34 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 
 #ifdef CONST_TIME_DECAY
             if( stepsToDecay > 0.0 && std::abs(_vel.zoom) > 0.0 )
-                _constTimeDecayCoeff.zoom = std::pow((postDecayVelocityTarget / std::abs(_vel.zoom)), (1.0 / stepsToDecay));
+                //Use half the number of steps for zooming in order to decay faster
+                _constTimeDecayCoeff.zoom = std::pow((postDecayVelocityTarget / std::abs(_vel.zoom)), (1.0 / stepsToDecay / 2));
             else
                 _constTimeDecayCoeff.zoom = 1.0;
 #endif
             if ((length(currDistanceToFocusNode) / distanceFromFocusSurface) > _zoomSensitivityDistanceThreshold) {
                 zoomFactor *= pow(std::abs(distanceFromFocusSurface), (float)_zoomSensitivity);
             }
+
+            //Make zoom-out gestures faster near the focus node
+            if (zoomFactor < 0.0) {
+                double distanceThreshold = std::pow(10.0, (double)_speedLimitDistanceThresholdExp);
+                double zoomOutGain;
+                if (distanceFromFocusSurface < distanceThreshold) {
+                    zoomOutGain = _zoomSpeedAsymmetryGain;
+                } else if (distanceFromFocusSurface < (distanceThreshold * 10)) {
+                    double zoomOutGainBeyondUnity = _zoomSpeedAsymmetryGain - 1.0;
+                    double ratioOfZoomOutGainToApplyBasedOnDistance = 1.0 - (distanceFromFocusSurface - distanceThreshold)
+                        / (distanceThreshold * 10 - distanceThreshold);
+                    zoomOutGain = 1.0 + zoomOutGainBeyondUnity*ratioOfZoomOutGainToApplyBasedOnDistance;
+                } else {
+                    zoomOutGain = 1.0;
+                }
+                zoomFactor *= zoomOutGain;
+            }
+
             _vel.zoom += zoomFactor * _sensitivity.zoom *
                          std::max(_touchScreenSize.value() * 0.1, 1.0);
-            //Speed Limit on zoom velocity
-#ifdef SPEED_BRAKE
-            double nearSpeedLimit = distanceFromFocusSurface/_speedLimitNearVelocityDivider;
-            double farSpeedLimit = distanceFromFocusSurface/_speedLimitFarVelocityDivider;
-            double distanceThreshold = std::pow((double)10.0, _speedLimitDistanceThresholdExp);
-            double velocityFraction = (distanceFromFocusSurface > distanceThreshold) ?
-                1.0 : distanceFromFocusSurface / distanceThreshold;
-            double speedLimit = farSpeedLimit * velocityFraction + nearSpeedLimit * (1.0 - velocityFraction);
-#else
-            double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
-#endif
-            if (std::abs(_vel.zoom) > 1e-7)
-                _vel.zoom = (std::min(std::abs(speedLimit), std::abs(_vel.zoom))) * (_vel.zoom > 0.0 ? 1.0 : -1.0);
-            else
-                _vel.zoom = 0.0;
             break;
         }
         case ROLL: {
@@ -1266,6 +1270,28 @@ void TouchInteraction::step(double dt) {
             double planetBoundaryRadius = length(centerToBoundingSphere);
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
+            //Speed Limit on zoom velocity
+#ifdef SPEED_BRAKE
+            double nearSpeedLimit = distToSurface / _speedLimitNearVelocityDivider;
+            double farSpeedLimit = _vel.zoom;
+            double distanceThreshold = std::pow(10.0, (double)_speedLimitDistanceThresholdExp);
+            double speedLimit;
+
+            if (distToSurface < distanceThreshold) {
+                double velocityFraction = distToSurface / distanceThreshold;
+                speedLimit = farSpeedLimit * velocityFraction + nearSpeedLimit * (1.0 - velocityFraction);
+            }
+            else {
+                speedLimit = farSpeedLimit;
+            }
+#else
+            double speedLimit = _speedLimitDistanceFraction * distanceFromFocusSurface;
+#endif
+            if (std::abs(_vel.zoom) > 1e-7)
+                _vel.zoom = (std::min(std::abs(speedLimit), std::abs(_vel.zoom))) * (_vel.zoom > 0.0 ? 1.0 : -1.0);
+            else
+                _vel.zoom = 0.0;
+            //Apply the velocity to update camera position
             if (length(_vel.zoom*dt) < distToSurface &&
                  length(centerToCamera + directionToCenter*_vel.zoom*dt)
                  > planetBoundaryRadius)

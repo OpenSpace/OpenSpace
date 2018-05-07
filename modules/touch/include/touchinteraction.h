@@ -191,12 +191,12 @@ private:
 #endif
 
 #ifdef SPEED_BRAKE
-    properties::FloatProperty _speedLimitFarVelocityDivider;
     properties::FloatProperty _speedLimitNearVelocityDivider;
-    properties::IntProperty _speedLimitDistanceThresholdExp;
+    properties::FloatProperty _speedLimitDistanceThresholdExp;
 #else
     properties::FloatProperty _speedLimitDistanceFraction;
 #endif
+    properties::FloatProperty _zoomSpeedAsymmetryGain;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
