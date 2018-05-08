@@ -8,7 +8,7 @@ import Overlay from '../components/common/Overlay/Overlay';
 import { startConnection } from '../api/Actions';
 
 import styles from './OnStartMenu.scss';
-import Slider from '../components/SliderTest/Slider';
+import Slider from '../components/ImageSlider/Slider';
 
 class OnStartMenu extends Component {
   constructor(props) {

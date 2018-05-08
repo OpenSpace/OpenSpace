@@ -1,6 +1,42 @@
+@import "../../styles/all";
+
 .Slide {
     display: inline-block;
     height: 100%;
     width: 100%;
     background-repeat: no-repeat;
+}
+
+.Container {
+    position: relative;
+    text-align: center;
+    color: black;
+}
+
+.StoryInfo {
+    height: 40%;
+    width: 30%;
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+    background-color: $ui-background-hover;
+}
+
+.StoryName {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 250%;
+}
+
+.Description {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 100%;
 }
