@@ -39,7 +39,7 @@ class Slider extends Component {
     }
 
     // Import all icon images from the given directory
-    const stories = importAll(require.context('../../../../../../sync/url/stories/files', false, /\.(png|jpe?g|svg)$/));
+    const stories = importAll(require.context('../../../../../../sync/url/story_images/files', false, /\.(png|jpe?g|svg)$/));
 
     // Push images from stories object into images array
     for (let i = 0; i < Object.keys(stories).length; i++) {

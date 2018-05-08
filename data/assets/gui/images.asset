@@ -18,3 +18,15 @@ asset.syncedResource({
     },
     UseHash = false
 })
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Stories",
+    Identifier = "story_images",
+    Url = {
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story1.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story2.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story3.png",
+    },
+    UseHash = false
+})
