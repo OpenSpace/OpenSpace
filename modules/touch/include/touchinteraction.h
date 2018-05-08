@@ -38,13 +38,29 @@
 #include <openspace/properties/vector/vec4property.h>
 
 //#define TOUCH_DEBUG_PROPERTIES
-#define CONST_TIME_DECAY
-#define SPEED_BRAKE
+#define ZOOM_CORNER_TAP
 
 namespace openspace {
 
 class Camera;
 class SceneGraphNode;
+
+//Class used for keeping track of the recent average frame time
+class FrameTimeAverage
+{
+public:
+    //Update the circular buffer with the most recent frame time
+    void updateWithNewFrame(double sample);
+    //Get the value of the most recent average frame time (seconds)
+    double getAvgFrameTime();
+
+private:
+    static const int totalSamples = 10;
+    int _nSamples = 0;
+    double _samples[totalSamples];
+    double _runningTotal = 0.0;
+    int index = 0;
+};
 
 class TouchInteraction : public properties::PropertyOwner {
 public:
@@ -53,7 +69,11 @@ public:
     TouchInteraction();
 
     // for interpretInteraction()
-    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK };
+    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK 
+#ifdef ZOOM_CORNER_TAP
+        , ZOOM_OUT
+#endif
+    };
 
     // Stores the velocity in all 6DOF
     struct VelocityStates {
@@ -150,6 +170,17 @@ private:
     void computeVelocities(const std::vector<TUIO::TuioCursor>& list,
         const std::vector<Point>& lastProcessed);
 
+    //Compute velocity based on double-tap for zooming
+    double computeTapZoomDistance(double zoomGain);
+
+    //Compute coefficient for velocity decay to be applied in decceleration
+    double computeConstTimeDecayCoefficient(double velocity);
+
+    //Compute coefficient of decay based on current frametime; if frametime has been
+    // longer than usual then multiple decay steps may be applied to keep the decay
+    // relative to user time
+    double computeDecayCoeffFromFrametime(double coeff, int times);
+
     /* Decelerate the velocities. Function is called in step() but is dereferenced from
      * frame time to assure same behaviour on all systems
      */
@@ -174,7 +205,8 @@ private:
     properties::FloatProperty _rollAngleThreshold;
     properties::FloatProperty _orbitSpeedThreshold;
     properties::FloatProperty _spinSensitivity;
-    properties::FloatProperty _zoomSensitivity;
+    properties::FloatProperty _zoomSensitivityExponential;
+    properties::FloatProperty _zoomSensitivityProportionalDist;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
     properties::FloatProperty _zoomBoundarySphereMultiplier;
     properties::FloatProperty _inputStillThreshold;
@@ -186,17 +218,7 @@ private:
     properties::Vec4Property _friction;
     properties::FloatProperty _pickingRadiusMinimum;
     properties::BoolProperty _ignoreGui;
-#ifdef CONST_TIME_DECAY
     properties::FloatProperty _constTimeDecay_secs;
-#endif
-
-#ifdef SPEED_BRAKE
-    properties::FloatProperty _speedLimitNearVelocityDivider;
-    properties::FloatProperty _speedLimitDistanceThresholdExp;
-#else
-    properties::FloatProperty _speedLimitDistanceFraction;
-#endif
-    properties::FloatProperty _zoomSpeedAsymmetryGain;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
@@ -228,6 +250,9 @@ private:
     bool _directTouchMode;
     bool _tap;
     bool _doubleTap;
+#ifdef ZOOM_CORNER_TAP
+    bool _zoomOutTap;
+#endif
     bool _lmSuccess;
     bool _guiON;
     std::vector<SelectedBody> _selected;
@@ -236,36 +261,6 @@ private:
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;
 
-#ifdef CONST_TIME_DECAY
-    class FrameTimeAverage
-    {
-    public:
-        void updateWithNewFrame (double sample)
-        {
-            if (sample > 0.0005) {
-                _samples[index++] = sample;
-                if (index >= totalSamples)
-                    index = 0;
-                if (_nSamples < totalSamples)
-                    _nSamples++;
-            }
-        }
-
-        double getAvgFrameTime () {
-            if (_nSamples == 0)
-                return 1.0 / 60.0;
-            else
-                return std::accumulate(_samples, _samples + _nSamples, 0.0)
-                    / (double)(_nSamples);
-        }
-
-    private:
-        static const int totalSamples = 10;
-        int _nSamples = 0;
-        double _samples[totalSamples];
-        double _runningTotal = 0.0;
-        int index = 0;
-    };
     FrameTimeAverage _frameTimeAvg;
 
     struct ConstantTimeDecayCoefficients {
@@ -275,7 +270,6 @@ private:
         double pan = 0.0;
     };
     ConstantTimeDecayCoefficients _constTimeDecayCoeff;
-#endif
 };
 
 } // openspace namespace
