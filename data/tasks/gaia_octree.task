@@ -1,8 +1,8 @@
 return {
     {
         Type = "ConstructOctreeTask",
-        InFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_18col/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_rv_Octree[10kSPN,20dist]/",
+        InFileOrFolderPath = "E:/gaia_sync_data/DR2_full_18col/",
+        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree[50kSPN,200dist]/",
         SingleFileInput = false,
         -- TODO: Specify filter thresholds 
     }
