@@ -628,6 +628,16 @@ size_t OctreeManager::biggestChunkIndexInUse() const {
     return _biggestChunkIndexInUse;
 }
 
+// Return current CPU RAM budget [Bytes]. 
+long long OctreeManager::cpuRamBudget() const {
+    return _cpuRamBudget;
+}
+
+// Return current budget for how many stars we can add to stream when using SSBOs. 
+long long OctreeManager::ssboStarStreamBudget() const {
+    return _ssboStarStreamBudget;
+}
+
 // Returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
 size_t OctreeManager::getChildIndex(float posX, float posY, float posZ, float origX,
     float origY, float origZ) {

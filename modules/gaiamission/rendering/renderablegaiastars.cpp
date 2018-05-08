@@ -170,6 +170,19 @@ namespace {
         "Rendered Stars",
         "The number of rendered stars in the current frame."
     };
+
+    static const openspace::properties::Property::PropertyInfo CpuRamBudgetInfo = {
+        "CpuRamBudget",
+        "CPU RAM Budget",
+        "Current remaining budget [bytes] on the CPU RAM for loading more node data files."
+    };
+
+    static const openspace::properties::Property::PropertyInfo SsboStreamBudgetInfo = {
+        "SsboStreamBudget",
+        "SSBO Star Stream Budget",
+        "Current remaining memory budget [in number of stars] on the GPU for streaming "
+        "additional stars."
+    };
 }  // namespace
 
 namespace openspace {
@@ -311,6 +324,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
+    , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0, 0, 1)
+    , _ssboStreamBudgetProperty(SsboStreamBudgetInfo, 0, 0, 1)
     , _nStarsToRender(0)
     , _program(nullptr)
     , _programTM(nullptr)
@@ -536,6 +551,12 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     // Add a read-only property for the number of rendered stars per frame.
     _nRenderedStars.setReadOnly(true);
     addProperty(_nRenderedStars);
+
+    // Add CPU RAM Budget Property and SSBO Star Stream Property to menu.
+    _cpuRamBudgetProperty.setReadOnly(true);
+    addProperty(_cpuRamBudgetProperty);
+    _ssboStreamBudgetProperty.setReadOnly(true);
+    addProperty(_ssboStreamBudgetProperty);
 }
 
 RenderableGaiaStars::~RenderableGaiaStars() {}
@@ -664,6 +685,7 @@ void RenderableGaiaStars::initializeGL() {
     // Set ceiling for how much of the installed CPU RAM to use for streaming. 
     long long installedRam = static_cast<long long>(CpuCap.installedMainMemory()) * 1024 * 1024;
     _cpuRamBudget = static_cast<long long>(static_cast<float>(installedRam) * MAX_CPU_RAM_PERCENT);
+    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudget));
 
     LINFO("GPU Memory Budget {bytes}: " + std::to_string(_gpuMemoryBudgetInBytes) +
         " - CPU RAM Budget {bytes}: " + std::to_string(_cpuRamBudget));
@@ -751,6 +773,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glm::dvec3 cameraPos = data.camera.positionVec3();
         glm::dvec3 cameraViewDir = data.camera.viewDirectionWorldSpace();
         _octreeManager->fetchSurroundingNodes(cameraPos, cameraViewDir);
+
+        // Update CPU Budget property.
+        _cpuRamBudgetProperty.set(static_cast<float>(_octreeManager->cpuRamBudget()));
     }
 
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide.
@@ -806,6 +831,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Use orphaning strategy for data SSBO.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+
+        // Update SSBO Star Stream Budget property.
+        _ssboStreamBudgetProperty.set(static_cast<float>(_octreeManager->ssboStarStreamBudget()));
 
         // Keep streaming memeory size to a minimum.
         //long long memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
@@ -1271,6 +1299,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // TODO: Figure out how to use properly! (Re-building fucked up)
         //long long maxStarsInStream = _gpuMemoryBudgetInBytes / (_nRenderValuesPerStar * sizeof(GLfloat));
         long long maxStarsInStream = maxNodesInStream;
+        _ssboStreamBudgetProperty.setMaxValue(static_cast<float>(maxStarsInStream));
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
             " - Max streaming budget (in bytes): " + std::to_string(_maxMemoryBudgetInBytes) +

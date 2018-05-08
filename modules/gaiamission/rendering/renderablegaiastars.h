@@ -127,6 +127,9 @@ private:
     properties::OptionProperty _renderOption;
     properties::OptionProperty _shaderOption;
     properties::IntProperty _nRenderedStars;
+    // LongLongProperty doesn't show up in menu, use FloatProperty instead.
+    properties::FloatProperty _cpuRamBudgetProperty;
+    properties::FloatProperty _ssboStreamBudgetProperty;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,

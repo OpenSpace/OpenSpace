@@ -81,6 +81,8 @@ public:
     size_t totalDepth() const;
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
+    long long cpuRamBudget() const;
+    long long ssboStarStreamBudget() const;
 
 private:
     const size_t POS_SIZE = 3;
