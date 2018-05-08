@@ -50,6 +50,7 @@ OctreeManager::OctreeManager()
     , _streamOctree(false)
     , _cpuRamBudget(0)
     , _ssboStarStreamBudget(0)
+    , _parentNodeOfCamera(8)
     , _streamFolderPath("")
 {   }
 
@@ -73,6 +74,7 @@ void OctreeManager::initOctree(long long cpuRamBudget) {
     _totalDepth = 0;
     _valuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE;
     _cpuRamBudget = cpuRamBudget;
+    _parentNodeOfCamera = 8;
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
@@ -83,7 +85,7 @@ void OctreeManager::initOctree(long long cpuRamBudget) {
         _root->Children[i]->isLeaf = true;
         _root->Children[i]->isLoaded = false;
         _root->Children[i]->bufferIndex = DEFAULT_INDEX;
-        _root->Children[i]->OctreePositionIndex = std::to_string(i);
+        _root->Children[i]->octreePositionIndex = 80 + i;
         _root->Children[i]->numStars = 0;
         _root->Children[i]->halfDimension = MAX_DIST / 2.f;
         _root->Children[i]->originX = (i % 2 == 0) ? _root->Children[i]->halfDimension
@@ -141,6 +143,120 @@ void OctreeManager::printStarsPerNode() const {
     LINFO(fmt::format("Number of leaf nodes: {}", std::to_string(_numLeafNodes)));
     LINFO(fmt::format("Number of inner nodes: {}", std::to_string(_numInnerNodes)));
     LINFO(fmt::format("Depth of tree: {}", std::to_string(_totalDepth)));
+}
+
+// Checks if any nodes needs to be loaded/removed and if so adds the indices to a reading 
+// or removing queue.
+void OctreeManager::fetchSurroundingNodes(glm::dvec3 cameraPos, glm::dvec3 cameraViewDir) {
+    
+    // Get leaf node in which the camera resides.
+    cameraPos /= 1000.0 * distanceconstants::Parsec;
+    size_t idx = getChildIndex(cameraPos.x, cameraPos.y, cameraPos.z);
+    auto node = _root->Children[idx];
+
+    while (!node->isLeaf) {
+        idx = getChildIndex(cameraPos.x, cameraPos.y, cameraPos.z,
+            node->originX, node->originY, node->originZ);
+        node = node->Children[idx];
+    }
+    unsigned long long leafId = node->octreePositionIndex;
+    unsigned long long firstParentId = leafId / 10;
+
+    // Return early if camera resides in the same first parent as before!
+    // Otherwise camera has moved and may need to load more nodes!
+    if (_parentNodeOfCamera == firstParentId) return;
+    _parentNodeOfCamera = firstParentId;
+
+    // Get the 3^3 closest parents and load all their (eventual) children.
+    for (int x = -1; x <= 1; x+=1) {
+        for (int y = -2; y <= 2; y+=2) {
+            for (int z = -4; z <= 4; z+=4) {
+                findAndFetchNeighborNode(firstParentId, x, y, z);
+            }
+        }
+    }
+
+    // TODO: Use CameraViewDir to construct a priority queue for rest of nodes
+    // + Get LOD from outer layer nodes!
+    // + Remove nodes that's no longer in our closest proximity or in a lower layer! 
+    
+}
+
+// Finds the neighboring node on the same level (or a higher level if there is no corresponding level)
+// in the specified direction. Also fetches data from found node if it's not already loaded.
+void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, int x, int y, int z) {
+
+    unsigned long long parentId = firstParentId;
+    auto indexStack = std::stack<int>();
+
+    //----------------- Change first index -------------------//
+    int nodeIndex = parentId % 10;
+
+    int dx = (nodeIndex % 2 == 0) ? 1 : -1;
+    int dy = (nodeIndex % 4 < 2) ? 2 : -2;
+    int dz = (nodeIndex < 4) ? 4 : -4;
+
+    // Determine if we need to switch any side (find a higher common parent). 
+    bool needToSwitchX = (x == dx);
+    bool needToSwitchY = (y == dy);
+    bool needToSwitchZ = (z == dz);
+
+    if (!needToSwitchX) x = -x;
+    if (!needToSwitchY) y = -y;
+    if (!needToSwitchZ) z = -z;
+
+    // Update node index and store it at the back of our stack.
+    nodeIndex += x + y + z;
+    indexStack.push(nodeIndex);
+    parentId /= 10;
+
+    //--------- Change all indices until we find a common parent --------------//
+    while (parentId != 8 && (needToSwitchX || needToSwitchY || needToSwitchZ) ) {
+
+        nodeIndex = parentId % 10;
+
+        dx = (nodeIndex % 2 == 0) ? 1 : -1;
+        dy = (nodeIndex % 4 < 2) ? 2 : -2;
+        dz = (nodeIndex < 4) ? 4 : -4;
+
+        if (needToSwitchX) {
+            if (x != dx) needToSwitchX = false;
+            nodeIndex += dx;
+        }
+        if (needToSwitchY) {
+            if (y != dy) needToSwitchY = false;
+            nodeIndex += dy;
+        }
+        if (needToSwitchZ) {
+            if (z != dz) needToSwitchZ = false;
+            nodeIndex += dz;
+        }
+
+        indexStack.push(nodeIndex);
+        parentId /= 10;
+    }
+
+    // Take care of edge cases. If we got to the root but still need to switch to a 
+    // common parent then no neighbor exists in that direction. 
+    if (needToSwitchX || needToSwitchY || needToSwitchZ) return;
+
+    // Continue to root if we didn't reach it.
+    while (parentId != 8) {
+        nodeIndex = parentId % 10;
+        indexStack.push(nodeIndex);
+        parentId /= 10;
+    }
+
+    // Traverse to that parent node (as long as such a child exists!).
+    auto node = _root->Children[indexStack.top()];
+    indexStack.pop();
+    while (!indexStack.empty() && !node->Children[indexStack.top()]->isLeaf) {
+        node = node->Children[indexStack.top()];
+        indexStack.pop();
+    }
+
+    // Fetch all children nodes from found parent.
+    fetchChildrenNodes(node);
 }
 
 // Builds render data structure by traversing the Octree and checking for intersection 
@@ -286,7 +402,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream,
 }
 
 
-// Read a constructed Octree from a file. 
+// Read a constructed Octree from a file. Returns the total number of (distinct) stars read.
 // <readData> defines if full data or only structure should be read. 
 int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData, std::string folderPath) {
     int nStarsRead = 0;
@@ -367,9 +483,10 @@ int OctreeManager::readNodeFromFile(std::ifstream& inFileStream,
 
     // Create children if we're in an inner node and read from the corresponding nodes.
     if (!node->isLeaf) {
+        numStars = 0;
         createNodeChildren(node);
         for (size_t i = 0; i < 8; ++i) {
-            readNodeFromFile(inFileStream, node->Children[i], readData);
+            numStars += readNodeFromFile(inFileStream, node->Children[i], readData);
         }
     }
 
@@ -424,10 +541,30 @@ void OctreeManager::writeNodeToMultipleFiles(std::string outFilePrefix,
     }
 }
 
-// Read node data from a specified file. Used in TraveseData to fetch potential nodes for next frame!?
+// Fetch data from all children of <parentNode>, as long as it's not already fetched,
+// it exists and can fit in RAM.
+void OctreeManager::fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode) {
+    
+    for (int i = 0; i < 8; ++i) {
+        // Fetch node data if we're streaming and it doesn't exist in RAM yet.
+        // (As long as there is any RAM budget left and node actually has any data!)
+        if (!parentNode->Children[i]->isLoaded && parentNode->Children[i]->numStars > 0 &&  
+            _cpuRamBudget > parentNode->Children[i]->numStars * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4) {
+            // TODO: Load asynchronous!
+            fetchNodeDataFromFile(parentNode->Children[i]);
+        }
+    }
+}
+
+// Read node data from a specified file. Used in TraveseData to fetch potential nodes for next frame.
+// Only call if node file exsists (i.e. has any data) and is not already loaded.
 void OctreeManager::fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node) {
 
-    std::string inFilePath = _streamFolderPath + node->OctreePositionIndex + BINARY_SUFFIX;
+    // Remove root ID ("8") from index before loading file.
+    std::string posId = std::to_string(node->octreePositionIndex);
+    posId.erase(posId.begin());
+
+    std::string inFilePath = _streamFolderPath + posId + BINARY_SUFFIX;
     std::ifstream inFileStream(inFilePath, std::ifstream::binary);
     //LINFO("Fetch node data file: " + inFilePath);
 
@@ -522,6 +659,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     }
     else if (node->isLeaf) {
         // Too many stars in leaf node, subdivide into 8 new nodes.
+        node->numStars = 0;
 
         // Create children and clean up parent.
         createNodeChildren(node);
@@ -531,7 +669,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
         constructLodCache(tmpLodNode);
 
         // Distribute stars from parent node into children. 
-        for (size_t n = 0; n < node->numStars; ++n) {
+        for (size_t n = 0; n < MAX_STARS_PER_NODE; ++n) {
             // Position data.
             auto posBegin = node->posData.begin() + n * POS_SIZE;
             auto posEnd = posBegin + POS_SIZE;
@@ -575,12 +713,10 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
 
     // Determine if new star should be kept in our LOD cache. Don't add if chunk is full.
     // Don't use LOD cache for our more shallow layers.
-    if (node->posData.size() / POS_SIZE < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
+    if (node->numStars < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
         insertStarInLodCache(node, starValues);
     }
 
-    // Increase counter for inner node to keep track of total stars in all children as well.
-    node->numStars++;
     return insertInNode(node->Children[index], starValues, ++depth);
 }
 
@@ -596,6 +732,7 @@ void OctreeManager::constructLodCache(std::shared_ptr<OctreeNode> node) {
     node->posData = std::move(std::vector<float>(insertData.begin(), insertData.end()));
     node->colData = std::move(std::vector<float>(COL_SIZE, 0.f));
     node->velData = std::move(std::vector<float>(VEL_SIZE, 0.f));
+    node->numStars++;
 }
 
 // Private help function for insertInNode(). Determines if star should be stored in LOD.
@@ -615,6 +752,8 @@ void OctreeManager::insertStarInLodCache(std::shared_ptr<OctreeNode> node,
         node->posData.insert(node->posData.end(), starValues.begin(), posEnd);
         node->colData.insert(node->colData.end(), posEnd, colEnd);
         node->velData.insert(node->velData.end(), colEnd, starValues.end());
+        // Increase counter for inner node to keep track of total LOD stars stored.
+        node->numStars++;
     }
 }
 
@@ -811,7 +950,7 @@ void OctreeManager::createNodeChildren(std::shared_ptr<OctreeNode> node) {
         node->Children[i]->isLeaf = true;
         node->Children[i]->isLoaded = false;
         node->Children[i]->bufferIndex = DEFAULT_INDEX;
-        node->Children[i]->OctreePositionIndex = node->OctreePositionIndex + std::to_string(i);
+        node->Children[i]->octreePositionIndex = (node->octreePositionIndex * 10) + i;
         node->Children[i]->numStars = 0;
         node->Children[i]->posData = std::vector<float>();
         node->Children[i]->colData = std::vector<float>();
@@ -866,12 +1005,6 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
 
     // Return early if node doesn't contain any stars!
     if (node->numStars == 0) return std::vector<float>();
-
-    // Fetch node data if we're streaming and it doesn't exist in RAM yet.
-    // (As long as there is any RAM budget left and node actually has any data!)
-    if (_streamOctree && !node->isLoaded && _cpuRamBudget > 0) {
-        fetchNodeDataFromFile(node);
-    }
 
     // Return empty if we're reached max streaming budget
     int nStarsInNode = static_cast<int>(node->posData.size() / POS_SIZE);

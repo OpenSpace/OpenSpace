@@ -746,14 +746,18 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     } 
     else _firstDrawCalls = false;
 
+    // Update which nodes that are stored in memory as the camera moves around (if streaming).
+    if (_fileReaderOption == FileReaderOption::StreamOctree) {
+        glm::dvec3 cameraPos = data.camera.positionVec3();
+        glm::dvec3 cameraViewDir = data.camera.viewDirectionWorldSpace();
+        _octreeManager->fetchSurroundingNodes(cameraPos, cameraViewDir);
+    }
+
     // Traverse Octree and build a map with new nodes to render, uses mvp matrix to decide.
     const int renderOption = _renderOption;
     int deltaStars = 0;
     auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
         gaiamission::RenderOption(renderOption));
-
-    // TODO: Use this to declare when all files have been loaded and we can start to render stars!
-    //_initialDataFilesLoaded = true;
 
     // Update number of rendered stars.
     _nStarsToRender += deltaStars;

@@ -51,7 +51,7 @@ public:
         bool isLeaf;
         bool isLoaded;
         int bufferIndex;
-        std::string OctreePositionIndex;
+        unsigned long long octreePositionIndex;
     };
 
     OctreeManager();
@@ -61,6 +61,8 @@ public:
     void initBufferIndexStack(long long maxStarsOrNodes, bool useVBO);
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
+
+    void fetchSurroundingNodes(glm::dvec3 cameraPos, glm::dvec3 cameraViewDir);
     std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
         int& deltaStars, gaiamission::RenderOption option);
 
@@ -127,6 +129,8 @@ private:
         std::shared_ptr<OctreeNode> node, bool readData);
 
     void writeNodeToMultipleFiles(std::string outFilePrefix, std::shared_ptr<OctreeNode> node);
+    void findAndFetchNeighborNode(unsigned long long firstParentId, int x, int y, int z);
+    void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode);
     void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
 
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
@@ -149,6 +153,7 @@ private:
     bool _streamOctree;
     long long _cpuRamBudget;
     long long _ssboStarStreamBudget;
+    unsigned long long _parentNodeOfCamera;
     std::string _streamFolderPath;
 
 }; // class OctreeManager
