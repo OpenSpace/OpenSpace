@@ -1,0 +1,325 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local transferFunctions = asset.require('./transferfunctions').TransferFunctions
+
+
+
+local enlilVelocityColorTable = transferFunctions .. "/kroyw.txt"
+local enlilDensityColorTable = transferFunctions .. "/enlil_density.txt"
+
+
+-- Fieldline data
+if not ENLILPaths then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths' table was not defined")
+    return
+end
+
+local failed = false
+if not ENLILPaths.EqPlane011AU1 then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths.EqPlane011AU1' was not defined")
+    failed = true
+end
+
+if not ENLILPaths.EqPlane011AU2 then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths.EqPlane011AU2' was not defined")
+    failed = true
+end
+
+if not ENLILPaths.Lat4011AU1 then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths.Lat4011AU1' was not defined")
+    failed = true
+end
+
+if not ENLILPaths.Lat4011AU2 then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths.Lat4011AU2' was not defined")
+    failed = true
+end
+
+if not ENLILPaths.Earth then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths.Earth' was not defined")
+    failed = true
+end
+
+if not ENLILPaths.StereoA then
+    openspace.printError("Trying to add ENLIL fieldlines, but 'ENLILPaths.StereoA' was not defined")
+    failed = true
+end
+
+
+local ENLILSliceEqPlane11AU1 = {
+    Identifier = "FL_ENLIL_slice_eqPlane_011AU_1",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.EqPlane011AU1,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Equatorial Plane 0.11 AU 1"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILSliceEqPlane11AU2 = {
+    Identifier = "FL_ENLIL_slice_eqPlane_011AU_2",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.EqPlane011AU2,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Equatorial Plane 0.11 AU 2"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILSliceLat411AU1 = {
+    Identifier = "FL_ENLIL_slice_lat4_011AU_1",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.Lat4011AU1,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Latitude 4 0.11 AU 1"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILSliceLat411AU2 = {
+    Identifier = "FL_ENLIL_slice_lat4_011AU_2",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.Lat4011AU2,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Slice Latitude 4 0.11 AU 2"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILEarth = {
+    Identifier = "FL_ENLIL_earth",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.Earth,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 1.0, 1.0, 1.0, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5 }
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL Earth"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+local ENLILStereoA = {
+    Identifier = "FL_ENLIL_stereoa",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = ENLILPaths.StereoA,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            enlilDensityColorTable,
+            enlilVelocityColorTable,
+        },
+        DefaultColor = { 1.0, 1.0, 1.0, 0.60 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 0, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true
+    },
+    GUI = {
+        Name = "Fieldlines ENLIL STEREO A"
+    }
+    -- Tag = {"fieldline_sequence", "fieldline_enlil"},
+}
+
+
+
+local objects = { ENLILSliceEqPlane11AU1, ENLILSliceEqPlane11AU2, ENLILSliceLat411AU1, ENLILSliceLat411AU2, ENLILEarth, ENLILStereoA }
+
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+
+
+asset.onInitialize(function ()
+    -- init()
+
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.colorMethod", 1)
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.colorQuantityMax", "225000")
+
+
+    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.color", { 1, 1, 1, 1.0 })
+    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.particleSize", 5)
+    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.particleSpacing", 25)
+    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.speed", 25.0)
+    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.reversed", true)
+
+    -- DEFAULT ENLIL
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.fieldlineColorQuantity", 1)
+    -- openspace.setPropertyValue("FL_ENLIL*.renderable.Color.transferFunctionPath", 'C:/Users/CCMC/fieldlinesdata/colortables/kroyw.txt')
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.transferFunctionLimit1", '150')
+    -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.transferFunctionLimit2", '1050')
+    -- openspace.setPropertyValue("Scene.FL*.renderable.Enabled", false)
+
+
+    ------------------------------ ENLIL ---------------------------
+    -- openspace.addVirtualProperty("BoolProperty",  "ENLIL ALL", "Scene.FL_ENLIL*.renderable.Enabled", "", false, nil, nil)
+    -- openspace.addVirtualProperty("BoolProperty",  "ENLIL SLICES", "Scene.FL_ENLIL_slice*.renderable.Enabled", "", false, nil, nil)
+    -- openspace.addVirtualProperty("BoolProperty",  "ENLIL LAT4", "Scene.FL_ENLIL_slice_lat*.renderable.Enabled", "", false, nil, nil)
+    -- openspace.addVirtualProperty("BoolProperty",  "ENLIL EQ_PLANE", "Scene.FL_ENLIL_slice_eq*.renderable.Enabled", "", false, nil, nil)
+    -- openspace.addVirtualProperty("BoolProperty",  "ENLIL EARTH", "Scene.FL_ENLIL_earth*.renderable.Enabled", "", false, nil, nil)
+    -- openspace.addVirtualProperty("BoolProperty",  "ENLIL STEREOA", "Scene.FL_ENLIL_stereoa*.renderable.Enabled", "", false, nil, nil)
+    -- --- SET COLOR METHOD ON ENLIL SLICES AND STEREOA/EARTH LINES
+    -- openspace.addVirtualProperty("IntProperty",  "ENLIL SlicesColorMethod", "Scene.FL_ENLIL_slice*.renderable.Color.colorMethod", "", 1,0,1)
+    -- openspace.addVirtualProperty("IntProperty",  "ENLIL EarthColorMethod", "Scene.FL_ENLIL_earth*.renderable.Color.colorMethod", "", 1,0,1)
+end)
+
+asset.onDeinitialize(function ()
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL*.renderable.enabled");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_slice*.renderable.enabled");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_slice_lat*.renderable.enabled");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_slice_eq*.renderable.enabled");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_earth*.renderable.enabled");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_stereoa*.renderable.enabled");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_slice*.renderable.Color.fieldlineColorMethod");
+    -- openspace.removeVirtualProperty("Scene.FL_ENLIL_earth*.renderable.Color.fieldlineColorMethod");
+
+    -- deinit()
+    -- assetHelper.registerSceneGraphNodes(asset, objects)
+end)
+
+
