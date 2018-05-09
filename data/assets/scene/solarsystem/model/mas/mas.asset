@@ -11,23 +11,16 @@ local Mas = {
         Parent = sunTransforms.SolarSystemBarycenter.Identifier,
         Renderable = {
             Type = "RenderableTimeVaryingVolume",
-            -- Type = "RenderableKameleonVolume",
-            Dimensions = {100, 100, 128},
             StepSize = 0.01,
             TransferFunction = "${DATA}/mas/mas_transfer_function.txt",
-            -- SourcePath = "${DATA}/mas/mas_merged_step_101.cdf",
             SourceDirectory = "${DATA}/mas/raw",
-            LowerValueBound = 0.000001,
-            UpperValueBound = 0.1,
-            MinValue = 0.000001,
+            LowerValueBound = 0,
+            UpperValueBound = 1,
+            MinValue = 0,
             MaxValue = 55941,
             GridType = "Spherical",
-            -- SecondsBefore = 24*60*60,
-            -- SecondsAfter = 24*60*60,
             SecondsBefore = 50*365*24*60*60, -- 50 years before
             SecondsAfter = 50*365*24*60*60, -- 50 years after
-            -- Time = "2017-08-01T17:00:00.001",
-            -- VisUnit = "amu/cm^3",
             VisUnit = "rho",
         },
         Transform = {
@@ -38,7 +31,7 @@ local Mas = {
             },
             Scale = {
                 Type = "StaticScale",
-                Scale = 0.001 * sunRadius
+                Scale = 0.04 * sunRadius
             }
         },
         GUI = {
