@@ -1,0 +1,11 @@
+local assetHelper = asset.require('util/asset_helper')
+
+-- Specifying transfer functions
+local transferFunctions = asset.syncedResource({
+    Name = "Fieldlines Transfer Functions",
+    Type = "HttpSynchronization",
+    Identifier = "sun_earth_event-fieldlines-transferfunctions",
+    Version = 1
+})
+
+asset.export("TransferFunctions", transferFunctions)
