@@ -63,7 +63,7 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
-        "KameleonVolumeToRawTask"
+        "GenerateRawVolumeTask"
     );
 
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
