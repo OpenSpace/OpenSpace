@@ -120,8 +120,9 @@ void main() {
     float starTemperature = bvToKelvin(ge_bvLumAbsMag.x);
     float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
     
+    
     //double scaleMultiply = apparentBrightness;  
-    double scaleMultiply = pow(10, magnitudeExponent + 2.f) * double(starRadius);  
+    double scaleMultiply = pow(10, magnitudeExponent * (ge_bvLumAbsMag.y + 2.f)) * double(starRadius);  
 
     dvec3 scaledRight    = dvec3(0.0);
     dvec3 scaledUp       = dvec3(0.0);
@@ -134,8 +135,8 @@ void main() {
         dvec3 normal   = normalize(eyePosition - dpos.xyz);
         dvec3 newRight = normalize(cross(cameraUp, normal));
         dvec3 newUp    = cross(normal, newRight);
-        scaledRight    = scaleMultiply * newRight * 0.5f;
-        scaledUp       = scaleMultiply * newUp * 0.5f;
+        scaledRight    = scaleMultiply * newRight;
+        scaledUp       = scaleMultiply * newUp;
     //}
    
     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
