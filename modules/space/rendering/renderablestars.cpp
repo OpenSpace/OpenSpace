@@ -332,9 +332,24 @@ namespace openspace {
             glm::vec2(OsEng.windowWrapper().getCurrentViewportSize())
         );
         
-        // Correct code to be used when stereo correction being added into master.
-        //_program->setUniform(_uniformCache.eyePosition, data.camera.eyePositionVec3());
-        _program->setUniform(_uniformCache.eyePosition, data.camera.positionVec3());
+        glm::dvec3 eyePosition = glm::dvec3(
+            glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+        );
+        _program->setUniform(_uniformCache.eyePosition, eyePosition);
+        
+        // JCC (05/09/2018): Testing solution for scintilating stars
+        // Almost Working
+        glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+        glm::dmat4 invMVPParts = worldToModelTransform * glm::inverse(data.camera.combinedViewMatrix()) *
+            glm::inverse(glm::dmat4(projectionMatrix));
+        glm::dvec3 orthoRight = glm::dvec3(
+            glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0)))
+        );
+        glm::dvec3 orthoUp = glm::dvec3(
+            glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0)))
+        );
+        _program->setUniform("invariantRight", orthoRight);
+        _program->setUniform("invariantUp", orthoUp);
 
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
@@ -377,7 +392,7 @@ namespace openspace {
             );
 
             GLint positionAttrib = _program->attributeLocation("in_position");
-            GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
+            GLint brightnessDataAttrib = _program->attributeLocation("in_bvLumAbsMag");
 
             const size_t nStars = _fullData.size() / _nValuesPerStar;
             const size_t nValues = _slicedData.size() / nStars;

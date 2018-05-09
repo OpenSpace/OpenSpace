@@ -30,14 +30,14 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-in vec3 vs_brightness[];
+in vec3 vs_bvLumAbsMag[];
 in vec3 vs_velocity[];
 in vec4 vs_gPosition[];
 in float vs_speed[];
 //in vec4 vs_worldPosition[];
 
 out vec4 vs_position;
-out vec3 ge_brightness;
+out vec3 ge_bvLumAbsMag;
 out vec3 ge_velocity;
 out float ge_speed;
 out vec2 psfCoords;
@@ -51,6 +51,9 @@ uniform float magnitudeExponent;
 uniform vec2 screenSize;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
+
+uniform dvec3 invariantRight;
+uniform dvec3 invariantUp;
 
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -88,13 +91,13 @@ void main() {
         return;
     }
 
-    ge_brightness    = vs_brightness[0];
-    ge_velocity      = vs_velocity[0];
-    ge_speed         = vs_speed[0];
+    ge_bvLumAbsMag = vs_bvLumAbsMag[0];
+    ge_velocity    = vs_velocity[0];
+    ge_speed       = vs_speed[0];
     
-    double distanceToStarInParsecs = length(dpos.xyz - eyePosition) / PARSEC;
-    double luminosity = double(ge_brightness.y);
-    float absMag = ge_brightness.x;
+    double distanceToStarInParsecs = trunc(length(dpos.xyz - eyePosition) / PARSEC);
+    double luminosity = double(ge_bvLumAbsMag.y);
+    float absMag = ge_bvLumAbsMag.z;
     float appMag = absMag + 5 * (log(float(distanceToStarInParsecs))-1.0);
     
     // Working like Partiview
@@ -108,12 +111,17 @@ void main() {
     dvec3 scaledUp       = dvec3(0.0);
     vec4 bottomLeftVertex, bottomRightVertex, topLeftVertex, topRightVertex;
   
-    dvec3 normal   = normalize(eyePosition - dpos.xyz);
-    dvec3 newRight = normalize(cross(cameraUp, normal));
-    dvec3 newUp    = cross(normal, newRight);
-    scaledRight    = scaleMultiply * newRight * 0.5f;
-    scaledUp       = scaleMultiply * newUp * 0.5f;
-
+    if (distanceToStarInParsecs > 800.0) {
+        scaledRight    = scaleMultiply * invariantRight * 0.5f;
+        scaledUp       = scaleMultiply * invariantUp * 0.5f;
+    } else {
+        dvec3 normal   = normalize(eyePosition - dpos.xyz);
+        dvec3 newRight = normalize(cross(cameraUp, normal));
+        dvec3 newUp    = cross(normal, newRight);
+        scaledRight    = scaleMultiply * newRight * 0.5f;
+        scaledUp       = scaleMultiply * newUp * 0.5f;
+    }
+   
     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
     gs_screenSpaceDepth  = bottomLeftVertex.w;
@@ -137,26 +145,26 @@ void main() {
     float height = sizes.y;
     float width  = sizes.x;
 
-    if ((height > billboardSize) ||
-        (width > billboardSize)) { 
-        float correctionScale = height > billboardSize ? billboardSize / height :
-                                                         billboardSize / width;
+    // if ((height > billboardSize) ||
+    //     (width > billboardSize)) { 
+    //     float correctionScale = height > billboardSize ? billboardSize / height :
+    //                                                      billboardSize / width;
 
-        scaledRight *= correctionScale;
-        scaledUp    *= correctionScale;
-        bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
-                                dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
-        gs_screenSpaceDepth = bottomLeftVertex.w;
-        topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                            dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))); 
+    //     scaledRight *= correctionScale;
+    //     scaledUp    *= correctionScale;
+    //     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix *
+    //                             dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));
+    //     gs_screenSpaceDepth = bottomLeftVertex.w;
+    //     topRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                         dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))); 
 
     
-        bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                    dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
+    //     bottomRightVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                 dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
         
-        topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
-                        dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    } else {
+    //     topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
+    //                     dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
+    // } else {
         // if (width < 2.0f) {
         //     float maxVar = 2.0f;
         //     float minVar = 1.0f;
@@ -172,7 +180,7 @@ void main() {
                     dvec4(dpos.xyz + scaledRight - scaledUp, dpos.w)));
         topLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w)));
-    } 
+    //} 
 
     // Build primitive
     gl_Position = topLeftVertex;

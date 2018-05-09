@@ -37,7 +37,7 @@ uniform float colorContribution;
 uniform int colorOption;
 
 in vec4 vs_position;
-flat in vec3 ge_brightness;
+flat in vec3 ge_bvLumAbsMag;
 flat in vec3 ge_velocity;
 in vec2 psfCoords;
 flat in float ge_speed;
@@ -57,7 +57,7 @@ Fragment getFragment() {
     vec4 color = vec4(0.0);
     switch (colorOption) {
         case COLOROPTION_COLOR: 
-            color = bv2rgb(ge_brightness.x);
+            color = bv2rgb(ge_bvLumAbsMag.x);
             break;
         case COLOROPTION_VELOCITY:
             color = vec4(abs(ge_velocity), 0.5); 
@@ -77,7 +77,8 @@ Fragment getFragment() {
     float f0  = 2.61E6 * exp(-pow(theta/alpha, 2.0));
     float f1  = 20.91/pow(theta + alpha, 3.0);
     float f2  = 72.37/pow(theta + alpha, 2.0);
-    float psf_p = 0.384 * f0 + 0.478 * f1 + 0.138 * f2;
+    //float psf_p = 0.384 * f0 + 0.478 * f1 + 0.138 * f2;
+    float psf_p = f2;// + 0.138 * f2;
     fullColor = vec4((colorContribution * color.rgb + psf_p) / (colorContribution + 1.0), psf_p);
     
     if (fullColor.a == 0) {
