@@ -178,7 +178,7 @@ int addNode(lua_State* L) {
         std::string scriptParent;
 
         const std::string starParent = "{"
-            "Name = '" + starname + "',"
+            "Identifier = '" + starname + "',"
             "Parent = 'SolarSystemBarycenter',"
             "Transform = {"
             "Translation = {"
@@ -193,7 +193,7 @@ int addNode(lua_State* L) {
         {
             std::string color = getStarColor(p.BMV);
             const std::string starGlobe = "{"
-                "Name = '" + starname + "Globe',"
+                "Identifier = '" + starname + "Globe',"
                 "Parent = '" + starname + "',"
                 "Renderable = {"
                 "Type = 'RenderableGlobe',"
@@ -204,14 +204,14 @@ int addNode(lua_State* L) {
                 "ColorLayers = {"
 
                 "{"
-                "Name = 'Star Color',"
+                "Identifier = 'StarColor',"
                 "Type = 'SolidColor',"
                 "Color = " + color + ","
                 "BlendMode = 'Normal',"
                 "Enabled = true"
                 "},"
                 "{"
-                "Name = 'Star Texture',"
+                "Identifier = 'StarTexture',"
                 "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"//'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
                 "BlendMode = 'Color',"
                 "Enabled = true"
@@ -221,7 +221,7 @@ int addNode(lua_State* L) {
                 "}"
                 "}";
             const std::string starGlare = "{"
-                "Name = '" + starname + "Glare',"
+                "Identifier = '" + starname + "Glare',"
                 "Parent = '" + starname + "',"
                 "Renderable = {"
                 "Type = 'RenderablePlaneImageLocal',"
@@ -272,7 +272,7 @@ int addNode(lua_State* L) {
             if (!isnan(plsy[i].R))
             {
                 const std::string luaTablePlanet = "{"
-                    "Name = '" + plna[i] + "',"
+                    "Identifier = '" + plna[i] + "',"
                     "Parent = '" + starname + "',"
                     "Renderable = {"
                     "Type = 'RenderableGlobe',"
@@ -282,7 +282,7 @@ int addNode(lua_State* L) {
                     "Layers = {"
                     "ColorLayers = {"
                     "{"
-                    "Name = 'Exoplanet Texture',"
+                    "Identifier = 'ExoplanetTexture',"
                     "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
                     "Enabled = true"
                     "}"
@@ -310,7 +310,7 @@ int addNode(lua_State* L) {
             
 
             const std::string PlanetTrail = "{"
-                "Name = '" + plna[i] + "Trail',"
+                "Identifier = '" + plna[i] + "Trail',"
                 "Parent = '" + starname + "',"
                 "Renderable = {"
                     "Type = 'RenderableTrailOrbit',"
@@ -339,9 +339,6 @@ int addNode(lua_State* L) {
             );
 
         }
-
-
-        
 
     }
     else
