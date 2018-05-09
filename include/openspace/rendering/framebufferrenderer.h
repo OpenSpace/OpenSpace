@@ -44,7 +44,7 @@ namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -67,8 +67,6 @@ public:
     void updateHDRData();
     void updateMSAASamplingPattern();
 
-    void setCamera(Camera* camera) override;
-    void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
@@ -81,7 +79,8 @@ public:
     std::vector<double> mSSAPattern() const override;
 
     void update() override;
-    void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    void render(Scene* scene, Camera* camera, float blackoutFactor,
+        bool doPerformanceMeasurements) override;
 
     /**
      * Update render data
@@ -91,7 +90,7 @@ public:
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
-        ghoul::Boolean isAttached) override;
+        isAttached isAttached) override;
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
@@ -132,8 +131,6 @@ private:
     bool _dirtyRaycastData;
     bool _dirtyResolution;
 
-    Camera* _camera;
-    Scene* _scene;
     glm::vec2 _resolution;
     int _nAaSamples;
     float _hdrExposure;

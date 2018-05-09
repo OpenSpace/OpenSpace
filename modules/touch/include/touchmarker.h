@@ -67,9 +67,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(radius, transparency, thickness, color) _uniformCache;
 
+    std::vector<GLfloat> _vertexData;
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;
-    int _numFingers = 0;
 };
 
 } // openspace namespace

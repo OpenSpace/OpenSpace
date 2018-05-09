@@ -1,0 +1,61 @@
+@import "../../../styles/all";
+
+$column-width: 100%/7;
+$selected-border-width: 2px;
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weekdays {
+  display: flex;
+  font-size: 0.8rem;
+  border-bottom: 1px solid $ui-background-hover;
+}
+
+.month {
+  display: grid;
+  grid-template-columns: repeat(7, $column-width);
+}
+
+.day {
+  padding: $button-padding;
+  text-align: center;
+
+  &.faint {
+    color: $text-color-blur;
+  }
+
+  &.selected {
+    background: $ui-background-selected;
+    border-bottom: $selected-border-width solid $blue;
+    font-weight: bold;
+    padding-bottom: unquote("calc(#{$vertical-padding} - #{$selected-border-width})");
+  }
+
+  &.today {
+    background: $ui-background-selected;
+  }
+
+  &:focus,
+  &:hover {
+    background: $ui-background-hover;
+    outline: 0;
+  }
+
+  &:active {
+    background: $ui-background-active;
+  }
+}
+
+.weekday {
+  padding: $button-padding;
+  text-align: center;
+  width: $column-width;
+}
+
+.year {
+  padding: $base-padding / 3 !important;
+}

@@ -40,7 +40,10 @@ void DeferredcasterManager::attachDeferredcaster(Deferredcaster& deferredcaster)
         _deferredcasters.push_back(&deferredcaster);
     }
     for (auto &listener : _listeners) {
-        listener->deferredcastersChanged(deferredcaster, ghoul::Boolean::Yes);
+        listener->deferredcastersChanged(
+            deferredcaster,
+            DeferredcasterListener::isAttached::Yes
+        );
     }
 }
 
@@ -53,7 +56,10 @@ void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster)
     if (it != _deferredcasters.end()) {
         _deferredcasters.erase(it);
         for (auto &listener : _listeners) {
-            listener->deferredcastersChanged(deferredcaster, ghoul::Boolean::No);
+            listener->deferredcastersChanged(
+                deferredcaster,
+                DeferredcasterListener::isAttached::No
+            );
         }
     }
 }

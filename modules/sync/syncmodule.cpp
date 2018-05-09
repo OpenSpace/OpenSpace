@@ -30,7 +30,6 @@
 #include <modules/sync/tasks/syncassettask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -121,6 +120,11 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
         _torrentClient.deinitialize();
     });
 }
+
+void SyncModule::internalDeinitialize() {
+    _torrentClient.deinitialize();
+}
+
 
 std::string SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;

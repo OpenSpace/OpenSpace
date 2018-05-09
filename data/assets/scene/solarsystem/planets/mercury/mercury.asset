@@ -8,30 +8,42 @@ asset.request('./trail')
 local mapServiceConfigs = asset.localResource("map_service_configs")
 
 local color_layers = {
-    -- Utah based servers
     {
+        Identifier = "Messenger_MDIS_Utah",
         Name = "Messenger MDIS [Utah]",
         FilePath = mapServiceConfigs .. "/Utah/MessengerMDIS.wms",
         Enabled = true
     },
     {
-        Name = "Messenger Mosaic [Utah]",
-        FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+        Identifier = "Messenger_MDIS_Sweden",
+        Name = "Messenger MDIS [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_MDIS.wms",
     },
-    -- AWS based servers
     {
+        Identifier = "Messenger_MDIS_AWS",
         Name = "Messenger MDIS [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/MessengerMdis.wms"
     },
     {
+        Identifier = "Messenger_Mosaic_Utah",
+        Name = "Messenger Mosaic [Utah]",
+        FilePath = mapServiceConfigs .. "/Utah/MessengerMosaic.wms"
+    },
+    {
+        Identifier = "Messenger_Mosaic_Sweden",
+        Name = "Messenger Mosaic [Sweden]",
+        FilePath = mapServiceConfigs .. "/LiU/Messenger_Mosaic.wms"
+    },
+    {
+        Identifier = "Messenger_Mosaic_AWS",
         Name = "Messenger Mosaic [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/MessengerMosaic.wms"
     }
 }
 
 local Mercury = {
-    Name = "Mercury",
-    Parent = transforms.MercuryBarycenter.Name,
+    Identifier = "Mercury",
+    Parent = transforms.MercuryBarycenter.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -51,7 +63,9 @@ local Mercury = {
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
-    GuiPath = "/Solar System/Planets/Mercury"
+    GUI = {
+        Path = "/Solar System/Planets/Mercury"
+    }
 }
 
 

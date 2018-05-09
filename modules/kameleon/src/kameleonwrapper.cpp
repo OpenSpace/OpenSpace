@@ -226,15 +226,15 @@ float* KameleonWrapper::getUniformSampledValues(
     LDEBUG(fmt::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
-    const int bins = 200;
+    constexpr const int NBins = 200;
     const float truncLim = 0.9f;
-    std::vector<int> histogram (bins,0);
-    auto mapToHistogram = [varMin, varMax, bins](double val) {
+    std::vector<int> histogram (NBins, 0);
+    auto mapToHistogram = [NBins, varMin, varMax](double val) {
         double zeroToOne = (val-varMin)/(varMax-varMin);
-        zeroToOne *= static_cast<double>(bins);
+        zeroToOne *= static_cast<double>(NBins);
         int izerotoone = static_cast<int>(zeroToOne);
 
-        return glm::clamp(izerotoone, 0, bins-1);
+        return glm::clamp(izerotoone, 0, NBins - 1);
     };
 
     //ProgressBar pb(static_cast<int>(outDimensions.x));
@@ -332,7 +332,7 @@ float* KameleonWrapper::getUniformSampledValues(
      //        std::cout << std::endl;
      //}
      //
-    // for(int i = 0; i < bins-1; ++i) {
+    // for(int i = 0; i < NBins-1; ++i) {
     //     // sum += histogram[i];
     //     // if(sum + histogram[i+1] > sumuntil) {
     //     //     stop = i;
@@ -345,7 +345,7 @@ float* KameleonWrapper::getUniformSampledValues(
     int sum = 0;
     int stop = 0;
     const int sumuntil = static_cast<int>(static_cast<float>(size) * truncLim);
-    for(int i = 0; i < bins; ++i) {
+    for(int i = 0; i < NBins; ++i) {
         sum += histogram[i];
         if(sum > sumuntil) {
             stop = i;
@@ -356,7 +356,7 @@ float* KameleonWrapper::getUniformSampledValues(
     }
 
     double dist = varMax - varMin;
-    dist = (dist / static_cast<double>(bins)) * static_cast<double>(stop);
+    dist = (dist / static_cast<double>(NBins)) * static_cast<double>(stop);
 
     varMax = varMin + dist;
     //LDEBUG(var << "Min: " << varMin);

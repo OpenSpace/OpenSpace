@@ -676,8 +676,8 @@ void LoadingScreen::setPhase(Phase phase) {
     _iProgress = 0;
 }
 
-void LoadingScreen::updateItem(const std::string& itemName,
-                               ItemStatus newStatus,
+void LoadingScreen::updateItem(const std::string& itemIdentifier,
+                               const std::string& itemName, ItemStatus newStatus,
                                float newProgress)
 {
     if (!_showNodeNames) {
@@ -690,8 +690,8 @@ void LoadingScreen::updateItem(const std::string& itemName,
     auto it = std::find_if(
         _items.begin(),
         _items.end(),
-        [&itemName](const Item& i) {
-            return i.name == itemName;
+        [&itemIdentifier](const Item& i) {
+            return i.identifier == itemIdentifier;
         }
     );
     if (it != _items.end()) {
@@ -704,11 +704,15 @@ void LoadingScreen::updateItem(const std::string& itemName,
     else {
         ghoul_assert(
             newStatus == ItemStatus::Started,
-            "Item '" + itemName + "' did not exist but first message was not Started"
+            fmt::format(
+                "Item '{}' did not exist and first message was not 'Started'",
+                itemIdentifier
+            )
         );
         // We are not computing the location in here since doing it this way might stall
         // the main thread while trying to find a position for the new item
         _items.push_back({
+            itemIdentifier,
             itemName,
             ItemStatus::Started,
             newProgress,

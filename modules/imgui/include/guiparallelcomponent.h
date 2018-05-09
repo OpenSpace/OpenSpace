@@ -38,6 +38,7 @@ public:
     void render() override;
 private:
     void renderDisconnected();
+    void renderConnecting();
     void renderClientWithHost();
     void renderClientWithoutHost();
     void renderClientCommon();

@@ -72,6 +72,7 @@ public:
     std::string time() const;
     std::string simulationStart() const;
     std::string simulationEnd() const;
+    std::string getVisUnit(const std::string& variable) const;
     float elapsedTime() const;
 
     double minValue(const std::string& variable) const;

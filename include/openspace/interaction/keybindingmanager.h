@@ -40,8 +40,8 @@ namespace openspace::interaction {
 
 class KeyBindingManager : public DocumentationGenerator {
 public:
-    using IsLocalBind = ghoul::Boolean;
-    using IsSynchronized = ghoul::Boolean;
+    BooleanType(IsLocalBind);
+    BooleanType(IsSynchronized);
 
     struct KeyInformation {
         std::string command;
@@ -79,7 +79,6 @@ public:
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
 private:
-
     std::string generateJson() const override;
 
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;

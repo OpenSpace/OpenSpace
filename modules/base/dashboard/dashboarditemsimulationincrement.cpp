@@ -123,7 +123,7 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                              ghoul::Dictionary dictionary)
-    : DashboardItem("Simulation Increment")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)

@@ -30,6 +30,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/timemanager.h>
 
+// Apple uses 'defer' as named arguments in some functions, so unfortunately, we have to
+// undef our defer macro from ghoul/misc/defer.h
+#undef defer
 #import <AppKit/NSButton.h>
 #import <AppKit/NSCustomTouchBarItem.h>
 #import <AppKit/NSTouchBar.h>
@@ -78,6 +81,8 @@ NSArray* focusIdentifiers;
     - (NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
                         makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
     {
+        // @TODO(abock):  Potential memory leak here by returning an alloc?
+
         // Remove the unused variable warning
         (void)touchBar;
 
@@ -264,7 +269,7 @@ void showTouchbar() {
         nodes.begin(),
         nodes.end(),
         [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            return lhs->name() < rhs->name();
+            return lhs->guiName() < rhs->guiName();
         }
     );
 
@@ -273,7 +278,7 @@ void showTouchbar() {
         const std::vector<std::string>& tags = n->tags();
         auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {
-            [ids addObject: [NSString stringWithCString:n->name().c_str()
+            [ids addObject: [NSString stringWithCString:n->identifier().c_str()
                                       encoding:[NSString defaultCStringEncoding]]];
         }
     }

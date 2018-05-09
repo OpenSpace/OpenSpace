@@ -56,7 +56,7 @@ properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
     return tagMatchOwner;
 }
 
-void applyRegularExpression(lua_State* L, std::regex regex,
+void applyRegularExpression(lua_State* L, const std::string& regex,
                             std::vector<properties::Property*> properties,
                             double interpolationDuration,
                             const std::string& groupName,
@@ -68,11 +68,15 @@ void applyRegularExpression(lua_State* L, std::regex regex,
 
     const int type = lua_type(L, -1);
 
+    // Stores whether we found at least one matching property. If this is false at the end
+    // of the loop, the property name regex was probably misspelled.
+    bool foundMatching = false;
+    std::regex r(regex);
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
         std::string id = prop->fullyQualifiedIdentifier();
 
-        if (std::regex_match(id, regex)) {
+        if (std::regex_match(id, r)) {
             // If the fully qualified id matches the regular expression, we queue the
             // value change if the types agree
             if (isGroupMode) {
@@ -99,6 +103,8 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                     )
                 );
             } else {
+                foundMatching = true;
+
                 if (interpolationDuration == 0.0) {
                     OsEng.renderEngine().scene()->removeInterpolation(prop);
                     prop->setLuaValue(L);
@@ -113,6 +119,17 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                 }
             }
         }
+    }
+
+    if (!foundMatching) {
+        LERRORC(
+            "property_setValue",
+            fmt::format(
+                "{}: No property matched the requested URI '{}'",
+                errorLocation(L),
+                regex
+            )
+        );
     }
 }
 
@@ -270,7 +287,7 @@ int property_setValue(lua_State* L) {
         try {
             applyRegularExpression(
                 L,
-                std::regex(uriOrRegex),
+                uriOrRegex,
                 allProperties(),
                 interpolationDuration,
                 groupName,
@@ -291,7 +308,7 @@ int property_setValue(lua_State* L) {
         try {
             applyRegularExpression(
                 L,
-                std::regex(uriOrRegex),
+                uriOrRegex,
                 allProperties(),
                 interpolationDuration,
                 "",
@@ -439,9 +456,10 @@ int addSceneGraphNode(lua_State* L) {
 int removeSceneGraphNode(lua_State* L) {
     using ghoul::lua::errorLocation;
 
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
+    const int n = ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    std::string nodeName = luaL_checkstring(L, -1);
+    std::string nodeName = luaL_checkstring(L, 1);
+
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
     if (!node) {
         LERRORC(
@@ -458,14 +476,30 @@ int removeSceneGraphNode(lua_State* L) {
         );
         return 0;
     }
-    node->deinitializeGL();
-    parent->detachChild(*node);
+
+    std::function<void (SceneGraphNode*, SceneGraphNode*)> removeNode =
+        [&removeNode](SceneGraphNode* parent, SceneGraphNode* node) {
+            std::vector<SceneGraphNode*> children = node->children();
+
+            std::unique_ptr<SceneGraphNode> n = parent->detachChild(*node);
+            ghoul_assert(n.get() == node, "Wrong node returned from detaching");
+
+            for (SceneGraphNode* c : children) {
+                removeNode(n.get(), c);
+            }
+
+            node->deinitializeGL();
+            node->deinitialize();
+            n = nullptr;
+        };
+
+    removeNode(parent, node);
+
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
-
 
 int hasSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");

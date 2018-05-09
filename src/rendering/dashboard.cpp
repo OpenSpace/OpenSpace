@@ -49,14 +49,14 @@ Dashboard::Dashboard()
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
-    std::string originalName = item->name();
+    std::string originalIdentifier = item->identifier();
     int suffix = 1;
     while (true) {
         auto it = std::find_if(
             _items.begin(),
             _items.end(),
             [&item](const std::unique_ptr<DashboardItem>& i) {
-                return (i->name() == item->name());
+                return (i->identifier() == item->identifier());
             }
         );
 
@@ -65,7 +65,8 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
             break;
         }
         else {
-            item->setName(originalName + " " + std::to_string(suffix));
+            item->setIdentifier(originalIdentifier + std::to_string(suffix));
+            item->setGuiName(originalIdentifier + " " + std::to_string(suffix));
             ++suffix;
         }
     }
@@ -80,6 +81,23 @@ void Dashboard::removeDashboardItem(int index) {
     _items.erase(_items.begin() + index);
 }
 
+void Dashboard::removeDashboardItem(const std::string& identifier) {
+    const auto it = std::find_if(
+        _items.begin(),
+        _items.end(),
+        [&identifier](const std::unique_ptr<DashboardItem>& i) {
+            return i->identifier() == identifier;
+        }
+    );
+
+    if (it == _items.end()) {
+        return;
+    }
+
+    removePropertySubOwner(it->get());
+    _items.erase(it);
+}
+
 bool Dashboard::hasItem(int index) const {
     return (index >= 0) && (index < static_cast<int>(_items.size()));
 }
@@ -89,7 +107,7 @@ const DashboardItem& Dashboard::item(int index) const {
     return *_items[index];
 }
 
-void Dashboard::removeDashboardItems() {
+void Dashboard::clearDashboardItems() {
     for (const std::unique_ptr<DashboardItem>& item : _items) {
         removePropertySubOwner(item.get());
     }
@@ -120,8 +138,15 @@ scripting::LuaLibrary Dashboard::luaLibrary() {
                 "Adds a new dashboard item to the main dashboard."
             },
             {
-                "removeDashboardItems",
-                &luascriptfunctions::removeDashboardItems,
+                "removeDashboardItem",
+                &luascriptfunctions::removeDashboardItem,
+                {},
+                "string",
+                "Removes the dashboard item with the specified identifier."
+            },
+            {
+                "clearDashboardItems",
+                &luascriptfunctions::clearDashboardItems,
                 {},
                 "",
                 "Removes all dashboard items from the main dashboard."

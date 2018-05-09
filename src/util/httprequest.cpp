@@ -331,7 +331,7 @@ bool HttpFileDownload::initDownload() {
     {
         std::lock_guard<std::mutex> g(_directoryCreationMutex);
         if (!FileSys.directoryExists(d)) {
-            FileSys.createDirectory(d, ghoul::filesystem::Directory::Recursive::Yes);
+            FileSys.createDirectory(d, ghoul::filesystem::FileSystem::Recursive::Yes);
         }
     }
 
@@ -362,12 +362,14 @@ bool HttpFileDownload::initDownload() {
 
             std::string message(Buffer, size);
 
-            LERROR(fmt::format("Cannot open file {}: {}", destinationFile, message));
+            LERROR(fmt::format(
+                "Cannot open file {}: {}", std::string(destinationFile), message)
+            );
 
             return false;
         }
         else {
-            LERROR(fmt::format("Cannot open file {}", destinationFile));
+            LERROR(fmt::format("Cannot open file {}", std::string(destinationFile)));
             return false;
         }
 #else
@@ -376,21 +378,21 @@ bool HttpFileDownload::initDownload() {
             char buffer[255];
             LERROR(fmt::format(
                 "Cannot open file '{}': {}",
-                destinationFile,
+                std::string(destinationFile),
                 std::string(strerror_r(errno, buffer, sizeof(buffer)))
             ));
             return false;
 #else
             LERROR(fmt::format(
                 "Cannot open file '{}': {}",
-                destinationFile,
+                std::string(destinationFile),
                 std::string(strerror(errno))
             ));
             return false;
 #endif
         }
 
-        LERROR(fmt::format("Cannot open file {}", destinationFile));
+        LERROR(fmt::format("Cannot open file {}", std::string(destinationFile)));
         return false;
 #endif
     }

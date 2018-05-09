@@ -36,8 +36,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
@@ -80,21 +78,26 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "ScreenSpaceImage"
+        "ScreenSpaceImageOnline"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceImageOnline");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceImageOnline");
         }
         else {
-            setName("ScreenSpaceImageOnline " + std::to_string(id));
+            setIdentifier("ScreenSpaceImageOnline" + std::to_string(iIdentifier));
         }
         ++id;
+    }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceImageOnline " + std::to_string(iIdentifier));
     }
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
@@ -104,7 +107,6 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     if (dictionary.hasKey(TextureInfo.identifier)) {
         _texturePath = dictionary.value<std::string>(TextureInfo.identifier);
     }
-
 }
 
 void ScreenSpaceImageOnline::update() {

@@ -132,16 +132,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         dictionary,
         "RenderableModelProjection"
     );
-
-    std::string name;
-    [[ maybe_unused ]] bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "Name was not passed to RenderableModelProjection");
-
     using ghoul::Dictionary;
     Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
-    using modelgeometry::ModelGeometry;
-    geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-    _geometry = ModelGeometry::createFromDictionary(geometryDictionary);
+    _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
 
     _colorTexturePath = absPath(dictionary.value<std::string>(
         ColorTextureInfo.identifier
@@ -154,6 +147,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
 
     _projectionComponent.initialize(
+        identifier(),
         dictionary.value<ghoul::Dictionary>(keyProjection)
     );
 
@@ -263,7 +257,7 @@ void RenderableModelProjection::deinitializeGL() {
 
     _projectionComponent.deinitialize();
 
-    OsEng.renderEngine().removeRenderProgram(_programObject);
+    OsEng.renderEngine().removeRenderProgram(_programObject.get());
     _programObject = nullptr;
 }
 

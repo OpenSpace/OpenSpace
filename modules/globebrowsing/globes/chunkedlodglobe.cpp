@@ -56,8 +56,9 @@ const TileIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = TileIndex(1, 0, 1);
 const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
-                                 std::shared_ptr<LayerManager> layerManager)
-    : Renderable({ { "Name", owner.name() } })
+                                 std::shared_ptr<LayerManager> layerManager,
+                                 Ellipsoid& ellipsoid)
+    : Renderable({ { "Identifier", owner.identifier() }, { "Name", owner.guiName() } })
     , minSplitDepth(2)
     , maxSplitDepth(22)
     , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
@@ -87,7 +88,11 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     _chunkEvaluatorByDistance =
     std::make_unique<chunklevelevaluator::Distance>();
 
-    _renderer = std::make_unique<ChunkRenderer>(geometry, layerManager);
+    _renderer = std::make_unique<ChunkRenderer>(
+        geometry,
+        layerManager,
+        ellipsoid
+    );
 }
 
 // The destructor is defined here to make it feasiable to use a unique_ptr

@@ -31,8 +31,10 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
+    ${OPENSPACE_BASE_DIR}/src/engine/configuration.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/configuration_doc.inl
+    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
+    # ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
@@ -42,25 +44,29 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/camerainteractionstates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/joystickinputstate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/joystickcamerastates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/navigationhandler_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/interaction/mousestate.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/mousecamerastates.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
-    ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/network/parallelpeer.cpp
+    ${OPENSPACE_BASE_DIR}/src/network/parallelpeer_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/network/parallelserver.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/binaryproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
@@ -125,6 +131,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/loadingscreen.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
@@ -197,7 +204,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationgenerator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
-    ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/configuration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
@@ -206,26 +213,30 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/camerainteractionstates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickinputstate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/joystickcamerastates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousestate.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecamerastates.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/navigationhandler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelpeer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelserver.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemeasurement.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/binaryproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
@@ -299,6 +310,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/loadingscreen.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/luaconsole.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h

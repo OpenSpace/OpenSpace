@@ -1,0 +1,20 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://wms.itn.liu.se/Mars/Color/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>92160</SizeX>
+    <SizeY>46080</SizeY>
+    <TileLevel>7</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>GEOGCS["Mars2000",DATUM["D_Mars_2000",SPHEROID["Mars_2000_IAU_IAG",3396190,169.8944472236118]],PRIMEM["Greenwich",0],UNIT["Decimal_Degree",0.0174532925199433]]</Projection>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
+  <BandsCount>3</BandsCount>
+  <MaxConnections>10</MaxConnections>
+</GDAL_WMS>

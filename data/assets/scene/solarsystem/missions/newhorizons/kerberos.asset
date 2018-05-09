@@ -12,8 +12,8 @@ local textures = asset.syncedResource({
 })
 
 local Kerberos = {
-    Name = "Kerberos",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "Kerberos",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -38,12 +38,14 @@ local Kerberos = {
         },
         ColorTexture = textures .. "/gray.jpg"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local KerberosText = {
-    Name = "KerberosText",
-    Parent = Kerberos.Name,
+    Identifier = "KerberosText",
+    Parent = Kerberos.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -57,12 +59,15 @@ local KerberosText = {
         Billboard = true,
         Texture = textures .. "/Kerberos-Text.png"
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Kerberos Text",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 local KerberosTrail = {
-    Name = "KerberosTrail",
-    Parent = transforms.PlutoBarycenter.Name,
+    Identifier = "KerberosTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
     Renderable = {
         Type = "RenderableTrailOrbit",
         Translation = {
@@ -74,7 +79,10 @@ local KerberosTrail = {
         Period = 32.16756,
         Resolution = 1000
     },
-    GuiPath = "/Solar System/Dwarf Planets/Pluto"
+    GUI = {
+        Name = "Kerberos Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
 }
 
 

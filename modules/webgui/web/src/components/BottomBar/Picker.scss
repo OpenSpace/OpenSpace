@@ -1,0 +1,45 @@
+@import "../../styles/all";
+
+.Picker {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  padding: $button-padding;
+  text-shadow: 0 1px 10px rgba(#000, 0.5);
+
+  &:hover,
+  &:focus {
+    background: $ui-background-hover;
+    outline: none;
+    text-shadow: none;
+  }
+
+  &.Active {
+    background: $ui-background;
+  }
+}
+
+.Title {
+  display: flex;
+  flex-direction: column;
+}
+
+.Name {
+  font-size: 1.2rem;
+  height: 21px;
+  line-height: 1;
+}
+
+.Wrapper {
+  position: relative;
+}
+
+.Popover {
+  bottom: unquote("calc(100% + #{$popover-arrow-size})");
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 10;
+}
+

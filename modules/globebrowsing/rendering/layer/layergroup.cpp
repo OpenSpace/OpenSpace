@@ -43,7 +43,10 @@ namespace {
 namespace openspace::globebrowsing {
 
 LayerGroup::LayerGroup(layergroupid::GroupID id)
-    : properties::PropertyOwner({ std::move(layergroupid::LAYER_GROUP_NAMES[id]) })
+    : properties::PropertyOwner({
+        layergroupid::LAYER_GROUP_IDENTIFIERS[id],
+        layergroupid::LAYER_GROUP_NAMES[id]
+    })
     , _groupId(id)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {
@@ -104,14 +107,14 @@ void LayerGroup::update() {
 }
 
 std::shared_ptr<Layer> LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
-    if (!layerDict.hasKeyAndValue<std::string>("Name")) {
-        LERROR("'Name' must be specified for layer.");
+    if (!layerDict.hasKeyAndValue<std::string>("Identifier")) {
+        LERROR("'Identifier' must be specified for layer.");
         return nullptr;
     }
     auto layer = std::make_shared<Layer>(_groupId, layerDict, *this);
     layer->onChange(_onChangeCallback);
-    if (hasPropertySubOwner(layer->name())) {
-        LINFO("Layer with name " + layer->name() + " already exists.");
+    if (hasPropertySubOwner(layer->identifier())) {
+        LINFO("Layer with identifier " + layer->identifier() + " already exists.");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
         return nullptr;
     }
@@ -132,7 +135,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
          it != _layers.end();
          ++it)
     {
-        if (it->get()->name() == layerName) {
+        if (it->get()->identifier() == layerName) {
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             _layers.erase(it);

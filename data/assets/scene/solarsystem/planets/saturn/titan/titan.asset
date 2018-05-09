@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Titan = {
-    Name = "Titan",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Titan",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Titan = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Titan Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/titan.jpg",
                     Enabled = true
                 }
@@ -43,7 +43,9 @@ local Titan = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Saturn/Moons"
+    }
 }
 
 

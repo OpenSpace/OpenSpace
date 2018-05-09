@@ -222,7 +222,7 @@ private:
 
 class HttpFileDownload : public virtual HttpDownload {
 public:
-    using Overwrite = ghoul::Boolean;
+    BooleanType(Overwrite);
 
     HttpFileDownload() = default;
     HttpFileDownload(std::string destination, Overwrite = Overwrite::No);

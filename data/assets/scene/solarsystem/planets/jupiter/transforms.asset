@@ -5,8 +5,8 @@ asset.require("spice/base")
 
 
 local JupiterBarycenter = {
-    Name = "JupiterBarycenter",
-    Parent = sun_transforms_asset.SolarSystemBarycenter.Name,
+    Identifier = "JupiterBarycenter",
+    Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -14,7 +14,11 @@ local JupiterBarycenter = {
             Observer = "SUN"
         }
     },
-    GuiPath = "/Solar System/Planets/Jupiter"
+    GUI = {
+        Name = "Jupiter Barycenter",
+        Path = "/Solar System/Planets/Jupiter",
+        Hidden = true
+    }
 }
 
 

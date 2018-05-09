@@ -183,7 +183,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
 }
 
 DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
-    : DashboardItem("Distance")
+    : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)
@@ -381,7 +381,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
 
     switch (mainComp.type) {
         case Type::Node:
-            return { mainComp.node->worldPosition(), mainComp.node->name() };
+            return { mainComp.node->worldPosition(), mainComp.node->guiName() };
         case Type::NodeSurface:
         {
             glm::dvec3 otherPos;
@@ -398,7 +398,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             glm::dvec3 dir = glm::normalize(otherPos - thisPos);
             glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            return { thisPos + dirLength, "surface of " + mainComp.node->name() };
+            return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
         }
         case Type::Focus:
             return {
@@ -406,7 +406,7 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
                 "focus"
             };
         case Type::Camera:
-            return { OsEng.renderEngine().camera()->positionVec3(), "camera" };
+            return { OsEng.renderEngine().scene()->camera()->positionVec3(), "camera" };
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }

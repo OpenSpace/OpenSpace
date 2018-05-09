@@ -48,6 +48,7 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
+    void internalDeinitialize() override;
 
 private:
     TorrentClient _torrentClient;

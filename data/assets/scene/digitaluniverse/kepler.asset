@@ -17,7 +17,7 @@ local speck = asset.syncedResource({
 })
 
 local object = {
-    Name = "Kepler Planetary Candidates",
+    Identifier = "KeplerPlanetaryCandidates",
     Renderable = {
         Type = "RenderableBillboardsCloud",
         Enabled = false,
@@ -28,7 +28,10 @@ local object = {
         Texture = textures .. "/halo.png",
         Unit = "pc"
     },
-    GuiPath = "/Milky Way/Exoplanets"
+    GUI = {
+        Name = "Kepler Planetary Candidates",
+        Path = "/Milky Way/Exoplanets"
+    }
 }
 
 

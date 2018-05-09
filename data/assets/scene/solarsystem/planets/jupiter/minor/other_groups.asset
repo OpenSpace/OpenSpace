@@ -5,120 +5,144 @@ local kernels341 = asset.require('../jup341').Kernels
 
 
 
-local parentName = transforms.JupiterBarycenter.Name
+local parentIdentifier = transforms.JupiterBarycenter.Identifier
 local parentSpice = "JUPITER BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_other" }
 local trailColor = { 0.4, 0.3, 0.01 }
 
 local otherGroups = {
     {
-        Name = "S/2003 J 12",
+        Identifier = "S2003J12",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55066",
         Radii = { 1000, 1000, 1000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 12",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 482.69,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 3",
+        Identifier = "S/2003J3",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55061",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 3",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 561.52,
         Kernels = kernels341
     },
     {
-        Name = "S/2011 J 1",
+        Identifier = "S2011J1",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55074",
         Radii = { 1000, 1000, 1000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2011 J 1",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 582.22,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 19",
+        Identifier = "S2003J19",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55070",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 19",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 699.12,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 10",
+        Identifier = "S2003J10",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55065",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 10",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 700.13,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 23",
+        Identifier = "S2003J23",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55071",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 23",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 700.54,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 9",
+        Identifier = "S2003J9",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55064",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 9",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 752.84,
         Kernels = kernels341
     },
     {
-        Name = "S/2003 J 2",
+        Identifier = "S2003J2",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "55060",
         Radii = { 2000, 2000, 2000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Jupiter/Moons/Other Groups",
+        GUI = {
+            Name = "S/2003 J 2",
+            Path = "/Solar System/Planets/Jupiter/Moons/Other Groups"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 981.55,
         Kernels = kernels341

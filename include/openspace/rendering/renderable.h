@@ -101,7 +101,7 @@ public:
 protected:
     properties::BoolProperty _enabled;
     properties::FloatProperty _opacity;
-    
+
     void registerUpdateRenderBinFromOpacity();
 
 private:

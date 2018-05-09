@@ -53,6 +53,14 @@ namespace {
         "elements not listed."
     };
 
+    static const openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
+        "IgnoreHidden",
+        "Ignore Hidden Hint",
+        "If this value is 'true', all 'Hidden' hints passed into the SceneGraphNodes are "
+        "ignored and thus all SceneGraphNodes are displayed. If this value is 'false', "
+        "the hidden hints are followed."
+    };
+
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props,
         openspace::properties::Property::Visibility visibility)
     {
@@ -98,8 +106,8 @@ namespace {
             node.children.begin(),
             node.children.end(),
             [p = *path.begin()](const std::unique_ptr<TreeNode>& c) {
-            return c.get()->path == p;
-        }
+                return c.get()->path == p;
+            }
         );
 
         TreeNode* n;
@@ -112,7 +120,6 @@ namespace {
             std::unique_ptr<TreeNode> newNode = std::make_unique<TreeNode>(*path.begin());
             n = newNode.get();
             node.children.push_back(std::move(newNode));
-
         }
 
         // Recurse into the tree and chop off the first path
@@ -162,13 +169,16 @@ namespace {
 
 namespace openspace::gui {
 
-GuiPropertyComponent::GuiPropertyComponent(std::string name, UseTreeLayout useTree)
-    : GuiComponent(std::move(name))
+GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string guiName,
+                                           UseTreeLayout useTree)
+    : GuiComponent(std::move(identifier), std::move(guiName))
     , _useTreeLayout(UseTreeInfo, useTree)
     , _treeOrdering(OrderingInfo)
+    , _ignoreHiddenHint(IgnoreHiddenInfo)
 {
     addProperty(_useTreeLayout);
     addProperty(_treeOrdering);
+    addProperty(_ignoreHiddenHint);
 }
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
@@ -189,7 +199,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     }
 
     int nThisProperty = nVisibleProperties(owner->properties(), _visibility);
-    ImGui::PushID(owner->name().c_str());
+    ImGui::PushID(owner->identifier().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {
         std::vector<properties::Property*> properties = subOwner->propertiesRecursive();
@@ -201,7 +211,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
             renderPropertyOwner(subOwner);
         }
         else {
-            bool opened = ImGui::TreeNode(subOwner->name().c_str());
+            bool opened = ImGui::TreeNode(subOwner->guiName().c_str());
             renderTooltip(subOwner);
             if (opened) {
                 renderPropertyOwner(subOwner);
@@ -252,7 +262,7 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
-    ImGui::Begin(name().c_str(), &v, Size, 0.75f);
+    ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
@@ -265,7 +275,7 @@ void GuiPropertyComponent::render() {
             owners.begin(),
             owners.end(),
             [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
-                return lhs->name() < rhs->name();
+                return lhs->guiName() < rhs->guiName();
             }
         );
 
@@ -358,11 +368,11 @@ void GuiPropertyComponent::render() {
             auto header = [&]() -> bool {
                 if (owners.size() > 1) {
                     // Create a header in case we have multiple owners
-                    return ImGui::CollapsingHeader(pOwner->name().c_str());
+                    return ImGui::CollapsingHeader(pOwner->guiName().c_str());
                 }
-                else if (!pOwner->name().empty()) {
+                else if (!pOwner->identifier().empty()) {
                     // If the owner has a name, print it first
-                    ImGui::Text("%s", pOwner->name().c_str());
+                    ImGui::Text("%s", pOwner->guiName().c_str());
                     ImGui::Spacing();
                     return true;
                 }
@@ -378,6 +388,25 @@ void GuiPropertyComponent::render() {
         };
 
         if (!_useTreeLayout || noGuiGroups) {
+            if (!_ignoreHiddenHint) {
+                // Remove all of the nodes that we want hidden first
+                owners.erase(
+                    std::remove_if(
+                        owners.begin(),
+                        owners.end(),
+                        [](properties::PropertyOwner* p) {
+                    SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
+                    if (s && s->hasGuiHintHidden()) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                    ),
+                    owners.end()
+                    );
+            }
             std::for_each(owners.begin(), owners.end(), renderProp);
         }
         else { // _useTreeLayout && gui groups exist
@@ -386,6 +415,9 @@ void GuiPropertyComponent::render() {
             for (properties::PropertyOwner* pOwner : owners) {
                 // We checked above that pOwner is a SceneGraphNode
                 SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
+                if (!_ignoreHiddenHint && nOwner->hasGuiHintHidden()) {
+                    continue;
+                }
 
                 if (nOwner->guiPath().empty()) {
                     // We know that we are done now since we stable_sort:ed them above
@@ -463,7 +495,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
             if (owner) {
                 it->second(
                     prop,
-                    owner->name(),
+                    owner->identifier(),
                     IsRegularProperty(_hasOnlyRegularProperties),
                     ShowToolTip(_showHelpTooltip),
                     _tooltipDelay
