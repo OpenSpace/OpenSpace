@@ -158,7 +158,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     metadata.hasDomainUnit = true;
     metadata.domainUnit = "m";
     metadata.hasValueUnit = true;
-    metadata.valueUnit = "kg/m^3";
+    metadata.valueUnit = "K";
     metadata.gridType = VolumeGridType::Cartesian;
     metadata.hasDomainBounds = true;
     metadata.lowerDomainBound = _lowerDomainBound;
