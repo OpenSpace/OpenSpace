@@ -24,18 +24,21 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <sstream>
-#include <ghoul/opengl/programobject.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <sstream>
+
 namespace {
-    const char* GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
-    const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
-    const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
+    const char* GlslRaycastPath = "${MODULE_TOYVOLUME}/shaders/raycast.glsl";
+    const char* GlslBoundsVsPath = "${MODULE_TOYVOLUME}/shaders/boundsvs.glsl";
+    const char* GlslBoundsFsPath = "${MODULE_TOYVOLUME}/shaders/boundsfs.glsl";
 } // namespace
 
 namespace openspace {
@@ -57,9 +60,8 @@ void ToyVolumeRaycaster::deinitialize() {
 void ToyVolumeRaycaster::renderEntryPoints(const RenderData& data,
                                            ghoul::opengl::ProgramObject& program)
 {
-    program.setUniform("modelTransform", _modelTransform);
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, data.camera, data.position);
 
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -73,9 +75,8 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
                                           ghoul::opengl::ProgramObject& program)
 {
     // Uniforms
-    program.setUniform("modelTransform", _modelTransform);
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform(data)));
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, data.camera, data.position);
 
     // Cull front face
     glEnable(GL_CULL_FACE);
@@ -86,6 +87,16 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
 
     // Restore defaults
     glCullFace(GL_BACK);
+}
+
+glm::dmat4 ToyVolumeRaycaster::modelViewTransform(const RenderData& data) {
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+        glm::dmat4(_modelTransform);
+
+    return data.camera.combinedViewMatrix() * modelTransform;
 }
 
 void ToyVolumeRaycaster::preRaycast(const RaycastData& data,
@@ -103,16 +114,29 @@ void ToyVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramO
     // For example: release texture units
 }
 
+bool ToyVolumeRaycaster::cameraIsInside(const RenderData& data,
+    glm::vec3& localPosition)
+{
+    glm::vec4 modelPos =
+        glm::inverse(modelViewTransform(data)) * glm::vec4(0.0, 0.0, 0.0, 1.0);
+
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
+
+    return (localPosition.x > 0 && localPosition.x < 1 &&
+        localPosition.y > 0 && localPosition.y < 1 &&
+        localPosition.z > 0 && localPosition.z < 1);
+}
+
 std::string ToyVolumeRaycaster::getBoundsVsPath() const {
-    return GlslBoundsVsPath;
+    return absPath(GlslBoundsVsPath);
 }
 
 std::string ToyVolumeRaycaster::getBoundsFsPath() const {
-    return GlslBoundsFsPath;
+    return absPath(GlslBoundsFsPath);
 }
 
 std::string ToyVolumeRaycaster::getRaycastPath() const {
-    return GlslRaycastPath;
+    return absPath(GlslRaycastPath);
 }
 
 std::string ToyVolumeRaycaster::getHelperPath() const {

@@ -72,6 +72,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         }
 
         vec4 color = texture(transferFunction_#{id}, val);
+
         vec3 backColor = color.rgb;
         vec3 backAlpha = color.aaa;
 

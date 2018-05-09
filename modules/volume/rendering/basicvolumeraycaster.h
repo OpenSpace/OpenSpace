@@ -33,8 +33,8 @@
 #include <ghoul/opengl/texture.h>
 
 #include <openspace/rendering/volumeraycaster.h>
-#include <openspace/util/boxgeometry.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/boxgeometry.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <modules/volume/volumegridtype.h>
@@ -56,7 +56,7 @@ class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunction> transferFunction,
+        std::shared_ptr<openspace::TransferFunction> transferFunction,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     virtual ~BasicVolumeRaycaster();
     void initialize();
@@ -81,7 +81,7 @@ public:
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
     void setTransferFunction(
-        std::shared_ptr<TransferFunction> transferFunction);
+        std::shared_ptr<openspace::TransferFunction> transferFunction);
 
     void setStepSize(float stepSize);
     float opacity() const;
@@ -100,7 +100,7 @@ private:
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform;

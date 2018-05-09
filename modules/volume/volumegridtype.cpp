@@ -38,6 +38,14 @@ VolumeGridType parseGridType(const std::string& gridType) {
     throw InvalidGridTypeError(gridType);
 }
 
+std::string gridTypeToString(VolumeGridType gridType) {
+    switch (gridType) {
+    case VolumeGridType::Cartesian: return "Cartesian";
+    case VolumeGridType::Spherical: return "Spherical";
+    }
+    return "Unknown";
+}
+
 InvalidGridTypeError::InvalidGridTypeError(std::string gt)
     : RuntimeError("Invalid grid type: '" + gt + "'")
     , gridType(std::move(gt))

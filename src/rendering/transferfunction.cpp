@@ -93,7 +93,7 @@ ghoul::opengl::Texture& TransferFunction::getTexture() {
 
 void TransferFunction::update() {
     if (_needsUpdate) {
-        if (hasExtension(_filepath, "tf")) {
+        if (hasExtension(_filepath, "txt")) {
             setTextureFromTxt();
         } else {
             setTextureFromImage();

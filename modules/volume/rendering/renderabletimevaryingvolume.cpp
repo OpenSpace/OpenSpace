@@ -47,7 +47,6 @@ namespace {
 } // namespace
 
 namespace {
-    const char* KeyDimensions = "Dimensions";
     const char* KeyStepSize = "StepSize";
     const char* KeyTransferFunction = "TransferFunction";
     const char* KeySourceDirectory = "SourceDirectory";
@@ -58,11 +57,7 @@ namespace {
     const char* KeyClipPlanes = "ClipPlanes";
     const char* KeySecondsBefore = "SecondsBefore";
     const char* KeySecondsAfter = "SecondsAfter";
-    const char* KeyGridType = "GridType";
-    const char* KeyMinValue = "MinValue";
-    const char* KeyMaxValue = "MaxValue";
-    const char* KeyTime = "Time";
-    const char* KeyUnit = "VisUnit";
+
     const float SecondsInOneDay = 60 * 60 * 24;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
@@ -173,6 +168,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
+
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -184,8 +180,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
-    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
-
+    _transferFunction = std::make_shared<openspace::TransferFunction>(
+        _transferFunctionPath,
+        [](const openspace::TransferFunction&) {}
+    );
 
     _gridType.addOptions({
         { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
@@ -208,12 +206,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasValue<std::string>(KeyGridType)) {
+    /*if (dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
             dictionary.value<std::string>(KeyGridType)
         );
         _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
-    }
+    }*/
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -238,9 +236,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         if (extension == "dictionary") {
             loadTimestepMetadata(path);
         }
-        /*if (extension == "tf") {
-            _transferFunctionHandler->setFilepath(path);
-        }*/
     }
 
 
@@ -250,11 +245,11 @@ void RenderableTimeVaryingVolume::initializeGL() {
         std::string path = FileSys.pathByAppendingComponent(
             _sourceDirectory, t.baseName
         ) + ".rawvolume";
-        RawVolumeReader<float> reader(path, t.dimensions);
+        RawVolumeReader<float> reader(path, t.metadata.dimensions);
         t.rawVolume = reader.read();
 
-        float min = t.minValue;
-        float diff = t.maxValue - t.minValue;
+        float min = t.metadata.minValue;
+        float diff = t.metadata.maxValue - t.metadata.minValue;
         float *data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
@@ -268,7 +263,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
-            t.dimensions,
+            t.metadata.dimensions,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
             GL_FLOAT,
@@ -316,8 +311,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());
-    // addPropertySubOwner(_transferFunctionHandler.get());
-
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
     addProperty(_currentTimestep);
@@ -348,14 +341,17 @@ void RenderableTimeVaryingVolume::initializeGL() {
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
-    ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-    documentation::testSpecificationAndThrow(
-        TimestepDocumentation(),
-        dictionary,
-        "TimeVaryingVolumeTimestep"
-    );
+    RawVolumeMetadata metadata;
+
+    try {
+        ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+        metadata = RawVolumeMetadata::CreateFromDictionary(dictionary);
+    } catch (...) {
+        return;
+    }
 
     Timestep t;
+    t.metadata = metadata;
     t.baseName = ghoul::filesystem::File(path).baseName();
     t.dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     t.lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
@@ -367,10 +363,11 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);
     // t.time = Time::convertTime("2012-07-01T00:00:00.001");
+
     t.inRam = false;
     t.onGpu = false;
 
-    _volumeTimesteps[t.time] = std::move(t);
+    _volumeTimesteps[t.metadata.time] = std::move(t);
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
@@ -384,14 +381,16 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     if (currentTimestepIt == _volumeTimesteps.end()) {
         // No such timestep was found: show last timestep if it is within the time margin.
         Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
-        double threshold = lastTimestep->time + static_cast<double>(_secondsAfter);
+        double threshold = lastTimestep->metadata.time +
+            static_cast<double>(_secondsAfter);
         return currentTime < threshold ? lastTimestep : nullptr;
     }
 
     if (currentTimestepIt == _volumeTimesteps.begin()) {
         // No such timestep was found: show first timestep if it is within the time margin
         Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
-        double threshold = firstTimestep->time - static_cast<double>(_secondsBefore);
+        double threshold = firstTimestep->metadata.time -
+            static_cast<double>(_secondsBefore);
         return currentTime >= threshold ? firstTimestep : nullptr;
     }
 
@@ -437,7 +436,7 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     if (!t) {
         return;
     }
-    OsEng.timeManager().setTimeNextFrame(t->time);
+    OsEng.timeManager().setTimeNextFrame(t->metadata.time);
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData&) {
@@ -448,9 +447,10 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         _currentTimestep = timestepIndex(t);
         if (t && t->texture) {
             if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
-                glm::dvec3 scale = t->upperDomainBound - t->lowerDomainBound;
+                glm::dvec3 scale = t->metadata.upperDomainBound -
+                    t->metadata.lowerDomainBound;
                 glm::dvec3 translation =
-                    (t->lowerDomainBound + t->upperDomainBound) * 0.5f;
+                    (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
 
                 glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
                 glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
@@ -460,7 +460,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 _raycaster->setModelTransform(
                     glm::scale(
                         glm::dmat4(1.0),
-                        glm::dvec3(t->upperDomainBound[0])
+                        glm::dvec3(t->metadata.upperDomainBound[0])
                     )
                 );
             }
@@ -481,6 +481,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             /*_transferFunctionHandler->setUnit(t->unit);
             _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
             _transferFunctionHandler->setHistogramProperty(t->histogram);*/
+
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }
@@ -527,12 +528,6 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
                 "Specifies the transfer function file path"
             },
             {
-                KeyGridType,
-                new StringInListVerifier({"Cartesian", "Spherical"}),
-                Optional::Yes,
-                "Specifies the grid type"
-            },
-            {
                 KeySecondsBefore,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -550,52 +545,6 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
     };
 }
 
-
-documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation() {
-    using namespace documentation;
-    return {
-        "TimevaryingVolumeTimestep",
-        "volume_timevaryingvolumetimestep",
-        {
-            {
-                KeyLowerDomainBound,
-                new Vector3Verifier<float>,
-                Optional::No,
-                "Specifies the lower domain bounds in the model coordinate system",
-            },
-            {
-                KeyUpperDomainBound,
-                new Vector3Verifier<float>,
-                Optional::No,
-                "Specifies the upper domain bounds in the model coordinate system",
-            },
-            {
-                KeyDimensions,
-                new Vector3Verifier<float>,
-                Optional::No,
-                "Specifies the number of grid cells in each dimension",
-            },
-            {
-                KeyTime,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
-            },
-            {
-                KeyMinValue,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the minimum value stored in the volume"
-            },
-            {
-                KeyMaxValue,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the maximum value stored in the volume"
-            }
-        }
-    };
-}
 
 } // namespace volume
 } // namespace openspace

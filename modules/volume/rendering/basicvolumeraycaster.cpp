@@ -47,7 +47,8 @@ namespace openspace::volume {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-    std::shared_ptr<TransferFunction> transferFunction,
+    std::shared_ptr<openspace::TransferFunction> transferFunction,
+
     std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _volumeTexture(volumeTexture)
     , _transferFunction(transferFunction)
@@ -113,7 +114,6 @@ void BasicVolumeRaycaster::preRaycast(
     const RaycastData& data,
     ghoul::opengl::ProgramObject& program)
 {
-
     if (!_volumeTexture || !_transferFunction) {
         return;
     }
@@ -123,11 +123,10 @@ void BasicVolumeRaycaster::preRaycast(
 
     std::string id = std::to_string(data.id);
 
+    _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-
     _transferFunction->getTexture().bind();
-    // LINFOC("PRERAYCAST", "hello");
 
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
@@ -188,7 +187,7 @@ std::string BasicVolumeRaycaster::getHelperPath() const {
 
 
 void BasicVolumeRaycaster::setTransferFunction(
-    std::shared_ptr<TransferFunction> transferFunction)
+    std::shared_ptr<openspace::TransferFunction> transferFunction)
 {
     _transferFunction = transferFunction;
 }
