@@ -278,6 +278,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setGuiName("Clip Planes");
 
     if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
+
         VolumeGridType gridType = volume::parseGridType(
            dictionary.value<std::string>(KeyGridType)
         );
@@ -425,6 +426,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     std::string timeString = dictionary.value<std::string>(KeyTime);
     t.time = Time::convertTime(timeString);
     // t.time = Time::convertTime("2012-07-01T00:00:00.001");
+
     t.inRam = false;
     t.onGpu = false;
 
