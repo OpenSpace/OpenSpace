@@ -7,14 +7,17 @@ import * as timeHelpers from "../../../utils/timeHelpers";
 import ScaleInput from "../../common/Input/ScaleInput/ScaleInput";
 
 class TimeController extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
+
+    this.mounted = false;
 
     this.state = {
       paused: false,
       time: new Date(),
       hasTime: false,
-      subscriptionId: -1,
+      subscriptionIdCurrent: -1,
+      subscriptionIdDelta: -1,
       deltaTime: 1,
     };
 
@@ -24,19 +27,24 @@ class TimeController extends Component {
 
     this.setDate = this.setDate.bind(this);
     this.setSimulationSpeed = this.setSimulationSpeed.bind(this);
-
   }
 
+
   componentDidMount() {
+    this.mounted = true;
     // subscribe to data
-    this.state.subscriptionId = DataManager
+    this.state.subscriptionIdCurrent = DataManager
       .subscribe(CurrenTimeKey, this.currentTimeCallback, TopicTypes.time);
-    DataManager.subscribe(DeltaTime, this.deltaTimeCallback, TopicTypes.time);
+    this.state.subscriptionIdDelta = DataManager
+      .subscribe(DeltaTime, this.deltaTimeCallback, TopicTypes.time);
   }
 
   componentWillUnmount() {
-    DataManager.unsubscribe(CurrenTimeKey, subscriptionId);
-    DataManager.unsubscribe(DeltaTime, this.deltaTimeCallback);
+    // TODO timetopic have no unsubscribe function, therefore this.mounted is used as a workaround.
+    this.mounted = false;
+    // DataManager.unsubscribe(CurrenTimeKey, this.state.subscriptionIdCurrent);
+    // DataManager.unsubscribe(DeltaTime, this.state.subscriptionIdDelta);
+    // this.setState({ subscriptionIdCurrent: -1, subscriptionIdDelta: -1 });
   }
 
   get time() {
@@ -49,11 +57,15 @@ class TimeController extends Component {
    */
   currentTimeCallback(message) {
     const time = new Date(timeHelpers.DateStringWithTimeZone(message.time));
-    this.setState({ time, hasTime: true });
+    if (this.mounted) {
+      this.setState({ time, hasTime: true });
+    }
   }
 
-  deltaTimeCallback({deltaTime}) {
-    this.setState({deltaTime});
+  deltaTimeCallback({ deltaTime }) {
+    if (this.mounted) {
+      this.setState({ deltaTime });
+    }
   }
 
   setDate(time) {

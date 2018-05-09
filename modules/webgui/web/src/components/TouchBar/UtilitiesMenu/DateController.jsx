@@ -90,11 +90,12 @@ DateController.propTypes = {
       planet: PropTypes.string,
       location: PropTypes.object,
     }),
-  ).isRequired,
+  ),
 };
 
 DateController.defaultProps = {
   onChangeSight: () => {},
+  dateList: [],
 };
 
 export default DateController;

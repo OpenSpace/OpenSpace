@@ -30,7 +30,8 @@ const std::string _loggerCat = "WebGui";
 
 namespace openspace {
 
-WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {}
-
+ WebGuiModule::WebGuiModule() : OpenSpaceModule(WebGuiModule::Name) {
+    addPropertySubOwner(storyHandler);
+ }
 }
 

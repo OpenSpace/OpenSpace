@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include "storyhandler.h"
 
 namespace openspace {
 
@@ -33,6 +34,8 @@ class WebGuiModule : public OpenSpaceModule {
 public:
     static constexpr const char* Name = "WebGui";
     WebGuiModule();
+
+    webgui::StoryHandler storyHandler;
 };
 
 } // namespace openspace

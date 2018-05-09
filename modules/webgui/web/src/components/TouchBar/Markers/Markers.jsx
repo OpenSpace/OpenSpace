@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import MarkerInfo from './MarkerInfo';
 import { traverseTreeWithURI, jsonToLuaTable } from '../../../utils/propertyTreeHelpers';
 import { startListening, stopListening } from '../../../api/Actions/index';
-import { infoIconKey, StoryKey } from '../../../api/keys';
+import { FocusNodesListKey, infoIconKey } from '../../../api/keys';
+import { fromStringToArray } from '../../../utils/storyHelpers';
 
 class Markers extends Component {
   componentDidUpdate() {
@@ -102,15 +103,15 @@ const mapStateToProps = (state) => {
   const screenSpaceRadius = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
-    const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
     const rootNodes = state.propertyTree.subowners
       .filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
 
-    nodes = nodes.filter(node => node.tag.some(tag => tag.includes(storyIdentifierNode.Value)))
-      .map(node => Object.assign(node, { key: node.identifier }));
+    const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
+    nodes = nodes.filter(node =>
+      (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
 
     nodes.forEach((node) => {
       screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSpacePosition`));

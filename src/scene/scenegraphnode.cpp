@@ -563,7 +563,7 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
 
     //LDEBUG(fmt::format("STORY IDENTIFIER {}", _scene->storyIdentifier()));
 
-    const std::string tag = _scene->storyIdentifier();
+    const std::string tag = "Story.Interesting";
 
     if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
 

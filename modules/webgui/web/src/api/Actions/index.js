@@ -89,3 +89,10 @@ export const fetchDataFailed = (id) => ({
     id,
   }
 });
+
+export const addStoryTree = story => ({
+  type: actionTypes.addStoryTree,
+  payload: {
+    story,
+  },
+});

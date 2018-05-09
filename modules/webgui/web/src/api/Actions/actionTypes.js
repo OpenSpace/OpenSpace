@@ -33,4 +33,7 @@ export const actionTypes = {
   toggleActiveEnvelope: 'TRANSFERFUNCTION_TOGGLE_ACTIVE_ENVELOPE',
   toggleActivePoint: 'TRANSFERFUNCTION_TOGGLE_ACTIVE_POINT',
   setClickablePoint: 'TRANSFERFUNCTION_TOGGLE_CLICKABLE_POINT',
+
+  // actions types for story tree
+  addStoryTree: 'STORY_TREE_ADD',
 };

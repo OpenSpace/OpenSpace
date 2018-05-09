@@ -1,0 +1,18 @@
+{
+  "storyidentifier":"story_solarsystem",
+  "overviewlimit": "2.2e+13",
+  "focusbuttons": "\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\"",
+  "focusbuttonslist": ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"],
+  "timecontroller": "true",
+  "datecontroller":  "false",
+  "sighscontroller" : "false",
+  "start": {
+    "planet": "Earth",
+    "time": "openspace.time.currentWallTime()",
+    "location": {
+      "latitude": "40.758701",
+      "longitude": "-111.876183",
+      "attitude": "20000000"
+    }
+  }
+}

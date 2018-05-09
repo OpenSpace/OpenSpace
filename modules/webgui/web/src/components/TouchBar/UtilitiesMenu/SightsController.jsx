@@ -37,14 +37,14 @@ class SightsController extends Component {
   get sightsButtons() {
     return (this.props.sightsList.map(sight => (
       <Button
-        key={sight.place}
+        key={sight.info}
         smalltext
         block
         onClick={this.selectSight}
-        id={sight.place}
+        id={sight.info}
       >
-        <SmallLabel id={sight.place} style={{ float: 'left' }}>
-          {sight.planet},{sight.place}
+        <SmallLabel id={sight.info} style={{ float: 'left' }}>
+          {sight.planet},{sight.info}
         </SmallLabel>
       </Button>
     )));
@@ -52,7 +52,7 @@ class SightsController extends Component {
 
   selectSight(e) {
     this.togglePopover();
-    const selectedSight = this.props.sightsList.find(sight => sight.place === e.target.id);
+    const selectedSight = this.props.sightsList.find(sight => sight.info === e.target.id);
     this.props.onChangeSight(selectedSight);
   }
 
@@ -81,11 +81,12 @@ SightsController.propTypes = {
       planet: PropTypes.string,
       location: PropTypes.object,
     }),
-  ).isRequired,
+  ),
 };
 
 SightsController.defaultProps = {
   onChangeSight: () => {},
+  sightsList: [],
 };
 
 

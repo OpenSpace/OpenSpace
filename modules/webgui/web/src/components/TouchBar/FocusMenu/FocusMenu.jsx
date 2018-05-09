@@ -3,12 +3,13 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import FocusButton from './FocusButton';
-import { OriginKey, ApplyOverviewKey, StoryKey } from '../../../api/keys';
+import { OriginKey, ApplyOverviewKey, FocusNodesListKey, ApplyFlyToKey } from '../../../api/keys';
 import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
 import styles from './FocusMenu.scss';
 import OverViewButton from './OverViewButton';
 import {throttle} from "lodash/function";
+import { fromStringToArray } from '../../../utils/storyHelpers';
 
 const UpdateDelayMs = 1000;
 
@@ -18,33 +19,29 @@ class FocusMenu extends Component {
 
     this.state = {
       origin: '',
-      listening: false,
     };
 
     this.triggerChanges = throttle(this.triggerChanges.bind(this), UpdateDelayMs);
   }
 
-  componentDidUpdate(nextProps, nextState) {
-    // If a focus button is clicked change property value
-    if (this.state.listening && nextState.origin !== this.state.origin) {
-      this.props.ChangePropertyValue(this.props.originNode.Description, this.state.origin);
-    }
-    // If changes are made in another gui update state
-    if (this.state.listening && nextState.origin !== this.props.originNode.Value) {
-      this.setState({ origin: this.props.originNode.Value });
-    }
-    // Start listening on the origin property property
-    if (!this.state.listening && this.props.nodes.length > 0) {
-      this.props.StartListening(OriginKey);
-      this.setState({ 
-        origin: this.props.originNode.Value,
-        listening: true });
+  componentDidUpdate() {
+    if (this.props.originNode.length !== 0) {
+      if (this.props.originNode.listeners <= 0) {
+        this.props.StartListening(OriginKey);
+        this.setState({ origin: this.props.originNode.Value });
+      }
+      if (this.state.origin !== this.props.originNode.Value) {
+        this.setState({ origin: this.props.originNode.Value });
+      }
     }
   }
 
   componentWillUnmount() {
     this.props.StopListening(OriginKey);
-    this.setState({ listening: false });
+  }
+
+  onChangeOrigin(origin) {
+    this.props.ChangePropertyValue(this.props.originNode.Description, origin.origin);
   }
 
   createFocusButtons() {
@@ -55,7 +52,7 @@ class FocusMenu extends Component {
           key={node.identifier}
           identifier={node.identifier}
           active={this.state.origin}
-          onChangeOrigin={origin => this.setState({ origin })}
+          onChangeOrigin={origin => this.onChangeOrigin({ origin })}
           onRefocus={this.triggerChanges}
           descriptionFlyTo={this.props.applyFlyTo.Description}
         />));
@@ -88,16 +85,18 @@ const mapStateToProps = (state) => {
   let applyFlyTo;
 
   if (Object.keys(state.propertyTree).length !== 0) {
-    const storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryKey);
     const rootNodes = state.propertyTree.subowners.filter(element => element.identifier === sceneType);
     rootNodes.forEach((node) => {
       nodes = [...nodes, ...node.subowners];
     });
-    nodes = nodes.filter(node => node.tag.some(tag => tag.includes(storyIdentifierNode.Value)))
-      .map(node => Object.assign(node, { key: node.identifier }));
+
+    const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
+    nodes = nodes.filter(node =>
+      (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
+
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
     applyOverview = traverseTreeWithURI(state.propertyTree, ApplyOverviewKey);
-    applyFlyTo = traverseTreeWithURI(state.propertyTree, 'NavigationHandler.OrbitalNavigator.ApplyFlyTo');
+    applyFlyTo = traverseTreeWithURI(state.propertyTree, ApplyFlyToKey);
   }
   return {
     nodes,
