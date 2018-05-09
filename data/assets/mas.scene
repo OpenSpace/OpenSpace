@@ -37,6 +37,18 @@ local Keybindings = {
         Command = "openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);",
         Documentation = "Turn off sun glare",
         Local = false
+    },
+    {
+        Key = "r",
+        Command = "openspace.setPropertyValueSingle('Scene.Mas.renderable.Enabled', false);",
+        Documentation = "Set Mas volume off",
+        Local = false
+    },
+    {
+        Key = "a",
+        Command = "openspace.setPropertyValueSingle('Scene.Mas.renderable.Enabled', true);",
+        Documentation = "Set Mas volume on",
+        Local = false
     }
 }
 
