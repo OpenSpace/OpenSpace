@@ -152,8 +152,21 @@ void OctreeManager::printStarsPerNode() const {
 // or removing queue.
 void OctreeManager::fetchSurroundingNodes(glm::dvec3 cameraPos, glm::dvec3 cameraViewDir) {
     
-    // If entire dataset fits in RAM then loading is done during traversal instead. 
-    if (_datasetFitInMemory) return;
+    // If entire dataset fits in RAM then load the entire dataset asynchronously now.
+    // Nodes will be rendered when they've been made available.
+    if (_datasetFitInMemory) {
+        // Only traverse Octree once!
+        if (_parentNodeOfCamera == 8) {
+            for (int i = 0; i < 8; ++i) {
+                // Use multithreading to load files and detach thread from main execution 
+                // so it can execute independently. Thread will be destroyed when finished!
+                std::thread(&OctreeManager::fetchChildrenNodes, this, _root->Children[i], 
+                    true).detach();
+            }
+            _parentNodeOfCamera = 0;
+        }
+        return;
+    }
 
     // Get leaf node in which the camera resides.
     glm::fvec3 fCameraPos = static_cast<glm::fvec3>(cameraPos / 
@@ -270,8 +283,10 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
         indexStack.pop();
     }
 
-    // Fetch all children nodes from found parent.
-    fetchChildrenNodes(node);
+    // Fetch all children nodes from found parent. Use multithreading to load files 
+    // asynchronously! Detach thread from main execution so it can execute independently. 
+    // Thread will then be destroyed when it has finished!
+    std::thread(&OctreeManager::fetchChildrenNodes, this, node, true).detach();
 }
 
 // Builds render data structure by traversing the Octree and checking for intersection 
@@ -557,8 +572,10 @@ void OctreeManager::writeNodeToMultipleFiles(std::string outFilePrefix,
 }
 
 // Fetch data from all children of <parentNode>, as long as it's not already fetched,
-// it exists and can fit in RAM.
-void OctreeManager::fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode) {
+// it exists and can fit in RAM. If <recursive> is true then all children's children will 
+// be fetched as well.
+void OctreeManager::fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode,
+    bool recursive) {
     
     for (int i = 0; i < 8; ++i) {
         // Fetch node data if we're streaming and it doesn't exist in RAM yet.
@@ -567,12 +584,12 @@ void OctreeManager::fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode
             _cpuRamBudget > static_cast<long long>(parentNode->Children[i]->numStars
             * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4) ) {
 
-            // Use multithreading to load files asynchronously!
-            std::thread readtask(&OctreeManager::fetchNodeDataFromFile, this, 
-                parentNode->Children[i]);
-            // Detach thread from main execution so it can execute independently. 
-            // Thread will be destroyed when it has finished!
-            readtask.detach();
+            fetchNodeDataFromFile(parentNode->Children[i]);
+        }
+
+        // Fetch all Children's Children if recursive is set to true!
+        if (recursive && !parentNode->Children[i]->isLeaf) {
+            fetchChildrenNodes(parentNode->Children[i], true);
         }
     }
 }
@@ -1018,9 +1035,8 @@ bool OctreeManager::updateBufferIndex(std::shared_ptr<OctreeNode> node) {
     }
 
     // Return false if there are no more spots in our buffer. 
-    // Or if we're streaming and node isn't loaded yet (when dataset is bigger than RAM).
-    if (_freeSpotsInBuffer.empty() || 
-        (_streamOctree && !_datasetFitInMemory && !node->isLoaded) ) {
+    // Or if we're streaming and node isn't loaded yet.
+    if (_freeSpotsInBuffer.empty() || (_streamOctree && !node->isLoaded) ) {
         return false;
     }
 
@@ -1043,16 +1059,6 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
 
     // Return early if node doesn't contain any stars!
     if (node->numStars == 0) return std::vector<float>();
-
-    // If streaming is enabled and entire dataset fits in RAM this is where the files are 
-    // fetched into memory (if it doesn't exists yet and as long as there is any RAM budget
-    // left and node actually has any data)!
-    if (_streamOctree && _datasetFitInMemory && !node->isLoaded && node->numStars > 0 &&
-        _cpuRamBudget > static_cast<long long>(
-        node->numStars * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4)) {
-        // Load files directly!
-        fetchNodeDataFromFile(node);
-    }
 
     // Return empty if we're reached max streaming budget
     int nStarsInNode = static_cast<int>(node->posData.size() / POS_SIZE);

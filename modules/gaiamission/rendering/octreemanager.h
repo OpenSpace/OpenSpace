@@ -134,7 +134,8 @@ private:
 
     void writeNodeToMultipleFiles(std::string outFilePrefix, std::shared_ptr<OctreeNode> node);
     void findAndFetchNeighborNode(unsigned long long firstParentId, int x, int y, int z);
-    void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode);
+    void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode, 
+        bool recursive = false);
     void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
 
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
