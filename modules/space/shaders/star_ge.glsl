@@ -70,6 +70,15 @@ const vec2 corners[4] = vec2[4](
     vec2(0.0, 1.0)     
 );
 
+const float SunTemperature = 5800.0f;
+const float SunAbsMagnitude = 4.83f;
+const float SunRadius = 6.957E8; // meters
+
+float bvToKelvin(float bv) {
+    float tmp = 0.92f * bv;
+    return 4600.f * (1.f/(tmp+1.7f) +1.f/(tmp+0.62f));
+}
+
 void main() {
     vs_position = gl_in[0].gl_Position; // in object space
     
@@ -105,22 +114,29 @@ void main() {
     // double apparentBrightness = (pSize * luminosity) /
     //  (distanceToStarInParsecs * distanceToStarInParsecs);
     double apparentBrightness = pSize * luminosity / distanceToStarInParsecs;
-    double scaleMultiply = apparentBrightness;  
+    //double apparentBrightness = pSize * appMag / distanceToStarInParsecs;
+    
+    float L_over_Lsun = pow(2.51f, SunAbsMagnitude - ge_bvLumAbsMag.z);
+    float starTemperature = bvToKelvin(ge_bvLumAbsMag.x);
+    float starRadius = SunRadius * pow(SunTemperature/starTemperature, 2.f) * sqrt(L_over_Lsun);
+    
+    //double scaleMultiply = apparentBrightness;  
+    double scaleMultiply = pow(10, magnitudeExponent + 2.f) * double(starRadius);  
 
     dvec3 scaledRight    = dvec3(0.0);
     dvec3 scaledUp       = dvec3(0.0);
     vec4 bottomLeftVertex, bottomRightVertex, topLeftVertex, topRightVertex;
   
-    if (distanceToStarInParsecs > 800.0) {
-        scaledRight    = scaleMultiply * invariantRight * 0.5f;
-        scaledUp       = scaleMultiply * invariantUp * 0.5f;
-    } else {
+    // if (distanceToStarInParsecs > 1800.0) {
+    //     scaledRight    = scaleMultiply * invariantRight * 0.5f;
+    //     scaledUp       = scaleMultiply * invariantUp * 0.5f;
+    // } else {
         dvec3 normal   = normalize(eyePosition - dpos.xyz);
         dvec3 newRight = normalize(cross(cameraUp, normal));
         dvec3 newUp    = cross(normal, newRight);
         scaledRight    = scaleMultiply * newRight * 0.5f;
         scaledUp       = scaleMultiply * newUp * 0.5f;
-    }
+    //}
    
     bottomLeftVertex = z_normalization(vec4(cameraViewProjectionMatrix * 
                         dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w)));

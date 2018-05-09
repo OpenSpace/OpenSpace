@@ -77,9 +77,11 @@ Fragment getFragment() {
     float f0  = 2.61E6 * exp(-pow(theta/alpha, 2.0));
     float f1  = 20.91/pow(theta + alpha, 3.0);
     float f2  = 72.37/pow(theta + alpha, 2.0);
-    //float psf_p = 0.384 * f0 + 0.478 * f1 + 0.138 * f2;
-    float psf_p = f2;// + 0.138 * f2;
+    float psf_p = 0.384 * f0 + 0.478 * f1 + 0.138 * f2;
     fullColor = vec4((colorContribution * color.rgb + psf_p) / (colorContribution + 1.0), psf_p);
+    //fullColor = vec4((ge_bvLumAbsMag.z * color.rgb + psf_p) / (colorContribution + 1.0), psf_p);
+    //fullColor = vec4(color.rgb * ge_bvLumAbsMag.y * 3.828f, psf_p * 800.0);
+    //fullColor = color;
     
     if (fullColor.a == 0) {
         discard;
