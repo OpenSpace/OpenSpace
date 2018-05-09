@@ -353,17 +353,6 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     Timestep t;
     t.metadata = metadata;
     t.baseName = ghoul::filesystem::File(path).baseName();
-    t.dimensions = dictionary.value<glm::vec3>(KeyDimensions);
-    t.lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    t.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
-    t.minValue = dictionary.value<float>(KeyMinValue);
-    t.maxValue = dictionary.value<float>(KeyMaxValue);
-    t.unit = dictionary.value<std::string>(KeyUnit);
-
-    std::string timeString = dictionary.value<std::string>(KeyTime);
-    t.time = Time::convertTime(timeString);
-    // t.time = Time::convertTime("2012-07-01T00:00:00.001");
-
     t.inRam = false;
     t.onGpu = false;
 
@@ -470,13 +459,13 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             // is sampled for upperLowerBound.
             // This means that volume values = 0 need to be remapped to how localMin
             // relates to the global range.
-            float zeroMap = (t->minValue - _lowerValueBound) /
-                            (_upperValueBound - _lowerValueBound);
+            // float zeroMap = (t.metadata.minValue - _lowerValueBound) /
+                            // (_upperValueBound - _lowerValueBound);
 
             // Volume values = 1 are mapped to how localMax relates to the global range.
-            float oneMap = (t->maxValue - _lowerValueBound) /
-                           (_upperValueBound - _lowerValueBound);
-            _raycaster->setValueRemapping(zeroMap, oneMap);
+            // float oneMap = (t.metadata.maxValue - _lowerValueBound) /
+                        //    (_upperValueBound - _lowerValueBound);
+            // _raycaster->setValueRemapping(zeroMap, oneMap);
 
             /*_transferFunctionHandler->setUnit(t->unit);
             _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
