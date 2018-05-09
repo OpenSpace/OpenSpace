@@ -119,7 +119,7 @@ std::string getStarColor(float bv){
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
-int addNode(lua_State* L) {
+int addExoplanetSystem(lua_State* L) {
 
     const int StringLocation = -1;
     const std::string starname = luaL_checkstring(L, StringLocation);
@@ -344,7 +344,7 @@ int addNode(lua_State* L) {
     return 0;
 }
 
-int removeNode(lua_State* L) {
+int removeExoplanetSystem(lua_State* L) {
     const int StringLocation = -1;
     const std::string starname = luaL_checkstring(L, StringLocation);
 
@@ -363,18 +363,18 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
     res.name = "exoplanets";
     res.functions = {
         {
-            "addNode",
-            &addNode,
+            "addExoplanetSystem",
+            &addExoplanetSystem,
             {},
             "string",
-            "Adds two nodes to the scenegraph, one position node and one node to represenet the star."
+            "Adds the nodes to the scene graph of the exoplanet system."
         },
         {
-            "removeNode",
-            &removeNode,
+            "removeExoplanetSystem",
+            &removeExoplanetSystem,
             {},
             "string",
-            "Removes the node with the name given in the arguments."
+            "Removes the nodes from the scene graph of the exoplanet system."
         }
 
     };
