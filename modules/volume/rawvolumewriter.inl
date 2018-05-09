@@ -97,6 +97,11 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     size_t length = volume.nCells() * sizeof(VoxelType);
 
     std::ofstream file(_path, std::ios::binary);
+
+    if (!file.good()) {
+        throw ghoul::RuntimeError("Could not create file '" + _path + "'");
+    }
+
     file.write(buffer, length);
     file.close();
 }

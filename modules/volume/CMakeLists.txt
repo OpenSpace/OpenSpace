@@ -27,11 +27,9 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/envelope.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.h
@@ -54,6 +52,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/envelope.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl

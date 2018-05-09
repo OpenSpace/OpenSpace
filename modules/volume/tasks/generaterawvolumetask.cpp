@@ -25,17 +25,19 @@
 #include <modules/volume/tasks/generaterawvolumetask.h>
 
 #include <modules/volume/rawvolume.h>
+#include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
 
-#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/filesystem/filesystem.h>
-
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/defer.h>
 
 #include <fstream>
 
@@ -48,8 +50,8 @@ namespace {
     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
 
-    // constexpr const char* KeyMinValue = "MinValue";
-    // constexpr const char* KeyMaxValue = "MaxValue";
+    constexpr const char* KeyMinValue = "MinValue";
+    constexpr const char* KeyMaxValue = "MaxValue";
     // constexpr const char* KeyVisUnit = "VisUnit";
 } // namespace
 
@@ -91,6 +93,15 @@ std::string GenerateRawVolumeTask::description() {
 }
 
 void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallback) {
+    // Spice kernel is required for time conversions.
+    // Todo: Make this dependency less hard coded.
+    SpiceManager::KernelHandle kernel =
+        SpiceManager::ref().loadKernel(absPath("${DATA}/assets/spice/naif0012.tls"));
+
+    defer {
+        SpiceManager::ref().unloadKernel(kernel);
+    };
+
     volume::RawVolume<float> rawVolume(_dimensions);
     progressCallback(0.1f);
 
@@ -105,9 +116,13 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
+
+    float minVal = std::numeric_limits<float>::max();
+    float maxVal = std::numeric_limits<float>::min();
+
     rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
         glm::vec3 coord = _lowerDomainBound +
-            glm::vec3(cell) * glm::vec3(_dimensions) * domainSize;
+            glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
 
         ghoul::lua::verifyStackSize(state, 0);
         lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
@@ -125,6 +140,9 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         float value = luaL_checknumber(state, 1);
         lua_pop(state, 1);
         rawVolume.set(cell, value);
+
+        minVal = std::min(minVal, value);
+        maxVal = std::max(maxVal, value);
     });
 
     luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
@@ -134,35 +152,24 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
 
     progressCallback(0.9f);
 
-    ghoul::Dictionary outputMetadata;
+    RawVolumeMetadata metadata;
+    metadata.time = Time::convertTime(_time);
+    metadata.dimensions = _dimensions;
+    metadata.hasDomainUnit = true;
+    metadata.domainUnit = "m";
+    metadata.hasValueUnit = true;
+    metadata.valueUnit = "kg/m^3";
+    metadata.gridType = VolumeGridType::Cartesian;
+    metadata.hasDomainBounds = true;
+    metadata.lowerDomainBound = _lowerDomainBound;
+    metadata.upperDomainBound = _upperDomainBound;
+    metadata.hasValueRange = true;
+    metadata.minValue = minVal;
+    metadata.maxValue = maxVal;
 
-    std::string time = _time;
-
-    // Do not include time offset in time string
-    if (time.back() == 'Z') {
-        time.pop_back();
-    }
-
-    outputMetadata.setValue<std::string>(KeyTime, time);
-    outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
-    outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
-    outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
-
-    /*outputMetadata.setValue<float>(
-        KeyMinValue,
-        static_cast<float>(reader.minValue(_variable))
-    );
-    outputMetadata.setValue<float>(
-        KeyMaxValue,
-        static_cast<float>(reader.maxValue(_variable))
-    );
-    outputMetadata.setValue<std::string>(
-        KeyVisUnit,
-        static_cast<std::string>(reader.getVisUnit(_variable))
-    );*/
-
+    ghoul::Dictionary outputDictionary = metadata.dictionary();
     ghoul::DictionaryLuaFormatter formatter;
-    std::string metadataString = formatter.format(outputMetadata);
+    std::string metadataString = formatter.format(outputDictionary);
 
     std::fstream f(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;

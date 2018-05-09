@@ -24,18 +24,21 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <sstream>
-#include <ghoul/opengl/programobject.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <sstream>
+
 namespace {
-    const char* GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
-    const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
-    const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
+    const char* GlslRaycastPath = "${MODULE_TOYVOLUME}/shaders/raycast.glsl";
+    const char* GlslBoundsVsPath = "${MODULE_TOYVOLUME}/shaders/boundsvs.glsl";
+    const char* GlslBoundsFsPath = "${MODULE_TOYVOLUME}/shaders/boundsfs.glsl";
 } // namespace
 
 namespace openspace {
@@ -125,15 +128,15 @@ bool ToyVolumeRaycaster::cameraIsInside(const RenderData& data,
 }
 
 std::string ToyVolumeRaycaster::getBoundsVsPath() const {
-    return GlslBoundsVsPath;
+    return absPath(GlslBoundsVsPath);
 }
 
 std::string ToyVolumeRaycaster::getBoundsFsPath() const {
-    return GlslBoundsFsPath;
+    return absPath(GlslBoundsFsPath);
 }
 
 std::string ToyVolumeRaycaster::getRaycastPath() const {
-    return GlslRaycastPath;
+    return absPath(GlslRaycastPath);
 }
 
 std::string ToyVolumeRaycaster::getHelperPath() const {
