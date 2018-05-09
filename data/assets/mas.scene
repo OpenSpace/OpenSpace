@@ -31,6 +31,12 @@ local Keybindings = {
         Command = "openspace.time.setTime('2017 AUG 21 17:00:00');",
         Documentation = "Set time to when eclipse data starts",
         Local = false
+    },
+    {
+        Key = "F9",
+        Command = "openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);",
+        Documentation = "Turn off sun glare",
+        Local = false
     }
 }
 
