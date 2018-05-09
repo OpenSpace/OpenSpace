@@ -58,7 +58,7 @@ public:
     ~OctreeManager();
 
     void initOctree(long long cpuRamBudget = 0);
-    void initBufferIndexStack(long long maxStarsOrNodes, bool useVBO);
+    void initBufferIndexStack(long long maxStarsOrNodes, bool useVBO, bool datasetFitInMemory);
     void insert(std::vector<float> starValues);
     void printStarsPerNode() const;
 
@@ -79,6 +79,7 @@ public:
     size_t numInnerNodes() const;
     size_t totalNodes() const;
     size_t totalDepth() const;
+    size_t maxDist() const;
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
     long long cpuRamBudget() const;
@@ -90,18 +91,19 @@ private:
     const size_t VEL_SIZE = 3;
 
     // MAX_DIST [kPc] - Determines the depth of Octree together with MAX_STARS_PER_NODE.
-    // A smaller distance is better (i.e. a smaller total depth) and a smaller MAX_STARS is also
-    // better (i.e. finer borders and fewer nodes/less data needs to be uploaded to the GPU), 
-    // but MAX_STARS still needs to be big enough to be able to swallow all stars that falls 
-    // outside of top border nodes, otherwise it causes a stack overflow when building Octree.
-    // However, fewer total nodes (i.e. bigger Stars/Node) reduces traversing time which is preferable. 
-    // DR1_TGAS [2M] - MaxRadius is ~100 kParsec. A MAX_DIST of 5 kPc works fine with down to 1 kSPN.
-    // DR1_full [1.2B]- ~18k outside of 10 kPc. A MAX_DIST of 10 kPc works fine with most SPN.
-    // DR2_rv [7.2M] - ~82k outside 20 kPc. A MAX_DIST of 15 kPc works fine with down to 10 kSPN.
-    // DR2_subset [42.9M] - ~Xk outside of XX kPc. A MAX_DIST of X kPc works fine with down to X kSPN.
-    // DR2_full [1.7B] - ~Xk outside of ~XX kPc. A MAX_DIST of X kPc works fine with down to X kSPN.
-    size_t MAX_DIST = 10; // [kPc]
-    size_t MAX_STARS_PER_NODE = 30000; 
+    // A smaller distance is better (i.e. a smaller total depth) and a smaller MAX_STARS 
+    // is also better (i.e. finer borders and fewer nodes/less data needs to be uploaded 
+    // to the GPU), but MAX_STARS still needs to be big enough to be able to swallow all 
+    // stars that falls outside of top border nodes, otherwise it causes a stack overflow 
+    // when building Octree. However, fewer total nodes (i.e. bigger Stars/Node) reduces 
+    // traversing time which is preferable, especially with big datasets 
+    // DR1_TGAS [2M] - A MAX_DIST of 5 kPc works fine with down to 1 kSPN.
+    // DR1_full [1.2B] - A MAX_DIST of 10 kPc works fine with most SPN.
+    // DR2_rv [7.2M] - A MAX_DIST of 15 kPc works fine with down to 10 kSPN.
+    // DR2_subset [42.9M] - A MAX_DIST of 100 kPc works fine with down to 20 kSPN.
+    // DR2_full [1.7B] - A MAX_DIST of 1000 kPc works fine with down to 100 kSPN.
+    size_t MAX_DIST = 1000; // [kPc]
+    size_t MAX_STARS_PER_NODE = 100000; 
 
     const int DEFAULT_INDEX = -1;
     const float MIN_TOTAL_PIXELS_LOD = 0.0; // Will be multiplied by depth.
@@ -153,6 +155,7 @@ private:
     bool _rebuildBuffer;
     bool _useVBO;
     bool _streamOctree;
+    bool _datasetFitInMemory;
     long long _cpuRamBudget;
     long long _ssboStarStreamBudget;
     unsigned long long _parentNodeOfCamera;

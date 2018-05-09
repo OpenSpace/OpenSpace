@@ -154,9 +154,10 @@ private:
     glm::dquat _previousCameraRotation;
     bool _initialDataFilesLoaded;
     bool _useVBO;
-    long long _cpuRamBudget;
+    long long _cpuRamBudgetInBytes;
+    long long _totalDatasetSizeInBytes;
     long long _gpuMemoryBudgetInBytes;
-    long long _maxMemoryBudgetInBytes;
+    long long _maxStreamingBudgetInBytes;
     size_t _chunkSize;
 
     GLuint _vao;

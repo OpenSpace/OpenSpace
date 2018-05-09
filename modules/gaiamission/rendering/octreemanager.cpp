@@ -31,6 +31,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/fmt.h>
 #include <fstream>
+#include <thread>
 
 namespace {
     constexpr const char* _loggerCat = "OctreeManager";
@@ -100,13 +101,15 @@ void OctreeManager::initOctree(long long cpuRamBudget) {
 }
 
 // Initialize a stack that keeps track of all free spot in VBO stream.
-void OctreeManager::initBufferIndexStack(long long maxStarsOrNodes, bool useVBO) {
+void OctreeManager::initBufferIndexStack(long long maxStarsOrNodes, bool useVBO, 
+    bool datasetFitInMemory) {
     
     // Clear stack if we've used it before.
     _biggestChunkIndexInUse = 0;
     _freeSpotsInBuffer = std::stack<int>();
     _rebuildBuffer = true;
     _useVBO = useVBO;
+    _datasetFitInMemory = datasetFitInMemory;
 
     // Store the number of stars we can stream if we're using SSBOs.
     /*if(!useVBO) {
@@ -116,7 +119,7 @@ void OctreeManager::initBufferIndexStack(long long maxStarsOrNodes, bool useVBO)
     }*/
     // Build stack back-to-front.
     for (long long idx = maxStarsOrNodes - 1; idx >= 0; --idx) {
-        _freeSpotsInBuffer.push(idx);
+        _freeSpotsInBuffer.push(static_cast<int>(idx));
     }
     _maxStackSize = _freeSpotsInBuffer.size();
     LINFO("StackSize: " + std::to_string(maxStarsOrNodes) );
@@ -149,18 +152,24 @@ void OctreeManager::printStarsPerNode() const {
 // or removing queue.
 void OctreeManager::fetchSurroundingNodes(glm::dvec3 cameraPos, glm::dvec3 cameraViewDir) {
     
+    // If entire dataset fits in RAM then loading is done during traversal instead. 
+    if (_datasetFitInMemory) return;
+
     // Get leaf node in which the camera resides.
-    cameraPos /= 1000.0 * distanceconstants::Parsec;
-    size_t idx = getChildIndex(cameraPos.x, cameraPos.y, cameraPos.z);
+    glm::fvec3 fCameraPos = static_cast<glm::fvec3>(cameraPos / 
+        (1000.0 * distanceconstants::Parsec));
+    size_t idx = getChildIndex(fCameraPos.x, fCameraPos.y, fCameraPos.z);
     auto node = _root->Children[idx];
 
     while (!node->isLeaf) {
-        idx = getChildIndex(cameraPos.x, cameraPos.y, cameraPos.z,
+        idx = getChildIndex(fCameraPos.x, fCameraPos.y, fCameraPos.z,
             node->originX, node->originY, node->originZ);
         node = node->Children[idx];
     }
     unsigned long long leafId = node->octreePositionIndex;
     unsigned long long firstParentId = leafId / 10;
+    unsigned long long secondParentId = leafId / 100;
+    unsigned long long thirdParentId = leafId / 1000;
 
     // Return early if camera resides in the same first parent as before!
     // Otherwise camera has moved and may need to load more nodes!
@@ -171,12 +180,18 @@ void OctreeManager::fetchSurroundingNodes(glm::dvec3 cameraPos, glm::dvec3 camer
     for (int x = -1; x <= 1; x+=1) {
         for (int y = -2; y <= 2; y+=2) {
             for (int z = -4; z <= 4; z+=4) {
+                // Fetch all stars the 216 closest leaf nodes. 
                 findAndFetchNeighborNode(firstParentId, x, y, z);
+                // Fetch LOD stars from 208 parents one and two layer(s) up.
+                if (x != 0 || y != 0 || z != 0) {
+                    findAndFetchNeighborNode(secondParentId, x, y, z);
+                    findAndFetchNeighborNode(thirdParentId, x, y, z);
+                }
             }
         }
     }
 
-    // TODO: Use CameraViewDir to construct a priority queue for rest of nodes
+    // TODO: Use CameraViewDir to construct a priority queue for rest of nodes?
     // + Get LOD from outer layer nodes!
     // + Remove nodes that's no longer in our closest proximity or in a lower layer! 
     
@@ -291,7 +306,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4 mv
             " 4/5: " + std::to_string(_maxStackSize * 4 / 5) +
             " FreeSpotsInVBO: " + std::to_string(_freeSpotsInBuffer.size()) +
             " 5/6: " + std::to_string(_maxStackSize * 5 / 6));
-        initBufferIndexStack(_maxStackSize, _useVBO);
+        initBufferIndexStack(_maxStackSize, _useVBO, _datasetFitInMemory);
         innerRebuild = true;
     }
 
@@ -406,7 +421,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream,
 // <readData> defines if full data or only structure should be read. 
 int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData, std::string folderPath) {
     int nStarsRead = 0;
-    int oldMaxdist = MAX_DIST;
+    int oldMaxdist = static_cast<int>(MAX_DIST);
 
     // If we're not reading data then we need to stream from files later on.
     _streamOctree = !readData;
@@ -549,9 +564,15 @@ void OctreeManager::fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode
         // Fetch node data if we're streaming and it doesn't exist in RAM yet.
         // (As long as there is any RAM budget left and node actually has any data!)
         if (!parentNode->Children[i]->isLoaded && parentNode->Children[i]->numStars > 0 &&  
-            _cpuRamBudget > parentNode->Children[i]->numStars * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4) {
-            // TODO: Load asynchronous!
-            fetchNodeDataFromFile(parentNode->Children[i]);
+            _cpuRamBudget > static_cast<long long>(parentNode->Children[i]->numStars
+            * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4) ) {
+
+            // Use multithreading to load files asynchronously!
+            std::thread readtask(&OctreeManager::fetchNodeDataFromFile, this, 
+                parentNode->Children[i]);
+            // Detach thread from main execution so it can execute independently. 
+            // Thread will be destroyed when it has finished!
+            readtask.detach();
         }
     }
 }
@@ -594,7 +615,7 @@ void OctreeManager::fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node) {
         _cpuRamBudget -= nBytes;
     }
     else {
-        LERROR("Error opening node data file:" +  inFilePath);
+        LERROR("Error opening node data file: " +  inFilePath);
     }
 }
 
@@ -616,6 +637,11 @@ size_t OctreeManager::totalNodes() const {
 // Return the total depth of Octree. 
 size_t OctreeManager::totalDepth() const {
     return _totalDepth;
+}
+
+// Return the set constant of max radius of first layer in Octree.
+size_t OctreeManager::maxDist() const {
+    return MAX_DIST;
 }
 
 // Return the set constant of max stars per node in Octree.
@@ -992,7 +1018,9 @@ bool OctreeManager::updateBufferIndex(std::shared_ptr<OctreeNode> node) {
     }
 
     // Return false if there are no more spots in our buffer. 
-    if (_freeSpotsInBuffer.empty()) {
+    // Or if we're streaming and node isn't loaded yet (when dataset is bigger than RAM).
+    if (_freeSpotsInBuffer.empty() || 
+        (_streamOctree && !_datasetFitInMemory && !node->isLoaded) ) {
         return false;
     }
 
@@ -1015,6 +1043,16 @@ std::vector<float> OctreeManager::constructInsertData(std::shared_ptr<OctreeNode
 
     // Return early if node doesn't contain any stars!
     if (node->numStars == 0) return std::vector<float>();
+
+    // If streaming is enabled and entire dataset fits in RAM this is where the files are 
+    // fetched into memory (if it doesn't exists yet and as long as there is any RAM budget
+    // left and node actually has any data)!
+    if (_streamOctree && _datasetFitInMemory && !node->isLoaded && node->numStars > 0 &&
+        _cpuRamBudget > static_cast<long long>(
+        node->numStars * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4)) {
+        // Load files directly!
+        fetchNodeDataFromFile(node);
+    }
 
     // Return empty if we're reached max streaming budget
     int nStarsInNode = static_cast<int>(node->posData.size() / POS_SIZE);

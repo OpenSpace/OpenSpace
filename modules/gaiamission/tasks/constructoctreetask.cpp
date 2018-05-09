@@ -98,6 +98,9 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
 
     LINFO("Reading data file: " + _inFileOrFolderPath);
 
+    LINFO("MAX_DIST: " + std::to_string(_octreeManager->maxDist()) +
+        " - MAX_STARS_PER_NODE: " + std::to_string(_octreeManager->maxStarsPerNode()));
+
     std::ifstream inFileStream(_inFileOrFolderPath, std::ifstream::binary);
     if (inFileStream.good()) {
 
@@ -176,6 +179,9 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     _indexOctreeManager->initOctree();
 
     float processOneFile = 1.f / allInputFiles.size();
+
+    LINFO("MAX_DIST: " + std::to_string(_octreeManager->maxDist()) +
+        " - MAX_STARS_PER_NODE: " + std::to_string(_octreeManager->maxStarsPerNode()));
 
     // TODO: Parallelize!
     for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {

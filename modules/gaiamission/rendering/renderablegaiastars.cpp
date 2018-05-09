@@ -334,9 +334,10 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _firstDrawCalls(true)
     , _initialDataFilesLoaded(true)
     , _useVBO(false)
-    , _cpuRamBudget(0)
+    , _cpuRamBudgetInBytes(0)
+    , _totalDatasetSizeInBytes(0)
     , _gpuMemoryBudgetInBytes(0)
-    , _maxMemoryBudgetInBytes(0)
+    , _maxStreamingBudgetInBytes(0)
     , _chunkSize(0)
     , _vao(0)
     , _vaoEmpty(0)
@@ -684,11 +685,12 @@ void RenderableGaiaStars::initializeGL() {
 
     // Set ceiling for how much of the installed CPU RAM to use for streaming. 
     long long installedRam = static_cast<long long>(CpuCap.installedMainMemory()) * 1024 * 1024;
-    _cpuRamBudget = static_cast<long long>(static_cast<float>(installedRam) * MAX_CPU_RAM_PERCENT);
-    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudget));
+    _cpuRamBudgetInBytes = static_cast<long long>(
+        static_cast<float>(installedRam) * MAX_CPU_RAM_PERCENT);
+    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes));
 
     LINFO("GPU Memory Budget {bytes}: " + std::to_string(_gpuMemoryBudgetInBytes) +
-        " - CPU RAM Budget {bytes}: " + std::to_string(_cpuRamBudget));
+        " - CPU RAM Budget {bytes}: " + std::to_string(_cpuRamBudgetInBytes));
 }
 
 void RenderableGaiaStars::deinitializeGL() {
@@ -837,8 +839,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Keep streaming memeory size to a minimum.
         //long long memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
-        //long long streamingBudgetInBytes = std::min(memoryQuery, _maxMemoryBudgetInBytes - indexBufferSize);
-        long long streamingBudgetInBytes = _maxMemoryBudgetInBytes;
+        //long long streamingBudgetInBytes = std::min(memoryQuery, _maxStreamingBudgetInBytes - indexBufferSize);
+        long long streamingBudgetInBytes = _maxStreamingBudgetInBytes;
 
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
@@ -875,7 +877,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         float posMemoryShare = static_cast<float>(POS_SIZE) / _nRenderValuesPerStar;
         int posChunkSize = maxStarsPerNode * POS_SIZE;
         //long long posMemoryQuery = nChunksToRender * posChunkSize * sizeof(GLfloat);
-        long long posStreamingBudget = static_cast<long long>(_maxMemoryBudgetInBytes * posMemoryShare);
+        long long posStreamingBudget = static_cast<long long>(_maxStreamingBudgetInBytes * posMemoryShare);
 
         // Use buffer orphaning to update a subset of total data.
         glBufferData(
@@ -906,7 +908,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             int colChunkSize = maxStarsPerNode * COL_SIZE;
             //long long colMemoryQuery = nChunksToRender * colChunkSize * sizeof(GLfloat);
             long long colStreamingBudget = static_cast<long long>(
-                _maxMemoryBudgetInBytes * colMemoryShare);
+                _maxStreamingBudgetInBytes * colMemoryShare);
 
             // Use buffer orphaning to update a subset of total data.
             glBufferData(
@@ -936,7 +938,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 int velChunkSize = maxStarsPerNode * VEL_SIZE;
                 //long long velMemoryQuery = nChunksToRender * velChunkSize * sizeof(GLfloat);
                 long long velStreamingBudget = static_cast<long long>(
-                    _maxMemoryBudgetInBytes * velMemoryShare);
+                    _maxStreamingBudgetInBytes * velMemoryShare);
 
                 // Use buffer orphaning to update a subset of total data.
                 glBufferData(
@@ -1293,16 +1295,18 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // Calculate memory budgets. 
         _chunkSize = _octreeManager->maxStarsPerNode() * _nRenderValuesPerStar;
         long long totalChunkSizeInBytes = _octreeManager->totalNodes() * _chunkSize * sizeof(GLfloat);
-        _maxMemoryBudgetInBytes = std::min(totalChunkSizeInBytes, _gpuMemoryBudgetInBytes);
-        long long maxNodesInStream = _maxMemoryBudgetInBytes / (_chunkSize * sizeof(GLfloat));
+        _maxStreamingBudgetInBytes = std::min(totalChunkSizeInBytes, _gpuMemoryBudgetInBytes);
+        long long maxNodesInStream = _maxStreamingBudgetInBytes / (_chunkSize * sizeof(GLfloat));
         
         // TODO: Figure out how to use properly! (Re-building fucked up)
         //long long maxStarsInStream = _gpuMemoryBudgetInBytes / (_nRenderValuesPerStar * sizeof(GLfloat));
         long long maxStarsInStream = maxNodesInStream;
-        _ssboStreamBudgetProperty.setMaxValue(static_cast<float>(maxStarsInStream));
+        _ssboStreamBudgetProperty.setMaxValue(static_cast<float>(_maxStreamingBudgetInBytes));
+
+        bool datasetFitInMemory = (_totalDatasetSizeInBytes < _cpuRamBudgetInBytes);
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
-            " - Max streaming budget (in bytes): " + std::to_string(_maxMemoryBudgetInBytes) +
+            " - Max streaming budget (in bytes): " + std::to_string(_maxStreamingBudgetInBytes) +
             " - Max stars in stream: " + std::to_string(maxStarsInStream) +
             " - Max nodes in stream: " + std::to_string(maxNodesInStream));
 
@@ -1312,7 +1316,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _useVBO = false;
 
             // Trigger a rebuild of buffer data from octree. With VBO we will fill the chunks.
-            _octreeManager->initBufferIndexStack(maxStarsInStream, _useVBO);
+            _octreeManager->initBufferIndexStack(maxStarsInStream, _useVBO, datasetFitInMemory);
             _nStarsToRender = 0;
 
             // Generate SSBO Buffers and bind them. 
@@ -1352,7 +1356,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _useVBO = true;
 
             // Trigger a rebuild of buffer data from octree. With VBO we will fill the chunks.
-            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO);
+            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO, datasetFitInMemory);
             _nStarsToRender = 0;
 
             // Generate VAO and VBOs
@@ -1639,7 +1643,7 @@ bool RenderableGaiaStars::readDataFile() {
     _initialDataFilesLoaded = false;
 
     std::string _file = _filePath;
-    _octreeManager->initOctree(_cpuRamBudget);
+    _octreeManager->initOctree(_cpuRamBudgetInBytes);
 
     LINFO("Loading data file: " + _file);
 
@@ -1681,6 +1685,8 @@ bool RenderableGaiaStars::readDataFile() {
 
     //_octreeManager->printStarsPerNode();
     _nRenderedStars.setMaxValue(nReadStars);
+    LINFO("Dataset contains a total of " + std::to_string(nReadStars) + " stars.");
+    _totalDatasetSizeInBytes = nReadStars * (POS_SIZE + COL_SIZE + VEL_SIZE) * 4;
     
     if (nReadStars > 0) _initialDataFilesLoaded = true;
     return _initialDataFilesLoaded;
