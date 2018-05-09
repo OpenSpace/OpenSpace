@@ -4,10 +4,16 @@ import PropTypes from 'prop-types';
 import MarkerInfo from './MarkerInfo';
 import { traverseTreeWithURI, jsonToLuaTable } from '../../../utils/propertyTreeHelpers';
 import { startListening, stopListening } from '../../../api/Actions/index';
-import { FocusNodesListKey, infoIconKey } from '../../../api/keys';
 import { fromStringToArray } from '../../../utils/storyHelpers';
+import { infoIconKey, OriginKey, FocusNodesListKey } from '../../../api/keys';
 
 class Markers extends Component {
+  // Check if the point [x,y] is outside the circle with the center [centerX,centerY] and radius r
+  static outsideCircle(centerX, centerY, r, x, y) {
+    const squareDist = ((x - centerX) ** 2) + ((y - centerY) ** 2);
+    return (squareDist > r ** 2);
+  }
+
   componentDidUpdate() {
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties,
@@ -50,12 +56,24 @@ class Markers extends Component {
       distFromCamToNodeProperties, infoIcons, screenSpaceRadius,
     } = this.props;
 
+    // Get current focus node, its screen space position and its screen space radius
+    const currentFocusNode = nodes.find(node => node.identifier === this.props.focusNodeName);
+    const focusNodePos = jsonToLuaTable(currentFocusNode.properties[0].Value).split(',');
+    const focusNodeRadius = Number(currentFocusNode.properties[3].Value);
+
     return (nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
       if (screenVisibilityProperties[i].Value === 'true') {
+        let outsideCircle = true;
+        // Check if node is behind the focus node or not, show label if not behind focus node
+        if (node.identifier !== this.props.focusNodeName) {
+          outsideCircle = Markers
+            .outsideCircle(Number(focusNodePos[0]), Number(focusNodePos[1]),
+              focusNodeRadius, Number(screenSpacePos[0]), Number(screenSpacePos[1]));
+        }
         // TODO Remove the magic numbers
         const distanceFromCam = (100000000000 / distFromCamToNodeProperties[i].Value);
-        const showLabel = distanceFromCam > 0.04;
+        const showLabel = (distanceFromCam > 0.04 && outsideCircle);
 
         const planetRadius = Number(screenSpaceRadius[i].Value);
         let size = planetRadius * 0.1;
@@ -101,6 +119,7 @@ const mapStateToProps = (state) => {
   const distFromCamToNodeProperties = [];
   let infoIcons = {};
   const screenSpaceRadius = [];
+  let focusNodeName = '';
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners
@@ -119,6 +138,8 @@ const mapStateToProps = (state) => {
       distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.DistanceFromCamToNode`));
       screenSpaceRadius.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSizeRadius`));
     });
+
+    focusNodeName = traverseTreeWithURI(state.propertyTree, OriginKey).Value;
   }
 
   if (state.fetchData.length > 0) {
@@ -132,6 +153,7 @@ const mapStateToProps = (state) => {
     distFromCamToNodeProperties,
     infoIcons,
     screenSpaceRadius,
+    focusNodeName,
   };
 };
 
@@ -171,6 +193,7 @@ Markers.propTypes = {
     info: PropTypes.string,
   })),
   nodes: PropTypes.arrayOf(PropTypes.shape({})),
+  focusNodeName: PropTypes.string,
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,
 };
@@ -184,6 +207,7 @@ Markers.defaultProps = {
   infoIcons: [],
   Description: [],
   Value: '',
+  focusNodeName: '',
   StopListening: null,
   StartListening: null,
 };
