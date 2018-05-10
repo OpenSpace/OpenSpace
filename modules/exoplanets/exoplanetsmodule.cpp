@@ -31,6 +31,7 @@
 #include <openspace/util/time.h>
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
 
@@ -91,7 +92,7 @@ struct Exoplanet {
 std::string getStarColor(float bv){
     std::string colorString;
 
-    std::ifstream colormap("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/colorbv.cmap", std::ios::in);
+    std::ifstream colormap(absPath("${BASE}/modules/exoplanets/colorbv.cmap"), std::ios::in);
     if (!colormap.good()) {
         std::cout << "Failed to open colormap data file";
     }
@@ -125,12 +126,12 @@ int addExoplanetSystem(lua_State* L) {
     const std::string starname = luaL_checkstring(L, StringLocation);
 
 
-    std::ifstream data("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/expl_data.bin", std::ios::in | std::ios::binary);
+    std::ifstream data(absPath("${BASE}/modules/exoplanets/expl_data.bin"), std::ios::in | std::ios::binary);
     if (!data.good()) {
         std::cout << "Failed to open exoplanets data file";
     }
 
-    std::ifstream lut("C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/lookup.txt");
+    std::ifstream lut(absPath("${BASE}/modules/exoplanets/lookup.txt"));
     if (!lut.good()) {
         std::cout << "Failed to open exoplanets look-up table file";
     }
@@ -188,6 +189,7 @@ int addExoplanetSystem(lua_State* L) {
         if (!isnan(p.RSTAR))
         {
             std::string color = getStarColor(p.BMV);
+ 
             const std::string starGlobe = "{"
                 "Identifier = '" + starname + "Globe',"
                 "Parent = '" + starname + "',"
@@ -207,7 +209,7 @@ int addExoplanetSystem(lua_State* L) {
                             "},"
                             "{"
                                 "Identifier = 'StarTexture',"
-                                "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"//'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg'," // adapt texture according to strar-temperature (TEFF)
+                                "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/sun.jpg',"
                                 "BlendMode = 'Color',"
                                 "Enabled = true"
                             "}"
@@ -215,7 +217,7 @@ int addExoplanetSystem(lua_State* L) {
                     "}"
                 "}"
             "}";
-
+            
             const std::string starGlare = "{"
                 "Identifier = '" + starname + "Glare',"
                 "Parent = '" + starname + "',"
