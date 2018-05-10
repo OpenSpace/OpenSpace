@@ -30,16 +30,18 @@ namespace openspace::luascriptfunctions {
 * Set renderer
 */
 int setRenderer(lua_State* L) {
-    using namespace ghoul::lua;
-
-    checkArgumentsAndThrow(L, 1, "lua::setRenderer");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setRenderer");
 
     const int type = lua_type(L, -1);
     if (type != LUA_TSTRING) {
         return luaL_error(L, "Expected argument of type 'string'");
     }
 
-    const std::string& renderer = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& renderer = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     OsEng.renderEngine().setRendererFromString(renderer);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -112,7 +114,7 @@ int addScreenSpaceRenderable(lua_State* L) {
         return 0;
     }
 
-    std::unique_ptr<ScreenSpaceRenderable> s = 
+    std::unique_ptr<ScreenSpaceRenderable> s =
         ScreenSpaceRenderable::createFromDictionary(d);
 
     OsEng.renderEngine().addScreenSpaceRenderable(std::move(s));
@@ -122,11 +124,13 @@ int addScreenSpaceRenderable(lua_State* L) {
 }
 
 int removeScreenSpaceRenderable(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
 
-    checkArgumentsAndThrow(L, 1, "lua::removeScreenSpaceRenderable");
-
-    const std::string& name = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& name = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     OsEng.renderEngine().removeScreenSpaceRenderable(name);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

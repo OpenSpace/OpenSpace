@@ -248,11 +248,13 @@ int loadWMSCapabilities(lua_State* L) {
 }
 
 int removeWMSServer(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
 
-    checkArgumentsAndThrow(L, 1, "lua::removeWMSServer");
-
-    const std::string& name = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& name = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     OsEng.moduleEngine().module<GlobeBrowsingModule>()->removeWMSServer(name);
 
@@ -261,11 +263,13 @@ int removeWMSServer(lua_State* L) {
 }
 
 int capabilities(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::capabilities");
 
-    checkArgumentsAndThrow(L, 1, "lua::capabilities");
-
-    const std::string& name = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& name = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     GlobeBrowsingModule::Capabilities cap =
         OsEng.moduleEngine().module<GlobeBrowsingModule>()->capabilities(name);
 
@@ -275,10 +279,10 @@ int capabilities(lua_State* L) {
 
         lua_newtable(L);
 
-        push(L, "Name", l.name);
+        ghoul::lua::push(L, "Name", l.name);
         lua_settable(L, -3);
 
-        push(L, "URL", l.url);
+        ghoul::lua::push(L, "URL", l.url);
         lua_settable(L, -3);
 
         lua_rawseti(L, -2, i + 1);

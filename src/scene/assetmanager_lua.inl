@@ -25,14 +25,16 @@
 namespace openspace::luascriptfunctions::asset {
 
 int add(lua_State* state) {
-    using namespace ghoul::lua;
-
-    checkArgumentsAndThrow(state, 1, "lua::add");
+    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::add");
 
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    const std::string& assetName = value<std::string>(state, 1, PopValue::Yes);
+    const std::string& assetName = ghoul::lua::value<std::string>(
+        state,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     assetManager->add(assetName);
 
     ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
@@ -40,14 +42,16 @@ int add(lua_State* state) {
 }
 
 int remove(lua_State* state) {
-    using namespace ghoul::lua;
-
-    checkArgumentsAndThrow(state, 1, "lua::remove");
+    ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::remove");
 
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    const std::string& assetName = value<std::string>(state, 1, PopValue::Yes);
+    const std::string& assetName = ghoul::lua::value<std::string>(
+        state,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     assetManager->remove(assetName);
 
     ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");

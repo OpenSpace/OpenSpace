@@ -94,9 +94,11 @@ int resetCameraDirection(lua_State* L) {
 }
 
 int bindJoystickAxis(lua_State* L) {
-    using namespace ghoul::lua;
-
-    const int n = checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindJoystickAxis");
+    const int n = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 4 },
+        "lua::bindJoystickAxis"
+    );
 
     const int axis = ghoul::lua::value<int>(L, 1);
     const std::string& axisType = ghoul::lua::value<std::string>(L, 2);

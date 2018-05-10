@@ -193,13 +193,15 @@ int printFatal(lua_State* L) {
  * tokens and returns the absolute path.
  */
 int absolutePath(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::absolutePath");
 
-    checkArgumentsAndThrow(L, 1, "lua::absolutePath");
+    const std::string& path = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
-    const std::string& path = value<std::string>(L, 1, PopValue::Yes);
-
-    push(L, absPath(path));
+    ghoul::lua::push(L, absPath(path));
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
@@ -234,14 +236,16 @@ int setPathToken(lua_State* L) {
  * Checks whether the provided file exists
  */
 int fileExists(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::fileExists");
 
-    checkArgumentsAndThrow(L, 1, "lua::fileExists");
-
-    const std::string& file = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& file = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     const bool e = FileSys.fileExists(absPath(file));
 
-    push(L, e);
+    ghoul::lua::push(L, e);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
@@ -253,14 +257,16 @@ int fileExists(lua_State* L) {
 * Checks whether the provided file exists
 */
 int directoryExists(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
 
-    checkArgumentsAndThrow(L, 1, "lua::directoryExists");
-
-    const std::string& file = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& file = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     const bool e = FileSys.directoryExists(absPath(file));
 
-    push(L, e);
+    ghoul::lua::push(L, e);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
@@ -315,14 +321,16 @@ int walkDirectoryFolder(lua_State* L) {
  * 'C:\\OpenSpace\\foobar'."
  */
 int directoryForPath(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
 
-    checkArgumentsAndThrow(L, 1, "lua::directoryForPath");
-
-    std::string file = value<std::string>(L, 1, PopValue::Yes);
+    std::string file = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     std::string path = ghoul::filesystem::File(std::move(file)).directoryName();
 
-    push(L, path);
+    ghoul::lua::push(L, path);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;

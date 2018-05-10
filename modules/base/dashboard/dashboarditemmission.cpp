@@ -204,7 +204,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 
             using PhaseWithDepth = std::pair<const MissionPhase*, int>;
             std::stack<PhaseWithDepth> S;
-            
+
             constexpr const int PixelIndentation = 20;
             S.push({ &mission, 0 });
             while (!S.empty()) {

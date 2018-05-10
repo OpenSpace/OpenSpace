@@ -371,11 +371,13 @@ int property_setValueSingle(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int property_getValue(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::property_getValue");
 
-    checkArgumentsAndThrow(L, 1, "lua::property_getValue");
-
-    const std::string& uri = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& uri = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {
@@ -383,7 +385,7 @@ int property_getValue(lua_State* L) {
             "property_getValue",
             fmt::format(
                 "{}: Property with URI '{}' was not found",
-                errorLocation(L),
+                ghoul::lua::errorLocation(L),
                 uri
             )
         );
@@ -404,11 +406,9 @@ int property_getValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int loadScene(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadScene");
 
-    checkArgumentsAndThrow(L, 1, "lua::loadScene");
-
-    const std::string& sceneFile = value<std::string>(L, 1);
+    const std::string& sceneFile = ghoul::lua::value<std::string>(L, 1);
     OsEng.scheduleLoadSingleAsset(sceneFile);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
@@ -453,16 +453,20 @@ int addSceneGraphNode(lua_State* L) {
 }
 
 int removeSceneGraphNode(lua_State* L) {
-    using namespace ghoul::lua;
-
     const int n = ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    const std::string& nodeName = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& nodeName = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
     if (!node) {
         LERRORC(
             "removeSceneGraphNode",
-            fmt::format("{}: Could not find node '{}'", errorLocation(L), nodeName)
+            fmt::format(
+                "{}: Could not find node '{}'", ghoul::lua::errorLocation(L), nodeName
+            )
         );
         return 0;
     }
@@ -470,7 +474,7 @@ int removeSceneGraphNode(lua_State* L) {
     if (!parent) {
         LERRORC(
             "removeSceneGraphNode",
-            fmt::format("{}: Cannot remove root node", errorLocation(L))
+            fmt::format("{}: Cannot remove root node", ghoul::lua::errorLocation(L))
         );
         return 0;
     }
@@ -499,14 +503,16 @@ int removeSceneGraphNode(lua_State* L) {
 }
 
 int hasSceneGraphNode(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
 
-    checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");
-
-    const std::string& nodeName = value<std::string>(L, -1, PopValue::Yes);
+    const std::string& nodeName = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
 
-    push(L, node != nullptr);
+    ghoul::lua::push(L, node != nullptr);
 
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;

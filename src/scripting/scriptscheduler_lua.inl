@@ -25,11 +25,13 @@
 namespace openspace::luascriptfunctions {
 
 int loadFile(lua_State* L) {
-    using namespace ghoul::lua;
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadFile");
 
-    checkArgumentsAndThrow(L, 1, "lua::loadFile");
-
-    const std::string& missionFileName = value<std::string>(L, 1, PopValue::Yes);
+    const std::string& missionFileName = ghoul::lua::value<std::string>(
+        L,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     if (missionFileName.empty()) {
         return luaL_error(L, "filepath string is empty");
     }
@@ -43,12 +45,14 @@ int loadFile(lua_State* L) {
 }
 
 int loadScheduledScript(lua_State* L) {
-    using namespace ghoul::lua;
+    int nArguments = ghoul::lua::checkArgumentsAndThrow(
+        L,
+        { 2, 4 },
+        "lua::loadScheduledScript"
+    );
 
-    int nArguments = checkArgumentsAndThrow(L, { 2, 4 }, "lua::loadScheduledScript");
-
-    std::string time = value<std::string>(L, 1);
-    std::string forwardScript = value<std::string>(L, 2);
+    std::string time = ghoul::lua::value<std::string>(L, 1);
+    std::string forwardScript = ghoul::lua::value<std::string>(L, 2);
 
     if (nArguments == 2) {
         OsEng.scriptScheduler().loadScripts({
@@ -62,7 +66,7 @@ int loadScheduledScript(lua_State* L) {
         });
     }
     else if (nArguments == 3) {
-        std::string backwardScript = value<std::string>(L, 3);
+        std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
         OsEng.scriptScheduler().loadScripts({
             {
                 "1",
@@ -75,8 +79,8 @@ int loadScheduledScript(lua_State* L) {
         });
     }
     else if (nArguments == 4) {
-        std::string backwardScript = value<std::string>(L, 3);
-        std::string universalScript = value<std::string>(L, 4);
+        std::string backwardScript = ghoul::lua::value<std::string>(L, 3);
+        std::string universalScript = ghoul::lua::value<std::string>(L, 4);
 
         OsEng.scriptScheduler().loadScripts({
             {
