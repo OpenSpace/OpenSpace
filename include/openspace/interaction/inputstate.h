@@ -36,9 +36,6 @@ namespace openspace::interaction {
 // This class represents the global input state of interaction devices
 class InputState {
 public:
-    InputState() = default;
-    ~InputState() = default;
-
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void mouseButtonCallback(MouseButton button, MouseAction action);

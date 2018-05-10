@@ -26,9 +26,7 @@
 #define __OPENSPACE_CORE___VERIFIER___H__
 
 #include <openspace/documentation/documentation.h>
-
 #include <ghoul/glm.h>
-
 #include <functional>
 #include <type_traits>
 

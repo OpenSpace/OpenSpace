@@ -61,7 +61,6 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     , _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
-    , _owner(nullptr)
 {
     ghoul_precondition(
         _identifier.find_first_of("\t\n ") == std::string::npos,
@@ -78,7 +77,7 @@ PropertyOwner::~PropertyOwner() {
     _subOwners.clear();
 }
 
-std::vector<Property*> PropertyOwner::properties() const {
+const std::vector<Property*>& PropertyOwner::properties() const {
     return _properties;
 }
 
@@ -94,7 +93,7 @@ std::vector<Property*> PropertyOwner::propertiesRecursive() const {
 }
 
 Property* PropertyOwner::property(const std::string& id) const {
-    std::vector<Property*>::const_iterator it = std::find_if(
+    auto it = std::find_if(
         _properties.begin(),
         _properties.end(),
         [&id](Property* prop) { return prop->identifier() == id; }
@@ -113,7 +112,7 @@ Property* PropertyOwner::property(const std::string& id) const {
             const std::string propertyName = id.substr(ownerSeparator + 1);
 
             PropertyOwner* owner = propertySubOwner(ownerName);
-            if (owner == nullptr) {
+            if (!owner) {
                 return nullptr;
             }
             else {
@@ -131,7 +130,7 @@ bool PropertyOwner::hasProperty(const std::string& id) const {
     return property(id) != nullptr;
 }
 
-std::vector<PropertyOwner*> PropertyOwner::propertySubOwners() const {
+const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
 
@@ -319,7 +318,7 @@ void PropertyOwner::setIdentifier(std::string identifier) {
     _identifier = std::move(identifier);
 }
 
-std::string PropertyOwner::identifier() const {
+const std::string& PropertyOwner::identifier() const {
     return _identifier;
 }
 
@@ -335,11 +334,11 @@ void PropertyOwner::setDescription(std::string description) {
     _description = std::move(description);
 }
 
-std::string PropertyOwner::description() const {
+const std::string& PropertyOwner::description() const {
     return _description;
 }
 
-std::vector<std::string> PropertyOwner::tags() const {
+const std::vector<std::string>& PropertyOwner::tags() const {
     return _tags;
 }
 
@@ -348,10 +347,7 @@ void PropertyOwner::addTag(std::string tag) {
 }
 
 void PropertyOwner::removeTag(const std::string& tag) {
-    _tags.erase(
-        std::remove(_tags.begin(), _tags.end(), tag),
-        _tags.end()
-    );
+    _tags.erase(std::remove(_tags.begin(), _tags.end(), tag), _tags.end());
 }
 
 std::string PropertyOwner::generateJson() const {

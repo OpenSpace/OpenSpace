@@ -115,8 +115,6 @@ documentation::Documentation LogFactoryDocumentation() {
 }
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
-    using namespace std::string_literals;
-
     documentation::testSpecificationAndThrow(
         LogFactoryDocumentation(),
         dictionary,

@@ -25,7 +25,6 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-
 #include <algorithm>
 
 namespace openspace::documentation {
@@ -134,7 +133,8 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
-                                   const std::string & key) const {
+                                   const std::string & key) const
+{
     if (dict.hasKeyAndValue<int>(key)) {
         // We we have a key and the value is int, we are done
         return { true, {}, {} };
@@ -181,7 +181,8 @@ TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
 {}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
-                                     const std::string& key) const {
+                                     const std::string& key) const
+{
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({documentations}, d);
@@ -287,8 +288,7 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
 }
 
 std::string ReferencingVerifier::documentation() const {
-    using namespace std::string_literals;
-    return "Referencing Documentation: '"s + identifier + "'";
+    return "Referencing Documentation: '" + identifier + "'";
 }
 
 AndVerifier::AndVerifier(Verifier* l, Verifier* r)
@@ -335,7 +335,8 @@ OrVerifier::OrVerifier(Verifier* l, Verifier* r)
 }
 
 TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string& key) const {
+                                   const std::string& key) const
+{
     TestResult resA = lhs->operator()(dict, key);
     TestResult resB = rhs->operator()(dict, key);
 

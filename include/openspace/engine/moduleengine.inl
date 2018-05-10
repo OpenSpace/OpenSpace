@@ -22,47 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DASHBOARD___H__
-#define __OPENSPACE_CORE___DASHBOARD___H__
-
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/glm.h>
-#include <memory>
-#include <vector>
-
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+template <class ModuleSubClass>
+ModuleSubClass* ModuleEngine::module() const {
+    auto it = std::find_if(_modules.begin(), _modules.end(),
+        [](const std::unique_ptr<OpenSpaceModule>& m) {
+        return m->identifier() == ModuleSubClass::Name;
+    });
+    if (it != _modules.end()) {
+        return dynamic_cast<ModuleSubClass*>(it->get());
+    }
+    else {
+        return nullptr;
+    }
+}
 
-class DashboardItem;
-
-class Dashboard : public properties::PropertyOwner {
-public:
-    Dashboard();
-
-    void render(glm::vec2& penPosition);
-
-    void addDashboardItem(std::unique_ptr<DashboardItem> item);
-    bool hasItem(int index) const;
-    const DashboardItem& item(int index) const;
-    void removeDashboardItem(const std::string& identifier);
-    void removeDashboardItem(int index);
-    void clearDashboardItems();
-
-    /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * rendering.
-    */
-    static scripting::LuaLibrary luaLibrary();
-
-private:
-    properties::BoolProperty _isEnabled;
-
-    std::vector<std::unique_ptr<DashboardItem>> _items;
-};
-
-} // openspace
-
-#endif // __OPENSPACE_CORE___DASHBOARD___H__
+} // namespace openspace

@@ -272,7 +272,7 @@ void LuaConsole::initialize() {
         ghoul::fontrendering::FontManager::Outline::No
     );
 
-    OsEng.parallelPeer().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent().subscribe(
         "luaConsole",
         "statusChanged",
         [this]() {
@@ -316,7 +316,7 @@ void LuaConsole::deinitialize() {
 
     _program = nullptr;
 
-    OsEng.parallelPeer().connectionEvent()->unsubscribe("luaConsole");
+    OsEng.parallelPeer().connectionEvent().unsubscribe("luaConsole");
 }
 
 bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {

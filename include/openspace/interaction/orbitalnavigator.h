@@ -46,10 +46,9 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-class OrbitalNavigator : public properties::PropertyOwner  {
+class OrbitalNavigator : public properties::PropertyOwner {
 public:
     OrbitalNavigator();
-    ~OrbitalNavigator();
 
     void updateStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromStates(Camera& camera, double deltaTime);

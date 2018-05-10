@@ -27,21 +27,19 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-
+#include <ghoul/fmt.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/filesystem/filesystem.h>
-
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <streambuf>
 
-#include <ghoul/fmt.h>
-
 namespace {
-    const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
-    const char* DocumentationTemplateFilename = "${WEB}/documentation/documentation.hbs";
-    const char* JsFilename = "${WEB}/documentation/script.js";
+    constexpr const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";
+    constexpr const char* DocumentationTemplateFilename =
+                                                 "${WEB}/documentation/documentation.hbs";
+    constexpr const char* JsFilename = "${WEB}/documentation/script.js";
 } // namespace
 
 namespace openspace::documentation {
@@ -70,7 +68,6 @@ DocumentationEngine::DocumentationEngine()
     )
 {}
 
-
 DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {
         _instance = new DocumentationEngine;
@@ -80,11 +77,10 @@ DocumentationEngine& DocumentationEngine::ref() {
 }
 
 std::string generateTextDocumentation(const Documentation& d, int& indentLevel) {
-    using namespace std::string_literals;
-
-    auto indentMessage = [&indentLevel](std::string prefix, std::string msg) {
+    auto indentMessage = [&indentLevel](const std::string& prefix, const std::string& msg)
+    {
         if (msg.empty()) {
-            return ""s;
+            return std::string();
         }
         else {
             return std::string(indentLevel, '\t') + prefix + ": " + msg + '\n';
@@ -96,7 +92,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
     if (!d.name.empty()) {
         ++indentLevel;
     }
-    for (const auto& p : d.entries) {
+    for (const DocumentationEntry& p : d.entries) {
         result += indentMessage("Key", (p.key == "*") ? p.key : "\"" + p.key + "\"");
         result += indentMessage("Optional", (p.optional ? "true" : "false"));
         result += indentMessage("Type", p.verifier->type());
@@ -107,7 +103,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
         // TableVerifier
         if (rv) {
-            std::vector<Documentation> documentations = DocEng.documentations();
+            const std::vector<Documentation>& documentations = DocEng.documentations();
             auto it = std::find_if(
                 documentations.begin(),
                 documentations.end(),
@@ -150,7 +146,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
     result << "\"name\": \"" << d.name << "\",";
     result << "\"id\": \"" << d.id << "\",";
     result << "\"entries\": [";
-    for (const auto& p : d.entries) {
+    for (const DocumentationEntry& p : d.entries) {
         result << "{";
         result << "\"key\": \"" << p.key << "\",";
         result << "\"optional\": " << (p.optional ? "true" : "false") << ",";
@@ -160,7 +156,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
         if (rv) {
-            std::vector<Documentation> documentations = DocEng.documentations();
+            const std::vector<Documentation>& documentations = DocEng.documentations();
             auto it = std::find_if(
                 documentations.begin(),
                 documentations.end(),
@@ -193,7 +189,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
     }
 
     result << ']';
-    result << "}";
+    result << '}';
 
     return result.str();
 }
@@ -204,7 +200,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
     html << "\t<tr>\n"
          << "\t\t<td colspan=6>" << d.name << "<a name=\"" << d.id << "\"></a></td>\n";
 
-    for (const auto& p : d.entries) {
+    for (const DocumentationEntry& p : d.entries) {
         html << "\t<tr>\n"
              << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
@@ -218,7 +214,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
         // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
         // TableVerifier
         if (rv) {
-            std::vector<Documentation> documentations = DocEng.documentations();
+            const std::vector<Documentation>& documentations = DocEng.documentations();
             auto it = std::find_if(
                 documentations.begin(),
                 documentations.end(),

@@ -24,6 +24,7 @@
 
 #include <openspace/network/parallelserver.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <functional>
 
@@ -66,7 +67,7 @@ void ParallelServer::handleNewPeers() {
 
         socket->startStreams();
 
-        size_t id = _nextConnectionId++;
+        const size_t id = _nextConnectionId++;
         std::shared_ptr<Peer> p = std::make_shared<Peer>(Peer{
             id,
             "",
@@ -124,10 +125,7 @@ void ParallelServer::eventLoop() {
 }
 
 void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
-    ParallelConnection::MessageType messageType = peerMessage.message.type;
-    size_t peerId = peerMessage.peerId;
-    std::vector<char>& data = peerMessage.message.content;
-
+    const size_t peerId = peerMessage.peerId;
     auto it = _peers.find(peerId);
     if (it == _peers.end()) {
         return;
@@ -135,6 +133,8 @@ void ParallelServer::handlePeerMessage(PeerMessage peerMessage) {
 
     std::shared_ptr<Peer>& peer = it->second;
 
+    const ParallelConnection::MessageType messageType = peerMessage.message.type;
+    std::vector<char>& data = peerMessage.message.content;
     switch (messageType) {
         case ParallelConnection::MessageType::Authentication:
             handleAuthentication(peer, std::move(data));
@@ -381,8 +381,9 @@ void ParallelServer::setToClient(std::shared_ptr<Peer> peer) {
             sendConnectionStatus(it.second);
         }
     } else {
-        peer->status = (_hostPeerId > 0) ? ParallelConnection::Status::ClientWithHost
-                                         : ParallelConnection::Status::ClientWithoutHost;
+        peer->status = (_hostPeerId > 0) ?
+            ParallelConnection::Status::ClientWithHost :
+            ParallelConnection::Status::ClientWithoutHost;
         sendConnectionStatus(peer);
     }
 }

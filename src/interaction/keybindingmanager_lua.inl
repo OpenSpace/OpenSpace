@@ -82,7 +82,6 @@ int bindKeyLocal(lua_State* L) {
     const std::string& key = ghoul::lua::value<std::string>(L, 1);
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
 
-
     if (command.empty()) {
         return luaL_error(L, "Command string is empty");
     }

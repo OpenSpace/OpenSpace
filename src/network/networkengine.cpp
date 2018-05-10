@@ -28,10 +28,8 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
 #include <array>
 #include <chrono>
 #include <thread>
@@ -64,21 +62,16 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     const char type = message[0];
     switch (type) {
         case MessageTypeLuaScript:  // LuaScript
-        {
-            std::string script = message.substr(1);
             OsEng.scriptEngine().queueScript(
-                script,
+                message.substr(1),
                 scripting::ScriptEngine::RemoteScripting::No
             );
             return true;
-        }
         case MessageTypeExternalControlConnected:
-        {
             publishIdentifierMappingMessage();
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
             sendInitialInformation();
             return true;
-        }
         default:
             LERROR(fmt::format("Unknown type '{}'", type));
             return false;
@@ -97,13 +90,13 @@ void NetworkEngine::publishStatusMessage() {
     // 8 bytes: delta time as double
     // Total: 40
 
-    Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = OsEng.timeManager().time();
 
     uint16_t messageSize = 0;
 
-    double time = currentTime.j2000Seconds();
-    std::string timeString = currentTime.UTC();
-    double delta = currentTime.deltaTime();
+    const double time = currentTime.j2000Seconds();
+    const std::string timeString = currentTime.UTC();
+    const double delta = currentTime.deltaTime();
 
     messageSize += sizeof(time);
     messageSize += static_cast<uint16_t>(timeString.length());
@@ -162,7 +155,6 @@ NetworkEngine::MessageIdentifier NetworkEngine::identifier(std::string name) {
     }
     else {
         _lastAssignedIdentifier++;
-
         MessageIdentifier result = _lastAssignedIdentifier;
 
         _identifiers[std::move(name)] = result;

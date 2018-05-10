@@ -29,6 +29,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
@@ -100,10 +101,8 @@ NavigationHandler::NavigationHandler()
     addPropertySubOwner(*_orbitalNavigator);
 }
 
-NavigationHandler::~NavigationHandler() {}
-
 void NavigationHandler::initialize() {
-    OsEng.parallelPeer().connectionEvent()->subscribe(
+    OsEng.parallelPeer().connectionEvent().subscribe(
         "NavigationHandler",
         "statusChanged",
         [this]() {
@@ -114,7 +113,7 @@ void NavigationHandler::initialize() {
 }
 
 void NavigationHandler::deinitialize() {
-    OsEng.parallelPeer().connectionEvent()->unsubscribe("NavigationHandler");
+    OsEng.parallelPeer().connectionEvent().unsubscribe("NavigationHandler");
 }
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
@@ -141,8 +140,8 @@ KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
-    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
-    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
+    ghoul_assert(_inputState != nullptr, "InputState must not be nullptr");
+    ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
     if (_cameraUpdatedFromScript) {
         _cameraUpdatedFromScript = false;
@@ -282,8 +281,9 @@ void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
 
 void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
     LINFO(fmt::format("Reading camera state from file: {}", filepath));
-    if (!FileSys.fileExists(filepath))
+    if (!FileSys.fileExists(filepath)) {
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
+    }
 
     ghoul::Dictionary cameraDict;
     try {

@@ -29,7 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
-
 #include <chrono>
 #include <cstring>
 #include <fstream>
@@ -112,11 +111,9 @@ namespace {
         // Compute estimated time remaining.
         auto timeRemaining = estimatedTime - transferTime;
 
-        float s = static_cast<float>(
+        i->future->secondsRemaining = static_cast<float>(
             std::chrono::duration_cast<std::chrono::seconds>(timeRemaining).count()
         );
-
-        i->future->secondsRemaining = s;
 
         if (*(i->callback)) {
             // The callback function is a pointer to an std::function; that is the reason
@@ -131,15 +128,7 @@ namespace {
 namespace openspace {
 
 DownloadManager::FileFuture::FileFuture(std::string file)
-    : currentSize(-1)
-    , totalSize(-1)
-    , progress(0.f)
-    , secondsRemaining(-1.f)
-    , isFinished(false)
-    , isAborted(false)
-    , filePath(std::move(file))
-    , errorMessage("")
-    , abortDownload(false)
+    : filePath(std::move(file))
 {}
 
 DownloadManager::DownloadManager(UseMultipleThreads useMultipleThreads)
@@ -149,9 +138,13 @@ DownloadManager::DownloadManager(UseMultipleThreads useMultipleThreads)
 }
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
-    const std::string& url, const ghoul::filesystem::File& file,
-    OverrideFile overrideFile, FailOnError failOnError, unsigned int timeout_secs,
-    DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
+                                                                   const std::string& url,
+                                                      const ghoul::filesystem::File& file,
+                                                                OverrideFile overrideFile,
+                                                                  FailOnError failOnError,
+                                                                unsigned int timeout_secs,
+                                                DownloadFinishedCallback finishedCallback,
+                                                DownloadProgressCallback progressCallback)
 {
     if (!overrideFile && FileSys.fileExists(file)) {
         return nullptr;
@@ -179,17 +172,20 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     }
 
     auto downloadFunction = [url, failOnError, timeout_secs, finishedCallback,
-                             progressCallback, future, fp]() {
+                             progressCallback, future, fp]()
+    {
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
-            if (timeout_secs)
+            if (timeout_secs) {
                 curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs);
-            if (failOnError)
+            }
+            if (failOnError) {
                 curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+            }
 
             ProgressInformation p = {
                 future,
@@ -219,8 +215,6 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
 
     if (_useMultithreadedDownload) {
         std::thread t = std::thread(downloadFunction);
-
-        using namespace ghoul::thread;
         ghoul::thread::setPriority(
             t,
             ghoul::thread::ThreadPriorityClass::Idle,
@@ -237,8 +231,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
 }
 
 std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
-    const std::string& url,
-    SuccessCallback successCallback, ErrorCallback errorCallback)
+                                                                   const std::string& url,
+                                                          SuccessCallback successCallback,
+                                                              ErrorCallback errorCallback)
 {
     LDEBUG(fmt::format("Start downloading file: '{}' into memory", url));
 
@@ -264,11 +259,11 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
         curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 
         CURLcode res = curl_easy_perform(curl);
-        if (res == CURLE_OK){
+        if (res == CURLE_OK) {
             // ask for the content-type
-            char *ct;
+            char* ct;
             res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-            if (res == CURLE_OK){
+            if (res == CURLE_OK) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
                 getline(ss, extension ,'/');
@@ -304,8 +299,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 }
 
 void DownloadManager::getFileExtension(const std::string& url,
-    RequestFinishedCallback finishedCallback){
-
+                                       RequestFinishedCallback finishedCallback)
+{
     auto requestFunction = [url, finishedCallback]() {
         CURL* curl = curl_easy_init();
         if (curl) {
@@ -326,10 +321,11 @@ void DownloadManager::getFileExtension(const std::string& url,
         }
     };
     if (_useMultithreadedDownload) {
-        using namespace ghoul::thread;
         std::thread t = std::thread(requestFunction);
         ghoul::thread::setPriority(
-            t, ThreadPriorityClass::Idle, ThreadPriorityLevel::Lowest
+            t,
+            ghoul::thread::ThreadPriorityClass::Idle,
+            ghoul::thread::ThreadPriorityLevel::Lowest
         );
         t.detach();
     }

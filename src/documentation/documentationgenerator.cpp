@@ -26,19 +26,16 @@
 
 #include <openspace/openspace.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/invariants.h>
-
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/misc/invariants.h>
 #include <fstream>
 
 namespace {
-    const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
-    const char* BaseLibraryFilename = "${WEB}/common/base.js";
-    const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    const char* CssFilename = "${WEB}/common/style.css";
+    constexpr const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr const char* BaseLibraryFilename = "${WEB}/common/base.js";
+    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr const char* CssFilename = "${WEB}/common/style.css";
 } // namespace
 
 namespace openspace {

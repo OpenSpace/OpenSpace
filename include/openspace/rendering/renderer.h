@@ -60,7 +60,7 @@ public:
 
     virtual float hdrBackground() const = 0;
     virtual int nAaSamples() const = 0;
-    virtual std::vector<double> mSSAPattern() const = 0;
+    virtual const std::vector<double>& mSSAPattern() const = 0;
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

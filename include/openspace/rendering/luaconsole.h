@@ -29,6 +29,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
@@ -38,6 +39,7 @@
 #include <string>
 #include <vector>
 
+namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {

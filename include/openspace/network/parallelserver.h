@@ -28,13 +28,10 @@
 #include <openspace/network/parallelconnection.h>
 
 #include <openspace/util/concurrentqueue.h>
-
 #include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/tcpsocket.h>
-
+#include <atomic>
 #include <string>
 #include <unordered_map>
-#include <atomic>
 
 namespace openspace {
 

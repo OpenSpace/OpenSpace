@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine() : properties::PropertyOwner({"Modules"}) {}
+ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)

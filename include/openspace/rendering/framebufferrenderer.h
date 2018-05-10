@@ -25,15 +25,14 @@
 #ifndef __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 #define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
-#include <openspace/rendering/deferredcasterlistener.h>
-#include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/renderer.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/rendering/raycasterlistener.h>
+#include <openspace/rendering/deferredcasterlistener.h>
 
+#include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/glm.h>
-
 #include <map>
 #include <string>
 #include <vector>
@@ -49,14 +48,16 @@ namespace ghoul::opengl {
 namespace openspace {
 
 class Camera;
+struct DeferredcastData;
+struct RaycastData;
 class Scene;
+struct UpdateStructures;
 
 class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
 public:
-    FramebufferRenderer();
-    virtual ~FramebufferRenderer();
+    virtual ~FramebufferRenderer() = default;
 
     void initialize() override;
     void deinitialize() override;
@@ -76,7 +77,7 @@ public:
     float hdrBackground() const override;
     int nAaSamples() const override;
     /*const double * mSSAPattern() const override;*/
-    std::vector<double> mSSAPattern() const override;
+    const std::vector<double>& mSSAPattern() const override;
 
     void update() override;
     void render(Scene* scene, Camera* camera, float blackoutFactor,
@@ -131,13 +132,12 @@ private:
     bool _dirtyRaycastData;
     bool _dirtyResolution;
 
-    glm::vec2 _resolution;
+    glm::ivec2 _resolution = glm::ivec2(0);
     int _nAaSamples;
-    float _hdrExposure;
-    float _hdrBackground;
-    float _gamma;
+    float _hdrExposure = 0.4f;
+    float _hdrBackground = 2.8f;
+    float _gamma = 2.2f;
 
-    //double * _mSAAPattern;
     std::vector<double> _mSAAPattern;
 
     ghoul::Dictionary _rendererData;

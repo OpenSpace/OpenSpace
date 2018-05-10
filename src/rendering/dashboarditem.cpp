@@ -31,7 +31,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    constexpr const char* KeyType = "Type";
 
     static const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",

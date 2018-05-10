@@ -38,8 +38,8 @@ struct PerformanceLayout;
 
 class PerformanceManager {
 public:
-    static void createGlobalSharedMemory();
-    static void destroyGlobalSharedMemory();
+    static void CreateGlobalSharedMemory();
+    static void DestroyGlobalSharedMemory();
 
     PerformanceManager(std::string loggingDirectory = "${BASE}",
         std::string prefix = "PM-");

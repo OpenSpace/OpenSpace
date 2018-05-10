@@ -30,7 +30,7 @@
 #undef far
 
 namespace {
-    const char* GuiWindowTag = "GUI";
+    constexpr const char* GuiWindowTag = "GUI";
 
     static const openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
         "EyeSeparation",
@@ -127,18 +127,12 @@ glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
     switch (window->getStereoMode()) {
         case sgct::SGCTWindow::Side_By_Side_Stereo:
         case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
-            return glm::ivec2(
-                window->getXResolution() / 2,
-                window->getYResolution());
+            return glm::ivec2(window->getXResolution() / 2, window->getYResolution());
         case sgct::SGCTWindow::Top_Bottom_Stereo:
         case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
-            return glm::ivec2(
-                window->getXResolution(),
-                window->getYResolution() / 2);
+            return glm::ivec2(window->getXResolution(), window->getYResolution() / 2);
         default:
-            return glm::ivec2(
-                window->getXResolution(),
-                window->getYResolution());
+            return glm::ivec2(window->getXResolution(), window->getYResolution());
     }
 }
 
@@ -266,7 +260,6 @@ void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
 void SGCTWindowWrapper::swapBuffer() const {
     GLFWwindow* w = glfwGetCurrentContext();
     glfwSwapBuffers(w);
-
     glfwPollEvents();
 }
 

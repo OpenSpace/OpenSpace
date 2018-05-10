@@ -35,9 +35,7 @@ namespace openspace {
     class SceneGraphNode;
 } // namespace openspace
 
-namespace openspace::scripting {
-    struct LuaLibrary;
-} // namespace openspace::scription
+namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
@@ -53,7 +51,6 @@ public:
     };
 
     KeyBindingManager();
-    ~KeyBindingManager() = default;
 
     void resetKeyBindings();
 

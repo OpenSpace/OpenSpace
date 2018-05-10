@@ -25,9 +25,7 @@
 #include <openspace/engine/syncengine.h>
 
 #include <openspace/util/syncdata.h>
-
 #include <ghoul/misc/assert.h>
-
 #include <algorithm>
 
 namespace openspace {

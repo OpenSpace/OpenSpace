@@ -24,20 +24,11 @@
 
 #include <openspace/interaction/keybindingmanager.h>
 
-#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
-#include <openspace/util/keys.h>
-
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/string_cast.hpp>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/util/keys.h>
 #include <ghoul/glm.h>
-
-#include <fstream>
 
 #include "keybindingmanager_lua.inl"
 
@@ -53,7 +44,7 @@ KeyBindingManager::KeyBindingManager()
         },
         "${WEB}/keybindings/script.js"
     )
-{ }
+{}
 
 void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {

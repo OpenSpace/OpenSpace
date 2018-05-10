@@ -33,11 +33,11 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* MetaDataKeyGroup = "Group";
-    const char* MetaDataKeyVisibility = "Visibility";
-    const char* MetaDataKeyReadOnly = "isReadOnly";
+    constexpr const char* MetaDataKeyGroup = "Group";
+    constexpr const char* MetaDataKeyVisibility = "Visibility";
+    constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
 
-    const char* _metaDataKeyViewPrefix = "view.";
+    constexpr const char* _metaDataKeyViewPrefix = "view.";
 } // namespace
 
 namespace openspace::properties {
@@ -61,11 +61,9 @@ uint64_t Property::Identifier = 0;
 #endif
 
 Property::Property(PropertyInfo info)
-    : _owner(nullptr)
-    , _identifier(std::move(info.identifier))
+    : _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
-    , _currentHandleValue(0)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif
@@ -127,7 +125,7 @@ std::string Property::getStringValue() const {
     std::string value;
     bool status = getStringValue(value);
     if (!status) {
-        throw std::runtime_error("Could not get string value");
+        throw ghoul::RuntimeError("Could not get string value", identifier());
     }
     return value;
 }
@@ -191,26 +189,25 @@ const ghoul::Dictionary& Property::metaData() const {
 
 std::string Property::toJson() const {
     std::string result = "{";
-    result +=
-        "\"" + std::string(DescriptionKey) + "\": " +
-        generateBaseJsonDescription() + ", ";
-    result +=
-        "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
-    result += "}";
+    result += "\"" + std::string(DescriptionKey) + "\": " +
+              generateBaseJsonDescription() + ", ";
+    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue() + '}';
     return result;
 }
 
 std::string Property::jsonValue() const {
     std::string value = getStringValue();
     if (value[0] == '"' && value[value.size() - 1] == '"') {
-        value.erase(0, 1);
-        value.erase(value.size() - 1, 1);
+        return value.substr(1, value.size() - 2);
     }
-    return value;
+    else {
+        return value;
+    }
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
+
     OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
     return handle;
@@ -218,6 +215,7 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
 
 Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
+
     OnDeleteHandle handle = _currentHandleValue++;
     _onDeleteCallbacks.emplace_back(handle, std::move(callback));
     return handle;

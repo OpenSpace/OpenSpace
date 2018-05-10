@@ -30,10 +30,10 @@
 namespace openspace::performance {
 
 struct PerformanceLayout {
-    static const int8_t Version = 0;
-    static const int LengthName = 256;
-    static const int NumberValues = 256;
-    static const int MaxValues = 256;
+    constexpr static const int8_t Version = 0;
+    constexpr static const int LengthName = 256;
+    constexpr static const int NumberValues = 256;
+    constexpr static const int MaxValues = 1024;
 
     PerformanceLayout();
 

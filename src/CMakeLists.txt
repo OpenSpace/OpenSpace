@@ -208,6 +208,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h

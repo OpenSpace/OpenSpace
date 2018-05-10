@@ -29,7 +29,6 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/misc/exception.h>
-
 #include <map>
 #include <string>
 

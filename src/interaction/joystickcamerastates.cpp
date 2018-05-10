@@ -66,7 +66,7 @@ void JoystickCameraStates::updateStateFromInput(const InputState& inputState,
             value *= -1.f;
         }
 
-        value *= _sensitivity;
+        value = static_cast<float>(value * _sensitivity);
 
         switch (t.type) {
             case AxisType::None:

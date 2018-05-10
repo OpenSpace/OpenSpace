@@ -1251,7 +1251,7 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(
             *_fontLog,
-            glm::vec2(10 + 37 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
+            glm::vec2(10 + 41 * _fontLog->pointSize(), _fontLog->pointSize() * nr * 2),
             message,
             white
         );

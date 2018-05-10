@@ -50,7 +50,6 @@ namespace openspace::interaction {
 class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
-    ~NavigationHandler();
 
     void initialize();
     void deinitialize();

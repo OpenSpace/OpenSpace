@@ -126,8 +126,7 @@ std::string to_string(openspace::documentation::TestResult::Warning::Reason reas
 
 } // namespace std
 
-namespace openspace {
-namespace documentation {
+namespace openspace::documentation {
 
 const std::string DocumentationEntry::Wildcard = "*";
 
@@ -228,21 +227,6 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         uniqueWarnings.begin(), uniqueWarnings.end()
     );
 
-    std::sort(
-        result.offenses.begin(),
-        result.offenses.end(),
-        [](const TestResult::Offense& lhs, const TestResult::Offense& rhs) {
-            return OffenseCompare()(lhs, rhs);
-        }
-    );
-    std::sort(
-        result.warnings.begin(),
-        result.warnings.end(),
-        [](const TestResult::Warning& lhs, const TestResult::Warning& rhs) {
-            return WarningCompare()(lhs, rhs);
-        }
-    );
-
     return result;
 }
 
@@ -256,5 +240,4 @@ void testSpecificationAndThrow(const Documentation& doc, const ghoul::Dictionary
     }
 }
 
-} // namespace documentation
-} // namespace openspace
+} // namespace openspace::documentation

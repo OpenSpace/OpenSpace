@@ -27,31 +27,23 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/performance/performancemeasurement.h>
+#include <openspace/rendering/deferredcaster.h>
+#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/volumeraycaster.h>
+#include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/deferredcaster.h>
-#include <openspace/rendering/deferredcastermanager.h>
-#include <openspace/rendering/volumeraycaster.h>
-#include <openspace/rendering/raycastermanager.h>
-
-#include <openspace/performance/performancemeasurement.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-
+#include <fstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "FramebufferRenderer";
@@ -63,38 +55,96 @@ namespace {
     constexpr const char* GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
+
+    void saveTextureToPPMFile(GLenum color_buffer_attachment, std::string& fileName,
+        int width, int height)
+    {
+        std::fstream ppmFile;
+
+        ppmFile.open(fileName.c_str(), std::fstream::out);
+        if (ppmFile.is_open()) {
+            unsigned char* pixels = new unsigned char[width*height * 3];
+            for (int t = 0; t < width*height * 3; ++t) {
+                pixels[t] = 255;
+            }
+
+            if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
+                glReadBuffer(color_buffer_attachment);
+                glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+            }
+            else {
+                glReadPixels(
+                    0,
+                    0,
+                    width,
+                    height,
+                    GL_DEPTH_COMPONENT,
+                    GL_UNSIGNED_BYTE,
+                    pixels
+                );
+            }
+
+            ppmFile << "P3" << std::endl;
+            ppmFile << width << " " << height << std::endl;
+            ppmFile << "255" << std::endl;
+
+            std::cout << "\n\nFILE\n\n";
+            int k = 0;
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    ppmFile << static_cast<unsigned int>(pixels[k]) << " "
+                        << static_cast<unsigned int>(pixels[k + 1]) << " "
+                        << static_cast<unsigned int>(pixels[k + 2]) << " ";
+                    k += 3;
+                }
+                ppmFile << std::endl;
+            }
+            delete[] pixels;
+
+            ppmFile.close();
+        }
+    }
+
+    void saveTextureToMemory(GLenum color_buffer_attachment, int width, int height,
+        std::vector<double>& memory)
+    {
+        memory.clear();
+        memory.resize(width * height * 3);
+
+        float *tempMemory = new float[width*height * 3];
+
+        if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
+            glReadBuffer(color_buffer_attachment);
+            glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
+
+        }
+        else {
+            glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
+        }
+
+        for (auto i = 0; i < width*height * 3; ++i) {
+            memory[i] = static_cast<double>(tempMemory[i]);
+        }
+
+        delete[] tempMemory;
+    }
+
 } // namespace
 
 namespace openspace {
-void saveTextureToPPMFile(const GLenum color_buffer_attachment,
-    const std::string & fileName,
-    const int width, const int height);
-
-void saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, std::vector<double> & memory);
-
-
-FramebufferRenderer::FramebufferRenderer()
-    : _resolution(glm::vec2(0))
-    , _hdrExposure(0.4f)
-    , _hdrBackground(2.8f)
-    , _gamma(2.2f)
-{}
-
-FramebufferRenderer::~FramebufferRenderer() {}
 
 void FramebufferRenderer::initialize() {
     LDEBUG("Initializing FramebufferRenderer");
 
-    const GLfloat size = 1.0f;
-    const GLfloat vertex_data[] = {
-        //      x      y     s     t
-        -size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f,
-        -size,  size, 0.0f, 1.0f,
-        -size, -size, 0.0f, 1.0f,
-        size, -size, 0.0f, 1.0f,
-        size,    size, 0.0f, 1.0f
+    const GLfloat vertexData[] = {
+        // x     y
+        -1.f, -1.f,
+         1.f,  1.f,
+        -1.f,  1.f,
+        -1.f, -1.f,
+         1.f, -1.f,
+         1.f,  1.f,
     };
 
     glGenVertexArrays(1, &_screenQuad);
@@ -103,15 +153,8 @@ void FramebufferRenderer::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 4,
-        nullptr
-    );
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, nullptr);
     glEnableVertexAttribArray(0);
 
     GLint defaultFbo;
@@ -258,11 +301,7 @@ void FramebufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
     _dirtyRaycastData = true;
 }
 
-void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster,
-                                                 isAttached isAttached)
-{
-    (void) deferredcaster;
-    (void) isAttached;
+void FramebufferRenderer::deferredcastersChanged(Deferredcaster&, isAttached) {
     _dirtyDeferredcastData = true;
 }
 
@@ -296,7 +335,9 @@ void FramebufferRenderer::update() {
         _uniformCache.nAaSamples = _resolveProgram->uniformLocation("nAaSamples");
     }
 
-    for (auto& program : _exitPrograms) {
+    using K = VolumeRaycaster*;
+    using V = std::unique_ptr<ghoul::opengl::ProgramObject>;
+    for (const std::pair<const K, V>& program : _exitPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
@@ -306,7 +347,7 @@ void FramebufferRenderer::update() {
         }
     }
 
-    for (auto& program : _raycastPrograms) {
+    for (const std::pair<const K, V>& program : _raycastPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
@@ -316,7 +357,7 @@ void FramebufferRenderer::update() {
         }
     }
 
-    for (auto& program : _insideRaycastPrograms) {
+    for (const std::pair<const K, V>& program : _insideRaycastPrograms) {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
@@ -327,7 +368,11 @@ void FramebufferRenderer::update() {
         }
     }
 
-    for (auto &program : _deferredcastPrograms) {
+    for (const std::pair<
+            Deferredcaster* const,
+            std::unique_ptr<ghoul::opengl::ProgramObject>
+        >& program : _deferredcastPrograms)
+    {
         if (program.second && program.second->isDirty()) {
             program.second->rebuildFromFile();
         }
@@ -358,7 +403,8 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_RGBA,
         GL_FLOAT,
-        nullptr);
+        nullptr
+    );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -371,7 +417,8 @@ void FramebufferRenderer::updateResolution() {
         GL_RGBA32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
+        true
+    );
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture);
 
@@ -381,7 +428,8 @@ void FramebufferRenderer::updateResolution() {
         GL_RGBA32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
+        true
+    );
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
     glTexImage2DMultisample(
@@ -438,10 +486,8 @@ void FramebufferRenderer::updateRaycastData() {
     const std::vector<VolumeRaycaster*>& raycasters =
         OsEng.renderEngine().raycasterManager().raycasters();
     int nextId = 0;
-    for (auto& raycaster : raycasters) {
-        RaycastData data;
-        data.id = nextId++;
-        data.namespaceName = "HELPER";
+    for (VolumeRaycaster* raycaster : raycasters) {
+        RaycastData data = { nextId++, "Helper" };
 
         std::string vsPath = raycaster->getBoundsVsPath();
         std::string fsPath = raycaster->getBoundsFsPath();
@@ -450,6 +496,7 @@ void FramebufferRenderer::updateRaycastData() {
         dict.setValue("rendererData", _rendererData);
         dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
+
         std::string helperPath = raycaster->getHelperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
@@ -467,9 +514,10 @@ void FramebufferRenderer::updateRaycastData() {
                 absPath(ExitFragmentShaderPath),
                 dict
             );
-        } catch (ghoul::RuntimeError e) {
+        } catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
         }
+
         try {
             ghoul::Dictionary outsideDict = dict;
             outsideDict.setValue("getEntryPath", absPath(GetEntryOutsidePath));
@@ -479,9 +527,10 @@ void FramebufferRenderer::updateRaycastData() {
                 absPath(RaycastFragmentShaderPath),
                 outsideDict
             );
-        } catch (ghoul::RuntimeError e) {
+        } catch (const ghoul::RuntimeError& e) {
             LERROR(e.message);
         }
+
         try {
             ghoul::Dictionary insideDict = dict;
             insideDict.setValue("getEntryPath", absPath(GetEntryInsidePath));
@@ -506,10 +555,8 @@ void FramebufferRenderer::updateDeferredcastData() {
     const std::vector<Deferredcaster*>& deferredcasters =
         OsEng.renderEngine().deferredcasterManager().deferredcasters();
     int nextId = 0;
-    for (auto& caster : deferredcasters) {
-        DeferredcastData data;
-        data.id = nextId++;
-        data.namespaceName = "HELPER";
+    for (Deferredcaster* caster : deferredcasters) {
+        DeferredcastData data = { nextId++, "HELPER" };
 
         std::string vsPath = caster->deferredcastVSPath();
         std::string fsPath = caster->deferredcastFSPath();
@@ -521,7 +568,7 @@ void FramebufferRenderer::updateDeferredcastData() {
         dict.setValue("id", data.id);
         std::string helperPath = caster->helperPath();
         ghoul::Dictionary helpersDict;
-        if (helperPath != "") {
+        if (!helperPath.empty()) {
             helpersDict.setValue("0", helperPath);
         }
         dict.setValue("helperPaths", helpersDict);
@@ -536,14 +583,14 @@ void FramebufferRenderer::updateDeferredcastData() {
                 "Deferred " + std::to_string(data.id) + " raycast",
                 absPath(vsPath),
                 absPath(deferredShaderPath),
-                deferredDict);
+                deferredDict
+            );
 
-            using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
             _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(
-                IgnoreError::Yes
+                ghoul::opengl::ProgramObject::IgnoreError::Yes
             );
             _deferredcastPrograms[caster]->setIgnoreUniformLocationError(
-                IgnoreError::Yes
+                ghoul::opengl::ProgramObject::IgnoreError::Yes
             );
 
             caster->initializeCachedVariables(*_deferredcastPrograms[caster]);
@@ -627,11 +674,10 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     }
 
     GLuint pixelSizeQuadVAO = 0;
-    GLuint pixelSizeQuadVBO = 0;
-
     glGenVertexArrays(1, &pixelSizeQuadVAO);
     glBindVertexArray(pixelSizeQuadVAO);
 
+    GLuint pixelSizeQuadVBO = 0;
     glGenBuffers(1, &pixelSizeQuadVBO);
     glBindBuffer(GL_ARRAY_BUFFER, pixelSizeQuadVBO);
 
@@ -659,17 +705,17 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     glGenTextures(1, &pixelSizeTexture);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, pixelSizeTexture);
 
-    const GLsizei ONEPIXEL = 1;
+    constexpr const GLsizei OnePixel = 1;
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA32F,
-        ONEPIXEL,
-        ONEPIXEL,
+        OnePixel,
+        OnePixel,
         true
     );
 
-    glViewport(0, 0, ONEPIXEL, ONEPIXEL);
+    glViewport(0, 0, OnePixel, OnePixel);
 
     glGenFramebuffers(1, &pixelSizeFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, pixelSizeFramebuffer);
@@ -806,7 +852,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         0,
         GL_RGBA32F,
         _nAaSamples,
-        ONEPIXEL,
+        OnePixel,
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -831,7 +877,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
         LERROR("nOneStrip framebuffer is not complete");
     }
 
-    glViewport(0, 0, _nAaSamples, ONEPIXEL);
+    glViewport(0, 0, _nAaSamples, OnePixel);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> nOneStripProgram =
         ghoul::opengl::ProgramObject::Build(
@@ -850,7 +896,7 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     // render strip
     glDrawBuffers(1, textureBuffers);
 
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(0.f, 1.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindVertexArray(nOneStripVAO);
     glDisable(GL_DEPTH_TEST);
@@ -909,8 +955,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     glEnable(GL_DEPTH_TEST);
 
-
-    Time time = OsEng.timeManager().time();
+    const Time& time = OsEng.timeManager().time();
 
     RenderData data = { *camera, psc(), time, doPerformanceMeasurements, 0, {} };
     RendererTasks tasks;
@@ -1106,13 +1151,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
             Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
-            ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
+            ghoul::opengl::ProgramObject* deferredcastProgram =
+                _deferredcastPrograms[deferredcaster].get();;
 
-            if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()
-                || deferredcastProgram == nullptr)
-            {
-                deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
-            }
+            //if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()
+            //    || deferredcastProgram == nullptr)
+            //{
+            //    deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
+            //}
 
             if (deferredcastProgram) {
                 deferredcastProgram->activate();
@@ -1206,7 +1252,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 }
 
 void FramebufferRenderer::setResolution(glm::ivec2 res) {
-    _resolution = res;
+    _resolution = std::move(res);
     _dirtyResolution = true;
 }
 
@@ -1224,23 +1270,23 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
 
 void FramebufferRenderer::setHDRExposure(float hdrExposure) {
     _hdrExposure = hdrExposure;
-    if (_hdrExposure < 0.0f) {
+    if (_hdrExposure < 0.f) {
         LERROR("HDR Exposure constant must be greater than zero.");
-        _hdrExposure = 1.0f;
+        _hdrExposure = 1.f;
     }
 }
 
 void FramebufferRenderer::setHDRBackground(float hdrBackground) {
     _hdrBackground = hdrBackground;
-    if (_hdrBackground < 0.0f) {
+    if (_hdrBackground < 0.f) {
         LERROR("HDR Background constant must be greater than zero.");
-        _hdrBackground = 1.0f;
+        _hdrBackground = 1.f;
     }
 }
 
 void FramebufferRenderer::setGamma(float gamma) {
     _gamma = gamma;
-    if (_gamma < 0.0f) {
+    if (_gamma < 0.f) {
         LERROR("Gamma value must be greater than zero.");
         _gamma = 2.2f;
     }
@@ -1254,7 +1300,7 @@ int FramebufferRenderer::nAaSamples() const {
     return _nAaSamples;
 }
 
-std::vector<double> FramebufferRenderer::mSSAPattern() const {
+const std::vector<double>& FramebufferRenderer::mSSAPattern() const {
     return _mSAAPattern;
 }
 
@@ -1265,82 +1311,6 @@ void FramebufferRenderer::updateRendererData() {
     _rendererData = dict;
 
     OsEng.renderEngine().setRendererData(dict);
-}
-
-void saveTextureToPPMFile(const GLenum color_buffer_attachment,
-                          const std::string & fileName, const int width, const int height)
-{
-    std::fstream ppmFile;
-
-    ppmFile.open(fileName.c_str(), std::fstream::out);
-    if (ppmFile.is_open()) {
-        unsigned char* pixels = new unsigned char[width*height * 3];
-        for (int t = 0; t < width*height * 3; ++t) {
-            pixels[t] = 255;
-        }
-
-        if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
-            glReadBuffer(color_buffer_attachment);
-            glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-
-        }
-        else {
-            glReadPixels(
-                0,
-                0,
-                width,
-                height,
-                GL_DEPTH_COMPONENT,
-                GL_UNSIGNED_BYTE,
-                pixels
-            );
-        }
-
-        ppmFile << "P3" << std::endl;
-        ppmFile << width << " " << height << std::endl;
-        ppmFile << "255" << std::endl;
-
-        std::cout << "\n\nFILE\n\n";
-        int k = 0;
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                ppmFile << static_cast<unsigned int>(pixels[k]) << " "
-                        << static_cast<unsigned int>(pixels[k + 1]) << " "
-                        << static_cast<unsigned int>(pixels[k + 2]) << " ";
-                k += 3;
-            }
-            ppmFile << std::endl;
-        }
-        delete[] pixels;
-
-        ppmFile.close();
-    }
-}
-
-void saveTextureToMemory(const GLenum color_buffer_attachment,
-    const int width, const int height, std::vector<double> & memory) {
-
-    if (!memory.empty()) {
-        memory.clear();
-    }
-    memory.resize(width * height * 3);
-
-    float *tempMemory = new float[width*height * 3];
-
-    if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
-        glReadBuffer(color_buffer_attachment);
-        glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, tempMemory);
-
-    }
-    else {
-        glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tempMemory);
-    }
-
-    for (auto i = 0; i < width*height * 3; ++i) {
-        memory[i] = static_cast<double>(tempMemory[i]);
-    }
-
-    delete[] tempMemory;
 }
 
 } // namespace openspace

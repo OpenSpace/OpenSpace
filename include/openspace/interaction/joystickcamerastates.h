@@ -68,9 +68,7 @@ public:
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 
-    void setAxisMapping(
-        int axis,
-        AxisType mapping,
+    void setAxisMapping(int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         AxisNormalize shouldNormalize = AxisNormalize::No
     );

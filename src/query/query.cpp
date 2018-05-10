@@ -26,16 +26,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-
-#include <modules/iswa/rendering/iswabasegroup.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <modules/iswa/rendering/iswacygnet.h>
 
 namespace openspace {
 
@@ -64,22 +56,14 @@ std::vector<properties::Property*> allProperties() {
     std::vector<properties::Property*> p =
         OsEng.rootPropertyOwner().propertiesRecursive();
 
-    properties.insert(
-        properties.end(),
-        p.begin(),
-        p.end()
-    );
+    properties.insert(properties.end(), p.begin(), p.end());
 
     // The virtual property manager is not part of the rootProperty owner since it cannot
     // have an identifier or the "regex as identifier" trick would not work
     std::vector<properties::Property*> p2 =
         OsEng.virtualPropertyManager().propertiesRecursive();
 
-    properties.insert(
-        properties.end(),
-        p2.begin(),
-        p2.end()
-    );
+    properties.insert(properties.end(), p2.begin(), p2.end());
 
     return properties;
 }

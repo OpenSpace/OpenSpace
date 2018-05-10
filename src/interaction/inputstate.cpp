@@ -25,7 +25,6 @@
 #include <openspace/interaction/inputstate.h>
 
 #include <ghoul/fmt.h>
-#include <ghoul/logging/logmanager.h>
 #include <algorithm>
 
 namespace openspace::interaction {
@@ -36,8 +35,9 @@ void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
     else if (action == KeyAction::Release) {
         // Remove all key pressings for 'key'
-        _keysDown.remove_if([key](std::pair<Key, KeyModifier> keyModPair)
-        { return keyModPair.first == key; });
+        _keysDown.remove_if([key](std::pair<Key, KeyModifier> keyModPair) {
+            return keyModPair.first == key;
+        });
     }
 }
 
@@ -83,15 +83,16 @@ bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const {
 }
 
 bool InputState::isKeyPressed(Key key) const {
-    return std::find_if(_keysDown.begin(), _keysDown.end(),
+    auto it = std::find_if(_keysDown.begin(), _keysDown.end(),
         [key](const std::pair<Key, KeyModifier>& keyModPair) {
-            return key == keyModPair.first;
-        }) != _keysDown.end();
+        return key == keyModPair.first;
+    });
+    return it != _keysDown.end();
 }
 
 bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
-    return std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(),
-        mouseButton) != _mouseButtonsDown.end();
+    auto it = std::find(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), mouseButton);
+    return it != _mouseButtonsDown.end();
 }
 
 const JoystickInputStates& InputState::joystickInputStates() const {
@@ -102,7 +103,7 @@ float InputState::joystickAxis(int i) const {
     return _joystickInputStates->axis(i);
 }
 
-bool InputState::joystickButton(int i) const{
+bool InputState::joystickButton(int i) const {
     return _joystickInputStates->button(i, JoystickAction::Press);
 }
 
