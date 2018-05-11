@@ -17,7 +17,15 @@ asset.require('util/default_keybindings')
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 -- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local masAsset = asset.require('scene/solarsystem/model/mas/mas')
+local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas')
+
+-- This causes crash because the renderable is not removed properly before the next frame
+local toggleMas = function ()
+    return 
+        -- "openspace.removeSceneGraphNode('Mas_MHD');" ..
+        "openspace.assset.remove('Mas_MHD');" ..
+        "openspace.asset.add('Mas_MHD');"
+end
 
 local Keybindings = {
     {
@@ -39,15 +47,9 @@ local Keybindings = {
         Local = false
     },
     {
-        Key = "r",
-        Command = "openspace.setPropertyValueSingle('Scene.Mas.renderable.Enabled', false);",
-        Documentation = "Set Mas volume off",
-        Local = false
-    },
-    {
-        Key = "a",
-        Command = "openspace.setPropertyValueSingle('Scene.Mas.renderable.Enabled', true);",
-        Documentation = "Set Mas volume on",
+        Key = "t",
+        Command = toggleMas(),
+        Documentation = "Toggle mas asset on/off",
         Local = false
     }
 }
@@ -63,6 +65,10 @@ asset.onInitialize(function ()
     --     openspace.absPath("${DATA}/globebrowsing_servers.lua")
     -- )
 
+    openspace.markInterestingNodes({
+        "Mas_MHD"
+    })
+
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
@@ -74,7 +80,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = masAsset.Mas.Identifier,
+        Focus = masMhdAsset.Mas_MHD.Identifier,
         Position = { 10000000000, 10000000000, 10000000000 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
@@ -83,6 +89,10 @@ end)
 
 asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
+
+    openspace.removeInterestingNodes({
+        "Mas_MHD"
+    })
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 end)
