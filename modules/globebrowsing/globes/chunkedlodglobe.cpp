@@ -303,6 +303,13 @@ void ChunkedLodGlobe::setLabels(RenderableGlobe::Labels & labels) {
 }
 
 void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
+    
+    // Calculate the MVP matrix
+    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        viewTransform;
+    glm::dmat4 mvp = vp * _owner.modelTransform();
+
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
         _renderer->recompileShaders(_owner);
@@ -315,12 +322,6 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
 
     _leftRoot->updateChunkTree(data);
     _rightRoot->updateChunkTree(data);
-
-    // Calculate the MVP matrix
-    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-                    viewTransform;
-    glm::dmat4 mvp = vp * _owner.modelTransform();
 
     // Render function
     auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
@@ -347,31 +348,34 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     stats.i["chunk globe render time"] = ms2 - millis;
 
     // JCC: Render labels
-    //renderLabels();
+    glm::dmat4 invMVP = glm::inverse(mvp);
+    glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
+    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
+    renderLabels(data, mvp, orthoRight, orthoUp, 1.0);
 }
 
 void ChunkedLodGlobe::renderLabels(const RenderData& data,
     const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
     const glm::dvec3& orthoUp, float fadeInVariable) {
     
-    glm::vec4 textColor = glm::vec4(1.0, 0.0, 1.0, 1.0);
+    glm::vec4 textColor = glm::vec4(1.0, 1.0, 0.0, 1.0);
     textColor.a *= fadeInVariable;
     // first position
     // second text
     for (const RenderableGlobe::LabelEntry lEntry: _labels.labelsArray) {
         GlobeBrowsingModule* _globeBrowsingModule = OsEng.moduleEngine().module<openspace::GlobeBrowsingModule>();
         glm::vec3 geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(_owner,
-            lEntry.latitude, lEntry.longitude, lEntry.diameter);
+            lEntry.latitude, 360.0f - lEntry.longitude, lEntry.diameter + 100.0);
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
             geoPosition,
             textColor,
             //pow(10.0, _textSize.value()),
-            pow(10.0, 10.0),
+            pow(10.0, 3.0),
             //_textMinSize,
             //_textMaxSize,
-            10.0,
-            100.0,
+            0.0,
+            500.0,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,

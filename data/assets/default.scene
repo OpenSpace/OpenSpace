@@ -68,7 +68,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Mars", "Moon"
+        "Earth", "Mars", "Moon", "Mercury"
     })
 
     openspace.addVirtualProperty(
