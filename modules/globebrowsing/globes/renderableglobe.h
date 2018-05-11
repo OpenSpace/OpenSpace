@@ -34,6 +34,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
+#include <ghoul/font/fontrenderer.h>
+
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
 namespace openspace {
     class AtmosphereDeferredcaster;
@@ -84,6 +86,7 @@ public:
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
+        properties::BoolProperty labelsEnabled;
     };
 
     // Shadow structure
@@ -95,6 +98,18 @@ public:
         glm::dvec3 sourceCasterVec;
         glm::dvec3 casterPositionVec;
         bool isShadowing;
+    };
+
+    // Labels Structures
+    struct LabelEntry {
+        char feature[256];
+        float diameter;
+        float latitude;
+        float longitude;
+    };
+    struct Labels {
+        std::string filename;
+        std::vector<LabelEntry> labelsArray;
     };
 
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -149,6 +164,10 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
+
+    // Labels:
+    Labels _labels;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace::globebrowsing

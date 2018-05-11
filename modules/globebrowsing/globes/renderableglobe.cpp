@@ -29,6 +29,14 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
+#include <openspace/engine/openspaceengine.h>
+
+#include <fstream>
+#include <cstdlib>
+
 namespace {
     constexpr const char* keyFrame = "Frame";
     constexpr const char* keyRadii = "Radii";
@@ -37,6 +45,8 @@ namespace {
     constexpr const char* keyShadowGroup = "ShadowGroup";
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
+    constexpr const char* keyLabels = "Labels";
+    constexpr const char* keyLabelsFileName = "FileName";
 
     static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
@@ -163,6 +173,13 @@ namespace {
         "orenNayarRoughness",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo LabelsInfo = {
+        "Labels",
+        "Labels Enabled",
+        "Enables and disables the rendering of labels on the globe surface from "
+        "the csv label file"
+    };
 } // namespace
 
 using namespace openspace::properties;
@@ -194,7 +211,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
-        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
+        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
+        BoolProperty(LabelsInfo, false)
     })
     , _debugPropertyOwner({ "Debug" })
 {
@@ -250,6 +268,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
+    addProperty(_generalProperties.labelsEnabled);
 
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -357,6 +376,57 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             }
         }
     }
+
+    // Reads labels' file and build cache file if necessary
+    ghoul::Dictionary labelsDictionary;
+    bool successLabels = dictionary.getValue(keyLabels, labelsDictionary);
+    if (successLabels) {
+        std::string labelsFile;
+        successLabels = labelsDictionary.getValue(keyLabelsFileName, labelsFile);
+        // DEBUG:
+        std::cout << "========== File Name: " << absPath(labelsFile) << " ===========" << std::endl;
+        if (successLabels) {
+            // Move everything for a method.
+            try {
+                std::fstream csvLabelFile;
+                csvLabelFile.open(absPath(labelsFile));
+                if (csvLabelFile.is_open()) {
+                    char line[4096];
+                    _labels.labelsArray.clear();
+                    while (!csvLabelFile.eof()) {
+                        csvLabelFile.getline(line, 4090);
+                        if (strnlen(line, 4090) > 10) {
+                            LabelEntry lEntry;
+                            char *token = strtok(line, ",");
+                            // First line is just the Header
+                            if (strcmp(token, "Feature_Name") == 0) {
+                                continue;
+                            }
+                            strncpy(lEntry.feature, token, 256);
+                            strtok(NULL, ","); // Target is not used
+                            lEntry.diameter = atof(strtok(NULL, ","));
+                            lEntry.latitude = atof(strtok(NULL, ","));
+                            lEntry.longitude = atof(strtok(NULL, ","));
+                            _labels.labelsArray.push_back(lEntry);
+                        }
+                    }
+                    //DEBUG:
+                    /*for (auto s : _labels.labelsArray) {
+                        std::cout << "Feature: " << s.feature << ", diameter: " << s.diameter << ", latitude: " << s.latitude << ", longitude: " << s.longitude << std::endl;
+                    }*/
+                }
+                // Does cache exists? Load Cache
+                // Otherwise reads csv to the labels structure
+
+                if (!_labels.labelsArray.empty()) {
+                    _generalProperties.labelsEnabled.set(true);
+                }
+            }
+            catch (const std::fstream::failure& e) {
+                // Handels exception
+            }
+        }
+    }
 }
 
 void RenderableGlobe::initializeGL() {
@@ -369,6 +439,18 @@ void RenderableGlobe::initializeGL() {
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     _chunkedLodGlobe->recompileShaders();
+
+    if (!_labels.labelsArray.empty()) {
+        if (_font == nullptr) {
+            size_t _fontSize = 30;
+            _font = OsEng.fontManager().font(
+                "Mono",
+                static_cast<float>(_fontSize),
+                ghoul::fontrendering::FontManager::Outline::Yes,
+                ghoul::fontrendering::FontManager::LoadGlyphs::No
+            );
+        }
+    }
 }
 
 void RenderableGlobe::deinitializeGL() {
