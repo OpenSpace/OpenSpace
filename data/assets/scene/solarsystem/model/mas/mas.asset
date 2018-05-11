@@ -6,12 +6,12 @@ asset.require("spice/base")
 
 local sunRadius = 695508000
 
-local Mas = {  
-        Identifier = "Mas",
+local Mas_MHD = {  
+        Identifier = "Mas_MHD",
         Parent = sunTransforms.SolarSystemBarycenter.Identifier,
         Renderable = {
             Type = "RenderableTimeVaryingVolume",
-            StepSize = 0.01,
+            StepSize = 0.001,
             TransferFunction = "${DATA}/mas/mas_transfer_function.txt",
             SourceDirectory = "${DATA}/mas/raw",
             LowerValueBound = 0,
@@ -36,8 +36,8 @@ local Mas = {
         },
         GUI = {
             Path = "/Solar System/Mas",
-            Hidden = true
+            Hidden = false
         }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, {Mas})
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mas_MHD })
