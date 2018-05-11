@@ -30,9 +30,6 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <openspace/engine/openspaceengine.h>
 
 #include <fstream>
 #include <cstdlib>
@@ -378,21 +375,23 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     // Reads labels' file and build cache file if necessary
+    _labelsDataPresent = false;
     ghoul::Dictionary labelsDictionary;
     bool successLabels = dictionary.getValue(keyLabels, labelsDictionary);
     if (successLabels) {
         std::string labelsFile;
         successLabels = labelsDictionary.getValue(keyLabelsFileName, labelsFile);
         // DEBUG:
-        std::cout << "========== File Name: " << absPath(labelsFile) << " ===========" << std::endl;
+        //std::cout << "========== File Name: " << absPath(labelsFile) << " ===========" << std::endl;
         if (successLabels) {
             // Move everything for a method.
             try {
+                Labels labels;
                 std::fstream csvLabelFile;
                 csvLabelFile.open(absPath(labelsFile));
-                if (csvLabelFile.is_open()) {
+                if (csvLabelFile.is_open()) {                    
                     char line[4096];
-                    _labels.labelsArray.clear();
+                    labels.labelsArray.clear();
                     while (!csvLabelFile.eof()) {
                         csvLabelFile.getline(line, 4090);
                         if (strnlen(line, 4090) > 10) {
@@ -407,7 +406,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                             lEntry.diameter = atof(strtok(NULL, ","));
                             lEntry.latitude = atof(strtok(NULL, ","));
                             lEntry.longitude = atof(strtok(NULL, ","));
-                            _labels.labelsArray.push_back(lEntry);
+                            labels.labelsArray.push_back(lEntry);
                         }
                     }
                     //DEBUG:
@@ -415,11 +414,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                         std::cout << "Feature: " << s.feature << ", diameter: " << s.diameter << ", latitude: " << s.latitude << ", longitude: " << s.longitude << std::endl;
                     }*/
                 }
+                // TODO:
                 // Does cache exists? Load Cache
                 // Otherwise reads csv to the labels structure
 
-                if (!_labels.labelsArray.empty()) {
+                if (!labels.labelsArray.empty()) {
                     _generalProperties.labelsEnabled.set(true);
+                    _chunkedLodGlobe->setLabels(labels);
+                    _labelsDataPresent = true;
                 }
             }
             catch (const std::fstream::failure& e) {
@@ -440,16 +442,8 @@ void RenderableGlobe::initializeGL() {
     // function is called.
     _chunkedLodGlobe->recompileShaders();
 
-    if (!_labels.labelsArray.empty()) {
-        if (_font == nullptr) {
-            size_t _fontSize = 30;
-            _font = OsEng.fontManager().font(
-                "Mono",
-                static_cast<float>(_fontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
+    if (_labelsDataPresent) {
+        _chunkedLodGlobe->initializeFonts();
     }
 }
 

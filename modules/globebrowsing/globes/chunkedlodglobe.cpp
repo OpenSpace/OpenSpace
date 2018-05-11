@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
 #include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
@@ -43,9 +44,13 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 
 #include <openspace/util/time.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 
 #include <math.h>
 
@@ -281,6 +286,22 @@ void ChunkedLodGlobe::recompileShaders() {
     _shadersNeedRecompilation = false;
 }
 
+void ChunkedLodGlobe::initializeFonts() {
+    if (_font == nullptr) {
+        size_t _fontSize = 30;
+        _font = OsEng.fontManager().font(
+            "Mono",
+            static_cast<float>(_fontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+    }
+}
+
+void ChunkedLodGlobe::setLabels(RenderableGlobe::Labels & labels) {
+    _labels = std::move(labels);
+}
+
 void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
@@ -324,7 +345,44 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
     auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
     stats.i["chunk globe render time"] = ms2 - millis;
+
+    // JCC: Render labels
+    //renderLabels();
 }
+
+void ChunkedLodGlobe::renderLabels(const RenderData& data,
+    const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
+    const glm::dvec3& orthoUp, float fadeInVariable) {
+    
+    glm::vec4 textColor = glm::vec4(1.0, 0.0, 1.0, 1.0);
+    textColor.a *= fadeInVariable;
+    // first position
+    // second text
+    for (const RenderableGlobe::LabelEntry lEntry: _labels.labelsArray) {
+        GlobeBrowsingModule* _globeBrowsingModule = OsEng.moduleEngine().module<openspace::GlobeBrowsingModule>();
+        glm::vec3 geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(_owner,
+            lEntry.latitude, lEntry.longitude, lEntry.diameter);
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+            *_font,
+            geoPosition,
+            textColor,
+            //pow(10.0, _textSize.value()),
+            pow(10.0, 10.0),
+            //_textMinSize,
+            //_textMaxSize,
+            10.0,
+            100.0,
+            modelViewProjectionMatrix,
+            orthoRight,
+            orthoUp,
+            data.camera.positionVec3(),
+            data.camera.lookUpVectorWorldSpace(),
+            0,
+            "%s",
+            lEntry.feature
+        );
+    }
+ }
 
 void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
     if (_owner.debugProperties().showChunkBounds ||

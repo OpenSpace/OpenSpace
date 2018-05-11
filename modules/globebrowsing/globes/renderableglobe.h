@@ -34,8 +34,6 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
-#include <ghoul/font/fontrenderer.h>
-
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
 namespace openspace {
     class AtmosphereDeferredcaster;
@@ -165,9 +163,8 @@ private:
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
 
-    // Labels:
-    Labels _labels;
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    // Labels
+    bool _labelsDataPresent;
 };
 
 } // namespace openspace::globebrowsing

@@ -29,6 +29,9 @@
 
 #include <modules/globebrowsing/other/statscollector.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+
+#include <ghoul/font/fontrenderer.h>
 
 #include <memory>
 
@@ -112,6 +115,16 @@ public:
      */
     void recompileShaders();
 
+    /**
+     * Creates and initializes the default font used on the labels.
+     */
+    void initializeFonts();
+    
+    /**
+     * Add the label info to be rendered on the globe surface. 
+     */
+    void setLabels(RenderableGlobe::Labels & labels);
+
     const int minSplitDepth;
     const int maxSplitDepth;
 
@@ -121,6 +134,8 @@ public:
 
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
+    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     static const GeodeticPatch COVERAGE;
     static const TileIndex LEFT_HEMISPHERE_INDEX;
@@ -146,6 +161,10 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
 
     bool _shadersNeedRecompilation;
+
+    // Label Rendering
+    RenderableGlobe::Labels _labels;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 
 } // namespace openspace::globebrowsing
