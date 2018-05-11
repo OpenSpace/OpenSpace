@@ -49,6 +49,7 @@ namespace openspace {
 class TouchMarker : public properties::PropertyOwner {
 public:
     TouchMarker();
+    virtual ~TouchMarker();
 
     void initialize();
     void deinitialize();

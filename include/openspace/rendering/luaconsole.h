@@ -25,17 +25,16 @@
 #ifndef __OPENSPACE_CORE___LUACONSOLE___H__
 #define __OPENSPACE_CORE___LUACONSOLE___H__
 
-#include <openspace/network/parallelpeer.h>
-#include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
+
+#include <openspace/network/parallelconnection.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
-
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -62,7 +61,6 @@ private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
 
     void addToCommand(std::string c);
-    std::string sanitizeInput(std::string str);
 
     properties::BoolProperty _isVisible;
     properties::BoolProperty _remoteScripting;
@@ -74,9 +72,9 @@ private:
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
 
-    size_t _inputPosition;
+    size_t _inputPosition = 0;
     std::vector<std::string> _commandsHistory;
-    size_t _activeCommand;
+    size_t _activeCommand = 0;
     std::vector<std::string> _commands;
 
     struct {
@@ -85,9 +83,9 @@ private:
         std::string initialValue;
     } _autoCompleteInfo;
 
-    float _currentHeight;
-    float _targetHeight;
-    float _fullHeight;
+    float _currentHeight = 0.f;
+    float _targetHeight = 0.f;
+    float _fullHeight = 0.f;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::shared_ptr<ghoul::fontrendering::Font> _historyFont;

@@ -37,7 +37,7 @@ void DeferredcasterManager::attachDeferredcaster(Deferredcaster& deferredcaster)
     for (DeferredcasterListener* listener : _listeners) {
         listener->deferredcastersChanged(
             deferredcaster,
-            DeferredcasterListener::isAttached::Yes
+            DeferredcasterListener::IsAttached::Yes
         );
     }
 }
@@ -53,7 +53,7 @@ void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster)
         for (DeferredcasterListener* listener : _listeners) {
             listener->deferredcastersChanged(
                 deferredcaster,
-                DeferredcasterListener::isAttached::No
+                DeferredcasterListener::IsAttached::No
             );
         }
     }

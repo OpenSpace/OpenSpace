@@ -24,8 +24,6 @@
 
 #include <openspace/rendering/renderengine.h>
 
-#include <openspace/util/syncdata.h>
-
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
@@ -50,7 +48,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
-
+#include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
@@ -226,15 +224,7 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner({ "RenderEngine" })
-    , _camera(nullptr)
-    , _scene(nullptr)
-    , _raycasterManager(nullptr)
-    , _deferredcasterManager(nullptr)
     , _doPerformanceMeasurements(PerformanceInfo)
-    , _performanceManager(nullptr)
-    , _renderer(nullptr)
-    , _rendererImplementation(RendererImplementation::Invalid)
-    , _log(nullptr)
     , _showOverlayOnSlaves(ShowOverlaySlavesInfo, false)
     , _showLog(ShowLogInfo, true)
     , _showVersionInfo(ShowVersionInfo, true)
@@ -244,7 +234,7 @@ RenderEngine::RenderEngine()
     , _showFrameNumber(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _disableSceneTranslationOnMaster(DisableTranslationInfo, false)
-    , _nAaSamples(AaSamplesInfo, 4, 1, 16)
+    , _nAaSamples(AaSamplesInfo, 4, 1, 8)
     , _hdrExposure(HDRExposureInfo, 0.4f, 0.01f, 10.0f)
     , _hdrBackground(BackgroundExposureInfo, 2.8f, 0.01f, 10.0f)
     , _gamma(GammaInfo, 2.2f, 0.01f, 10.0f)
@@ -312,8 +302,6 @@ RenderEngine::RenderEngine()
     addProperty(_disableMasterRendering);
 }
 
-RenderEngine::~RenderEngine() {}
-
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
     _rendererImplementation = rendererFromString(renderingMethod);
 
@@ -333,8 +321,6 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 void RenderEngine::initialize() {
-    _frameNumber = 0;
-
     std::string renderingMethod = OsEng.configuration().renderingMethod;
     if (renderingMethod == "ABuffer") {
         using Version = ghoul::systemcapabilities::Version;
@@ -400,14 +386,14 @@ void RenderEngine::initializeGL() {
     // development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
 
-    constexpr const float fontSizeBig = 50.f;
-    _fontBig = OsEng.fontManager().font(KeyFontMono, fontSizeBig);
-    constexpr const float fontSizeTime = 15.f;
-    _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
-    constexpr const float fontSizeMono = 10.f;
-    _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
-    constexpr const float fontSizeLight = 8.f;
-    _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
+    constexpr const float FontSizeBig = 50.f;
+    _fontBig = OsEng.fontManager().font(KeyFontMono, FontSizeBig);
+    constexpr const float FontSizeTime = 15.f;
+    _fontDate = OsEng.fontManager().font(KeyFontMono, FontSizeTime);
+    constexpr const float FontSizeMono = 10.f;
+    _fontInfo = OsEng.fontManager().font(KeyFontMono, FontSizeMono);
+    constexpr const float FontSizeLight = 8.f;
+    _fontLog = OsEng.fontManager().font(KeyFontLight, FontSizeLight);
 
     LINFO("Initializing Log");
     std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
@@ -467,13 +453,12 @@ void RenderEngine::updateShaderPrograms() {
 }
 
 void RenderEngine::updateRenderer() {
-    bool windowResized = OsEng.windowWrapper().windowHasResized();
+    const bool windowResized = OsEng.windowWrapper().windowHasResized();
 
     if (windowResized) {
         _renderer->setResolution(renderingResolution());
 
         using FR = ghoul::fontrendering::FontRenderer;
-
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
     }
@@ -548,7 +533,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
-    WindowWrapper& wrapper = OsEng.windowWrapper();
+    const WindowWrapper& wrapper = OsEng.windowWrapper();
     if (_camera) {
         if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
             _camera->sgctInternal.setViewMatrix(viewMatrix);
@@ -560,7 +545,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     }
 
-    bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
+    const bool masterEnabled = wrapper.isMaster() ? !_disableMasterRendering : true;
     if (masterEnabled && !wrapper.isGuiWindow() && _globalBlackOutFactor > 0.f) {
         _renderer->render(
             _scene,
@@ -657,7 +642,8 @@ void RenderEngine::renderOverlays(const ShutdownInformation& info) {
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     timer = std::max(timer, 0.f);
 
-    auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+    using BBox = ghoul::fontrendering::FontRenderer::BoundingBoxInformation;
+    BBox size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_fontDate,
         fmt::format("Shutdown in: {:.2f}s/{:.2f}s", timer, fullTime)
     );
@@ -694,10 +680,8 @@ void RenderEngine::renderDashboard() {
     }
     glm::vec2 penPosition = glm::vec2(
         10.f,
-        fontResolution().y
+        fontResolution().y - OsEng.console().currentHeight()
     );
-
-    penPosition.y -= OsEng.console().currentHeight();
 
     OsEng.dashboard().render(penPosition);
 }
@@ -911,7 +895,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return{
+    return {
         "",
         {
             {
@@ -980,7 +964,7 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
-    auto it = std::find_if(
+    const auto it = std::find_if(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
         [s](const std::unique_ptr<ScreenSpaceRenderable>& r) { return r.get() == s; }
@@ -1004,7 +988,7 @@ void RenderEngine::removeScreenSpaceRenderable(const std::string& name) {
 ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(
                                                             const std::string& identifier)
 {
-    auto it = std::find_if(
+    const auto it = std::find_if(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
         [&identifier](const std::unique_ptr<ScreenSpaceRenderable>& s) {
@@ -1056,8 +1040,7 @@ void RenderEngine::renderCameraInformation() {
     const glm::vec4 DisabledColor = glm::vec4(0.55f, 0.2f, 0.2f, 1.f);
 
     using FR = ghoul::fontrendering::FontRenderer;
-
-    FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
+    const FR::BoundingBoxInformation rotationBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
         "Rotation"
     );
@@ -1127,13 +1110,12 @@ void RenderEngine::renderVersionInformation() {
     }
 
     using FR = ghoul::fontrendering::FontRenderer;
-
-    FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
+    const FR::BoundingBoxInformation versionBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
         OPENSPACE_VERSION_STRING_FULL
     );
 
-    FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
+    const FR::BoundingBoxInformation commitBox = FR::defaultRenderer().boundingBox(
         *_fontInfo,
         fmt::format("{}@{}", OPENSPACE_GIT_BRANCH, OPENSPACE_GIT_COMMIT)
     );
@@ -1185,7 +1167,7 @@ void RenderEngine::renderScreenLog() {
         std::make_pair(entries.rbegin(), entries.rend());
 
     size_t nr = 1;
-    auto now = std::chrono::steady_clock::now();
+    const auto now = std::chrono::steady_clock::now();
     for (auto& it = lastEntries.first; it != lastEntries.second; ++it) {
         const ScreenLog::LogEntry* e = &(*it);
 
@@ -1194,8 +1176,8 @@ void RenderEngine::renderScreenLog() {
         float alpha = 1.f;
         std::chrono::duration<double> ttf = ScreenLogTimeToLive - FadeTime;
         if (diff > ttf) {
-            auto d = (diff - ttf).count();
-            auto t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
+            double d = (diff - ttf).count();
+            float t = static_cast<float>(d) / static_cast<float>(FadeTime.count());
             float p = 0.8f - t;
             alpha = (p <= 0.f) ? 0.f : pow(p, 0.4f);
         }

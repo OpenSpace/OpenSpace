@@ -32,7 +32,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const std::string _loggerCat = "TouchMarker";
+    constexpr const char* _loggerCat = "TouchMarker";
 
     static const openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
@@ -86,6 +86,8 @@ TouchMarker::TouchMarker()
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 }
+
+TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array

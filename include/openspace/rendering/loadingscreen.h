@@ -29,16 +29,13 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
 #include <mutex>
 #include <random>
 
 // #define LOADINGSCREEN_DEBUGGING
 
-namespace ghoul::fontrendering {
-    class Font;
-} // namespace ghoul::fontrendering
+namespace ghoul::fontrendering { class Font; }
 
 namespace ghoul::opengl {
     class ProgramObject;

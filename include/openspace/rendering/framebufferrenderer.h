@@ -89,9 +89,10 @@ public:
      */
     virtual void updateRendererData() override;
 
-    virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+    virtual void raycastersChanged(VolumeRaycaster& raycaster,
+        RaycasterListener::IsAttached attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
-        isAttached isAttached) override;
+        DeferredcasterListener::IsAttached isAttached) override;
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;

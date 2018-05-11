@@ -81,7 +81,8 @@ public:
      * Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData() override;
-    virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+    virtual void raycastersChanged(VolumeRaycaster& raycaster,
+        IsAttached attached) override;
 
 private:
     void clear();

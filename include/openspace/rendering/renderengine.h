@@ -66,7 +66,7 @@ public:
     };
 
     RenderEngine();
-    ~RenderEngine();
+    ~RenderEngine() = default;
 
     void initialize();
     void initializeGL();
@@ -173,19 +173,19 @@ private:
     void renderDashboard();
 
 
-    Camera* _camera;
-    Scene* _scene;
-    std::unique_ptr<RaycasterManager> _raycasterManager;
-    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
+    Camera* _camera = nullptr;
+    Scene* _scene = nullptr;
+    std::unique_ptr<RaycasterManager> _raycasterManager = nullptr;
+    std::unique_ptr<DeferredcasterManager> _deferredcasterManager = nullptr;
 
     properties::BoolProperty _doPerformanceMeasurements;
-    std::shared_ptr<performance::PerformanceManager> _performanceManager;
+    std::shared_ptr<performance::PerformanceManager> _performanceManager = nullptr;
 
-    std::unique_ptr<Renderer> _renderer;
-    RendererImplementation _rendererImplementation;
+    std::unique_ptr<Renderer> _renderer = nullptr;
+    RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
-    ScreenLog* _log;
+    ScreenLog* _log = nullptr;
 
     properties::BoolProperty _showOverlayOnSlaves;
     properties::BoolProperty _showLog;

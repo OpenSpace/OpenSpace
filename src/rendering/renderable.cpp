@@ -106,34 +106,21 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "renderable" })
     , _enabled(EnabledInfo, true)
     , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _renderBin(RenderBin::Opaque)
-    , _boundingSphere(0.f)
-    , _startTime("")
-    , _endTime("")
-    , _hasTimeInterval(false)
 {
-    dictionary.getValue(keyStart, _startTime);
-    dictionary.getValue(keyEnd, _endTime);
-
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
         if (!tagName.empty()) {
             addTag(std::move(tagName));
         }
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-        ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-        std::vector<std::string> keys = tagNames.keys();
-        std::string tagName;
+        const ghoul::Dictionary& tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+        const std::vector<std::string>& keys = tagNames.keys();
         for (const std::string& key : keys) {
-            tagName = tagNames.value<std::string>(key);
+            std::string tagName = tagNames.value<std::string>(key);
             if (!tagName.empty()) {
                 addTag(std::move(tagName));
             }
         }
-    }
-
-    if (!_startTime.empty() && !_endTime.empty()) {
-        _hasTimeInterval = true;
     }
 
     if (dictionary.hasKey(EnabledInfo.identifier)) {
@@ -147,8 +134,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     addProperty(_enabled);
 }
 
-Renderable::~Renderable() {}
-
 void Renderable::initialize() {}
 
 void Renderable::initializeGL() {}
@@ -156,6 +141,10 @@ void Renderable::initializeGL() {}
 void Renderable::deinitialize() {}
 
 void Renderable::deinitializeGL() {}
+
+void Renderable::update(const UpdateData&) {}
+
+void Renderable::render(const RenderData&, RendererTasks&) {}
 
 void Renderable::setBoundingSphere(float boundingSphere) {
     _boundingSphere = boundingSphere;
@@ -165,14 +154,10 @@ float Renderable::boundingSphere() const {
     return _boundingSphere;
 }
 
-void Renderable::update(const UpdateData&) {}
-
-void Renderable::render(const RenderData&, RendererTasks&) {}
-
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)
 {
-    glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
+    const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {
         directionFromCenterToTarget * static_cast<double>(boundingSphere()),
         directionFromCenterToTarget,
@@ -206,21 +191,6 @@ bool Renderable::isVisible() const {
     return _enabled;
 }
 
-bool Renderable::hasTimeInterval() {
-    return _hasTimeInterval;
-}
-
-bool Renderable::getInterval(double& start, double& end) {
-    if (_startTime != "" && _endTime != "") {
-        start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
-        end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 bool Renderable::isReady() const {
     return true;
 }
@@ -230,7 +200,7 @@ bool Renderable::isEnabled() const {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([this, c{ std::move(callback) }]() {
+    _enabled.onChange([this, c = std::move(callback)]() {
         c(isEnabled());
     });
 }

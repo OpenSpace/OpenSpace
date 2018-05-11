@@ -154,7 +154,7 @@ void ABufferRenderer::deinitialize() {
     OsEng.renderEngine().raycasterManager().removeListener(*this);
 }
 
-void ABufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
+void ABufferRenderer::raycastersChanged(VolumeRaycaster&, IsAttached) {
     _dirtyRaycastData = true;
 }
 
