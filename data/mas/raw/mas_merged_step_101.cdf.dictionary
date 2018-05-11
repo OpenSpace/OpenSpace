@@ -4,6 +4,6 @@ return {
   MaxValue=1.000000E0,
   MinValue=0,
   Time="2017-08-21T00:17:00.001",
-  UpperDomainBound={2.500000E1,9.000000E1,3.600000E2},
+  UpperDomainBound={1.500000E1,9.000000E1,3.600000E2},
   VisUnit="amu/cm^3",
 }
