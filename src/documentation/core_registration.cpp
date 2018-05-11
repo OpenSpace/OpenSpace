@@ -35,6 +35,7 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>

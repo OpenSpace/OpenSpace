@@ -80,7 +80,7 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
-                Renderable* r = n->renderable();
+                const Renderable* r = n->renderable();
                 return !r || r->identifier() != "RenderableGlobe";
             }
         ),

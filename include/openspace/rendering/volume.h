@@ -31,7 +31,7 @@
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -40,12 +40,12 @@ public:
     /**
      * Constructor
      */
-    Volume() {};
+    Volume() = default;
 
     /**
      * Destructor
      */
-    virtual ~Volume() {};
+    virtual ~Volume() = default;
 
     /**
      * Render the volume's entry points (front face of the bounding geometry)

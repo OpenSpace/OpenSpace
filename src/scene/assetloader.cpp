@@ -24,8 +24,8 @@
 
 #include <openspace/scene/assetloader.h>
 
-#include <openspace/scene/asset.h>
-
+#include <openspace/util/resourcesynchronization.h>
+#include <openspace/scene/assetlistener.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
@@ -115,7 +115,7 @@ void AssetLoader::trackAsset(std::shared_ptr<Asset> asset) {
 
 void AssetLoader::untrackAsset(Asset* asset) {
     tearDownAssetLuaTable(asset);
-    auto it = _trackedAssets.find(asset->id());
+    const auto it = _trackedAssets.find(asset->id());
     if (it != _trackedAssets.end()) {
         _trackedAssets.erase(it);
     }
@@ -275,33 +275,33 @@ bool AssetLoader::loadAsset(std::shared_ptr<Asset> asset) {
     return true;
 }
 
-void AssetLoader::unloadAsset(std::shared_ptr<Asset> asset) {
-    for (int ref : _onInitializationFunctionRefs[asset.get()]) {
+void AssetLoader::unloadAsset(Asset* asset) {
+    for (int ref : _onInitializationFunctionRefs[asset]) {
        luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
     _onInitializationFunctionRefs.clear();
 
-    for (int ref : _onDeinitializationFunctionRefs[asset.get()]) {
+    for (int ref : _onDeinitializationFunctionRefs[asset]) {
         luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
     }
     _onDeinitializationFunctionRefs.clear();
 
-    for (const auto& it : _onDependencyInitializationFunctionRefs[asset.get()]) {
+    for (const auto& it : _onDependencyInitializationFunctionRefs[asset]) {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
-    _onDependencyInitializationFunctionRefs.erase(asset.get());
+    _onDependencyInitializationFunctionRefs.erase(asset);
 
-    for (const auto& it : _onDependencyDeinitializationFunctionRefs[asset.get()]) {
+    for (const auto& it : _onDependencyDeinitializationFunctionRefs[asset]) {
         for (int ref : it.second) {
             luaL_unref(*_luaState, LUA_REGISTRYINDEX, ref);
         }
     }
-    _onDependencyDeinitializationFunctionRefs.erase(asset.get());
+    _onDependencyDeinitializationFunctionRefs.erase(asset);
 
     asset->clearSynchronizations();
-    untrackAsset(asset.get());
+    untrackAsset(asset);
 }
 
 std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
@@ -450,7 +450,7 @@ std::shared_ptr<Asset> AssetLoader::request(const std::string& name) {
 void AssetLoader::unrequest(const std::string& name) {
     std::shared_ptr<Asset> asset = has(name);
     std::shared_ptr<Asset> parent = _currentAsset;
-    parent->unrequest(asset);
+    parent->unrequest(asset.get());
     assetUnrequested(parent, asset);
 }
 

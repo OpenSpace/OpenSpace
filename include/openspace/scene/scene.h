@@ -27,32 +27,28 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <vector>
-#include <unordered_map>
-#include <set>
-#include <mutex>
-
-#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scenelicense.h>
-#include <openspace/scene/scenelicensewriter.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/exception.h>
+#include <mutex>
+#include <set>
+#include <unordered_map>
+#include <vector>
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+namespace scripting { struct LuaLibrary; }
+
+class SceneInitializer;
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene
-    : public properties::PropertyOwner
-{
+class Scene : public properties::PropertyOwner {
 public:
     BooleanType(UpdateDependencies);
 
@@ -235,7 +231,7 @@ private:
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
     std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
-    bool _dirtyNodeRegistry;
+    bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootDummy;
     std::unique_ptr<SceneInitializer> _initializer;
 

@@ -63,6 +63,7 @@
 
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

@@ -43,9 +43,9 @@ template<typename T>
 class GPUData {
 public:
     /**
-    * Updates the uniform location of the uniform variable named <name>
-    * in the provided shader program.
-    */
+     * Updates the uniform location of the uniform variable named <name>
+     * in the provided shader program.
+     */
     void bind(ghoul::opengl::ProgramObject* program, const std::string& name) {
         _uniformLocation = program->uniformLocation(name);
     }
@@ -70,9 +70,9 @@ protected:
 class GPUTexture {
 public:
     /**
-    * Updates the uniform location of the uniform variable named <name>
-    * in the provided shader program.
-    */
+     * Updates the uniform location of the uniform variable named <name>
+     * in the provided shader program.
+     */
     void bind(ghoul::opengl::ProgramObject* program, const std::string& name) {
         _uniformLocation = program->uniformLocation(name);
     }

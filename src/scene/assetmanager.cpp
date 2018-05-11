@@ -24,21 +24,19 @@
 
 #include <openspace/scene/assetmanager.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/scene/assetloader.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/synchronizationwatcher.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 
 #include "assetmanager_lua.inl"
 
-namespace {
-    // constexpr const char* _loggerCat = "AssetManager";
-}
-
 namespace openspace {
-AssetManager::AssetManager(
-    std::unique_ptr<AssetLoader> loader,
-    std::unique_ptr<SynchronizationWatcher> syncWatcher
-)
+
+AssetManager::AssetManager(std::unique_ptr<AssetLoader> loader,
+                           std::unique_ptr<SynchronizationWatcher> syncWatcher)
     : _synchronizationWatcher(std::move(syncWatcher))
     , _assetLoader(std::move(loader))
 {}
@@ -58,7 +56,7 @@ void AssetManager::deinitialize() {
 
 bool AssetManager::update() {
     // Add assets
-    for (const auto& c : _pendingStateChangeCommands) {
+    for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool add = c.second;
         if (add) {
@@ -66,7 +64,7 @@ bool AssetManager::update() {
         }
     }
     // Remove assets
-    for (const auto& c : _pendingStateChangeCommands) {
+    for (const std::pair<const std::string, bool>& c : _pendingStateChangeCommands) {
         const std::string& path = c.first;
         const bool remove = !c.second;
         if (remove && _assetLoader->has(path)) {
@@ -109,7 +107,7 @@ void AssetManager::removeAll() {
     std::vector<std::shared_ptr<Asset>> allAssets =
         _assetLoader->rootAsset()->requestedAssets();
 
-    for (const auto& a : allAssets) {
+    for (const std::shared_ptr<Asset>& a : allAssets) {
         _pendingStateChangeCommands[a->assetFilePath()] = false;
     }
 }
@@ -126,14 +124,14 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             {
                 "add",
                 &luascriptfunctions::asset::add,
-                {this},
+                { this },
                 "string",
                 ""
             },
             {
                 "remove",
                 &luascriptfunctions::asset::remove,
-                {this},
+                { this },
                 "string",
                 ""
             }

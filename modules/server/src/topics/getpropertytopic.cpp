@@ -30,6 +30,7 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <modules/server/include/getpropertytopic.h>
 #include <modules/volume/transferfunctionhandler.h>

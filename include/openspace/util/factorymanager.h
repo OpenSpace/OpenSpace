@@ -28,9 +28,12 @@
 #include <openspace/documentation/documentationgenerator.h>
 
 #include <ghoul/misc/exception.h>
-#include <ghoul/misc/templatefactory.h>
-
 #include <memory>
+
+namespace ghoul {
+    template <class T> class TemplateFactory;
+    class TemplateFactoryBase;
+} // namespace ghoul
 
 namespace openspace {
 

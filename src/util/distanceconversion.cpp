@@ -25,7 +25,6 @@
 #include <openspace/util/distanceconversion.h>
 
 #include <openspace/util/distanceconstants.h>
-
 #include <ghoul/glm.h>
 
 namespace openspace {

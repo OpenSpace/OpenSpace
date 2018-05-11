@@ -27,6 +27,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <iterator>
 #include <fstream>

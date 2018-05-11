@@ -26,17 +26,13 @@
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
 #include <openspace/scene/asset.h>
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/resourcesynchronization.h>
-
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/luastate.h>
-
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+struct lua_State;
+
+namespace ghoul::lua { class LuaState; }
 
 namespace openspace {
 
@@ -56,18 +52,10 @@ int exportAsset(lua_State* state);
 
 } // namespace assetloader
 
+class Asset;
+class ResourceSynchronization;
 class SynchronizationWatcher;
-
-class AssetListener {
-public:
-    virtual ~AssetListener() = default;
-    virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
-    virtual void assetRequested(std::shared_ptr<Asset> parent,
-        std::shared_ptr<Asset> child) = 0;
-
-    virtual void assetUnrequested(std::shared_ptr<Asset> parent,
-        std::shared_ptr<Asset> child) = 0;
-};
+class AssetListener;
 
 class AssetLoader {
 public:
@@ -125,7 +113,7 @@ public:
     /**
      * Unload an asset
      */
-    void unloadAsset(std::shared_ptr<Asset> asset);
+    void unloadAsset(Asset* asset);
 
     /**
      * Call the onInitialize function specified in the asset file

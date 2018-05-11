@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
 #define __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
 
+#include <openspace/scene/assetlistener.h>
+
 #include <openspace/util/task.h>
 
-#include <openspace/scene/asset.h>
 #include <openspace/scene/assetloader.h>
 
 #include <string>

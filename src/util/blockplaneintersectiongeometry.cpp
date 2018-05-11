@@ -25,9 +25,6 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <ghoul/logging/logmanager.h>
-
-#include <ghoul/glm.h>
-#include <vector>
 #include <algorithm>
 
 namespace {
@@ -39,10 +36,7 @@ namespace openspace {
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSize,
                                                                glm::vec3 planeNormal,
                                                                float planeDistance)
-    // : _initialized(false)
-    : _vaoId(0)
-    , _vBufferId(0)
-    , _size(blockSize)
+    : _size(blockSize)
 {}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
@@ -51,7 +45,7 @@ BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
 }
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
-    _size = size;
+    _size = std::move(size);
     updateVertices();
 }
 
@@ -65,23 +59,23 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     _vertices.clear();
 
     const int cornersInLines[24] = {
-        0,1,
-        1,5,
-        5,4,
-        4,0,
+        0, 1,
+        1, 5,
+        5, 4,
+        4, 0,
 
-        2,3,
-        3,7,
-        7,6,
-        6,2,
+        2, 3,
+        3, 7,
+        7, 6,
+        6, 2,
 
-        0,2,
-        1,3,
-        5,7,
-        4,6
+        0, 2,
+        1, 3,
+        5, 7,
+        4, 6
     };
 
-    glm::vec3 halfSize = _size * 0.5f;
+    const glm::vec3 halfSize = _size * 0.5f;
     glm::vec3 intersections[12];
     int nIntersections = 0;
 
@@ -100,11 +94,14 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         }
     }
 
-    if (nIntersections <3) return; // Gotta love intersections
+    // Gotta love intersections
+    if (nIntersections <3) {
+        return;
+    }
 
     // Construct vectors vectors (vectors1 .. vectorsN) between the N points
 
-    std::vector< std::pair<int, float> > angles(nIntersections-1);
+    std::vector<std::pair<int, float>> angles(nIntersections - 1);
 
     glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
     angles[0] = std::pair<int, float>(1, 0.0f);

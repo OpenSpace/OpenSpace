@@ -78,7 +78,7 @@ public:
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                                      const glm::dvec3& targetModelSpace);
+                                                const glm::dvec3& targetModelSpace) const;
 
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);

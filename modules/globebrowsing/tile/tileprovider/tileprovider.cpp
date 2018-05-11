@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>

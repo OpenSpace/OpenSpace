@@ -31,6 +31,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <ghoul/filesystem/file.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>

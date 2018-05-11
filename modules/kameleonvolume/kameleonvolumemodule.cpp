@@ -28,6 +28,7 @@
 
 #include <ghoul/misc/assert.h>
 #include <vector>
+#include <ghoul/misc/templatefactory.h>
 
 #include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>

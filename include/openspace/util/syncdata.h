@@ -46,10 +46,10 @@ protected:
     // Allowing SyncEngine synchronization methods and at the same time hiding them
     // from the used of implementations of the interface
     friend class SyncEngine;
-    virtual void presync(bool /*isMaster*/) {};
+    virtual void preSync(bool /*isMaster*/) {};
     virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
     virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void postsync(bool /*isMaster*/) {};
+    virtual void postSync(bool /*isMaster*/) {};
 };
 
 /**
@@ -109,7 +109,7 @@ protected:
         _mutex.unlock();
     }
 
-    virtual void postsync(bool isMaster) override {
+    virtual void postSync(bool isMaster) override {
         // apply synced update
         if (!isMaster) {
             _mutex.lock();

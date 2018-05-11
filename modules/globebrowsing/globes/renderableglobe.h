@@ -109,7 +109,7 @@ public:
 
     // Getters that perform calculations
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-    float getHeight(glm::dvec3 position);
+    float getHeight(glm::dvec3 position) const;
 
     // Getters
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
@@ -126,7 +126,7 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override;
+                                       const glm::dvec3& targetModelSpace) const override;
 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier

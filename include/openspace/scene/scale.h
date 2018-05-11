@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
-
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -48,18 +47,20 @@ public:
     virtual ~Scale() = default;
 
     virtual bool initialize();
+
     double scaleValue() const;
     virtual double scaleValue(const Time& time) const = 0;
     virtual void update(const Time& data);
 
     static documentation::Documentation Documentation();
+
 protected:
     void requireUpdate();
 
 private:
-    bool _needsUpdate;
+    bool _needsUpdate = true;
     double _cachedTime;
-    double _cachedScale;
+    double _cachedScale = 1.0;
 };
 
 }  // namespace openspace

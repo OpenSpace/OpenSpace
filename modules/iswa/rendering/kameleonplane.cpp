@@ -26,6 +26,7 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/programobject.h>
 
 #ifdef __clang__
 #elif defined(__GNUC__)

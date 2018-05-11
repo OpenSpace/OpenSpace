@@ -25,21 +25,24 @@
 #ifndef __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 #define __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 
-#include <string>
 #include <ghoul/glm.h>
 #include <functional>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/filesystem/file.h>
 #include <memory>
+#include <string>
+
+namespace ghoul::filesystem { class File; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
 class TransferFunction {
 public:
-    typedef std::function<void (const TransferFunction&)> TfChangedCallback;
+    using TfChangedCallback = std::function<void (const TransferFunction&)>;
 
     TransferFunction(const std::string& filepath,
         TfChangedCallback tfChangedCallback = TfChangedCallback());
+    ~TransferFunction();
+
     void setPath(const std::string& filepath);
     ghoul::opengl::Texture& getTexture();
     void bind();
@@ -48,6 +51,7 @@ public:
     size_t width();
     void setCallback(TfChangedCallback callback);
     void setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr);
+
 private:
     void setTextureFromTxt() {
         setTextureFromTxt(_texture);
@@ -63,11 +67,12 @@ private:
 };
 
 struct MappingKey {
-    float position{0.0f};
-    glm::vec4 color{0.0f,0.0f,0.0f,0.0f};
     MappingKey(float p, const glm::vec4& c): position(p), color(c) {};
     MappingKey(float p): position(p), color(glm::vec4(0.0f)) {};
     bool operator<(const MappingKey& rhs) {return position < rhs.position;};
+
+    float position = 0.f;
+    glm::vec4 color = glm::vec4(0.f, 0.f, 0.f, 0.f);
 };
 
 } // namespace openspace

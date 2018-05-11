@@ -429,7 +429,7 @@ glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
     return _ellipsoid.geodeticSurfaceProjection(position);
 }
 
-float RenderableGlobe::getHeight(glm::dvec3 position) {
+float RenderableGlobe::getHeight(glm::dvec3 position) const {
     if (_chunkedLodGlobe) {
         return _chunkedLodGlobe->getHeight(position);
     }
@@ -473,7 +473,7 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
 }
 
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace)
+                                                 const glm::dvec3& targetModelSpace) const
 {
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);

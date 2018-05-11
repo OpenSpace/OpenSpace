@@ -27,7 +27,6 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
-
 #include <vector>
 
 namespace openspace {
@@ -49,8 +48,8 @@ private:
     void updateVertices();
     std::vector<float> _vertices;
     // bool _initialized;
-    GLuint _vaoId;
-    GLuint _vBufferId;
+    GLuint _vaoId = 0;
+    GLuint _vBufferId = 0;
     glm::vec3 _size;
     glm::vec3 _normal;
     float _planeDistance;

@@ -32,7 +32,7 @@
 namespace ghoul::opengl {
     class Texture;
     class ProgramObject;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 

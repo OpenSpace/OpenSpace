@@ -30,6 +30,7 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <modules/digitaluniverse/rendering/renderablepoints.h>
 #include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>

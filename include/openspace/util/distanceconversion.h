@@ -189,8 +189,6 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
 
 
 
-
-
 std::pair<double, std::string> simplifyDistance(double meters,
     bool forceSingularForm = false);
 

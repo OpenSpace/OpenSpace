@@ -357,7 +357,7 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
 }
 
 glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
-                                                    globebrowsing::RenderableGlobe& globe,
+                                              const globebrowsing::RenderableGlobe& globe,
                                        double latitude, double longitude, double altitude)
 {
     using namespace globebrowsing;
@@ -383,7 +383,7 @@ void GlobeBrowsingModule::goToChunk(Camera& camera, globebrowsing::TileIndex ti,
 {
     using namespace globebrowsing;
 
-    RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
     if (!globe) {
         LERROR("Focus node must have a RenderableGlobe renderable.");
         return;
@@ -416,7 +416,7 @@ void GlobeBrowsingModule::goToGeodetic2(Camera& camera,
 {
     using namespace globebrowsing;
 
-    RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
     if (!globe) {
         LERROR("Focus node must have a RenderableGlobe renderable.");
         return;
@@ -443,7 +443,7 @@ void GlobeBrowsingModule::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3
 {
     using namespace globebrowsing;
 
-    RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
     if (!globe) {
         LERROR("Focus node must have a RenderableGlobe renderable.");
         return;
@@ -465,7 +465,7 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
 {
     using namespace globebrowsing;
 
-    RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* globe = castFocusNodeRenderableToGlobe();
     if (!globe) {
         LERROR("Focus node must have a RenderableGlobe renderable.");
         return;
@@ -500,16 +500,17 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
     camera.setRotation(rotation);
 }
 
-globebrowsing::RenderableGlobe* GlobeBrowsingModule::castFocusNodeRenderableToGlobe() {
+const globebrowsing::RenderableGlobe*
+GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
+{
     using namespace globebrowsing;
 
-    Renderable* baseRenderable = OsEng.navigationHandler().focusNode()->renderable();
-    if (!baseRenderable) {
+    const Renderable* renderable = OsEng.navigationHandler().focusNode()->renderable();
+    if (!renderable) {
         return nullptr;
     }
-    if (globebrowsing::RenderableGlobe* globe =
-            dynamic_cast<RenderableGlobe*>(baseRenderable))
-    {
+    using namespace globebrowsing;
+    if (const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(renderable)) {
         return globe;
     }
     else {

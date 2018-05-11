@@ -54,13 +54,13 @@ void SyncEngine::decodeSyncables() {
 
 void SyncEngine::preSynchronization(IsMaster isMaster) {
     for (Syncable* syncable : _syncables) {
-        syncable->presync(isMaster);
+        syncable->preSync(isMaster);
     }
 }
 
 void SyncEngine::postSynchronization(IsMaster isMaster) {
     for (Syncable* syncable : _syncables) {
-        syncable->postsync(isMaster);
+        syncable->postSync(isMaster);
     }
 }
 

@@ -28,6 +28,7 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <modules/fieldlines/rendering/renderablefieldlines.h>
 

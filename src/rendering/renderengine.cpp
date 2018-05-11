@@ -49,6 +49,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/syncdata.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>

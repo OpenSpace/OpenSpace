@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___SYSTEMCAPABILITIESBINDING___H__
 #define __OPENSPACE_CORE___SYSTEMCAPABILITIESBINDING___H__
 
-#include <openspace/scripting/lualibrary.h>
-
 namespace openspace::scripting {
+
+struct LuaLibrary;
 
 LuaLibrary generalSystemCapabilities();
 LuaLibrary openglSystemCapabilities();

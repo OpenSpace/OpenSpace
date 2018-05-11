@@ -48,6 +48,10 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <openspace/util/camera.h>
+#include <openspace/scene/scenelicensewriter.h>
+#include <openspace/scene/sceneinitializer.h>
+#include <ghoul/opengl/programobject.h>
 #include <iterator>
 #include <fstream>
 #include <string>
@@ -65,9 +69,13 @@ namespace {
 
 namespace openspace {
 
+Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
+    const std::string& comp)
+    : ghoul::RuntimeError(error, comp)
+{}
+
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     : properties::PropertyOwner({"Scene", "Scene"})
-    , _dirtyNodeRegistry(false)
     , _initializer(std::move(initializer))
 {
     _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
@@ -96,7 +104,7 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByIdentifier.count(node->identifier())){
+    if (_nodesByIdentifier.count(node->identifier())) {
         throw Scene::InvalidSceneError(
             "Node with identifier " + node->identifier() + " already exits."
         );
@@ -166,7 +174,7 @@ void Scene::sortTopologically() {
     std::unordered_map<SceneGraphNode*, size_t> inDegrees;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         size_t inDegree = node->dependencies().size();
-        if (node->parent() != nullptr) {
+        if (node->parent()) {
             inDegree++;
             inDegrees[node] = inDegree;
         }
@@ -183,7 +191,7 @@ void Scene::sortTopologically() {
         zeroInDegreeNodes.pop();
 
         for (SceneGraphNode* n : node->dependentNodes()) {
-            auto it = inDegrees.find(n);
+            const auto it = inDegrees.find(n);
             it->second -= 1;
             if (it->second == 0) {
                 zeroInDegreeNodes.push(n);
@@ -191,7 +199,7 @@ void Scene::sortTopologically() {
             }
         }
         for (SceneGraphNode* n : node->children()) {
-            auto it = inDegrees.find(n);
+            const auto it = inDegrees.find(n);
             it->second -= 1;
             if (it->second == 0) {
                 zeroInDegreeNodes.push(n);
@@ -199,14 +207,14 @@ void Scene::sortTopologically() {
             }
         }
     }
-    if (inDegrees.size() > 0) {
+    if (!inDegrees.empty()) {
         LERROR(fmt::format(
             "The scene contains circular dependencies. {} nodes will be disabled",
             inDegrees.size()
         ));
     }
 
-    for (auto it : inDegrees) {
+    for (const std::pair<SceneGraphNode*, size_t>& it : inDegrees) {
         _circularNodes.push_back(it.first);
     }
 
@@ -222,7 +230,6 @@ bool Scene::isInitializing() const {
 }
 
 /*
-
 void Scene::initialize() {
     bool useMultipleThreads = true;
     if (OsEng.configurationManager().hasKey(
@@ -292,8 +299,7 @@ void Scene::initializeGL() {
 */
 
 void Scene::update(const UpdateData& data) {
-    std::vector<SceneGraphNode*> initializedNodes =
-        _initializer->getInitializedNodes();
+    std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
 
     for (SceneGraphNode* node : initializedNodes) {
         try {
@@ -348,7 +354,7 @@ const SceneGraphNode* Scene::root() const {
 }
 
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
-    auto it = _nodesByIdentifier.find(name);
+    const auto it = _nodesByIdentifier.find(name);
     if (it != _nodesByIdentifier.end()) {
         return it->second;
     }
@@ -363,7 +369,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 
-    const std::string nodeIdentifier = dict.value<std::string>(KeyIdentifier);
+    const std::string& nodeIdentifier = dict.value<std::string>(KeyIdentifier);
     const bool hasParent = dict.hasKey(KeyParent);
 
     if (_nodesByIdentifier.find(nodeIdentifier) != _nodesByIdentifier.end()) {
@@ -401,7 +407,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
         ghoul::Dictionary nodeDependencies;
         dict.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
 
-        std::vector<std::string> keys = nodeDependencies.keys();
+        const std::vector<std::string>& keys = nodeDependencies.keys();
         for (const std::string& key : keys) {
             std::string value = nodeDependencies.value<std::string>(key);
             dependencyNames.push_back(value);
@@ -458,8 +464,7 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
     );
 
     ghoul::EasingFunc<float> func =
-        easingFunction == ghoul::EasingFunction::Linear
-         ?
+        easingFunction == ghoul::EasingFunction::Linear ?
         nullptr :
         ghoul::easingFunction<float>(easingFunction);
 
@@ -478,11 +483,12 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
         }
     }
 
-    InterpolationInfo i;
-    i.prop = prop;
-    i.beginTime = std::chrono::steady_clock::now();
-    i.durationSeconds = durationSeconds;
-    i.easingFunction = func;
+    InterpolationInfo i = {
+        prop,
+        std::chrono::steady_clock::now(),
+        durationSeconds,
+        func
+    };
 
     _interpolationInfos.push_back(std::move(i));
 }
@@ -512,6 +518,7 @@ void Scene::removeInterpolation(properties::Property* prop) {
 
 void Scene::updateInterpolations() {
     using namespace std::chrono;
+
     auto now = steady_clock::now();
 
     for (InterpolationInfo& i : _interpolationInfos) {
@@ -639,10 +646,5 @@ scripting::LuaLibrary Scene::luaLibrary() {
         }
     };
 }
-
-Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
-                                            const std::string& comp)
-    : ghoul::RuntimeError(error, comp)
-{}
 
 }  // namespace openspace

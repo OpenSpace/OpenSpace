@@ -27,14 +27,10 @@
 
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/synchronizationwatcher.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
-
-#include <iterator>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace openspace {
@@ -65,25 +61,25 @@ public:
     /**
     * Regular asset constructor
     */
-    Asset(AssetLoader* loader,
-        SynchronizationWatcher* watcher,
+    Asset(AssetLoader* loader, SynchronizationWatcher* watcher,
         ghoul::filesystem::File assetPath);
 
-    ~Asset();
+    ~Asset() = default;
 
     std::string id() const;
-    std::string assetFilePath() const;
+    const std::string& assetFilePath() const;
     bool hasAssetFile() const;
     std::string assetDirectory() const;
-    std::string assetName() const;
+    const std::string& assetName() const;
     AssetLoader* loader() const;
     State state() const;
 
     void addSynchronization(std::shared_ptr<ResourceSynchronization> synchronization);
     void clearSynchronizations();
-    std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
+    const std::vector<std::shared_ptr<ResourceSynchronization>>&
+        ownSynchronizations() const;
 
-    void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
+    void syncStateChanged(ResourceSynchronization* sync,
         ResourceSynchronization::State s);
 
     /**
@@ -107,8 +103,8 @@ public:
     bool cancelAllSynchronizations();
     bool cancelUnwantedSynchronizations();
     bool restartAllSynchronizations();
-    float requestedSynchronizationProgress();
     float requiredSynchronizationProgress();
+    float requestedSynchronizationProgress();
 
     /**
      * Initialize this asset and return true if successful,
@@ -123,15 +119,15 @@ public:
     // Dependency graph
     bool requires(const Asset* asset) const;
     void require(std::shared_ptr<Asset> asset);
-    void unrequire(std::shared_ptr<Asset> asset);
+    void unrequire(Asset* asset);
 
-    bool requests(const Asset* child) const;
+    bool requests(Asset* child) const;
     void request(std::shared_ptr<Asset> child);
-    void unrequest(std::shared_ptr<Asset> child);
+    void unrequest(Asset* child);
 
-    std::vector<std::shared_ptr<Asset>> requestedAssets() const;
+    const std::vector<std::shared_ptr<Asset>>& requestedAssets() const;
     std::vector<std::shared_ptr<Asset>> requestingAssets() const;
-    std::vector<std::shared_ptr<Asset>> requiredAssets() const;
+    const std::vector<std::shared_ptr<Asset>>& requiredAssets() const;
     std::vector<std::shared_ptr<Asset>> requiringAssets() const;
 
     std::vector<std::shared_ptr<Asset>> requiredSubTreeAssets();
@@ -149,7 +145,7 @@ private:
     void setState(State state);
 
     void requiredAssetChangedState(std::shared_ptr<Asset> a, Asset::State state);
-    void requestedAssetChangedState(std::shared_ptr<Asset> a, Asset::State state);
+    void requestedAssetChangedState(Asset* a, Asset::State state);
 
     bool isSyncResolveReady();
 

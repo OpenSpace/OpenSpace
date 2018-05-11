@@ -51,10 +51,12 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
+#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/scenelicense.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -73,8 +75,10 @@
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>

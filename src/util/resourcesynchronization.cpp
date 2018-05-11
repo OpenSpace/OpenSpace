@@ -32,6 +32,7 @@
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <memory>
 

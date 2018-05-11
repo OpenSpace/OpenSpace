@@ -35,6 +35,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
     constexpr const char* keyStart = "StartTime";
@@ -155,7 +156,7 @@ float Renderable::boundingSphere() const {
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
-                                                       const glm::dvec3& targetModelSpace)
+                                                 const glm::dvec3& targetModelSpace) const 
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {

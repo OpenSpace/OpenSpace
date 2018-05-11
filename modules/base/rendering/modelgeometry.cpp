@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <fstream>
 

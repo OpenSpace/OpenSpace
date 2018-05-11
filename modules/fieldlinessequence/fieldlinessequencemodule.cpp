@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <fstream>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
     constexpr const char* DefaultTransferfunctionSource =

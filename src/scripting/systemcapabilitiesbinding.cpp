@@ -24,6 +24,7 @@
 
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
@@ -38,42 +39,42 @@ using namespace ghoul::systemcapabilities;
 namespace luascripting::general {
 
 int operatingSystem(lua_State* L) {
-    lua_pushstring(L, CpuCap.operatingSystemString().c_str());
+    ghoul::lua::push(L, CpuCap.operatingSystemString());
     return 1;
 }
 
 int fullOperatingSystem(lua_State* L) {
-    lua_pushstring(L, CpuCap.fullOperatingSystem().c_str());
+    ghoul::lua::push(L, CpuCap.fullOperatingSystem());
     return 1;
 }
 
 int installedMainMemory(lua_State* L) {
-    lua_pushnumber(L, CpuCap.installedMainMemory());
+    ghoul::lua::push(L, CpuCap.installedMainMemory());
     return 1;
 }
 
 int cores(lua_State* L) {
-    lua_pushnumber(L, CpuCap.cores());
+    ghoul::lua::push(L, CpuCap.cores());
     return 1;
 }
 
 int cacheLineSize(lua_State* L) {
-    lua_pushnumber(L, CpuCap.cacheLineSize());
+    ghoul::lua::push(L, CpuCap.cacheLineSize());
     return 1;
 }
 
 int L2Associativity(lua_State* L) {
-    lua_pushnumber(L, CpuCap.L2Associativity());
+    ghoul::lua::push(L, CpuCap.L2Associativity());
     return 1;
 }
 
 int cacheSize(lua_State* L) {
-    lua_pushnumber(L, CpuCap.cacheSize());
+    ghoul::lua::push(L, CpuCap.cacheSize());
     return 1;
 }
 
 int extensions(lua_State* L) {
-    lua_pushstring(L, CpuCap.extensions().c_str());
+    ghoul::lua::push(L, CpuCap.extensions());
     return 1;
 }
 
@@ -109,29 +110,29 @@ int hasOpenGLVersion(lua_State* L) {
         }
     }
 
-    int major = std::stoi(v[0]);
-    int minor = std::stoi(v[1]);
-    int release = v.size() == 3 ? std::stoi(v[2]) : 0;
-    Version version = { major, minor, release };
+    const int major = std::stoi(v[0]);
+    const int minor = std::stoi(v[1]);
+    const int release = v.size() == 3 ? std::stoi(v[2]) : 0;
+    const Version version = { major, minor, release };
 
-    bool supported = OpenGLCap.openGLVersion() >= version;
+    const bool supported = OpenGLCap.openGLVersion() >= version;
 
-    lua_pushboolean(L, supported);
+    ghoul::lua::push(L, supported);
     return 1;
 }
 
 int openGLVersion(lua_State* L) {
-    lua_pushstring(L, std::to_string(OpenGLCap.openGLVersion()).c_str());
+    ghoul::lua::push(L, std::to_string(OpenGLCap.openGLVersion()));
     return 1;
 }
 
 int glslCompiler(lua_State* L) {
-    lua_pushstring(L, OpenGLCap.glslCompiler().c_str());
+    ghoul::lua::push(L, OpenGLCap.glslCompiler());
     return 1;
 }
 
 int gpuVendor(lua_State* L) {
-    lua_pushstring(L, OpenGLCap.gpuVendorString().c_str());
+    ghoul::lua::push(L, OpenGLCap.gpuVendorString());
     return 1;
 }
 
@@ -141,7 +142,7 @@ int extensions(lua_State* L) {
     lua_newtable(L);
 
     for (size_t i = 1; i <= extensions.size(); ++i) {
-        lua_pushstring(L, extensions[i].c_str());
+        ghoul::lua::push(L, extensions[i]);
         lua_rawseti(L, -2, i);
     }
     return 1;
@@ -156,37 +157,37 @@ int isExtensionSupported(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
 
-    lua_pushboolean(L, OpenGLCap.isExtensionSupported(extension));
+    ghoul::lua::push(L, OpenGLCap.isExtensionSupported(extension));
     return 1;
 }
 
 int maxTextureUnits(lua_State* L) {
-    lua_pushnumber(L, OpenGLCap.maxTextureUnits());
+    ghoul::lua::push(L, OpenGLCap.maxTextureUnits());
     return 1;
 }
 
 int max2DTextureSize(lua_State* L) {
-    lua_pushnumber(L, OpenGLCap.max2DTextureSize());
+    ghoul::lua::push(L, OpenGLCap.max2DTextureSize());
     return 1;
 }
 
 int max3DTextureSize(lua_State* L) {
-    lua_pushnumber(L, OpenGLCap.max3DTextureSize());
+    ghoul::lua::push(L, OpenGLCap.max3DTextureSize());
     return 1;
 }
 
 int maxAtomicCounterBufferBindings(lua_State* L) {
-    lua_pushnumber(L, OpenGLCap.maxAtomicCounterBufferBindings());
+    ghoul::lua::push(L, OpenGLCap.maxAtomicCounterBufferBindings());
     return 1;
 }
 
 int maxShaderStorageBufferBindings(lua_State* L) {
-    lua_pushnumber(L, OpenGLCap.maxShaderStorageBufferBindings());
+    ghoul::lua::push(L, OpenGLCap.maxShaderStorageBufferBindings());
     return 1;
 }
 
 int maxUniformBufferBindings(lua_State* L) {
-    lua_pushnumber(L, OpenGLCap.maxUniformBufferBindings());
+    ghoul::lua::push(L, OpenGLCap.maxUniformBufferBindings());
     return 1;
 }
 

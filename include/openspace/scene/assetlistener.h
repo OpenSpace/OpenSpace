@@ -22,33 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/debugging/debuggingmodule.h>
+#ifndef __OPENSPACE_CORE___ASSETLISTENER___H__
+#define __OPENSPACE_CORE___ASSETLISTENER___H__
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-
-#include <modules/debugging/rendering/renderabledebugplane.h>
+#include <openspace/scene/asset.h>
 
 namespace openspace {
 
-DebuggingModule::DebuggingModule() : OpenSpaceModule(Name) {}
+class AssetListener {
+public:
+    virtual ~AssetListener() = default;
+    virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
+    virtual void assetRequested(std::shared_ptr<Asset> parent,
+        std::shared_ptr<Asset> child) = 0;
 
-void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
-}
-
-std::vector<documentation::Documentation> DebuggingModule::documentations() const {
-    return {
-        RenderableDebugPlane::Documentation()
-    };
-}
-
+    virtual void assetUnrequested(std::shared_ptr<Asset> parent,
+        std::shared_ptr<Asset> child) = 0;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___ASSETLISTENER___H__

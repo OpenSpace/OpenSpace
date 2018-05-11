@@ -36,6 +36,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>

@@ -35,6 +35,8 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/camera.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing::luascriptfunctions {
 
@@ -49,13 +51,13 @@ int addLayer(lua_State* L) {
     const std::string& layerGroupName = ghoul::lua::value<std::string>(L, 2);
 
     // Get the node and make sure it exists
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
-    if (!node) {
+    SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    if (!n) {
         return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
     }
 
     // Get the renderable globe
-    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
     }
@@ -99,13 +101,13 @@ int deleteLayer(lua_State* L) {
     lua_pop(L, 3);
 
     // Get the node and make sure it exists
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
-    if (!node) {
+    SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    if (!n) {
         return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
     }
 
     // Get the renderable globe
-    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
     }
@@ -169,11 +171,11 @@ int getGeoPosition(lua_State* L) {
     const double altitude = ghoul::lua::value<double>(L, 4);
     lua_pop(L, 4);
 
-    SceneGraphNode* node = sceneGraphNode(name);
-    if (!node) {
+    SceneGraphNode* n = sceneGraphNode(name);
+    if (!n) {
         return luaL_error(L, ("Unknown globe name: " + name).c_str());
     }
-    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
         return luaL_error(L, "Name must be a RenderableGlobe");
     }
@@ -196,7 +198,7 @@ int getGeoPositionForCamera(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::getGeoPositionForCamera");
 
     GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
-    RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
+    const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
         return luaL_error(L, "Focus node must be a RenderableGlobe");
     }

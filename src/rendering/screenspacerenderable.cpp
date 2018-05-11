@@ -39,6 +39,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/defer.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
     constexpr const char* KeyType = "Type";

@@ -29,6 +29,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 
 #include <modules/space/rendering/renderableconstellationbounds.h>

@@ -36,6 +36,7 @@
 #include <openspace/util/keys.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/util/camera.h>
 
 #include <glm/gtx/quaternion.hpp>
 

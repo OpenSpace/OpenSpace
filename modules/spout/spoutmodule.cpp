@@ -28,6 +28,7 @@
 #include <modules/spout/screenspacespout.h>
 
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <ghoul/misc/assert.h>
 

@@ -29,6 +29,7 @@
 #include <ghoul/misc/assert.h>
 
 #include <modules/toyvolume/rendering/renderabletoyvolume.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
