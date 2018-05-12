@@ -23,18 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/util/resourcesynchronization.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
-#include <modules/sync/syncmodule.h>
 
-#include <openspace/util/factorymanager.h>
-#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/logging/logmanager.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
-
-#include <memory>
 
 namespace {
     constexpr const char* KeyType = "Type";
@@ -73,18 +66,19 @@ documentation::Documentation ResourceSynchronization::Documentation() {
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
-    const ghoul::Dictionary & dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
-        Documentation(), dictionary, "ResourceSynchronization");
+        Documentation(),
+        dictionary,
+        "ResourceSynchronization"
+    );
 
-    std::string synchronizationType = dictionary.value<std::string>(KeyType);
+    const std::string& synchronizationType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
     ghoul_assert(factory, "ResourceSynchronization factory did not exist");
-    std::unique_ptr<ResourceSynchronization> result =
-        factory->create(synchronizationType, dictionary);
-    return result;
+    return factory->create(synchronizationType, dictionary);
 }
 
 ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict) {
@@ -118,7 +112,7 @@ ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
 {
     std::lock_guard<std::mutex> guard(_callbackMutex);
     CallbackHandle callbackId = _nextCallbackId++;
-    _stateChangeCallbacks[callbackId] = cb;
+    _stateChangeCallbacks[callbackId] = std::move(cb);
     return callbackId;
 }
 
@@ -169,7 +163,7 @@ float ResourceSynchronization::progress() {
     return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
 }
 
-std::string ResourceSynchronization::name() const {
+const std::string& ResourceSynchronization::name() const {
     return _name;
 }
 

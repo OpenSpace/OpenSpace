@@ -27,7 +27,6 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
-
 #include <algorithm>
 #include <vector>
 
@@ -38,9 +37,8 @@ namespace {
 namespace openspace {
 
 bool hasKeyModifier(KeyAction lhs, KeyAction rhs) {
-    return
-        static_cast<std::underlying_type_t<KeyAction>>(lhs) &
-        static_cast<std::underlying_type_t<KeyAction>>(rhs);
+    return static_cast<std::underlying_type_t<KeyAction>>(lhs) &
+           static_cast<std::underlying_type_t<KeyAction>>(rhs);
 }
 
 KeyAction operator|(KeyAction lhs, KeyAction rhs) {
@@ -51,14 +49,12 @@ KeyAction operator|(KeyAction lhs, KeyAction rhs) {
 }
 
 KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
-    lhs = (lhs | rhs);
-    return lhs;
+    return (lhs | rhs);
 }
 
 bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
-    return
-        static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
-        static_cast<std::underlying_type_t<KeyModifier>>(rhs);
+    return static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
+           static_cast<std::underlying_type_t<KeyModifier>>(rhs);
 }
 
 
@@ -70,8 +66,7 @@ KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
 }
 
 KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
-    lhs = (lhs | rhs);
-    return lhs;
+    return (lhs | rhs);
 }
 
 KeyWithModifier stringToKey(std::string str) {
@@ -87,7 +82,7 @@ KeyWithModifier stringToKey(std::string str) {
 
     // default is unknown
     Key k = Key::Unknown;
-    auto itKey = KeyMapping.find(tokens.back());
+    const auto itKey = KeyMapping.find(tokens.back());
     if (itKey != KeyMapping.end()) {
         k = itKey->second;
     }
@@ -98,7 +93,7 @@ KeyWithModifier stringToKey(std::string str) {
         tokens.begin(),
         tokens.end() - 1,
         [&m](const std::string& s) {
-            auto itMod = KeyModifierMapping.find(s);
+            const auto itMod = KeyModifierMapping.find(s);
             if (itMod != KeyModifierMapping.end()) {
                 m |= itMod->second;
             }
@@ -124,13 +119,12 @@ bool operator==(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
     return (lhs.key == rhs.key) && (lhs.modifier == rhs.modifier);
 }
 
-
 } // namespace openspace
 
 namespace std {
 
 std::string to_string(openspace::Key key) {
-    for (const auto& p : openspace::KeyMapping) {
+    for (const std::pair<const std::string, openspace::Key>& p : openspace::KeyMapping) {
         if (p.second == key) {
             return p.first;
         }
@@ -146,7 +140,9 @@ std::string to_string(openspace::KeyModifier mod) {
     }
 
     std::string result;
-    for (const auto& p : KeyModifierMapping) {
+    using K = const std::string;
+    using V = openspace::KeyModifier;
+    for (const std::pair<K, V>& p : KeyModifierMapping) {
         if (hasKeyModifier(mod, p.second)) {
             result += p.first + "+";
         }

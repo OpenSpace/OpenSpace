@@ -36,6 +36,7 @@
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/scripting/lualibrary.h>
 
 #include <openspace/rendering/dashboard.h>
 

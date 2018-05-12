@@ -25,13 +25,12 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <openspace/util/syncdata.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeline.h>
+#include <functional>
 #include <utility>
 #include <vector>
-#include <deque>
-#include <functional>
-#include <openspace/util/timeline.h>
-#include <openspace/util/time.h>
-#include <openspace/util/syncdata.h>
 
 namespace openspace {
 
@@ -54,6 +53,7 @@ public:
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+
 private:
     bool _shouldSetTime = false;
     Time _timeNextFrame;

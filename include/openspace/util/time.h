@@ -25,13 +25,11 @@
 #ifndef __OPENSPACE_CORE___TIME___H__
 #define __OPENSPACE_CORE___TIME___H__
 
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/syncdata.h>
-
-#include <mutex>
 #include <string>
 
 namespace openspace {
+
+namespace scripting { struct LuaLibrary; }
 
 /**
  * This singleton class represents the current simulation time in OpenSpace. It
@@ -194,7 +192,7 @@ public:
 
 private:
     double _time;
-    double _dt;
+    double _dt = 1.0;
     bool _timeJumped;
     bool _timePaused = false;
 };

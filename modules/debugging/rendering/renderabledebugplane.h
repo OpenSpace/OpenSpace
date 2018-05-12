@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {

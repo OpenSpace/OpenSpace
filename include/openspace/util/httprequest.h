@@ -27,15 +27,13 @@
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
-
 #include <atomic>
+#include <condition_variable>
 #include <fstream>
 #include <functional>
-#include <memory>
 #include <string>
-#include <vector>
 #include <thread>
-#include <condition_variable>
+#include <vector>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -45,27 +43,12 @@
 namespace openspace {
 
 namespace curlfunctions {
-    size_t writeCallback(
-        char *ptr,
-        size_t size,
-        size_t nmemb,
-        void *userdata
-    );
+    size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userdata);
 
-    int progressCallback(
-        void *clientp,
-        int64_t dltotal,
-        int64_t dlnow,
-        int64_t ultotal,
-        int64_t ulnow
-    );
+    int progressCallback(void* clientp, int64_t dltotal, int64_t dlnow, int64_t ultotal,
+        int64_t ulnow);
 
-    size_t headerCallback(
-        char* ptr,
-        size_t size,
-        size_t nmemb,
-        void* userData
-    );
+    size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData);
 }
 
 // Synchronous http request
@@ -167,9 +150,9 @@ public:
     virtual ~HttpDownload() = default;
     void onProgress(ProgressCallback progressCallback);
     void onHeader(HeaderCallback headerCallback);
-    bool hasStarted();
-    bool hasFailed();
-    bool hasSucceeded();
+    bool hasStarted() const;
+    bool hasFailed() const;
+    bool hasSucceeded() const;
 
 protected:
     virtual size_t handleData(HttpRequest::Data d) = 0;
@@ -252,7 +235,7 @@ public:
     HttpMemoryDownload() = default;
     HttpMemoryDownload(HttpMemoryDownload&& d) = default;
     virtual ~HttpMemoryDownload() = default;
-    const std::vector<char>& downloadedData();
+    const std::vector<char>& downloadedData() const;
 
 protected:
     bool initDownload() override;

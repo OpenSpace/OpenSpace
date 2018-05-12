@@ -29,7 +29,6 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/constexpr.h>
-
 #include <array>
 #include <string>
 #include <utility>

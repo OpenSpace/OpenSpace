@@ -28,6 +28,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/resourcesynchronization.h>
+#include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
 
 #include <ghoul/ghoul.h>

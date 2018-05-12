@@ -26,11 +26,10 @@
 #define __OPENSPACE_CORE___SYNCHRONIZATIONWATCHER___H__
 
 #include <openspace/util/resourcesynchronization.h>
-
 #include <memory>
 #include <mutex>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
 
 namespace openspace {
 

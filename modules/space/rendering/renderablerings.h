@@ -33,6 +33,7 @@
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/uniformcache.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {

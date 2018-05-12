@@ -26,9 +26,7 @@
 
 namespace openspace {
 
-Worker::Worker(ThreadPool& pool_)
-    : pool(pool_)
-{}
+Worker::Worker(ThreadPool& pool_) : pool(pool_) {}
 
 void Worker::operator()() {
     std::function<void()> task;
@@ -58,17 +56,13 @@ void Worker::operator()() {
     }
 }
 
-ThreadPool::ThreadPool(size_t numThreads)
-    : stop(false)
-{
+ThreadPool::ThreadPool(size_t numThreads) : stop(false) {
     for (size_t i = 0; i < numThreads; ++i) {
         workers.push_back(std::thread(Worker(*this)));
     }
 }
 
-ThreadPool::ThreadPool(const ThreadPool& toCopy)
-    : ThreadPool(toCopy.workers.size())
-{ }
+ThreadPool::ThreadPool(const ThreadPool& toCopy) : ThreadPool(toCopy.workers.size()) {}
 
 // the destructor joins all threads
 ThreadPool::~ThreadPool() {

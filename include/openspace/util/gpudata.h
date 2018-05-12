@@ -28,7 +28,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <string>
 #include <memory>
 

@@ -22,53 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
-#define __OPENSPACE_CORE___THREAD_POOL___H__
-
-#include <condition_variable>
-#include <functional>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
-
-// Implementation based on http://progsch.net/wordpress/?p=81
+#ifndef __OPENSPACE_CORE___SYNCABLE___H__
+#define __OPENSPACE_CORE___SYNCABLE___H__
 
 namespace openspace {
 
-class ThreadPool;
+class SyncBuffer;
 
-class Worker {
+/**
+ * Interface for synchronizable data
+ *
+ * Used by <code>SyncEngine</code>
+ */
+class Syncable {
 public:
-    Worker(ThreadPool& pool);
-    void operator()();
+    virtual ~Syncable() = default;
 
-private:
-    ThreadPool& pool;
-};
+protected:
+    // Allowing SyncEngine synchronization methods and at the same time hiding them
+    // from the used of implementations of the interface
+    friend class SyncEngine;
 
-class ThreadPool {
-public:
-    ThreadPool(size_t numThreads);
-    ThreadPool(const ThreadPool& toCopy);
-    ~ThreadPool();
-
-    void enqueue(std::function<void()> f);
-    void clearTasks();
-
-private:
-    friend class Worker;
-
-    std::vector<std::thread> workers;
-
-    std::deque<std::function<void()>> tasks;
-
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-
-    bool stop;
+    virtual void preSync(bool /*isMaster*/) {};
+    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void postSync(bool /*isMaster*/) {};
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___THREAD_POOL___H__
+#endif // __OPENSPACE_CORE___SYNCDATA___H__

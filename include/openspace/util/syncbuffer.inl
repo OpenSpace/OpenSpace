@@ -22,53 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
-#define __OPENSPACE_CORE___THREAD_POOL___H__
-
-#include <condition_variable>
-#include <functional>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
-
-// Implementation based on http://progsch.net/wordpress/?p=81
+#include <ghoul/misc/assert.h>
+#include <cstring>
 
 namespace openspace {
 
-class ThreadPool;
+template <typename T>
+void SyncBuffer::encode(const T& v) {
+    const size_t size = sizeof(T);
+    ghoul_assert(_encodeOffset + size < _n, "");
 
-class Worker {
-public:
-    Worker(ThreadPool& pool);
-    void operator()();
+    memcpy(_dataStream.data() + _encodeOffset, &v, size);
+    _encodeOffset += size;
+}
 
-private:
-    ThreadPool& pool;
-};
+template <typename T>
+T SyncBuffer::decode() {
+    const size_t size = sizeof(T);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    T value;
+    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+    return value;
+}
 
-class ThreadPool {
-public:
-    ThreadPool(size_t numThreads);
-    ThreadPool(const ThreadPool& toCopy);
-    ~ThreadPool();
-
-    void enqueue(std::function<void()> f);
-    void clearTasks();
-
-private:
-    friend class Worker;
-
-    std::vector<std::thread> workers;
-
-    std::deque<std::function<void()>> tasks;
-
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-
-    bool stop;
-};
+template <typename T>
+void SyncBuffer::decode(T& value) {
+    const size_t size = sizeof(T);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___THREAD_POOL___H__

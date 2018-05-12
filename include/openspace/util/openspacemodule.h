@@ -27,17 +27,16 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scripting/lualibrary.h>
-
 #include <ghoul/systemcapabilities/version.h>
-
 #include <string>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
 namespace documentation {  struct Documentation; }
+namespace scripting { struct LuaLibrary; }
 
 class ModuleEngine;
 

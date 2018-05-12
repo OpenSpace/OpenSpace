@@ -360,8 +360,11 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/synchronizationwatcher.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h

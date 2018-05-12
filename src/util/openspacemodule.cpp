@@ -25,7 +25,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <openspace/documentation/documentation.h>
-
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -65,7 +65,7 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
 
     std::string path = modulePath();
     LDEBUG(fmt::format("Registering module path {}: {}", moduleToken, path));
-    FileSys.registerPathToken(moduleToken, path);
+    FileSys.registerPathToken(moduleToken, std::move(path));
 
     _moduleEngine = moduleEngine;
     internalInitialize(configuration);
@@ -114,7 +114,7 @@ std::string OpenSpaceModule::modulePath() const {
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
-            const std::string path = std::string(dir) + '/' + moduleIdentifier;
+            const std::string& path = std::string(dir) + '/' + moduleIdentifier;
             if (FileSys.directoryExists(absPath(path))) {
                 return absPath(path);
             }

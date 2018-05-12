@@ -27,6 +27,7 @@
 #include <time.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 #include "time_lua.inl"
 
@@ -34,6 +35,7 @@
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <mutex>
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
@@ -43,10 +45,7 @@ double Time::convertTime(const std::string& time) {
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
-Time::Time(double secondsJ2000)
-    : _time(secondsJ2000)
-    , _dt(1.0)
-{}
+Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
 
 
 Time::Time(const Time& other)
@@ -54,9 +53,7 @@ Time::Time(const Time& other)
     , _dt(other._dt)
     , _timeJumped(other._timeJumped)
     , _timePaused(other._timePaused)
-{
-
-}
+{}
 
 Time Time::now() {
     Time now;
@@ -64,7 +61,9 @@ Time Time::now() {
     secondsSince1970 = time(nullptr);
 
     const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
-    double secondsSince2000 = static_cast<double>(secondsSince1970 - 30 * secondsInAYear);
+    const double secondsSince2000 = static_cast<double>(
+        secondsSince1970 - 30 * secondsInAYear
+    );
     now.setTime(secondsSince2000);
     return now;
 }
@@ -116,10 +115,10 @@ std::string Time::UTC() const {
 
 std::string Time::ISO8601() const {
     std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
-    std::string month = datetime.substr(5, 3);
+    const std::string& month = datetime.substr(5, 3);
 
     std::string MM = "";
-    if (month == "JAN") MM = "01";
+    if (month == "JAN")      MM = "01";
     else if (month == "FEB") MM = "02";
     else if (month == "MAR") MM = "03";
     else if (month == "APR") MM = "04";

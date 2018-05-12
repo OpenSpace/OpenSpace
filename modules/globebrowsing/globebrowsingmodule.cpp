@@ -52,6 +52,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <openspace/scripting/lualibrary.h>
 
 #include <vector>
 

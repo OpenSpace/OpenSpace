@@ -22,53 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___THREAD_POOL___H__
-#define __OPENSPACE_CORE___THREAD_POOL___H__
-
-#include <condition_variable>
-#include <functional>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <vector>
-
-// Implementation based on http://progsch.net/wordpress/?p=81
+#include <openspace/util/syncbuffer.h>
 
 namespace openspace {
 
-class ThreadPool;
+template<class T>
+SyncData<T>::SyncData(const T& val) : data(val) {};
 
-class Worker {
-public:
-    Worker(ThreadPool& pool);
-    void operator()();
+template<class T>
+SyncData<T>::SyncData(const SyncData<T>& o) : data(o.data) {}
 
-private:
-    ThreadPool& pool;
-};
+template<class T>
+SyncData<T>& SyncData<T>::operator=(const T& rhs) {
+    data = rhs;
+    return *this;
+}
 
-class ThreadPool {
-public:
-    ThreadPool(size_t numThreads);
-    ThreadPool(const ThreadPool& toCopy);
-    ~ThreadPool();
+template<class T>
+SyncData<T>::operator T&() {
+    return data;
+}
 
-    void enqueue(std::function<void()> f);
-    void clearTasks();
+template<class T>
+SyncData<T>::operator const T&() const {
+    return data;
+}
 
-private:
-    friend class Worker;
+template<class T>
+void SyncData<T>::encode(SyncBuffer* syncBuffer) {
+    _mutex.lock();
+    syncBuffer->encode(data);
+    _mutex.unlock();
+}
 
-    std::vector<std::thread> workers;
+template<class T>
+void SyncData<T>::decode(SyncBuffer* syncBuffer) {
+    _mutex.lock();
+    syncBuffer->decode(doubleBufferedData);
+    _mutex.unlock();
+}
 
-    std::deque<std::function<void()>> tasks;
-
-    std::mutex queue_mutex;
-    std::condition_variable condition;
-
-    bool stop;
+template<class T>
+void SyncData<T>::postSync(bool isMaster) {
+    // apply synced update
+    if (!isMaster) {
+        _mutex.lock();
+        data = doubleBufferedData;
+        _mutex.unlock();
+    }
 };
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___THREAD_POOL___H__
