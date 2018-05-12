@@ -410,13 +410,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                             lEntry.diameter = atof(strtok(NULL, ","));
                             lEntry.latitude = atof(strtok(NULL, ","));
                             lEntry.longitude = atof(strtok(NULL, ","));
+                            char * coordinateSystem = strtok(NULL, ",");
+
+                            if (strstr(coordinateSystem, "West") != NULL) {
+                                lEntry.longitude = 360.0f - lEntry.longitude;
+                            }
 
                             GlobeBrowsingModule* _globeBrowsingModule = 
                                 OsEng.moduleEngine().module<openspace::GlobeBrowsingModule>();
                             lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
                                 *this, 
                                 lEntry.latitude, 
-                                360.0f - lEntry.longitude, 
+                                lEntry.longitude, 
                                 lEntry.diameter + 100.f
                             );
 
