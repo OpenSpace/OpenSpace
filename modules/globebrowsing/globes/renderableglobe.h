@@ -104,6 +104,7 @@ public:
         float diameter;
         float latitude;
         float longitude;
+        glm::vec3 geoPosition;
     };
     struct Labels {
         std::string filename;

@@ -363,18 +363,15 @@ void ChunkedLodGlobe::renderLabels(const RenderData& data,
     // first position
     // second text
     for (const RenderableGlobe::LabelEntry lEntry: _labels.labelsArray) {
-        GlobeBrowsingModule* _globeBrowsingModule = OsEng.moduleEngine().module<openspace::GlobeBrowsingModule>();
-        glm::vec3 geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(_owner,
-            lEntry.latitude, 360.0f - lEntry.longitude, lEntry.diameter + 100.0);
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
-            geoPosition,
+            lEntry.geoPosition,
             textColor,
             //pow(10.0, _textSize.value()),
-            pow(10.0, 2.0),
+            pow(10.0, 2.5),
             //_textMinSize,
             //_textMaxSize,
-            1.5,
+            4.0,
             500.0,
             modelViewProjectionMatrix,
             orthoRight,

@@ -28,6 +28,10 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
@@ -406,6 +410,16 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                             lEntry.diameter = atof(strtok(NULL, ","));
                             lEntry.latitude = atof(strtok(NULL, ","));
                             lEntry.longitude = atof(strtok(NULL, ","));
+
+                            GlobeBrowsingModule* _globeBrowsingModule = 
+                                OsEng.moduleEngine().module<openspace::GlobeBrowsingModule>();
+                            lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
+                                *this, 
+                                lEntry.latitude, 
+                                360.0f - lEntry.longitude, 
+                                lEntry.diameter + 100.f
+                            );
+
                             labels.labelsArray.push_back(lEntry);
                         }
                     }
