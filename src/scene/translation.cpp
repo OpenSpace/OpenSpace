@@ -67,7 +67,7 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
     std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
-    result->setName("Translation");
+    result->setIdentifier("Translation");
     return result;
 }
 

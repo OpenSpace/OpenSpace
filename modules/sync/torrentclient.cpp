@@ -61,10 +61,6 @@ TorrentError::TorrentError(std::string msg)
     : RuntimeError(std::move(msg), "TorrentClient")
 {}
 
-TorrentClient::~TorrentClient() {
-    deinitialize();
-}
-
 void TorrentClient::initialize() {
 #ifdef SYNC_USE_LIBTORRENT
     libtorrent::settings_pack settings;
@@ -76,7 +72,7 @@ void TorrentClient::initialize() {
 
     settings.set_str(
         libtorrent::settings_pack::listen_interfaces,
-        "0.0.0.0:6881,0.0.0.0:20280,0.0.0.0:20285,0.0.0.0:20290,0.0.0.0:0"
+        "0.0.0.0:6881,0.0.0.0:20280,0.0.0.0:20285,0.0.0.0:20290"
     );
     settings.set_bool(libtorrent::settings_pack::allow_multiple_connections_per_ip, true);
     settings.set_bool(libtorrent::settings_pack::enable_upnp, true);

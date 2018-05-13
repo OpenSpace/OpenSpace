@@ -26,7 +26,8 @@
 #define __OPENSPACE_MODULE_MARSROVER___MARSROVERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
+
+#include <ghoul/opengl/programobjectmanager.h>
 
 namespace openspace {
 
@@ -40,8 +41,11 @@ public:
     std::vector<documentation::Documentation> documentations() const override;
     std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
+    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
+    void internalDeinitializeGL() override;
 };
 
 } // namespace openspace

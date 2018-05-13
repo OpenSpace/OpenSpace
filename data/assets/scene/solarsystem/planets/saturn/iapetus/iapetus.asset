@@ -13,8 +13,8 @@ local textures = asset.syncedResource({
 })
 
 local Iapetus = {
-    Name = "Iapetus",
-    Parent = transforms.SaturnBarycenter.Name,
+    Identifier = "Iapetus",
+    Parent = transforms.SaturnBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -35,7 +35,7 @@ local Iapetus = {
         Layers = {
             ColorLayers = {
                 {
-                    Name = "Iapetus Texture",
+                    Identifier = "Texture",
                     FilePath = textures .. "/iapetus.jpg",
                     Enabled = true
                 }
@@ -43,7 +43,9 @@ local Iapetus = {
         }
     },
     Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
-    GuiPath = "/Solar System/Planets/Saturn/Moons"
+    GUI = {
+        Path = "/Solar System/Planets/Saturn/Moons"
+    }
 }
 
 

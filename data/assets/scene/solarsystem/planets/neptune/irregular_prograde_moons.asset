@@ -7,50 +7,56 @@ local kernels088 = asset.require('./nep088').Kernels
 
 
 
-local parentName = transforms.NeptuneBarycenter.Name
+local parentIdentifier = transforms.NeptuneBarycenter.Identifier
 local parentSpice = "NEPTUNE BARYCENTER"
 local tags = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_irregular_prograde" }
 local trailColor = { 0.2, 0.5, 0.75 }
 
 local irregularProgradeMoons = {
     {
-        Name = "Halimede",
+        Identifier = "Halimede",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "HALIMEDE",
         Radii = { 62000, 62000, 62000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 1879.08,
         Kernels = kernels086
     },
     {
-        Name = "Psamathe",
+        Identifier = "Psamathe",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "PSAMATHE",
         Radii = { 40000, 40000, 40000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 9074.3,
         Kernels = kernels086
     },
     {
-        Name = "Neso",
+        Identifier = "Neso",
         Parent = {
-            Name = parentName,
+            Identifier = parentIdentifier,
             Spice = parentSpice
         },
         Spice = "NESO",
         Radii = { 60000, 60000, 60000 },
         Tags = tags,
-        GuiPath = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons",
+        GUI = {
+            Path = "/Solar System/Planets/Neptune/Moons/Irregular Prograde Moons"
+        },
         TrailColor = trailColor,
         OrbitPeriod = 9740.73,
         Kernels = kernels086

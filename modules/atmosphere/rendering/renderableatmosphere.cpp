@@ -42,7 +42,6 @@
 
 #include <openspace/rendering/deferredcastermanager.h>
 #include <modules/atmosphere/rendering/atmospheredeferredcaster.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderer.h>
@@ -299,8 +298,8 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _hardShadows(false)
  {
     ghoul_precondition(
-        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "RenderableAtmosphere needs the name to be specified"
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyIdentifier),
+        "RenderableAtmosphere needs the identifier to be specified"
     );
 
     documentation::testSpecificationAndThrow(
@@ -309,7 +308,9 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         "RenderableAtmosphere"
     );
 
-    const std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
+    const std::string identifier = dictionary.value<std::string>(
+        SceneGraphNode::KeyIdentifier
+    );
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
@@ -335,7 +336,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                         "No Radius value expecified for Shadow Source Name '{}' from "
                         "'{}' planet. Disabling shadows for this planet.",
                         sourceName,
-                        name
+                        identifier
                     ));
                     disableShadows = true;
                     break;
@@ -364,7 +365,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
                             "No Radius value expecified for Shadow Caster Name '{}' from "
                             "'{}' planet. Disabling shadows for this planet.",
                             casterName,
-                            name
+                            identifier
                         ));
                         disableShadows = true;
                         break;
@@ -398,7 +399,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         if (!atmosphereDictionary.getValue(keyAtmosphereRadius, _atmosphereRadius)) {
             errorReadingAtmosphereData = true;
             LWARNINGC(
-                name,
+                identifier,
                 "No Atmosphere Radius value specified for Atmosphere Effects. "
                 "Disabling atmosphere effects for this planet."
             );
@@ -407,7 +408,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         if (!atmosphereDictionary.getValue(keyPlanetRadius, _atmospherePlanetRadius)) {
             errorReadingAtmosphereData = true;
             LWARNINGC(
-                name,
+                identifier,
                 "No Planet Radius value expecified for Atmosphere Effects. "
                 "Disabling atmosphere effects for this planet."
             );
@@ -419,7 +420,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         {
             errorReadingAtmosphereData = true;
             LWARNINGC(
-                name,
+                identifier,
                 "No Average Atmosphere Ground Reflectance value specified for "
                 "Atmosphere Effects. Disabling atmosphere effects for this planet."
             );
@@ -431,7 +432,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         {
             errorReadingAtmosphereData = true;
             LWARNINGC(
-                name,
+                identifier,
                 "No Ground Radiance Emitted percentage value specified for Atmosphere "
                 "Effects. Disabling atmosphere effects for this planet."
             );
@@ -454,7 +455,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
-                    name,
+                    identifier,
                     "No Rayleigh Scattering parameters specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
@@ -466,7 +467,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
-                    name,
+                    identifier,
                     "No Rayleigh Height Scale value specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
@@ -475,7 +476,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         else {
             errorReadingAtmosphereData = true;
             LWARNINGC(
-                name,
+                identifier,
                 "No Rayleigh parameters specified for Atmosphere Effects. "
                 "Disabling atmosphere effects for this planet."
             );
@@ -506,7 +507,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (!mieDictionary.getValue(keyMieHeightScale, _mieHeightScale)) {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
-                    name,
+                    identifier,
                     "No Mie Height Scale value specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
@@ -515,7 +516,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (!mieDictionary.getValue("Coefficients.Scattering", _mieScatteringCoeff)) {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
-                    name,
+                    identifier,
                     "No Mie Scattering parameters specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
@@ -524,7 +525,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (!mieDictionary.getValue("Coefficients.Extinction", _mieExtinctionCoeff)) {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
-                    name,
+                    identifier,
                     "No Mie Extinction parameters specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
@@ -533,7 +534,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
             if (!mieDictionary.getValue(keyMiePhaseConstant, _miePhaseConstant)) {
                 errorReadingAtmosphereData = true;
                 LWARNINGC(
-                    name,
+                    identifier,
                     "No Mie Phase Constant value specified for Atmosphere Effects. "
                     "Disabling atmosphere effects for this planet."
                 );
@@ -542,7 +543,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
         else {
             errorReadingAtmosphereData = true;
             LWARNINGC(
-                name,
+                identifier,
                 "No Mie parameters specified for Atmosphere Effects. "
                 "Disabling atmosphere effects for this planet."
             );
@@ -762,6 +763,7 @@ void RenderableAtmosphere::update(const UpdateData& data) {
         _deferredcaster->setTime(data.time.j2000Seconds());
         glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
         _deferredcaster->setModelTransform(modelTransform);
+        _deferredcaster->update(data);
     }
 }
 

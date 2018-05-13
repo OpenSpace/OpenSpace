@@ -29,9 +29,9 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -47,7 +47,6 @@ struct UpdateData;
 namespace documentation { struct Documentation; }
 
 class RenderableMarsrover : public Renderable {
-
 public:
     RenderableMarsrover(const ghoul::Dictionary& dictionary);
 
@@ -70,17 +69,18 @@ private:
     properties::FloatProperty _size;
     properties::IntProperty _segments;
 
-    properties::FloatProperty _transparency;
-
     properties::BoolProperty _disableFadeInDistance;
 
     float _fadeOutThreshold;
     float _fadeInThreshold;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader1;
-    std::unique_ptr<ghoul::opengl::Texture> _texture1;
+    ghoul::opengl::ProgramObject* _shader;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     std::unique_ptr<PowerScaledSphere> _marsrover;
+
+    UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
+
 
     bool _sphereIsDirty;
 };

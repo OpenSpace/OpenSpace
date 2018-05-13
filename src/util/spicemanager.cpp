@@ -421,6 +421,7 @@ void getValueInternal(const std::string& body, const std::string& value, int siz
                body
         )
     );
+
 }
 
 void SpiceManager::getValue(const std::string& body, const std::string& value,
@@ -465,6 +466,7 @@ double SpiceManager::spacecraftClockToET(const std::string& craft, double craftT
         "Error transforming spacecraft clock of '{}' at time {}",
         craft, craftTicks)
     );
+
     return et;
 }
 
@@ -473,7 +475,9 @@ double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const 
 
     double et;
     str2et_c(timeString.c_str(), &et);
+
     throwOnSpiceError(format("Error converting date '{}'", timeString));
+
     return et;
 }
 
@@ -485,6 +489,7 @@ string SpiceManager::dateFromEphemerisTime(double ephemerisTime,
     static const int BufferSize = 256;
     SpiceChar buffer[BufferSize];
     timout_c(ephemerisTime, formatString.c_str(), BufferSize - 1, buffer);
+    
     throwOnSpiceError(
         format("Error converting ephemeris time '{}' to date with format '{}'",
                ephemerisTime,
@@ -523,6 +528,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
+
         glm::dvec3 position;
         spkpos_c(
             target.c_str(),
@@ -569,7 +575,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
 glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     const std::string& observer, const std::string& referenceFrame,
     AberrationCorrection aberrationCorrection, double ephemerisTime) const
-{
+{   
     double unused = 0.0;
     return targetPosition(
         target,
@@ -756,6 +762,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
 
     glm::dmat3 result;
+
     pxform_c(
         fromFrame.c_str(),
         toFrame.c_str(),
@@ -763,7 +770,11 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
 
-    throwOnSpiceError("");
+    throwOnSpiceError(format(
+        "Error retrieved state transform matrix from frame '{}' to frame '{}' at time "
+        "'{}'",
+        fromFrame, toFrame, ephemerisTime
+    ));
     SpiceBoolean success = !(failed_c());
     reset_c();
     if (!success)

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/rendering/screenspacedashboard.h>
+#include <modules/base/rendering/screenspacedashboard.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -42,8 +42,6 @@
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
@@ -78,14 +76,13 @@ int addDashboardItemToScreenSpace(lua_State* L) {
             return 0;
         }
 
-        std::shared_ptr<ScreenSpaceRenderable> ssr =
-            OsEng.renderEngine().screenSpaceRenderable(name);
+        ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
         if (!ssr) {
             return luaL_error(L, "Provided name is not a ScreenSpace item");
         }
 
-        ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
+        ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
         if (!dash) {
             return luaL_error(
                 L,
@@ -108,19 +105,18 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
     std::string name = ghoul::lua::checkStringAndPop(L);
-    std::shared_ptr<ScreenSpaceRenderable> ssr =
-        OsEng.renderEngine().screenSpaceRenderable(name);
+    ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
         return luaL_error(L, "Provided name is not a ScreenSpace item");
     }
 
-    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr.get());
+    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
         return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
     }
 
-    dash->dashboard().removeDashboardItems();
+    dash->dashboard().clearDashboardItems();
     return 0;
 }
 
@@ -159,18 +155,23 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         "ScreenSpaceDashboard"
     );
 
-    if (dictionary.hasKey(KeyName)) {
-        setName(dictionary.value<std::string>(KeyName));
-    }
-    else {
+    int iIdentifier = 0;
+    if (_identifier.empty()) {
         static int id = 0;
-        if (id == 0) {
-            setName("ScreenSpaceDashboard");
+        iIdentifier = id;
+
+        if (iIdentifier == 0) {
+            setIdentifier("ScreenSpaceDashboard");
         }
         else {
-            setName("ScreenSpaceDashboard" + std::to_string(id));
+            setIdentifier("ScreenSpaceDashboard" + std::to_string(iIdentifier));
         }
         ++id;
+    }
+
+    if (_guiName.empty()) {
+        // Adding an extra space to the user-facing name as it looks nicer
+        setGuiName("ScreenSpaceDashboard " + std::to_string(iIdentifier));
     }
 
     if (dictionary.hasKey(UseMainInfo.identifier)) {

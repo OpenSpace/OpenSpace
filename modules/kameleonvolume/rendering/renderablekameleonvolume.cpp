@@ -153,7 +153,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)
     , _raycaster(nullptr)
-    , _transferFunction(nullptr)
+    , _transferFunctionHandler(nullptr)
 {
 
     glm::vec3 dimensions;
@@ -172,8 +172,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     std::string transferFunctionPath;
     if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
-        _transferFunction = std::make_shared<TransferFunction>(
-            absPath(transferFunctionPath)
+        _transferFunctionHandler = std::make_shared<volume::TransferFunctionHandler>(
+            _transferFunctionPath
         );
     }
 
@@ -229,7 +229,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
-    _clipPlanes->setName("clipPlanes");
+    _clipPlanes->setIdentifier("clipPlanes");
+    _clipPlanes->setGuiName("Clip Planes");
 
     bool cache;
     if (dictionary.getValue(KeyCache, cache)) {
@@ -262,11 +263,11 @@ void RenderableKameleonVolume::initializeGL() {
     load();
 
     _volumeTexture->uploadTexture();
-    _transferFunction->update();
+    _transferFunctionHandler->initialize();
 
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
         _volumeTexture,
-        _transferFunction,
+        _transferFunctionHandler,
         _clipPlanes
     );
 
@@ -317,6 +318,7 @@ void RenderableKameleonVolume::initializeGL() {
     addProperty(_gridType);
     addProperty(_cache);
     addPropertySubOwner(_clipPlanes.get());
+    addPropertySubOwner(_transferFunctionHandler.get());
 }
 
 void RenderableKameleonVolume::updateRaycasterModelTransform() {

@@ -1,0 +1,13 @@
+@import "../../../styles/all";
+@import "../LoadingString/LoadingString";
+
+.block {
+  @extend .loadingBackground;
+  content: ' ';
+  height: $font-size * 1.6;
+  width: 100%;
+}
+
+.block + .block {
+  margin-top: $base-padding / 2;
+}

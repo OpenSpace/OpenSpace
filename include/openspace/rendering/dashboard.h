@@ -48,8 +48,9 @@ public:
     void addDashboardItem(std::unique_ptr<DashboardItem> item);
     bool hasItem(int index) const;
     const DashboardItem& item(int index) const;
+    void removeDashboardItem(const std::string& identifier);
     void removeDashboardItem(int index);
-    void removeDashboardItems();
+    void clearDashboardItems();
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the

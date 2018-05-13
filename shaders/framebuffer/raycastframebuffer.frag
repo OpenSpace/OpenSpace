@@ -66,7 +66,7 @@ void main() {
 
     float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
 
-    vec3 entryPos; 
+    vec3 entryPos;
     float entryDepth;
     getEntry(entryPos, entryDepth);
 
@@ -110,11 +110,9 @@ void main() {
 
     vec3 accumulatedColor = vec3(0.0);
     vec3 accumulatedAlpha = vec3(0.0);
-        
-    
-    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
 
-        
+
+    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
         while (sampleIndex < nAaSamples && currentDepth + nextStepSize * jitterFactor > raycastDepths[sampleIndex]) {
             sampleIndex++;
             aaOpacity -= opacityDecay;
@@ -132,16 +130,15 @@ void main() {
         vec3 jitteredPosition = position + direction*jitteredStepSize;
         position += direction * currentStepSize;
 
-        
         sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
 
         float sampleDistance = aaOpacity * (jitteredStepSize + previousJitterDistance);
 
         //blendStep(finalColor, raycasterContribution, sampleDistance);
-        //finalColor 
+        //finalColor
 
         previousJitterDistance = currentStepSize - jitteredStepSize;
-        
+
         float maxStepSize = raycastDepths[nAaSamples - 1] - currentDepth;
 
         nextStepSize = min(nextStepSize, maxStepSize);
@@ -149,7 +146,7 @@ void main() {
     }
 
     finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3);
-    
-    finalColor.rgb /= finalColor.a;
+
+    finalColor.rgb /= finalColor.a ;
     gl_FragDepth = normalizeFloat(entryDepth);
 }

@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
+local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
 
 local textures = asset.syncedResource({
     Name = "Mars Curiosity Textures",
@@ -19,16 +20,18 @@ local models = asset.syncedResource({
 -- Curiosity Model --
 
 local Curiosity = {
-    Name = "Curiosity",
-    Parent = transforms.CuriosityPosition.Name,
+    Identifier = "Curiosity",
+    Parent = transforms.landingSite.Identifier,
     Tag = {"planet_solarsystem", "planet_terrestrial"},
-    GuiPath = "Solar System/Planets/Mars/Curiosity"
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity"
+    }
 }
 
 local CuriosityModel = {
-    Name = "CuriosityModel",
-    Parent = Curiosity.Name,
-    GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
+    Identifier = "CuriosityModel",
+    Parent = Curiosity.Identifier
+    --GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
 }
 
 
@@ -36,8 +39,8 @@ local CuriosityModel = {
 -- Test Model
 
 --local renderTestMarsrover = {
---    Name = "renderTestMarsrover",
---    Parent = transforms.RoverLocation.Name,
+--    Identifier = "renderTestMarsrover",
+--    Parent = transforms.RoverLocation.Identifier,
 --    Renderable = {
 --        Type = "RenderableSphere",
 --        Size = 300.0,
@@ -47,8 +50,8 @@ local CuriosityModel = {
 --}
 
 local Body = {
-    Name = "body",
-    Parent = transforms.RoverLocation.Name,
+    Identifier = "body",
+    Parent = CuriosityModel.Identifier, --transforms.RoverLocation.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -56,14 +59,16 @@ local Body = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 local Body_staticParts = {
-    Name = "body_staticparts",
-    Parent = Body.Name,
+    Identifier = "body_staticparts",
+    Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -71,14 +76,16 @@ local Body_staticParts = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_BODY_STATICPARTS.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 local Wheels_static = {
-    Name = "Wheels_static",
-    Parent = Body.Name,
+    Identifier = "Wheels_static",
+    Parent = Body.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -86,9 +93,11 @@ local Wheels_static = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEELS_STATIC.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
@@ -96,8 +105,8 @@ local Wheels_static = {
 
 -- RA AZ
 local RA_Shoulder_AZ = {
-    Name = "RA_Shoulder_AZ",
-    Parent = transforms.RA_Shoulder_AZ_Location.Name,
+    Identifier = "RA_Shoulder_AZ",
+    Parent = transforms.RA_Shoulder_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -105,15 +114,17 @@ local RA_Shoulder_AZ = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_AZ.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
--- RA EL
+---- RA EL
 local RA_Shoulder_EL = {
-    Name = "RA_Shoulder_EL",
-    Parent = transforms.RA_Shoulder_EL_Location.Name,
+    Identifier = "RA_Shoulder_EL",
+    Parent = transforms.RA_Shoulder_EL_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -121,15 +132,17 @@ local RA_Shoulder_EL = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_EL.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 -- RA ELBOW
 local RA_Elbow = {
-    Name = "RA_Elbow",
-    Parent = transforms.RA_Elbow_Location.Name,
+    Identifier = "RA_Elbow",
+    Parent = transforms.RA_Elbow_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -137,15 +150,17 @@ local RA_Elbow = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/MSL_RA_ELBOW.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 -- RA WRIST
 local RA_Wrist = {
-    Name = "RA_Wrist",
-    Parent = transforms.RA_Wrist_Location.Name,
+    Identifier = "RA_Wrist",
+    Parent = transforms.RA_Wrist_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -153,15 +168,17 @@ local RA_Wrist = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_WRIST_test.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 -- RA TURRET
 local RA_Turret = {
-    Name = "RA_Turret",
-    Parent = transforms.RA_Turret_Location.Name,
+    Identifier = "RA_Turret",
+    Parent = transforms.RA_Turret_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -169,15 +186,17 @@ local RA_Turret = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET_test.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
 local RA_Mahli = {
-    Name = "RA_Mahli",
-    Parent = transforms.RA_Mahli_Location.Name,
+    Identifier = "RA_Mahli",
+    Parent = transforms.RA_Mahli_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -185,9 +204,11 @@ local RA_Mahli = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_TURRET.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
@@ -195,8 +216,8 @@ local RA_Mahli = {
 -- MastCam--
 
 local RSM_root = {
-    Name = "RSM_root",
-    Parent = transforms.RSM_ZERO_AZ_Location.Name,
+    Identifier = "RSM_root",
+    Parent = transforms.RSM_ZERO_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -205,15 +226,17 @@ local RSM_root = {
           GeometryFile = models .. "/MSL_RSM_ROOT.obj"
 
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
 local RSM_AZ = {
-    Name = "RSM_AZ",
-    Parent = transforms.RSM_AZ_Location.Name,
+    Identifier = "RSM_AZ",
+    Parent = transforms.RSM_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -221,15 +244,17 @@ local RSM_AZ = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_AZ.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
 local RSM_EL = {
-    Name = "RSM_EL",
-    Parent = transforms.RSM_EL_Location.Name,
+    Identifier = "RSM_EL",
+    Parent = transforms.RSM_EL_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -237,9 +262,11 @@ local RSM_EL = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RSM_EL.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
@@ -247,8 +274,8 @@ local RSM_EL = {
 ---- HGA ----
 
 local HGA_AZ = {
-    Name = "HGA_AZ",
-    Parent = transforms.HGA_AZ_Location.Name,
+    Identifier = "HGA_AZ",
+    Parent = transforms.HGA_AZ_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -256,14 +283,16 @@ local HGA_AZ = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_HGA_AZ_0ANGLE.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 local HGA_EL = {
-    Name = "HGA_EL",
-    Parent = transforms.HGA_EL_Location.Name,
+    Identifier = "HGA_EL",
+    Parent = transforms.HGA_EL_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -271,16 +300,18 @@ local HGA_EL = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_HGA_EL.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 ---- SAM & CHEMIN ----
 
 local SAM_Cover_1 = {
-    Name = "SAM_Cover_1",
-    Parent = transforms.SAM_Cover_1_Location.Name,
+    Identifier = "SAM_Cover_1",
+    Parent = transforms.SAM_Cover_1_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -288,14 +319,16 @@ local SAM_Cover_1 = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_SAM_FIXED_COVER_1.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 local SAM_Cover_2 = {
-    Name = "SAM_Cover_2",
-    Parent = transforms.SAM_Cover_2_Location.Name,
+    Identifier = "SAM_Cover_2",
+    Parent = transforms.SAM_Cover_2_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -303,14 +336,16 @@ local SAM_Cover_2 = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_SAM_FIXED_COVER_2.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 local CHEMIN_Bottom = {
-    Name = "CHEMIN_Bottom",
-    Parent = transforms.CHEMIN_Location.Name,
+    Identifier = "CHEMIN_Bottom",
+    Parent = transforms.CHEMIN_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -318,9 +353,11 @@ local CHEMIN_Bottom = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_CHEMIN.obj"
         },
-        ColorTexture = textures .. "/MSLTextureTest.png"
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity"
+        ColorTexture = textures .. "/MSLTextureTest.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
 }
 
 
@@ -332,21 +369,18 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Body,
     Body_staticParts,
     Wheels_static,
-
     RA_Shoulder_AZ,
     RA_Shoulder_EL,
     RA_Elbow,
     RA_Wrist,
     RA_Turret,
     RA_Mahli,
-
     RSM_root,
     RSM_AZ,
     RSM_EL,
-
     HGA_AZ,
     HGA_EL,
-
+    
     SAM_Cover_1,
     SAM_Cover_2,
     CHEMIN_Bottom

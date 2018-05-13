@@ -83,7 +83,8 @@ public:
     void clearSynchronizations();
     std::vector<std::shared_ptr<ResourceSynchronization>> ownSynchronizations() const;
 
-    void syncStateChanged(ResourceSynchronization::State s);
+    void syncStateChanged(std::shared_ptr<ResourceSynchronization> sync,
+        ResourceSynchronization::State s);
 
     /**
      * Load this asset and return true if successful,

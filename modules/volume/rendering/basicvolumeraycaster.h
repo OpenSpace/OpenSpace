@@ -34,7 +34,7 @@
 
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/util/boxgeometry.h>
-#include <openspace/rendering/transferfunction.h>
+#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <modules/volume/volumegridtype.h>
@@ -56,7 +56,7 @@ class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
     BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunction> transferFunction,
+        std::shared_ptr<TransferFunctionHandler> transferFunctionHandler,
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
     virtual ~BasicVolumeRaycaster();
     void initialize();
@@ -77,9 +77,12 @@ public:
     std::string getRaycastPath() const override;
     std::string getHelperPath() const override;
 
+
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
-    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
+    void setTransferFunctionHandler(
+        std::shared_ptr<TransferFunctionHandler> transferFunctionHandler);
+
     void setStepSize(float stepSize);
     float opacity() const;
     void setOpacity(float opacity);
@@ -87,7 +90,6 @@ public:
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
     void setRUpperBound(float rNormalization);
-    void setValueRemapping(float mapZeroTo, float mapOneTo);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
@@ -97,14 +99,13 @@ private:
 
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
     glm::mat4 _modelTransform;
     float _opacity;
     float _rNormalization;
     float _rUpperBound;
-    glm::vec2 _valueRemapping;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
@@ -113,6 +114,4 @@ private:
 
 } // namespace volume
 } // namespace openspace
-
-
 #endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__

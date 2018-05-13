@@ -79,6 +79,7 @@ public:
     Capabilities capabilities(const std::string& name);
 
     std::vector<UrlInfo> urlInfo(const std::string& globe) const;
+    bool hasUrlInfo(const std::string& globe) const;
 
     void removeWMSServer(const std::string& name);
 

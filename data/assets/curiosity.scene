@@ -1,55 +1,62 @@
-local sceneHelper = asset.require('util/scene_helper')
 local assetHelper = asset.require('util/asset_helper')
-asset.require('util/default_keybindings')
+local sceneHelper = asset.require('util/scene_helper')
+local propertyHelper = asset.require('util/property_helper')
 
+-- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
-asset.request('scene/digitaluniverse/stars')
-asset.request('scene/digitaluniverse/milkyway')
 
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+asset.require('util/default_joystick')
 
+asset.request('customization/globebrowsing')
 
-local CuriosityModelAsset = asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
-local MarsAsset = asset.require('scene/solarsystem/planets/mars/mars')
+asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
-
-
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
 asset.onInitialize(function ()
-    -- openspace.time.setTime(openspace.time.currentWallTime())
-    
-    -- Time: Curiosity selfie 
+    --openspace.time.setTime(openspace.time.currentWallTime())
+
     openspace.time.setTime("2018-01-23T12:28:28")
-    openspace.setDefaultDashboard()
+
     openspace.setDefaultGuiSorting()
 
+    openspace.globebrowsing.loadWMSServersFromFile(
+        openspace.absPath("${DATA}/globebrowsing_servers.lua")
+    )
+
     openspace.markInterestingNodes({
-       "Curiosity", "Mars"
+        "Earth", "Mars", "Curiosity"
     })
-
-
 
     openspace.addVirtualProperty(
         "BoolProperty",
         "Show Trails",
-        "*Trail.renderable.Enabled",
+        "Scene.*Trail.renderable.Enabled",
         "Disable or enable all trails of the scene at the same time",
         true,
         nil,
         nil
     )
- 
+
     openspace.navigation.setCameraState({
-        Focus = CuriosityModelAsset.Curiosity.Name,
-        -- Focus = MarsAsset.Mars.Name,
-        Position = { 10.0, 10.0, 10.0 },
-        Rotation = { 0.0, -0.0, 0.0, 0.0 },
+        Focus = earthAsset.Earth.Identifier,
+        Position = { 0, 0, 0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
+
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 end)
 
 asset.onDeinitialize(function ()
+    sceneHelper.unbindKeys(Keybindings)
+
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+
     openspace.removeInterestingNodes({
-    	"Curiosity", "Mars"
+        "Earth", "Mars", "Curiosity"
     })
 end)

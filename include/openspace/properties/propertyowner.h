@@ -55,11 +55,23 @@ public:
     static const char URISeparator = '.';
 
     struct PropertyOwnerInfo {
-        std::string name;
+        std::string identifier;
+        std::string guiName = "";
         std::string description = "";
     };
 
-    /// The constructor initializing the PropertyOwner's name to <code>""</code>
+    /**
+     * The constructor of PropertyOwner.
+     *
+     * \param info the PropertyOwnerInfo struct that contains the
+     * #PropertyOwnerInfo::identifier, #PropertyOwnerInfo::guiName, and
+     * #PropertyOwnerInfo::description of this PropertyOwner.
+     *
+     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
+     * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any
+     *      <code>.</code>
+     */
+
     PropertyOwner(PropertyOwnerInfo info);
 
     /**
@@ -69,20 +81,40 @@ public:
     virtual ~PropertyOwner();
 
     /**
-     * Sets the name for this PropertyOwner. If the PropertyOwner does not have an owner
-     * itself, the name must be globally unique. If the PropertyOwner has an owner, the
-     * name must be unique to the owner (including the owner's properties). No uniqueness
-     * check will be preformed here, but rather in the PropertyOwner::addProperty and
-     * PropertyOwner::addPropertySubOwner methods).
-     * \param name The name of this PropertyOwner. It may not contain any <code>.</code>s
+     * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
+     * owner itself, the identifier must be globally unique. If the PropertyOwner has an
+     * owner, the identifier must be unique to the owner (including the owner's
+     * properties). No uniqueness check will be preformed here, but rather in the
+     * PropertyOwner::addProperty and PropertyOwner::addPropertySubOwner methods).
+     *
+     * \param identifier The identifier of this PropertyOwner. It must not contain any
+     *        <code>.</code>s or whitespaces
+     *
+     * \pre \p identifier must not contain any whitespaces
+     * \pre \p identifier must not contain any <code>.</code>
      */
-    void setName(std::string name);
+    void setIdentifier(std::string identifier);
 
     /**
-     * Returns the name of this PropertyOwner.
-     * \return The name of this PropertyOwner
+     * Returns the identifier of this PropertyOwner.
+     * \return The identifier of this PropertyOwner
      */
-    std::string name() const;
+    std::string identifier() const;
+
+    /**
+     * Sets the user-facing name of this PropertyOwner. This name does not have to be
+     * unique, but it is recommended to be.
+     *
+     * \param guiName The new user-facing name for this PropertyOwner
+     */
+    void setGuiName(std::string guiName);
+
+    /**
+     * Returns the current user-facing name for this PropertyOwner.
+     *
+     * \return The current user-facing name for this PropertyOwner
+     */
+    const std::string& guiName() const;
 
     void setDescription(std::string description);
 
@@ -91,12 +123,14 @@ public:
     /**
      * Returns a list of all Propertys directly owned by this PropertyOwner. This list not
      * include Propertys owned by other sub-owners.
+     *
      * \return A list of all Propertys directly owned by this PropertyOwner
      */
     std::vector<Property*> properties() const;
 
     /**
      * Returns a list of all Propertys directly or indirectly owned by this PropertyOwner.
+     *
      * \return A list of all Propertys directly or indirectly owned by this PropertyOwner
      */
     std::vector<Property*> propertiesRecursive() const;
@@ -239,13 +273,18 @@ public:
      */
     void removeTag(const std::string& tag);
 
+
+protected:
+    /// The unique identifier of this PropertyOwner
+    std::string _identifier;
+    /// The user-facing GUI name for this PropertyOwner
+    std::string _guiName;
+    /// The description for this PropertyOwner
+    std::string _description;
+
 private:
     std::string generateJson() const override;
 
-    /// The name of this PropertyOwner
-    std::string _name;
-    /// The description for this PropertyOwner
-    std::string _description;
     /// The owner of this PropertyOwner
     PropertyOwner* _owner;
     /// A list of all registered Property's

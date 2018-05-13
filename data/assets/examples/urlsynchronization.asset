@@ -3,15 +3,15 @@
 local assetHelper = asset.require("util/asset_helper")
 
 asset.syncedResource({
-    Type = "UrlSynchronization",
     Name = "Example Single",
+    Type = "UrlSynchronization",
     Identifier = "example_single",
     Url = "http://celestrak.com/NORAD/elements/geo.txt"
 })
 
 asset.syncedResource({
-    Type = "UrlSynchronization",
     Name = "Example Multiple",
+    Type = "UrlSynchronization",
     Identifier = "example_multiple",
     Url = {
         "http://celestrak.com/NORAD/elements/stations.txt",
@@ -20,23 +20,31 @@ asset.syncedResource({
 })
 
 asset.syncedResource({
-    Type = "UrlSynchronization",
     Name = "Example Large",
+    Type = "UrlSynchronization",
     Identifier = "example_large",
     Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
     Override = true
 })
 
 asset.syncedResource({
-    Type = "UrlSynchronization",
     Name = "Example Medium",
+    Type = "UrlSynchronization",
     Identifier = "example_medium",
     Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
     Override = true
 })
 
 asset.syncedResource({
-    Type = "UrlSynchronization",
     Name = "Example No ident",
+    Type = "UrlSynchronization",
     Url = "http://ipv4.download.thinkbroadband.com/5MB.zip"
+})
+
+asset.syncedResource({
+    Name = "Example No Hash",
+    Type = "UrlSynchronization",
+    Identifier = "no_hash",
+    Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
+    UseHash = false
 })

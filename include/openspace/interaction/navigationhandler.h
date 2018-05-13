@@ -29,6 +29,8 @@
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
+#include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -63,7 +65,7 @@ public:
     void updateCamera(double deltaTime);
 
     // Accessors
-    ghoul::Dictionary getCameraStateDictionary();
+    ghoul::Dictionary cameraStateDictionary();
     SceneGraphNode* focusNode() const;
     glm::dvec3 focusNodeToCameraVector() const;
     glm::quat focusNodeToCameraRotation() const;
@@ -74,9 +76,34 @@ public:
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void setJoystickInputStates(JoystickInputStates& states);
+
+    void setJoystickAxisMapping(
+        int axis,
+        JoystickCameraStates::AxisType mapping,
+        JoystickCameraStates::AxisInvert shouldInvert =
+            JoystickCameraStates::AxisInvert::No,
+        JoystickCameraStates::AxisNormalize shouldNormalize =
+            JoystickCameraStates::AxisNormalize::No
+    );
+
+    JoystickCameraStates::AxisInformation joystickAxisMapping(int axis) const;
+
+    void setJoystickAxisDeadzone(int axis, float deadzone);
+    float joystickAxisDeadzone(int axis) const;
+
+    void bindJoystickButtonCommand(int button, std::string command, JoystickAction action,
+        JoystickCameraStates::ButtonCommandRemote remote);
+
+    void clearJoystickButtonCommand(int button);
+    std::vector<std::string> joystickButtonCommand(int button) const;
+
+
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);

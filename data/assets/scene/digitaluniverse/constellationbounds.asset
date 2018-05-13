@@ -15,7 +15,7 @@ local zodiacs = {
 }
 
 local object = {
-    Name = "Constellation Bounds",
+    Identifier = "ConstellationBounds",
     Renderable = {
         Type = "RenderableConstellationBounds",
         Enabled = false,
@@ -34,7 +34,10 @@ local object = {
             Scale = 10e17
         }
     },
-    GuiPath = "/Milky Way/Constellations"
+    GUI = {
+        Name = "Constellation Bounds",
+        Path = "/Milky Way/Constellations"
+    }
 }
 
 

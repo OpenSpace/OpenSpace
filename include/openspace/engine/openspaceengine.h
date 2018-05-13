@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
 #define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -43,7 +44,7 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 class AssetManager;
-class ConfigurationManager;
+struct Configuration;
 class Dashboard;
 class DownloadManager;
 class GUI;
@@ -51,7 +52,7 @@ class LoadingScreen;
 class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
-class ParallelConnection;
+class ParallelPeer;
 class RenderEngine;
 class Scene;
 class SyncEngine;
@@ -60,9 +61,9 @@ class VirtualPropertyManager;
 class WindowWrapper;
 
 namespace interaction {
-    class NavigationHandler;
     class KeyBindingManager;
-}
+    class NavigationHandler;
+} // namespace interaction
 namespace gui { class GUI; }
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -75,12 +76,12 @@ namespace scripting {
 struct ShutdownInformation {
     // Whether the application is currently in shutdown mode (i.e. counting down the
     // timer and closing it at '0'
-    bool inShutdown;
+    bool inShutdown = false;
     // Total amount of time the application will wait before actually shutting down
-    float waitTime;
+    float waitTime = 0.f;
     // Current state of the countdown; if it reaches '0', the application will
     // close
-    float timer;
+    float timer = 0.f;
 };
 
 class OpenSpaceEngine {
@@ -94,7 +95,7 @@ public:
     static OpenSpaceEngine& ref();
     static bool isCreated();
 
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() = default;
 
     // callbacks
     void initialize();
@@ -111,6 +112,7 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double posX, double posY);
+    void setJoystickInputStates(interaction::JoystickInputStates& states);
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
@@ -119,8 +121,12 @@ public:
     void scheduleLoadSingleAsset(std::string assetPath);
     void toggleShutdownMode();
 
+    // On purpose, there is no function that returns a non-const reference to
+    // Configuration;  that guards us against anyone in the program changing the
+    // configuration values underneath our feet
+    const Configuration& configuration() const;
+
     // Guaranteed to return a valid pointer
-    ConfigurationManager& configurationManager();
     LuaConsole& console();
     AssetManager& assetManager();
     Dashboard& dashboard();
@@ -128,7 +134,7 @@ public:
     ModuleEngine& moduleEngine();
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
-    ParallelConnection& parallelConnection();
+    ParallelPeer& parallelPeer();
     RenderEngine& renderEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
@@ -193,7 +199,6 @@ private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
 
-    std::unique_ptr<LoadingScreen> createLoadingScreen();
     void loadSingleAsset(const std::string& assetPath);
     void gatherCommandlineArguments();
     void loadFonts();
@@ -203,8 +208,9 @@ private:
     void runGlobalCustomizationScripts();
     void configureLogging();
 
+    std::unique_ptr<Configuration> _configuration;
+
     // Components
-    std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
     std::unique_ptr<Dashboard> _dashboard;
@@ -212,7 +218,7 @@ private:
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<NetworkEngine> _networkEngine;
-    std::unique_ptr<ParallelConnection> _parallelConnection;
+    std::unique_ptr<ParallelPeer> _parallelPeer;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;
@@ -237,7 +243,7 @@ private:
         properties::StringProperty sourceControlInformation;
     } _versionInformation;
 
-    bool _hasScheduledAssetLoading;
+    bool _hasScheduledAssetLoading = false;
     std::string _scheduledAssetPathToLoad;
 
     struct {
@@ -265,7 +271,9 @@ private:
 
     // The first frame might take some more time in the update loop, so we need to know to
     // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
-    bool _isFirstRenderingFirstFrame;
+    bool _isFirstRenderingFirstFrame = true;
+
+    glm::dvec2 _mousePosition;
 
     static OpenSpaceEngine* _engine;
 };

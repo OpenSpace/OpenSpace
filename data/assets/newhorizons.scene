@@ -13,6 +13,7 @@ asset.require('scene/solarsystem/missions/newhorizons/newhorizons')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
 
 -- Custom Keybindings
 local Keybindings = {
@@ -101,7 +102,7 @@ local Keybindings = {
     },
     {
         Key = "l",
-        Command = propertyHelper.invert('Scene.Labels.renderable.Enabled'),
+        Command = propertyHelper.fadeInOut('Scene.Labels.renderable.Opacity', 2.0),
         Documentation = "Toggles the visibility of the labels for the New Horizons instruments.",
         Local = false
     },
@@ -131,27 +132,32 @@ local Keybindings = {
 
 local NewHorizonsAsset = asset.require('scene/solarsystem/missions/newhorizons/model')
 
-asset.onInitialize(function ()
-    openspace.time.setTime("2015-07-14T08:00:00.00")
-    sceneHelper.bindKeys(Keybindings)
-
-    openspace.setDefaultDashboard()
-    openspace.dashboard.addDashboardItem({
+assetHelper.registerDashboardItems(asset, {
+    {
         Type = "DashboardItemSpacing",
+        Identifier = "NewHorizonsSpacing",
+        GuiName = "New Horizons Spacing",
         Spacing = 25
-    })
-
-    openspace.dashboard.addDashboardItem({
+    },
+    {
         Type = "DashboardItemDistance",
+        Identifier = "NewHorizonsPlutoDistance",
+        GuiName = "New Horizons Pluto Distance",
         SourceType = "Node",
         SourceNodeName = "NewHorizons",
         DestinationType = "Node Surface",
         DestinationNodeName = "Pluto"
-    })
+    },
+    {
+        Type = "DashboardItemInstruments",
+        Identifier = "NewHorizonsInstruments",
+        GuiName = "NewHorizons Instruments",
+    }
+})
 
-    openspace.dashboard.addDashboardItem({
-        Type = "DashboardItemInstruments"
-    })
+asset.onInitialize(function ()
+    openspace.time.setTime("2015-07-14T08:00:00.00")
+    sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultGuiSorting()
 
@@ -177,7 +183,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = NewHorizonsAsset.NewHorizons.Name,
+        Focus = NewHorizonsAsset.NewHorizons.Identifier,
         Position = { 4662120063743.592773, 1263245003503.724854, -955413856565.788086 },
         Rotation = { 0.683224, -0.165934, 0.701234, 0.118073 },
     })

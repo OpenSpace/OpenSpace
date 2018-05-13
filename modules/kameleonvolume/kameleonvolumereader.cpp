@@ -114,7 +114,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                 volumeCoords[2]);
         };
 
-    auto sample = [this, &variable, &interpolate](glm::vec3 volumeCoords) {
+    auto sample = [&variable, &interpolate](glm::vec3 volumeCoords) {
         return interpolate(variable, volumeCoords);
     };
 
@@ -324,6 +324,10 @@ float KameleonVolumeReader::elapsedTime() const {
 
 std::string KameleonVolumeReader::simulationEnd() const {
     return _model->getGlobalAttribute("end_time").getAttributeString();
+}
+
+std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const {
+    return _model->getNativeUnit(variable);
 }
 
 std::string KameleonVolumeReader::time() const {

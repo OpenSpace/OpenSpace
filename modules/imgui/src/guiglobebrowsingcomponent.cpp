@@ -53,7 +53,7 @@ namespace {
 namespace openspace::gui {
 
 GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
-    : GuiPropertyComponent("GlobeBrowsing")
+    : GuiPropertyComponent("GlobeBrowsing", "Globe Browsing")
 {}
 
 void GuiGlobeBrowsingComponent::render() {
@@ -80,7 +80,8 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
-                return !(n->renderable() && n->renderable()->name() == "RenderableGlobe");
+                Renderable* r = n->renderable();
+                return !r || r->identifier() != "RenderableGlobe";
             }
         ),
         nodes.end()
@@ -88,11 +89,40 @@ void GuiGlobeBrowsingComponent::render() {
     std::sort(
         nodes.begin(),
         nodes.end(),
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) { return lhs->name() < rhs->name(); }
+        [module](SceneGraphNode* lhs, SceneGraphNode* rhs) {
+            bool lhsHasUrl = module->hasUrlInfo(lhs->identifier());
+            bool rhsHasUrl = module->hasUrlInfo(rhs->identifier());
+
+            if (lhsHasUrl && !rhsHasUrl) {
+                return true;
+            }
+            if (!lhsHasUrl && rhsHasUrl) {
+                return false;
+            }
+
+            return lhs->guiName() < rhs->guiName();
+        }
     );
+
+
+    auto firstWithoutUrl = std::find_if(
+        nodes.begin(),
+        nodes.end(),
+        [module](SceneGraphNode* n) {
+            return !module->hasUrlInfo(n->identifier());
+        }
+    );
+    nodes.insert(firstWithoutUrl, nullptr);
+
     std::string nodeNames;
     for (SceneGraphNode* n : nodes) {
-        nodeNames += n->name() + '\0';
+        // Add separator between nodes with URL and nodes without
+        if (n) {
+            nodeNames += n->identifier() + '\0';
+        }
+        else {
+            nodeNames += std::string("===== =====") + '\0';
+        }
     }
 
     int iNode = -1;
@@ -104,7 +134,7 @@ void GuiGlobeBrowsingComponent::render() {
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = focus->name();
+            _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
         }
     }
@@ -113,7 +143,7 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.cbegin(),
             nodes.cend(),
             [this](SceneGraphNode* lhs) {
-                return lhs->name() == _currentNode;
+                return lhs && (lhs->identifier() == _currentNode);
             }
         );
         iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
@@ -127,7 +157,7 @@ void GuiGlobeBrowsingComponent::render() {
         const SceneGraphNode* const focus = OsEng.navigationHandler().focusNode();
         auto it = std::find(nodes.cbegin(), nodes.cend(), focus);
         if (it != nodes.end()) {
-            _currentNode = focus->name();
+            _currentNode = focus->identifier();
             iNode = static_cast<int>(std::distance(nodes.cbegin(), it));
             nodeChanged = true;
         }
@@ -138,7 +168,13 @@ void GuiGlobeBrowsingComponent::render() {
         // or if there are no nodes
         return;
     }
-    _currentNode = nodes[iNode]->name();
+
+    if (!nodes[iNode]) {
+        // The user selected the separator
+        return;
+    }
+
+    _currentNode = nodes[iNode]->identifier();
 
     if (nodeChanged) {
         _currentServer = "";
@@ -222,7 +258,7 @@ void GuiGlobeBrowsingComponent::render() {
 
     }
 
-    if (iServer == -1) {
+    if (iServer < 0) {
         return;
     }
     _currentServer = urlInfo[iServer].name;
@@ -296,16 +332,26 @@ void GuiGlobeBrowsingComponent::render() {
         auto addFunc = [this, &l](const std::string& type) {
             std::string layerName = l.name;
             std::replace(layerName.begin(), layerName.end(), '.', '-');
+            layerName.erase(
+                std::remove(layerName.begin(), layerName.end(), ' '),
+                layerName.end()
+            );
             OsEng.scriptEngine().queueScript(
                 fmt::format(
                     "openspace.globebrowsing.addLayer(\
                         '{}', \
                         '{}', \
-                        {{ Name = '{}', FilePath = '{}', Enabled = true }}\
+                        {{ \
+                            Identifier = '{}',\
+                            Name = '{}',\
+                            FilePath = '{}',\
+                            Enabled = true\
+                        }}\
                     );",
                     _currentNode,
                     type,
                     layerName,
+                    l.name,
                     l.url
                 ),
                 scripting::ScriptEngine::RemoteScripting::Yes

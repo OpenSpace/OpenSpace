@@ -521,10 +521,10 @@ std::string GlobeBrowsingModule::layerGroupNamesList() {
     std::string listLayerGroups("");
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
         listLayerGroups +=
-            globebrowsing::layergroupid::LAYER_GROUP_NAMES[i] + std::string(", ");
+            globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] + std::string(", ");
     }
     listLayerGroups +=
-        std::string(" and ") + globebrowsing::layergroupid::LAYER_GROUP_NAMES[
+        std::string(" and ") + globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[
             globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1];
     return listLayerGroups;
 }
@@ -627,6 +627,11 @@ GlobeBrowsingModule::urlInfo(const std::string& globe) const
     }
     return res;
 }
+
+bool GlobeBrowsingModule::hasUrlInfo(const std::string& globe) const {
+    return _urlList.find(globe) != _urlList.end();
+}
+
 
 #endif // GLOBEBROWSING_USE_GDAL
 

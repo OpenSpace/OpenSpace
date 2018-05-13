@@ -1,66 +1,80 @@
 local assetHelper = asset.require('util/asset_helper')
 local kernels = asset.require('./kernels')
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+--local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
-
-local CuriosityPosition = {
-    Name = "CuriosityPosition",
+local correctRotation = {
+    Identifier = "correctRotation",
     Parent = "MarsBarycenter",
+    Transform = {
+        Rotation = {
+          Type = "SpiceRotation",
+          SourceFrame = "IAU_MARS",  
+          DestinationFrame = "J2000"
+        }
+    }
+}
+
+
+--translate out to mars surface
+local centerMars = {
+    Identifier = "centerMars",
+    Parent = correctRotation.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
-            Target = "MSL_ROVER",
-            Observer = "MARS BARYCENTER",
-            Kernels = kernels.CuriosityKernels
-        },
-        --Rotation = {
-        --    Type = "SpiceRotation",
-        --    SourceFrame = "MSL_ROVER",
-        --    DestinationFrame = "MARS BARYCENTER"
-        --}
-        Scale = {
-             Type = "StaticScale",
-             Scale = 10.0
+            Target = "MSL",                 
+            Observer = "MARS",
+            Frame = "J2000",                        
+            Kernels = kernels.CuriosityKernels          
         }
-    },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    }
 }
 
-local RoverLocation = {
-    Name = "RoverLocation",
-    Parent = "CuriosityPosition",
-    --Transform = {
-    --    Translation = {
-    --        Type = "SpiceTranslation",
-    --        Target = "MARS SCIENCE LABORATORY",
-    --        Observer = "MSL_ROVER",
-    --        Kernels = kernels.CuriosityKernels
-    --    }
-    --},
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+
+local landingSite = {
+    Identifier = "landingSite",
+    Parent =  centerMars.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MSL",
+            Observer = "MSL_LANDING_SITE",
+            Frame = "MSL_TOPO",                     
+            Kernels = kernels.CuriosityKernels          
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 
 ---- ROBOTIC ARM RA ----
 
 local RA_Base_Location = {
-    Name = "RA_Base_Location",
-    Parent = RoverLocation.Name,
+    Identifier = "RA_Base_Location",
+    Parent = landingSite.Identifier,
     Transform = {   
         Translation = {
             Type = "StaticTranslation",
             Position = { 1.111, -0.4525, -0.106 }
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER",
+            DestinationFrame = "MSL_RA_BASE"
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 --AZ
 local RA_Shoulder_AZ_Location = {
-    Name = "RA_Shoulder_AZ_Location",
-    Parent = RA_Base_Location.Name,
+    Identifier = "RA_Shoulder_AZ_Location",
+    Parent = RA_Base_Location.Identifier,
     Transform = {   
         Rotation = {
             Type = "SpiceRotation",
@@ -69,13 +83,15 @@ local RA_Shoulder_AZ_Location = {
             Kernels = kernels.CuriosityKernels
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
---EL
+----EL
 local RA_Shoulder_EL_Location = {
-    Name = "RA_Shoulder_EL_Location",
-    Parent = RA_Shoulder_AZ_Location.Name,
+    Identifier = "RA_Shoulder_EL_Location",
+    Parent = RA_Shoulder_AZ_Location.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -87,13 +103,16 @@ local RA_Shoulder_EL_Location = {
             Type = "StaticTranslation",
             Position = {0.15, 0.2, 0.0}
         }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
 }
 
 --ELBOW
 local RA_Elbow_Location = {
-    Name = "RA_Elbow_Location",
-    Parent = RA_Shoulder_EL_Location.Name,
+    Identifier = "RA_Elbow_Location",
+    Parent = RA_Shoulder_EL_Location.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -106,13 +125,15 @@ local RA_Elbow_Location = {
             Position = {0.83, -0.2, 0.0 }
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 --WRIST
 local RA_Wrist_Location = {
-    Name = "RA_Wrist_Location",
-    Parent = RA_Elbow_Location.Name,
+    Identifier = "RA_Wrist_Location",
+    Parent = RA_Elbow_Location.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -125,14 +146,16 @@ local RA_Wrist_Location = {
             Position = {0.77, 0.13, 0.035}
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 
 --TURRET
 local RA_Turret_Location = {
-    Name = "RA_Turret_Location",
-    Parent = RA_Wrist_Location.Name,
+    Identifier = "RA_Turret_Location",
+    Parent = RA_Wrist_Location.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -145,34 +168,36 @@ local RA_Turret_Location = {
             Position = {0.0, 0.04, -0.15}
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 --MAHLI
 local RA_Mahli_Location = {
-    Name = "RA_Mahli_Location",
-    Parent = RA_Turret_Location.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    Identifier = "RA_Mahli_Location",
+    Parent = RA_Turret_Location.Identifier
 }
 
 
 ---- MASTCAM RSM ----
-
 local RSM_ZERO_AZ_Location = {
-    Name = "RSM_ZERO_AZ_Location",
-    Parent = RoverLocation.Name,
+    Identifier = "RSM_ZERO_AZ_Location",
+    Parent = landingSite.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
             Position = {0.702, 0.575, -0.526}
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 local RSM_AZ_Location = {
-    Name = "RSM_AZ_Location",
-    Parent = RSM_ZERO_AZ_Location.Name,
+    Identifier = "RSM_AZ_Location",
+    Parent = RSM_ZERO_AZ_Location.Identifier,
     Transform = {
         Rotation = {
             Type = "SpiceRotation",
@@ -181,18 +206,22 @@ local RSM_AZ_Location = {
             Kernels = kernels.CuriosityKernels
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 local RSM_ZERO_EL_Location = {
-    Name = "RSM_ZERO_EL_Location",
-    Parent = RSM_AZ_Location.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    Identifier = "RSM_ZERO_EL_Location",
+    Parent = RSM_AZ_Location.Identifier,
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 local RSM_EL_Location = {
-    Name = "RSM_EL_Location",
-    Parent = RSM_ZERO_EL_Location.Name,
+    Identifier = "RSM_EL_Location",
+    Parent = RSM_ZERO_EL_Location.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -205,7 +234,9 @@ local RSM_EL_Location = {
             Kernels = kernels.CuriosityKernels
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 
@@ -213,8 +244,8 @@ local RSM_EL_Location = {
 ---- HIGH GAIN ANTENNA HGA ----
 
 local HGA_AZ_Location = {
-    Name = "HGA_AZ_Location",
-    Parent = RoverLocation.Name,
+    Identifier = "HGA_AZ_Location",
+    Parent = landingSite.Identifier,
     Transform = {   
         Rotation = {
             Type = "SpiceRotation",
@@ -227,12 +258,14 @@ local HGA_AZ_Location = {
             Position = {-0.46, -0.47, -0.55}
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 local HGA_EL_Location = {
-    Name = "HGA_EL_Location",
-    Parent = HGA_AZ_Location.Name,
+    Identifier = "HGA_EL_Location",
+    Parent = HGA_AZ_Location.Identifier,
     Transform = {   
         Rotation = {
             Type = "SpiceRotation",
@@ -245,33 +278,42 @@ local HGA_EL_Location = {
             Position = {0.0, 0.0, -0.17}
         }
     },
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 ---- SAM & HEMIN ----
 
 local SAM_Cover_1_Location = {
-    Name = "SAM_Cover_1_Location",
-    Parent = RoverLocation.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    Identifier = "SAM_Cover_1_Location",
+    Parent = landingSite.Identifier,
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 local SAM_Cover_2_Location = {
-    Name = "SAM_Cover_2_Location",
-    Parent = RoverLocation.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    Identifier = "SAM_Cover_2_Location",
+    Parent = landingSite.Identifier,
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 local CHEMIN_Location = {
-    Name = "CHEMIN_Location",
-    Parent = RoverLocation.Name,
-    GuiPath = "/Solar System/Planets/Mars/Curiosity "
+    Identifier = "CHEMIN_Location",
+    Parent = landingSite.Identifier,
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
 }
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
-    CuriosityPosition,
-    RoverLocation,
+    correctRotation,
+    centerMars,
+    landingSite,
     RA_Base_Location,
     RA_Shoulder_AZ_Location,
     RA_Shoulder_EL_Location,
@@ -279,7 +321,6 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Wrist_Location,
     RA_Turret_Location,
     RA_Mahli_Location,
-
     RSM_ZERO_AZ_Location,
     RSM_AZ_Location,
     RSM_ZERO_EL_Location,
@@ -291,5 +332,4 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     SAM_Cover_2_Location,
     CHEMIN_Location
 })
-
 

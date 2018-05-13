@@ -49,18 +49,18 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
 void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
                                  const ghoul::Dictionary& configuration)
 {
-    std::string upperName = name();
+    std::string upperIdentifier = identifier();
     std::transform(
-        upperName.begin(),
-        upperName.end(),
-        upperName.begin(),
+        upperIdentifier.begin(),
+        upperIdentifier.end(),
+        upperIdentifier.begin(),
         [](char v) { return static_cast<char>(toupper(v)); }
     );
 
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
         std::string(ModuleBaseToken) +
-        upperName +
+        upperIdentifier +
         ghoul::filesystem::FileSystem::TokenClosingBraces;
 
     std::string path = modulePath();
@@ -71,8 +71,16 @@ void OpenSpaceModule::initialize(const ModuleEngine* moduleEngine,
     internalInitialize(configuration);
 }
 
+void OpenSpaceModule::initializeGL() {
+    internalInitializeGL();
+}
+
 void OpenSpaceModule::deinitialize() {
     internalDeinitialize();
+}
+
+void OpenSpaceModule::deinitializeGL() {
+    internalDeinitializeGL();
 }
 
 std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
@@ -92,21 +100,21 @@ ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() cons
 }
 
 std::string OpenSpaceModule::modulePath() const {
-    std::string moduleName = name();
+    std::string moduleIdentifier = identifier();
     std::transform(
-        moduleName.begin(),
-        moduleName.end(),
-        moduleName.begin(),
+        moduleIdentifier.begin(),
+        moduleIdentifier.end(),
+        moduleIdentifier.begin(),
         [](char v) { return static_cast<char>(tolower(v)); }
     );
 
     // First try the internal module directory
-    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleName))) {
-        return absPath("${MODULES}/" + moduleName);
+    if (FileSys.directoryExists(absPath("${MODULES}/" + moduleIdentifier))) {
+        return absPath("${MODULES}/" + moduleIdentifier);
     }
     else { // Otherwise, it might be one of the external directories
         for (const char* dir : ModulePaths) {
-            const std::string path = std::string(dir) + '/' + moduleName;
+            const std::string path = std::string(dir) + '/' + moduleIdentifier;
             if (FileSys.directoryExists(absPath(path))) {
                 return absPath(path);
             }
@@ -115,7 +123,7 @@ std::string OpenSpaceModule::modulePath() const {
 
     // If we got this far, neither the internal module nor any of the external modules fit
     throw ghoul::RuntimeError(
-        "Could not resolve path for module '" + name() + "'",
+        "Could not resolve path for module '" + identifier() + "'",
         "OpenSpaceModule"
     );
 }
@@ -126,6 +134,10 @@ const ModuleEngine* OpenSpaceModule::moduleEngine() const {
 
 void OpenSpaceModule::internalInitialize(const ghoul::Dictionary&) {}
 
+void OpenSpaceModule::internalInitializeGL() {}
+
 void OpenSpaceModule::internalDeinitialize() {}
+
+void OpenSpaceModule::internalDeinitializeGL() {}
 
 } // namespace openspace

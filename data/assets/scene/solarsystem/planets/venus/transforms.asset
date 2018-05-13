@@ -5,8 +5,8 @@ asset.require("spice/base")
 
 
 local VenusBarycenter = {
-    Name = "VenusBarycenter",
-    Parent = transforms.SolarSystemBarycenter.Name,
+    Identifier = "VenusBarycenter",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
     Transform = {
         Translation = {
             Type = "SpiceTranslation",
@@ -14,7 +14,10 @@ local VenusBarycenter = {
             Observer = "SUN"
         }
     },
-    GuiPath = "/Solar System/Planets/Venus"
+    GUI = {
+        Name = "Venus Barycenter",
+        Path = "/Solar System/Planets/Venus"
+    }
 }
 
 

@@ -41,33 +41,33 @@
 #include <modules/marsrover/scale/luascale.h>
 #include <modules/marsrover/scale/staticscale.h>
 
-
-//#include <../data/assets/scene/solarsystem/planets/mars/rovers/kernels.asset>
-
 namespace openspace {
 
-    MarsroverModule::MarsroverModule() : OpenSpaceModule("Marsrover") {}    //changed by kristin: original was MarsRoverModule::Name instead of "Marsrover"
+ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
 
-    void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
+MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
 
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "Renderable factory was not created");
+void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
+    ghoul_assert(fRenderable, "Renderable factory was not created");    
+    fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
+}
 
-        fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
+void MarsroverModule::internalDeinitializeGL() {
+    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
+}
 
-    }
-
-    std::vector<documentation::Documentation> MarsroverModule::documentations() const {
-        return {
-            RenderableMarsrover::Documentation(),
-        };
-    }
+std::vector<documentation::Documentation> MarsroverModule::documentations() const {
+    return {
+        RenderableMarsrover::Documentation()
+    };
+}
 
 
-    std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
-        return {
-            ScreenSpaceDashboard::luaLibrary()
-        };
-    }
+std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
+    return {
+        ScreenSpaceDashboard::luaLibrary()
+    };
+}
 
 } // namespace openspace

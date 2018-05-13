@@ -31,9 +31,9 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
@@ -69,7 +69,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                         &(OsEng.windowWrapper()),
                         &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
-                        &(OsEng.parallelConnection()),
+                        &(OsEng.parallelPeer()),
                         &(OsEng.console()),
                         &(OsEng.dashboard())
                     };
@@ -79,9 +79,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
 
             gui._screenSpaceProperty.setSource(
                 []() {
-                   const std::vector<ScreenSpaceRenderable*>& ssr =
-                       OsEng.renderEngine().screenSpaceRenderables();
-                   return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
+                    return OsEng.renderEngine().screenSpaceOwner().propertySubOwners();
                 }
             );
 
