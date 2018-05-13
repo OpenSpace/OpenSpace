@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/interaction/joystickcamerastates.h>
+#include <numeric>
+
 namespace openspace::luascriptfunctions {
 
 int restoreCameraStateFromFile(lua_State* L) {
@@ -86,6 +89,132 @@ int resetCameraDirection(lua_State* L) {
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
+}
+
+int bindJoystickAxis(lua_State* L) {
+    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindJoystickAxis");
+
+    int axis = static_cast<int>(lua_tonumber(L, 1));
+    std::string axisType = lua_tostring(L, 2);
+
+    bool shouldInvert = false;
+    if (n > 2) {
+        shouldInvert = lua_toboolean(L, 3);
+    }
+
+    bool shouldNormalize = false;
+    if (n > 3) {
+        shouldNormalize = lua_toboolean(L, 4);
+    }
+
+    OsEng.navigationHandler().setJoystickAxisMapping(
+        axis,
+        ghoul::from_string<interaction::JoystickCameraStates::AxisType>(axisType),
+        interaction::JoystickCameraStates::AxisInvert(shouldInvert),
+        interaction::JoystickCameraStates::AxisNormalize(shouldNormalize)
+    );
+
+
+    return 0;
+}
+
+int joystickAxis(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::joystickAxis");
+
+    int axis = static_cast<int>(lua_tonumber(L, 1));
+
+    using AI = interaction::JoystickCameraStates::AxisInformation;
+    AI info = OsEng.navigationHandler().joystickAxisMapping(axis);
+
+    lua_settop(L, 0);
+    lua_pushstring(L, std::to_string(info.type).c_str());
+    lua_pushboolean(L, info.invert);
+    lua_pushboolean(L, info.normalize);
+
+    return 3;
+}
+
+int setJoystickAxisDeadzone(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::setJoystickAxisDeadzone");
+
+    int axis = static_cast<int>(lua_tointeger(L, 1));
+    float deadzone = static_cast<float>(lua_tonumber(L, 2));
+
+    OsEng.navigationHandler().setJoystickAxisDeadzone(axis, deadzone);
+
+    return 0;
+}
+
+int joystickAxisDeadzone(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::setJoystickAxisDeadzone");
+
+    int axis = static_cast<int>(lua_tointeger(L, 1));
+
+    float deadzone = OsEng.navigationHandler().joystickAxisDeadzone(axis);
+
+    lua_pushnumber(L, deadzone);
+    return 1;
+}
+
+int bindJoystickButton(lua_State* L) {
+    int n = ghoul::lua::checkArgumentsAndThrow(L, { 2, 4 }, "lua::bindJoystickButton");
+
+    int button = static_cast<int>(lua_tonumber(L, 1));
+    std::string command = lua_tostring(L, 2);
+
+    interaction::JoystickAction action = interaction::JoystickAction::Press;
+    if (n >= 3) {
+        action = ghoul::from_string<interaction::JoystickAction>(lua_tostring(L, 3));
+    }
+
+    bool isRemote = true;
+    if (n == 4) {
+        isRemote = lua_toboolean(L, 4);
+    }
+
+    OsEng.navigationHandler().bindJoystickButtonCommand(
+        button,
+        std::move(command),
+        action,
+        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote)
+    );
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int clearJoystickButton(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
+
+    int button = static_cast<int>(lua_tonumber(L, 1));
+
+    OsEng.navigationHandler().clearJoystickButtonCommand(button);
+
+    lua_settop(L, 0);
+    return 0;
+}
+
+int joystickButton(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::bindJoystickButton");
+
+    int button = static_cast<int>(lua_tonumber(L, 1));
+
+    std::vector<std::string> cmds = OsEng.navigationHandler().joystickButtonCommand(
+        button
+    );
+
+    std::string cmd = std::accumulate(
+        cmds.begin(),
+        cmds.end(),
+        std::string(),
+        [](std::string lhs, std::string rhs) {
+            return lhs + ";" + rhs;
+        }
+    );
+
+    lua_settop(L, 0);
+    lua_pushstring(L, cmd.c_str());
+    return 1;
 }
 
 } // namespace openspace::luascriptfunctions

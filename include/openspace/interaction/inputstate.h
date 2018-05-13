@@ -25,15 +25,15 @@
 #ifndef __OPENSPACE_CORE___INPUTSTATE___H__
 #define __OPENSPACE_CORE___INPUTSTATE___H__
 
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-
 #include <ghoul/glm.h>
-
 #include <list>
 
 namespace openspace::interaction {
 
+// This class represents the global input state of interaction devices
 class InputState {
 public:
     InputState() = default;
@@ -45,22 +45,34 @@ public:
     void mousePositionCallback(double mouseX, double mouseY);
     void mouseScrollWheelCallback(double mouseScrollDelta);
 
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier>>& getPressedKeys() const;
-    const std::list<MouseButton>& getPressedMouseButtons() const;
-    glm::dvec2 getMousePosition() const;
-    double getMouseScrollDelta() const;
+    void setJoystickInputStates(JoystickInputStates& states);
 
+    // Accessors
+    const std::list<std::pair<Key, KeyModifier>>& pressedKeys() const;
     bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
     bool isKeyPressed(Key key) const;
+
+    const std::list<MouseButton>& pressedMouseButtons() const;
+    glm::dvec2 mousePosition() const;
+    double mouseScrollDelta() const;
     bool isMouseButtonPressed(MouseButton mouseButton) const;
 
+    const JoystickInputStates& joystickInputStates() const;
+    float joystickAxis(int i) const;
+    bool joystickButton(int i) const;
+
 private:
-    // Input from keyboard and mouse
+    // Input from keyboard
     std::list<std::pair<Key, KeyModifier>> _keysDown;
+
+    // Input from mouse
     std::list<MouseButton> _mouseButtonsDown;
     glm::dvec2 _mousePosition;
     double _mouseScrollDelta;
+
+    // Input from joysticks
+    // The memory is owned by the outer most main (apps/OpenSpace/main.cpp right now)
+    JoystickInputStates* _joystickInputStates = nullptr;
 };
 
 } // namespace openspace::interaction

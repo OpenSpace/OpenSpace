@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/other/statscollector.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 
@@ -44,6 +43,7 @@ namespace culling { class ChunkCuller; }
 class Chunk;
 class ChunkNode;
 class ChunkRenderer;
+class Ellipsoid;
 struct Geodetic2;
 class LayerManager;
 class RenderableGlobe;
@@ -51,7 +51,7 @@ class RenderableGlobe;
 class ChunkedLodGlobe : public Renderable {
 public:
     ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
-        std::shared_ptr<LayerManager> layerManager);
+        std::shared_ptr<LayerManager> layerManager, Ellipsoid& ellipsoid);
     ~ChunkedLodGlobe();
 
     bool isReady() const override;

@@ -22,56 +22,79 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MOUSESTATE___H__
-#define __OPENSPACE_CORE___MOUSESTATE___H__
-
-#include <openspace/interaction/delayedvariable.h>
-#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/joystickinputstate.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/invariants.h>
+#include <algorithm>
+#include <map>
+#include <numeric>
 
 namespace openspace::interaction {
 
-struct MouseState {
-    MouseState(double scaleFactor);
-    void setFriction(double friction);
-    void setVelocityScaleFactor(double scaleFactor);
+float JoystickInputStates::axis(int axis) const {
+    ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
-    glm::dvec2 previousPosition;
-    DelayedVariable<glm::dvec2, double> velocity;
-};
+    float res = std::accumulate(
+        begin(),
+        end(),
+        0.f,
+        [axis](float value, const JoystickInputState& state) {
+            if (state.isConnected) {
+                value += state.axes[axis];
+            }
+            return value;
+        }
+    );
 
-class MouseStates {
-public:
-    /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
-     */
-    MouseStates(double sensitivity, double velocityScaleFactor);
-    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
+    // If multiple joysticks are connected, we might get values outside the -1,1 range by
+    // summing them up
+    glm::clamp(res, -1.f, 1.f);
+    return res;
+}
 
-    glm::dvec2 globalRotationMouseVelocity() const;
-    glm::dvec2 localRotationMouseVelocity() const;
-    glm::dvec2 truckMovementMouseVelocity() const;
-    glm::dvec2 localRollMouseVelocity() const;
-    glm::dvec2 globalRollMouseVelocity() const;
+bool JoystickInputStates::button(int button, JoystickAction action) const {
+    ghoul_precondition(button >= 0, "button must be 0 or positive");
 
-private:
-    double _sensitivity;
-
-    MouseState _globalRotationMouseState;
-    MouseState _localRotationMouseState;
-    MouseState _truckMovementMouseState;
-    MouseState _localRollMouseState;
-    MouseState _globalRollMouseState;
-};
+    bool res = std::any_of(
+        begin(),
+        end(),
+        [button, action](const JoystickInputState& state) {
+            return state.isConnected ? (state.buttons[button] == action) : false;
+        }
+    );
+    return res;
+}
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___MOUSESTATE___H__
+namespace std {
+
+std::string to_string(openspace::interaction::JoystickAction action) {
+    switch (action) {
+        case openspace::interaction::JoystickAction::Idle:    return "Idle";
+        case openspace::interaction::JoystickAction::Press:   return "Press";
+        case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
+        case openspace::interaction::JoystickAction::Release: return "Release";
+        default:                                              return "";
+    }
+}
+
+} // namespace std
+
+namespace ghoul {
+
+template <>
+openspace::interaction::JoystickAction from_string(const std::string& string) {
+    static const std::map<std::string, openspace::interaction::JoystickAction> Map = {
+        { "Idle",    openspace::interaction::JoystickAction::Idle },
+        { "Press",   openspace::interaction::JoystickAction::Press },
+        { "Repeat",  openspace::interaction::JoystickAction::Repeat },
+        { "Release", openspace::interaction::JoystickAction::Release }
+    };
+
+    return Map.at(string);
+
+}
+
+} // namespace ghoul

@@ -206,7 +206,7 @@ struct TimeKeyframe {
         // Timestamp
         size = sizeof(_timestamp);
         memcpy(&_timestamp, buffer.data() + offset, size);
-        offset += size;
+        // offset += size;
     };
 };
 

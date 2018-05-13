@@ -121,11 +121,11 @@ bool RenderableExplorationPath::initialize(globebrowsing::RenderableGlobe* globe
 bool RenderableExplorationPath::deinitialize() {
  RenderEngine& renderEngine = OsEng.renderEngine();
  if (_pathShader) {
-  renderEngine.removeRenderProgram(_pathShader);
+  renderEngine.removeRenderProgram(_pathShader.get());
   _pathShader = nullptr;
  }
  if (_siteShader) {
-  renderEngine.removeRenderProgram(_siteShader);
+  renderEngine.removeRenderProgram(_siteShader.get());
   _siteShader = nullptr;
  }
 

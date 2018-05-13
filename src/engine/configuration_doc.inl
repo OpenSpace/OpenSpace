@@ -27,22 +27,20 @@
 
 namespace openspace {
 
-documentation::Documentation ConfigurationManager::Documentation() {
-    using namespace documentation;
-
-    return {
-        "OpenSpace Configuration",
-        "openspace_configuraion",
+using namespace documentation;
+documentation::Documentation Configuration::Documentation = {
+    "OpenSpace Configuration",
+    "openspace_configuraion",
+    {
         {
-        {
-            ConfigurationManager::KeyConfigSgct,
+            KeySGCTConfig,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
             Optional::No,
             "The SGCT configuration file that determines the window and view frustum "
             "settings that are being used when OpenSpace is started."
         },
         {
-            ConfigurationManager::KeyConfigAsset,
+            KeyAsset,
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"
             ),
@@ -53,7 +51,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the Scene documentation."
         },
         {
-            ConfigurationManager::KeyGlobalCustomizationScripts,
+            KeyGlobalCustomizationScripts,
             new StringListVerifier,
             Optional::Yes,
             "This value names a list of scripts that get executed after initialization "
@@ -61,7 +59,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "such as a global rebinding of keys from the default."
         },
         {
-            ConfigurationManager::KeyPaths,
+            KeyPaths,
             new StringListVerifier,
             Optional::No,
             "A list of paths that are automatically registered with the file system. "
@@ -69,15 +67,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "in all other configuration files or scripts."
         },
         {
-            
-            ConfigurationManager::KeyCachePath,
-            new StringVerifier,
-            Optional::No,
-            "The path to be used as a cache folder. If per scene caching is enabled, the "
-            "name of the scene will be appended to this folder"
-        },
-        {
-            ConfigurationManager::KeyFonts,
+            KeyFonts,
             new StringListVerifier("Font paths loadable by FreeType"),
             Optional::Yes,
             "A list of all fonts that will automatically be loaded on startup. Each "
@@ -85,23 +75,23 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "for a font."
         },
         {
-            ConfigurationManager::KeyLogging,
+            KeyLogging,
             new TableVerifier({
                 {
-                    ConfigurationManager::PartLogDir,
+                    KeyLogDir,
                     new StringVerifier,
                     Optional::Yes,
                     "The directory for logs. Default value is \"${BASE}\""
                 },
                 {
-                    ConfigurationManager::PartLogPerformancePrefix,
+                    KeyPerformancePrefix,
                     new StringVerifier,
                     Optional::Yes,
                     "A string to prefix PerformanceMeasurement logfiles."
                     "Default value is \"PM-\""
                 },
                 {
-                    ConfigurationManager::PartLogLevel,
+                    KeyLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
                         { "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None" }
@@ -113,7 +103,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     "severities is: Debug < Info < Warning < Error < Fatal < None."
                 },
                 {
-                    ConfigurationManager::PartImmediateFlush,
+                    KeyImmediateFlush,
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether error messages will be displayed immediately "
@@ -123,7 +113,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     "logged."
                 },
                 {
-                    ConfigurationManager::PartLogs,
+                    KeyLogs,
                     new TableVerifier({
                         {
                             "*",
@@ -139,7 +129,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     "be used additionally."
                 },
                 {
-                    ConfigurationManager::PartCapabilitiesVerbosity,
+                    KeyCapabilitiesVerbosity,
                     new StringInListVerifier(
                         // List from OpenspaceEngine::initialize
                         { "None", "Minimal", "Default", "Full" }
@@ -155,22 +145,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "other information."
         },
         {
-            ConfigurationManager::KeyLuaDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The filename that will be created on startup containing the documentation "
-            "of available Lua functions that can be executed in scene files or per "
-            "console. Any existing file will be silently overwritten."
-        },
-        {
-            ConfigurationManager::KeyPropertyDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing a list of all "
-            "properties in the scene. Any existing file will be silently overwritten."
-        },
-        {
-            ConfigurationManager::KeyScriptLog,
+            KeyScriptLog,
             new StringVerifier,
             Optional::Yes,
             "The file that will be created on startup containing the log of all Lua "
@@ -178,78 +153,84 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the results from previous runs) will be silently overwritten."
         },
         {
-            ConfigurationManager::KeyKeyboardShortcuts,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing the list of all "
-            "keyboard bindings with their respective Lua scripts. For each key, it "
-            "mentions which scripts will be executed in the current session."
-        },
-        {
-            ConfigurationManager::KeyDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing this documentation. Any "
-            "previous file in this location will be silently overwritten."
-        },
-        {
-            ConfigurationManager::KeyFactoryDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing the factory "
-            "documentation which shows the different types of objects that can be "
-            "created in the current application configuration. Any previous file in this "
-            "location will be silently overritten."
-        },
-        {
-            ConfigurationManager::KeyRequireSocketAuthentication,
-            new BoolVerifier,
-            Optional::Yes,
-            "If socket connections should be authenticated or not before they are allowed to "
-            "get or set information. Defaults to `true`."
-        },
-        {
-            ConfigurationManager::KeyServerPasskey,
-                new StringVerifier,
-                Optional::Yes,
-                "Passkey to limit server access. Used to authorize incoming connections."
-        },
-        {
-            ConfigurationManager::KeyServerClientAddressWhitelist,
-                new StringVerifier,
-                Optional::Yes,
-                "String containing white listed client IP addresses that won't need to be"
-                "authorized with the server. Space separated"
-        },
-        {
-            ConfigurationManager::KeySceneLicenseDocumentation,
-            new StringVerifier,
-            Optional::Yes,
-            "The file that will be created on startup containing the scene license "
-            "information. Any previous file in this location will be silently "
-            "overwritten."
-        },
-        {
-            ConfigurationManager::KeyLauncher,
+            KeyDocumentation,
             new TableVerifier({
                 {
-                    ConfigurationManager::PartLogLevel,
-                    new StringInListVerifier(
-                    // List from logmanager.cpp::levelFromString
-                    { "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None" }
-                    ),
+                    KeyLuaDocumentation,
+                    new StringVerifier,
                     Optional::Yes,
-                    "The severity of log messages that will be displayed. Only "
-                    "messages of the selected level or higher will be displayed. All "
-                    "levels below will be silently discarded. The order of "
-                    "severities is: Debug < Info < Warning < Error < Fatal < None."
+                    "The filename that will be created on startup containing the "
+                    "documentation of available Lua functions that can be executed in "
+                    "scene files or per console. Any existing file will be silently "
+                    "overwritten."
+                },
+                {
+                    KeyPropertyDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing a list of all "
+                    "properties in the scene. Any existing file will be silently "
+                    "overwritten."
+                },
+                {
+                    KeyKeyboardShortcuts,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing the list of all "
+                    "keyboard bindings with their respective Lua scripts. For each key, "
+                    "it mentions which scripts will be executed in the current session."
+                },
+                {
+                    KeyDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing this "
+                    "documentation. Any previous file in this location will be silently "
+                    "overwritten."
+                },
+                {
+                    KeyFactoryDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing the factory "
+                    "documentation which shows the different types of objects that can "
+                    "be created in the current application configuration. Any previous "
+                    "file in this location will be silently overritten."
+                },
+                {
+                    KeyLicenseDocumentation,
+                    new StringVerifier,
+                    Optional::Yes,
+                    "The file that will be created on startup containing the scene "
+                    "license information. Any previous file in this location will be "
+                    "silently overwritten."
                 },
             }),
             Optional::Yes,
-            "Configurations for the Launcher & syncing application."
+            "All documentations that are generated at application startup."
         },
         {
-            ConfigurationManager::KeyShutdownCountdown,
+            KeyRequireSocketAuthentication,
+            new BoolVerifier,
+            Optional::Yes,
+            "If socket connections should be authenticated or not before they are "
+            "allowed to get or set information. Defaults to 'true'."
+        },
+        {
+            KeyServerPasskey,
+            new StringVerifier,
+            Optional::Yes,
+            "Passkey to limit server access. Used to authorize incoming connections."
+        },
+        {
+            KeyClientAddressWhitelist,
+            new StringListVerifier,
+            Optional::Yes,
+            "String containing white listed client IP addresses that won't need to be"
+            "authorized with the server. Space separated"
+        },
+        {
+            KeyShutdownCountdown,
             new DoubleGreaterEqualVerifier(0.0),
             Optional::Yes,
             "The countdown that the application will wait between pressing ESC and "
@@ -257,7 +238,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "shutdown is aborted."
         },
         {
-            ConfigurationManager::KeyPerSceneCache,
+            KeyPerSceneCache,
             new BoolVerifier,
             Optional::Yes,
             "If this is set to 'true', the name of the scene will be appended to the "
@@ -266,7 +247,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the caches should be retained. This value defaults to 'false'."
         },
         {
-            ConfigurationManager::KeyOnScreenTextScaling,
+            KeyOnScreenTextScaling,
             new StringInListVerifier({
                 // Values from RenderEngine:updateRenderer
                 "window", "framebuffer"
@@ -278,7 +259,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "rendering resolution ('framebuffer'). This value defaults to 'window'."
         },
         {
-            ConfigurationManager::KeyRenderingMethod,
+            KeyRenderingMethod,
             new StringInListVerifier(
                 // List from RenderEngine::setRendererFromString
                 { "Framebuffer", "ABuffer" }
@@ -288,7 +269,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "support for at least OpenGL 4.3"
         },
         {
-            ConfigurationManager::KeyDisableMasterRendering,
+            KeyDisableRenderingOnMaster,
             new BoolVerifier,
             Optional::Yes,
             "Toggles whether the master in a multi-application setup should be rendering "
@@ -296,7 +277,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "the master computer does not have the resources to render a scene."
         },
         {
-            ConfigurationManager::KeyDisableSceneOnMaster,
+            KeyDisableSceneOnMaster,
             new BoolVerifier,
             Optional::Yes,
             "Toggles whether a potential scene transformation matrix, for example as "
@@ -306,7 +287,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "default is false."
         },
         {
-            ConfigurationManager::KeyScreenshotUseDate,
+            KeyScreenshotUseDate,
             new BoolVerifier,
             Optional::Yes,
             "Toggles whether screenshots generated by OpenSpace contain the date when "
@@ -315,22 +296,28 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "individual frames pass beyond local midnight."
         },
         {
-            ConfigurationManager::KeyHttpProxy,
+            KeyHttpProxy,
             new TableVerifier({
                 {
-                    ConfigurationManager::PartHttpProxyAddress,
+                    KeyActivate,
+                    new BoolVerifier,
+                    Optional::Yes,
+                    "Determines whether the proxy is being used"
+                },
+                {
+                    KeyAddress,
                     new StringVerifier,
                     Optional::No,
                     "The address of the http proxy"
                 },
                 {
-                    ConfigurationManager::PartHttpProxyPort,
-                    new StringVerifier,
+                    KeyPort,
+                    new IntVerifier,
                     Optional::No,
                     "The port of the http proxy"
                 },
                 {
-                    ConfigurationManager::PartHttpProxyAuthentication,
+                    KeyAuthentication,
                     new StringInListVerifier(
                         { "basic", "ntlm", "digest", "any" }
                     ),
@@ -338,13 +325,13 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     "The authentication method of the http proxy"
                 },
                 {
-                    ConfigurationManager::PartHttpProxyUser,
+                    KeyUser,
                     new StringVerifier,
                     Optional::Yes,
                     "The user of the http proxy"
                 },
                 {
-                    ConfigurationManager::PartHttpProxyPassword,
+                    KeyPassword,
                     new StringVerifier,
                     Optional::Yes,
                     "The password of the http proxy"
@@ -355,36 +342,36 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "No proxy will be used if this is left out."
         },
         {
-            ConfigurationManager::KeyOpenGLDebugContext,
+            KeyOpenGLDebugContext,
             new TableVerifier({
                 {
-                    ConfigurationManager::PartActivate,
+                    KeyActivate,
                     new BoolVerifier,
                     Optional::No,
                     "Determines whether the OpenGL context should be a debug context"
                 },
                 {
-                    ConfigurationManager::PartSynchronous,
+                    KeySynchronous,
                     new BoolVerifier,
                     Optional::Yes,
                     "Determines whether the OpenGL debug callbacks are performed "
-                    "synchronously. If set to <True> the callbacks are in the same thread "
-                    "as the context and in the scope of the OpenGL function that "
+                    "synchronously. If set to <True> the callbacks are in the same "
+                    "thread as the context and in the scope of the OpenGL function that "
                     "triggered the message. The default value is <True>."
                 },
                 {
-                    ConfigurationManager::PartFilterIdentifier,
+                    KeyFilterIdentifier,
                     new TableVerifier({{
                         "*",
                         new TableVerifier({
                             {
-                                ConfigurationManager::PartFilterIdentifierIdentifier,
+                                KeyIdentifier,
                                 new IntVerifier,
                                 Optional::No,
                                 "The identifier that is to be filtered"
                             },
                             {
-                                ConfigurationManager::PartFilterIdentifierSource,
+                                KeySource,
                                 new StringInListVerifier({
                                     // Taken from ghoul::debugcontext.cpp
                                     "API", "Window System", "Shader Compiler",
@@ -394,7 +381,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                                 "The source of the identifier to be filtered"
                             },
                             {
-                                ConfigurationManager::PartFilterIdentifierType,
+                                KeyType,
                                 new StringInListVerifier({
                                     // Taken from ghoul::debugcontext.cpp
                                     "Error", "Deprecated", "Undefined", "Portability",
@@ -412,7 +399,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     "A list of OpenGL debug messages identifiers that are filtered"
                 },
                 {
-                    ConfigurationManager::PartFilterSeverity,
+                    KeyFilterSeverity,
                     new TableVerifier({
                         {
                             "*",
@@ -431,7 +418,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "Determines the settings for the creation of an OpenGL debug context.",
         },
         {
-            ConfigurationManager::KeyCheckOpenGLState,
+            KeyCheckOpenGLState,
             new BoolVerifier,
             Optional::Yes,
             "Determines whether the OpenGL state is checked after each OpenGL function "
@@ -439,7 +426,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "OpenGL errors easier. This defaults to 'false'."
         },
         {
-            ConfigurationManager::KeyLogEachOpenGLCall,
+            KeyLogEachOpenGLCall,
             new BoolVerifier,
             Optional::Yes,
             "Determines whether each OpenGL call that happens should be logged using the "
@@ -448,7 +435,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "defaults to 'false'."
         },
         {
-            ConfigurationManager::KeyUseMultithreadedInitialization,
+            KeyUseMultithreadedInitialization,
             new BoolVerifier,
             Optional::Yes,
             "This value determines whether the initialization of the scene graph should "
@@ -457,17 +444,17 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "debugging support."
         },
         {
-            ConfigurationManager::KeyLoadingScreen,
+            KeyLoadingScreen,
             new TableVerifier({
                 {
-                    ConfigurationManager::PartShowMessage,
+                    KeyShowMessage,
                     new BoolVerifier,
                     Optional::Yes,
                     "If this value is set to 'true', the loading screen will display a "
                     "message information about the current phase the loading is in."
                 },
                 {
-                    ConfigurationManager::PartShowNodeNames,
+                    KeyShowNodeNames,
                     new BoolVerifier,
                     Optional::Yes,
                     "If this value is set to 'true', the loading screen will display a "
@@ -475,7 +462,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     "loaded, initialized)."
                 },
                 {
-                    ConfigurationManager::PartShowProgressbar,
+                    KeyShowProgressbar,
                     new BoolVerifier,
                     Optional::Yes,
                     "If this value is set to 'true', the loading screen will contain a "
@@ -487,14 +474,12 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "displayed while the scene graph is created and initialized."
         },
         {
-            ConfigurationManager::KeyModuleConfigurations,
+            KeyModuleConfigurations,
             new TableVerifier,
             Optional::Yes,
             "Configurations for each module"
         }
-        }
-    };
-}
-
+    }
+};
 
 } // namespace openspace

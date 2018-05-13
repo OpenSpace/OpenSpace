@@ -91,8 +91,8 @@ namespace {
         ghoul_assert(p, "Passed progress information is nullptr");
         ProgressInformation* i = static_cast<ProgressInformation*>(p);
         ghoul_assert(i, "Passed pointer is not a ProgressInformation");
-        ghoul_assert(i->future, "FileFuture is not initialized");
-        ghoul_assert(i->callback, "Callback pointer is nullptr");
+        ghoul_assert(i && i->future, "FileFuture is not initialized");
+        ghoul_assert(i && i->callback, "Callback pointer is nullptr");
 
         if (i->future->abortDownload) {
             i->future->isAborted = true;

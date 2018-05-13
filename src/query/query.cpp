@@ -70,6 +70,17 @@ std::vector<properties::Property*> allProperties() {
         p.end()
     );
 
+    // The virtual property manager is not part of the rootProperty owner since it cannot
+    // have an identifier or the "regex as identifier" trick would not work
+    std::vector<properties::Property*> p2 =
+        OsEng.virtualPropertyManager().propertiesRecursive();
+
+    properties.insert(
+        properties.end(),
+        p2.begin(),
+        p2.end()
+    );
+
     return properties;
 }
 

@@ -30,14 +30,13 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace {
-    const char* keyFrame = "Frame";
-    const char* keyRadii = "Radii";
-    const char* keySegmentsPerPatch = "SegmentsPerPatch";
-    const char* keyLayers = "Layers";
-    const char* keyShadowGroup = "ShadowGroup";
-    const char* keyShadowSource = "Source";
-    const char* keyShadowCaster = "Caster";
-    const std::string _loggerCat = "RenderableGlobe";
+    constexpr const char* keyFrame = "Frame";
+    constexpr const char* keyRadii = "Radii";
+    constexpr const char* keySegmentsPerPatch = "SegmentsPerPatch";
+    constexpr const char* keyLayers = "Layers";
+    constexpr const char* keyShadowGroup = "ShadowGroup";
+    constexpr const char* keyShadowSource = "Source";
+    constexpr const char* keyShadowCaster = "Caster";
 
     static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
@@ -233,8 +232,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
         *this,
         patchSegments,
-        _layerManager
-        );
+        _layerManager,
+        _ellipsoid
+    );
     //_pointGlobe = std::make_shared<PointGlobe>(*this);
 
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
