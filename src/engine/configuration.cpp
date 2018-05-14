@@ -43,7 +43,6 @@ namespace {
     constexpr const char* KeyAsset = "Asset";
     constexpr const char* KeyGlobalCustomizationScripts = "GlobalCustomizationScripts";
     constexpr const char* KeyPaths = "Paths";
-    constexpr const char* KeyPathsCACHE = "Paths.CACHE";
     constexpr const char* KeyFonts = "Fonts";
     constexpr const char* KeyLogging = "Logging";
     constexpr const char* KeyLogDir = "LogDir";

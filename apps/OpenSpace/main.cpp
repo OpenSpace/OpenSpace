@@ -315,7 +315,7 @@ void mainInitFunc() {
 
     std::string screenshotPath = "${SCREENSHOTS}";
     std::string screenshotNames = "OpenSpace";
-    
+
     if (OsEng.configuration().shouldUseScreenshotDate) {
         std::time_t now = std::time(nullptr);
         std::tm* nowTime = std::localtime(&now);
@@ -631,7 +631,6 @@ int main_main(int argc, char** argv) {
     std::pair<int, int> glVersion = supportedOpenGLVersion();
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
-    // @CLEANUP:  Replace the return valua with throwing an exception --abock
     std::vector<std::string> sgctArguments;
     bool requestQuit = false;
     try {

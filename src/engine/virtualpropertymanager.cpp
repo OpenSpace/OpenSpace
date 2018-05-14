@@ -28,8 +28,12 @@
 
 namespace openspace {
 
+// The VirtualPropertyManager cannot have an identifier (and thus cannot be part of
+// another PropertyOwner) as otherwise the regex-as-name trick would no longer work. I
+// don't particular like this implementation, but it's what we got for now;  I'm open to
+// replacing it with a better mechanism
 VirtualPropertyManager::VirtualPropertyManager()
-    : properties::PropertyOwner({ "VirtualPropertyManager" })
+    : properties::PropertyOwner({ "" })
 {}
 
 void VirtualPropertyManager::addProperty(std::unique_ptr<properties::Property> prop) {

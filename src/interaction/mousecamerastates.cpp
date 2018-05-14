@@ -32,7 +32,9 @@ MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFac
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
 {}
 
-void MouseCameraStates::updateStateFromInput(const InputState& inputState, double deltaTime) {
+void MouseCameraStates::updateStateFromInput(const InputState& inputState,
+                                             double deltaTime)
+{
     glm::dvec2 mousePosition = inputState.mousePosition();
 
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);

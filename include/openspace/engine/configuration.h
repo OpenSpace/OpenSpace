@@ -39,7 +39,9 @@ struct Configuration {
     std::string windowConfiguration = "${CONFIG}/single.xml";
     std::string asset = "default";
     std::vector<std::string> globalCustomizationScripts;
-    std::map<std::string, std::string> pathTokens;
+    std::map<std::string, std::string> pathTokens = {
+        { "CACHE" , "CACHE = \"${BASE}/cache\"" }
+    };
     std::map<std::string, std::string> fonts;
 
     struct Logging {
@@ -83,14 +85,14 @@ struct Configuration {
 
     std::string onScreenTextScaling = "window";
     bool usePerSceneCache = false;
-    
+
     bool isRenderingOnMasterDisabled = false;
     bool isSceneTranslationOnMasterDisabled = false;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
     std::string renderingMethod = "Framebuffer";
-    
+
     struct OpenGLDebugContext {
         bool isActive = false;
         bool isSynchronous = true;
@@ -128,6 +130,8 @@ struct Configuration {
 std::string findConfiguration(const std::string& filename = "openspace.cfg");
 
 Configuration loadConfigurationFromFile(const std::string& filename);
+
+void parseLuaState(Configuration& configuration);
 
 } // namespace openspace
 

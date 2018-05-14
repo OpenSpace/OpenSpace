@@ -26,30 +26,29 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/htmllog.h>
 #include <ghoul/logging/textlog.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 
 namespace {
-    const char* keyType = "Type";
-    const char* keyFilename = "File";
-    const char* keyAppend = "Append";
-    const char* keyTimeStamping = "TimeStamping";
-    const char* keyDateStamping = "DateStamping";
-    const char* keyCategoryStamping = "CategoryStamping";
-    const char* keyLogLevelStamping = "LogLevelStamping";
-    const char* keyLogLevel = "LogLevel";
+    constexpr const char* KeyType = "Type";
+    constexpr const char* KeyFilename = "File";
+    constexpr const char* KeyAppend = "Append";
+    constexpr const char* KeyTimeStamping = "TimeStamping";
+    constexpr const char* KeyDateStamping = "DateStamping";
+    constexpr const char* KeyCategoryStamping = "CategoryStamping";
+    constexpr const char* KeyLogLevelStamping = "LogLevelStamping";
+    constexpr const char* KeyLogLevel = "LogLevel";
 
-    const char* valueHtmlLog = "html";
-    const char* valueTextLog = "Text";
+    constexpr const char* ValueHtmlLog = "html";
+    constexpr const char* ValueTextLog = "Text";
 
-    const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
-    const char* CssPath = "${WEB}/log/style.css";
-    const char* JsPath = "${WEB}/log/script.js";
+    constexpr const char* BootstrapPath = "${WEB}/common/bootstrap.min.css";
+    constexpr const char* CssPath = "${WEB}/log/style.css";
+    constexpr const char* JsPath = "${WEB}/log/script.js";
 } // namespace
 
 namespace openspace {
@@ -62,50 +61,50 @@ documentation::Documentation LogFactoryDocumentation() {
         "core_logfactory",
         {
             {
-                keyType,
+                KeyType,
                 new StringInListVerifier({
                     // List from createLog
-                    valueTextLog, valueHtmlLog
+                    ValueTextLog, ValueHtmlLog
                 }),
                 Optional::No,
                 "The type of the new log to be generated."
             },
             {
-                keyFilename,
+                KeyFilename,
                 new StringVerifier,
                 Optional::No,
                 "The filename to which the log will be written."
             },
             {
-                keyAppend,
+                KeyAppend,
                 new BoolVerifier,
                 Optional::Yes,
                 "Determines whether the file will be cleared at startup or if the "
                 "contents will be appended to previous runs."
             },
             {
-                keyTimeStamping,
+                KeyTimeStamping,
                 new BoolVerifier,
                 Optional::Yes,
                 "Determines whether the log entires should be stamped with the time at "
                 "which the message was logged."
             },
             {
-                keyDateStamping,
+                KeyDateStamping,
                 new BoolVerifier,
                 Optional::Yes,
                 "Determines whether the log entries should be stamped with the date at "
                 "which the message was logged."
             },
             {
-                keyCategoryStamping,
+                KeyCategoryStamping,
                 new BoolVerifier,
                 Optional::Yes,
                 "Determines whether the log entries should be stamped with the "
                 "category that creates the log message."
             },
             {
-                keyLogLevelStamping,
+                KeyLogLevelStamping,
                 new BoolVerifier,
                 Optional::Yes,
                 "Determines whether the log entries should be stamped with the log level "
@@ -125,33 +124,33 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     );
 
     // 'type' and 'filename' are required keys
-    std::string type = dictionary.value<std::string>(keyType);
-    std::string filename = absPath(dictionary.value<std::string>(keyFilename));
+    std::string type = dictionary.value<std::string>(KeyType);
+    std::string filename = absPath(dictionary.value<std::string>(KeyFilename));
 
     // the rest are optional
     bool append = true;
-    if (dictionary.hasKeyAndValue<bool>(keyAppend)) {
-        append = dictionary.value<bool>(keyAppend);
+    if (dictionary.hasKeyAndValue<bool>(KeyAppend)) {
+        append = dictionary.value<bool>(KeyAppend);
     }
     bool timeStamp = true;
-    if (dictionary.hasKeyAndValue<bool>(keyTimeStamping)) {
-        timeStamp = dictionary.value<bool>(keyTimeStamping);
+    if (dictionary.hasKeyAndValue<bool>(KeyTimeStamping)) {
+        timeStamp = dictionary.value<bool>(KeyTimeStamping);
     }
     bool dateStamp = true;
-    if (dictionary.hasKeyAndValue<bool>(keyDateStamping)) {
-        dateStamp = dictionary.value<bool>(keyDateStamping);
+    if (dictionary.hasKeyAndValue<bool>(KeyDateStamping)) {
+        dateStamp = dictionary.value<bool>(KeyDateStamping);
     }
     bool categoryStamp = true;
-    if (dictionary.hasKeyAndValue<bool>(keyCategoryStamping)) {
-        categoryStamp = dictionary.value<bool>(keyCategoryStamping);
+    if (dictionary.hasKeyAndValue<bool>(KeyCategoryStamping)) {
+        categoryStamp = dictionary.value<bool>(KeyCategoryStamping);
     }
     bool logLevelStamp = true;
-    if (dictionary.hasKeyAndValue<bool>(keyLogLevelStamping)) {
-        logLevelStamp = dictionary.value<bool>(keyLogLevelStamping);
+    if (dictionary.hasKeyAndValue<bool>(KeyLogLevelStamping)) {
+        logLevelStamp = dictionary.value<bool>(KeyLogLevelStamping);
     }
     std::string logLevel;
-    if (dictionary.hasKeyAndValue<std::string>(keyLogLevel)) {
-        logLevel = dictionary.value<std::string>(keyLogLevel);
+    if (dictionary.hasKeyAndValue<std::string>(KeyLogLevel)) {
+        logLevel = dictionary.value<std::string>(KeyLogLevel);
     }
 
     using Append = ghoul::logging::TextLog::Append;
@@ -160,18 +159,18 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     using CategoryStamping = ghoul::logging::Log::CategoryStamping;
     using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
 
-    if (type == valueHtmlLog) {
+    if (type == ValueHtmlLog) {
         std::vector<std::string> cssFiles{absPath(BootstrapPath), absPath(CssPath)};
         std::vector<std::string> jsFiles{absPath(JsPath)};
 
         if (logLevel.empty()) {
             return std::make_unique<ghoul::logging::HTMLLog>(
                 filename,
-                append ? Append::Yes : Append::No,
-                timeStamp ? TimeStamping::Yes : TimeStamping::No,
-                dateStamp ? DateStamping::Yes : DateStamping::No,
-                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
+                Append(append),
+                TimeStamping(timeStamp),
+                DateStamping(dateStamp),
+                CategoryStamping(categoryStamp),
+                LogLevelStamping(logLevelStamp),
                 cssFiles,
                 jsFiles
             );
@@ -179,35 +178,36 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
         else {
             return std::make_unique<ghoul::logging::HTMLLog>(
                 filename,
-                append ? Append::Yes : Append::No,
-                timeStamp ? TimeStamping::Yes : TimeStamping::No,
-                dateStamp ? DateStamping::Yes : DateStamping::No,
-                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
-                cssFiles, jsFiles,
+                Append(append),
+                TimeStamping(timeStamp),
+                DateStamping(dateStamp),
+                CategoryStamping(categoryStamp),
+                LogLevelStamping(logLevelStamp),
+                cssFiles,
+                jsFiles,
                 ghoul::logging::levelFromString(logLevel)
-                );
+            );
         }
     }
-    else if (type == valueTextLog) {
+    else if (type == ValueTextLog) {
         if (logLevel.empty()) {
             return std::make_unique<ghoul::logging::TextLog>(
                 filename,
-                append ? Append::Yes : Append::No,
-                timeStamp ? TimeStamping::Yes : TimeStamping::No,
-                dateStamp ? DateStamping::Yes : DateStamping::No,
-                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
+                Append(append),
+                TimeStamping(timeStamp),
+                DateStamping(dateStamp),
+                CategoryStamping(categoryStamp),
+                LogLevelStamping(logLevelStamp)
             );
         }
         else {
             return std::make_unique<ghoul::logging::TextLog>(
                 filename,
-                append ? Append::Yes : Append::No,
-                timeStamp ? TimeStamping::Yes : TimeStamping::No,
-                dateStamp ? DateStamping::Yes : DateStamping::No,
-                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
+                Append(append),
+                TimeStamping(timeStamp),
+                DateStamping(dateStamp),
+                CategoryStamping(categoryStamp),
+                LogLevelStamping(logLevelStamp),
                 ghoul::logging::levelFromString(logLevel)
             );
         }

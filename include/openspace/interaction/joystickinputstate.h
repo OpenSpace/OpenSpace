@@ -52,9 +52,9 @@ enum class JoystickAction : uint8_t {
  */
 struct JoystickInputState {
     /// The maximum number of supported axes
-    static const int MaxAxes = 8;
+    static constexpr const int MaxAxes = 8;
     /// The maximum number of supported buttons
-    static const int MaxButtons = 32;
+    static constexpr const int MaxButtons = 32;
 
     /// Marks whether this joystick is connected. If this value is \c false, all other
     /// members of this struct are undefined
@@ -123,4 +123,4 @@ openspace::interaction::JoystickAction from_string(const std::string& str);
 
 } // namespace ghoul
 
-#endif // __OPENSPACE_CORE___JOYSTICKSTATE___H__
+#endif // __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
