@@ -26,6 +26,8 @@ local object = {
         ScaleFactor = 395.0,
         File = speck .. "/kepler.speck",
         Texture = textures .. "/halo.png",
+        CorrectionSizeEndDistance = 15.86,
+        CorrectionSizeFactor = 8.59,
         Unit = "pc"
     },
     GUI = {

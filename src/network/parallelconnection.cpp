@@ -27,7 +27,7 @@
 #include <cstdint>
 
 namespace {
-const uint32_t ProtocolVersion = 3;
+const uint32_t ProtocolVersion = 4;
 const char* _loggerCat = "ParallelConnection";
 } // namespace
 
