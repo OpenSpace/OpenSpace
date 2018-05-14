@@ -264,7 +264,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
         }
 
         // Store color values.
-        values[idx++] = magCol[i%nStars];
+        values[idx++] = magCol[i%nStars] == -999 ? 20.f : magCol[i%nStars];
         values[idx++] = tycho_b[i%nStars] - tycho_v[i%nStars];
 
         // Store velocity. Convert it to m/s with help by parallax.

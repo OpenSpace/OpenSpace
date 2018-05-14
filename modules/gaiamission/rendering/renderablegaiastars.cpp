@@ -1707,6 +1707,7 @@ int RenderableGaiaStars::readFitsFile(std::string filePath) {
 
         _octreeManager->insert(starValues);
     }
+    _octreeManager->sliceLodData();
     return fullData.size() / nReadValuesPerStar;
 }
 
@@ -1724,6 +1725,7 @@ int RenderableGaiaStars::readSpeckFile(std::string filePath) {
 
         _octreeManager->insert(starValues);
     }
+    _octreeManager->sliceLodData();
     return fullData.size() / nReadValuesPerStar;
 }
 
@@ -1753,6 +1755,7 @@ int RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
             //TODO: Filter?
             _octreeManager->insert(starValues);
         }
+        _octreeManager->sliceLodData();
 
         nReadStars = nValues / nReadValuesPerStar;
         fileStream.close();

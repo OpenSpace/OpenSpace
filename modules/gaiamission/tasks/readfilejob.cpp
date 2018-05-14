@@ -132,10 +132,10 @@ void ReadFileJob::execute() {
         values[idx++] = radiusInKiloParsec * sin(glm::radians(b_latitude[i])); // Pos Z
 
 
-        // Store magnitude values.
-        values[idx++] = std::isnan(meanMagG[i]) ? 0.f : meanMagG[i]; // Mean G-band Magnitude
-        //values[idx++] = std::isnan(meanMagBp[i]) ? 0.f : meanMagBp[i]; // Mean Bp-band Magnitude
-        //values[idx++] = std::isnan(meanMagRp[i]) ? 0.f : meanMagRp[i]; // Mean Rp-band Magnitude
+        // Store magnitude values. (Set default to high mag = low brightness)
+        values[idx++] = std::isnan(meanMagG[i]) ? 20.f : meanMagG[i]; // Mean G-band Magnitude
+        //values[idx++] = std::isnan(meanMagBp[i]) ? 20.f : meanMagBp[i]; // Mean Bp-band Magnitude
+        //values[idx++] = std::isnan(meanMagRp[i]) ? 20.f : meanMagRp[i]; // Mean Rp-band Magnitude
 
         // Store color values.
         values[idx++] = std::isnan(bp_rp[i]) ? 0.f : bp_rp[i]; // Bp-Rp Color

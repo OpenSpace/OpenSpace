@@ -136,6 +136,9 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
             , _inFileOrFolderPath));
     }
 
+    // Slice LOD data before writing to files.
+    _octreeManager->sliceLodData();
+
     LINFO("Writing octree to: " + _outFileOrFolderPath);
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
@@ -231,13 +234,16 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
                     if (maxVal > 5000) starsOutside5000++;
                 }
             }
-
             inFileStream.close();
         }
         else {
             LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
                 , inFilePath));
         }
+
+        // Slice LOD data.
+        LINFO("Slicing LOD data!");
+        _indexOctreeManager->sliceLodData(idx);
 
         progressCallback((idx + 1) * processOneFile / 2.f);
         nStars += nStarsInfile;

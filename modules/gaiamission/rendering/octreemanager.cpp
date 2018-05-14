@@ -83,6 +83,7 @@ void OctreeManager::initOctree(long long cpuRamBudget) {
         _root->Children[i]->posData = std::vector<float>();
         _root->Children[i]->colData = std::vector<float>();
         _root->Children[i]->velData = std::vector<float>();
+        _root->Children[i]->magOrder = std::multimap<float, int>();
         _root->Children[i]->isLeaf = true;
         _root->Children[i]->isLoaded = false;
         _root->Children[i]->bufferIndex = DEFAULT_INDEX;
@@ -131,6 +132,19 @@ void OctreeManager::insert(std::vector<float> starValues) {
     size_t index = getChildIndex(starValues[0], starValues[1], starValues[2]);
 
     insertInNode(_root->Children[index], starValues);
+}
+
+// Slices LOD data so only the MAX_STARS_PER_NODE brightest stars are stores in inner nodes.
+// If <branchIndex> is defined then only that branch will be sliced.
+void OctreeManager::sliceLodData(size_t branchIndex) {
+    if (branchIndex != 8) {
+        sliceNodeLodCache(_root->Children[branchIndex]);
+    }
+    else {
+        for (int i = 0; i < 7; ++i) {
+            sliceNodeLodCache(_root->Children[i]);
+        }
+    }
 }
 
 // Prints the whole tree structure, including number of stars per node.
@@ -699,12 +713,8 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
 
     if (node->isLeaf && node->numStars < MAX_STARS_PER_NODE) {
         // Node is a leaf and it's not yet full -> insert star.
-        node->numStars++;
-        auto posEnd = starValues.begin() + POS_SIZE;
-        auto colEnd = posEnd + COL_SIZE;
-        node->posData.insert(node->posData.end(), starValues.begin(), posEnd);
-        node->colData.insert(node->colData.end(), posEnd, colEnd);
-        node->velData.insert(node->velData.end(), colEnd, starValues.end());
+        storeStarData(node, starValues);
+
         if (depth > _totalDepth) {
             _totalDepth = depth;
         }
@@ -712,14 +722,8 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     }
     else if (node->isLeaf) {
         // Too many stars in leaf node, subdivide into 8 new nodes.
-        node->numStars = 0;
-
         // Create children and clean up parent.
         createNodeChildren(node);
-
-        // Construct an initial LOD cache in inner node for faster traversals during render.
-        auto tmpLodNode = std::make_shared<OctreeNode>();
-        constructLodCache(tmpLodNode);
 
         // Distribute stars from parent node into children. 
         for (size_t n = 0; n < MAX_STARS_PER_NODE; ++n) {
@@ -736,27 +740,11 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
             auto velEnd = velBegin + VEL_SIZE;
             tmpValues.insert(tmpValues.end(), velBegin, velEnd);
 
+            // Find out which child that will inherit the data and store it. 
             size_t index = getChildIndex(tmpValues[0], tmpValues[1], tmpValues[2],
                 node->originX, node->originY, node->originZ);
             insertInNode(node->Children[index], tmpValues, depth);
-            
-            // Check if we should keep this star in LOD cache. 
-            insertStarInLodCache(tmpLodNode, starValues);
         }
-        
-        // Copy LOD cache data from the first MAX_STARS_PER_NODE stars.
-        // Don't use LOD cache for our more shallow layers.
-        if (depth > FIRST_LOD_DEPTH) {
-            node->posData = std::move(tmpLodNode->posData);
-            node->colData = std::move(tmpLodNode->colData);
-            node->velData = std::move(tmpLodNode->velData);
-        }
-        else {
-            node->posData = std::vector<float>();
-            node->colData = std::vector<float>();
-            node->velData = std::vector<float>();
-        }
-        
     }
 
     // Node is an inner node, keep recursion going.
@@ -764,50 +752,62 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
     size_t index = getChildIndex(starValues[0], starValues[1], starValues[2],
         node->originX, node->originY, node->originZ);
 
-    // Determine if new star should be kept in our LOD cache. Don't add if chunk is full.
-    // Don't use LOD cache for our more shallow layers.
-    if (node->numStars < MAX_STARS_PER_NODE && depth > FIRST_LOD_DEPTH) {
-        insertStarInLodCache(node, starValues);
+    // Determine if new star should be kept in our LOD cache. 
+    // Keeps track of the MAX_STARS_PER_NODE brightest nodes in children. 
+    if (starValues[POS_SIZE] < (*std::prev(node->magOrder.end())).first ) {
+        storeStarData(node, starValues);
+
+        // Remove previous dimmest star at the back of ordered map.
+        node->magOrder.erase(std::prev(node->magOrder.end()));
     }
 
     return insertInNode(node->Children[index], starValues, ++depth);
 }
 
-// Private help function for insertInNode(). Constructs our LOD cache with 1 virtual star.
-void OctreeManager::constructLodCache(std::shared_ptr<OctreeNode> node) {
+// Slices LOD cache data to the MAX_STARS_PER_NODE brightest stars. This needs to be 
+// called after the last star has been inserted into Octree.
+void OctreeManager::sliceNodeLodCache(std::shared_ptr<OctreeNode> node) {
+    
+    // Slice stored LOD data in inner nodes.
+    if (!node->isLeaf) {
+        std::vector<float> tmpPos;
+        std::vector<float> tmpCol;
+        std::vector<float> tmpVel;
 
-    // Add this node's origin as the only value. 
-    // This will be used initially for comparisons in insertStarInLodCache().
-    std::vector<float> insertData(POS_SIZE, 0.f);
-    insertData[0] = node->originX;
-    insertData[1] = node->originY;
-    insertData[2] = node->originZ;
-    node->posData = std::move(std::vector<float>(insertData.begin(), insertData.end()));
-    node->colData = std::move(std::vector<float>(COL_SIZE, 0.f));
-    node->velData = std::move(std::vector<float>(VEL_SIZE, 0.f));
-    node->numStars++;
+        // Ordered map contain the MAX_STARS_PER_NODE brightest stars in all children!
+        for (auto &[absMag, placement] : node->magOrder) {
+            auto posBegin = node->posData.begin() + placement * POS_SIZE;
+            auto colBegin = node->colData.begin() + placement * COL_SIZE;
+            auto velBegin = node->velData.begin() + placement * VEL_SIZE;
+            tmpPos.insert(tmpPos.end(), posBegin, posBegin + POS_SIZE);
+            tmpCol.insert(tmpCol.end(), colBegin, colBegin + COL_SIZE);
+            tmpVel.insert(tmpVel.end(), velBegin, velBegin + VEL_SIZE);
+        }
+        node->posData = std::move(tmpPos);
+        node->colData = std::move(tmpCol);
+        node->velData = std::move(tmpVel);
+        node->numStars == node->magOrder.size(); // = MAX_STARS_PER_NODE
+    }
+    
 }
 
-// Private help function for insertInNode(). Determines if star should be stored in LOD.
-void OctreeManager::insertStarInLodCache(std::shared_ptr<OctreeNode> node,
+// Private help function for insertInNode(). Stores star data in node and keeps track of
+// the brightest stars in an ordered map.
+void OctreeManager::storeStarData(std::shared_ptr<OctreeNode> node,
     std::vector<float> starValues) {
-    
-    // Add star if it is further away from last inserted star with a set threshold.
-    std::vector<float> cachePosData(node->posData.end() - POS_SIZE, node->posData.end());
-    glm::vec3 lastCachePos(cachePosData[0], cachePosData[1], cachePosData[2]);
-    glm::vec3 starPos(starValues[0], starValues[1], starValues[2]);
-    float dist = glm::distance(lastCachePos, starPos);
-    
-    // Add star if it's more than a quarter of node's size away.
-    if (dist > node->halfDimension / 2.0) {
-        auto posEnd = starValues.begin() + POS_SIZE;
-        auto colEnd = posEnd + COL_SIZE;
-        node->posData.insert(node->posData.end(), starValues.begin(), posEnd);
-        node->colData.insert(node->colData.end(), posEnd, colEnd);
-        node->velData.insert(node->velData.end(), colEnd, starValues.end());
-        // Increase counter for inner node to keep track of total LOD stars stored.
-        node->numStars++;
-    }
+
+    // Insert star data at the back of vectors but store the position index in a map, sorted
+    // by magnitude. Inverse relation (i.e. a lower magnitude means a brighter star!) 
+    // so we can use the built-in weak ordering in map. LOD cache needs to be sliced later.
+    float mag = starValues[POS_SIZE];
+    node->magOrder.insert(std::make_pair(mag, node->numStars));
+    node->numStars++;
+
+    auto posEnd = starValues.begin() + POS_SIZE;
+    auto colEnd = posEnd + COL_SIZE;
+    node->posData.insert(node->posData.end(), starValues.begin(), posEnd);
+    node->colData.insert(node->colData.end(), posEnd, colEnd);
+    node->velData.insert(node->velData.end(), colEnd, starValues.end());
 }
 
 // Private help function for printStarsPerNode(). Recursively adds all nodes to the string.
@@ -1008,6 +1008,7 @@ void OctreeManager::createNodeChildren(std::shared_ptr<OctreeNode> node) {
         node->Children[i]->posData = std::vector<float>();
         node->Children[i]->colData = std::vector<float>();
         node->Children[i]->velData = std::vector<float>();
+        node->Children[i]->magOrder = std::multimap<float, int>();
         node->Children[i]->halfDimension = node->halfDimension / 2.f;
 
         // Calculate new origin.
