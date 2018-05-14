@@ -286,7 +286,7 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
     // Fetch all children nodes from found parent. Use multithreading to load files 
     // asynchronously! Detach thread from main execution so it can execute independently. 
     // Thread will then be destroyed when it has finished!
-    std::thread(&OctreeManager::fetchChildrenNodes, this, node, true).detach();
+    std::thread(&OctreeManager::fetchChildrenNodes, this, node, false).detach();
 }
 
 // Builds render data structure by traversing the Octree and checking for intersection 
