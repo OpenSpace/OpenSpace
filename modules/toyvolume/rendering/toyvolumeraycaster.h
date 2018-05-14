@@ -58,6 +58,7 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program) override;
+    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
 
     std::string getBoundsVsPath() const override;
     std::string getBoundsFsPath() const override;
@@ -69,6 +70,8 @@ public:
     void setTime(double time);
     void setStepSize(float time);
 private:
+    glm::dmat4 modelViewTransform(const RenderData& data);
+
     BoxGeometry _boundingBox;
     glm::vec4 _color;
     glm::mat4 _modelTransform;

@@ -16,7 +16,7 @@ local MercuryTrail = {
         },
         Color = { 0.6, 0.5, 0.5 },
         Period = 87.968,
-        Resolution = 100
+        Resolution = 1000
     },
     Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
     GUI = {
