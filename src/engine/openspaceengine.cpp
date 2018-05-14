@@ -858,23 +858,6 @@ void OpenSpaceEngine::loadFonts() {
             ));
         }
     }
-
-    try {
-        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess) {
-            LERROR("Error initializing default font renderer");
-        }
-
-        using FR = ghoul::fontrendering::FontRenderer;
-        FR::defaultRenderer().setFramebufferSize(_renderEngine->fontResolution());
-
-        FR::defaultProjectionRenderer().setFramebufferSize(
-            _renderEngine->renderingResolution()
-        );
-    }
-    catch (const ghoul::RuntimeError& err) {
-        LERRORC(err.component, err.message);
-    }
 }
 
 void OpenSpaceEngine::configureLogging(bool consoleLog) {

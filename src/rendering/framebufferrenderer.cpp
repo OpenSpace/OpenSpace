@@ -264,6 +264,10 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster& /*deferredcaste
 }
 
 void FramebufferRenderer::update() {
+    if (_dirtyMsaaSamplingPattern) {
+        updateMSAASamplingPattern();
+    }
+
     if (_dirtyResolution) {
         updateResolution();
         updateMSAASamplingPattern();
@@ -889,6 +893,8 @@ void FramebufferRenderer::updateMSAASamplingPattern() {
     glDeleteTextures(1, &nOneStripTexture);
     glDeleteBuffers(1, &nOneStripVBO);
     glDeleteVertexArrays(1, &nOneStripVAO);
+
+    _dirtyMsaaSamplingPattern = false;
 }
 
 void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
