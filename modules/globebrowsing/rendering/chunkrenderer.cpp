@@ -279,7 +279,7 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         glm::vec3 directionToSunCameraSpace =
             glm::vec3(viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
         programObject.setUniform(
-            "lightDirectionCameraSpace", -directionToSunCameraSpace);
+            "lightDirectionCameraSpace", -glm::normalize(directionToSunCameraSpace));
     }
 
     if (chunk.owner().generalProperties().performShading) {
@@ -390,7 +390,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
-            "heightScale", static_cast<float>(data.modelTransform.scale));
+            "heightScale", static_cast<float>(data.modelTransform.scale * data.camera.scaling()));
     }
 
     setCommonUniforms(*programObject, chunk, data);
@@ -485,7 +485,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
-            "heightScale", static_cast<float>(data.modelTransform.scale));
+            "heightScale", static_cast<float>(data.modelTransform.scale * data.camera.scaling()));
     }
 
     setCommonUniforms(*programObject, chunk, data);
