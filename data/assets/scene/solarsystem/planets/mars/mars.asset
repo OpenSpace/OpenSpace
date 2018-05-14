@@ -16,6 +16,7 @@ local textures = asset.syncedResource({
 local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
+local heightDATA = asset. localResource("map_datasets")    --//Kristin added for reading the heghtmaps 
 
 local color_layers = {
     {
@@ -132,6 +133,12 @@ local color_layers = {
         Name = "Themis IR Night [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/Themis_IR_Night.wms",
         BlendMode = "Color"
+    },
+    {   
+        Identifier = "HiRISE_texture",
+        Name = "MSL Gale Texture",
+        FilePath = "F:/MSLBaseMap/MSL_Gale_Orthophoto_Mosaic_25cm_v3_lonlat_Texture.vrt",
+        TilePixelSize = 90
     }
 }
 
@@ -173,7 +180,16 @@ local height_layers = {
         Name = "Mola Elevation [AWS]",
         FilePath = mapServiceConfigs .. "/AWS/Mola_Elevation.wms",
         TilePixelSize = 90
+    },
+    {
+        -- M & R heightmaps, generetaed by highschool students, want it in wms
+        Identifier = "HiRISE",
+        Name = "MSL Gale",
+        Enables = true,
+        FilePath = "F:/MSLBaseMap/MSL_Gale_DEM_Mosaic_1m_v3_lonlat_Heightmap.vrt",
+        TilePixelSize = 90
     }
+
 }
 
 local Mars = {

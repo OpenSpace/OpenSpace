@@ -34,18 +34,22 @@
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace { class Renderable; }
-namespace openspace::documentation { struct Documentation; }
+namespace openspace { 
+    class Renderable;
 
-namespace openspace::modelgeometry {
-
-class ModelGeometry : public properties::PropertyOwner {
-public:
     struct Vertex {
         GLfloat location[4];
         GLfloat tex[2];
         GLfloat normal[3];
     };
+}
+namespace openspace::documentation { struct Documentation; }
+
+namespace openspace::modelgeometry {
+       
+
+class ModelGeometry : public properties::PropertyOwner {
+public:
 
     static std::unique_ptr<ModelGeometry> createFromDictionary(
         const ghoul::Dictionary& dictionary

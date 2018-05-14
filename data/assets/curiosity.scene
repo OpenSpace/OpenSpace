@@ -4,18 +4,19 @@ local propertyHelper = asset.require('util/property_helper')
 
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
 asset.require('util/default_dashboard')
 asset.require('util/default_joystick')
-
+assetHelper.requestAll(asset, 'scene/digitaluniverse')
 asset.request('customization/globebrowsing')
-
-asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
+
+asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
 asset.onInitialize(function ()
     --openspace.time.setTime(openspace.time.currentWallTime())
@@ -43,16 +44,16 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = earthAsset.Earth.Identifier,
-        Position = { 0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+        --Focus = CuriosityModelAsset.CuriosityModel.Name,
+        Focus = marsAsset.Mars.Identifier,
+        Position = { 10.0, 10.0, 10.0 },
+        Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })
-
     openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 end)
 
+
 asset.onDeinitialize(function ()
-    sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 

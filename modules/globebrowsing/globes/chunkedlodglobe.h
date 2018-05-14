@@ -30,6 +30,8 @@
 #include <modules/globebrowsing/other/statscollector.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 
+#include <modules/roverterrainrenderer/filehandler/subsite.h>
+
 #include <memory>
 
 namespace openspace::globebrowsing {
@@ -112,12 +114,16 @@ public:
      */
     void recompileShaders();
 
+    void addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
+
     const int minSplitDepth;
     const int maxSplitDepth;
 
     std::shared_ptr<LayerManager> layerManager() const;
 
     StatsCollector stats;
+    
+    std::vector<std::vector<std::shared_ptr<Subsite>>> subsites();
 
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
@@ -146,6 +152,7 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
 
     bool _shadersNeedRecompilation;
+    std::vector<std::vector<std::shared_ptr<Subsite>>> _subsites;
 };
 
 } // namespace openspace::globebrowsing

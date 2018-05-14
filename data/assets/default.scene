@@ -8,6 +8,7 @@ assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 asset.require('scene/solarsystem/planets')
 asset.require('scene/solarsystem/planets/mars/moons/phobos')
 asset.require('scene/solarsystem/planets/mars/moons/deimos')
+
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -55,7 +56,8 @@ local Keybindings = {
     },
 }
 
-local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+--local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
 
 asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
@@ -82,7 +84,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = earthAsset.Earth.Identifier,
+        Focus = marsAsset.Mars.Identifier,
         Position = { 0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })

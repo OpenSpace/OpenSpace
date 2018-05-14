@@ -72,6 +72,12 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     }
 }
 
+void ChunkNode::addSites(const std::vector<std::shared_ptr<Subsite>> subSites) {
+    if (subSites.size() > 0) {
+        _subsites = subSites;
+    }
+}
+
 void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const {
     f(*this);
     if (!isLeaf()) {
@@ -158,8 +164,24 @@ const ChunkNode& ChunkNode::getChild(Quad quad) const {
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < _children.size(); ++i) {
-            Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
-            _children[i] = std::make_unique<ChunkNode>(chunk, this);
+            Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
+            globebrowsing::GeodeticPatch patch = chunk.surfacePatch();
+            std::vector<std::shared_ptr<Subsite>> tempSites;
+            std::unique_ptr<ChunkNode> temp = std::make_unique<ChunkNode>(chunk, this);
+            if (this != nullptr) {
+                for (int k = 0; k < this->_subsites.size(); ++k) {
+                    if (patch.contains(this->_subsites.at(k)->geodetic)) {
+                        tempSites.push_back(this->_subsites.at(k));
+                    }
+                }
+                temp->addSites(tempSites);
+            }
+            _children[i] = std::move(temp);
+
+            // This is how it should be (beforte merge)
+            //Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
+            //_children[i] = std::make_unique<ChunkNode>(chunk, this);
+
         }
     }
 
@@ -185,4 +207,10 @@ const Chunk& ChunkNode::getChunk() const {
     return _chunk;
 }
 
+const std::vector<std::shared_ptr<Subsite>> ChunkNode::getSubsites() const {
+    if (_subsites.size() > 0) {
+        return _subsites;
+    }
+    return _subsites;
+}
 } // namespace openspace::globebrowsing

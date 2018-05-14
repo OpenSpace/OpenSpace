@@ -89,16 +89,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         result->_guiHintHidden = dictionary.value<bool>(KeyGuiHidden);
     }
 
-    //Caroline
-
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
         result->_transform.translation = Translation::createFromDictionary(
             translationDictionary
         );
-
-
         if (result->_transform.translation == nullptr) {
             LERROR(fmt::format(
                 "Failed to create ephemeris for SceneGraphNode '{}'", result->identifier()
@@ -115,8 +111,6 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul::Dictionary rotationDictionary;
         dictionary.getValue(keyTransformRotation, rotationDictionary);
         result->_transform.rotation = Rotation::createFromDictionary(rotationDictionary);
-
-
         if (result->_transform.rotation == nullptr) {
             LERROR(fmt::format(
                 "Failed to create rotation for SceneGraphNode '{}'", result->identifier()
@@ -353,7 +347,6 @@ void SceneGraphNode::update(const UpdateData& data) {
             _renderable->update(newUpdateData);
     }
 }
-
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     if (_state != State::GLInitialized) {
         return;

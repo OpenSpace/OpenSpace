@@ -17,6 +17,8 @@ local models = asset.syncedResource({
 })
 
 
+
+
 -- Curiosity Model --
 
 local Curiosity = {
@@ -360,10 +362,25 @@ local CHEMIN_Bottom = {
     }
 }
 
+local dataPath = asset.localResource("data")
+
+local Submodules = {
+    Identifier = "Submodules",
+    Parent = "Mars",
+    Renderable = {
+        Type = "RoverTerrain",
+        RoverLocationPath = dataPath .. "/path/rover_locations.shp",
+        --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
+        ModelPath = "F:/RoverTerrain-Models&Textures/modelsEasy/",    
+        TexturePath = "F:/RoverTerrain-Models&Textures/texturesEasy/",
+    },
+    GuiPath = "/Solar System/Curiosity"
+}
 
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     --renderTestMarsrover,
+
     Curiosity,
     CuriosityModel, 
     Body,
@@ -383,6 +400,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     
     SAM_Cover_1,
     SAM_Cover_2,
-    CHEMIN_Bottom
+    CHEMIN_Bottom,
+    Submodules
 
 })

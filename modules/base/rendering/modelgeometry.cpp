@@ -114,12 +114,7 @@ double ModelGeometry::boundingRadius() const {
 void ModelGeometry::render() {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(
-        _mode,
-        static_cast<GLsizei>(_indices.size()),
-        GL_UNSIGNED_INT,
-        nullptr
-    );
+    glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

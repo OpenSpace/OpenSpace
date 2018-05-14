@@ -184,11 +184,11 @@ void PropertyOwner::addProperty(Property* prop) {
 
     // If we found the property identifier, we need to bail out
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
-        LERROR(fmt::format(
+        /*LERROR(fmt::format(
             "Property identifier '{}' already present in PropertyOwner '{}'",
             prop->identifier(),
             identifier()
-        ));
+        ));*/
         return;
     } else {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
