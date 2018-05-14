@@ -218,7 +218,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
     glm::vec3 directionToSunViewSpace =
-        glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+        glm::normalize(glm::mat3(data.camera.combinedViewMatrix()) * directionToSun);
 
     _programObject->setUniform(
         _uniformCache.directionToSunViewSpace,

@@ -69,7 +69,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         _url = dictionary.value<std::string>(KeyUrl);
     }
 
-    glm::vec2 windowDimensions = OsEng.windowWrapper().currentWindowSize();
+    glm::vec2 windowDimensions = OsEng.windowWrapper().currentSubwindowSize();
     _dimensions = windowDimensions;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
@@ -91,7 +91,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 }
 
 bool ScreenSpaceBrowser::initialize() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowSize();
+    _originalViewportSize = OsEng.windowWrapper().currentSubwindowSize();
     _renderHandler->setTexture((GLuint) *_texture);
 
     createPlane();

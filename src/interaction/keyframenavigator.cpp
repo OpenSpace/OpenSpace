@@ -116,6 +116,14 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
     camera.setRotation(
         glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t)
     );
+
+    // We want to affect view scaling, such that we achieve
+    // logarithmic interpolation of distance to an imagined focus node.
+    // To do this, we interpolate the scale reciprocal logarithmically.
+    const float prevInvScaleExp = glm::log(1.0 / prevPose.scale);
+    const float nextInvScaleExp = glm::log(1.0 / nextPose.scale);
+    const float interpolatedInvScaleExp = prevInvScaleExp * (1 - t) + nextInvScaleExp * t;
+    camera.setScaling(1.0 / glm::exp(interpolatedInvScaleExp));
 }
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {

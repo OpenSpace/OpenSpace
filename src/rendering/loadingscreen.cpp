@@ -124,6 +124,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     _uniformCache.useTexture = _program->uniformLocation("useTexture");
     _uniformCache.color = _program->uniformLocation("color");
 
+    _renderer = ghoul::fontrendering::FontRenderer::createDefault();
+
     _loadingFont = OsEng.fontManager().font(
         "Loading",
         LoadingFontSize,
@@ -223,6 +225,8 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
 LoadingScreen::~LoadingScreen() {
     _logoTexture = nullptr;
 
+    _renderer = nullptr;
+
     _loadingFont = nullptr;
     _messageFont = nullptr;
     _itemFont = nullptr;
@@ -238,17 +242,20 @@ LoadingScreen::~LoadingScreen() {
 }
 
 void LoadingScreen::render() {
+    using FR = ghoul::fontrendering::FontRenderer;
     // We have to recalculate the positions here because we will not be informed about a
     // window size change
 
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+        glm::vec2(OsEng.windowWrapper().currentDrawBufferResolution()) / dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
     float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
+
+    _renderer->setFramebufferSize(res);
 
     glm::vec2 size = {
         LogoSize.x,
@@ -411,8 +418,6 @@ void LoadingScreen::render() {
     //
     // "Loading" text
     //
-    using FR = ghoul::fontrendering::FontRenderer;
-    FR& renderer = FR::defaultRenderer();
 
 
     std::string headline =
@@ -421,7 +426,7 @@ void LoadingScreen::render() {
         "Loading...";
     // We use "Loading" to center the text, but render "Loading..." to make it look more
     // pleasing
-    FR::BoundingBoxInformation bbox = renderer.boundingBox(
+    FR::BoundingBoxInformation bbox = _renderer->boundingBox(
         *_loadingFont,
         "%s",
         headline.substr(0, headline.size() - 2).c_str()
@@ -433,7 +438,7 @@ void LoadingScreen::render() {
     );
     glm::vec2 loadingUr = loadingLl + bbox.boundingBox;
 
-    renderer.render(
+    _renderer->render(
         *_loadingFont,
         loadingLl,
         glm::vec4(1.f, 1.f, 1.f, 1.f),
@@ -446,7 +451,7 @@ void LoadingScreen::render() {
     if (_showMessage) {
         std::lock_guard<std::mutex> guard(_messageMutex);
 
-        FR::BoundingBoxInformation bboxMessage = renderer.boundingBox(
+        FR::BoundingBoxInformation bboxMessage = _renderer->boundingBox(
             *_messageFont,
             "%s",
             _message.c_str()
@@ -459,7 +464,7 @@ void LoadingScreen::render() {
         messageUr = messageLl + bboxMessage.boundingBox;
 
 
-        renderer.render(
+        _renderer->render(
             *_messageFont,
             messageLl,
             glm::vec4(1.f, 1.f, 1.f, 1.f),
@@ -477,7 +482,7 @@ void LoadingScreen::render() {
             if (!item.hasLocation) {
                 // Compute a new location
 
-                FR::BoundingBoxInformation b = renderer.boundingBox(
+                FR::BoundingBoxInformation b = _renderer->boundingBox(
                     *_itemFont,
                     "%s",
                     (item.name + " 100%").c_str()
@@ -600,7 +605,7 @@ void LoadingScreen::render() {
                     "%";
             }
 
-            renderer.render(
+            _renderer->render(
                 *_itemFont,
                 item.ll,
                 color,
