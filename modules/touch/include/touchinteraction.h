@@ -38,7 +38,6 @@
 #include <openspace/properties/vector/vec4property.h>
 
 //#define TOUCH_DEBUG_PROPERTIES
-#define ZOOM_CORNER_TAP
 
 namespace openspace {
 
@@ -69,11 +68,7 @@ public:
     TouchInteraction();
 
     // for interpretInteraction()
-    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK 
-#ifdef ZOOM_CORNER_TAP
-        , ZOOM_OUT
-#endif
-    };
+    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK, ZOOM_OUT };
 
     // Stores the velocity in all 6DOF
     struct VelocityStates {
@@ -250,9 +245,7 @@ private:
     bool _directTouchMode;
     bool _tap;
     bool _doubleTap;
-#ifdef ZOOM_CORNER_TAP
     bool _zoomOutTap;
-#endif
     bool _lmSuccess;
     bool _guiON;
     std::vector<SelectedBody> _selected;

@@ -282,9 +282,7 @@ TouchInteraction::TouchInteraction()
     , _directTouchMode(false)
     , _tap(false)
     , _doubleTap(false)
-#ifdef ZOOM_CORNER_TAP
     , _zoomOutTap(false)
-#endif
     , _lmSuccess(true)
     , _guiON(false)
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -354,7 +352,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _time.initSession();
     }
 
-#ifdef ZOOM_CORNER_TAP
+    //Code for lower-right corner double-tap to zoom-out
     WindowWrapper& wrapper = OsEng.windowWrapper();
     glm::ivec2 res = wrapper.currentWindowSize();
     glm::dvec2 pos = glm::vec2(
@@ -373,7 +371,6 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         _tap = false;
         _doubleTap = false;
     }
-#endif
 
     if (!guiMode(list)) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
@@ -939,12 +936,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     _debugProperties.minDiff = minDiff;
 #endif
 
-#ifdef ZOOM_CORNER_TAP
     if (_zoomOutTap)
          return ZOOM_OUT;
-    else
-#endif
-    if (_doubleTap) {
+    else if (_doubleTap) {
         return PICK;
     }
     else  if (list.size() == 1) {
@@ -1138,13 +1132,11 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
             }
             break;
         }
-#ifdef ZOOM_CORNER_TAP
         case ZOOM_OUT: {
             // zooms out from current if triple tap occurred
             _vel.zoom = computeTapZoomDistance(-1.0);
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
         }
-#endif
     }
 }
 
@@ -1279,9 +1271,7 @@ void TouchInteraction::step(double dt) {
 
         _tap = false;
         _doubleTap = false;
-#ifdef ZOOM_CORNER_TAP
         _zoomOutTap = false;
-#endif
         if (_reset) {
             resetToDefault();
         }
