@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "floatoperations.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int COLOROPTION_COLOR = 0;
@@ -32,11 +32,10 @@ const int COLOROPTION_SPEED = 2;
  
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
+uniform float minBillboardSize;
 
-uniform float magnitudeExponent;
-uniform float sharpness;
+uniform float alphaValue;
 uniform int colorOption;
-uniform vec3 eyePosition;
 
 in vec4 vs_position;
 in vec4 ge_gPosition;
@@ -44,8 +43,13 @@ in vec3 ge_brightness;
 in vec3 ge_velocity;
 in float ge_speed;
 in vec2 texCoord;
-in float ge_observationDistance;
-in vec4 ge_worldPosition;
+in float billboardSize;
+
+#include "fragment.glsl"
+//#include "PowerScaling/powerScaling_fs.hglsl"
+
+uniform vec2 magnitudeClamp;
+
 
 vec4 bv2rgb(float bv) {
     // BV is [-0.4,2.0]
@@ -56,7 +60,7 @@ vec4 bv2rgb(float bv) {
 Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
-
+        
     vec4 color = vec4(0.0);
     switch (colorOption) {
         case COLOROPTION_COLOR: 
@@ -73,15 +77,19 @@ Fragment getFragment() {
 
     vec4 textureColor = texture(psfTexture, texCoord);
     vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a = pow(fullColor.a, sharpness);
+    fullColor.a *= alphaValue;
 
-    float d = magnitudeExponent - log(ge_observationDistance) / log(10.0);
-    fullColor.a *= clamp(d, 0.0, 1.0);
+    vec4 position = vs_position;
+    // This has to be fixed when the scale graph is in place ---emiax
+    position.w = 15;
 
     Fragment frag;
     frag.color = fullColor;
-    frag.depth = safeLength(vs_position);
+    frag.depth = pscDepth(position);
+
+    // G-Buffer
     frag.gPosition  = ge_gPosition;
+    // There is no normal here
     frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     
     if (fullColor.a == 0) {
