@@ -26,20 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/distanceconversion.h>
-#include <openspace/util/timeconversion.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-
-#include <openspace/rendering/dashboard.h>
-
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
@@ -63,40 +54,36 @@ namespace luascriptfunctions {
 int addDashboardItemToScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addDashboardItemToScreenSpace");
 
-    std::string name = luaL_checkstring(L, -2);
-    int type = lua_type(L, -1);
+    const std::string& name = ghoul::lua::value<std::string>(L, 1);
+    const int type = lua_type(L, 2);
     if (type != LUA_TTABLE) {
         return luaL_error(L, "Expected argument of type 'table'");
     }
-    else {
-        ghoul::Dictionary d;
-        try {
-            ghoul::lua::luaDictionaryFromState(L, d);
-        }
-        catch (const ghoul::lua::LuaFormatException& e) {
-            LERRORC("addDashboardItem", e.what());
-            return 0;
-        }
 
-        ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
-
-        if (!ssr) {
-            return luaL_error(L, "Provided name is not a ScreenSpace item");
-        }
-
-        ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
-        if (!dash) {
-            return luaL_error(
-                L,
-                "Provided name is a ScreenSpace item but not a dashboard"
-            );
-        }
-
-        dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
-
-        lua_settop(L, 0);
+    ghoul::Dictionary d;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, d);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERRORC("addDashboardItem", e.what());
         return 0;
     }
+
+    ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
+
+    if (!ssr) {
+        return luaL_error(L, "Provided name is not a ScreenSpace item");
+    }
+
+    ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
+    if (!dash) {
+        return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+    }
+
+    dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
+
+    lua_settop(L, 0);
+    return 0;
 }
 
 /**
@@ -106,7 +93,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
 int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeDashboardItemsFromScreenSpace");
 
-    std::string name = ghoul::lua::value<std::string>(L, 1);
+    const std::string& name = ghoul::lua::value<std::string>(L, 1);
     ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
@@ -185,16 +172,11 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     _scale.setMaxValue(15.f);
 }
 
-ScreenSpaceDashboard::~ScreenSpaceDashboard() {}
-
 bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(
-            10.f,
-            _size.value().w
-        );
+        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w );
 
         if (_useMainDashboard) {
             OsEng.dashboard().render(penPosition);
@@ -221,7 +203,7 @@ bool ScreenSpaceDashboard::isReady() const {
 
 void ScreenSpaceDashboard::update() {
     if (OsEng.windowWrapper().windowHasResized()) {
-        glm::ivec2 size = OsEng.windowWrapper().currentWindowResolution();
+        const glm::ivec2 size = OsEng.windowWrapper().currentWindowResolution();
         _size = { 0.f, 0.f, size.x, size.y };
         _originalViewportSize = size;
         createFramebuffer();

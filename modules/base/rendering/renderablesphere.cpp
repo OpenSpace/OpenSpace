@@ -31,7 +31,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -157,12 +156,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _disableFadeInDistance(DisableFadeInOuInfo, true)
-    , _fadeOutThreshold(-1.0)
-    , _fadeInThreshold(0.0)
-    , _shader(nullptr)
-    , _texture(nullptr)
-    , _sphere(nullptr)
-    , _sphereIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -184,7 +177,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     });
 
     if (dictionary.hasKey(OrientationInfo.identifier)) {
-        const std::string v = dictionary.value<std::string>(OrientationInfo.identifier);
+        const std::string& v = dictionary.value<std::string>(OrientationInfo.identifier);
         if (v == "Inside") {
             _orientation = Inside;
         }
@@ -204,10 +197,10 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_orientation);
 
     addProperty(_size);
-    _size.onChange([this](){ _sphereIsDirty = true; });
+    _size.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_segments);
-    _segments.onChange([this](){ _sphereIsDirty = true; });
+    _segments.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
@@ -237,7 +230,8 @@ bool RenderableSphere::isReady() const {
 
 void RenderableSphere::initializeGL() {
     _sphere = std::make_unique<PowerScaledSphere>(
-        PowerScaledScalar::CreatePSS(_size), _segments
+        PowerScaledScalar::CreatePSS(_size),
+        _segments
     );
     _sphere->initialize();
 
@@ -290,20 +284,20 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     float adjustedTransparency = _opacity;
 
     if (_fadeInThreshold > 0.0) {
-        double distCamera = glm::length(data.camera.positionVec3());
-        float funcValue = static_cast<float>(
-            (1.0 / double(_fadeInThreshold/1E24))*(distCamera / 1E24)
+        const double distCamera = glm::length(data.camera.positionVec3());
+        const float funcValue = static_cast<float>(
+            (1.0 / double(_fadeInThreshold / 1E24)) * (distCamera / 1E24)
         );
 
-        adjustedTransparency *= funcValue > 1.f ? 1.f : funcValue;
+        adjustedTransparency *= (funcValue > 1.f) ? 1.f : funcValue;
     }
 
     if (_fadeOutThreshold > -1.0) {
-        double distCamera = glm::distance(
+        const double distCamera = glm::distance(
             data.camera.positionVec3(),
             data.position.dvec3()
         );
-        double term = std::exp(
+        const double term = std::exp(
             (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
         );
 
@@ -325,13 +319,11 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
+    bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                    RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::ABuffer;
+    bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", true);
@@ -363,7 +355,8 @@ void RenderableSphere::update(const UpdateData&) {
 
     if (_sphereIsDirty) {
         _sphere = std::make_unique<PowerScaledSphere>(
-            PowerScaledScalar::CreatePSS(_size), _segments
+            PowerScaledScalar::CreatePSS(_size),
+            _segments
         );
         _sphere->initialize();
         _sphereIsDirty = false;
@@ -373,9 +366,9 @@ void RenderableSphere::update(const UpdateData&) {
 void RenderableSphere::loadTexture() {
     if (_texturePath.value() != "") {
         using TR = ghoul::io::TextureReader;
-        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
-            _texturePath
-        );
+        std::unique_ptr<ghoul::opengl::Texture> texture =
+            ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",

@@ -30,7 +30,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/stringproperty.h>
 
-#include <ghoul/opengl/texture.h>
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -39,6 +39,7 @@ namespace documentation { struct Documentation; }
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
     ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+    ~ScreenSpaceImageOnline();
 
     void update() override;
 

@@ -31,9 +31,7 @@
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
 
 namespace ghoul::opengl {
@@ -67,17 +65,17 @@ protected:
     void loadTexture();
 
 private:
-    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry = nullptr;
 
     properties::StringProperty _colorTexturePath;
     properties::BoolProperty _performShading;
     properties::Mat3Property _modelTransform;
 
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _programObject = nullptr;
     UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
         projectionTransform, performShading, texture) _uniformCache;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
 
     glm::dvec3 _sunPos;
 };

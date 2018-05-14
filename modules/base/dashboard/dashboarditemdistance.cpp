@@ -33,7 +33,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -215,9 +214,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
 
     _fontName.onChange([this]() {
@@ -395,9 +392,9 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             else {
                 otherPos = positionAndLabel(otherComp, mainComp).first;
             }
-            glm::dvec3 thisPos = mainComp.node->worldPosition();
+            const glm::dvec3 thisPos = mainComp.node->worldPosition();
 
-            glm::dvec3 dir = glm::normalize(otherPos - thisPos);
+            const glm::dvec3 dir = glm::normalize(otherPos - thisPos);
             glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
 
             return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
@@ -424,14 +421,14 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         _source
     );
 
-    double d = glm::length(sourceInfo.first - destinationInfo.first);
+    const double d = glm::length(sourceInfo.first - destinationInfo.first);
     std::pair<double, std::string> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);
     }
     else {
-        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertDistance(d, unit);
+        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        const double convertedD = convertDistance(d, unit);
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
@@ -441,16 +438,13 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         penPosition,
         fmt::format(
             "Distance from {} to {}: {} {}",
-            sourceInfo.second,
-            destinationInfo.second,
-            dist.first,
-            dist.second
+            sourceInfo.second, destinationInfo.second, dist.first, dist.second
         )
     );
 }
 
 glm::vec2 DashboardItemDistance::size() const {
-    double d = glm::length(1e20);
+    const double d = glm::length(1e20);
     std::pair<double, std::string> dist;
     if (_doSimplification) {
         dist = simplifyDistance(d);

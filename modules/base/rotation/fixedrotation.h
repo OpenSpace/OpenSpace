@@ -80,7 +80,7 @@ private:
     Axis _zAxis;
 
     properties::StringProperty _attachedObject;
-    SceneGraphNode* _attachedNode;
+    SceneGraphNode* _attachedNode = nullptr;
 
     ghoul::Dictionary _constructorDictionary;
 };

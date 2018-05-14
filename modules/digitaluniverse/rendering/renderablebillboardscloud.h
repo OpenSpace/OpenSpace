@@ -34,16 +34,13 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
 #include <functional>
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }
-
+namespace ghoul::fontrendering { class Font; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -70,7 +67,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-
     enum Unit {
         Meter = 0,
         Kilometer = 1,
@@ -78,15 +74,13 @@ private:
         Kiloparsec = 3,
         Megaparsec = 4,
         Gigaparsec = 5,
-
         GigalightYears = 6
     };
 
     void createDataSlice();
     void createPolygonTexture();
-    void renderToTexture(std::function<void(void)> geometryLoadingFunction,
-        std::function<void(GLuint)> renderFunction,
-        GLuint textureToRenderTo, GLuint textureWidth, GLuint textureHeight);
+    void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
+        GLuint textureHeight);
     void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
     void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
@@ -104,19 +98,19 @@ private:
     bool loadCachedFile(const std::string& file);
     bool saveCachedFile(const std::string& file) const;
 
-    bool _hasSpeckFile;
-    bool _dataIsDirty;
-    bool _textColorIsDirty;
-    bool _hasSpriteTexture;
-    bool _spriteTextureIsDirty;
-    bool _hasColorMapFile;
-    bool _hasPolygon;
-    bool _hasLabel;
-    bool _labelDataIsDirty;
+    bool _hasSpeckFile = false;
+    bool _dataIsDirty = true;
+    bool _textColorIsDirty = true;
+    bool _hasSpriteTexture = false;
+    bool _spriteTextureIsDirty = true;
+    bool _hasColorMapFile = false;
+    bool _hasPolygon = false;
+    bool _hasLabel = false;
+    bool _labelDataIsDirty = true;
 
-    int _polygonSides;
+    int _polygonSides = 0;
 
-    GLuint _pTexture;
+    GLuint _pTexture = 0;
 
     properties::FloatProperty _alphaValue;
     properties::FloatProperty _scaleFactor;
@@ -138,24 +132,24 @@ private:
     properties::OptionProperty _renderOption;
 
 
-    std::unique_ptr<ghoul::opengl::Texture> _polygonTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-    ghoul::opengl::ProgramObject* _program;
-    ghoul::opengl::ProgramObject* _renderToPolygonProgram;
+    std::unique_ptr<ghoul::opengl::Texture> _polygonTexture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture = nullptr;
+    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile = nullptr;
+    ghoul::opengl::ProgramObject* _program = nullptr;
+    ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
     UniformCache(modelViewProjection, cameraPos, cameraLookup,
         renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
         color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
         spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
     std::string _speckFile;
     std::string _colorMapFile;
     std::string _labelFile;
     std::string _colorOptionString;
 
-    Unit _unit;
+    Unit _unit = Parsec;
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
@@ -165,16 +159,16 @@ private:
     std::unordered_map<int, std::string> _optionConversionMap;
     std::vector<glm::vec2> _colorRangeData;
 
-    int _nValuesPerAstronomicalObject;
+    int _nValuesPerAstronomicalObject = 0;
 
-    glm::dmat4 _transformationMatrix;
+    glm::dmat4 _transformationMatrix = glm::dmat4(1.0);
 
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     // For polygons
-    GLuint _polygonVao;
-    GLuint _polygonVbo;
+    GLuint _polygonVao = 0;
+    GLuint _polygonVbo = 0;
 };
 
 

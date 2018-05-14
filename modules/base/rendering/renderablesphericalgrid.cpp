@@ -30,7 +30,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/documentation/verifier.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -127,11 +126,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _segments(SegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 0.f, 20.f)
     , _radius(RadiusInfo, 1e20f, 1.f, 1e35f)
-    , _gridIsDirty(true)
-    , _vaoID(0)
-    , _vBufferID(0)
-    , _iBufferID(0)
-    , _mode(GL_LINES)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -174,8 +168,6 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     _radius.onChange([&]() { _gridIsDirty = true; });
     addProperty(_radius);
 }
-
-RenderableSphericalGrid::~RenderableSphericalGrid() {}
 
 bool RenderableSphericalGrid::isReady() const {
     bool ready = true;
@@ -230,12 +222,12 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
     _gridProgram->setUniform("opacity", _opacity);
 
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _gridProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -322,14 +314,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
 
-        glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(Vertex),
-            nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
-        );
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
         glBufferData(

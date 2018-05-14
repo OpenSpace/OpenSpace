@@ -29,7 +29,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -72,9 +71,7 @@ namespace {
             openspace::TimeUnits.begin(),
             openspace::TimeUnits.end(),
             res.begin(),
-            [](openspace::TimeUnit unit) -> std::string {
-                return nameForTimeUnit(unit);
-            }
+            [](openspace::TimeUnit unit) -> std::string { return nameForTimeUnit(unit); }
         );
         return res;
     }
@@ -180,14 +177,14 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    double t = OsEng.timeManager().time().deltaTime();
+    const double t = OsEng.timeManager().time().deltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
     }
     else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
+        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
+        const double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
 
@@ -197,8 +194,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         penPosition,
         fmt::format(
             "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first,
-            deltaTime.second
+            deltaTime.first, deltaTime.second
         )
     );
 }
@@ -219,8 +215,7 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
         *_font,
         fmt::format(
             "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first,
-            deltaTime.second
+            deltaTime.first, deltaTime.second
         )
     ).boundingBox;
 }

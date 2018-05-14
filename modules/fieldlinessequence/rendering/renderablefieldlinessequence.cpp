@@ -31,21 +31,19 @@
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
-#include <sstream>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableFieldlinesSequence";
 
-    const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
-    const GLuint VaColor    = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
-    const GLuint VaMasking  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaPosition = 0; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaColor    = 1; // MUST CORRESPOND TO THE SHADER PROGRAM
+    constexpr const GLuint VaMasking  = 2; // MUST CORRESPOND TO THE SHADER PROGRAM
 
     // ----- KEYS POSSIBLE IN MODFILE. EXPECTED DATA TYPE OF VALUE IN [BRACKETS]  ----- //
     // ---------------------------- MANDATORY MODFILE KEYS ---------------------------- //
@@ -292,9 +290,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 
     // Set a default color table, just in case the (optional) user defined paths are
     // corrupt or not provided!
-    _colorTablePaths.push_back(
-        FieldlinesSequenceModule::DefaultTransferFunctionFile
-    );
+    _colorTablePaths.push_back(FieldlinesSequenceModule::DefaultTransferFunctionFile);
     _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
 
     // EXTRACT OPTIONAL INFORMATION FROM DICTIONARY
@@ -338,7 +334,7 @@ void RenderableFieldlinesSequence::initializeGL() {
     }
 
     // At this point there should be at least one state loaded into memory!
-    if (_states.size() == 0) {
+    if (_states.empty()) {
         LERROR("Wasn't able to extract any valid states from provided source files!");
         return;
     }
@@ -379,9 +375,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
     // ------------------- EXTRACT MANDATORY VALUES FROM DICTIONARY ------------------- //
     std::string inputFileTypeString;
     if (!_dictionary->getValue(KeyInputFileType, inputFileTypeString)) {
-        LERROR(fmt::format(
-            "{}: The field {} is missing", _identifier, KeyInputFileType
-        ));
+        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeyInputFileType));
     }
     else {
         std::transform(
@@ -412,9 +406,7 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 
     std::string sourceFolderPath;
     if (!_dictionary->getValue(KeySourceFolder, sourceFolderPath)) {
-        LERROR(fmt::format(
-            "{}: The field {} is missing", _identifier, KeySourceFolder
-        ));
+        LERROR(fmt::format("{}: The field {} is missing", _identifier, KeySourceFolder));
         return false;
     }
 
@@ -429,18 +421,23 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
         );
 
         // Remove all files that don't have <inputFileTypeString> as extension
-        _sourceFiles.erase(std::remove_if(_sourceFiles.begin(), _sourceFiles.end(),
-            [inputFileTypeString](std::string str) {
-            const size_t extLength = inputFileTypeString.length();
-            std::string sub = str.substr(str.length() - extLength, extLength);
-            std::transform(
-                sub.begin(),
-                sub.end(),
-                sub.begin(),
-                [](char c) { return static_cast<char>(::tolower(c)); }
-            );
-            return sub != inputFileTypeString;
-        }), _sourceFiles.end());
+        _sourceFiles.erase(
+            std::remove_if(
+                _sourceFiles.begin(),
+                _sourceFiles.end(),
+                [inputFileTypeString](const std::string& str) {
+                    const size_t extLength = inputFileTypeString.length();
+                    std::string sub = str.substr(str.length() - extLength, extLength);
+                    std::transform(
+                        sub.begin(),
+                        sub.end(),
+                        sub.begin(),
+                        [](char c) { return static_cast<char>(::tolower(c)); }
+                    );
+                    return sub != inputFileTypeString;
+                }),
+            _sourceFiles.end()
+        );
         // Ensure that there are available and valid source files left
         if (_sourceFiles.empty()) {
             LERROR(fmt::format(
@@ -463,7 +460,8 @@ bool RenderableFieldlinesSequence::extractMandatoryInfoFromDictionary(
 }
 
 void RenderableFieldlinesSequence::extractOptionalInfoFromDictionary(
-    std::string& outputFolderPath) {
+                                                            std::string& outputFolderPath)
+{
 
     // ------------------- EXTRACT OPTIONAL VALUES FROM DICTIONARY ------------------- //
     if (_dictionary->getValue(KeyOutputFolder, outputFolderPath)) {
@@ -559,10 +557,13 @@ bool RenderableFieldlinesSequence::loadJsonStatesIntoRAM(const std::string& outp
         return false;
     }
     // Load states into RAM!
-    for (std::string filePath : _sourceFiles) {
+    for (const std::string& filePath : _sourceFiles) {
         FieldlinesState newState;
-        bool loadedSuccessfully = newState.loadStateFromJson(filePath, model,
-            _scalingFactor);
+        const bool loadedSuccessfully = newState.loadStateFromJson(
+            filePath,
+            model,
+            _scalingFactor
+        );
         if (loadedSuccessfully) {
             addStateToSequence(newState);
             if (!outputFolder.empty()) {
@@ -584,7 +585,6 @@ bool RenderableFieldlinesSequence::prepareForOsflsStreaming() {
     _nStates = _startTimes.size();
     _activeStateIndex = 0;
     return true;
-
 }
 
 void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM(const std::string& outputFolder)
@@ -619,7 +619,7 @@ void RenderableFieldlinesSequence::extractOsflsInfoFromDictionary() {
 }
 
 void RenderableFieldlinesSequence::setupProperties() {
-    bool hasExtras = _states[0].nExtraQuantities() > 0;
+    bool hasExtras = (_states[0].nExtraQuantities() > 0);
 
     // -------------- Add non-grouped properties (enablers and buttons) -------------- //
     addProperty(_pColorABlendEnabled);
@@ -696,7 +696,7 @@ void RenderableFieldlinesSequence::setupProperties() {
 
 void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
     // Add Property Callback Functions
-    bool hasExtras = _states[0].nExtraQuantities() > 0;
+    bool hasExtras = (_states[0].nExtraQuantities() > 0);
     if (hasExtras) {
         _pColorQuantity.onChange([this] {
             _shouldUpdateColorBuffer = true;
@@ -711,7 +711,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         });
 
         _pColorQuantityMin.onChange([this] {
-            float f = stringToFloat(
+            const float f = stringToFloat(
                 _pColorQuantityMin,
                 _colorTableRanges[_pColorQuantity].x
             );
@@ -720,7 +720,7 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         });
 
         _pColorQuantityMax.onChange([this] {
-            float f = stringToFloat(
+            const float f = stringToFloat(
                 _pColorQuantityMax,
                 _colorTableRanges[_pColorQuantity].y
             );
@@ -735,13 +735,19 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         });
 
         _pMaskingMin.onChange([this] {
-            float f = stringToFloat(_pMaskingMin, _maskingRanges[_pMaskingQuantity].x);
+            const float f = stringToFloat(
+                _pMaskingMin,
+                _maskingRanges[_pMaskingQuantity].x
+            );
             _pMaskingMin = std::to_string(f);
             _maskingRanges[_pMaskingQuantity].x = f;
         });
 
         _pMaskingMax.onChange([this] {
-            float f = stringToFloat(_pMaskingMax, _maskingRanges[_pMaskingQuantity].y);
+            const float f = stringToFloat(
+                _pMaskingMax,
+                _maskingRanges[_pMaskingQuantity].y
+            );
             _pMaskingMax = std::to_string(f);
             _maskingRanges[_pMaskingQuantity].y = f;
         });
@@ -783,21 +789,21 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
     const fls::Model simulationModel = _states[0].model();
     float limit = 100.f; // Just used as a default value.
     switch (simulationModel) {
-    case fls::Model::Batsrus:
-        _scalingFactor = fls::ReToMeter;
-        limit = 300; // Should include a long magnetotail
-        break;
-    case fls::Model::Enlil:
-        _pFlowReversed = true;
-        _scalingFactor = fls::AuToMeter;
-        limit = 50; // Should include Plutos furthest distance from the Sun
-        break;
-    case fls::Model::Pfss:
-        _scalingFactor = fls::RsToMeter;
-        limit = 100; // Just a default value far away from the solar surface
-        break;
-    default:
-        break;
+        case fls::Model::Batsrus:
+            _scalingFactor = fls::ReToMeter;
+            limit = 300; // Should include a long magnetotail
+            break;
+        case fls::Model::Enlil:
+            _pFlowReversed = true;
+            _scalingFactor = fls::AuToMeter;
+            limit = 50; // Should include Plutos furthest distance from the Sun
+            break;
+        case fls::Model::Pfss:
+            _scalingFactor = fls::RsToMeter;
+            limit = 100; // Just a default value far away from the solar surface
+            break;
+        default:
+            break;
     }
     _pDomainX.setMinValue(glm::vec2(-limit));
     _pDomainX.setMaxValue(glm::vec2(limit));
@@ -823,16 +829,16 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
 // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'
 void RenderableFieldlinesSequence::extractTriggerTimesFromFileNames() {
     // number of  characters in filename (excluding '.osfls')
-    const size_t filenameSize = 23;
+    constexpr const int FilenameSize = 23;
     // size(".osfls")
-    const size_t extSize = 6;
+    constexpr const int ExtSize = 6;
 
     for (const std::string& filePath : _sourceFiles) {
         const size_t strLength = filePath.size();
         // Extract the filename from the path (without extension)
         std::string timeString = filePath.substr(
-            strLength - filenameSize - extSize,
-            filenameSize - 1
+            strLength - FilenameSize - ExtSize,
+            FilenameSize - 1
         );
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
@@ -870,10 +876,15 @@ bool RenderableFieldlinesSequence::getStatesFromCdfFiles(const std::string& outp
 
     // Load states into RAM!
     for (const std::string& cdfPath : _sourceFiles) {
-
         FieldlinesState newState;
-        bool isSuccessful = fls::convertCdfToFieldlinesState(newState, cdfPath,
-            seedPoints, tracingVar, extraVars, extraMagVars);
+        bool isSuccessful = fls::convertCdfToFieldlinesState(
+            newState,
+            cdfPath,
+            seedPoints,
+            tracingVar,
+            extraVars,
+            extraMagVars
+        );
 
         if (isSuccessful) {
             addStateToSequence(newState);
@@ -913,7 +924,8 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
 
     if (!_dictionary->getValue(KeyCdfTracingVariable, tracingVar)) {
         tracingVar = "b"; //  Magnetic field variable as default
-        LWARNING(fmt::format("{}: No '{}', using default '{}'",
+        LWARNING(fmt::format(
+            "{}: No '{}', using default '{}'",
             _identifier, KeyCdfTracingVariable, tracingVar
         ));
     }
@@ -923,7 +935,8 @@ bool RenderableFieldlinesSequence::extractCdfInfoFromDictionary(std::string& see
         const size_t nProvidedExtras = extraQuantityNamesDictionary.size();
         for (size_t i = 1; i <= nProvidedExtras; ++i) {
             extraVars.push_back(
-                extraQuantityNamesDictionary.value<std::string>(std::to_string(i)));
+                extraQuantityNamesDictionary.value<std::string>(std::to_string(i))
+            );
         }
     }
 
@@ -943,8 +956,8 @@ bool RenderableFieldlinesSequence::extractSeedPointsFromFile(const std::string& 
     LDEBUG(fmt::format("Reading seed points from file '{}'", path));
     std::string line;
     while (std::getline(seedFile, line)) {
-        glm::vec3 point;
         std::stringstream ss(line);
+        glm::vec3 point;
         ss >> point.x;
         ss >> point.y;
         ss >> point.z;
@@ -965,15 +978,21 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
 {
 
     for (int i = 0; i < static_cast<int>(extraVars.size()); i++) {
-        const std::string str = extraVars[i];
+        const std::string& str = extraVars[i];
         // Check if string is in the format specified for magnitude variables
         if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
             std::istringstream ss(str.substr(2, str.size() - 4));
             std::string magVar;
             size_t counter = 0;
             while (std::getline(ss, magVar, ',')) {
-                magVar.erase(std::remove_if(magVar.begin(), magVar.end(), ::isspace),
-                    magVar.end());
+                magVar.erase(
+                    std::remove_if(
+                        magVar.begin(),
+                        magVar.end(),
+                        ::isspace
+                    ),
+                    magVar.end()
+                );
                 extraMagVars.push_back(magVar);
                 counter++;
                 if (counter == 3) {
@@ -988,7 +1007,6 @@ void RenderableFieldlinesSequence::extractMagnitudeVarsFromStrings(
         }
     }
 }
-
 
 void RenderableFieldlinesSequence::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArrayObject);
@@ -1076,10 +1094,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         bool additiveBlending = false;
         if (_pColorABlendEnabled) {
             const auto renderer = OsEng.renderEngine().rendererImplementation();
-            bool usingFBufferRenderer = renderer ==
+            const bool usingFBufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::Framebuffer;
 
-            bool usingABufferRenderer = renderer ==
+            const bool usingABufferRenderer = renderer ==
                                         RenderEngine::RendererImplementation::ABuffer;
 
             if (usingABufferRenderer) {
@@ -1095,10 +1113,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
 
         glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
-                GL_LINE_STRIP, //_drawingOutputType,
-                _states[_activeStateIndex].lineStart().data(),
-                _states[_activeStateIndex].lineCount().data(),
-                static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
+            GL_LINE_STRIP, //_drawingOutputType,
+            _states[_activeStateIndex].lineStart().data(),
+            _states[_activeStateIndex].lineCount().data(),
+            static_cast<GLsizei>(_states[_activeStateIndex].lineStart().size())
         );
 
         glBindVertexArray(0);
@@ -1117,19 +1135,19 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     }
 
     const double currentTime = data.time.j2000Seconds();
-    bool isInInterval = (currentTime >= _startTimes[0]) &&
-                        (currentTime < _sequenceEndTime);
+    const bool isInInterval = (currentTime >= _startTimes[0]) &&
+                              (currentTime < _sequenceEndTime);
 
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
             // true => Previous frame was not within the sequence interval
-            _activeTriggerTimeIndex < 0
+            _activeTriggerTimeIndex < 0 ||
             // true => We stepped back to a time represented by another state
-            || currentTime < _startTimes[_activeTriggerTimeIndex]
+            currentTime < _startTimes[_activeTriggerTimeIndex] ||
             // true => We stepped forward to a time represented by another state
-            || (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
+            (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
             updateActiveTriggerTimeIndex(currentTime);
 
@@ -1167,12 +1185,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         updateVertexPositionBuffer();
 
         if (_states[_activeStateIndex].nExtraQuantities() > 0) {
-            _shouldUpdateColorBuffer   = true;
+            _shouldUpdateColorBuffer = true;
             _shouldUpdateMaskingBuffer = true;
         }
 
         // Everything is set and ready for rendering!
-        _needsUpdate     = false;
+        _needsUpdate = false;
         _newStateIsReady = false;
     }
 
@@ -1244,7 +1262,8 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 
     bool isSuccessful;
     const std::vector<float>& quantities = _states[_activeStateIndex].extraQuantity(
-        _pColorQuantity, isSuccessful
+        _pColorQuantity,
+        isSuccessful
     );
 
     if (isSuccessful) {
@@ -1268,7 +1287,8 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
 
     bool isSuccessful;
     const std::vector<float>& maskings = _states[_activeStateIndex].extraQuantity(
-        _pMaskingQuantity, isSuccessful
+        _pMaskingQuantity,
+        isSuccessful
     );
 
     if (isSuccessful) {

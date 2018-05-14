@@ -30,7 +30,8 @@
 #include <openspace/properties/stringproperty.h>
 
 #include <ghoul/lua/luastate.h>
-#include <ghoul/filesystem/file.h>
+
+namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 

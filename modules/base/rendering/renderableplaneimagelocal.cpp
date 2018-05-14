@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
@@ -61,8 +61,6 @@ documentation::Documentation RenderablePlaneImageLocal::Documentation() {
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
-    , _texture(nullptr)
-    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -81,7 +79,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 }
 
 bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady() && _texture != nullptr;
+    return RenderablePlane::isReady() && (_texture != nullptr);
 }
 
 void RenderablePlaneImageLocal::initializeGL() {

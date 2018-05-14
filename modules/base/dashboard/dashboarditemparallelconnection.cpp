@@ -27,12 +27,10 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/navigationhandler.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/network/parallelconnection.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
 #include <openspace/util/distanceconversion.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -118,11 +116,11 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
 }
 
 void DashboardItemParallelConnection::render(glm::vec2& penPosition) {
-    ParallelConnection::Status status = OsEng.parallelPeer().status();
-    size_t nConnections = OsEng.parallelPeer().nConnections();
+    const ParallelConnection::Status status = OsEng.parallelPeer().status();
+    const size_t nConnections = OsEng.parallelPeer().nConnections();
     const std::string& hostName = OsEng.parallelPeer().hostName();
 
-    std::string connectionInfo = "";
+    std::string connectionInfo;
     int nClients = static_cast<int>(nConnections);
     if (status == ParallelConnection::Status::Host) {
         nClients--;

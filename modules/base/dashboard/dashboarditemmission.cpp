@@ -30,11 +30,9 @@
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
 #include <stack>
 
 namespace {
@@ -156,14 +154,9 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 
             if (phaseTrace.size()) {
                 const MissionPhase& phase = phaseTrace.back().get();
-                std::string title = "Current Mission Phase: " + phase.name();
+                const std::string title = "Current Mission Phase: " + phase.name();
                 penPosition.y -= _font->height();
-                RenderFont(
-                    *_font,
-                    penPosition,
-                    title,
-                    missionProgressColor
-                );
+                RenderFont(*_font, penPosition, title, missionProgressColor);
                 double remaining = phase.timeRange().end - currentTime;
                 float t = static_cast<float>(
                     1.0 - remaining / phase.timeRange().duration()
@@ -173,24 +166,14 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 RenderFont(
                     *_font,
                     penPosition,
-                    fmt::format(
-                        "{:.0f} s {:s} {:.1f} %",
-                        remaining,
-                        progress,
-                        t * 100
-                    ),
+                    fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
                     missionProgressColor
                 );
             }
             else {
                 penPosition.y -= _font->height();
-                RenderFont(
-                    *_font,
-                    penPosition,
-                    "Next Mission:",
-                    nextMissionColor
-                );
-                double remaining = mission.timeRange().start - currentTime;
+                RenderFont(*_font, penPosition, "Next Mission:", nextMissionColor);
+                const double remaining = mission.timeRange().start - currentTime;
                 penPosition.y -= _font->height();
                 RenderFont(
                     *_font,
@@ -209,27 +192,25 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
             S.push({ &mission, 0 });
             while (!S.empty()) {
                 const MissionPhase* phase = S.top().first;
-                int depth = S.top().second;
+                const int depth = S.top().second;
                 S.pop();
 
-                bool isCurrentPhase = phase->timeRange().includes(currentTime);
+                const bool isCurrentPhase = phase->timeRange().includes(currentTime);
 
                 penPosition.x += depth * PixelIndentation;
                 if (isCurrentPhase) {
-                    double remaining = phase->timeRange().end - currentTime;
-                    float t = static_cast<float>(
+                    const double remaining = phase->timeRange().end - currentTime;
+                    const float t = static_cast<float>(
                         1.0 - remaining / phase->timeRange().duration()
                     );
-                    std::string progress = progressToStr(25, t);
+                    const std::string progress = progressToStr(25, t);
                     penPosition.y -= _font->height();
                     RenderFont(
                         *_font,
                         penPosition,
                         fmt::format(
                             "{:s}  {:s} {:.1f} %",
-                            phase->name(),
-                            progress,
-                            t * 100
+                            phase->name(),progress,t * 100
                         ),
                         currentMissionColor
                     );

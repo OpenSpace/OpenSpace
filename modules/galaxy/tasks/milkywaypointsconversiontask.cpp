@@ -24,10 +24,6 @@
 
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
-#include <modules/volume/volumesampler.h>
-
 #include <openspace/documentation/documentation.h>
 
 #include <fstream>
@@ -46,8 +42,7 @@ MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictiona
 
 MilkywayPointsConversionTask::~MilkywayPointsConversionTask() {}
 
-std::string MilkywayPointsConversionTask::description()
-{
+std::string MilkywayPointsConversionTask::description() {
     return std::string();
 }
 
@@ -64,7 +59,14 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 
     std::vector<float> pointData(nFloats);
 
-    float x, y, z, r, g, b, a;
+    float x;
+    float y;
+    float z;
+    float r;
+    float g;
+    float b;
+    float a;
+
     for (int64_t i = 0; i < nPoints; ++i) {
         in >> x >> y >> z >> r >> g >> b >> a;
         if (in.good()) {
@@ -90,9 +92,8 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
     out.close();
 }
 
-documentation::Documentation MilkywayPointsConversionTask::documentation()
-{
+documentation::Documentation MilkywayPointsConversionTask::documentation() {
     return documentation::Documentation();
 }
 
-}
+} // namespace openspace

@@ -28,7 +28,6 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -111,7 +110,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     if (dictionary.hasKey(FontNameInfo.identifier)) {
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
     }
-    _fontName.onChange([this](){
+    _fontName.onChange([this]() {
         _font = OsEng.fontManager().font(_fontName, _fontSize);
     });
     addProperty(_fontName);

@@ -26,13 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/renderengine.h>
-
+#include <openspace/engine/downloadmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace {
@@ -109,6 +107,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
 }
 
+ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
+
 void ScreenSpaceImageOnline::update() {
     if (_textureIsDirty) {
         if (!_imageFuture.valid()) {
@@ -180,9 +180,6 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 void ScreenSpaceImageOnline::bindTexture() {
     if (_texture) {
         _texture->bind();
-    }
-    else {
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
 

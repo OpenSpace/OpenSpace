@@ -30,7 +30,6 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::filesystem { class File; }
@@ -44,6 +43,7 @@ namespace documentation { struct Documentation; }
 namespace openspace {
 
 struct LinePoint;
+struct UpdateStructure;
 
 class RenderableDebugPlane : public Renderable {
 public:
@@ -70,10 +70,10 @@ private:
 
     bool _planeIsDirty;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
 } // namespace openspace

@@ -31,7 +31,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 
@@ -168,7 +167,9 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _lineFade(FadeInfo, 1.f, 0.f, 30.f)
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 20.f)
     , _pointSize(PointSizeInfo, 1, 1, 64)
-    , _renderingModes(RenderingModeInfo, properties::OptionProperty::DisplayType::Dropdown
+    , _renderingModes(
+        RenderingModeInfo,
+        properties::OptionProperty::DisplayType::Dropdown
     )
 {
     addProperty(_opacity);
@@ -289,7 +290,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         { RenderInformation::VertexSorting::NoSorting, 2}
     };
 
-    bool usingFramebufferRenderer =
+    const bool usingFramebufferRenderer =
         OsEng.renderEngine().rendererImplementation() ==
         RenderEngine::RendererImplementation::Framebuffer;
 
@@ -298,13 +299,11 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    bool renderLines =
-        (_renderingModes == RenderingModeLines) |
-        (_renderingModes == RenderingModeLinesPoints);
+    const bool renderLines = (_renderingModes == RenderingModeLines) |
+                             (_renderingModes == RenderingModeLinesPoints);
 
-    bool renderPoints =
-        (_renderingModes == RenderingModePoints) |
-        (_renderingModes == RenderingModeLinesPoints);
+    const bool renderPoints = (_renderingModes == RenderingModePoints) |
+                              (_renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
         glLineWidth(_lineWidth);
@@ -390,13 +389,14 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     };
 
     // The combined size of vertices; -1 because we duplicate the penultimate point
-    int totalNumber =
-        _primaryRenderInformation.count + _floatingRenderInformation.count - 1;
+    const int totalNumber = _primaryRenderInformation.count +
+                            _floatingRenderInformation.count - 1;
 
     // The primary information might use an index buffer, so we might need to start at an
     // offset
-    int primaryOffset =
-        _primaryRenderInformation._iBufferID == 0 ? 0 : _primaryRenderInformation.first;
+    const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
+        0 :
+        _primaryRenderInformation.first;
 
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);

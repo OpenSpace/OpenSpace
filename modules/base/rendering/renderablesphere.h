@@ -71,18 +71,17 @@ private:
 
     properties::BoolProperty _disableFadeInDistance;
 
-    float _fadeOutThreshold;
-    float _fadeInThreshold;
+    float _fadeOutThreshold = -1.0;
+    float _fadeInThreshold = 0.0;
 
-    ghoul::opengl::ProgramObject* _shader;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    ghoul::opengl::ProgramObject* _shader = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
 
-    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<PowerScaledSphere> _sphere = nullptr;
 
     UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
 
-
-    bool _sphereIsDirty;
+    bool _sphereIsDirty = false;
 };
 
 } // namespace openspace

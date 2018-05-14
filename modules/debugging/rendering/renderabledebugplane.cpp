@@ -26,21 +26,17 @@
 
 #include <modules/debugging/rendering/renderabledebugplane.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/rendering/renderengine.h>
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
-
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 
 namespace {
     enum Origin {
@@ -123,9 +119,6 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _origin(OriginInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shader(nullptr)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
 {
     if (dictionary.hasKey(TextureInfo.identifier)) {
         _texture = static_cast<int>(dictionary.value<double>(TextureInfo.identifier));
@@ -258,7 +251,7 @@ void RenderableDebugPlane::createPlane() {
     // ============================
     const GLfloat size = _size;
 
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         //  x      y    z    w    s    t
         -size, -size, 0.f, 0.f, 0.f, 0.f,
          size,  size, 0.f, 0.f, 1.f, 1.f,
@@ -270,7 +263,7 @@ void RenderableDebugPlane::createPlane() {
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);
