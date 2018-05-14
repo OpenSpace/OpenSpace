@@ -176,6 +176,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp

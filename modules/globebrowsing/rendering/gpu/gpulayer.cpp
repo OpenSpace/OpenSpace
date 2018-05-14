@@ -63,11 +63,7 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
 void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                     const std::string& nameBase, int pileSize)
 {
-    gpuRenderSettings.bind(
-        layer.renderSettings(),
-        programObject,
-        nameBase + "settings."
-    );
+    gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
     gpuLayerAdjustment.bind(
         layer.layerAdjustment(),
         programObject,

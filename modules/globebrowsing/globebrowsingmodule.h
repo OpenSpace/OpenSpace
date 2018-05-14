@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <ghoul/glm.h>
 #include <memory>
 #include <future>
@@ -61,7 +62,6 @@ public:
     const globebrowsing::RenderableGlobe* castFocusNodeRenderableToGlobe();
 
 #ifdef GLOBEBROWSING_USE_GDAL
-
     struct Layer {
         std::string name;
         std::string url;
@@ -82,7 +82,6 @@ public:
     bool hasUrlInfo(const std::string& globe) const;
 
     void removeWMSServer(const std::string& name);
-
 #endif // GLOBEBROWSING_USE_GDAL
 
 protected:
@@ -90,12 +89,12 @@ protected:
 
 private:
     void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
-                   bool resetCameraDirection);
+        bool doResetCameraDirection);
     void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
-                       bool resetCameraDirection);
+        bool doResetCameraDirection);
     void goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3,
-                       bool resetCameraDirection);
-    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+        bool doResetCameraDirection);
+    void resetCameraDirection(Camera& camera, globebrowsing::Geodetic2 geo2);
 
     /**
      \return a comma separated list of layer group names.
@@ -110,15 +109,12 @@ private:
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 
 #ifdef GLOBEBROWSING_USE_GDAL
-
     // name -> capabilities
     std::map<std::string, std::future<Capabilities>> _inFlightCapabilitiesMap;
     // name -> capabilities
     std::map<std::string, Capabilities> _capabilitiesMap;
 
-
     std::multimap<std::string, UrlInfo> _urlList;
-
 #endif // GLOBEBROWSING_USE_GDAL
 };
 

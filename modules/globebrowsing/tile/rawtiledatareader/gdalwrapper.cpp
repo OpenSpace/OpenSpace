@@ -29,21 +29,12 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configuration.h>
 
-#include <ghoul/filesystem/filesystem.h> // abspath
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
+#include <gdal.h>
 
-
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4251) // needs to have dll-interface to be used by clients
-#endif // WIN32
-
-#include <gdal_priv.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
+#include <cpl_conv.h>
 
 namespace {
     constexpr const char* _loggerCat = "GdalWrapper";
@@ -78,15 +69,12 @@ void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
 }
 
 GdalWrapper* GdalWrapper::_singleton = nullptr;
-std::mutex GdalWrapper::_mutexLock;
 
 void GdalWrapper::create(size_t maximumCacheSize, size_t maximumMaximumCacheSize) {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     _singleton = new GdalWrapper(maximumCacheSize, maximumMaximumCacheSize);
 }
 
 void GdalWrapper::destroy() {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     ghoul_assert(_singleton, "Cannot delete null");
     delete _singleton;
 }
@@ -143,14 +131,19 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 
 void GdalWrapper::setGdalProxyConfiguration() {
     if (OsEng.configuration().httpProxy.usingHttpProxy) {
-        std::string address = OsEng.configuration().httpProxy.address;
-        unsigned int port = OsEng.configuration().httpProxy.port;
-        std::string user = OsEng.configuration().httpProxy.user;
-        std::string password = OsEng.configuration().httpProxy.password;
+        const std::string address = OsEng.configuration().httpProxy.address;
+        const unsigned int port = OsEng.configuration().httpProxy.port;
+        const std::string user = OsEng.configuration().httpProxy.user;
+        const std::string password = OsEng.configuration().httpProxy.password;
         std::string auth = OsEng.configuration().httpProxy.authentication;
-        std::transform(auth.begin(), auth.end(), auth.begin(), ::toupper);
+        std::transform(
+            auth.begin(),
+            auth.end(),
+            auth.begin(),
+            [](char c) { return static_cast<char>(::toupper(c)); }
+        );
 
-        std::string proxy = address + ":" + std::to_string(port);
+        const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
         LDEBUG(fmt::format("Using proxy server {}", proxy));
 

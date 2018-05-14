@@ -197,11 +197,9 @@ Angle<T>& Angle<T>::clamp(const Angle<T>& min, const Angle<T>& max) {
     return *this;
 }
 
-
 template <typename T>
-Angle<T>& Angle<T>::abs() {
-    _radians = glm::abs(_radians);
-    return *this;
+Angle<T> Angle<T>::abs() const {
+    return Angle<T>::fromRadians(glm::abs(_radians));
 }
 
 } // namespace openspace::globebrowsing

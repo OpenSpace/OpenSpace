@@ -25,12 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 
-#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
-#include <modules/globebrowsing/tile/chunktile.h>
-
-#include <openspace/util/gpudata.h>
-
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -38,6 +35,7 @@ namespace openspace::globebrowsing {
 
 struct ChunkTile;
 class Layer;
+class GPULayer;
 struct LayerRenderSettings;
 struct TileDepthTransform;
 struct TileUvTransform;
@@ -50,8 +48,7 @@ struct TileIndex;
  */
 class GPULayerGroup {
 public:
-
-    virtual ~GPULayerGroup() = default;
+    virtual ~GPULayerGroup();
 
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding

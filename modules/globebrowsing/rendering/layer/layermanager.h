@@ -28,15 +28,15 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
-
 #include <functional>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::globebrowsing {
 
+class Layer;
 struct LayerGroup;
+class TileTextureInitData;
 
 /**
  * Manages multiple LayerGroups.
@@ -63,8 +63,7 @@ public:
     void reset(bool includingDisabled = false);
 
     static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-                                                      bool padTiles,
-                                                      size_t preferredTileSize = 0);
+        bool padTiles, size_t preferredTileSize = 0);
 
     static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);

@@ -45,10 +45,10 @@ class DistanceSwitch {
 public:
     ~DistanceSwitch();
 
-    bool initialize();
-    bool initializeGL();
-    bool deinitialize();
-    bool deinitializeGL();
+    void initialize();
+    void initializeGL();
+    void deinitialize();
+    void deinitializeGL();
 
     /**
      * Picks the first Renderable with the associated maxDistance greater than the

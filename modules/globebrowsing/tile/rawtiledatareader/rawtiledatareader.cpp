@@ -324,9 +324,9 @@ std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     padfTransform[5] = -Angle<double>::fromRadians(
         globalCoverage.size().lat).asDegrees() / rasterYSize();
     padfTransform[0] = Angle<double>::fromRadians(
-        globalCoverage.getCorner(Quad::NORTH_WEST).lon).asDegrees();
+        globalCoverage.corner(Quad::NORTH_WEST).lon).asDegrees();
     padfTransform[3] = Angle<double>::fromRadians(
-        globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
+        globalCoverage.corner(Quad::NORTH_WEST).lat).asDegrees();
     padfTransform[2] = 0;
     padfTransform[4] = 0;
     return padfTransform;
@@ -381,8 +381,8 @@ Geodetic2 RawTileDataReader::pixelToGeodetic(
 PixelRegion RawTileDataReader::highestResPixelRegion(
                                                  const GeodeticPatch& geodeticPatch) const
 {
-    Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
-    Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
+    Geodetic2 nwCorner = geodeticPatch.corner(Quad::NORTH_WEST);
+    Geodetic2 swCorner = geodeticPatch.corner(Quad::SOUTH_EAST);
     PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
     PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
     PixelRegion region(pixelStart, pixelEnd - pixelStart);

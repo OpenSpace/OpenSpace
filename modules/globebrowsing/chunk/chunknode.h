@@ -60,8 +60,8 @@ public:
     void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
 
     const ChunkNode& find(const Geodetic2& location) const;
-    const ChunkNode& getChild(Quad quad) const;
-    const Chunk& getChunk() const;
+    const ChunkNode& child(const Quad& quad) const;
+    const Chunk& chunk() const;
 
     /**
      * Updates all children recursively. If this ChunkNode wants to split it will,

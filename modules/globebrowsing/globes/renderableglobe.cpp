@@ -382,8 +382,18 @@ bool RenderableGlobe::isReady() const {
 }
 
 void RenderableGlobe::render(const RenderData& data, RendererTasks& renderTask) {
-    bool statsEnabled = _debugProperties.collectStats.value();
+    bool statsEnabled = _debugProperties.collectStats;
+#ifdef DEBUG_GLOBEBROWSING_STATSRECORD
     _chunkedLodGlobe->stats.setEnabled(statsEnabled);
+#else // DEBUG_GLOBEBROWSING_STATSRECORD
+    if (statsEnabled) {
+        LWARNINGC(
+            "RenderableGlobe",
+            "Stats collection was enabled, but ChunkedLodGlobe compiled without support"
+        );
+        _debugProperties.collectStats = false;
+    }
+#endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
     if (_enabled) {
         if (_debugProperties.saveOrThrowCamera.value()) {

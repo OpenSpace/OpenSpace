@@ -103,7 +103,6 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     , _enabled(EnabledInfo, false)
     , _reset(ResetInfo)
     , _remove(RemoveInfo)
-    , _tileProvider(nullptr)
     , _otherTypesProperties({
         { ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f) }
     })
@@ -123,8 +122,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     bool padTiles = true;
     layerDict.getValue<bool>(KeyPadTiles, padTiles);
 
-    TileTextureInitData initData = LayerManager::getTileTextureInitData(_layerGroupId,
-                                                                        padTiles);
+    TileTextureInitData initData = LayerManager::getTileTextureInitData(
+        _layerGroupId,
+        padTiles
+    );
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
 
@@ -156,20 +157,20 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
     if (layerDict.getValue(KeyBlendMode, blendModeName)) {
         layergroupid::BlendModeID blendModeID =
             layergroupid::getBlendModeIDFromName(blendModeName);
-        _blendModeOption.setValue(static_cast<int>(blendModeID));
+        _blendModeOption = static_cast<int>(blendModeID);
     }
     else {
-        _blendModeOption.setValue(static_cast<int>(layergroupid::BlendModeID::Normal));
+        _blendModeOption = static_cast<int>(layergroupid::BlendModeID::Normal);
     }
 
     // On change callbacks definitions
-    _enabled.onChange([&](){
+    _enabled.onChange([&]() {
         if (_onChangeCallback) {
             _onChangeCallback();
         }
     });
 
-    _reset.onChange([&](){
+    _reset.onChange([&]() {
         if (_tileProvider) {
             _tileProvider->reset();
         }
@@ -187,7 +188,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         }
     });
 
-    _typeOption.onChange([&](){
+    _typeOption.onChange([&]() {
         removeVisibleProperties();
         _type = static_cast<layergroupid::TypeID>(_typeOption.value());
         ghoul::Dictionary dict;
@@ -198,13 +199,13 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
         }
     });
 
-    _blendModeOption.onChange([&](){
+    _blendModeOption.onChange([&]() {
         if (_onChangeCallback) {
             _onChangeCallback();
         }
     });
 
-    _layerAdjustment.onChange([&](){
+    _layerAdjustment.onChange([&]() {
         if (_onChangeCallback) {
             _onChangeCallback();
         }
@@ -277,12 +278,12 @@ TileDepthTransform Layer::depthTransform() const {
         return _tileProvider->depthTransform();
     }
     else {
-        return {1.0f, 0.0f};
+        return { 1.f, 0.f };
     }
 }
 
 bool Layer::enabled() const {
-    return _enabled.value();
+    return _enabled;
 }
 
 tileprovider::TileProvider* Layer::tileProvider() const {
@@ -302,7 +303,7 @@ const LayerAdjustment& Layer::layerAdjustment() const {
 }
 
 void Layer::onChange(std::function<void(void)> callback) {
-    _onChangeCallback = callback;
+    _onChangeCallback = std::move(callback);
 }
 
 void Layer::update() {
@@ -323,9 +324,9 @@ glm::vec2 Layer::compensateSourceTextureSampling(glm::vec2 startOffset,
                                                  glm::vec2 sizeDiff,
                                                  glm::uvec2 resolution, glm::vec2 tileUV)
 {
-    glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
-    glm::vec2 currentSize = glm::vec2(resolution);
-    glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
+    const glm::vec2 sourceSize = glm::vec2(resolution) + sizeDiff;
+    const glm::vec2 currentSize = glm::vec2(resolution);
+    const glm::vec2 sourceToCurrentSize = currentSize / sourceSize;
     tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
     return tileUV;
 }
@@ -343,10 +344,10 @@ glm::vec2 Layer::TileUvToTextureSamplePosition(const TileUvTransform& uvTransfor
 }
 
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(
-    const ghoul::Dictionary& initDict) const
+                                                  const ghoul::Dictionary& initDict) const
 {
     if (initDict.hasKeyAndValue<std::string>("Type")) {
-        const std::string typeString = initDict.value<std::string>("Type");
+        const std::string& typeString = initDict.value<std::string>("Type");
         return layergroupid::getTypeIDFromTypeString(typeString);
     }
     else {

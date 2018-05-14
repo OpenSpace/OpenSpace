@@ -127,7 +127,7 @@ LayerShaderManager::LayerShaderPreprocessingData
     pairs.emplace_back("showHeightIntensities",
         std::to_string(debugProps.showHeightIntensities)
     );
-    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DefaultHeight));
 
     return preprocessingData;
 }

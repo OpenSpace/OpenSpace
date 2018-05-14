@@ -25,22 +25,18 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-
 #include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
-#include <modules/globebrowsing/other/pixelbuffercontainer.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-
 #include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
 #include <map>
 #include <set>
-#include <unordered_map>
+
+namespace openspace { class GlobeBrowsingModule; }
 
 namespace openspace::globebrowsing {
 
-//class GlobeBrowsingModule;
+template <typename T> class PixelBufferContainer;
+
 struct RawTile;
 class RawTileDataReader;
 
@@ -55,7 +51,9 @@ public:
      * tile loading.
      */
     AsyncTileDataProvider(const std::string& name,
-                          std::shared_ptr<RawTileDataReader> textureDataProvider);
+        std::shared_ptr<RawTileDataReader> textureDataProvider);
+
+    ~AsyncTileDataProvider();
 
     /**
      * Creates a job which asynchronously loads a raw tile. This job is enqueued.
@@ -65,7 +63,7 @@ public:
     /**
      * Get all finished jobs.
      */
-    std::vector<std::shared_ptr<RawTile>> getRawTiles();
+    std::vector<std::shared_ptr<RawTile>> rawTiles();
 
     /**
      * Get one finished job.
@@ -78,7 +76,7 @@ public:
 
     bool shouldBeDeleted();
 
-    std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
+    std::shared_ptr<RawTileDataReader> rawTileDataReader() const;
     float noDataValueAsFloat() const;
 
 protected:
@@ -119,11 +117,11 @@ private:
         _concurrentJobManager;
 
     /// nullptr if pbo is not used for texture uploading. Otherwise initialized.
-    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
+    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer = nullptr;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 
-    ResetMode _resetMode;
-    bool _shouldBeDeleted;
+    ResetMode _resetMode = ResetMode::ShouldResetAllButRawTileDataReader;
+    bool _shouldBeDeleted = false;
 };
 
 } // namespace openspace::globebrowsing

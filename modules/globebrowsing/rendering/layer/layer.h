@@ -25,21 +25,21 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
-#include <modules/globebrowsing/tile/chunktile.h>
+#include <openspace/properties/propertyowner.h>
 
+#include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/rendering/layer/layeradjustment.h>
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/vectorproperty.h>
 
 namespace openspace::globebrowsing {
 
 struct LayerGroup;
+struct TileIndex;
+struct TileDepthTransform;
 
 namespace tileprovider { class TileProvider; }
 
@@ -99,7 +99,7 @@ private:
     properties::TriggerProperty _remove;
 
     layergroupid::TypeID _type;
-    std::shared_ptr<tileprovider::TileProvider> _tileProvider;
+    std::shared_ptr<tileprovider::TileProvider> _tileProvider = nullptr;
     OtherTypesProperties _otherTypesProperties;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;

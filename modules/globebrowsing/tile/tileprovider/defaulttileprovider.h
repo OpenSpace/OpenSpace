@@ -26,36 +26,37 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___DEFAULT_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/numericalproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace { class PixelBuffer; }
 
 namespace openspace::globebrowsing {
     class AsyncTileDataProvider;
     struct RawTile;
+
+    namespace cache { class MemoryAwareTileCache; }
 } // namespace openspace::globebrowsing
 
 namespace openspace::globebrowsing::tileprovider {
 
 /**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and
-* caches them in memory using LRU caching
-*/
+ * Provides tiles loaded by <code>AsyncTileDataProvider</code> and
+ * caches them in memory using LRU caching
+ */
 class DefaultTileProvider : public TileProvider {
 public:
     DefaultTileProvider(const ghoul::Dictionary& dictionary);
     DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
-    virtual ~DefaultTileProvider() override;
+    virtual ~DefaultTileProvider();
 
     /**
-    * \returns a Tile with status OK iff it exists in in-memory
-    * cache. If not, it may enqueue some IO operations on a
-    * separate thread.
-    */
+     * \return A Tile with status OK iff it exists in in-memory cache. If not, it may
+     *         enqueue some IO operations on a separate thread.
+     */
     virtual Tile getTile(const TileIndex& tileIndex) override;
 
     virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
@@ -67,11 +68,11 @@ public:
 
 private:
     /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s,
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
+     * Collects all asynchronously downloaded <code>RawTile</code>
+     * and uses <code>createTile</code> to create <code>Tile</code>s,
+     * which are put in the LRU cache - potentially pushing out outdated
+     * Tiles.
+     */
     void initTexturesFromLoadedData();
 
     void initAsyncTileDataReader(TileTextureInitData initData);
@@ -83,7 +84,7 @@ private:
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;
     layergroupid::GroupID _layerGroupID;
-    int _preCacheLevel;
+    int _preCacheLevel = 0;
     bool _performPreProcessing;
     bool _padTiles;
 };

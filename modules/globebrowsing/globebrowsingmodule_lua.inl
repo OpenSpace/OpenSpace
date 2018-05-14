@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>

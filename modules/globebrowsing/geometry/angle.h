@@ -91,7 +91,7 @@ public:
     */
     Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 
-    Angle<T>& abs();
+    Angle<T> abs() const;
 
 private:
     /** Private constructor. Use factory methods to avoid unit confusion */

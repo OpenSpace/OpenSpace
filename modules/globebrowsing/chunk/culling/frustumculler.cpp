@@ -37,9 +37,9 @@ FrustumCuller::FrustumCuller(AABB3 viewFrustum)
 
 bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // Calculate the MVP matrix
-    glm::dmat4 modelTransform = chunk.owner().modelTransform();
-    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 modelViewProjectionTransform = glm::dmat4(
+    const glm::dmat4 modelTransform = chunk.owner().modelTransform();
+    const glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
         data.camera.sgctInternal.projectionMatrix()
     ) * viewTransform * modelTransform;
 
@@ -47,12 +47,9 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
-    std::vector<glm::vec4> clippingSpaceCorners(8);
     for (size_t i = 0; i < 8; ++i) {
-        glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
-        clippingSpaceCorners[i] = cornerClippingSpace;
-
-        glm::dvec3 ndc = glm::dvec3(
+        const glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+        const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
         );
         bounds.expand(ndc);

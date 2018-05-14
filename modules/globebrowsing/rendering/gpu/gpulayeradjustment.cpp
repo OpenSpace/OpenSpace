@@ -23,12 +23,13 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
+
 #include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 
 namespace openspace::globebrowsing {
 
 void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
-                                      const LayerAdjustment& layerAdjustment)
+                                  const LayerAdjustment& layerAdjustment)
 {
     switch (layerAdjustment.type()) {
         case layergroupid::AdjustmentTypeID::None:
@@ -36,11 +37,11 @@ void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
         case layergroupid::AdjustmentTypeID::ChromaKey: {
             gpuChromaKeyColor.setValue(
                 programObject,
-                layerAdjustment.chromaKeyColor.value()
+                layerAdjustment.chromaKeyColor()
             );
             gpuChromaKeyTolerance.setValue(
                 programObject,
-                layerAdjustment.chromaKeyTolerance.value()
+                layerAdjustment.chromaKeyTolerance()
             );
             break;
         }

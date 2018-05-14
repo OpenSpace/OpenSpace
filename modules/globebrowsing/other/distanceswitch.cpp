@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/other/distanceswitch.h>
+
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 
@@ -30,45 +31,43 @@ namespace openspace::globebrowsing {
 
 DistanceSwitch::~DistanceSwitch() {}
 
-bool DistanceSwitch::initialize() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->initialize();
+void DistanceSwitch::initialize() {
+    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
+        renderable->initialize();
     }
-    return true;
 }
 
-bool DistanceSwitch::initializeGL() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->initializeGL();
+void DistanceSwitch::initializeGL() {
+    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
+        renderable->initializeGL();
     }
-    return true;
 }
 
-bool DistanceSwitch::deinitialize() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->deinitialize();
+void DistanceSwitch::deinitialize() {
+    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
+        renderable->deinitialize();
     }
-    return true;
 }
 
-bool DistanceSwitch::deinitializeGL() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->deinitializeGL();
+void DistanceSwitch::deinitializeGL() {
+    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
+        renderable->deinitializeGL();
     }
-    return true;
 }
 
 void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    const double distanceToCamera =
-        distance(data.camera.positionVec3(), data.modelTransform.translation);
+    const double distanceToCamera = distance(
+        data.camera.positionVec3(),
+        data.modelTransform.translation
+    );
 
     // This distance will be enough to render the globe as one pixel if the field of
     // view is 'fov' radians and the screen resolution is 'res' pixels.
     const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-    int res = 2880;
+    const int res = 2880;
 
     // linear search through nodes to find which Renderable to render
-    for (std::shared_ptr<Renderable> renderable : _renderables) {
+    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
         const double distance = res * renderable->boundingSphere() / tan(fov / 2);
         if (distanceToCamera < distance) {
             renderable->render(data, tasks);
@@ -77,13 +76,13 @@ void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void DistanceSwitch::update(const UpdateData& data) {
-    for (std::shared_ptr<Renderable> renderable : _renderables) {
+    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
         renderable->update(data);
     }
 }
 
 void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable) {
-    _renderables.push_back(renderable);
+    _renderables.push_back(std::move(renderable));
 }
 
 } // namespace openspace::globebrowsing

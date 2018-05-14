@@ -25,26 +25,26 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GRIDGEOMETRY___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GRIDGEOMETRY___H__
 
-#include <modules/globebrowsing/meshes/trianglesoup.h>
-
 #include <ghoul/glm.h>
-
+#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
 #include <vector>
 
 namespace openspace::globebrowsing {
 
+class TriangleSoup;
+
 /**
  * Abstract class defining an interface used for geometries with grid structures.
- * The class <code>Grid</code> should be extended for use of geometries with a 2D
- * structure where the number of segments in x and y direction represents the number
- * of vertices + 1 in each direction.
+ * The class Grid should be extended for use of geometries with a 2D structure where the
+ * number of segments in x and y direction represents the number of vertices + 1 in each
+ * direction.
  */
 class Grid {
 public:
     Grid(int xSegments, int ySegments);
 
-    virtual ~Grid() = default;
+    virtual ~Grid();
 
     TriangleSoup& geometry();
 
@@ -62,31 +62,31 @@ public:
 
 protected:
     /**
-     * Should return the indices of vertices for a grid with size <code>xSegments</code>
-     * <code>ySegments</code>. Where the number of vertices in each direction is the
-     * number of segments + 1.
+     * Should return the indices of vertices for a grid with size \c xSegments *
+     * \c ySegments. Where the number of vertices in each direction is the number of
+     * segments + 1.
      */
     virtual std::vector<GLuint> createElements(int xSegments, int ySegments) = 0;
 
     /**
-     * Should return the positions of vertices for a grid with size <code>xSegments</code>
-     * * <code>ySegments</code>. Where the number of vertices in each direction is the
-     * number of segments + 1.
+     * Should return the positions of vertices for a grid with size \c xSegments *
+     * \c ySegments. Where the number of vertices in each direction is the number of
+     * segments + 1.
      */
     virtual std::vector<glm::vec4> createPositions(int xSegments, int ySegments) = 0;
 
     /**
      * Should return the texture coordinates of vertices for a grid with size
-     * <code>xSegments</code> * <code>ySegments</code>. Where the number of vertices in
-     * each direction is the number of segments + 1.
+     * \c xSegments * \c ySegments. Where the number of vertices in each direction is the
+     * number of segments + 1.
      */
-    virtual std::vector<glm::vec2>
-        createTextureCoordinates(int xSegments, int ySegments) = 0;
+    virtual std::vector<glm::vec2> createTextureCoordinates(int xSegments,
+        int ySegments) = 0;
 
     /**
-     * Should return the normals of vertices for a grid with size <code>xSegments</code> *
-     * <code>ySegments</code>. Where the number of vertices in each direction is the
-     * number of segments + 1.
+     * Should return the normals of vertices for a grid with size \c xSegments *
+     * \c ySegments. Where the number of vertices in each direction is the number of
+     * segments + 1.
      */
     virtual std::vector<glm::vec3> createNormals(int xSegments, int ySegments) = 0;
 

@@ -27,21 +27,15 @@
 
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-
 #include <vector>
 
 namespace openspace::globebrowsing {
 
 struct ChunkTile {
-    ChunkTile() : tile(Tile::TileUnavailable) {};
+    ChunkTile() = default;
+    ChunkTile(Tile t, TileUvTransform uv, TileDepthTransform depth);
 
-    ChunkTile(Tile t, TileUvTransform uv, TileDepthTransform depth)
-        : tile(t)
-        , uvTransform(uv)
-        , depthTransform(depth)
-    {};
-
-    Tile tile;
+    Tile tile = Tile::TileUnavailable;
     TileUvTransform uvTransform;
     TileDepthTransform depthTransform;
 };

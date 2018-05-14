@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>

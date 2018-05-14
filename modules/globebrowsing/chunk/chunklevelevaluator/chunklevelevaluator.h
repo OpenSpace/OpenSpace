@@ -39,7 +39,7 @@ namespace openspace::globebrowsing::chunklevelevaluator {
 class Evaluator {
 public:
     virtual ~Evaluator() = default;
-    static const int UnknownDesiredLevel = -1;
+    constexpr static const int UnknownDesiredLevel = -1;
 
     virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
 };

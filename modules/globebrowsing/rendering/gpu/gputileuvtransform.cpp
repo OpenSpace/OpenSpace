@@ -24,10 +24,6 @@
 
 #include <modules/globebrowsing/rendering/gpu/gputileuvtransform.h>
 
-//#include <modules/globebrowsing/rendering/layermanager.h>
-//#include <modules/globebrowsing/tile/chunktile.h>
-//#include <modules/globebrowsing/tile/tile.h>
-//#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace::globebrowsing {
