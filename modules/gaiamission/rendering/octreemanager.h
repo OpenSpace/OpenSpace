@@ -58,7 +58,7 @@ public:
     OctreeManager();
     ~OctreeManager();
 
-    void initOctree(long long cpuRamBudget = 0);
+    void initOctree(long long cpuRamBudget = 0, int maxDist = 0, int maxStarsPerNode = 0);
     void initBufferIndexStack(long long maxStarsOrNodes, bool useVBO, bool datasetFitInMemory);
     void insert(std::vector<float> starValues);
     void sliceLodData(size_t branchIndex = 8);

@@ -49,6 +49,8 @@ private:
     
     std::string _inFileOrFolderPath;
     std::string _outFileOrFolderPath;
+    int _maxDist;
+    int _maxStarsPerNode;
     bool _singleFileInput;
 
     std::shared_ptr<OctreeManager> _octreeManager;

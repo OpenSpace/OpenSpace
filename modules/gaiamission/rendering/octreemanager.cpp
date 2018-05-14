@@ -58,7 +58,7 @@ OctreeManager::OctreeManager()
 OctreeManager::~OctreeManager() {   }
 
 // Initialize a one layer Octree with root and 8 children. Covers all stars.
-void OctreeManager::initOctree(long long cpuRamBudget) {
+void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStarsPerNode) {
 
     LDEBUG("Initializing Octree");
     _root = std::make_unique<OctreeNode>();
@@ -76,6 +76,13 @@ void OctreeManager::initOctree(long long cpuRamBudget) {
     _valuesPerStar = POS_SIZE + COL_SIZE + VEL_SIZE;
     _cpuRamBudget = cpuRamBudget;
     _parentNodeOfCamera = 8;
+
+    if (maxDist > 0) {
+        MAX_DIST = static_cast<size_t>(maxDist);
+    }
+    if (maxStarsPerNode > 0) {
+        MAX_STARS_PER_NODE = static_cast<size_t>(maxStarsPerNode);
+    }
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;

@@ -38,6 +38,8 @@
 namespace {
     const char* KeyInFileOrFolderPath = "InFileOrFolderPath";
     const char* KeyOutFileOrFolderPath = "OutFileOrFolderPath";
+    const char* KeyMaxDist = "MaxDist";
+    const char* KeyMaxStarsPerNode = "MaxStarsPerNode";
     const char* KeySingleFileInput = "SingleFileInput";
 
     constexpr const char* _loggerCat = "ConstructOctreeTask";
@@ -49,6 +51,8 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary)
     : _inFileOrFolderPath("")
     , _outFileOrFolderPath("")
     , _singleFileInput(false)
+    , _maxDist(0)
+    , _maxStarsPerNode(0)
 {
     
     openspace::documentation::testSpecificationAndThrow(
@@ -59,6 +63,14 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary)
 
     _inFileOrFolderPath = absPath(dictionary.value<std::string>(KeyInFileOrFolderPath));
     _outFileOrFolderPath = absPath(dictionary.value<std::string>(KeyOutFileOrFolderPath));
+
+    if (dictionary.hasKey(KeyMaxDist)) {
+        _maxDist = static_cast<int>(dictionary.value<double>(KeyMaxDist));
+    }
+
+    if (dictionary.hasKey(KeyMaxStarsPerNode)) {
+        _maxStarsPerNode = static_cast<int>(dictionary.value<double>(KeyMaxStarsPerNode));
+    }
 
     if (dictionary.hasKey(KeySingleFileInput)) {
         _singleFileInput = dictionary.value<bool>(KeySingleFileInput);
@@ -94,7 +106,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
     int32_t nValues = 0;
     int32_t nValuesPerStar = 0;
 
-    _octreeManager->initOctree();
+    _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
     LINFO("Reading data file: " + _inFileOrFolderPath);
 
@@ -179,12 +191,12 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     std::vector<std::string> allInputFiles = currentDir.readFiles();
     std::vector<float> filterValues;
 
-    _indexOctreeManager->initOctree();
+    _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
     float processOneFile = 1.f / allInputFiles.size();
 
-    LINFO("MAX_DIST: " + std::to_string(_octreeManager->maxDist()) +
-        " - MAX_STARS_PER_NODE: " + std::to_string(_octreeManager->maxStarsPerNode()));
+    LINFO("MAX_DIST: " + std::to_string(_indexOctreeManager->maxDist()) +
+        " - MAX_STARS_PER_NODE: " + std::to_string(_indexOctreeManager->maxStarsPerNode()));
 
     // TODO: Parallelize!
     for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
@@ -322,6 +334,18 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 Optional::No,
                 "If SingleFileInput is set to true then this specifies the output file name (including "
                 "full path). Otherwise this specifies the path to the folder which to save all files.",
+            },
+            {
+                KeyMaxDist,
+                new IntVerifier,
+                Optional::Yes,
+                "If set it determines what MAX_DIST to use when creating Octree."
+            },
+            {
+                KeyMaxStarsPerNode,
+                new IntVerifier,
+                Optional::Yes,
+                "If set it determines what MAX_STAR_PER_NODE to use when creating Octree."
             },
             {
                 KeySingleFileInput,
