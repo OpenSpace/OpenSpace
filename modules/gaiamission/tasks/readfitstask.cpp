@@ -185,26 +185,25 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
 
     // Define what columns to read. Append additional filter parameters to default rendering parameters.
     _allColumnNames = std::vector<std::string>();
+    // Read in the order of table in file.
     auto defaultColumnNames = std::vector<std::string>({
-        "l",
-        "b",
+        "ra",
+        "ra_error",
+        "dec",
+        "dec_error",
         "parallax",
+        "parallax_error",
+        "pmra",
+        "pmra_error",
+        "pmdec",
+        "pmdec_error",
         "phot_g_mean_mag",
         "phot_bp_mean_mag",
         "phot_rp_mean_mag",
         "bp_rp",
         "bp_g",
         "g_rp",
-        "pmra",
-        "pmdec",
         "radial_velocity",
-        "ra",
-        "ra_error",
-        "dec",
-        "dec_error",
-        "parallax_error",
-        "pmra_error",
-        "pmdec_error",
         "radial_velocity_error",
         });
     _allColumnNames.insert(_allColumnNames.end(), defaultColumnNames.begin(), defaultColumnNames.end());
@@ -217,7 +216,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
     LINFO(allNames);
 
     // Declare how many values to save for each star.
-    int32_t nValuesPerStar = 18;
+    int32_t nValuesPerStar = 24;
     size_t nDefaultColumns = defaultColumnNames.size();
     auto fitsFileReader = std::make_shared<FitsFileReader>(false);
 
@@ -251,6 +250,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
                     totalStars += writeOctantToFile(octants[i], i, isFirstWrite, nValuesPerStar);
 
                     octants[i].clear();
+                    octants[i].shrink_to_fit();
                 }
             }
         }
