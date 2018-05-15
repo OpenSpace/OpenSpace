@@ -575,7 +575,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _projectionComponent.generateMipMap();
     }
 
-    _camScaling = data.camera.scaling();
+    _camScaling = glm::vec2(1.f, 0.f); // Unit scaling
     _up = data.camera.lookUpVectorCameraSpace();
 
     if (_capture && _projectionComponent.doesPerformProjection()) {

@@ -407,7 +407,7 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
     // Create link between parent and child
     child->_parent = this;
     SceneGraphNode* childRaw = child.get();
-   _children.push_back(std::move(child));
+    _children.push_back(std::move(child));
 
     // Set scene of child (and children recursively)
     childRaw->setScene(_scene);
@@ -627,7 +627,7 @@ Scene* SceneGraphNode::scene() {
 
 void SceneGraphNode::setScene(Scene* scene) {
     // Unregister from previous scene, bottom up
-    traversePostOrder([scene](SceneGraphNode* node) {
+    traversePostOrder([](SceneGraphNode* node) {
         if (node->_scene) {
             node->_scene->unregisterNode(node);
         }

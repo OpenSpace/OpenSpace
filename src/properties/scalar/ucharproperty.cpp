@@ -50,7 +50,7 @@ bool toLuaConversion(lua_State* state, unsigned char value) {
 
 unsigned char fromStringConversion(std::string val, bool& success) {
     std::stringstream s(val);
-    unsigned char v;
+    unsigned char v = 0;
     s >> v;
     success = !s.fail();
     if (success) {

@@ -52,8 +52,6 @@ public:
     virtual void initialize() = 0;
     virtual void deinitialize() = 0;
 
-    virtual void setCamera(Camera* camera) = 0;
-    virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
     virtual void setNAaSamples(int nAaSamples) = 0;
     virtual void setHDRExposure(float hdrExposure) = 0;
@@ -77,7 +75,8 @@ public:
 
     virtual void update() = 0;
 
-    virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;
+    virtual void render(Scene* scene, Camera* camera, float blackoutFactor,
+        bool doPerformanceMeasurements) = 0;
     /**
      * Update render data
      * Responsible for calling renderEngine::setRenderData

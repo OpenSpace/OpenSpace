@@ -30,6 +30,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
@@ -540,7 +541,7 @@ void ScreenSpaceRenderable::draw(glm::mat4 modelTransform) {
 
     _shader->setUniform(
         _uniformCache.viewProj,
-        OsEng.renderEngine().camera()->viewProjectionMatrix()
+        OsEng.renderEngine().scene()->camera()->viewProjectionMatrix()
     );
 
     ghoul::opengl::TextureUnit unit;

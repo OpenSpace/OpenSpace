@@ -28,7 +28,6 @@
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
@@ -219,7 +218,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
     glm::vec3 directionToSunViewSpace =
-        glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+        glm::normalize(glm::mat3(data.camera.combinedViewMatrix()) * directionToSun);
 
     _programObject->setUniform(
         _uniformCache.directionToSunViewSpace,

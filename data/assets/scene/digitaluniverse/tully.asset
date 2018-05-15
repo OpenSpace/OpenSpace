@@ -45,6 +45,8 @@ local tullyPoints = {
         -- Max size in pixels
         BillboardMaxSize = 50.0,
         BillboardMinSize = 0.0,
+        CorrectionSizeEndDistance = 20.55,
+        CorrectionSizeFactor = 10.45,
     },
     GUI = {
         Name = "Tully Galaxies",

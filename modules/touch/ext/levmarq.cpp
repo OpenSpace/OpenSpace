@@ -1,4 +1,4 @@
-﻿/*
+/*
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
 files(the "Software"), to deal in the Software without
@@ -26,6 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <modules/touch/ext/levmarq.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
 
 namespace {
     std::chrono::milliseconds TimeLimit(200);
@@ -82,6 +83,20 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
     double* d = new double[npar];
     double* delta = new double[npar];
     double* newpar = new double[npar];
+    
+    defer {
+        // deallocate the arrays
+        for (i = 0; i < npar; i++) {
+            delete[] h[i];
+            delete[] ch[i];
+        }
+        delete[] h;
+        delete[] ch;
+        delete[] g;
+        delete[] d;
+        delete[] delta;
+        delete[] newpar;
+    };
 
     verbose = lmstat->verbose;
     nit = lmstat->max_it;
@@ -215,18 +230,6 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
     lmstat->final_err = err;
     lmstat->final_derr = derr;
     lmstat->data = data;
-
-    // deallocate the arrays
-    for (i = 0; i < npar; i++) {
-        delete[] h[i];
-        delete[] ch[i];
-    }
-    delete[] h;
-    delete[] ch;
-    delete[] g;
-    delete[] d;
-    delete[] delta;
-    delete[] newpar;
 
     return (it != lmstat->max_it);
 }

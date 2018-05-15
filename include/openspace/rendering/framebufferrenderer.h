@@ -44,7 +44,7 @@ namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -54,6 +54,15 @@ class Scene;
 class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
+public: 
+    typedef std::map<
+        VolumeRaycaster*, 
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    > RaycasterProgObjMap;
+    typedef std::map<
+        Deferredcaster*,
+        std::unique_ptr<ghoul::opengl::ProgramObject>
+    > DeferredcasterProgObjMap;
 public:
     FramebufferRenderer();
     virtual ~FramebufferRenderer();
@@ -67,8 +76,6 @@ public:
     void updateHDRData();
     void updateMSAASamplingPattern();
 
-    void setCamera(Camera* camera) override;
-    void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
     void setHDRExposure(float hdrExposure) override;
@@ -77,11 +84,13 @@ public:
 
     float hdrBackground() const override;
     int nAaSamples() const override;
-    /*const double * mSSAPattern() const override;*/
     std::vector<double> mSSAPattern() const override;
 
     void update() override;
-    void render(float blackoutFactor, bool doPerformanceMeasurements) override;
+    void performRaycasterTasks(const std::vector<RaycasterTask>& tasks);
+    void performDeferredTasks(const std::vector<DeferredcasterTask>& tasks);
+    void render(Scene* scene, Camera* camera, float blackoutFactor,
+        bool doPerformanceMeasurements) override;
 
     /**
      * Update render data
@@ -95,21 +104,12 @@ public:
 
 private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
-    std::map<
-        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
-    > _exitPrograms;
-    std::map<
-        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
-    > _raycastPrograms;
-    std::map<
-        VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>
-    > _insideRaycastPrograms;
+    RaycasterProgObjMap _exitPrograms;
+    RaycasterProgObjMap _raycastPrograms;
+    RaycasterProgObjMap _insideRaycastPrograms;
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
-    std::map<
-        Deferredcaster*,
-        std::unique_ptr<ghoul::opengl::ProgramObject>
-    > _deferredcastPrograms;
+    DeferredcasterProgObjMap _deferredcastPrograms;
     std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
@@ -131,9 +131,8 @@ private:
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
+    bool _dirtyMsaaSamplingPattern;
 
-    Camera* _camera;
-    Scene* _scene;
     glm::vec2 _resolution;
     int _nAaSamples;
     float _hdrExposure;

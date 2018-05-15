@@ -27,7 +27,7 @@
 layout (location = 0) out vec4 finalColor;
 
 in vec2 vTexCoord;
-flat in vec3 vPosition;
+// flat in vec3 vPosition;
 
 uniform int currentSample;
 uniform sampler2DMS pixelSizeTexture;
