@@ -34,9 +34,9 @@
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo ScalingInfo = {
-        "Scaling",
-        "Scaling",
+    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+        "Size",
+        "Size",
         "" // @TODO Missing documentation
     };
 
@@ -75,7 +75,7 @@ namespace openspace {
 
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scaling(ScalingInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
+    , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
@@ -83,24 +83,24 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
 {
     float stepSize, scalingExponent;
-    glm::vec3 scaling, translation, rotation;
+    glm::vec3 size, translation, rotation;
     glm::vec4 color;
-    if (dictionary.getValue("ScalingExponent", scalingExponent)) {
+    if (dictionary.getValue(ScalingExponentInfo.identifier, scalingExponent)) {
         _scalingExponent = static_cast<int>(scalingExponent);
     }
-    if (dictionary.getValue("Scaling", scaling)) {
-        _scaling = scaling;
+    if (dictionary.getValue(SizeInfo.identifier, size)) {
+        _size = size;
     }
-    if (dictionary.getValue("Translation", translation)) {
+    if (dictionary.getValue(TranslationInfo.identifier, translation)) {
         _translation = translation;
     }
-    if (dictionary.getValue("Rotation", rotation)) {
+    if (dictionary.getValue(RotationInfo.identifier, rotation)) {
         _rotation = rotation;
     }
-    if (dictionary.getValue("Color", color)) {
+    if (dictionary.getValue(ColorInfo.identifier, color)) {
         _color = color;
     }
-    if (dictionary.getValue("StepSize", stepSize)) {
+    if (dictionary.getValue(StepSizeInfo.identifier, stepSize)) {
         _stepSize = stepSize;
     }
 }
@@ -124,7 +124,7 @@ void RenderableToyVolume::initializeGL() {
 
     onEnabledChange(onChange);
 
-    addProperty(_scaling);
+    addProperty(_size);
     addProperty(_scalingExponent);
     addProperty(_stepSize);
     addProperty(_translation);
@@ -158,7 +158,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
 
         transform = glm::scale(
             transform,
-            static_cast<glm::vec3>(_scaling) *
+            static_cast<glm::vec3>(_size) *
                 std::pow(10.0f, static_cast<float>(_scalingExponent))
         );
 

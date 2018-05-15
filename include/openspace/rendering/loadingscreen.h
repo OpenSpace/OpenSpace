@@ -38,6 +38,7 @@
 
 namespace ghoul::fontrendering {
     class Font;
+    class FontRenderer;
 } // namespace ghoul::fontrendering
 
 namespace ghoul::opengl {
@@ -101,6 +102,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::Texture> _logoTexture;
 
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _renderer;
     std::shared_ptr<ghoul::fontrendering::Font> _loadingFont;
     std::shared_ptr<ghoul::fontrendering::Font> _messageFont;
     std::shared_ptr<ghoul::fontrendering::Font> _itemFont;

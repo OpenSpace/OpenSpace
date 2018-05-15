@@ -187,7 +187,7 @@ void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
     program.setUniform("campos", camera.position().vec4());
     program.setUniform("objpos", position.vec4());
     program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
-    program.setUniform("scaling", camera.scaling());
+    program.setUniform("scaling", glm::vec2(1.f, 0.f));
 }
 
 Renderable::RenderBin Renderable::renderBin() const {

@@ -134,6 +134,48 @@ namespace {
         "Apply fly to node",
         "Triggering this property makes the camera move to the focus node."
     };
+    static const openspace::properties::Property::PropertyInfo
+        StereoInterpolationTimeInfo = {
+        "StereoInterpolationTime",
+        "Stereo interpolation time",
+        "The time to interpolate to a new stereoscopic depth "
+        "when the focus node is changed"
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+        RotateToFocusInterpolationTimeInfo = {
+        "RotateToFocusInterpolationTime",
+        "Rotate to focus interpolation time",
+        "The time to interpolate the camera rotation "
+        "when the focus node is changed"
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+        UseAdaptiveStereoscopicDepthInfo = {
+            "UseAdaptiveStereoscopicDepth",
+            "Adaptive Steroscopic Depth",
+            "Dynamically adjust the view scaling based on the distance to the surface of "
+            "the focus node. If enabled, view scale will be set to "
+            "StereoscopicDepthOfFocusSurface / distance. "
+            "If disabled, view scale will be set to 10^StaticViewScaleExponent."
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+        StaticViewScaleExponentInfo = {
+            "StaticViewScaleExponent",
+            "Static View Scale Exponent",
+            "Statically scale the world by 10^StaticViewScaleExponent. "
+            "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
+        };
+
+    static const openspace::properties::Property::PropertyInfo
+        StereoscopicDepthOfFocusSurfaceInfo = {
+            "StereoscopicDepthOfFocusSurface",
+            "Stereoscopic depth of the surface in focus",
+            "Set the stereoscopically perceived distance (in meters) to the surface of "
+            "the focus node. "
+            "Only used if UseAdaptiveStereoscopicDepthInfo is set to true."
+        };
 } // namespace
 
 namespace openspace::interaction {
@@ -165,6 +207,11 @@ OrbitalNavigator::OrbitalNavigator()
     , _joystickSensitivity(JoystickSensitivityInfo, 10.0f, 1.0f, 50.f)
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
+    , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
+    , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
+    , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
+    , _rotateToFocusInterpolationTime(RotateToFocusInterpolationTimeInfo, 2.0, 0.0, 10.0)
+    , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
 {
     auto smoothStep =
         [](double t) {
@@ -198,6 +245,7 @@ OrbitalNavigator::OrbitalNavigator()
         return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
     };
     _rotateToFocusNodeInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
+    _cameraToSurfaceDistanceInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
 
     // Define callback functions for changed properties
     _friction.roll.onChange([&]() {
@@ -233,6 +281,14 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
     addProperty(_overview);
+
+    addProperty(_useAdaptiveStereoscopicDepth);
+    addProperty(_staticViewScaleExponent);
+    addProperty(_stereoscopicDepthOfFocusSurface);
+
+    addProperty(_rotateToFocusInterpolationTime);
+    addProperty(_stereoInterpolationTime);
+
     addProperty(_mouseSensitivity);
     addProperty(_joystickSensitivity);
 }
@@ -384,16 +440,57 @@ void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaT
         // Update the camera state
         camera.setPositionVec3(camPos);
         camera.setRotation(camRot.globalRotation * camRot.localRotation);
+
+        if (_useAdaptiveStereoscopicDepth) {
+            double targetCameraToSurfaceDistance = glm::length(
+                cameraToSurfaceVector(camPos, centerPos, posHandle)
+            );
+            if (_directlySetStereoDistance) {
+                _currentCameraToSurfaceDistance = targetCameraToSurfaceDistance;
+                _directlySetStereoDistance = false;
+            } else {
+                _currentCameraToSurfaceDistance = interpolateCameraToSurfaceDistance(
+                    deltaTime,
+                    _currentCameraToSurfaceDistance,
+                    targetCameraToSurfaceDistance);
+            }
+
+            camera.setScaling(
+                _stereoscopicDepthOfFocusSurface /
+                static_cast<float>(_currentCameraToSurfaceDistance)
+            );
+        } else {
+            camera.setScaling(glm::pow(10.f, _staticViewScaleExponent));
+        }
     }
 }
 
+glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& camPos,
+    const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle)
+{
+    glm::dmat4 modelTransform = _focusNode->modelTransform();
+    glm::dvec3 posDiff = camPos - centerPos;
+    glm::dvec3 centerToActualSurfaceModelSpace =
+        posHandle.centerToReferenceSurface +
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+
+    glm::dvec3 centerToActualSurface =
+        glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
+
+    return centerToActualSurface - posDiff;
+}
+
 void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
+    if (!_focusNode) {
+        _directlySetStereoDistance = true;
+    }
+
     _focusNode = focusNode;
     _flyTo = true;
 
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
+    if (focusNode != nullptr) {
+        _previousFocusNodePosition = focusNode->worldPosition();
+        _previousFocusNodeRotation = glm::quat_cast(focusNode->worldRotationMatrix());
     }
 }
 
@@ -407,9 +504,12 @@ void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
 
     // Minimum is two second. Otherwise proportional to angle
     _rotateToFocusNodeInterpolator.setInterpolationTime(static_cast<float>(
-        glm::max(angle * 2.0, 2.0) 
+        glm::max(angle, 1.0) * _rotateToFocusInterpolationTime
     ));
     _rotateToFocusNodeInterpolator.start();
+
+    _cameraToSurfaceDistanceInterpolator.setInterpolationTime(_stereoInterpolationTime);
+    _cameraToSurfaceDistanceInterpolator.start();
 }
 
 bool OrbitalNavigator::followingNodeRotation() const {
@@ -495,7 +595,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-                                                    const glm::dquat& localCameraRotation)
+                                                      const glm::dquat& localCameraRotation)
 {
     if (_rotateToFocusNodeInterpolator.isInterpolating()) {
         double t = _rotateToFocusNodeInterpolator.value();
@@ -517,6 +617,49 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     else {
         return localCameraRotation;
     }
+    
+    double t = _rotateToFocusNodeInterpolator.value();
+    _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+    _rotateToFocusNodeInterpolator.step();
+    
+    glm::dquat result = glm::slerp(
+        localCameraRotation,
+        glm::dquat(glm::dvec3(0.0)),
+        glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0)
+    );
+
+    if (angle(result) < 0.01) {
+        _rotateToFocusNodeInterpolator.end();
+    }
+    
+    return result;
+}
+
+double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
+                                                            double currentDistance,
+                                                            double targetDistance
+) {
+    if (!_cameraToSurfaceDistanceInterpolator.isInterpolating()) {
+        return targetDistance;
+    }
+
+    double t = _cameraToSurfaceDistanceInterpolator.value();
+    _cameraToSurfaceDistanceInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+    _cameraToSurfaceDistanceInterpolator.step();
+
+    // Interpolate distance logarithmically.
+    double result = glm::exp(glm::mix(
+        glm::log(currentDistance),
+        glm::log(targetDistance),
+        glm::min(t * _cameraToSurfaceDistanceInterpolator.deltaTimeScaled(), 1.0))
+    );
+
+    double ratio = currentDistance / targetDistance;
+    if (glm::abs(ratio - 1.0) < 0.000001) {
+        _cameraToSurfaceDistanceInterpolator.end();
+    }
+
+    return result;
 }
 
 glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,

@@ -49,6 +49,7 @@ struct CameraKeyframe {
     glm::dquat _rotation;
     bool _followNodeRotation;
     std::string _focusNode;
+    float _scale;
 
     double _timestamp;
 
@@ -88,6 +89,12 @@ struct CameraKeyframe {
             _focusNode.data() + nodeNameLength
         );
 
+        buffer.insert(
+            buffer.end(),
+            reinterpret_cast<char*>(&_scale),
+            reinterpret_cast<char*>(&_scale) + sizeof(_scale)
+        );
+
         // Add timestamp
         buffer.insert(
             buffer.end(),
@@ -122,6 +129,11 @@ struct CameraKeyframe {
         offset += size;
         size = nodeNameLength;
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
+        offset += size;
+
+        // Scale
+        size = sizeof(_scale);
+        memcpy(&_scale, buffer.data() + offset, size);
         offset += size;
 
         // Timestamp
