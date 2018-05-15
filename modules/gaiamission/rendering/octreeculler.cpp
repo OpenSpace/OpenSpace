@@ -41,7 +41,7 @@ OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
 OctreeCuller::~OctreeCuller() {   }
 
 // Returns true if any part of the node is visible in the current view. 
-bool OctreeCuller::isVisible(std::vector<glm::dvec4> corners, const glm::mat4 mvp) {
+bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners, const glm::mat4& mvp) {
     
     // Create a bounding box in screen space from node boundaries.
     _nodeBounds = globebrowsing::AABB3();
@@ -59,7 +59,7 @@ bool OctreeCuller::isVisible(std::vector<glm::dvec4> corners, const glm::mat4 mv
 }
 
  //Returns the size [in pixels] of the node in screen space. 
-glm::vec2 OctreeCuller::getNodeSizeInPixels(const glm::vec2 screenSize) {
+glm::vec2 OctreeCuller::getNodeSizeInPixels(const glm::vec2& screenSize) {
     // Use the same AABB as before {created in isVisible()}. 
     // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
     glm::vec3 size = _nodeBounds.size() / 2.f;

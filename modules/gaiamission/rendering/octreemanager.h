@@ -58,24 +58,26 @@ public:
     OctreeManager();
     ~OctreeManager();
 
-    void initOctree(long long cpuRamBudget = 0, int maxDist = 0, int maxStarsPerNode = 0);
-    void initBufferIndexStack(long long maxStarsOrNodes, bool useVBO, bool datasetFitInMemory);
-    void insert(std::vector<float> starValues);
+    void initOctree(const long long& cpuRamBudget = 0, int maxDist = 0, 
+        int maxStarsPerNode = 0);
+    void initBufferIndexStack(const long long& maxStarsOrNodes, bool useVBO, 
+        bool datasetFitInMemory);
+    void insert(const std::vector<float>& starValues);
     void sliceLodData(size_t branchIndex = 8);
     void printStarsPerNode() const;
 
-    void fetchSurroundingNodes(glm::dvec3 cameraPos, glm::dvec3 cameraViewDir);
-    std::map<int, std::vector<float>> traverseData(const glm::mat4 mvp, const glm::vec2 screenSize, 
-        int& deltaStars, gaiamission::RenderOption option);
+    void fetchSurroundingNodes(const glm::dvec3& cameraPos, const glm::dvec3& cameraViewDir);
+    std::map<int, std::vector<float>> traverseData(const glm::mat4& mvp, 
+        const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option);
 
     std::vector<float> getAllData(gaiamission::RenderOption option);
     void clearAllData(int branchIndex = -1);
 
     void writeToFile(std::ofstream& outFileStream, bool writeData);
     int readFromFile(std::ifstream& inFileStream, bool readData, 
-        std::string folderPath = std::string());
+        const std::string& folderPath = std::string());
 
-    void writeToMultipleFiles(std::string outFolderPath, size_t branchIndex);
+    void writeToMultipleFiles(const std::string& outFolderPath, size_t branchIndex);
 
     size_t numLeafNodes() const;
     size_t numInnerNodes() const;
@@ -104,26 +106,29 @@ private:
     // DR2_rv [7.2M] - A MAX_DIST of 15 kPc works fine with down to 10 kSPN.
     // DR2_subset [42.9M] - A MAX_DIST of 100 kPc works fine with down to 20 kSPN.
     // DR2_full [1.7B] - A MAX_DIST of 1000 kPc works fine with down to 100 kSPN.
-    size_t MAX_DIST = 1000; // [kPc]
-    size_t MAX_STARS_PER_NODE = 100000; 
+    size_t MAX_DIST = 100; // [kPc]
+    size_t MAX_STARS_PER_NODE = 20000; 
 
     const int DEFAULT_INDEX = -1;
-    const float MIN_TOTAL_PIXELS_LOD = 0.0; // Will be multiplied by depth.
+    const float MIN_TOTAL_PIXELS_LOD = 50.0; // Will be multiplied by depth.
     const std::string BINARY_SUFFIX = ".bin"; 
 
-    size_t getChildIndex(float posX, float posY, float posZ,
-        float origX = 0.0, float origY = 0.0, float origZ = 0.0);
+    size_t getChildIndex(const float& posX, const float& posY, const float& posZ,
+        const float& origX = 0.0, const float& origY = 0.0, const float& origZ = 0.0);
     bool insertInNode(std::shared_ptr<OctreeNode> node,
-        std::vector<float> starValues, int depth = 1);
+        const std::vector<float>& starValues, int depth = 1);
     void sliceNodeLodCache(std::shared_ptr<OctreeNode> node);
-    void storeStarData(std::shared_ptr<OctreeNode> node, std::vector<float> starValues);
-    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node, std::string prefix) const;
+    void storeStarData(std::shared_ptr<OctreeNode> node, 
+        const std::vector<float>& starValues);
+    std::string printStarsPerNode(std::shared_ptr<OctreeNode> node, 
+        const std::string& prefix) const;
     std::map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
-        const glm::mat4 mvp, const glm::vec2 screenSize, int& deltaStars, 
+        const glm::mat4& mvp, const glm::vec2& screenSize, int& deltaStars, 
         gaiamission::RenderOption option);
     std::map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<OctreeNode> node, 
         int& deltaStars, bool recursive = true);
-    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, gaiamission::RenderOption option);
+    std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, 
+        gaiamission::RenderOption option);
     void clearNodeData(std::shared_ptr<OctreeNode> node);
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
     bool updateBufferIndex(std::shared_ptr<OctreeNode> node);
@@ -133,8 +138,9 @@ private:
     int readNodeFromFile(std::ifstream& inFileStream, 
         std::shared_ptr<OctreeNode> node, bool readData);
 
-    void writeNodeToMultipleFiles(std::string outFilePrefix, std::shared_ptr<OctreeNode> node);
-    void findAndFetchNeighborNode(unsigned long long firstParentId, int x, int y, int z);
+    void writeNodeToMultipleFiles(const std::string& outFilePrefix, 
+        std::shared_ptr<OctreeNode> node);
+    void findAndFetchNeighborNode(const unsigned long long& firstParentId, int x, int y, int z);
     void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode, 
         bool recursive);
     void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);

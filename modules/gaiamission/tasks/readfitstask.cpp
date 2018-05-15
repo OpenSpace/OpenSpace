@@ -258,7 +258,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
     LINFO(fmt::format("A total of {} stars were written to binary files.", totalStars));
 }
 
-int ReadFitsTask::writeOctantToFile(std::vector<float> octantData, int index, 
+int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int index, 
     std::vector<bool>& isFirstWrite, int nValuesPerStar) {
 
     std::string outPath = _outFileOrFolderPath + "octant_" + std::to_string(index) + ".bin";

@@ -77,9 +77,9 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary)
     }
 
     _octreeManager = std::make_shared<OctreeManager>();
-    _indexOctreeManager = std::make_unique<OctreeManager>();
-}
+    _indexOctreeManager = std::make_shared<OctreeManager>();
 
+}
 ConstructOctreeTask::~ConstructOctreeTask() {}
 
 std::string ConstructOctreeTask::description() {
@@ -171,7 +171,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     
     int32_t nStars = 0;
     int32_t nValuesPerStar = 0;
-    float maxRadius = 0.0;
+    /*float maxRadius = 0.0;
     int starsOutside10 = 0;
     int starsOutside25 = 0;
     int starsOutside50 = 0;
@@ -185,11 +185,12 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     int starsOutside1000 = 0;
     int starsOutside1500 = 0;
     int starsOutside2000 = 0;
-    int starsOutside5000 = 0;
+    int starsOutside5000 = 0;*/
 
     ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
     std::vector<std::string> allInputFiles = currentDir.readFiles();
     std::vector<float> filterValues;
+    auto writeThreads = std::vector<std::thread>(8);
 
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
@@ -226,7 +227,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
                     _indexOctreeManager->insert(renderValues);
                     nStarsInfile++;
 
-                    float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])), 
+                    /*float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])), 
                         fabs(renderValues[2]));
                     if (maxVal > maxRadius) maxRadius = maxVal;
                     // Calculate how many stars are outside of different thresholds.
@@ -243,7 +244,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
                     if (maxVal > 1000) starsOutside1000++;
                     if (maxVal > 1500) starsOutside1500++;
                     if (maxVal > 2000) starsOutside2000++;
-                    if (maxVal > 5000) starsOutside5000++;
+                    if (maxVal > 5000) starsOutside5000++;*/
                 }
             }
             inFileStream.close();
@@ -257,7 +258,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         LINFO("Slicing LOD data!");
         _indexOctreeManager->sliceLodData(idx);
 
-        progressCallback((idx + 1) * processOneFile / 2.f);
+        progressCallback((idx + 1) * processOneFile);
         nStars += nStarsInfile;
 
         LINFO(fmt::format("Writing {} stars to octree files!", nStarsInfile));
@@ -265,20 +266,17 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
             "\n Number of inner nodes: " + std::to_string(_indexOctreeManager->numInnerNodes()) +
             "\n Total depth of tree: " + std::to_string(_indexOctreeManager->totalDepth()));
 
-        // Write to several files! TODO: What happens if we don't use 8 files?
-        _indexOctreeManager->writeToMultipleFiles(_outFileOrFolderPath, idx);
-
-        // Remove all data from Octree structure.
-        LINFO("Clear all data from Octree!");
-        _indexOctreeManager->clearAllData(static_cast<int>(idx));
-
-        progressCallback((idx + 1) * processOneFile);
+        // Write to 8 separate files in a separate thread. Data will be cleared after it 
+        // has been written. Store joinable thread for later sync.
+        std::thread t(&OctreeManager::writeToMultipleFiles, _indexOctreeManager,
+            _outFileOrFolderPath, idx);
+        writeThreads[idx] = std::move(t);
     }
 
     LINFO("A total of " + std::to_string(nStars) + " stars where read from files and distributed into "
         + std::to_string(_indexOctreeManager->totalNodes()) + " total nodes!");
 
-    LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + "\n Number of stars outside of:" +  
+    /*LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + "\n Number of stars outside of:" +  
         " - 10kPc is " + std::to_string(starsOutside10) + "\n" + 
         " - 25kPc is " + std::to_string(starsOutside25) + "\n" +
         " - 50kPc is " + std::to_string(starsOutside50) + "\n" + 
@@ -292,7 +290,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         " - 1000kPc is " + std::to_string(starsOutside1000) + "\n" +
         " - 1500kPc is " + std::to_string(starsOutside1500) + "\n" +
         " - 2000kPc is " + std::to_string(starsOutside2000) + "\n" +
-        " - 5000kPc is " + std::to_string(starsOutside5000));
+        " - 5000kPc is " + std::to_string(starsOutside5000));*/
 
     // Write index file of Octree structure.
     std::string indexFileOutPath = _outFileOrFolderPath + "index.bin";
@@ -306,6 +304,11 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     }
     else {
         LERROR(fmt::format("Error opening file: {} as index output file.", indexFileOutPath));
+    }
+
+    // Make sure all threads are done.
+    for (int i = 0; i < 8; ++i) {
+        writeThreads[i].join();
     }
 }
 

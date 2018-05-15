@@ -1692,7 +1692,7 @@ bool RenderableGaiaStars::readDataFile() {
     return _initialDataFilesLoaded;
 }
 
-int RenderableGaiaStars::readFitsFile(std::string filePath) {
+int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fitsFileReader(false);
@@ -1711,7 +1711,7 @@ int RenderableGaiaStars::readFitsFile(std::string filePath) {
     return fullData.size() / nReadValuesPerStar;
 }
 
-int RenderableGaiaStars::readSpeckFile(std::string filePath) {
+int RenderableGaiaStars::readSpeckFile(const std::string& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
@@ -1729,7 +1729,7 @@ int RenderableGaiaStars::readSpeckFile(std::string filePath) {
     return fullData.size() / nReadValuesPerStar;
 }
 
-int RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
+int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
 
     std::vector<float> fullData;
     int nReadStars = 0;
@@ -1767,7 +1767,7 @@ int RenderableGaiaStars::readBinaryRawFile(std::string filePath) {
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeFile(std::string filePath) {
+int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
     int nReadStars = 0;
 
     std::ifstream fileStream(filePath, std::ifstream::binary);
@@ -1783,7 +1783,7 @@ int RenderableGaiaStars::readBinaryOctreeFile(std::string filePath) {
     return nReadStars;
 }
 
-int RenderableGaiaStars::readBinaryOctreeStructureFile(std::string folderPath) {
+int RenderableGaiaStars::readBinaryOctreeStructureFile(const std::string& folderPath) {
     int nReadStars = 0;
     std::string indexFile = folderPath + "index.bin";
 

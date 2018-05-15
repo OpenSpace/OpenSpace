@@ -54,7 +54,7 @@ private:
     bool _singleFileInput;
 
     std::shared_ptr<OctreeManager> _octreeManager;
-    std::unique_ptr<OctreeManager> _indexOctreeManager;
+    std::shared_ptr<OctreeManager> _indexOctreeManager;
 };
 
 } // namespace openspace

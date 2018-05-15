@@ -33,8 +33,9 @@ namespace openspace::gaiamission {
 
 struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
 
-    ReadFileJob(std::string filePath, std::vector<std::string> allColumns, int firstRow, int lastRow,
-        size_t nDefaultCols, int nValuesPerStar, std::shared_ptr<FitsFileReader> fitsReader);
+    ReadFileJob(const std::string& filePath, const std::vector<std::string>& allColumns, 
+        int firstRow, int lastRow, size_t nDefaultCols, int nValuesPerStar, 
+        std::shared_ptr<FitsFileReader> fitsReader);
 
     ~ReadFileJob();
 

@@ -49,8 +49,8 @@ public:
     OctreeCuller(globebrowsing::AABB3 viewFrustum);
     ~OctreeCuller();
 
-    bool isVisible(std::vector<glm::dvec4> corners, const glm::mat4 mvp);
-    glm::vec2 getNodeSizeInPixels(const glm::vec2 screenSize);
+    bool isVisible(const std::vector<glm::dvec4>& corners, const glm::mat4& mvp);
+    glm::vec2 getNodeSizeInPixels(const glm::vec2& screenSize);
 
 private:
     const globebrowsing::AABB3 _viewFrustum;

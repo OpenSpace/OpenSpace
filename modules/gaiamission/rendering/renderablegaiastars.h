@@ -89,11 +89,11 @@ private:
     };
     
     bool readDataFile();
-    int readFitsFile(std::string filePath);
-    int readSpeckFile(std::string filePath);
-    int readBinaryRawFile(std::string filePath);
-    int readBinaryOctreeFile(std::string filePath);
-    int readBinaryOctreeStructureFile(std::string folderPath);
+    int readFitsFile(const std::string& filePath);
+    int readSpeckFile(const std::string& filePath);
+    int readBinaryRawFile(const std::string& filePath);
+    int readBinaryOctreeFile(const std::string& filePath);
+    int readBinaryOctreeStructureFile(const std::string& folderPath);
 
 
     properties::StringProperty _filePath;
