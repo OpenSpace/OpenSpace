@@ -141,7 +141,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
             int numCols = columnNames.size();
             int numRowsInTable = table.rows();
             std::unordered_map<string, std::vector<T>> contents;
-            LINFO("Read file: " + _infile->name());
+            //LINFO("Read file: " + _infile->name());
 
             int firstRow = startRow < 1 ? 1 : startRow;
 

@@ -43,7 +43,7 @@ public:
         std::vector<float> posData;
         std::vector<float> colData;
         std::vector<float> velData;
-        std::multimap<float, int> magOrder;
+        std::vector<std::pair<float, size_t>> magOrder;
         float originX;
         float originY;
         float originZ;

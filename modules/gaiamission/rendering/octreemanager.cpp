@@ -90,7 +90,7 @@ void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStars
         _root->Children[i]->posData = std::vector<float>();
         _root->Children[i]->colData = std::vector<float>();
         _root->Children[i]->velData = std::vector<float>();
-        _root->Children[i]->magOrder = std::multimap<float, int>();
+        _root->Children[i]->magOrder = std::vector<std::pair<float, size_t>>();
         _root->Children[i]->isLeaf = true;
         _root->Children[i]->isLoaded = false;
         _root->Children[i]->bufferIndex = DEFAULT_INDEX;
@@ -752,6 +752,10 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
                 node->originX, node->originY, node->originZ);
             insertInNode(node->Children[index], tmpValues, depth);
         }
+
+        // Sort magnitudes in inner node.
+        // (The last value will be used as comparison for what to store in LOD cache.)
+        std::sort(node->magOrder.begin(), node->magOrder.end());
     }
 
     // Node is an inner node, keep recursion going.
@@ -760,19 +764,16 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
         node->originX, node->originY, node->originZ);
 
     // Determine if new star should be kept in our LOD cache. 
-    // Keeps track of the MAX_STARS_PER_NODE brightest nodes in children. 
+    // Keeps track of the brightest nodes in children. 
     if (starValues[POS_SIZE] < (*std::prev(node->magOrder.end())).first ) {
         storeStarData(node, starValues);
-
-        // Remove previous dimmest star at the back of ordered map.
-        node->magOrder.erase(std::prev(node->magOrder.end()));
     }
 
     return insertInNode(node->Children[index], starValues, ++depth);
 }
 
 // Slices LOD cache data to the MAX_STARS_PER_NODE brightest stars. This needs to be 
-// called after the last star has been inserted into Octree.
+// called after the last star has been inserted into Octree but before it is saved to files.
 void OctreeManager::sliceNodeLodCache(std::shared_ptr<OctreeNode> node) {
     
     // Slice stored LOD data in inner nodes.
@@ -780,6 +781,10 @@ void OctreeManager::sliceNodeLodCache(std::shared_ptr<OctreeNode> node) {
         std::vector<float> tmpPos;
         std::vector<float> tmpCol;
         std::vector<float> tmpVel;
+
+        // Sort by magnitude. Inverse relation (i.e. a lower magnitude means a brighter star!) 
+        std::sort(node->magOrder.begin(), node->magOrder.end());
+        node->magOrder.resize(MAX_STARS_PER_NODE);
 
         // Ordered map contain the MAX_STARS_PER_NODE brightest stars in all children!
         for (auto &[absMag, placement] : node->magOrder) {
@@ -794,20 +799,22 @@ void OctreeManager::sliceNodeLodCache(std::shared_ptr<OctreeNode> node) {
         node->colData = std::move(tmpCol);
         node->velData = std::move(tmpVel);
         node->numStars == node->magOrder.size(); // = MAX_STARS_PER_NODE
+
+        for (int i = 0; i < 8; ++i) {
+            sliceNodeLodCache(node->Children[i]);
+        }
     }
-    
 }
 
 // Private help function for insertInNode(). Stores star data in node and keeps track of
-// the brightest stars in an ordered map.
+// the brightest stars all children.
 void OctreeManager::storeStarData(std::shared_ptr<OctreeNode> node,
     std::vector<float> starValues) {
 
-    // Insert star data at the back of vectors but store the position index in a map, sorted
-    // by magnitude. Inverse relation (i.e. a lower magnitude means a brighter star!) 
-    // so we can use the built-in weak ordering in map. LOD cache needs to be sliced later.
+    // Insert star data at the back of vectors and store a vector with pairs consisting of
+    // star magnitude and insert index for later sorting and slicing of LOD cache.
     float mag = starValues[POS_SIZE];
-    node->magOrder.insert(std::make_pair(mag, node->numStars));
+    node->magOrder.insert(node->magOrder.end(), std::make_pair(mag, node->numStars));
     node->numStars++;
 
     auto posEnd = starValues.begin() + POS_SIZE;
@@ -992,6 +999,9 @@ void OctreeManager::clearNodeData(std::shared_ptr<OctreeNode> node) {
     node->velData.clear();
     node->velData.shrink_to_fit();
 
+    // Clear magnitudes as well!
+    std::vector<std::pair<float, size_t>>().swap(node->magOrder);
+
     if (!node->isLeaf) {
         // Remove data from all children recursively.
         for (size_t i = 0; i < 8; ++i) {
@@ -1015,7 +1025,7 @@ void OctreeManager::createNodeChildren(std::shared_ptr<OctreeNode> node) {
         node->Children[i]->posData = std::vector<float>();
         node->Children[i]->colData = std::vector<float>();
         node->Children[i]->velData = std::vector<float>();
-        node->Children[i]->magOrder = std::multimap<float, int>();
+        node->Children[i]->magOrder = std::vector<std::pair<float, size_t>>();
         node->Children[i]->halfDimension = node->halfDimension / 2.f;
 
         // Calculate new origin.
