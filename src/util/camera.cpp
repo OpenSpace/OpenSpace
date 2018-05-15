@@ -72,6 +72,7 @@ namespace openspace {
         _position = pos;
 
         _cachedCombinedViewMatrix.isDirty = true;
+        _cachedCombinedViewMatrixNoScale.isDirty = true;
     }
 
     void Camera::setFocusPositionVec3(Vec3 pos) {
@@ -86,6 +87,7 @@ namespace openspace {
         _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
         _cachedCombinedViewMatrix.isDirty = true;
+        _cachedCombinedViewMatrixNoScale.isDirty = true;
     }
 
     void Camera::setScaling(float scaling) {
@@ -93,6 +95,7 @@ namespace openspace {
         _scaling = scaling;
         _cachedViewScaleMatrix.isDirty = true;
         _cachedCombinedViewMatrix.isDirty = true;
+        _cachedCombinedViewMatrixNoScale.isDirty = true;
     }
 
     void Camera::setMaxFov(float fov) {
@@ -114,6 +117,7 @@ namespace openspace {
         _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
         _cachedCombinedViewMatrix.isDirty = true;
+        _cachedCombinedViewMatrixNoScale.isDirty = true;
     }
 
     // Accessors
@@ -227,6 +231,19 @@ namespace openspace {
             _cachedCombinedViewMatrix.isDirty = true;
         }
         return _cachedCombinedViewMatrix.datum;
+    }
+
+    const Camera::Mat4& Camera::combinedViewMatrixNoScale() const {
+        if (_cachedCombinedViewMatrixNoScale.isDirty) {
+            Mat4 cameraTranslation =
+                glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));
+            _cachedCombinedViewMatrixNoScale.datum =
+                Mat4(sgctInternal.viewMatrix()) *
+                Mat4(viewRotationMatrix()) *
+                cameraTranslation;
+            _cachedCombinedViewMatrixNoScale.isDirty = true;
+        }
+        return _cachedCombinedViewMatrixNoScale.datum;
     }
 
     void Camera::invalidateCache() {

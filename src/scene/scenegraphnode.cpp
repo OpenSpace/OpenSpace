@@ -570,7 +570,7 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
         // Calculate ndc
         Camera cam = newData.camera;
         glm::dvec3 worldPos = this->_worldPositionCached;
-        glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(worldPos, 1.0);
+        glm::dvec4 clipSpace = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrixNoScale() * glm::vec4(worldPos, 1.0);
         glm::dvec3 ndc = clipSpace / clipSpace.w;
 
          // If the object is not in the screen, we dont want to consider it at all

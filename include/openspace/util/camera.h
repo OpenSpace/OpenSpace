@@ -121,6 +121,7 @@ public:
     // Right now this function returns the actual combined matrix which makes some
     // of the old calls to the function wrong..
     const Mat4& combinedViewMatrix() const;
+    const Mat4& combinedViewMatrixNoScale() const;
 
     void invalidateCache();
 
@@ -202,6 +203,7 @@ private:
     mutable Cached<Mat4> _cachedViewRotationMatrix;
     mutable Cached<Mat4> _cachedViewScaleMatrix;
     mutable Cached<Mat4> _cachedCombinedViewMatrix;
+    mutable Cached<Mat4> _cachedCombinedViewMatrixNoScale;
     mutable Cached<float> _cachedSinMaxFov;
 
     mutable std::mutex _mutex;
