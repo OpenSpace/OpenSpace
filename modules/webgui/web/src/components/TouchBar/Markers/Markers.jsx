@@ -60,8 +60,8 @@ class Markers extends Component {
 
     // Get current focus node, its screen space position and its screen space radius
     const currentFocusNode = nodes.find(node => node.identifier === this.props.focusNodeName);
-    const focusNodePos = jsonToLuaTable(currentFocusNode.properties[0].Value).split(',');
-    const focusNodeRadius = Number(currentFocusNode.properties[3].Value);
+    const focusNodePos = jsonToLuaTable(currentFocusNode.properties.find(property => property.id === 'ScreenSpacePosition').Value).split(',');
+    const focusNodeRadius = Number(currentFocusNode.properties.find(property => property.id === 'ScreenSizeRadius').Value);
 
     return (nodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');

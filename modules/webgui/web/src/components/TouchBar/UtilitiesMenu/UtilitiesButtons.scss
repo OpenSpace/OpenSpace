@@ -25,3 +25,16 @@ $icon-size: 32px;
 .Icon {
   font-size: $icon-size;
 }
+
+.Instructions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index:-9999;
+  height: 80%;
+  margin-right: ($base-padding);
+  margin-top: ($base-padding);
+  padding: 2%;
+  animation: $fade-out-animation;
+  animation-delay: 8s;
+}

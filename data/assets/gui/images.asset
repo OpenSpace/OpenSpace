@@ -15,6 +15,10 @@ asset.syncedResource({
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/saturn.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/uranus.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/venus.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/callisto.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/europa.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/ganymede.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/io.png",
     },
     UseHash = false
 })
@@ -27,6 +31,15 @@ asset.syncedResource({
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story1.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story2.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story3.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story4.png",
     },
+    UseHash = false
+})
+
+asset.syncedResource({
+    Type = "UrlSynchronization",
+    Name = "Instructions",
+    Identifier = "images",
+    Url = "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/instructions.png",
     UseHash = false
 })
