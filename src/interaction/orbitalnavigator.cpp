@@ -23,10 +23,14 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
+
+#include <modules/webgui/webguimodule.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
@@ -283,14 +287,15 @@ void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaT
         }
 
         // Zoom away from the focus node until the entire solar system is in the camera view
-        /* TODO: Remove magic numbers */
         if (_overview) {
-            double solarSystemLimit = 2.2e+13;
+            WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
+            float overviewLimit = module.storyHandler.overviewLimit();
+
             _flyTo = false;
 
-            if (length(camPos) <= solarSystemLimit) {
-                camPos = zoomToFocusNode(camPos, solarSystemLimit, -camPosToCenterPosDiff, length(camPos));
-                if (length(camPos) > solarSystemLimit*0.9)
+            if (length(camPos) <= overviewLimit) {
+                camPos = zoomToFocusNode(camPos, overviewLimit, -camPosToCenterPosDiff, length(camPos));
+                if (length(camPos) > overviewLimit*0.9)
                     _overview = false;
             }
             else {

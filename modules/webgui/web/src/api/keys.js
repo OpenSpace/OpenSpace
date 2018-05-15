@@ -52,3 +52,7 @@ export const ApplyAddTagKey = 'Modules.WebGui.StoryHandler.ApplyAddTag';
 export const FocusNodesListKey = 'Modules.WebGui.StoryHandler.FocusNodesList';
 // key for default story
 export const defaultStory = 'story_default';
+// key for overview limit
+export const OverlimitKey = 'Modules.WebGui.StoryHandler.OverviewLimit';
+// key for scale property
+export const ScaleKey = `Scene.${ValuePlaceholder}.Scale.Scale`;

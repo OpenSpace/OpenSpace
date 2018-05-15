@@ -1,8 +1,7 @@
 {
   "storyidentifier":"story_example",
   "overviewlimit": "2.2e+13",
-  "focusbuttons": "\"Mercury\", \"Venus\", \"Mars\", \"Jupiter\", \"Saturn\"",
-  "focusbuttonslist": ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"],
+  "focusbuttons": "\"Earth\", \"Mercury\", \"Venus\", \"Mars\", \"Jupiter\", \"Saturn\"",
   "timecontroller": "true",
   "datecontroller":  [
     {

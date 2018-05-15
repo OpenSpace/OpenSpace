@@ -1,0 +1,23 @@
+{
+  "storyidentifier":"story_jupitermoons",
+  "overviewlimit": "2e+12",
+  "focusbuttons": "\"Jupiter\", \"Io\", \"Europa\", \"Ganymede\", \"Callisto\"",
+  "timecontroller": "true",
+  "datecontroller": "false",
+  "sighscontroller" : "false",
+  "start": {
+    "planet": "Jupiter",
+    "time": "openspace.time.currentWallTime()",
+    "location": {
+      "latitude": "-10",
+      "longitude": "-10",
+      "attitude": "9000000000000000000000000"
+    }
+  },
+  "hideplanets": ["Mercury", "Venus", "Earth", "Mars", "Saturn", "Uranus", "Neptune"],
+  "scaleplanets": {
+    "info": "Moons",
+    "scale": "10",
+    "planets": ["Io", "Europa", "Ganymede", "Callisto"]
+  }
+}

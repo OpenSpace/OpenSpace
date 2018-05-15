@@ -16,6 +16,7 @@ namespace openspace::webgui {
 
         void removeTags();
         void addTags();
+        float overviewLimit();
 
     private:
         properties::FloatProperty _overviewLimit;

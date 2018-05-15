@@ -28,7 +28,11 @@ local Europa = {
             Target = "EUROPA",
             Observer = "JUPITER BARYCENTER",
             Kernels = kernels
-        }
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1
+        },
     },
     Renderable = {
         Type = "RenderableGlobe",

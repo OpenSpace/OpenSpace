@@ -2,7 +2,6 @@
   "storyidentifier":"story_solarsystem",
   "overviewlimit": "2.2e+13",
   "focusbuttons": "\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\"",
-  "focusbuttonslist": ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"],
   "timecontroller": "true",
   "datecontroller":  "false",
   "sighscontroller" : "false",

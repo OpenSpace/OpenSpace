@@ -29,6 +29,10 @@ local Io = {
             Observer = "JUPITER BARYCENTER",
             Kernels = kernels
         },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1
+        },
     },
     Renderable = {
         Type = "RenderableGlobe",

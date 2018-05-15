@@ -41,12 +41,14 @@ class Markers extends Component {
   componentWillUnmount() {
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+      screenSpaceRadius,
     } = this.props;
 
     nodes.forEach((node, i) => {
       this.props.StopListening(screenSpaceProperties[i].Description.Identifier);
       this.props.StopListening(screenVisibilityProperties[i].Description.Identifier);
       this.props.StopListening(distFromCamToNodeProperties[i].Description.Identifier);
+      this.props.StopListening(screenSpaceRadius[i].Description.Identifier);
     });
   }
 

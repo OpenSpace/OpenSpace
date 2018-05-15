@@ -15,6 +15,7 @@ import { traverseTreeWithURI } from '../utils/propertyTreeHelpers';
 import {
   infoIconKey, SetGoToGeoScript, ValuePlaceholder, OriginKey, StoryIdentifierKey,
   ApplyRemoveTagKey, ApplyAddTagKey, FocusNodesListKey, SetTimeScript, defaultStory,
+  OverlimitKey, ScaleKey,
 } from '../api/keys';
 import DataManager from '../api/DataManager';
 
@@ -24,6 +25,7 @@ class OnTouchGui extends Component {
 
     this.changeStory = this.changeStory.bind(this);
     this.setStory = this.setStory.bind(this);
+    this.toggleHidePlanet = this.toggleHidePlanet.bind(this);
   }
 
   componentDidMount() {
@@ -47,7 +49,7 @@ class OnTouchGui extends Component {
 
   setStory(selectedStory) {
     const {
-      storyIdentifierNode, applyRemoveTag, focusNodesList, applyAddTag, focusNode,
+      storyIdentifierNode, applyRemoveTag, focusNodesList, applyAddTag, focusNode, overViewNode,
     } = this.props;
 
     // Check if the selected story is different from the OpenSpace property value
@@ -64,7 +66,24 @@ class OnTouchGui extends Component {
       this.props.ChangePropertyValue(focusNodesList.Description, json.focusbuttons);
       this.props.ChangePropertyValue(applyAddTag.Description, '');
       this.props.ChangePropertyValue(focusNode.Description, json.start.planet);
+      this.props.ChangePropertyValue(overViewNode.Description, json.overviewlimit);
 
+      // Check if previous story hide any nodes
+      if (this.props.story.hideplanets) {
+        this.props.story.hideplanets.forEach(planet => this.toggleHidePlanet(planet, 'true'));
+      }
+
+      // If story wants to hide planets -> hide them
+      if (json.hideplanets) {
+        json.hideplanets.forEach(planet => this.toggleHidePlanet(planet, 'false'));
+      }
+
+      // If the previous story scaled planets -> reset value
+      if (this.props.story.scaleplanets) {
+        this.props.scaleNodes.forEach((planet) => {
+          this.props.ChangePropertyValue(planet.Description, '1');
+        });
+      }
       const startPosition = json.start.location;
       const goToGeoScript = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.latitude}, ${startPosition.longitude}, ${startPosition.attitude}`);
       const setTimeScript = SetTimeScript.replace(ValuePlaceholder, `${json.start.time}`);
@@ -85,12 +104,22 @@ class OnTouchGui extends Component {
     this.setStory(e.target.id);
   }
 
+  toggleHidePlanet(planet, value) {
+    DataManager.runScript(`openspace.setPropertyValueSingle("Scene.${planet}.RenderableGlobe.Enabled", ${value})`);
+    DataManager.runScript(`openspace.setPropertyValueSingle("Scene.${planet}Trail.renderable.Enabled",${value})`);
+    DataManager.runScript(`openspace.setPropertyValueSingle("Scene.${planet}.ScreenVisibility",${value})`);
+  }
+
   render() {
     return (
       <div className={styles.app}>
-        <button onClick={this.changeStory} id={defaultStory}>Default Story</button>
-        <button onClick={this.changeStory} id={'story_solarsystem'}>Solar System Story</button>
-        <button onClick={this.changeStory} id={'story_example'}>Example Story</button>
+        <div style={{ width: '200px', display: 'flex', flexDirection: 'column' }}>
+          <button onClick={this.changeStory} id={defaultStory}>Default Story</button>
+          <button onClick={this.changeStory} id={'story_solarsystem'}>Solar System Story</button>
+          <button onClick={this.changeStory} id={'story_example'}>Example Story</button>
+          <button onClick={this.changeStory} id={'story_earthweather'}>Earth Weather Story</button>
+          <button onClick={this.changeStory} id={'story_jupitermoons'}>Jupiter Moons Story</button>
+        </div>
 
         { this.props.connectionLost && (
           <Overlay>
@@ -114,6 +143,9 @@ const mapStateToProps = (state) => {
   let applyAddTag = [];
   let focusNodesList = [];
   let focusNode;
+  let overViewNode;
+  const scaleNodes = [];
+  const story = state.storyTree.story;
 
   if (Object.keys(state.propertyTree).length !== 0) {
     storyIdentifierNode = traverseTreeWithURI(state.propertyTree, StoryIdentifierKey);
@@ -121,6 +153,13 @@ const mapStateToProps = (state) => {
     applyAddTag = traverseTreeWithURI(state.propertyTree, ApplyAddTagKey);
     focusNodesList = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
     focusNode = traverseTreeWithURI(state.propertyTree, OriginKey);
+    overViewNode = traverseTreeWithURI(state.propertyTree, OverlimitKey);
+
+    if (story.scaleplanets) {
+      story.scaleplanets.planets.forEach((node) => {
+        scaleNodes.push(traverseTreeWithURI(state.propertyTree, ScaleKey.replace(ValuePlaceholder, `${node}`)));
+      });
+    }
   }
 
   return {
@@ -129,8 +168,10 @@ const mapStateToProps = (state) => {
     focusNodesList,
     storyIdentifierNode,
     connectionLost: state.connection.connectionLost,
-    story: state.storyTree.story,
+    story,
     focusNode,
+    overViewNode,
+    scaleNodes,
   };
 };
 
@@ -169,6 +210,8 @@ OnTouchGui.propTypes = {
   applyAddTag: PropTypes.objectOf(PropTypes.shape({})),
   focusNodesList: PropTypes.objectOf(PropTypes.shape({})),
   focusNode: PropTypes.objectOf(PropTypes.shape({})),
+  overViewNode: PropTypes.objectOf(PropTypes.shape({})),
+  scaleNodes: PropTypes.objectOf(PropTypes.shape({})),
   connectionLost: PropTypes.bool,
 };
 
@@ -184,6 +227,8 @@ OnTouchGui.defaultProps = {
   applyAddTag: {},
   focusNodesList: {},
   focusNode: {},
+  overViewNode: {},
+  scaleNodes: {},
   connectionLost: null,
 };
 

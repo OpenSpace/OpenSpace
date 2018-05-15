@@ -25,6 +25,7 @@
 #include <modules/touch/include/touchinteraction.h>
 #include <modules/imgui/imguimodule.h>
 #include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webgui/webguimodule.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/engine/moduleengine.h>
@@ -1204,12 +1205,15 @@ void TouchInteraction::step(double dt) {
             double planetBoundaryRadius = length(centerToBoundingSphere);
             planetBoundaryRadius *= _zoomBoundarySphereMultiplier;
             double distToSurface = length(centerToCamera - planetBoundaryRadius);
-            double solarSystemView = 2.2e+13;
+
+            WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
+            float overviewLimit = module.storyHandler.overviewLimit();
+
             if (length(_vel.zoom*dt) < distToSurface &&
                  length(centerToCamera + directionToCenter*_vel.zoom*dt)
                  > planetBoundaryRadius &&
                     length(centerToCamera + directionToCenter * _vel.zoom*dt)
-                    < solarSystemView)
+                    < overviewLimit)
             {
                 camPos += directionToCenter * _vel.zoom * dt;
             }

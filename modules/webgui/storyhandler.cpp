@@ -66,5 +66,9 @@ namespace openspace::webgui {
         scripting::ScriptEngine::RemoteScripting::Yes
       );
    };
+
+    float StoryHandler::overviewLimit() {
+        return _overviewLimit;
+    };
 };// namespace
 
