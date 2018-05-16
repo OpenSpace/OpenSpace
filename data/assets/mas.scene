@@ -17,8 +17,7 @@ asset.require('util/default_keybindings')
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 -- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas')
--- local testSphere = asset.require('scene/solarsystem/model/mas/testsphere')
+local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas_mhd')
 
 -- This causes crash because the renderable is not removed properly before the next frame
 local toggleMas = function ()
