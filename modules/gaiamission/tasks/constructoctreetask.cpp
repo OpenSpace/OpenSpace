@@ -276,6 +276,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
     std::vector<float> fullData;
     int32_t nValues = 0;
     int32_t nValuesPerStar = 0;
+    size_t nFilteredStars = 0;
+    int nTotalStars = 0;
 
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
@@ -292,6 +294,7 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
 
         fullData.resize(nValues);
         inFileStream.read(reinterpret_cast<char*>(&fullData[0]), nValues * sizeof(fullData[0]));
+        nTotalStars = nValues / nValuesPerStar;
 
         progressCallback(0.3f);
         LINFO("Constructing Octree.");
@@ -304,7 +307,10 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
             std::vector<float> renderValues(first, first + RENDER_VALUES);
 
             // Filter data by parameters.
-            if (checkAllFilters(filterValues)) continue;
+            if (checkAllFilters(filterValues)) {
+                nFilteredStars++;
+                continue;
+            }
             
             // If all filters passed then insert render values into Octree.
             _octreeManager->insert(renderValues);
@@ -315,6 +321,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
         LERROR(fmt::format("Error opening file '{}' for loading preprocessed file!"
             , _inFileOrFolderPath));
     }
+    LINFO(std::to_string(nFilteredStars) + " out of " + std::to_string(nTotalStars) + 
+        " read stars were filtered away.");
 
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
@@ -339,6 +347,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     
     int32_t nStars = 0;
     int32_t nValuesPerStar = 0;
+    size_t nFilteredStars = 0;
     float maxRadius = 0.0;
     int starsOutside10 = 0;
     int starsOutside25 = 0;
@@ -384,7 +393,10 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
                 nValuesPerStar * sizeof(filterValues[0]))) {
 
                 // Filter data by parameters.
-                if (checkAllFilters(filterValues)) continue;
+                if (checkAllFilters(filterValues)) {
+                    nFilteredStars++;
+                    continue;
+                }
 
                 // If all filters passed then insert render values into Octree.
                 std::vector<float> renderValues(filterValues.begin(),
@@ -438,8 +450,9 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         writeThreads[idx] = std::move(t);
     }
 
-    LINFO("A total of " + std::to_string(nStars) + " stars where read from files and distributed into "
+    LINFO("A total of " + std::to_string(nStars) + " stars were read from files and distributed into "
         + std::to_string(_indexOctreeManager->totalNodes()) + " total nodes!");
+    LINFO(std::to_string(nFilteredStars) + " stars were filtered away.");
 
     LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + "\n Number of stars outside of:" +  
         " - 10kPc is " + std::to_string(starsOutside10) + "\n" + 
@@ -509,10 +522,10 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, const float& filter
     
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue =< min (when min != 0.0) or filterValue >= max (when max != 0.0).
-    return (fabs(range[0] - range[1]) < FLT_EPSILON &&
-        fabs(range[0] - filterValue) < FLT_EPSILON) &&
-        !(fabs(range[0]) > FLT_EPSILON && filterValue > range[0]) &&
-        !(fabs(range[1]) > FLT_EPSILON && filterValue < range[1]);
+    return (fabs(range.x - range.y) < FLT_EPSILON &&
+        fabs(range.x - filterValue) < FLT_EPSILON) &&
+        !(fabs(range.x) > FLT_EPSILON && filterValue > range.x) &&
+        !(fabs(range.y) > FLT_EPSILON && filterValue < range.y);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {
