@@ -19,8 +19,8 @@ for i=1,length do
 	    UpperDomainBound = {0.5, 0.5, 0.5},
 	    ValueFunction = fn,
 	    Time = "2018-05-04T00:00:" .. step,
-	    RawVolumeOutput = "${DATA}/assets/examples/generatedvolume/generatedvolume" .. step .. ".rawvolume",
-	    DictionaryOutput = "${DATA}/assets/examples/generatedvolume/generatedvolume" .. step .. ".dictionary"
+	    RawVolumeOutput = "${DATA}/assets/examples/volume/generated/cartesiansequence/" .. step .. ".rawvolume",
+	    DictionaryOutput = "${DATA}/assets/examples/volume/generated/cartesiansequence/" .. step .. ".dictionary"
 	}
 end
 

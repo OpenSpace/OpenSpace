@@ -41,6 +41,7 @@ public:
         glm::dvec3 position;
         glm::quat rotation;
         std::string focusNode;
+        float scale;
         bool followFocusNodeRotation;
     };
 

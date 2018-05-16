@@ -500,7 +500,8 @@ glm::ivec2 RenderEngine::renderingResolution() const {
 glm::ivec2 RenderEngine::fontResolution() const {
     const std::string& value = OsEng.configuration().onScreenTextScaling;
     if (value == "framebuffer") {
-        return OsEng.windowWrapper().currentWindowResolution();
+        return OsEng.windowWrapper().getCurrentViewportSize();
+        //return OsEng.windowWrapper().currentWindowResolution();
     }
     else {
         return OsEng.windowWrapper().currentWindowSize();

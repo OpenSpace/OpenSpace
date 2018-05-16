@@ -138,6 +138,15 @@ public:
     virtual glm::ivec2 currentWindowSize() const;
 
     /**
+    * Returns the size of the currently active subwindow in pixel coordinates. On default,
+    * this method returns the same a currentWindowSize. A subwindow is the part of a
+    * window that is used for one of the eyes in stereoscopic side-by-side/top-bottom
+    * rendering.
+    * \return The size of the currently active subwindow in pixel coordinates
+    */
+    virtual glm::ivec2 currentSubwindowSize() const;
+
+    /**
      * Returns the resolution of the currently active window in pixel coordinates. On
      * default, this method returns the same size as #currentWindowSize.
      * \return The resolution of the currently active window in pixel coordinates
@@ -150,6 +159,13 @@ public:
      * \return The resolution of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentDrawBufferResolution() const;
+
+    /**
+    * Returns the resolution of the currently viewport resolution in pixel
+    * coordinates.
+    * \return The resolution of the currently viewport in pixel coordinates
+    */
+    virtual glm::ivec2 getCurrentViewportSize() const;
 
     /**
      * Returns the DPI scaling factor for the current window. This is normally 1 on all

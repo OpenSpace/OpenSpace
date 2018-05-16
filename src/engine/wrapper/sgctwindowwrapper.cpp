@@ -51,7 +51,7 @@ namespace {
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 10.f)
+    : _eyeSeparation(EyeSeparationInfo, 0.f, 0.f, 0.2f)
     , _showStatsGraph(ShowStatsGraphInfo, false)
 {
     _showStatsGraph.onChange([this](){
@@ -124,21 +124,28 @@ uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
 
 glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
     auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    return glm::ivec2(
+        window->getXResolution(),
+        window->getYResolution());
+}
+
+glm::ivec2 SGCTWindowWrapper::currentSubwindowSize() const {
+    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
     switch (window->getStereoMode()) {
-        case sgct::SGCTWindow::Side_By_Side_Stereo:
-        case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
-            return glm::ivec2(
-                window->getXResolution() / 2,
-                window->getYResolution());
-        case sgct::SGCTWindow::Top_Bottom_Stereo:
-        case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
-            return glm::ivec2(
-                window->getXResolution(),
-                window->getYResolution() / 2);
-        default:
-            return glm::ivec2(
-                window->getXResolution(),
-                window->getYResolution());
+    case sgct::SGCTWindow::Side_By_Side_Stereo:
+    case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
+        return glm::ivec2(
+            window->getXResolution() / 2,
+            window->getYResolution());
+    case sgct::SGCTWindow::Top_Bottom_Stereo:
+    case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
+        return glm::ivec2(
+            window->getXResolution(),
+            window->getYResolution() / 2);
+    default:
+        return glm::ivec2(
+            window->getXResolution(),
+            window->getYResolution());
     }
 }
 
@@ -159,6 +166,17 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
         } else {
             return currentWindowResolution();
         }
+    }
+    throw WindowWrapperException("No viewport available");
+}
+
+glm::ivec2 SGCTWindowWrapper::getCurrentViewportSize() const {
+    sgct_core::Viewport* viewport =
+        sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0);
+    if (viewport != nullptr) {
+        int xx = 0, yy = 0;
+        sgct::Engine::instance()->getCurrentViewportSize(xx, yy);
+        return glm::ivec2(xx, yy);
     }
     throw WindowWrapperException("No viewport available");
 }
@@ -230,14 +248,13 @@ void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
 }
 
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
-    int x1, xSize, y1, ySize;
-    sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(
-        x1,
-        y1,
-        xSize,
-        ySize
-    );
-    return glm::ivec4(x1, xSize, y1, ySize);
+    sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();   
+    if (!window || !window->getCurrentViewport()) {
+        return glm::ivec4(0, 0, 0, 0);
+    }
+
+    const int* viewportData = sgct::Engine::instance()->getCurrentViewportPixelCoords();
+    return glm::ivec4(viewportData[0], viewportData[2], viewportData[1], viewportData[3]);
 }
 
 bool SGCTWindowWrapper::isExternalControlConnected() const {

@@ -93,7 +93,7 @@ private:
     std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
 } // namespace kameleonvolume
