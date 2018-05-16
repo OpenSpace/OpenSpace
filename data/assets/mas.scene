@@ -18,7 +18,7 @@ asset.require('util/default_keybindings')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 -- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas')
-local testSphere = asset.require('scene/solarsystem/model/mas/testsphere')
+-- local testSphere = asset.require('scene/solarsystem/model/mas/testsphere')
 
 -- This causes crash because the renderable is not removed properly before the next frame
 local toggleMas = function ()
@@ -48,6 +48,12 @@ local Keybindings = {
         Local = false
     },
     {
+        Key = "F10",
+        Command = propertyHelper.invert('Scene.Sun.renderable.Enabled'),
+        Documentation = "Toggle sun",
+        Local = false
+    },
+    {
         Key = "t",
         Command = toggleMas(),
         Documentation = "Toggle mas asset on/off",
@@ -69,7 +75,7 @@ asset.onInitialize(function ()
     -- )
 
     openspace.markInterestingNodes({
-        "Mas_MHD", "TestSphere"
+        "Mas_MHD"
     })
 
     openspace.addVirtualProperty(
@@ -94,7 +100,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeInterestingNodes({
-        "Mas_MHD", "TestSphere"
+        "Mas_MHD"
     })
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
