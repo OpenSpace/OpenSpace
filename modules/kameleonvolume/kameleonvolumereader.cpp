@@ -114,7 +114,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                 volumeCoords[2]);
         };
 
-    auto sample = [this, &variable, &interpolate](glm::vec3 volumeCoords) {
+    auto sample = [&variable, &interpolate](glm::vec3 volumeCoords) {
         return interpolate(variable, volumeCoords);
     };
 

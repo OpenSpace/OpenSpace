@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,9 @@ const bool DID_NOT_LEAVE_WINDOW = false;
 
 namespace openspace {
 
-BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : _isInitialized(false) {
+BrowserInstance::BrowserInstance(WebRenderHandler* renderer)
+    : _isInitialized(false)
+{
     _renderHandler = renderer;
     _client = new BrowserClient(_renderHandler);
 
@@ -44,7 +46,13 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : _isInitialized(fa
     browserSettings.windowless_frame_rate = 60;
 
     std::string url = "";
-    _browser = CefBrowserHost::CreateBrowserSync(windowInfo, _client.get(), url, browserSettings, NULL);
+    _browser = CefBrowserHost::CreateBrowserSync(
+        windowInfo,
+        _client.get(),
+        url,
+        browserSettings,
+        nullptr
+    );
 }
 
 BrowserInstance::~BrowserInstance() {
@@ -52,7 +60,7 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    auto &wrapper = OsEng.windowWrapper();
+    auto& wrapper = OsEng.windowWrapper();
     reshape(wrapper.currentWindowSize());
 
     _isInitialized = true;
@@ -112,8 +120,10 @@ bool BrowserInstance::sendKeyEvent(const CefKeyEvent &event) {
     return false;
 }
 
-bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event, CefBrowserHost::MouseButtonType button,
-                                          bool mouseUp, int clickCount) {
+bool BrowserInstance::sendMouseClickEvent(const CefMouseEvent &event,
+                                          CefBrowserHost::MouseButtonType button,
+                                          bool mouseUp, int clickCount)
+{
     _browser->GetHost()->SendMouseClickEvent(event, button, mouseUp, clickCount);
     return hasContent(event.x, event.y);
 }

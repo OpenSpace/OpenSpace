@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,7 +87,7 @@ void ServerModule::preSync() {
     // Join threads for sockets that disconnected.
     cleanUpFinishedThreads();
 }
-                               
+
 void ServerModule::cleanUpFinishedThreads() {
     for (auto& connectionData : _connections) {
         std::shared_ptr<Connection>& connection = connectionData.connection;
@@ -106,7 +106,7 @@ void ServerModule::cleanUpFinishedThreads() {
         }
     ), _connections.end());
 }
-    
+
 void ServerModule::disconnectAll() {
     for (auto& connectionData : _connections) {
         std::shared_ptr<Connection>& connection = connectionData.connection;
@@ -117,7 +117,7 @@ void ServerModule::disconnectAll() {
         }
     }
 }
-    
+
 void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     std::string messageString;
     while (connection->socket()->getMessage(messageString)) {

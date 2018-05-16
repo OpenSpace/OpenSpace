@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER__SCREEN_SPACE_BROWSER_H
-#define __OPENSPACE_MODULE_WEBBROWSER__SCREEN_SPACE_BROWSER_H
+#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
+#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/properties/stringproperty.h>
@@ -35,19 +35,6 @@
 #include <fmt/format.h>
 #include "include/screenspacerenderhandler.h"
 #include "include/browserinstance.h"
-
-namespace {
-static const openspace::properties::Property::PropertyInfo BrowserDimensionsInfo = {
-    "Dimensions",
-    "Browser Dimensions",
-    "Set the dimensions of the web browser windows."
-};
-static const openspace::properties::Property::PropertyInfo UrlInfo = {
-    "URL",
-    "url",
-    "The URL to load"
-};
-}
 
 namespace openspace {
 
@@ -72,6 +59,6 @@ private:
     bool _dimensionsAreDirty;
 };
 
-};
+} // namespace openspace
 
-#endif //__OPENSPACE_MODULE_WEBBROWSER__SCREEN_SPACE_BROWSER_H
+#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__

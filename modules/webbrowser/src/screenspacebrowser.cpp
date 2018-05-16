@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,18 @@ namespace {
 const char* KeyIdentifier = "Indentifier";
 const char* KeyUrl = "URL";
 const std::string _loggerCat = "ScreenSpaceBrowser";
+
+static const openspace::properties::Property::PropertyInfo BrowserDimensionsInfo = {
+    "Dimensions",
+    "Browser Dimensions",
+    "Set the dimensions of the web browser windows."
+};
+static const openspace::properties::Property::PropertyInfo UrlInfo = {
+    "URL",
+    "url",
+    "The URL to load"
+};
+
 } // namespace
 
 namespace openspace {
@@ -57,10 +69,12 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         _url = dictionary.value<std::string>(KeyUrl);
     }
 
-    glm::vec2 windowDimensions = OsEng.windowWrapper().currentWindowSize();
+    glm::vec2 windowDimensions = OsEng.windowWrapper().currentSubwindowSize();
     _dimensions = windowDimensions;
 
-    _texture = std::make_unique<ghoul::opengl::Texture>(glm::uvec3(windowDimensions, 1.0f));
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(windowDimensions, 1.0f)
+    );
     _renderHandler = new ScreenSpaceRenderHandler();
     _browserInstance = std::make_shared<BrowserInstance>(_renderHandler);
 
@@ -77,7 +91,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
 }
 
 bool ScreenSpaceBrowser::initialize() {
-    _originalViewportSize = OsEng.windowWrapper().currentWindowSize();
+    _originalViewportSize = OsEng.windowWrapper().currentSubwindowSize();
     _renderHandler->setTexture((GLuint) *_texture);
 
     createPlane();

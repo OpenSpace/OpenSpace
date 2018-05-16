@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,8 @@
 namespace {
 const char* _loggerCat = "TimeTopic";
 const char* PropertyKey = "property";
+const char* EventKey = "event";
+const char* UnsubscribeEvent = "stop_subscription";
 const char* CurrentTimeKey = "currentTime";
 const char* DeltaTimeKey = "deltaTime";
 const int UNSET_ONCHANGE_HANDLE = -1;
@@ -43,6 +45,7 @@ namespace openspace {
 
 TimeTopic::TimeTopic()
     : Topic()
+    , _isDone(false)
     , _timeCallbackHandle(UNSET_ONCHANGE_HANDLE)
     , _deltaTimeCallbackHandle(UNSET_ONCHANGE_HANDLE)
     , _lastUpdateTime(std::chrono::system_clock::now())
@@ -60,10 +63,15 @@ TimeTopic::~TimeTopic() {
 }
 
 bool TimeTopic::isDone() {
-    return false;
+    return _isDone;
 }
 
 void TimeTopic::handleJson(json j) {
+    std::string event = j.at(EventKey).get<std::string>();
+    if (event == UnsubscribeEvent) {
+        _isDone = true;
+        return;
+    }
 
     std::string requestedKey = j.at(PropertyKey).get<std::string>();
     LDEBUG("Subscribing to " + requestedKey);
@@ -92,6 +100,7 @@ void TimeTopic::handleJson(json j) {
     }
     else {
         LWARNING("Cannot get " + requestedKey);
+        _isDone = true;
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,10 +38,13 @@ void LuaScriptTopic::handleJson(nlohmann::json json) {
     try {
         auto script = json.at(ScriptKey).get<std::string>();
         LDEBUG("Queueing Lua script: " + script);
-        OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::No);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::No
+        );
     }
-    catch (std::out_of_range& e) {
-        LERROR("Could run script -- key or value is missing in payload");
+    catch (const std::out_of_range& e) {
+        LERROR("Could not run script -- key or value is missing in payload");
         LERROR(e.what());
     }
 }

@@ -27,7 +27,7 @@
 #include <cstdint>
 
 namespace {
-const uint32_t ProtocolVersion = 3;
+const uint32_t ProtocolVersion = 4;
 const char* _loggerCat = "ParallelConnection";
 } // namespace
 
@@ -45,7 +45,9 @@ bool ParallelConnection::isConnectedOrConnecting() {
     return _socket->isConnected() || _socket->isConnecting();
 }
 
-void ParallelConnection::sendDataMessage(const ParallelConnection::DataMessage& dataMessage) {
+void ParallelConnection::sendDataMessage(
+                                       const ParallelConnection::DataMessage& dataMessage)
+{
     uint32_t dataMessageTypeOut = static_cast<uint32_t>(dataMessage.type);
 
     std::vector<char> messageContent;
@@ -57,7 +59,10 @@ void ParallelConnection::sendDataMessage(const ParallelConnection::DataMessage& 
         dataMessage.content.begin(),
         dataMessage.content.end());
 
-    sendMessage(ParallelConnection::Message(ParallelConnection::MessageType::Data, messageContent));
+    sendMessage(ParallelConnection::Message(
+        ParallelConnection::MessageType::Data,
+        messageContent
+    ));
 }
 
 bool ParallelConnection::sendMessage(const  ParallelConnection::Message& message) {
@@ -112,7 +117,6 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     std::vector<char> headerBuffer(headerSize);
     std::vector<char> messageBuffer;
 
-    
     // Receive the header data
     if (!_socket->get(headerBuffer.data(), headerSize)) {
         LERROR("Failed to read header from socket. Disconencting.");
@@ -150,7 +154,10 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     }
 
     // And delegate decoding depending on type
-    return ParallelConnection::Message(static_cast<ParallelConnection::MessageType>(messageTypeIn), messageBuffer);
+    return ParallelConnection::Message(
+        static_cast<ParallelConnection::MessageType>(messageTypeIn),
+        messageBuffer
+    );
 }
 
 } // namespace openspace
