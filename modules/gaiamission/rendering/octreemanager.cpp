@@ -62,7 +62,7 @@ void OctreeManager::initOctree(const long long& cpuRamBudget,
     int maxDist, int maxStarsPerNode) {
 
     LDEBUG("Initializing Octree");
-    _root = std::make_unique<OctreeNode>();
+    _root = std::make_shared<OctreeNode>();
 
     // Initialize the culler. The NDC.z of the comparing corners are always -1 or 1.
     _culler = std::make_unique<OctreeCuller>(
@@ -87,7 +87,7 @@ void OctreeManager::initOctree(const long long& cpuRamBudget,
 
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
-        _root->Children[i] = std::make_unique<OctreeNode>();
+        _root->Children[i] = std::make_shared<OctreeNode>();
         _root->Children[i]->posData = std::vector<float>();
         _root->Children[i]->colData = std::vector<float>();
         _root->Children[i]->velData = std::vector<float>();
@@ -180,7 +180,13 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
     if (_datasetFitInMemory) {
         // Only traverse Octree once!
         if (_parentNodeOfCamera == 8) {
+            // Fetch first layer of children
+            fetchChildrenNodes(_root, false);
+
             for (int i = 0; i < 8; ++i) {
+                // Check so branch doesn't have a single layer.
+                if (_root->Children[i]->isLeaf) continue;
+
                 // Use multithreading to load files and detach thread from main execution 
                 // so it can execute independently. Thread will be destroyed when finished!
                 std::thread(&OctreeManager::fetchChildrenNodes, this, _root->Children[i], 
@@ -241,6 +247,11 @@ void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstPare
     unsigned long long parentId = firstParentId;
     auto indexStack = std::stack<int>();
 
+    // Fetch first layer children if we're already at root.
+    if (parentId == 8) {
+        fetchChildrenNodes(_root, false);
+    }
+
     //----------------- Change first index -------------------//
     int nodeIndex = parentId % 10;
 
@@ -300,8 +311,7 @@ void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstPare
     }
 
     // Traverse to that parent node (as long as such a child exists!).
-    auto node = _root->Children[indexStack.top()];
-    indexStack.pop();
+    auto node = _root;
     while (!indexStack.empty() && !node->Children[indexStack.top()]->isLeaf) {
         node = node->Children[indexStack.top()];
         indexStack.pop();
@@ -1027,7 +1037,7 @@ void OctreeManager::createNodeChildren(std::shared_ptr<OctreeNode> node) {
     
     for (size_t i = 0; i < 8; ++i) {
         _numLeafNodes++;
-        node->Children[i] = std::make_unique<OctreeNode>();
+        node->Children[i] = std::make_shared<OctreeNode>();
         node->Children[i]->isLeaf = true;
         node->Children[i]->isLoaded = false;
         node->Children[i]->bufferIndex = DEFAULT_INDEX;

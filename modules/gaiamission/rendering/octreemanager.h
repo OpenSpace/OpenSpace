@@ -148,7 +148,7 @@ private:
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
         gaiamission::RenderOption option, int& deltaStars);
 
-    std::unique_ptr<OctreeNode> _root;
+    std::shared_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
     std::stack<int> _freeSpotsInBuffer;
     std::set<int> _removedKeysInPrevCall;

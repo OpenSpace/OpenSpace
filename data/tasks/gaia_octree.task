@@ -1,9 +1,35 @@
 return {
     {
         Type = "ConstructOctreeTask",
-        InFileOrFolderPath = "E:/gaia_sync_data/DR2_full_18col/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree[50kSPN,200dist]/",
+        InFileOrFolderPath = "E:/gaia_sync_data/DR2_full_24col/",
+        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree_test/",
+        MaxDist = 250,
+        MaxStarsPerNode = 150000,
         SingleFileInput = false,
-        -- TODO: Specify filter thresholds 
+        -- Specify filter thresholds
+        --FilterPosX = {0.0, 0.0},
+        --FilterPosY = {0.0, 0.0},
+        --FilterPosZ = {0.0, 0.0},
+        --FilterGMag = {20.0, 20.0},
+        --FilterBpRp = {0.0, 0.0},
+        --FilterVelX = {0.0, 0.0},
+        --FilterVelY = {0.0, 0.0},
+        --FilterVelZ = {0.0, 0.0},
+        --FilterBpMag = {20.0, 20.0},
+        --FilterRpMag = {20.0, 20.0},
+        --FilterBpG = {0.0, 0.0},
+        --FilterGRp = {0.0, 0.0},
+        --FilterRa = {0.0, 0.0},
+        --FilterRaError = {0.0, 0.0},
+        --FilterDec = {0.0, 0.0},
+        --FilterDecError = {0.0, 0.0},
+        --FilterParallax = {0.0, 0.0},
+        --FilterParallaxError = {0.0, 0.9},
+        --FilterPmra = {0.0, 0.0},
+        --FilterPmraError = {0.0, 0.0},
+        --FilterPmdec = {0.0, 0.0},
+        --FilterPmdecError = {0.0, 0.0},
+        --FilterRv = {0.0, 0.0},
+        --FilterRvError = {0.0, 0.0},
     }
 }

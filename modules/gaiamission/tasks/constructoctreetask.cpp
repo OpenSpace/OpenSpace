@@ -42,6 +42,31 @@ namespace {
     const char* KeyMaxStarsPerNode = "MaxStarsPerNode";
     const char* KeySingleFileInput = "SingleFileInput";
 
+    const char* KeyFilterPosX = "FilterPosX";
+    const char* KeyFilterPosY = "FilterPosY";
+    const char* KeyFilterPosZ = "FilterPosZ";
+    const char* KeyFilterGMag = "FilterGMag";
+    const char* KeyFilterBpRp = "FilterBpRp";
+    const char* KeyFilterVelX = "FilterVelX";
+    const char* KeyFilterVelY = "FilterVelY";
+    const char* KeyFilterVelZ = "FilterVelZ";
+    const char* KeyFilterBpMag = "FilterBpMag";
+    const char* KeyFilterRpMag = "FilterRpMag";
+    const char* KeyFilterBpG = "FilterBpG";
+    const char* KeyFilterGRp = "FilterGRp";
+    const char* KeyFilterRa = "FilterRa";
+    const char* KeyFilterRaError = "FilterRaError";
+    const char* KeyFilterDec = "FilterDec";
+    const char* KeyFilterDecError = "FilterDecError";
+    const char* KeyFilterParallax = "FilterParallax";
+    const char* KeyFilterParallaxError = "FilterParallaxError";
+    const char* KeyFilterPmra = "FilterPmra";
+    const char* KeyFilterPmraError = "FilterPmraError";
+    const char* KeyFilterPmdec = "FilterPmdec";
+    const char* KeyFilterPmdecError = "FilterPmdecError";
+    const char* KeyFilterRv = "FilterRv";
+    const char* KeyFilterRvError = "FilterRvError";
+
     constexpr const char* _loggerCat = "ConstructOctreeTask";
 } // namespace
 
@@ -53,6 +78,54 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary)
     , _singleFileInput(false)
     , _maxDist(0)
     , _maxStarsPerNode(0)
+    , _posX(0.0)
+    , _filterPosX(false)
+    , _posY(0.0)
+    , _filterPosY(false)
+    , _posZ(0.0)
+    , _filterPosZ(false)
+    , _gMag(0.0)
+    , _filterGMag(false)
+    , _bpRp(0.0)
+    , _filterBpRp(false)
+    , _velX(0.0)
+    , _filterVelX(false)
+    , _velY(0.0)
+    , _filterVelY(false)
+    , _velZ(0.0)
+    , _filterVelZ(false)
+    , _bpMag(0.0)
+    , _filterBpMag(false)
+    , _rpMag(0.0)
+    , _filterRpMag(false)
+    , _bpG(0.0)
+    , _filterBpG(false)
+    , _gRp(0.0)
+    , _filterGRp(false)
+    , _ra(0.0)
+    , _filterRa(false)
+    , _raError(0.0)
+    , _filterRaError(false)
+    , _dec(0.0)
+    , _filterDec(false)
+    , _decError(0.0)
+    , _filterDecError(false)
+    , _parallax(0.0)
+    , _filterParallax(false)
+    , _parallaxError(0.0)
+    , _filterParallaxError(false)
+    , _pmra(0.0)
+    , _filterPmra(false)
+    , _pmraError(0.0)
+    , _filterPmraError(false)
+    , _pmdec(0.0)
+    , _filterPmdec(false)
+    , _pmdecError(0.0)
+    , _filterPmdecError(false)
+    , _rv(0.0)
+    , _filterRv(false)
+    , _rvError(0.0)
+    , _filterRvError(false)
 {
     
     openspace::documentation::testSpecificationAndThrow(
@@ -79,7 +152,105 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary)
     _octreeManager = std::make_shared<OctreeManager>();
     _indexOctreeManager = std::make_shared<OctreeManager>();
 
+    // Check for filter params.
+    if (dictionary.hasKey(KeyFilterPosX)) {
+        _posX = dictionary.value<glm::vec2>(KeyFilterPosX);
+        _filterPosX = true;
+    }
+    if (dictionary.hasKey(KeyFilterPosY)) {
+        _posY = dictionary.value<glm::vec2>(KeyFilterPosY);
+        _filterPosY = true;
+    }
+    if (dictionary.hasKey(KeyFilterPosZ)) {
+        _posZ = dictionary.value<glm::vec2>(KeyFilterPosZ);
+        _filterPosZ = true;
+    }
+    if (dictionary.hasKey(KeyFilterGMag)) {
+        _gMag = dictionary.value<glm::vec2>(KeyFilterGMag);
+        _filterGMag = true;
+    }
+    if (dictionary.hasKey(KeyFilterBpRp)) {
+        _bpRp = dictionary.value<glm::vec2>(KeyFilterBpRp);
+        _filterBpRp = true;
+    }
+    if (dictionary.hasKey(KeyFilterVelX)) {
+        _velX = dictionary.value<glm::vec2>(KeyFilterVelX);
+        _filterVelX = true;
+    }
+    if (dictionary.hasKey(KeyFilterVelY)) {
+        _velY = dictionary.value<glm::vec2>(KeyFilterVelY);
+        _filterVelY = true;
+    }
+    if (dictionary.hasKey(KeyFilterVelZ)) {
+        _velZ = dictionary.value<glm::vec2>(KeyFilterVelZ);
+        _filterVelZ = true;
+    }
+    if (dictionary.hasKey(KeyFilterBpMag)) {
+        _bpMag = dictionary.value<glm::vec2>(KeyFilterBpMag);
+        _filterBpMag = true;
+    }
+    if (dictionary.hasKey(KeyFilterRpMag)) {
+        _rpMag = dictionary.value<glm::vec2>(KeyFilterRpMag);
+        _filterRpMag = true;
+    }
+    if (dictionary.hasKey(KeyFilterBpG)) {
+        _bpG = dictionary.value<glm::vec2>(KeyFilterBpG);
+        _filterBpG = true;
+    }
+    if (dictionary.hasKey(KeyFilterGRp)) {
+        _gRp = dictionary.value<glm::vec2>(KeyFilterGRp);
+        _filterGRp = true;
+    }
+    if (dictionary.hasKey(KeyFilterRa)) {
+        _ra = dictionary.value<glm::vec2>(KeyFilterRa);
+        _filterRa = true;
+    }
+    if (dictionary.hasKey(KeyFilterRaError)) {
+        _raError = dictionary.value<glm::vec2>(KeyFilterRaError);
+        _filterRaError = true;
+    }
+    if (dictionary.hasKey(KeyFilterDec)) {
+        _dec = dictionary.value<glm::vec2>(KeyFilterDec);
+        _filterDec = true;
+    }
+    if (dictionary.hasKey(KeyFilterDecError)) {
+        _decError = dictionary.value<glm::vec2>(KeyFilterDecError);
+        _filterDecError = true;
+    }
+    if (dictionary.hasKey(KeyFilterParallax)) {
+        _parallax = dictionary.value<glm::vec2>(KeyFilterParallax);
+        _filterParallax = true;
+    }
+    if (dictionary.hasKey(KeyFilterParallaxError)) {
+        _parallaxError = dictionary.value<glm::vec2>(KeyFilterParallaxError);
+        _filterParallaxError = true;
+    }
+    if (dictionary.hasKey(KeyFilterPmra)) {
+        _pmra = dictionary.value<glm::vec2>(KeyFilterPmra);
+        _filterPmra = true;
+    }
+    if (dictionary.hasKey(KeyFilterPmraError)) {
+        _pmraError = dictionary.value<glm::vec2>(KeyFilterPmraError);
+        _filterPmraError = true;
+    }
+    if (dictionary.hasKey(KeyFilterPmdec)) {
+        _pmdec = dictionary.value<glm::vec2>(KeyFilterPmdec);
+        _filterPmdec = true;
+    }
+    if (dictionary.hasKey(KeyFilterPmdecError)) {
+        _pmdecError = dictionary.value<glm::vec2>(KeyFilterPmdecError);
+        _filterPmdecError = true;
+    }
+    if (dictionary.hasKey(KeyFilterRv)) {
+        _rv = dictionary.value<glm::vec2>(KeyFilterRv);
+        _filterRv = true;
+    }
+    if (dictionary.hasKey(KeyFilterRvError)) {
+        _rvError = dictionary.value<glm::vec2>(KeyFilterRvError);
+        _filterRvError = true;
+    }
 }
+
 ConstructOctreeTask::~ConstructOctreeTask() {}
 
 std::string ConstructOctreeTask::description() {
@@ -132,14 +303,11 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(const Task::ProgressCall
             std::vector<float> filterValues(first, last);
             std::vector<float> renderValues(first, first + RENDER_VALUES);
 
-            // TODO: Filter data by parameters!
-            bool passFilters = true;
-
-            // If all filters passed then insert render values into Octree.
-            if (passFilters) {
-                _octreeManager->insert(renderValues);
-            }
+            // Filter data by parameters.
+            if (checkAllFilters(filterValues)) continue;
             
+            // If all filters passed then insert render values into Octree.
+            _octreeManager->insert(renderValues);
         }
         inFileStream.close();
     }
@@ -171,7 +339,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     
     int32_t nStars = 0;
     int32_t nValuesPerStar = 0;
-    /*float maxRadius = 0.0;
+    float maxRadius = 0.0;
     int starsOutside10 = 0;
     int starsOutside25 = 0;
     int starsOutside50 = 0;
@@ -185,7 +353,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     int starsOutside1000 = 0;
     int starsOutside1500 = 0;
     int starsOutside2000 = 0;
-    int starsOutside5000 = 0;*/
+    int starsOutside5000 = 0;
 
     ghoul::filesystem::Directory currentDir(_inFileOrFolderPath);
     std::vector<std::string> allInputFiles = currentDir.readFiles();
@@ -199,7 +367,6 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     LINFO("MAX_DIST: " + std::to_string(_indexOctreeManager->maxDist()) +
         " - MAX_STARS_PER_NODE: " + std::to_string(_indexOctreeManager->maxStarsPerNode()));
 
-    // TODO: Parallelize!
     for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
 
         std::string inFilePath = allInputFiles[idx];
@@ -216,36 +383,34 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
             while (inFileStream.read(reinterpret_cast<char*>(&filterValues[0]),
                 nValuesPerStar * sizeof(filterValues[0]))) {
 
-                // TODO: Filter data by parameters!
-                bool passFilters = true;
+                // Filter data by parameters.
+                if (checkAllFilters(filterValues)) continue;
 
                 // If all filters passed then insert render values into Octree.
-                if (passFilters) {
-                    std::vector<float> renderValues(filterValues.begin(),
-                        filterValues.begin() + RENDER_VALUES);
+                std::vector<float> renderValues(filterValues.begin(),
+                    filterValues.begin() + RENDER_VALUES);
 
-                    _indexOctreeManager->insert(renderValues);
-                    nStarsInfile++;
+                _indexOctreeManager->insert(renderValues);
+                nStarsInfile++;
 
-                    /*float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])), 
-                        fabs(renderValues[2]));
-                    if (maxVal > maxRadius) maxRadius = maxVal;
-                    // Calculate how many stars are outside of different thresholds.
-                    if (maxVal > 10) starsOutside10++;
-                    if (maxVal > 25) starsOutside25++;
-                    if (maxVal > 50) starsOutside50++;
-                    if (maxVal > 75) starsOutside75++;
-                    if (maxVal > 100) starsOutside100++;
-                    if (maxVal > 200) starsOutside200++;
-                    if (maxVal > 300) starsOutside300++;
-                    if (maxVal > 400) starsOutside400++;
-                    if (maxVal > 500) starsOutside500++;
-                    if (maxVal > 750) starsOutside750++;
-                    if (maxVal > 1000) starsOutside1000++;
-                    if (maxVal > 1500) starsOutside1500++;
-                    if (maxVal > 2000) starsOutside2000++;
-                    if (maxVal > 5000) starsOutside5000++;*/
-                }
+                float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])), 
+                    fabs(renderValues[2]));
+                if (maxVal > maxRadius) maxRadius = maxVal;
+                // Calculate how many stars are outside of different thresholds.
+                if (maxVal > 10) starsOutside10++;
+                if (maxVal > 25) starsOutside25++;
+                if (maxVal > 50) starsOutside50++;
+                if (maxVal > 75) starsOutside75++;
+                if (maxVal > 100) starsOutside100++;
+                if (maxVal > 200) starsOutside200++;
+                if (maxVal > 300) starsOutside300++;
+                if (maxVal > 400) starsOutside400++;
+                if (maxVal > 500) starsOutside500++;
+                if (maxVal > 750) starsOutside750++;
+                if (maxVal > 1000) starsOutside1000++;
+                if (maxVal > 1500) starsOutside1500++;
+                if (maxVal > 2000) starsOutside2000++;
+                if (maxVal > 5000) starsOutside5000++;
             }
             inFileStream.close();
         }
@@ -276,7 +441,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     LINFO("A total of " + std::to_string(nStars) + " stars where read from files and distributed into "
         + std::to_string(_indexOctreeManager->totalNodes()) + " total nodes!");
 
-    /*LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + "\n Number of stars outside of:" +  
+    LINFO("Max radius of dataset is: " + std::to_string(maxRadius) + "\n Number of stars outside of:" +  
         " - 10kPc is " + std::to_string(starsOutside10) + "\n" + 
         " - 25kPc is " + std::to_string(starsOutside25) + "\n" +
         " - 50kPc is " + std::to_string(starsOutside50) + "\n" + 
@@ -290,7 +455,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
         " - 1000kPc is " + std::to_string(starsOutside1000) + "\n" +
         " - 1500kPc is " + std::to_string(starsOutside1500) + "\n" +
         " - 2000kPc is " + std::to_string(starsOutside2000) + "\n" +
-        " - 5000kPc is " + std::to_string(starsOutside5000));*/
+        " - 5000kPc is " + std::to_string(starsOutside5000));
 
     // Write index file of Octree structure.
     std::string indexFileOutPath = _outFileOrFolderPath + "index.bin";
@@ -310,6 +475,44 @@ void ConstructOctreeTask::constructOctreeFromFolder(const Task::ProgressCallback
     for (int i = 0; i < 8; ++i) {
         writeThreads[i].join();
     }
+}
+
+bool ConstructOctreeTask::checkAllFilters(const std::vector<float>& filterValues) {
+    // Return true if star is caught in any filter.
+    return (_filterPosX && filterStar(_posX, filterValues[0])) ||
+        (_filterPosY && filterStar(_posY, filterValues[1])) ||
+        (_filterPosZ && filterStar(_posZ, filterValues[2])) ||
+        (_filterGMag && filterStar(_gMag, filterValues[3])) ||
+        (_filterBpRp && filterStar(_bpRp, filterValues[4])) ||
+        (_filterVelX && filterStar(_velX, filterValues[5])) ||
+        (_filterVelY && filterStar(_velY, filterValues[6])) ||
+        (_filterVelZ && filterStar(_velZ, filterValues[7])) ||
+        (_filterBpMag && filterStar(_bpMag, filterValues[8])) ||
+        (_filterRpMag && filterStar(_rpMag, filterValues[9])) ||
+        (_filterBpG && filterStar(_bpG, filterValues[10])) ||
+        (_filterGRp && filterStar(_gRp, filterValues[11])) ||
+        (_filterRa && filterStar(_ra, filterValues[12])) ||
+        (_filterRaError && filterStar(_raError, filterValues[13])) ||
+        (_filterDec && filterStar(_dec, filterValues[14])) ||
+        (_filterDecError && filterStar(_decError, filterValues[15])) ||
+        (_filterParallax && filterStar(_parallax, filterValues[16])) ||
+        (_filterParallaxError && filterStar(_parallaxError, filterValues[17])) ||
+        (_filterPmra && filterStar(_pmra, filterValues[18])) ||
+        (_filterPmraError && filterStar(_pmraError, filterValues[19])) ||
+        (_filterPmdec && filterStar(_pmdec, filterValues[20])) ||
+        (_filterPmdecError && filterStar(_pmdecError, filterValues[21])) ||
+        (_filterRv && filterStar(_rv, filterValues[22])) ||
+        (_filterRvError && filterStar(_rvError, filterValues[23]));
+}
+
+bool ConstructOctreeTask::filterStar(const glm::vec2& range, const float& filterValue) {
+    
+    // Return true if star should be filtered away, i.e. if min = max = filterValue or
+    // if filterValue =< min (when min != 0.0) or filterValue >= max (when max != 0.0).
+    return (fabs(range[0] - range[1]) < FLT_EPSILON &&
+        fabs(range[0] - filterValue) < FLT_EPSILON) &&
+        !(fabs(range[0]) > FLT_EPSILON && filterValue > range[0]) &&
+        !(fabs(range[1]) > FLT_EPSILON && filterValue < range[1]);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {
@@ -358,8 +561,223 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 "with the full Octree. If false then task will read all files in specified folder and "
                 "output multiple files for the Octree."
             },
+            {
+                KeyFilterPosX,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Position X values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterPosY,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Position Y values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterPosZ,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Position Z values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterGMag,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with G mean magnitude values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterBpRp,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Bp-Rp color values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterVelX,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Velocity X values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterVelY,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Velocity Y values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterVelZ,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Velocity Z values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterBpMag,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Bp mean magnitude values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterRpMag,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Rp mean magnitude values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterBpG,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Bp-G color values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterGRp,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with G-Rp color values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterRa,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with RA values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterRaError,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with RA Error values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterDec,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with DEC values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterDecError,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with DEC Error values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterParallax,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Parallax values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterParallaxError,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Parallax Error values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterPmra,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Proper Motion RA values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterPmraError,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Proper Motion RA Error values between "
+                "]min, max[ will be inserted into Octree (if min is set to 0.0 it is read "
+                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all "
+                "values equal min|max will be filtered away."
+            },
+            {
+                KeyFilterPmdec,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Proper Motion DEC values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterPmdecError,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Proper Motion DEC Error values between "
+                "]min, max[ will be inserted into Octree (if min is set to 0.0 it is read "
+                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all "
+                "values equal min|max will be filtered away."
+            },
+            {
+                KeyFilterRv,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Radial Velocity values between ]min, max[ "
+                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
+                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away."
+            },
+            {
+                KeyFilterRvError,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                "If defined then only stars with Radial Velocity Error values between "
+                "]min, max[ will be inserted into Octree (if min is set to 0.0 it is read "
+                "as -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all "
+                "values equal min|max will be filtered away."
+            },
         }
     };
 }
-
 } // namespace openspace
