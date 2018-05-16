@@ -26,7 +26,6 @@
 
 #include <modules/imgui/include/gui.h>
 #include <modules/imgui/include/imgui_include.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
@@ -43,7 +42,7 @@ namespace {
         std::string missionHashname = "##" + mission.name();
 
 
-        double currentTime = OsEng.timeManager().time().j2000Seconds();
+        const double currentTime = OsEng.timeManager().time().j2000Seconds();
         openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
@@ -67,8 +66,8 @@ namespace {
             ImGui::Text("%s", startTime.UTC().c_str());
             ImGui::SameLine();
             float v = static_cast<float>(currentTime);
-            float s = static_cast<float>(startTime.j2000Seconds());
-            float e = static_cast<float>(endTime.j2000Seconds());
+            const float s = static_cast<float>(startTime.j2000Seconds());
+            const float e = static_cast<float>(endTime.j2000Seconds());
 
             ImGui::SliderFloat(
                 missionHashname.c_str(),
@@ -86,7 +85,6 @@ namespace {
                 renderMission(m);
             }
 
-
             ImGui::TreePop();
         }
     }
@@ -95,8 +93,8 @@ namespace {
 
 namespace openspace::gui {
 
-GuiMissionComponent::GuiMissionComponent() :
-    GuiComponent("Missions", "Mission Information")
+GuiMissionComponent::GuiMissionComponent()
+    : GuiComponent("Missions", "Mission Information")
 {}
 
 void GuiMissionComponent::render() {

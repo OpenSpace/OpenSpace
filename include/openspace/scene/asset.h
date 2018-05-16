@@ -103,7 +103,7 @@ public:
     bool cancelAllSynchronizations();
     bool cancelUnwantedSynchronizations();
     bool restartAllSynchronizations();
-    float requiredSynchronizationProgress();
+    float requiredSynchronizationProgress() const;
     float requestedSynchronizationProgress();
 
     /**
@@ -130,8 +130,8 @@ public:
     const std::vector<std::shared_ptr<Asset>>& requiredAssets() const;
     std::vector<std::shared_ptr<Asset>> requiringAssets() const;
 
-    std::vector<std::shared_ptr<Asset>> requiredSubTreeAssets();
-    std::vector<std::shared_ptr<Asset>> subTreeAssets();
+    std::vector<std::shared_ptr<const Asset>> requiredSubTreeAssets() const;
+    std::vector<std::shared_ptr<const Asset>> subTreeAssets() const;
     std::vector<std::shared_ptr<Asset>> childAssets() const;
     std::vector<std::shared_ptr<Asset>> parentAssets() const;
 

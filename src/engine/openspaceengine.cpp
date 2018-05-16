@@ -665,11 +665,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
     _loadingScreen->postMessage("Synchronizing assets");
 
-    std::vector<std::shared_ptr<Asset>> allAssets =
+    std::vector<std::shared_ptr<const Asset>> allAssets =
         _assetManager->rootAsset()->subTreeAssets();
 
     std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
-    for (const std::shared_ptr<Asset>& a : allAssets) {
+    for (const std::shared_ptr<const Asset>& a : allAssets) {
         std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
             a->ownSynchronizations();
 

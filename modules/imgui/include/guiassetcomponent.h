@@ -38,9 +38,7 @@ public:
     void render() override;
 
 private:
-    void renderTree(const std::shared_ptr<openspace::Asset> a,
-        const std::string& rootPath
-    );
+    void renderTree(const Asset& a, const std::string& rootPath);
 };
 
 } // namespace openspace::gui

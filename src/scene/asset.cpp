@@ -34,11 +34,12 @@
 namespace {
     const constexpr char* _loggerCat = "Asset";
 
-    float syncProgress(const std::vector<std::shared_ptr<openspace::Asset>>& assets) {
+    float syncProgress(const std::vector<std::shared_ptr<const openspace::Asset>>& assets)
+    {
         size_t nTotalBytes = 0;
         size_t nSyncedBytes = 0;
 
-        for (const std::shared_ptr<openspace::Asset>& a : assets) {
+        for (const std::shared_ptr<const openspace::Asset>& a : assets) {
             const std::vector<std::shared_ptr<openspace::ResourceSynchronization>>& s =
                 a->ownSynchronizations();
 
@@ -237,23 +238,23 @@ Asset::ownSynchronizations() const
     return _synchronizations;
 }
 
-std::vector<std::shared_ptr<Asset>> Asset::subTreeAssets() {
-    std::unordered_set<std::shared_ptr<Asset>> assets({ shared_from_this() });
+std::vector<std::shared_ptr<const Asset>> Asset::subTreeAssets() const {
+    std::unordered_set<std::shared_ptr<const Asset>> assets({ shared_from_this() });
     for (const std::shared_ptr<Asset>& c : childAssets()) {
-        const std::vector<std::shared_ptr<Asset>>& subTree = c->subTreeAssets();
+        const std::vector<std::shared_ptr<const Asset>>& subTree = c->subTreeAssets();
         std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
     }
-    std::vector<std::shared_ptr<Asset>> assetVector(assets.begin(), assets.end());
+    std::vector<std::shared_ptr<const Asset>> assetVector(assets.begin(), assets.end());
     return assetVector;
 }
 
-std::vector<std::shared_ptr<Asset>> Asset::requiredSubTreeAssets() {
-    std::unordered_set<std::shared_ptr<Asset>> assets({ shared_from_this() });
+std::vector<std::shared_ptr<const Asset>> Asset::requiredSubTreeAssets() const {
+    std::unordered_set<std::shared_ptr<const Asset>> assets({ shared_from_this() });
     for (const std::shared_ptr<Asset>& dep : _requiredAssets) {
-        const std::vector<std::shared_ptr<Asset>>& subTree = dep->requiredSubTreeAssets();
+        const std::vector<std::shared_ptr<const Asset>>& subTree = dep->requiredSubTreeAssets();
         std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
     }
-    std::vector<std::shared_ptr<Asset>> assetVector(assets.begin(), assets.end());
+    std::vector<std::shared_ptr<const Asset>> assetVector(assets.begin(), assets.end());
     return assetVector;
 }
 
@@ -447,13 +448,13 @@ bool Asset::restartAllSynchronizations() {
     return startSynchronizations();
 }
 
-float Asset::requiredSynchronizationProgress() {
-    const std::vector<std::shared_ptr<Asset>>& assets = requiredSubTreeAssets();
+float Asset::requiredSynchronizationProgress() const {
+    const std::vector<std::shared_ptr<const Asset>>& assets = requiredSubTreeAssets();
     return syncProgress(assets);
 }
 
 float Asset::requestedSynchronizationProgress() {
-    const std::vector<std::shared_ptr<Asset>>& assets = subTreeAssets();
+    const std::vector<std::shared_ptr<const Asset>>& assets = subTreeAssets();
     return syncProgress(assets);
 }
 
