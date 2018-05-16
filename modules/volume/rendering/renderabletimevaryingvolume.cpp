@@ -49,25 +49,21 @@ namespace {
 } // namespace
 
 namespace {
-    constexpr const char* KeyDimensions = "Dimensions";
-    constexpr const char* KeyStepSize = "StepSize";
-    constexpr const char* KeyTransferFunction = "TransferFunction";
-    constexpr const char* KeySourceDirectory = "SourceDirectory";
-    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
-    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
-    constexpr const char* KeyClipPlanes = "ClipPlanes";
-    constexpr const char* KeySecondsBefore = "SecondsBefore";
-    constexpr const char* KeySecondsAfter = "SecondsAfter";
-    constexpr const char* KeyGridType = "GridType";
-    constexpr const char* KeyOpacity = "Opacity";
-    constexpr const char* KeyMinValue = "MinValue";
-    constexpr const char* KeyMaxValue = "MaxValue";
-    constexpr const char* KeyTime = "Time";
-    constexpr const char* KeyUnit = "VisUnit";
-    constexpr const float SecondsInOneDay = 60 * 60 * 24;
+
+    const char* KeyStepSize = "StepSize";
+    const char* KeyGridType = "GridType";
+    const char* KeyTransferFunction = "TransferFunction";
+    const char* KeySourceDirectory = "SourceDirectory";
+
+    const char* KeyClipPlanes = "ClipPlanes";
+    const char* KeySecondsBefore = "SecondsBefore";
+    const char* KeySecondsAfter = "SecondsAfter";
+    const char* KeyOpacity = "Opacity";
+
+    const float SecondsInOneDay = 60 * 60 * 24;
     constexpr const float VolumeMaxOpacity = 500;
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
         "Step Size",
         "" // @TODO Missing documentation
@@ -178,52 +174,6 @@ namespace openspace::volume {
     };
 }
 
-//documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation() {
-//    using namespace documentation;
-//    return {
-//        "TimevaryingVolumeTimestep",
-//        "volume_timevaryingvolumetimestep",
-//        {
-//            {
-//                KeyLowerDomainBound,
-//                new Vector3Verifier<float>,
-//                Optional::No,
-//                "Specifies the lower domain bounds in the model coordinate system",
-//            },
-//            {
-//                KeyUpperDomainBound,
-//                new Vector3Verifier<float>,
-//                Optional::No,
-//                "Specifies the upper domain bounds in the model coordinate system",
-//            },
-//            {
-//                KeyDimensions,
-//                new Vector3Verifier<float>,
-//                Optional::No,
-//                "Specifies the number of grid cells in each dimension",
-//            },
-//            {
-//                KeyTime,
-//                new StringVerifier,
-//                Optional::No,
-//                "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
-//            },
-//            {
-//                KeyMinValue,
-//                new DoubleVerifier,
-//                Optional::No,
-//                "Specifies the minimum value stored in the volume"
-//            },
-//            {
-//                KeyMaxValue,
-//                new DoubleVerifier,
-//                Optional::No,
-//                "Specifies the maximum value stored in the volume"
-//            }
-//        }
-//    };
-//}
-
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -277,7 +227,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
-
+    
     if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
            dictionary.value<std::string>(KeyGridType)
