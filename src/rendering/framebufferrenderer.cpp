@@ -471,8 +471,8 @@ void FramebufferRenderer::updateRaycastData() {
         try {
             _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " exit",
-                vsPath,
-                ExitFragmentShaderPath,
+                absPath(vsPath),
+                absPath(ExitFragmentShaderPath),
                 dict
             );
         } 
