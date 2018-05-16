@@ -16,7 +16,7 @@ asset.request('customization/globebrowsing')
 asset.require('scene/solarsystem/sun/sun')
 
 -- We need to specify paths to the prepared fieldline files before requesting the BATSRUS, ENLIL, and PFSS fieldline assets:
-local FieldLineBasePath = "C:/Users/CCMC/data/old_fieldlines_binaries/"
+local FieldLineBasePath = "C:/Users/CCMC/data/fieldlines_binaries/"
 ENLILPaths = {
     EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
     EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
@@ -27,6 +27,10 @@ ENLILPaths = {
 }
 asset.require('./fieldlines/enlil')
 
+MASPaths = {
+    Sun = FieldLineBasePath .. "mas/"
+}
+asset.require('./fieldlines/mas')
 
 -- Keybindings that are specific for this scene
 local Keybindings = {
@@ -56,7 +60,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Sun", "Moon", "FL_ENLIL_earth"
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS"
     })
 
     openspace.navigation.setCameraState({
@@ -74,6 +78,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Mars", "Moon", "FL_ENLIL_earth"
+        "Earth", "Mars", "Moon", "FL_ENLIL_earth", "FL_MAS"
     })
 end)
