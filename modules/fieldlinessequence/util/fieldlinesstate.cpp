@@ -157,7 +157,9 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     {
         const char* sTime = "time";
         const json& jTmp = *(jFile.begin()); // First field line in the file
-        _triggerTime = Time::convertTime(jTmp[sTime]);
+        
+        //_triggerTime = Time::convertTime(jTmp[sTime]);
+        _triggerTime = Time::convertTime("2012 JUL 01 00:01:00"); // Temporary for MAS-fieldlines
 
         const char* sColumns = "columns";
         const json::value_type& variableNameVec = jTmp[sTrace][sColumns];

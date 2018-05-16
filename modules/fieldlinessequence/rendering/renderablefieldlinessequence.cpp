@@ -539,7 +539,7 @@ bool RenderableFieldlinesSequence::extractJsonInfoFromDictionary(fls::Model& mod
         return false;
     }
 
-    float scaleFactor;
+    float scaleFactor = 1.0;
     if (_dictionary->getValue(KeyJsonScalingFactor, scaleFactor)) {
         _scalingFactor = scaleFactor;
     }

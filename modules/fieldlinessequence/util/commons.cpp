@@ -33,6 +33,8 @@ Model stringToModel(const std::string& s) {
         return Model::Enlil;
     } else if (s == "pfss") {
         return Model::Pfss;
+    } else if (s == "mas") {
+        return Model::Mas;
     }
     return Model::Invalid;
 }

@@ -1,0 +1,130 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local transferFunctions = asset.require('./transferfunctions').TransferFunctions
+
+local masVelocityColorTable = transferFunctions .. "/kroyw.txt"
+local masDensityColorTable = transferFunctions .. "/enlil_density.txt"
+
+-- -- Mas data
+-- if not MASPaths then
+--     openspace.printError("Trying to add MAS fieldlines, but 'MASaths' table was not defined")
+--     return
+-- end
+
+-- local failed = false
+-- if not MASPaths.EqPlane011AU1 then
+--     openspace.printError("Trying to add MAS fieldlines, but 'MASPaths.EqPlane011AU1' was not defined")
+--     failed = true
+-- end
+
+local sunRadius = 695508000
+
+
+-- Fieldlies from binaries
+local MAS = {
+    Identifier = "FL_MAS",
+    Parent = transforms.HNMReferenceFrame.Identifier,
+    Renderable = {
+        Type = "RenderableFieldlinesSequence",
+        -- TracingMethod = "PreTracedBinary",
+        SourceFolder = MASPaths.Sun,
+        InputFileType = "osfls",
+        -- StartStateOffset = 309,
+        -- MaxNumStates = 1,
+        ColorTablePaths = {
+            masDensityColorTable,
+            masVelocityColorTable,
+        },
+        DefaultColor = { 0.4, 0.15, 0.4, 1.0 },
+        ColorTableMinMax = {
+            { 0, 1000000 },
+            { 100, 2000 }
+        },
+        ExtraMinMaxLimits = {
+            { -1, 10000000 },
+            { 0, 5000 }
+        },
+        RadialDomainLimits = { 1, 5 },
+        CartesianDomainLimits = {
+            { -2.5, 2.5 },
+            { -2.5, 2.5 },
+            { -2.5, 2.5}
+        },
+        LoadAtRuntime = true,
+        ScaleToMeters = 1.0,
+        SecondsBefore = 50*365*24*60*60, -- 50 years before
+        SecondsAfter = 50*365*24*60*60, -- 50 years after
+    },
+    GUI = {
+        Name = "Fieldlines MAS"
+    },
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "SUN",
+            Observer = "SUN"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 0.04 * sunRadius
+        }
+    }
+} 
+
+-- Fieldlines from json. This will convert the files into binary upon run
+-- local MAS = {
+--     Identifier = "FL_MAS",
+--     Parent = transforms.HNMReferenceFrame.Identifier,
+--     Renderable = {
+--         Type = "RenderableFieldlinesSequence",
+--         -- TracingMethod = "PreTracedBinary",
+--         SourceFolder = "C:/Users/CCMC/data/fieldlines_json/mas/",
+--         InputFileType = "json",
+--         -- StartStateOffset = 309,
+--         -- MaxNumStates = 1,
+--         ColorTablePaths = {
+--             masDensityColorTable,
+--             masVelocityColorTable,
+--         },
+--         DefaultColor = { 0.4, 0.15, 0.4, 1.0 },
+--         ColorTableMinMax = {
+--             { 0, 1000000 },
+--             { 100, 2000 }
+--         },
+--         ExtraMinMaxLimits = {
+--             { -1, 10000000 },
+--             { 0, 5000 }
+--         },
+--         RadialDomainLimits = { 1, 5 },
+--         CartesianDomainLimits = {
+--             { -2.5, 2.5 },
+--             { -2.5, 2.5 },
+--             { -2.5, 2.5}
+--         },
+--         LoadAtRuntime = true,
+--         OutputFolder = "C:/Users/CCMC/data/fieldlines_binaries/mas/",
+--         SimulationModel = "mas",
+--         ScaleToMeters = 1.0,
+--         SecondsBefore = 50*365*24*60*60, -- 50 years before
+--         SecondsAfter = 50*365*24*60*60, -- 50 years after
+--     },
+--     GUI = {
+--         Name = "Fieldlines MAS"
+--     },
+-- } 
+
+local objects = { MAS }
+
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+
+asset.onInitialize(function ()
+    
+    -- deinit()
+end)
+
+asset.onDeinitialize(function ()
+ 
+    -- deinit()
+end)
+
+

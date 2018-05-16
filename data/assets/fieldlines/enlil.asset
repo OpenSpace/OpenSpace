@@ -282,11 +282,11 @@ asset.onInitialize(function ()
     -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.colorQuantityMax", "225000")
 
 
-    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.color", { 1, 1, 1, 1.0 })
-    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.particleSize", 5)
-    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.particleSpacing", 25)
-    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.speed", 25.0)
-    openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.reversed", true)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.color", { 1, 1, 1, 1.0 })
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.particleSize", 5)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.particleSpacing", 25)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.speed", 25.0)
+    -- openspace.setPropertyValueSingle("Scene.FL_ENLIL_slice_eqPlane_011AU_1.renderable.Flow.reversed", true)
 
     -- DEFAULT ENLIL
     -- openspace.setPropertyValue("Scene.FL_ENLIL*.renderable.Color.fieldlineColorQuantity", 1)
