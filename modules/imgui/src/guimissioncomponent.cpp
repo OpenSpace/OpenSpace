@@ -100,17 +100,16 @@ GuiMissionComponent::GuiMissionComponent() :
 {}
 
 void GuiMissionComponent::render() {
+    if (!MissionManager::ref().hasCurrentMission()) {
+        return;
+    }
+
     ImGui::SetNextWindowCollapsed(_isCollapsed);
     bool v = _isEnabled;
     ImGui::Begin(guiName().c_str(), &v, Size, 0.75f);
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
-
-    ghoul_assert(
-        MissionManager::ref().hasCurrentMission(),
-        "Must have a current mission"
-    );
 
     const Mission& currentMission = MissionManager::ref().currentMission();
     renderMission(currentMission);

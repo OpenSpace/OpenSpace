@@ -94,6 +94,11 @@ GuiPerformanceComponent::GuiPerformanceComponent()
 }
 
 void GuiPerformanceComponent::render() {
+    if (!OsEng.renderEngine().doesPerformanceMeasurements()) {
+        return;
+    }
+
+
     using ghoul::SharedMemory;
     using namespace performance;
 
