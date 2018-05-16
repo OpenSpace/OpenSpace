@@ -139,7 +139,7 @@ private:
         std::shared_ptr<OctreeNode> node, bool readData);
 
     void writeNodeToMultipleFiles(const std::string& outFilePrefix, 
-        std::shared_ptr<OctreeNode> node);
+        std::shared_ptr<OctreeNode> node, bool threadWrites);
     void findAndFetchNeighborNode(const unsigned long long& firstParentId, int x, int y, int z);
     void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode, 
         bool recursive);

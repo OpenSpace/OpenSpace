@@ -566,7 +566,7 @@ void OctreeManager::writeToMultipleFiles(const std::string& outFolderPath,
 
     // Write entire branch to disc, with one file per node.
     std::string outFilePrefix = outFolderPath + std::to_string(branchIndex);
-    writeNodeToMultipleFiles(outFilePrefix, _root->Children[branchIndex]);
+    writeNodeToMultipleFiles(outFilePrefix, _root->Children[branchIndex], true);
 
     // Clear all data in branch.
     LINFO("Clear all data from branch " + std::to_string(branchIndex) + " in Octree!");
@@ -575,7 +575,7 @@ void OctreeManager::writeToMultipleFiles(const std::string& outFolderPath,
 
 // Write node data to a file. outFilePrefix specifies the name of file.
 void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix, 
-    std::shared_ptr<OctreeNode> node) {
+    std::shared_ptr<OctreeNode> node, bool threadWrites) {
 
     // Prepare node data, save nothing else.
     std::vector<float> nodeData = node->posData;
@@ -605,9 +605,24 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
 
     // Recursively write children to file (in Morton order) if we're in an inner node.
     if (!node->isLeaf) {
+        auto writeThreads = std::vector<std::thread>(8);
         for (size_t i = 0; i < 8; ++i) {
             std::string newOutFilePrefix = outFilePrefix + std::to_string(i);
-            writeNodeToMultipleFiles(newOutFilePrefix, node->Children[i]);
+            if (threadWrites) {
+                // Divide writing to new threads to speed up the process.
+                std::thread t(&OctreeManager::writeNodeToMultipleFiles, this,
+                    newOutFilePrefix, node->Children[i], false);
+                writeThreads[i] = std::move(t);
+            }
+            else {
+                writeNodeToMultipleFiles(newOutFilePrefix, node->Children[i], false);
+            }
+        }
+        if (threadWrites) {
+            // Make sure all threads are done.
+            for (int thread = 0; thread < 8; ++thread) {
+                writeThreads[thread].join();
+            }
         }
     }
 }
@@ -785,7 +800,7 @@ bool OctreeManager::insertInNode(std::shared_ptr<OctreeNode> node,
 
     // Determine if new star should be kept in our LOD cache. 
     // Keeps track of the brightest nodes in children. 
-    if (starValues[POS_SIZE] < (*std::prev(node->magOrder.end())).first ) {
+    if (starValues[POS_SIZE] < node->magOrder[MAX_STARS_PER_NODE - 1].first ) {
         storeStarData(node, starValues);
     }
 
@@ -836,6 +851,13 @@ void OctreeManager::storeStarData(std::shared_ptr<OctreeNode> node,
     float mag = starValues[POS_SIZE];
     node->magOrder.insert(node->magOrder.end(), std::make_pair(mag, node->numStars));
     node->numStars++;
+
+    // If LOD is growing too large then sort it and resize to [chunk size] to avoid too 
+    // much RAM usage and increase threshold for adding new stars.
+    if (node->magOrder.size() > MAX_STARS_PER_NODE * 3) {
+        std::sort(node->magOrder.begin(), node->magOrder.end());
+        node->magOrder.resize(MAX_STARS_PER_NODE);
+    }
 
     auto posEnd = starValues.begin() + POS_SIZE;
     auto colEnd = posEnd + COL_SIZE;
