@@ -278,7 +278,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setGuiName("Clip Planes");
 
     if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
-
         VolumeGridType gridType = volume::parseGridType(
            dictionary.value<std::string>(KeyGridType)
         );
