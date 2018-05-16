@@ -48,6 +48,7 @@ namespace {
 
 namespace {
     const char* KeyStepSize = "StepSize";
+    const char* KeyGridType = "GridType";
     const char* KeyTransferFunction = "TransferFunction";
     const char* KeySourceDirectory = "SourceDirectory";
 
@@ -197,12 +198,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    /*if (dictionary.hasValue<std::string>(KeyGridType)) {
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
             dictionary.value<std::string>(KeyGridType)
         );
         _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
-    }*/
+    }
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -310,6 +311,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_opacity);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
+    addProperty(_gridType);
 
     _raycaster->setGridType(
         (_gridType.value() == 1) ?
@@ -424,6 +426,10 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
     if (_raycaster) {
         Timestep* t = currentTimestep();
         _currentTimestep = timestepIndex(t);
+
+        // Set scale and translation matrices:
+        // The original data cube is a unit cube centered in 0
+        // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
         if (t && t->texture) {
             if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
                 glm::dvec3 scale = t->metadata.upperDomainBound -
@@ -436,10 +442,12 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
                 modelTransform = modelTransform * scaleMatrix;
                 _raycaster->setModelTransform(glm::mat4(modelTransform));
             } else {
+                // The diameter is two times the maximum radius.
+                // No translation: the sphere is always centered in (0, 0, 0)
                 _raycaster->setModelTransform(
                     glm::scale(
                         glm::dmat4(1.0),
-                        glm::dvec3(t->metadata.upperDomainBound[0])
+                        glm::dvec3(2.0 * t->metadata.upperDomainBound[0])
                     )
                 );
             }

@@ -33,6 +33,7 @@
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
@@ -52,7 +53,6 @@ namespace {
 
     constexpr const char* KeyMinValue = "MinValue";
     constexpr const char* KeyMaxValue = "MaxValue";
-    // constexpr const char* KeyVisUnit = "VisUnit";
 } // namespace
 
 namespace openspace {
@@ -146,6 +146,12 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     });
 
     luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
+
+    ghoul::filesystem::File file(_rawVolumeOutputPath);
+    const std::string directory = file.directoryName();
+    if (!FileSys.directoryExists(directory)) {
+        FileSys.createDirectory(directory, ghoul::filesystem::FileSystem::Recursive::Yes);
+    }
 
     volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(rawVolume);
