@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>

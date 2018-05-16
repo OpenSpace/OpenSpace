@@ -43,7 +43,7 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
         case layergroupid::TypeID::TileIndexTileLayer:
         case layergroupid::TypeID::ByIndexTileLayer:
         case layergroupid::TypeID::ByLevelTileLayer: {
-            ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
+            ChunkTilePile chunkTilePile = layer.chunkTilePile(tileIndex, pileSize);
             gpuChunkTilePile.setValue(programObject, chunkTilePile);
             paddingStartOffset.setValue(programObject, layer.tilePixelStartOffset());
             paddingSizeDifference.setValue(

@@ -22,67 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/distanceswitch.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEMPLATED_STATS_COLLECTOR___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TEMPLATED_STATS_COLLECTOR___H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
+#include <ghoul/misc/boolean.h>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace openspace::globebrowsing {
 
-DistanceSwitch::~DistanceSwitch() {}
+template <typename T>
+class TemplatedStatsCollector {
+public:
+    BooleanType(Enabled);
 
-void DistanceSwitch::initialize() {
-    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
-        renderable->initialize();
-    }
-}
+    TemplatedStatsCollector(Enabled enabled, std::string delimiter);
+    ~TemplatedStatsCollector() = default;
 
-void DistanceSwitch::initializeGL() {
-    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
-        renderable->initializeGL();
-    }
-}
+    void startNewRecord();
 
-void DistanceSwitch::deinitialize() {
-    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
-        renderable->deinitialize();
-    }
-}
+    T& operator[](const std::string& name);
+    T previous(const std::string& name) const;
 
-void DistanceSwitch::deinitializeGL() {
-    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
-        renderable->deinitializeGL();
-    }
-}
+    void setEnabled(bool enabled);
+    bool enabled() const;
 
-void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    const double distanceToCamera = distance(
-        data.camera.positionVec3(),
-        data.modelTransform.translation
-    );
+    bool hasHeaders() const;
+    bool hasRecordsToWrite() const;
 
-    // This distance will be enough to render the globe as one pixel if the field of
-    // view is 'fov' radians and the screen resolution is 'res' pixels.
-    const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-    const int res = 2880;
+    void reset();
 
-    // linear search through nodes to find which Renderable to render
-    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
-        const double distance = res * renderable->boundingSphere() / tan(fov / 2);
-        if (distanceToCamera < distance) {
-            renderable->render(data, tasks);
-        }
-    }
-}
+    void writeHeader(std::ostream& os);
+    void writeNextRecord(std::ostream& os);
 
-void DistanceSwitch::update(const UpdateData& data) {
-    for (const std::shared_ptr<Renderable>& renderable : _renderables) {
-        renderable->update(data);
-    }
-}
+private:
+    template <typename U>
+    using StatsRecord = std::unordered_map<std::string, U>;
 
-void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable) {
-    _renderables.push_back(std::move(renderable));
-}
+    template <typename U>
+    struct StatsCollection : public std::vector<StatsRecord<U>> {
+        std::set<std::string> keys;
+    };
+
+    StatsCollection<T> _data;
+    T _dummy; // used when disabled
+    bool _enabled;
+
+    size_t _writePos = 0;
+    std::string _delimiter;
+};
 
 } // namespace openspace::globebrowsing
+
+#include "templatedstatscollector.inl"
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPLATED_STATS_COLLECTOR___H__

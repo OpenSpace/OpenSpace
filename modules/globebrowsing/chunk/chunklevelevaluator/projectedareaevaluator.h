@@ -38,8 +38,7 @@ namespace openspace::globebrowsing::chunklevelevaluator {
 */
 class ProjectedArea : public Evaluator {
 public:
-    virtual int getDesiredLevel(
-        const Chunk& chunk, const RenderData& data) const override;
+    virtual int desiredLevel(const Chunk& chunk, const RenderData& data) const override;
 };
 
 } // namespace openspace::globebrowsing::chunklevelevaluator

@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalarproperty.h>
 
+#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 

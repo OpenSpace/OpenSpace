@@ -63,32 +63,21 @@ struct TileIndex {
     TileIndex(const ghoul::Dictionary& dict);
 
 
-    bool hasParent() const {
-        return level > 0;
-    }
+    bool hasParent() const;
 
     TileIndex parent() const;
+
+    bool operator==(const TileIndex& other) const;
 
     TileIndex& operator--();
     TileIndex operator--(int);
 
     TileIndex& operator-=(unsigned int levels);
 
-    inline bool isWestChild() const {
-        return x % 2 == 0;
-    }
-
-    inline bool isEastChild() const {
-        return x % 2 == 1;
-    }
-
-    inline bool isNorthChild() const {
-        return y % 2 == 0;
-    }
-
-    inline bool isSouthChild() const {
-        return y % 2 == 1;
-    }
+    bool isWestChild() const;
+    bool isEastChild() const;
+    bool isNorthChild() const;
+    bool isSouthChild() const;
 
     TileIndex child(Quad q) const;
 
@@ -101,15 +90,11 @@ struct TileIndex {
      * Gets the tile at a specified offset from this tile.
      * Accepts delta indices ranging from [-2^level, Infinity[
      */
-    TileIndex getRelatedTile(int deltaX, int deltaY) const;
+    TileIndex relatedTile(int deltaX, int deltaY) const;
 
     int manhattan(const TileIndex& other) const;
 
     TileHashKey hashKey() const;
-
-    inline bool operator==(const TileIndex& other) const {
-        return (x == other.x) && (y == other.y) && (level == other.level);
-    }
 };
 
 std::ostream& operator<<(std::ostream& os, const TileIndex& ti);

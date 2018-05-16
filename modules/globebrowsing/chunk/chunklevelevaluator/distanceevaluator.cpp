@@ -31,7 +31,7 @@
 
 namespace openspace::globebrowsing::chunklevelevaluator {
 
-int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+int Distance::desiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
     // with the inverse model matrix

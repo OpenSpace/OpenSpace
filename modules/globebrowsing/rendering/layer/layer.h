@@ -59,8 +59,8 @@ public:
     void initialize();
     void deinitialize();
 
-    ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
-    Tile::Status getTileStatus(const TileIndex& index) const;
+    ChunkTilePile chunkTilePile(const TileIndex& tileIndex, int pileSize) const;
+    Tile::Status tileStatus(const TileIndex& index) const;
 
     layergroupid::TypeID type() const;
     layergroupid::BlendModeID blendMode() const;

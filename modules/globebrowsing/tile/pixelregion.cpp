@@ -165,24 +165,28 @@ void PixelRegion::clampTo(const PixelRegion& boundingRegion) {
 
 void PixelRegion::forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple) {
     ghoul_assert(multiple > 0, "multiple must be 1 or larger");
-    int sizeDiff = numPixels.x - numPixels.y;
-    if (static_cast<int>(std::abs(static_cast<double>(sizeDiff))) > 0) {
+    const int sizeDiff = numPixels.x - numPixels.y;
+    if (std::abs(sizeDiff) > 0) {
         if (sizeDiff > 0) {
             numPixels.y += sizeDiff % multiple;
         }
         else {
-            numPixels.x += static_cast<int>(
-                std::abs(static_cast<double>(sizeDiff))) % multiple;
+            numPixels.x += std::abs(sizeDiff) % multiple;
         }
     }
 }
 
 void PixelRegion::roundUpNumPixelToNearestMultipleOf(unsigned int multiple) {
     ghoul_assert(multiple > 0, "multiple must be 1 or larger");
-    numPixels.x += (numPixels.x % multiple == 0) ? 0 :
+
+    numPixels.x += (numPixels.x % multiple == 0) ?
+        0 :
         (multiple - (numPixels.x % multiple));
-    numPixels.y += (numPixels.y % multiple == 0) ? 0 :
+
+    numPixels.y += (numPixels.y % multiple == 0) ?
+        0 :
         (multiple - (numPixels.y % multiple));
+
     ghoul_assert((numPixels.x % multiple) == 0, "Round to nearest multiple failed");
     ghoul_assert((numPixels.y % multiple) == 0, "Round to nearest multiple failed");
 }
@@ -264,6 +268,7 @@ bool PixelRegion::lineIntersect(Side side, int p) {
         case Side::TOP:
         case Side::BOTTOM:
             return start.y <= p && p <= (start.y + numPixels.y);
+
         default:
             throw ghoul::MissingCaseException();
     }

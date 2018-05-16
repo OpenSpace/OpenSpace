@@ -88,7 +88,7 @@ public:
      * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
      * its siblings.
      */
-    int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+    int desiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
     /**
      * Calculates the height from the surface of the reference ellipsoid to the

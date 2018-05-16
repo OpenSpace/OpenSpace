@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <ghoul/misc/boolean.h>
 #include <functional>
 
 namespace ghoul { class Dictionary; }
@@ -43,6 +44,8 @@ class TileTextureInitData;
  */
 class LayerManager : public properties::PropertyOwner  {
 public:
+    BooleanType(PadTiles);
+
     LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
 
     void initialize();
@@ -63,7 +66,7 @@ public:
     void reset(bool includingDisabled = false);
 
     static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
-        bool padTiles, size_t preferredTileSize = 0);
+        PadTiles padTiles, size_t preferredTileSize = 0);
 
     static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);

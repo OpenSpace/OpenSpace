@@ -76,7 +76,7 @@ protected:
      * If the transform is not available, the function returns a transform to map
      * the pixel coordinates to cover the whole geodetic lat long space.
      */
-    virtual std::array<double, 6> getGeoTransform() const override;
+    virtual std::array<double, 6> geoTransform() const override;
 
 private:
     // Private virtual function overloading

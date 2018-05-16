@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_SELECTOR___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_SELECTOR___H__
 
-#include <modules/globebrowsing/tile/chunktile.h>
-
 #include <vector>
+#include <utility>
 
 namespace openspace::globebrowsing {
+    struct ChunkTile;
     struct LayerGroup;
     struct TileIndex;
+    struct TileUvTransform;
     struct LayerRenderSettings;
 } // namespace openspace::globebrowsing
 
@@ -42,12 +43,13 @@ ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
 
 std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layerGroup,
     const TileIndex& tileIndex);
-std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
-    getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
+
+std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
+getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
     const TileIndex& tileIndex);
-std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
-    getTilesAndSettingsUnsorted(const LayerGroup& layerGroup,
-    const TileIndex& tileIndex);
+
+std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>
+getTilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
 void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);
 

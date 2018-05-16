@@ -34,7 +34,6 @@ namespace openspace::globebrowsing {
 PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
     : _numBytes(numBytes)
     , _usage(usage)
-    , _isMapped(false)
 {
     glGenBuffers(1, &_id);
     bind();
@@ -56,7 +55,7 @@ void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length,
                                   BufferAccessMask access)
 {
     void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
-    _isMapped = dataPtr ? true : false;
+    _isMapped = dataPtr;
     return dataPtr;
 }
 

@@ -29,9 +29,10 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-
+#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 #include <openspace/util/updatestructures.h>
 
 namespace openspace::globebrowsing {
@@ -78,7 +79,7 @@ Chunk::Status Chunk::update(const RenderData& data) {
         return Status::WantMerge;
     }
 
-    const int desiredLevel = _owner.chunkedLodGlobe()->getDesiredLevel(
+    const int desiredLevel = _owner.chunkedLodGlobe()->desiredLevel(
         *this,
         myRenderData
     );
@@ -113,13 +114,13 @@ Chunk::BoundingHeights Chunk::boundingHeights() const {
 
     bool lastHadMissingData = true;
     for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
-        ChunkTile chunkTile = chunkTileSettingsPair.first;
+        const ChunkTile& chunkTile = chunkTileSettingsPair.first;
         const LayerRenderSettings* settings = chunkTileSettingsPair.second;
         const bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
         const bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
 
         if (goodTile && hasTileMetaData) {
-            std::shared_ptr<TileMetaData> tileMetaData = chunkTile.tile.metaData();
+            TileMetaData* tileMetaData = chunkTile.tile.metaData();
 
             const float minValue = settings->performLayerSettings(
                 tileMetaData->minValues[HeightChannel]

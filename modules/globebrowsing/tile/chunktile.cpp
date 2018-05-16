@@ -26,10 +26,10 @@
 
 namespace openspace::globebrowsing {
 
-ChunkTile::ChunkTile(Tile t, TileUvTransform uv, TileDepthTransform depth)
-    : tile(t)
-    , uvTransform(uv)
-    , depthTransform(depth)
-{};
+//ChunkTile::ChunkTile(Tile t, TileUvTransform uv, TileDepthTransform depth)
+//    : tile(std::move(t))
+//    , uvTransform(uv)
+//    , depthTransform(depth)
+//{};
 
 } // namespace openspace::globwbrowsing

@@ -22,89 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TIMEQUANTIZER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TIMEQUANTIZER___H__
+
+#include <openspace/util/timerange.h>
+#include <string>
+#include <vector>
+
+namespace openspace { class Time; }
+
 namespace openspace::globebrowsing {
 
-template <typename T>
-TemplatedStatsCollector<T>::TemplatedStatsCollector(bool& enabled,
-                                                    const std::string& delimiter)
-    : _enabled(enabled)
-    , _writePos(0)
-    , _delimiter(delimiter)
-{}
+/**
+* Used to quantize time to descrete values.
+*/
+struct TimeQuantizer {
+    TimeQuantizer() = default;
+    TimeQuantizer(const Time& start, const Time& end, double resolution);
+    TimeQuantizer(const Time& start, const Time& end, const std::string& resolutionStr);
 
-template <typename T>
-void TemplatedStatsCollector<T>::startNewRecord() {
-    if (_enabled) {
-        _data.push_back(StatsRecord<T>());
-    }
-}
+    /**
+    * Takes a time resulition string and parses it into a double
+    * value representing the time resolution as seconds.
+    *
+    * Example: parseTimeResolutionStr("1d");
+    *
+    * \param resoltutionStr with the format {number}{unit}
+    *        where supported units are:
+    *        (s)econds, (m)inutes, (h)ours, (d)ays, (y)ears
+    * \return the time resolution in seconds
+    */
+    static double parseTimeResolutionStr(const std::string& resoltutionStr);
 
-template <typename T>
-T& TemplatedStatsCollector<T>::operator[](const std::string& name) {
-    if (_enabled) {
-        _data.keys.insert(name);
-        return _data.back()[name];
-    }
-    else {
-        return _dummy;
-    }
-}
+    /**
+    * Quantizes a OpenSpace Time into descrete values. If the provided Time \p t is
+    * outside the time range, it will be clamped to the the time range.
+    *
+    * \param t Time instance, which will be quantized
+    * \param clamp Whether or not time should be clamped if not t is in the time range
+    * \return wether or not time was quantized
+    */
+    bool quantize(Time& t, bool clamp) const;
 
-template<typename T>
-T TemplatedStatsCollector<T>::previous(const std::string& name) {
-    if (_data.size() > 1) {
-        return _data[_data.size() - 2][name];
-    }
-    return T();
-}
+    /**
+    * Returns a list of quantized Time objects that represent all the valid quantized
+    * Time%s between \p start and \p end.
+    *
+    * \param start The start time for the time range quantization
+    * \param end The end time for the time range quantization
+    * \return A list of quantized times between \p start and \end
+    */
+    std::vector<Time> quantized(const Time& start, const Time& end) const;
 
-template<typename T>
-bool TemplatedStatsCollector<T>::hasHeaders() {
-    return _data.keys.size() > 0;
-}
-
-template<typename T>
-bool TemplatedStatsCollector<T>::hasRecordsToWrite() {
-    return _writePos < _data.size() - 1;
-}
-
-template<typename T>
-void TemplatedStatsCollector<T>::reset() {
-    // copy last, i.e. current record
-    StatsRecord<T> lastRecord = _data.back();
-    _data.clear();
-    // add it again after cleared the vector
-    _data.push_back(lastRecord);
-    _writePos = 0;
-
-}
-
-template<typename T>
-void TemplatedStatsCollector<T>::writeHeader(std::ostream& os) {
-    auto keyIt = _data.keys.begin();
-    os << *keyIt;
-    while (++keyIt != _data.keys.end()) {
-        os << _delimiter << *keyIt;
-    }
-}
-
-template<typename T>
-void TemplatedStatsCollector<T>::writeNextRecord(std::ostream& os) {
-    if (hasRecordsToWrite()) {
-        // output line by line
-        StatsRecord<T>& record = _data[_writePos];
-
-        // Access every key. Records with no entry will get a default value
-        auto keyIt = _data.keys.begin();
-        if (keyIt != _data.keys.end()) {
-            os << record[(*keyIt)];
-            while (++keyIt != _data.keys.end()) {
-                os << _delimiter << record[(*keyIt)];
-            }
-        }
-
-        _writePos++;
-    }
-}
+private:
+    TimeRange _timerange;
+    double _resolution;
+};
 
 } // namespace openspace::globebrowsing
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TIMEQUANTIZER___H__

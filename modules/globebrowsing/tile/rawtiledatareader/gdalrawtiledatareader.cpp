@@ -113,7 +113,7 @@ float GdalRawTileDataReader::depthScale() const {
     return _gdalDatasetMetaDataCached.scale;
 }
 
-std::array<double, 6> GdalRawTileDataReader::getGeoTransform() const {
+std::array<double, 6> GdalRawTileDataReader::geoTransform() const {
     return _gdalDatasetMetaDataCached.padfTransform;
 }
 
@@ -145,7 +145,7 @@ void GdalRawTileDataReader::initialize() {
 
     CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
     if (err == CE_Failure) {
-        _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::getGeoTransform();
+        _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::geoTransform();
     }
 
     _depthTransform = calculateTileDepthTransform();

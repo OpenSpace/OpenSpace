@@ -35,7 +35,7 @@ namespace openspace::globebrowsing::cache {
  * Templated class implementing a Least-Recently-Used Cache.
  * <code>KeyType</code> needs to be an enumerable type.
  */
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 class LRUCache {
 public:
     using Item = std::pair<KeyType, ValueType>;
@@ -46,8 +46,8 @@ public:
      */
     LRUCache(size_t size);
 
-    void put(const KeyType& key, const ValueType& value);
-    std::vector<Item> putAndFetchPopped(const KeyType& key, const ValueType& value);
+    void put(KeyType key, ValueType value);
+    std::vector<Item> putAndFetchPopped(KeyType key, ValueType value);
     void clear();
     bool exist(const KeyType& key) const;
 
@@ -72,7 +72,7 @@ public:
     size_t maximumCacheSize() const;
 
 private:
-    void putWithoutCleaning(const KeyType& key, const ValueType& value);
+    void putWithoutCleaning(KeyType key, ValueType value);
     void clean();
 
     std::vector<Item> cleanAndFetchPopped();

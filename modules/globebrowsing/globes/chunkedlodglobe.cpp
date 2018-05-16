@@ -35,19 +35,17 @@
 #include <modules/globebrowsing/chunk/culling/horizonculler.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/rendering/chunkrenderer.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/debugging/rendering/debugrenderer.h>
-#include <modules/globebrowsing/tile/tileindex.h>
-
 #include <openspace/util/time.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
-
-#include <math.h>
+//#include <math.h>
 
 namespace {
     const openspace::globebrowsing::GeodeticPatch Coverage =
@@ -134,18 +132,18 @@ const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2& p) const {
     return p.lon < Coverage.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
 }
 
-int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk,
+int ChunkedLodGlobe::desiredLevel(const Chunk& chunk,
                                      const RenderData& renderData) const
 {
     int desiredLevel = 0;
     if (_owner.debugProperties().levelByProjectedAreaElseDistance) {
-        desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(chunk, renderData);
+        desiredLevel = _chunkEvaluatorByProjectedArea->desiredLevel(chunk, renderData);
     }
     else {
-        desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
+        desiredLevel = _chunkEvaluatorByDistance->desiredLevel(chunk, renderData);
     }
 
-    int levelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
+    int levelByAvailableData = _chunkEvaluatorByAvailableTiles->desiredLevel(
         chunk,
         renderData
     );
@@ -188,7 +186,7 @@ float ChunkedLodGlobe::getHeight(const glm::dvec3& position) const {
             continue;
         }
         // Transform the uv coordinates to the current tile texture
-        const ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
+        const ChunkTile chunkTile = tileProvider->chunkTile(tileIndex);
         const Tile& tile = chunkTile.tile;
         const TileUvTransform& uvTransform = chunkTile.uvTransform;
         const TileDepthTransform& depthTransform = tileProvider->depthTransform();

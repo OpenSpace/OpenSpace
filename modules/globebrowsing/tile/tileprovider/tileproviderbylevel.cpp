@@ -23,10 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/logging/logmanager.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace {
     constexpr const char* KeyProviders = "LevelTileProviders";
@@ -47,47 +46,34 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     }
 
     for (size_t i = 0; i < providers.size(); i++) {
-        std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
-            dictKey
+            std::to_string(i + 1)
         );
-        double floatMaxLevel;
-        int maxLevel = 0;
-        if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
-            throw std::runtime_error(
-                "Must define key '" + std::string(KeyMaxLevel) + "'"
-            );
-        }
-        maxLevel = static_cast<int>(std::round(floatMaxLevel));
+        double floatMaxLevel = levelProviderDict.value<double>(KeyMaxLevel);
+        int maxLevel = static_cast<int>(std::round(floatMaxLevel));
 
-        ghoul::Dictionary providerDict;
-        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict))
-        {
-            throw std::runtime_error(
-                "Must define key '" + std::string(KeyTileProvider) + "'"
-            );
-        }
+        ghoul::Dictionary providerDict = levelProviderDict.value<ghoul::Dictionary>(
+            KeyTileProvider
+        );
         providerDict.setValue(KeyLayerGroupID, layerGroupID);
 
-        std::string typeString;
-        providerDict.getValue("Type", typeString);
-        layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
-        if (typeString.empty()) {
-            typeID = layergroupid::TypeID::DefaultTileLayer;
+        layergroupid::TypeID typeID;
+        if (providerDict.hasKeyAndValue<std::string>("Type")) {
+            const std::string& typeString = providerDict.value<std::string>("Type");
+            typeID = layergroupid::getTypeIDFromTypeString(typeString);
+
+            if (typeID == layergroupid::TypeID::Unknown) {
+                throw ghoul::RuntimeError("Unknown layer type: " + typeString);
+            }
         }
         else {
-            typeID = layergroupid::getTypeIDFromTypeString(typeString);
-        }
-
-        if (typeID == layergroupid::TypeID::Unknown) {
-            throw ghoul::RuntimeError("Unknown layer type: " + typeString);
+            typeID = layergroupid::TypeID::DefaultTileLayer;
         }
 
         _levelTileProviders.push_back(
-            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(
-                typeID,
-                providerDict
-            ))
+            std::shared_ptr<TileProvider>(
+                TileProvider::createFromDictionary(typeID, providerDict)
+            )
         );
 
         std::string providerIdentifier;
@@ -111,7 +97,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     // Fill in the gaps (value -1) in provider indices, from back to end
     for (int i = static_cast<int>(_providerIndices.size()) - 2; i >= 0; --i) {
-        if(_providerIndices[i] == -1){
+        if (_providerIndices[i] == -1) {
             _providerIndices[i] = _providerIndices[i+1];
         }
     }
@@ -135,20 +121,20 @@ bool TileProviderByLevel::deinitialize() {
     return TileProvider::deinitialize() && success;
 }
 
-Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {
+Tile TileProviderByLevel::tile(const TileIndex& tileIndex) {
     TileProvider* provider = levelProvider(tileIndex.level);
     if (provider) {
-        return provider->getTile(tileIndex);
+        return provider->tile(tileIndex);
     }
     else {
         return Tile::TileUnavailable;
     }
 }
 
-Tile::Status TileProviderByLevel::getTileStatus(const TileIndex& index) {
+Tile::Status TileProviderByLevel::tileStatus(const TileIndex& index) {
     TileProvider* provider = levelProvider(index.level);
     if (provider) {
-        return provider->getTileStatus(index);
+        return provider->tileStatus(index);
     }
     else {
         return Tile::Status::Unavailable;
@@ -156,20 +142,18 @@ Tile::Status TileProviderByLevel::getTileStatus(const TileIndex& index) {
 }
 
 TileDepthTransform TileProviderByLevel::depthTransform() {
-    TileDepthTransform transform;
-    transform.depthOffset = 0.0f;
-    transform.depthScale = 1.0f;
+    TileDepthTransform transform { 0.f, 1.f };
     return transform;
 }
 
 void TileProviderByLevel::update() {
-    for(auto provider : _levelTileProviders){
+    for (const std::shared_ptr<TileProvider>& provider : _levelTileProviders) {
         provider->update();
     }
 }
 
 void TileProviderByLevel::reset() {
-    for(auto provider : _levelTileProviders){
+    for (const std::shared_ptr<TileProvider>& provider : _levelTileProviders){
         provider->reset();
     }
 }
@@ -181,13 +165,13 @@ int TileProviderByLevel::maxLevel() {
 int TileProviderByLevel::providerIndex(int level) const {
     int clampedLevel = std::max(
         0,
-        std::min(level, static_cast<int>(_providerIndices.size()-1))
+        std::min(level, static_cast<int>(_providerIndices.size() - 1))
     );
     return _providerIndices[clampedLevel];
 }
 
 TileProvider* TileProviderByLevel::levelProvider(int level) const {
-    if (_levelTileProviders.size() > 0) {
+    if (!_levelTileProviders.empty()) {
         return _levelTileProviders[providerIndex(level)].get();
     }
     else {

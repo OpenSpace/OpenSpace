@@ -231,7 +231,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
-    _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
+    _chunkedLodGlobe = std::make_unique<ChunkedLodGlobe>(
         *this,
         patchSegments,
         _layerManager,
@@ -239,7 +239,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     );
     //_pointGlobe = std::make_shared<PointGlobe>(*this);
 
-    _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
+    //_distanceSwitch.addSwitchValue(_chunkedLodGlobe);
     //_distanceSwitch.addSwitchValue(_pointGlobe);
 
     addProperty(_generalProperties.atmosphereEnabled);
@@ -364,7 +364,7 @@ void RenderableGlobe::initializeGL() {
 
     _layerManager->update();
 
-    _distanceSwitch.initializeGL();
+    _chunkedLodGlobe->initializeGL();
 
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
@@ -372,7 +372,7 @@ void RenderableGlobe::initializeGL() {
 }
 
 void RenderableGlobe::deinitializeGL() {
-    _distanceSwitch.deinitializeGL();
+    _chunkedLodGlobe->deinitializeGL();
 
     _layerManager->deinitialize();
 }
@@ -406,7 +406,22 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& renderTask) 
                 setSaveCamera(nullptr);
             }
         }
-        _distanceSwitch.render(data, renderTask);
+
+        const double distanceToCamera = distance(
+            data.camera.positionVec3(),
+            data.modelTransform.translation
+        );
+
+        // This distance will be enough to render the globe as one pixel if the field of
+        // view is 'fov' radians and the screen resolution is 'res' pixels.
+        const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
+        const int res = 2880;
+
+        const double distance = res * _chunkedLodGlobe->boundingSphere() / tan(fov / 2);
+
+        if (distanceToCamera < distance) {
+            _chunkedLodGlobe->render(data, renderTask);
+        }
     }
     if (_savedCamera != nullptr) {
         DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
@@ -415,7 +430,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& renderTask) 
 
 void RenderableGlobe::update(const UpdateData& data) {
     _time = data.time.j2000Seconds();
-    _distanceSwitch.update(data);
+    _chunkedLodGlobe->update(data);
 
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
@@ -448,8 +463,8 @@ float RenderableGlobe::getHeight(glm::dvec3 position) const {
     }
 }
 
-std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() const{
-    return _chunkedLodGlobe;
+ChunkedLodGlobe* RenderableGlobe::chunkedLodGlobe() const{
+    return _chunkedLodGlobe.get();
 }
 
 LayerManager* RenderableGlobe::layerManager() const {

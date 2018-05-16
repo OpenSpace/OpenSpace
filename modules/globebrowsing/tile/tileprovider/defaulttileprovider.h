@@ -57,9 +57,9 @@ public:
      * \return A Tile with status OK iff it exists in in-memory cache. If not, it may
      *         enqueue some IO operations on a separate thread.
      */
-    virtual Tile getTile(const TileIndex& tileIndex) override;
+    virtual Tile tile(const TileIndex& tileIndex) override;
 
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
+    virtual Tile::Status tileStatus(const TileIndex& tileIndex) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;

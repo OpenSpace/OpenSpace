@@ -350,6 +350,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h

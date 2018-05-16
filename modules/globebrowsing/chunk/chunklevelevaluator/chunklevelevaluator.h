@@ -41,7 +41,7 @@ public:
     virtual ~Evaluator() = default;
     constexpr static const int UnknownDesiredLevel = -1;
 
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
+    virtual int desiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
 };
 
 } // namespace openspace::globebrowsing::chunklevelevaluator

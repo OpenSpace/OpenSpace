@@ -27,12 +27,14 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/tile/tile.h>
 
 namespace openspace::globebrowsing::chunklevelevaluator {
 
-int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData&) const {
+int AvailableTileData::desiredLevel(const Chunk& chunk, const RenderData&) const {
     std::shared_ptr<LayerManager> layerManager =
         chunk.owner().chunkedLodGlobe()->layerManager();
 
@@ -42,7 +44,7 @@ int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData&) co
         for (const std::shared_ptr<Layer>& layer :
              layerManager->layerGroup(i).activeLayers()) 
         {
-            Tile::Status status = layer->getTileStatus(chunk.tileIndex());
+            Tile::Status status = layer->tileStatus(chunk.tileIndex());
             if (status == Tile::Status::OK) {
                 return UnknownDesiredLevel;
             }

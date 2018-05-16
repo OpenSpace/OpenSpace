@@ -26,8 +26,9 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace::globebrowsing {
 
@@ -124,7 +125,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict,
 
     TileTextureInitData initData = LayerManager::getTileTextureInitData(
         _layerGroupId,
-        padTiles
+        LayerManager::PadTiles(padTiles)
     );
     _padTilePixelStartOffset = initData.tilePixelStartOffset();
     _padTilePixelSizeDifference = initData.tilePixelSizeDifference();
@@ -240,9 +241,9 @@ void Layer::deinitialize() {
     }
 }
 
-ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+ChunkTilePile Layer::chunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     if (_tileProvider) {
-        return _tileProvider->getChunkTilePile(tileIndex, pileSize);
+        return _tileProvider->chunkTilePile(tileIndex, pileSize);
     }
     else {
         ChunkTilePile chunkTilePile;
@@ -256,9 +257,9 @@ ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) 
     }
 }
 
-Tile::Status Layer::getTileStatus(const TileIndex& index) const {
+Tile::Status Layer::tileStatus(const TileIndex& index) const {
     if (_tileProvider) {
-        return _tileProvider->getTileStatus(index);
+        return _tileProvider->tileStatus(index);
     }
     else {
         return Tile::Status::Unavailable;

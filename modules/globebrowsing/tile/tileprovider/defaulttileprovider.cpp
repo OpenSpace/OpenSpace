@@ -90,7 +90,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
         _layerGroupID,
-        _padTiles,
+        LayerManager::PadTiles(_padTiles),
         tilePixelSize
     ));
     _tilePixelSize = initData.dimensions().x;
@@ -131,7 +131,7 @@ void DefaultTileProvider::update() {
             _asyncTextureDataProvider = nullptr;
             TileTextureInitData initData(LayerManager::getTileTextureInitData(
                 _layerGroupID,
-                _padTiles,
+                LayerManager::PadTiles(_padTiles),
                 _tilePixelSize
             ));
             initAsyncTileDataReader(initData);
@@ -147,7 +147,7 @@ void DefaultTileProvider::reset() {
     else {
         TileTextureInitData initData(LayerManager::getTileTextureInitData(
             _layerGroupID,
-            _padTiles,
+            LayerManager::PadTiles(_padTiles),
             _tilePixelSize
         ));
         initAsyncTileDataReader(initData);
@@ -165,7 +165,7 @@ int DefaultTileProvider::maxLevel() {
     }
 }
 
-Tile DefaultTileProvider::getTile(const TileIndex& tileIndex) {
+Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     if (_asyncTextureDataProvider) {
         if (tileIndex.level > maxLevel()) {
             return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
@@ -242,7 +242,7 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
     }
 }
 
-Tile::Status DefaultTileProvider::getTileStatus(const TileIndex& tileIndex) {
+Tile::Status DefaultTileProvider::tileStatus(const TileIndex& tileIndex) {
     if (_asyncTextureDataProvider) {
         const std::shared_ptr<RawTileDataReader>& rawTileDataReader =
             _asyncTextureDataProvider->rawTileDataReader();
@@ -262,7 +262,7 @@ Tile::Status DefaultTileProvider::getTileStatus(const TileIndex& tileIndex) {
 
 TileDepthTransform DefaultTileProvider::depthTransform() {
     if (_asyncTextureDataProvider) {
-        return _asyncTextureDataProvider->rawTileDataReader()->getDepthTransform();
+        return _asyncTextureDataProvider->rawTileDataReader()->depthTransform();
     }
     else {
         return { 1.f, 0.f };

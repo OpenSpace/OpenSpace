@@ -138,8 +138,8 @@ void LayerManager::reset(bool includeDisabled) {
 }
 
 TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID id,
-    bool padTiles,
-    size_t preferredTileSize)
+                                                         PadTiles padTiles,
+                                                         size_t preferredTileSize)
 {
     switch (id) {
         case layergroupid::GroupID::HeightLayers: {
@@ -149,7 +149,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
                 tileSize,
                 GL_FLOAT,
                 ghoul::opengl::Texture::Format::Red,
-                padTiles,
+                TileTextureInitData::PadTiles(padTiles),
                 TileTextureInitData::ShouldAllocateDataOnCPU::Yes
             );
         }
@@ -160,7 +160,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
                 tileSize,
                 GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA,
-                padTiles
+                TileTextureInitData::PadTiles(padTiles)
             );
         }
         case layergroupid::GroupID::Overlays: {
@@ -170,7 +170,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
                 tileSize,
                 GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA,
-                padTiles
+                TileTextureInitData::PadTiles(padTiles)
             );
         }
         case layergroupid::GroupID::NightLayers: {
@@ -180,7 +180,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
                 tileSize,
                 GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA,
-                padTiles
+                TileTextureInitData::PadTiles(padTiles)
             );
         }
         case layergroupid::GroupID::WaterMasks: {
@@ -190,7 +190,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
                 tileSize,
                 GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA,
-                padTiles
+                TileTextureInitData::PadTiles(padTiles)
             );
         }
         default: {
@@ -202,7 +202,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
                 tileSize,
                 GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA,
-                padTiles
+                TileTextureInitData::PadTiles(padTiles)
             );
         }
     }

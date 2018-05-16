@@ -22,50 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
+#ifndef __OPENSPACE_CORE___JOB___H__
+#define __OPENSPACE_CORE___JOB___H__
 
 #include <memory>
-#include <vector>
 
 namespace openspace {
-    class Renderable;
-    struct RenderData;
-    struct RendererTasks;
-    struct UpdateData;
-} // namespace openspace
 
-namespace openspace::globebrowsing {
+// Templated abstract base class representing a job to be done.
+// Client code derive from this class and implement the virtual execute() method
+template <typename P>
+struct Job {
+    Job() = default;
+    virtual ~Job() = default;
 
-/**
- * Selects a specific Renderable to be used for rendering, based on distance to the
- * camera
- */
-class DistanceSwitch {
-public:
-    ~DistanceSwitch();
-
-    void initialize();
-    void initializeGL();
-    void deinitialize();
-    void deinitializeGL();
-
-    /**
-     * Picks the first Renderable with the associated maxDistance greater than the
-     * current distance to the camera
-     */
-    void render(const RenderData& data, RendererTasks& rendererTask);
-    void update(const UpdateData& data);
-
-    /**
-     * Adds a new renderable
-     */
-    void addSwitchValue(std::shared_ptr<Renderable> renderable);
-
-private:
-    std::vector<std::shared_ptr<Renderable>> _renderables;
+    virtual void execute() = 0;
+    virtual std::shared_ptr<P> product() = 0;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
+#endif // __OPENSPACE_CORE___JOB___H__

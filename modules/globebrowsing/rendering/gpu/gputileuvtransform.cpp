@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/rendering/gpu/gputileuvtransform.h>
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileuvtransform.h>
 
 namespace openspace::globebrowsing {
 

@@ -135,7 +135,7 @@ bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex)
 
 void AsyncTileDataProvider::endUnfinishedJobs() {
     std::vector<TileIndex::TileHashKey> unfinishedJobs =
-        _concurrentJobManager.getKeysToUnfinishedJobs();
+        _concurrentJobManager.keysToUnfinishedJobs();
     for (const TileIndex::TileHashKey& unfinishedJob : unfinishedJobs) {
         // Unmap unfinished jobs
         if (_pboContainer) {
@@ -148,7 +148,7 @@ void AsyncTileDataProvider::endUnfinishedJobs() {
 
 void AsyncTileDataProvider::endEnqueuedJobs() {
     std::vector<TileIndex::TileHashKey> enqueuedJobs =
-        _concurrentJobManager.getKeysToEnqueuedJobs();
+        _concurrentJobManager.keysToEnqueuedJobs();
     for (const TileIndex::TileHashKey& enqueuedJob : enqueuedJobs) {
         // Unmap unfinished jobs
         if (_pboContainer) {
