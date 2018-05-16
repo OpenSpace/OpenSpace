@@ -46,6 +46,8 @@ asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
+    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MouseSensitivity', 40.0);
+    
     openspace.setDefaultGuiSorting()
 
     -- Mark the Gaia Instrument Model (and a few stars?) as interesting nodes

@@ -755,7 +755,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.modelTransform.rotation) *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
-    float viewScaling = 1.0f; //data.camera.scaling();
+    float viewScaling = data.camera.scaling();
     glm::mat4 view = data.camera.combinedViewMatrix();
     glm::mat4 projection = data.camera.projectionMatrix();
 
