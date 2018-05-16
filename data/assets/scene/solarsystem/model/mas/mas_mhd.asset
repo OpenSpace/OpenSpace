@@ -31,7 +31,7 @@ local Mas_MHD = {
             },
             Scale = {
                 Type = "StaticScale",
-                Scale = 1.1 * sunRadius
+                Scale = 0.8 * sunRadius
             }
         },
         GUI = {
