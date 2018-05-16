@@ -1,0 +1,43 @@
+local assetHelper = asset.require("util/asset_helper")
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
+asset.require("spice/base")
+
+local textures = asset.syncedResource({
+    Name = "Background Radiation Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_backgroundradiation_textures",
+    Version = 1
+})
+
+local TestSphere = {  
+        Identifier = "TestSphere",
+        Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+        Renderable = {
+            Type = "RenderableSphere",
+            Enabled = true,
+            Size = 1.2E9,
+            Segments = 80,
+            Opacity = 1.0,
+            Texture = textures .. "/wmap_ilc_7yr_v4_200uK_RGB_sos.png",
+            Orientation = "Outside",
+            FadeInThreshould = 0.1
+        },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Target = "SUN",
+                Observer = "SUN"
+            }
+            -- Scale = {
+            --     Type = "StaticScale",
+            --     Scale = 0.04 * sunRadius
+            -- }
+        },
+        GUI = {
+            Path = "/Solar System/Mas/TestSphere",
+            Hidden = false
+        }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { TestSphere })
+

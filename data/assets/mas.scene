@@ -18,6 +18,7 @@ asset.require('util/default_keybindings')
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 -- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas')
+local testSphere = asset.require('scene/solarsystem/model/mas/testsphere')
 
 -- This causes crash because the renderable is not removed properly before the next frame
 local toggleMas = function ()
@@ -42,8 +43,8 @@ local Keybindings = {
     },
     {
         Key = "F9",
-        Command = "openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);",
-        Documentation = "Turn off sun glare",
+        Command = propertyHelper.invert('Scene.SunGlare.renderable.Enabled'),
+        Documentation = "Toggle sun glare",
         Local = false
     },
     {
@@ -59,6 +60,8 @@ asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
+    openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);
+
     openspace.setDefaultGuiSorting()
 
     -- openspace.globebrowsing.loadWMSServersFromFile(
@@ -66,7 +69,7 @@ asset.onInitialize(function ()
     -- )
 
     openspace.markInterestingNodes({
-        "Mas_MHD"
+        "Mas_MHD", "TestSphere"
     })
 
     openspace.addVirtualProperty(
@@ -91,7 +94,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeInterestingNodes({
-        "Mas_MHD"
+        "Mas_MHD", "TestSphere"
     })
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
