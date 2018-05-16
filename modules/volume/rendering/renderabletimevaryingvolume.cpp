@@ -53,8 +53,8 @@ namespace {
     const char* KeySourceDirectory = "SourceDirectory";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyLowerValueBound = "LowerValueBound";
-    const char* KeyUpperValueBound = "UpperValueBound";
+    // const char* KeyLowerValueBound = "LowerValueBound";
+    // const char* KeyUpperValueBound = "UpperValueBound";
     const char* KeyClipPlanes = "ClipPlanes";
     const char* KeySecondsBefore = "SecondsBefore";
     const char* KeySecondsAfter = "SecondsAfter";
@@ -133,17 +133,18 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo lowerValueBoundInfo = {
-        "lowerValueBound",
-        "Lower value bound",
-        "" // @TODO Missing documentation
-    };
+    // static const openspace::properties::Property::PropertyInfo lowerValueBoundInfo = {
+    //     "lowerValueBound",
+    //     "Lower value bound",
+    //     "" // @TODO Missing documentation
+    // };
 
-    static const openspace::properties::Property::PropertyInfo upperValueBoundInfo = {
-        "upperValueBound",
-        "Upper value bound",
-        "" // @TODO Missing documentation
-    };
+    // static const openspace::properties::Property::PropertyInfo upperValueBoundInfo = {
+    //     "upperValueBound",
+    //     "Upper value bound",
+    //     "" // @TODO Missing documentation
+    // };
+
 } // namespace
 
 namespace openspace {
@@ -162,8 +163,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _secondsAfter(SecondsAfterInfo, 0.f, 0.01f, SecondsInOneDay)
     , _sourceDirectory(SourceDirectoryInfo)
     , _transferFunctionPath(TransferFunctionInfo)
-    , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
-    , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
+    // , _lowerValueBound(lowerValueBoundInfo, 0.f, 0.f, 1000000.f)
+    // , _upperValueBound(upperValueBoundInfo, 0.f, 0.f, 1000000.f)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
@@ -178,8 +179,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     );
 
     _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
-    _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
-    _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
+    // _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
+    // _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
     _transferFunction = std::make_shared<openspace::TransferFunction>(
         _transferFunctionPath,
@@ -318,8 +319,8 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_opacity);
     addProperty(_rNormalization);
     addProperty(_rUpperBound);
-    addProperty(_lowerValueBound);
-    addProperty(_upperValueBound);
+    // addProperty(_lowerValueBound);
+    // addProperty(_upperValueBound);
     addProperty(_gridType);
 
 
