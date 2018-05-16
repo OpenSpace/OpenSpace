@@ -248,7 +248,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = 
                 dInverseCameraRotationToSgctEyeTransform * dInverseProjection;
             
-            double *mSource = (double*)glm::value_ptr(dInverseSGCTEyeToTmpRotTransformMatrix);
+            double* mSource = glm::value_ptr(dInverseSGCTEyeToTmpRotTransformMatrix);
             mSource[12] += renderData.camera.positionVec3().x;
             mSource[13] += renderData.camera.positionVec3().y;
             mSource[14] += renderData.camera.positionVec3().z;

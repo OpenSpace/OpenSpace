@@ -29,6 +29,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
+#include <thread>
 
 namespace openspace {
 

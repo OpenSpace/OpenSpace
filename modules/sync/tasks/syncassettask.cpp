@@ -36,10 +36,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <string>
-#include <fstream>
 #include <chrono>
-
+#include <fstream>
+#include <string>
+#include <thread>
 
 namespace {
     const char* KeyAsset = "Asset";

@@ -75,9 +75,9 @@ private:
     float _fadeInThreshold = 0.0;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    std::unique_ptr<PowerScaledSphere> _sphere = nullptr;
+    std::unique_ptr<PowerScaledSphere> _sphere;
 
     UniformCache(opacity, viewProjection, modelTransform, texture) _uniformCache;
 

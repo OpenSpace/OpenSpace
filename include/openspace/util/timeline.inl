@@ -44,7 +44,7 @@ void Timeline<T>::addKeyframe(double timestamp, T data) {
 
 template <typename T>
 void Timeline<T>::removeKeyframesAfter(double timestamp, bool inclusive) {
-    std::deque<Keyframe<T>>::const_iterator iter;
+    typename std::deque<Keyframe<T>>::const_iterator iter;
     if (inclusive) {
         iter = std::lower_bound(
             _keyframes.cbegin(),
@@ -67,7 +67,7 @@ void Timeline<T>::removeKeyframesAfter(double timestamp, bool inclusive) {
 
 template <typename T>
 void Timeline<T>::removeKeyframesBefore(double timestamp, bool inclusive) {
-    std::deque<Keyframe<T>>::const_iterator iter;
+    typename std::deque<Keyframe<T>>::const_iterator iter;
     if (inclusive) {
         iter = std::upper_bound(
             _keyframes.cbegin(),
@@ -92,7 +92,7 @@ template <typename T>
 void Timeline<T>::removeKeyframesBetween(double begin, double end, bool inclusiveBegin,
                                          bool inclusiveEnd)
 {
-    std::deque<Keyframe<T>>::const_iterator beginIter;
+    typename std::deque<Keyframe<T>>::const_iterator beginIter;
     if (inclusiveBegin) {
         beginIter = std::lower_bound(
             _keyframes.cbegin(),
@@ -111,7 +111,7 @@ void Timeline<T>::removeKeyframesBetween(double begin, double end, bool inclusiv
     }
 
 
-    std::deque<Keyframe<T>>::const_iterator endIter;
+    typename std::deque<Keyframe<T>>::const_iterator endIter;
     if (inclusiveEnd) {
         endIter = std::upper_bound(
             beginIter,
@@ -157,7 +157,7 @@ size_t Timeline<T>::nKeyframes() const {
 template <typename T>
 const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclusive) const
 {
-    std::deque<Keyframe<T>>::const_iterator it;
+    typename std::deque<Keyframe<T>>::const_iterator it;
     if (inclusive) {
         it = std::lower_bound(
             _keyframes.begin(),
@@ -184,7 +184,7 @@ const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclus
 template <typename T>
 const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclusive) const
 {
-    std::deque<Keyframe<T>>::const_iterator it;
+    typename std::deque<Keyframe<T>>::const_iterator it;
     if (inclusive) {
         it = std::upper_bound(
             _keyframes.begin(),

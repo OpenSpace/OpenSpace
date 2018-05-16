@@ -206,12 +206,12 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand,
 
     // Convert error to RawTile::ReadError
     switch (readError) {
-        case CE_None:    return RawTile::ReadError::None; break;
-        case CE_Debug:   return RawTile::ReadError::Debug; break;
-        case CE_Warning: return RawTile::ReadError::Warning; break;
-        case CE_Failure: return RawTile::ReadError::Failure; break;
-        case CE_Fatal:   return RawTile::ReadError::Fatal; break;
-        default:         return RawTile::ReadError::Failure; break;
+        case CE_None:    return RawTile::ReadError::None;
+        case CE_Debug:   return RawTile::ReadError::Debug;
+        case CE_Warning: return RawTile::ReadError::Warning;
+        case CE_Failure: return RawTile::ReadError::Failure;
+        case CE_Fatal:   return RawTile::ReadError::Fatal;
+        default:         return RawTile::ReadError::Failure;
     }
 }
 

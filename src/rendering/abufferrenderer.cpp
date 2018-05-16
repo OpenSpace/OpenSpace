@@ -56,7 +56,6 @@ namespace openspace {
 
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
-    const GLfloat size = 1.f;
     const GLfloat vertexData[] = {
         // x     y
         -1.f, -1.f,
@@ -979,7 +978,7 @@ void ABufferRenderer::saveTextureToMemory(GLenum color_buffer_attachment, int wi
         glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, tmpMemory.data());
     }
 
-    for (size_t i = 0; i < width * height * 3; ++i) {
+    for (int i = 0; i < width * height * 3; ++i) {
         memory[i] = static_cast<double>(tmpMemory[i]);
     }
 }

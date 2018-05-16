@@ -38,8 +38,6 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr const char* keyStart = "StartTime";
-    constexpr const char* keyEnd = "EndTime";
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyTag = "Tag";
 

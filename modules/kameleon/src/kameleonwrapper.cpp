@@ -229,7 +229,7 @@ float* KameleonWrapper::getUniformSampledValues(
     constexpr const int NBins = 200;
     const float truncLim = 0.9f;
     std::vector<int> histogram (NBins, 0);
-    auto mapToHistogram = [NBins, varMin, varMax](double val) {
+    auto mapToHistogram = [varMin, varMax](double val) {
         double zeroToOne = (val-varMin)/(varMax-varMin);
         zeroToOne *= static_cast<double>(NBins);
         int izerotoone = static_cast<int>(zeroToOne);

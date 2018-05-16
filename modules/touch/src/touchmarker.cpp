@@ -32,8 +32,6 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const char* _loggerCat = "TouchMarker";
-
     static const openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",

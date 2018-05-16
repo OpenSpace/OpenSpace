@@ -65,7 +65,7 @@ protected:
     void loadTexture();
 
 private:
-    std::unique_ptr<modelgeometry::ModelGeometry> _geometry = nullptr;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
     properties::StringProperty _colorTexturePath;
     properties::BoolProperty _performShading;
@@ -75,7 +75,7 @@ private:
     UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
         projectionTransform, performShading, texture) _uniformCache;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     glm::dvec3 _sunPos;
 };

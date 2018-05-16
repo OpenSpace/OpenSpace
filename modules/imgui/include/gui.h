@@ -46,6 +46,8 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <array>
 
+//#define SHOW_IMGUI_HELPERS
+
 struct ImGuiContext;
 
 namespace ghoul::opengl {
@@ -124,11 +126,6 @@ public:
 private:
     void renderAndUpdatePropertyVisibility();
 
-    //struct ComponentInfo {
-    //    GuiComponent* component;
-    //    const char* name;
-    //    //bool isHidden = false;
-    //};
     // The ordering of this array determines the order of components in the in-game menu
     std::array<GuiComponent*, detail::nComponents()> _components = {
         &_sceneProperty,
@@ -156,33 +153,6 @@ private:
 
         &_help
     };
-/*
-    { &_sceneProperty, "Scene Graph Properties" },
-    { &_screenSpaceProperty, "Screen Space Properties" },
-    { &_featuredProperties, "Features Properties" },
-    { &_virtualProperty, "Virtual Properties" },
-    { &_globalProperty, "Global Properties" },
-    { &_moduleProperty, "Module Properties" },
-
-    { &_spaceTime, "Space/Time" },
-    { &_mission, "Mission Information" },
-    { &_parallel, "Parallel Connection" },
-#ifdef GLOBEBROWSING_USE_GDAL
-    { &_globeBrowsing, "GlobeBrowsing" },
-#endif
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    { &_iswa, "iSWA" },
-#endif
-
-    { &_asset, "Assets" },
-    { &_joystick, "Joystick Information" },
-    { &_filePath, "File Paths" },
-
-    { &_performance, "Performance" },
-
-    { &_help, "Help" }*/
-
-
 
 
     GLuint vao = 0;
@@ -192,7 +162,9 @@ private:
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 
+#ifdef SHOW_IMGUI_HELPERS
     bool _showInternals = false;
+#endif // SHOW_IMGUI_HELPERS
 
     properties::Property::Visibility _currentVisibility =
         properties::Property::Visibility::Developer;

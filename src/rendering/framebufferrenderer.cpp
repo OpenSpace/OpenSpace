@@ -56,58 +56,6 @@ namespace {
     constexpr const char* RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer.frag";
 
-    void saveTextureToPPMFile(GLenum attachment, std::string& fileName,
-                              int width, int height)
-    {
-        std::fstream ppmFile;
-
-        ppmFile.open(fileName.c_str(), std::fstream::out);
-        if (ppmFile.is_open()) {
-            std::vector<unsigned char> pixels(width * height * 3, 255);
-
-            if (attachment != GL_DEPTH_ATTACHMENT) {
-                glReadBuffer(attachment);
-                glReadPixels(
-                    0,
-                    0,
-                    width,
-                    height,
-                    GL_RGB,
-                    GL_UNSIGNED_BYTE,
-                    pixels.data()
-                );
-            }
-            else {
-                glReadPixels(
-                    0,
-                    0,
-                    width,
-                    height,
-                    GL_DEPTH_COMPONENT,
-                    GL_UNSIGNED_BYTE,
-                    pixels.data()
-                );
-            }
-
-            ppmFile << "P3" << std::endl;
-            ppmFile << width << " " << height << std::endl;
-            ppmFile << "255" << std::endl;
-
-            int k = 0;
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    ppmFile << static_cast<unsigned int>(pixels[k]) << " "
-                        << static_cast<unsigned int>(pixels[k + 1]) << " "
-                        << static_cast<unsigned int>(pixels[k + 2]) << " ";
-                    k += 3;
-                }
-                ppmFile << std::endl;
-            }
-
-            ppmFile.close();
-        }
-    }
-
     void saveTextureToMemory(GLenum attachment, int width, int height,
         std::vector<double>& memory)
     {

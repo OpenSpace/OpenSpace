@@ -31,6 +31,7 @@
 
 #include <modules/globebrowsing/other/timequantizer.h>
 #include <openspace/properties/stringproperty.h>
+#include <unordered_map>
 
 struct CPLXMLNode;
 

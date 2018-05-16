@@ -39,8 +39,6 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
- 
- //#define SHOW_IMGUI_HELPERS
 
 namespace {
     constexpr const char* _loggerCat = "GUI";

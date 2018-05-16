@@ -120,7 +120,7 @@ protected:
     GLuint _vertexPositionBuffer = 0;
     glm::ivec2 _objectSize;
     UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
     bool _useEuclideanCoordinates;
     glm::vec2 _originalViewportSize;

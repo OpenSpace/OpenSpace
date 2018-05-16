@@ -77,12 +77,12 @@ namespace openspace {
         TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
             : properties::PropertyOwner({ "TransferFunctionHandler" }),
             _transferFunctionPath(prop),
-            _transferFunctionProperty(TransferFunctionInfo),
             _dataUnit(DataUnitInfo),
             _minValue(MinValueInfo),
             _maxValue(MaxValueInfo),
-            _histogramProperty(HistogramInfo),
-            _saveTransferFunction(SaveTransferFunctionInfo)
+            _saveTransferFunction(SaveTransferFunctionInfo),
+            _transferFunctionProperty(TransferFunctionInfo),
+            _histogramProperty(HistogramInfo)
         {
             _transferFunction = std::make_shared<openspace::TransferFunction>(_transferFunctionPath);
         }

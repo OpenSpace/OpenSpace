@@ -92,7 +92,7 @@ private:
     properties::Vec3Property _pointColor;
     properties::StringProperty _spriteTexturePath;
 
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
     std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,

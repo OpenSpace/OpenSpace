@@ -59,7 +59,7 @@ private:
     properties::StringProperty _texturePath;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
     bool _textureIsDirty = false;
 };
 

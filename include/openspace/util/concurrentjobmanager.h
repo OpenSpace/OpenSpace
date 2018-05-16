@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-template <typename T> class Job;
+template <typename T> struct Job;
 
 /*
  * Templated Concurrent Job Manager

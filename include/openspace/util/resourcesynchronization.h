@@ -28,6 +28,7 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 
 namespace ghoul { class Dictionary; }

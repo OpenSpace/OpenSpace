@@ -34,6 +34,7 @@ namespace openspace::gui {
 class GuiAssetComponent : public GuiComponent {
 public:
     GuiAssetComponent();
+
     void render() override;
 
 private:

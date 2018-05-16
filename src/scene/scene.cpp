@@ -214,7 +214,7 @@ void Scene::sortTopologically() {
         ));
     }
 
-    for (const std::pair<SceneGraphNode*, size_t>& it : inDegrees) {
+    for (const std::pair<SceneGraphNode* const, size_t>& it : inDegrees) {
         _circularNodes.push_back(it.first);
     }
 

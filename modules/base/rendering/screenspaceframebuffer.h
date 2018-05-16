@@ -73,7 +73,7 @@ private:
 
     static int id();
 
-    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer = nullptr;
+    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
     std::vector<std::function<void()>> _renderFunctions;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;

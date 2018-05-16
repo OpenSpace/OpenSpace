@@ -157,7 +157,7 @@ private:
 
     PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
-    std::unique_ptr<Renderable> _renderable = nullptr;
+    std::unique_ptr<Renderable> _renderable;
 
     std::string _guiPath;
 

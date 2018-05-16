@@ -453,7 +453,7 @@ int addSceneGraphNode(lua_State* L) {
 }
 
 int removeSceneGraphNode(lua_State* L) {
-    const int n = ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
     const std::string& nodeName = ghoul::lua::value<std::string>(
         L,

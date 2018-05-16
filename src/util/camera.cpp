@@ -26,10 +26,6 @@
 
 namespace openspace {
 
-namespace {
-    constexpr const char* _loggerCat = "Camera";
-} // namespace
-
 const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0, 0, -1);
 const glm::dvec3 Camera::LookupVectorCameraSpace = glm::dvec3(0, 1, 0);
 

@@ -70,7 +70,7 @@ private:
 
     bool _planeIsDirty;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;

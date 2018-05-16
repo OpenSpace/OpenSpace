@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/openspacemodule.h>
+
 namespace openspace {
 
 template <class ModuleSubClass>

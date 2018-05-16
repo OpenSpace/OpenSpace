@@ -27,6 +27,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace ghoul { class SharedMemory; }
@@ -81,7 +82,7 @@ private:
 
     std::map<std::string, size_t> individualPerformanceLocations;
 
-    std::unique_ptr<ghoul::SharedMemory> _performanceMemory = nullptr;
+    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
 
     size_t _currentTick = 0;
 

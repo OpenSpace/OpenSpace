@@ -73,7 +73,6 @@ float interpretFloat(GDALDataType gdalType, const char* src) {
             ghoul_assert(false, "Unknown data type");
             throw ghoul::MissingCaseException();
         }
-    return 0.0f;
 }
 
 size_t numberOfBytes(GDALDataType gdalType) {
@@ -96,7 +95,6 @@ size_t numberOfBytes(GDALDataType gdalType) {
             ghoul_assert(false, "Unknown data type");
             throw ghoul::MissingCaseException();
     }
-    return 0ULL;
 }
 
 size_t getMaximumValue(GDALDataType gdalType) {
@@ -115,7 +113,6 @@ size_t getMaximumValue(GDALDataType gdalType) {
             ghoul_assert(false, "Unknown data type");
             throw ghoul::MissingCaseException();
     }
-    return 0ULL;
 }
 
 TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {

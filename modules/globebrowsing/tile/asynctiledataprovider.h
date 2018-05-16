@@ -117,7 +117,7 @@ private:
         _concurrentJobManager;
 
     /// nullptr if pbo is not used for texture uploading. Otherwise initialized.
-    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer = nullptr;
+    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 
     ResetMode _resetMode = ResetMode::ShouldResetAllButRawTileDataReader;

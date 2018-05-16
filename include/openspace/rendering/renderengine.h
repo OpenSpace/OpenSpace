@@ -175,13 +175,13 @@ private:
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
-    std::unique_ptr<RaycasterManager> _raycasterManager = nullptr;
-    std::unique_ptr<DeferredcasterManager> _deferredcasterManager = nullptr;
+    std::unique_ptr<RaycasterManager> _raycasterManager;
+    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _doPerformanceMeasurements;
-    std::shared_ptr<performance::PerformanceManager> _performanceManager = nullptr;
+    std::shared_ptr<performance::PerformanceManager> _performanceManager;
 
-    std::unique_ptr<Renderer> _renderer = nullptr;
+    std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation = RendererImplementation::Invalid;
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
@@ -214,10 +214,10 @@ private:
     properties::PropertyOwner _screenSpaceOwner;
     std::vector<std::unique_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
-    std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontBig;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
+    std::shared_ptr<ghoul::fontrendering::Font> _fontLog;
 
     struct {
         glm::ivec4 rotation;

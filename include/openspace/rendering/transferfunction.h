@@ -60,8 +60,8 @@ private:
     void uploadTexture();
 
     std::string _filepath;
-    std::unique_ptr<ghoul::filesystem::File> _file = nullptr;
-    std::shared_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    std::unique_ptr<ghoul::filesystem::File> _file;
+    std::shared_ptr<ghoul::opengl::Texture> _texture;
     bool _needsUpdate = false;
     TfChangedCallback _tfChangedCallback;
 };

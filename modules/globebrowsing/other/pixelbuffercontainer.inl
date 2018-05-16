@@ -36,7 +36,7 @@ PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
 
 template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access access) {
-    const std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     const bool notFoundAmongMappedBuffers = (iter == _indexMap.end());
 
     if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
@@ -65,7 +65,7 @@ void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset
                                                     GLsizeiptr length,
                                                     BufferAccessMask access)
 {
-    const std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     const bool notFoundAmongMappedBuffers = (iter == _indexMap.end());
 
     if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
@@ -105,7 +105,7 @@ bool PixelBufferContainer<KeyType>::resetMappedBuffers() {
 template <class KeyType>
 bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
     bool success = false;
-    const std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     if (iter != _indexMap.end()) { // Found a mapped pixel buffer
         const int index = iter->second; // Index where the mapped buffer is stored
         _pixelBuffers[index]->bind();
@@ -118,7 +118,7 @@ bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
 
 template <class KeyType>
 GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
-    const std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     if (iter != _indexMap.end()) { // Found a mapped pixel buffer
         int index = iter->second; // Index where the mapped buffer is stored
         return *_pixelBuffers[index];

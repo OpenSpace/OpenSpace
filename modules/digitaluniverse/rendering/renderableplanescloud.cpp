@@ -462,7 +462,6 @@ RenderablePlanesCloud::RenderablePlanesCloud(const ghoul::Dictionary& dictionary
     }
 
     if (dictionary.hasKey(FadeInDistancesInfo.identifier)) {
-        glm::vec2 fadeInValue = 
         _fadeInDistance = dictionary.value<glm::vec2>(FadeInDistancesInfo.identifier);
         _disableFadeInDistance = false;
         addProperty(_fadeInDistance);

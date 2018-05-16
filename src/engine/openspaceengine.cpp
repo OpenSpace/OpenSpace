@@ -42,9 +42,13 @@
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
+#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderer.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
@@ -78,6 +82,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/systemcapabilities.h>

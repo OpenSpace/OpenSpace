@@ -132,9 +132,9 @@ private:
     properties::OptionProperty _renderOption;
 
 
-    std::unique_ptr<ghoul::opengl::Texture> _polygonTexture = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture = nullptr;
-    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _polygonTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
+    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
@@ -142,7 +142,7 @@ private:
         renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
         color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
         spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
-    std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
     std::string _colorMapFile;
