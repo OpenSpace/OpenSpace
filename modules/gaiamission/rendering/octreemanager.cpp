@@ -211,8 +211,9 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
     }
     unsigned long long leafId = node->octreePositionIndex;
     unsigned long long firstParentId = leafId / 10;
-    unsigned long long secondParentId = leafId / 100;
-    unsigned long long thirdParentId = leafId / 1000;
+    // Each parent level may be root, make sure to propagate it in that case!
+    unsigned long long secondParentId = (firstParentId == 8) ? 8 : leafId / 100;
+    unsigned long long thirdParentId = (secondParentId == 8) ? 8 : leafId / 1000;
 
     // Return early if camera resides in the same first parent as before!
     // Otherwise camera has moved and may need to load more nodes!
@@ -251,6 +252,7 @@ void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstPare
     // Fetch first layer children if we're already at root.
     if (parentId == 8) {
         fetchChildrenNodes(_root, false);
+        return;
     }
 
     //----------------- Change first index -------------------//
@@ -655,7 +657,10 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
 // be fetched as well.
 void OctreeManager::fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode,
     bool recursive) {
-    
+
+    // Lock node to make sure nobody else are trying to load the same children.
+    std::lock_guard<std::mutex> lock(parentNode->loadingLock);
+
     for (int i = 0; i < 8; ++i) {
         // Fetch node data if we're streaming and it doesn't exist in RAM yet.
         // (As long as there is any RAM budget left and node actually has any data!)

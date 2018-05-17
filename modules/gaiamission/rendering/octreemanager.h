@@ -28,6 +28,7 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <mutex>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <modules/gaiamission/rendering/renderoption.h>
@@ -51,6 +52,7 @@ public:
         size_t numStars;
         bool isLeaf;
         bool isLoaded;
+        std::mutex loadingLock;
         int bufferIndex;
         unsigned long long octreePositionIndex;
     };
