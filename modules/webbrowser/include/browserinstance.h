@@ -48,8 +48,11 @@ public:
 
     bool sendKeyEvent(const CefKeyEvent &event);
 
-    bool sendTouchTapEvent(const CefMouseEvent &event,
-        CefBrowserHost::MouseButtonType button, int clickCount = SINGLE_CLICK);
+	void sendTouchPressEvent(const CefMouseEvent & event,
+        CefBrowserHost::MouseButtonType button, int clickCount);
+
+    void sendResleasePressEvent(const CefMouseEvent & event,
+        CefBrowserHost::MouseButtonType button, int clickCount);
 
     bool sendMouseClickEvent(const CefMouseEvent &event,
         CefBrowserHost::MouseButtonType button, bool mouseUp,

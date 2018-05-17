@@ -348,7 +348,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
     bool hasWebContent = webContent(list);
 
-    if (!guiMode(list) || !hasWebContent) {
+    if (!guiMode(list) && !hasWebContent) {
         if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 #ifdef TOUCH_DEBUG_PROPERTIES
             _debugProperties.interactionMode = "Direct";
@@ -380,7 +380,7 @@ bool TouchInteraction::webContent(const std::vector<TuioCursor>& list) {
     );
 
     WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
-    return module.getEventHandler().touchEventCallback(pos.x, pos.y);
+    return module.getEventHandler().hasContentCallback(pos.x, pos.y);
 }
 
 // Activates/Deactivates gui input mode (if active it voids all other interactions)

@@ -78,16 +78,28 @@ void EventHandler::initialize() {
 
 }
 
-bool EventHandler::touchEventCallback(double x, double y) {
+void EventHandler::touchPressCallback(double x, double y) {
     if (_browserInstance) {
         _mousePosition.x = (int)x;
         _mousePosition.y = (int)y;
 
         int clickCount = BrowserInstance::SINGLE_CLICK;
-
-        return _browserInstance->sendTouchTapEvent(mouseEvent(), MBT_LEFT, clickCount);
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, false, clickCount);
     }
+}
 
+void EventHandler::touchReleaseCallback(double x, double y) {
+    if (_browserInstance) {
+        _mousePosition.x = (int)x;
+        _mousePosition.y = (int)y;
+
+        int clickCount = BrowserInstance::SINGLE_CLICK;
+        _browserInstance->sendMouseClickEvent(mouseEvent(), MBT_LEFT, true, clickCount);
+    }
+}
+
+bool EventHandler::hasContentCallback(double x, double y) {
+    return _browserInstance->hasContent(x, y);
 }
 
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {

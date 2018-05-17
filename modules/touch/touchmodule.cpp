@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
+#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webgui/webguimodule.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -72,6 +74,9 @@ bool TouchModule::hasNewInput() {
         return true;
     }
 
+    // Check if we need to parse touchevent to the webgui
+    hasNewWebInput(listOfContactPoints);
+
     // Return true if we got new input
     if (listOfContactPoints.size() == lastProcessed.size() &&
         !listOfContactPoints.empty())
@@ -102,6 +107,30 @@ bool TouchModule::hasNewInput() {
     }
     else {
         return false;
+    }
+}
+
+void TouchModule::hasNewWebInput(const std::vector<TuioCursor>& listOfContactPoints) {
+    // If one point input and no data in webPosition callback send mouse click to webgui
+    if (listOfContactPoints.size() == 1 && (webPositionCallback.x == 0 && webPositionCallback.y == 0)) {
+        WindowWrapper& wrapper = OsEng.windowWrapper();
+        glm::ivec2 res = wrapper.currentWindowSize();
+        glm::dvec2 pos = glm::vec2(
+            listOfContactPoints.at(0).getScreenX(res.x),
+            listOfContactPoints.at(0).getScreenY(res.y)
+        );
+
+        WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
+        if (module.getEventHandler().hasContentCallback(pos.x, pos.y)) {
+            webPositionCallback = glm::vec2(pos.x, pos.y);
+            module.getEventHandler().touchPressCallback(pos.x, pos.y);
+        }
+    }
+    // Send mouse release if not same point input
+    else if (listOfContactPoints.size() != 1 && (webPositionCallback.x != 0 && webPositionCallback.y != 0)) {
+        WebBrowserModule& module = *(OsEng.moduleEngine().module<WebBrowserModule>());
+        module.getEventHandler().touchReleaseCallback(webPositionCallback.x, webPositionCallback.y);
+        webPositionCallback = glm::vec2(0, 0);
     }
 }
 
