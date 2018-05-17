@@ -129,18 +129,6 @@ namespace {
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
-
-    static const openspace::properties::Property::PropertyInfo lowerValueBoundInfo = {
-        "lowerValueBound",
-        "Lower value bound",
-        "" // @TODO Missing documentation
-    };
-
-    static const openspace::properties::Property::PropertyInfo upperValueBoundInfo = {
-        "upperValueBound",
-        "Upper value bound",
-        "" // @TODO Missing documentation
-    };
 } // namespace
 
 namespace openspace {

@@ -1,5 +1,9 @@
 -- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_VOLUME enabled
 
+-- Before using this example,
+-- the volume data itself needs to be generated,
+-- using the task 'data/tasks/volume/generate_spherical.task'
+
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
