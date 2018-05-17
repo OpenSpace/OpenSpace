@@ -135,6 +135,18 @@ namespace {
         "Set the distance where stars starts to increase in size. Unit is Parsec."
     };
 
+    static const openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
+        "FilterSize",
+        "Filter Size [px]",
+        "Set the filter size in pixels used in tonemapping for point splatting rendering."
+    };
+
+    static const openspace::properties::Property::PropertyInfo TmPointSigmaInfo = {
+        "Sigma",
+        "Normal Distribution Sigma",
+        "Set the normal distribution sigma used in tonemapping for point splatting rendering."
+    };
+
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color Texture",
@@ -177,10 +189,10 @@ namespace {
         "Current remaining budget [bytes] on the CPU RAM for loading more node data files."
     };
 
-    static const openspace::properties::Property::PropertyInfo SsboStreamBudgetInfo = {
-        "SsboStreamBudget",
-        "SSBO Star Stream Budget",
-        "Current remaining memory budget [in number of stars] on the GPU for streaming "
+    static const openspace::properties::Property::PropertyInfo GpuStreamBudgetInfo = {
+        "GpuStreamBudget",
+        "GPU Stream Budget",
+        "Current remaining memory budget [in number of chunks] on the GPU for streaming "
         "additional stars."
     };
 }  // namespace
@@ -277,6 +289,18 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 CloseUpBoostDistInfo.description
             },
             {
+                TmPointFilterSizeInfo.identifier,
+                new IntVerifier,
+                Optional::Yes,
+                TmPointFilterSizeInfo.description
+            },
+            {
+                TmPointSigmaInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TmPointSigmaInfo.description
+            },
+            {
                 FirstRowInfo.identifier,
                 new IntVerifier,
                 Optional::Yes,
@@ -320,12 +344,14 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _sharpness(SharpnessInfo, 1.45f, 0.f, 5.f)
     , _billboardSize(BillboardSizeInfo, 10.f, 1.f, 100.f)
     , _closeUpBoostDist(CloseUpBoostDistInfo, 300.f, 1.f, 1000.f)
+    , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
+    , _tmPointSigma(TmPointSigmaInfo, 1.0, 0.1, 3.0)
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
     , _nRenderedStars(NumRenderedStarsInfo, 0, 0, 2000000000) // 2 Billion stars
     , _cpuRamBudgetProperty(CpuRamBudgetInfo, 0, 0, 1)
-    , _ssboStreamBudgetProperty(SsboStreamBudgetInfo, 0, 0, 1)
+    , _gpuStreamBudgetProperty(GpuStreamBudgetInfo, 0, 0, 1)
     , _nStarsToRender(0)
     , _program(nullptr)
     , _programTM(nullptr)
@@ -454,7 +480,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _pointSpreadFunctionFile->setCallback(
         [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
     );
-    addProperty(_pointSpreadFunctionTexturePath);
 
 
     _colorTexturePath = absPath(dictionary.value<std::string>(
@@ -465,49 +490,54 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _colorTextureFile->setCallback(
         [&](const File&) { _colorTextureIsDirty = true; }
     );
-    addProperty(_colorTexturePath);
     
     if (dictionary.hasKey(LuminosityMultiplierInfo.identifier)) {
         _luminosityMultiplier = static_cast<float>(
             dictionary.value<double>(LuminosityMultiplierInfo.identifier)
             );
     }
-    addProperty(_luminosityMultiplier);
 
     if (dictionary.hasKey(MagnitudeBoostInfo.identifier)) {
         _magnitudeBoost = static_cast<float>(
             dictionary.value<double>(MagnitudeBoostInfo.identifier)
             );
     }
-    addProperty(_magnitudeBoost);
 
     if (dictionary.hasKey(CutOffThresholdInfo.identifier)) {
         _cutOffThreshold = static_cast<float>(
             dictionary.value<double>(CutOffThresholdInfo.identifier)
             );
     }
-    addProperty(_cutOffThreshold);
 
     if (dictionary.hasKey(SharpnessInfo.identifier)) {
         _sharpness = static_cast<float>(
             dictionary.value<double>(SharpnessInfo.identifier)
             );
     }
-    addProperty(_sharpness);
 
     if (dictionary.hasKey(BillboardSizeInfo.identifier)) {
         _billboardSize = static_cast<float>(
             dictionary.value<double>(BillboardSizeInfo.identifier)
             );
     }
-    addProperty(_billboardSize);
 
     if (dictionary.hasKey(CloseUpBoostDistInfo.identifier)) {
         _closeUpBoostDist = static_cast<float>(
             dictionary.value<double>(CloseUpBoostDistInfo.identifier)
             );
     }
-    addProperty(_closeUpBoostDist);
+
+    if (dictionary.hasKey(TmPointFilterSizeInfo.identifier)) {
+        _tmPointFilterSize = static_cast<int>(
+            dictionary.value<double>(TmPointFilterSizeInfo.identifier)
+            );
+    }
+
+    if (dictionary.hasKey(TmPointSigmaInfo.identifier)) {
+        _tmPointSigma = static_cast<float>(
+            dictionary.value<double>(TmPointSigmaInfo.identifier)
+            );
+    }
 
     // Only add properties correlated to fits files if we're actually reading from a fits file.
     if (_fileReaderOption == FileReaderOption::Fits) {
@@ -556,8 +586,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     // Add CPU RAM Budget Property and SSBO Star Stream Property to menu.
     _cpuRamBudgetProperty.setReadOnly(true);
     addProperty(_cpuRamBudgetProperty);
-    _ssboStreamBudgetProperty.setReadOnly(true);
-    addProperty(_ssboStreamBudgetProperty);
+    _gpuStreamBudgetProperty.setReadOnly(true);
+    addProperty(_gpuStreamBudgetProperty);
 }
 
 RenderableGaiaStars::~RenderableGaiaStars() {}
@@ -570,6 +600,11 @@ void RenderableGaiaStars::initializeGL() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     //using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     //_program->setIgnoreUniformLocationError(IgnoreError::Yes);
+
+    // Add common properties to menu.
+    addProperty(_colorTexturePath);
+    addProperty(_luminosityMultiplier);
+    addProperty(_cutOffThreshold);
 
     // Construct shader program depending on user-defined shader option.
     const int option = _shaderOption;
@@ -590,6 +625,11 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
         );
         _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+        _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
+        _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+
+        addProperty(_tmPointFilterSize);
+        addProperty(_tmPointSigma);
         break;
     }
     case ShaderOption::Point_VBO: {
@@ -605,6 +645,11 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
         );
         _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+        _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
+        _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+
+        addProperty(_tmPointFilterSize);
+        addProperty(_tmPointSigma);
         break;
     }
     case ShaderOption::Billboard_SSBO: {
@@ -629,6 +674,12 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
         );
+
+        addProperty(_magnitudeBoost);
+        addProperty(_sharpness);
+        addProperty(_billboardSize);
+        addProperty(_closeUpBoostDist);
+        //addProperty(_pointSpreadFunctionTexturePath);
         break;
     }
     case ShaderOption::Billboard_VBO: {
@@ -649,6 +700,12 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
         );
+
+        addProperty(_magnitudeBoost);
+        addProperty(_sharpness);
+        addProperty(_billboardSize);
+        addProperty(_closeUpBoostDist);
+        //addProperty(_pointSpreadFunctionTexturePath);
         break;
     }
     }
@@ -790,6 +847,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _nStarsToRender += deltaStars;
     _nRenderedStars.set(_nStarsToRender);
 
+    // Update GPU Stream Budget property.
+    _gpuStreamBudgetProperty.set(static_cast<float>(_octreeManager->numFreeSpotsInBuffer()));
+
     int nChunksToRender = _octreeManager->biggestChunkIndexInUse();
     int maxStarsPerNode = _octreeManager->maxStarsPerNode();
     int valuesPerStar = _nRenderValuesPerStar;
@@ -833,10 +893,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Use orphaning strategy for data SSBO.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
-
-        // Update SSBO Star Stream Budget property.
-        //_ssboStreamBudgetProperty.set(static_cast<float>(_octreeManager->ssboStarStreamBudget()));
-        _ssboStreamBudgetProperty.set(static_cast<float>(_octreeManager->numFreeSpotsInBuffer()));
 
         // Keep streaming memeory size to a minimum.
         //long long memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
@@ -1096,6 +1152,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     if (shaderOption == ShaderOption::Point_SSBO || shaderOption == ShaderOption::Point_VBO) {
         _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
+        _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
+        _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
     }
 
     glBindVertexArray(_vaoQuad);
@@ -1174,6 +1232,14 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
                 _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
             }
+            if (hasProperty(&_magnitudeBoost)) removeProperty(_magnitudeBoost);
+            if (hasProperty(&_sharpness)) removeProperty(_sharpness);
+            if (hasProperty(&_billboardSize)) removeProperty(_billboardSize);
+            if (hasProperty(&_closeUpBoostDist)) removeProperty(_closeUpBoostDist);
+            if (hasProperty(&_pointSpreadFunctionTexturePath))
+                removeProperty(_pointSpreadFunctionTexturePath);
+            if (!hasProperty(&_tmPointFilterSize)) addProperty(_tmPointFilterSize);
+            if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
         case ShaderOption::Point_VBO: {
@@ -1184,6 +1250,15 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
             );
             _program->rebuildFromFile();
+
+            if (hasProperty(&_magnitudeBoost)) removeProperty(_magnitudeBoost);
+            if (hasProperty(&_sharpness)) removeProperty(_sharpness);
+            if (hasProperty(&_billboardSize)) removeProperty(_billboardSize);
+            if (hasProperty(&_closeUpBoostDist)) removeProperty(_closeUpBoostDist);
+            if (hasProperty(&_pointSpreadFunctionTexturePath))
+                removeProperty(_pointSpreadFunctionTexturePath);
+            if (!hasProperty(&_tmPointFilterSize)) addProperty(_tmPointFilterSize);
+            if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
         case ShaderOption::Billboard_SSBO: {
@@ -1212,6 +1287,15 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
                 _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
             }
+
+            if (!hasProperty(&_magnitudeBoost)) addProperty(_magnitudeBoost);
+            if (!hasProperty(&_sharpness)) addProperty(_sharpness);
+            if (!hasProperty(&_billboardSize)) addProperty(_billboardSize);
+            if (!hasProperty(&_closeUpBoostDist)) addProperty(_closeUpBoostDist);
+            if (!hasProperty(&_pointSpreadFunctionTexturePath))
+                addProperty(_pointSpreadFunctionTexturePath);
+            if (hasProperty(&_tmPointFilterSize)) removeProperty(_tmPointFilterSize);
+            if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
             break;
         }
         case ShaderOption::Billboard_VBO: {
@@ -1229,6 +1313,15 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
             _uniformCache.screenSize = _program->uniformLocation("screenSize");
             _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+
+            if (!hasProperty(&_magnitudeBoost)) addProperty(_magnitudeBoost);
+            if (!hasProperty(&_sharpness)) addProperty(_sharpness);
+            if (!hasProperty(&_billboardSize)) addProperty(_billboardSize);
+            if (!hasProperty(&_closeUpBoostDist)) addProperty(_closeUpBoostDist);
+            if (!hasProperty(&_pointSpreadFunctionTexturePath)) 
+                addProperty(_pointSpreadFunctionTexturePath);
+            if (hasProperty(&_tmPointFilterSize)) removeProperty(_tmPointFilterSize);
+            if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
             break;
         }
         }
@@ -1261,6 +1354,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _programTM->rebuildFromFile();
 
             _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
+            _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
+            _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
             break;
         }
         case ShaderOption::Billboard_SSBO:
@@ -1302,8 +1397,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // TODO: Figure out how to use properly! (Re-building fucked up)
         //long long maxStarsInStream = _gpuMemoryBudgetInBytes / (_nRenderValuesPerStar * sizeof(GLfloat));
         long long maxStarsInStream = maxNodesInStream;
-        //_ssboStreamBudgetProperty.setMaxValue(static_cast<float>(_maxStreamingBudgetInBytes));
-        _ssboStreamBudgetProperty.setMaxValue(static_cast<float>(maxStarsInStream));
+        _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxStarsInStream));
 
         bool datasetFitInMemory = (_totalDatasetSizeInBytes < _cpuRamBudgetInBytes);
 

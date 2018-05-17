@@ -28,11 +28,11 @@ in vec2 uv;
 
 uniform sampler2D renderedTexture;
 uniform vec2 screenSize;
+uniform int filterSize;
+uniform float sigma;
 
 const float M_PI = 3.141592653589793238462;
 const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
-const int filterSize = 7;
-const float sigma = 1.0;
 
 Fragment getFragment() {
 

@@ -118,6 +118,8 @@ private:
     properties::FloatProperty _sharpness;
     properties::FloatProperty _billboardSize;
     properties::FloatProperty _closeUpBoostDist;
+    properties::IntProperty _tmPointFilterSize;
+    properties::FloatProperty _tmPointSigma;
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
@@ -129,7 +131,7 @@ private:
     properties::IntProperty _nRenderedStars;
     // LongLongProperty doesn't show up in menu, use FloatProperty instead.
     properties::FloatProperty _cpuRamBudgetProperty;
-    properties::FloatProperty _ssboStreamBudgetProperty;
+    properties::FloatProperty _gpuStreamBudgetProperty;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
@@ -138,7 +140,7 @@ private:
         maxStarsPerNode) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
-    UniformCache(renderedTexture, screenSize) _uniformCacheTM;
+    UniformCache(renderedTexture, screenSize, filterSize, sigma) _uniformCacheTM;
     std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
 
     std::shared_ptr<OctreeManager> _octreeManager;
