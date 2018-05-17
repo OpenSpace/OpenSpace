@@ -56,8 +56,8 @@ namespace openspace {
 
 Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address)
     : _socket(s)
-    , _isAuthorized(false)
     , _address(address)
+    , _isAuthorized(false)
 {
     _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);

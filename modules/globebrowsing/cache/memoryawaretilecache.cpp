@@ -170,8 +170,13 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
         }
     );
 
-    const size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
-    resetTextureContainerSize(numTexturesPerType);
+    if (sumTextureTypeSize > 0) {
+        const size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
+        resetTextureContainerSize(numTexturesPerType);
+    }
+    else {
+        resetTextureContainerSize(0);
+    }
     LINFO("Tile cache size was reset");
 }
 

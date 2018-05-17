@@ -106,7 +106,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([identifier isEqualToString:showFullGuiId]) {
@@ -125,7 +125,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([identifier isEqualToString:showSimpleGuiId]) {
@@ -144,7 +144,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([focusIdentifiers containsObject:identifier]) {
@@ -163,7 +163,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         return nil;
