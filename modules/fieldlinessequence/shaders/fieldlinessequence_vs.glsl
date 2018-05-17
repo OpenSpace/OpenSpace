@@ -63,7 +63,7 @@ const int colorByQuantity  = 1;
 
 out vec4 vs_color;
 out float vs_depth;
-
+//out vec4 vs_gPosition;
 
 vec4 getTransferFunctionColor() {
     // Remap the color scalar to a [0,1] range
@@ -121,6 +121,8 @@ void main() {
 
     vec4 position_in_meters = vec4(in_position, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
+    //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
     gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
+
     vs_depth = gl_Position.w;
 }

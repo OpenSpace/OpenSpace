@@ -91,7 +91,7 @@ public:
     void setPositionVec3(Vec3 pos);
     void setFocusPositionVec3(Vec3 pos);
     void setRotation(Quat rotation);
-    void setScaling(glm::vec2 scaling);
+    void setScaling(float scaling);
     void setMaxFov(float fov);
     void setParent(SceneGraphNode* parent);
 
@@ -101,17 +101,19 @@ public:
     // Accessors
     // Remove Vec3 from the name when psc is gone
     const Vec3& positionVec3() const;
+    const Vec3 eyePositionVec3() const;
     const Vec3& unsynchedPositionVec3() const;
     const Vec3& focusPositionVec3() const;
     const Vec3& viewDirectionWorldSpace() const;
     const Vec3& lookUpVectorCameraSpace() const;
     const Vec3& lookUpVectorWorldSpace() const;
-    const glm::vec2& scaling() const;
     const Mat4& viewRotationMatrix() const;
+    const Mat4& viewScaleMatrix() const;
     const Quat& rotationQuaternion() const;
     float maxFov() const;
     float sinMaxFov() const;
     SceneGraphNode* parent() const;
+    float scaling() const;
 
     // @TODO this should simply be called viewMatrix!
     // Or it needs to be changed so that it actually is combined. Right now it is
@@ -170,6 +172,7 @@ public:
     psc unsynchedPosition() const;
     // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
     psc focusPosition() const;
+    const glm::mat4& sceneMatrix() const;
     // @TODO use Camera::SgctInternal interface instead
     // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
@@ -186,9 +189,8 @@ private:
 
     SyncData<Vec3> _position;
     SyncData<Quat> _rotation;
-    SyncData<glm::vec2> _scaling;
+    SyncData<float> _scaling;
     SceneGraphNode* _parent;
-
 
     // _focusPosition to be removed
     Vec3 _focusPosition;
@@ -198,6 +200,7 @@ private:
     mutable Cached<Vec3> _cachedViewDirection;
     mutable Cached<Vec3> _cachedLookupVector;
     mutable Cached<Mat4> _cachedViewRotationMatrix;
+    mutable Cached<Mat4> _cachedViewScaleMatrix;
     mutable Cached<Mat4> _cachedCombinedViewMatrix;
     mutable Cached<float> _cachedSinMaxFov;
 

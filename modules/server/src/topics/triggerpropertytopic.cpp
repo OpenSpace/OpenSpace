@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,16 +45,16 @@ void TriggerPropertyTopic::handleJson(nlohmann::json json) {
         if (prop != nullptr) {
             LDEBUG("Triggering " + propertyKey);
             prop->set("poke");
-        } 
+        }
         else {
             LWARNING("Could not find property " + propertyKey);
         }
     }
-    catch (std::out_of_range& e) {
+    catch (const std::out_of_range& e) {
         LERROR("Could not poke property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (ghoul::RuntimeError e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR("Could not poke property -- runtime error:");
         LERROR(e.what());
     }

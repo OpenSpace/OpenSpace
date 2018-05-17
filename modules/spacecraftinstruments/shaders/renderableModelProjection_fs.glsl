@@ -65,8 +65,9 @@ void main() {
             stencil = vec4(1.0);
         }
         else {
-            color = vec4(vec3(0.0), 0.0);
-            stencil = vec4(0.0);
+            discard;
+            // color = vec4(vec3(0.0), 0.0);
+            // stencil = vec4(0.0);
         }
     }
     else {
@@ -79,8 +80,9 @@ void main() {
             stencil = vec4(1.0);
         }
         else {
-            color = vec4(0.0);
-            stencil = vec4(0.0);
+            discard;
+            // color = vec4(0.0);
+            // stencil = vec4(0.0);
         }
     }
 }

@@ -456,9 +456,10 @@ int addSceneGraphNode(lua_State* L) {
 int removeSceneGraphNode(lua_State* L) {
     using ghoul::lua::errorLocation;
 
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
+    const int n = ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeSceneGraphNode");
 
-    std::string nodeName = luaL_checkstring(L, -1);
+    std::string nodeName = luaL_checkstring(L, 1);
+
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
     if (!node) {
         LERRORC(
@@ -475,14 +476,30 @@ int removeSceneGraphNode(lua_State* L) {
         );
         return 0;
     }
-    node->deinitializeGL();
-    parent->detachChild(*node);
+
+    std::function<void (SceneGraphNode*, SceneGraphNode*)> removeNode =
+        [&removeNode](SceneGraphNode* parent, SceneGraphNode* node) {
+            std::vector<SceneGraphNode*> children = node->children();
+
+            std::unique_ptr<SceneGraphNode> n = parent->detachChild(*node);
+            ghoul_assert(n.get() == node, "Wrong node returned from detaching");
+
+            for (SceneGraphNode* c : children) {
+                removeNode(n.get(), c);
+            }
+
+            node->deinitializeGL();
+            node->deinitialize();
+            n = nullptr;
+        };
+
+    removeNode(parent, node);
+
 
     lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
-
 
 int hasSceneGraphNode(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::hasSceneGraphNode");

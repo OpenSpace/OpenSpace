@@ -28,7 +28,6 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/openspace.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
@@ -66,7 +65,6 @@ std::fstream ff("d:/test.csv", std::fstream::out);
 
 namespace {
     constexpr const char* _loggerCat = "Scene";
-    constexpr const char* KeyName = "Name";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyParent = "Parent";
 } // namespace

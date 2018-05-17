@@ -36,8 +36,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr const char* KeyName = "Name";
-
     static const openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",

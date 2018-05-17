@@ -22,10 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_IMGUI___GUIJOYSTICKCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUIJOYSTICKCOMPONENT___H__
 
-out vec4 renderTableColor;
+#include <modules/imgui/include/guicomponent.h>
 
-void main() {
-    renderTableColor = vec4(0.0);
-}
+namespace openspace::gui {
+
+class GuiJoystickComponent : public GuiComponent {
+public:
+    GuiJoystickComponent();
+
+    void render() override;
+};
+
+} // namespace openspace::gui
+
+#endif // __OPENSPACE_MODULE_IMGUI___GUIJOYSTICKCOMPONENT___H__

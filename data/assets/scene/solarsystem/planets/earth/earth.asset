@@ -110,8 +110,14 @@ local Earth = {
                     )
                 },
                 {
-                    Identifier = "BMNG",
+                    Name = "BMNH [Utah]",
+                    Identifier = "BMNG_Utah",
                     FilePath = mapServiceConfigsPath .. "/Utah/Bmng.wms"
+                },
+                {
+                    Name = "BMNH [Sweden]",
+                    Identifier = "BMNG_Sweden",
+                    FilePath = mapServiceConfigsPath .. "/LiU/Bmng.wms"
                 },
                 {
                     Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
@@ -188,9 +194,15 @@ local Earth = {
                     Enabled = true
                 },
                 {
-                    Identifier = "GEBCO",
+                    Name = "Gebco [Utah]",
+                    Identifier = "Gebco_Utah",
                     FilePath = mapServiceConfigsPath .. "/Utah/Gebco.wms"
-                }
+                },
+                {
+                    Name = "Gebco [Sweden]",
+                    Identifier = "Gebco_Sweden",
+                    FilePath = mapServiceConfigsPath .. "/LiU/Gebco.wms"
+                },
             },
             Overlays = {
                 {
@@ -233,7 +245,21 @@ local Earth = {
                     }
                 }
             }
-        }
+        },
+        ShadowGroup = {
+            Source1 = {
+                Name = "Sun",
+                -- All radius in meters
+                Radius = 696.3E6
+            },
+            --Source2 = { Name = "Monolith", Radius = 0.01E6, },
+            Caster1 = { 
+                Name = "Moon",
+                -- All radius in meters
+                Radius = 1.737E6
+            }
+            --Caster2 = { Name = "Independency Day Ship", Radius = 0.0, }
+         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {

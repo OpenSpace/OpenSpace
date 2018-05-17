@@ -44,7 +44,6 @@
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/util/taskloader.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
@@ -62,12 +61,12 @@ namespace {
 void initTextureReaders() {
     #ifdef GHOUL_USE_DEVIL
         ghoul::io::TextureReader::ref().addReader(
-            std::make_shared<ghoul::io::TextureReaderDevIL>()
+            std::make_unique<ghoul::io::TextureReaderDevIL>()
         );
     #endif // GHOUL_USE_DEVIL
     #ifdef GHOUL_USE_FREEIMAGE
         ghoul::io::TextureReader::ref().addReader(
-            std::make_shared<ghoul::io::TextureReaderFreeImage>()
+            std::make_unique<ghoul::io::TextureReaderFreeImage>()
         );
     #endif // GHOUL_USE_FREEIMAGE
 }

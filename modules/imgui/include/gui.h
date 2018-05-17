@@ -31,6 +31,7 @@
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 #include <modules/imgui/include/guihelpcomponent.h>
 #include <modules/imgui/include/guiiswacomponent.h>
+#include <modules/imgui/include/guijoystickcomponent.h>
 #include <modules/imgui/include/guimissioncomponent.h>
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guiperformancecomponent.h>
@@ -87,6 +88,7 @@ public:
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     GuiIswaComponent _iswa;
 #endif // OPENSPACE_MODULE_ISWA_ENABLED
+    GuiJoystickComponent _joystick;
     GuiParallelComponent _parallel;
     GuiPropertyComponent _featuredProperties;
 

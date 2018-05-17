@@ -41,6 +41,7 @@ namespace {
     constexpr const char* KeyUrl = "Url";
     constexpr const char* KeyIdentifier = "Identifier";
     constexpr const char* KeyOverride = "Override";
+    constexpr const char* KeyUseHash = "UseHash";
 
     constexpr const char* TempSuffix = ".tmp";
 } // namespace
@@ -66,7 +67,8 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 Optional::Yes,
                 "This optional identifier will be part of the used folder structure and, "
                 "if provided, can be used to manually find the downloaded folder in the "
-                "synchronization folder."
+                "synchronization folder. If this value is not specified, 'UseHash' has "
+                "to be set to 'true'."
             },
             {
                 KeyOverride,
@@ -77,6 +79,16 @@ documentation::Documentation UrlSynchronization::Documentation() {
                 "be downloaded, thus overwriting the local files. This is useful for "
                 "files that are updated regularly remotely and should be fetch at every "
                 "startup."
+            },
+            {
+                KeyUseHash,
+                new BoolVerifier,
+                Optional::Yes,
+                "If this value is set to 'true' (the default), the hash of the URL is "
+                "appended to the directory name to produce a unique directory under all "
+                "circumstances. If this is not desired, the URLSynchronization use the "
+                "bare directory name alone if this value is 'false'. If this value is "
+                "'false', the identifier has to be specified."
             }
         }
     };
@@ -104,16 +116,37 @@ UrlSynchronization::UrlSynchronization(const ghoul::Dictionary& dict,
         }
     }
 
+    bool useHash = true;
+    if (dict.hasValue<bool>(KeyUseHash)) {
+        useHash = dict.value<bool>(KeyUseHash);
+    }
+
     // We just merge all of the URLs together to generate a hash, it's not as stable to
     // reordering URLs, but every other solution would be more error prone
     std::string urlConcat = std::accumulate(_urls.begin(), _urls.end(), std::string());
     size_t hash = std::hash<std::string>{}(urlConcat);
     if (dict.hasValue<std::string>(KeyIdentifier)) {
         std::string ident = dict.value<std::string>(KeyIdentifier);
-        _identifier = ident + "(" + std::to_string(hash) + ")";
+        if (useHash) {
+            _identifier = std::move(ident) + "(" + std::to_string(hash) + ")";
+        }
+        else {
+            _identifier = std::move(ident);
+        }
     }
     else {
-        _identifier = std::to_string(hash);
+        if (useHash) {
+            _identifier = std::to_string(hash);
+        }
+        else {
+            documentation::TestResult res;
+            res.success = false;
+            res.offenses.push_back({
+                std::string(KeyIdentifier) + "|" + KeyUseHash,
+                documentation::TestResult::Offense::Reason::MissingKey
+            });
+            throw documentation::SpecificationError(std::move(res), "UrlSynchronization");
+        }
     }
 
     if (dict.hasValue<bool>(KeyOverride)) {
@@ -203,7 +236,7 @@ void UrlSynchronization::start() {
                 // If we are forcing the override, we download to a temporary file first,
                 // so when we are done here, we need to rename the file to the original
                 // name
-                
+
                 const std::string& tempName = d->destination();
                 std::string originalName = tempName.substr(
                     0,
