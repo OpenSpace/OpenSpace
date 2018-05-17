@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>

@@ -23,25 +23,20 @@
  ****************************************************************************************/
 
 #include <modules/iswa/rendering/datasphere.h>
+
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 
 #include <ghoul/opengl/programobject.h>
-
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
+#include <ghoul/glm.h>
 
 namespace openspace {
 
 DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     : DataCygnet(dictionary)
-    , _sphere(nullptr)
 {
-    float radius;
-    dictionary.getValue("Radius", radius);
-    _radius = radius;
+    _radius = dictionary.value<float>("Radius");
 
     _programName = "DataSphereProgram";
     _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
@@ -53,12 +48,8 @@ DataSphere::~DataSphere() {}
 void DataSphere::initialize() {
     IswaCygnet::initialize();
 
-    //rotate 90 degrees because of the texture coordinates in PowerScaledSphere
-    _rotation = glm::rotate(
-        _rotation,
-        static_cast<float>(M_PI_2),
-        glm::vec3(1.0, 0.0, 0.0)
-    );
+    // Rotate 90 degrees because of the texture coordinates in PowerScaledSphere
+    _rotation = glm::rotate(_rotation, glm::half_pi<float>(), glm::vec3(1.f, 0.f, 0.f));
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();
@@ -69,8 +60,8 @@ void DataSphere::initialize() {
         _autoFilter.onChange([this]() {
             // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
-            if (_autoFilter.value()) {
-                _backgroundValues.setValue(_dataProcessor->filterValues());
+            if (_autoFilter) {
+                _backgroundValues =  _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
@@ -84,14 +75,14 @@ void DataSphere::initialize() {
     readTransferFunctions(_transferFunctionsFile.value());
 
     setPropertyCallbacks();
-    _useHistogram.setValue(true);
-    _autoFilter.setValue(true);
+    _useHistogram = true;
+    _autoFilter = true;
 }
 
 bool DataSphere::createGeometry() {
-    PowerScaledScalar radius =  PowerScaledScalar(6.371f*_radius, 6.0);
+    PowerScaledScalar radius =  PowerScaledScalar(6.371f * _radius, 6.0);
     int segments = 100;
-    _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
+    _sphere = std::make_unique<PowerScaledSphere>(radius, segments);
     _sphere->initialize();
     return true;
 }
@@ -109,17 +100,17 @@ void DataSphere::renderGeometry() const {
 
 std::vector<float*> DataSphere::textureData() {
     // if the buffer in the datafile is empty, do not proceed
-    if(_dataBuffer.empty()) {
+    if (_dataBuffer.empty()) {
         return std::vector<float*>();
     }
 
-    if(!_dataOptions.options().size()) { // load options for value selection
+    if (!_dataOptions.options().empty()) { // load options for value selection
         fillOptions(_dataBuffer);
         _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 
         // if this datacygnet has added new values then reload texture
         // for the whole group, including this datacygnet, and return after.
-        if(_group) {
+        if (_group) {
             _group->updateGroup();
             return std::vector<float*>();
         }
@@ -131,8 +122,8 @@ std::vector<float*> DataSphere::textureData() {
 void DataSphere::setUniforms() {
     // set both data texture and transfer function texture
     setTextureUniforms();
-    _shader->setUniform("backgroundValues", _backgroundValues.value());
-    _shader->setUniform("transparency", _alpha.value());
+    _shader->setUniform("backgroundValues", _backgroundValues);
+    _shader->setUniform("transparency", _alpha);
 }
 
 } //namespace openspace

@@ -324,7 +324,7 @@ public:
      *
      * \return The human-readable GUI name for this Property
      */
-    std::string guiName() const;
+    const std::string& guiName() const;
 
     /**
      * This function returns a user-facing description of the Property which can be
@@ -333,7 +333,7 @@ public:
      *
      * \return The description of this Property
      */
-    std::string description() const;
+    const std::string& description() const;
 
     /**
      * Sets the identifier of the group that this Property belongs to. Property groups can

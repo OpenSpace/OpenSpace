@@ -238,7 +238,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/binaryproperty.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -246,14 +245,12 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalarproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vectorproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h

@@ -24,16 +24,7 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <fstream>
 #include <modules/iswa/ext/json.h>
-
-#include <modules/iswa/util/dataprocessortext.h>
-#include <modules/iswa/util/dataprocessorjson.h>
-#include <modules/iswa/util/dataprocessorkameleon.h>
-
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
     constexpr const char* _loggerCat = "IswaBaseGroup";
@@ -66,9 +57,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _dataProcessor(nullptr)
-    , _registered(false)
-    , _type(type)
+    , _type(std::move(type))
 {
     addProperty(_enabled);
     addProperty(_alpha);
@@ -78,53 +67,50 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     registerProperties();
 }
 
-IswaBaseGroup::~IswaBaseGroup(){}
+IswaBaseGroup::~IswaBaseGroup() {}
 
-bool IswaBaseGroup::isType(std::string type){
+bool IswaBaseGroup::isType(const std::string& type) const {
     return (_type == type);
 }
 
-void IswaBaseGroup::updateGroup(){
+void IswaBaseGroup::updateGroup() {
     LDEBUG("Group " + identifier() + " published updateGroup");
     _groupEvent->publish("updateGroup", ghoul::Dictionary());
-
 }
 
-void IswaBaseGroup::clearGroup(){
+void IswaBaseGroup::clearGroup() {
     _groupEvent->publish("clearGroup", ghoul::Dictionary());
     LDEBUG("Group " + identifier() + " published clearGroup");
     unregisterProperties();
 }
 
-std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor(){
+std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor() {
     return _dataProcessor;
 }
 
-std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent() {
+std::shared_ptr<ghoul::Event<ghoul::Dictionary>> IswaBaseGroup::groupEvent() {
     return _groupEvent;
 }
 
-void IswaBaseGroup::registerProperties(){
-    _enabled.onChange([this]{
+void IswaBaseGroup::registerProperties() {
+    _enabled.onChange([this]() {
         LDEBUG("Group " + identifier() + " published enabledChanged");
         _groupEvent->publish(
             "enabledChanged",
-            ghoul::Dictionary({{"enabled", _enabled.value()}})
+            ghoul::Dictionary({{"enabled", _enabled}})
         );
     });
 
-    _alpha.onChange([this]{
+    _alpha.onChange([this]() {
         LDEBUG("Group " + identifier() + " published alphaChanged");
         _groupEvent->publish(
             "alphaChanged",
-            ghoul::Dictionary({{"alpha", _alpha.value()}})
+            ghoul::Dictionary({{"alpha", _alpha}})
         );
     });
 
 
-    _delete.onChange([this]{
-        clearGroup();
-    });
+    _delete.onChange([this]() { clearGroup(); });
 
     _registered = true;
 }

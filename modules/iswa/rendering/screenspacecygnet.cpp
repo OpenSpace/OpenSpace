@@ -28,6 +28,8 @@
 #include <openspace/util/time.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/scripting/scriptengine.h>
 
 namespace openspace {
 
@@ -38,7 +40,10 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
 
     _downloadImage = true;
-    _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
+    _texturePath = IswaManager::ref().iswaUrl(
+        _cygnetId,
+        OsEng.timeManager().time().j2000Seconds()
+    );
 
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
@@ -72,7 +77,10 @@ void ScreenSpaceCygnet::update() {
         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if ((OsEng.timeManager().time().timeJumped() || timeToUpdate )) {
-        _texturePath = IswaManager::ref().iswaUrl(_cygnetId);
+        _texturePath = IswaManager::ref().iswaUrl(
+            _cygnetId,
+            OsEng.timeManager().time().j2000Seconds()
+        );
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }

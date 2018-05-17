@@ -32,7 +32,6 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/binaryproperty.h>
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/util/histogram.h>
 #include <modules/volume/transferfunctionproperty.h>
 #include <modules/volume/transferfunction.h>

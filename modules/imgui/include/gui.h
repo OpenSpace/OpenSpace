@@ -39,6 +39,8 @@
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
 #include <openspace/properties/property.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <ghoul/glm.h>

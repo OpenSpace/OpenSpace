@@ -134,11 +134,11 @@ bool Property::setStringValue(std::string) {
     return false;
 }
 
-std::string Property::guiName() const {
+const std::string& Property::guiName() const {
     return _guiName;
 }
 
-std::string Property::description() const {
+const std::string& Property::description() const {
     return _description;
 }
 

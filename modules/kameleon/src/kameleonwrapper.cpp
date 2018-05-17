@@ -229,7 +229,9 @@ float* KameleonWrapper::getUniformSampledValues(
     constexpr const int NBins = 200;
     const float truncLim = 0.9f;
     std::vector<int> histogram (NBins, 0);
-    auto mapToHistogram = [varMin, varMax](double val) {
+    // Explicitly mentioning the capture list provides either an error on MSVC (if NBins)
+    // is not specified or a warning on Clang if it is specified. Sigh... 
+    auto mapToHistogram = [=](double val) {
         double zeroToOne = (val-varMin)/(varMax-varMin);
         zeroToOne *= static_cast<double>(NBins);
         int izerotoone = static_cast<int>(zeroToOne);

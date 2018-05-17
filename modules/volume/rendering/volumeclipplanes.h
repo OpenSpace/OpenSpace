@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <modules/volume/rendering/volumeclipplane.h>
 

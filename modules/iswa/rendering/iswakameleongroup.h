@@ -29,21 +29,21 @@
 
 namespace openspace {
 
-class IswaKameleonGroup : public IswaDataGroup{
+class IswaKameleonGroup : public IswaDataGroup {
 public:
     IswaKameleonGroup(std::string name, std::string type);
-    ~IswaKameleonGroup();
+    virtual ~IswaKameleonGroup();
 
     virtual void clearGroup() override;
 
-    std::vector<int> fieldlineValue();
+    std::vector<int> fieldlineValue() const;
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
     void changeCdf(std::string path);
 
 protected:
     void registerProperties();
 
-    void readFieldlinePaths(std::string indexFile);
+    void readFieldlinePaths(const std::string& indexFile);
     void updateFieldlineSeeds();
     void clearFieldlines();
 
@@ -52,7 +52,7 @@ protected:
 
     std::string _fieldlineIndexFile;
     std::string _kameleonPath;
-    std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
+    std::map<int, std::tuple<std::string, std::string, bool>> _fieldlineState;
 };
 
 } //namespace openspace

@@ -24,7 +24,6 @@
 
 #include <modules/volume/transferfunctionhandler.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/properties/scalarproperty.h>
 #include <iostream>
 #include <fstream>
 

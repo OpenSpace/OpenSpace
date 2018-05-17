@@ -251,7 +251,7 @@ Histogram Histogram::equalize() {
  * Given a value within the domain of this histogram (_minValue < value < maxValue),
  * this method will use its equalizer to return a histogram equalized result.
  */
-float Histogram::equalize(float value) {
+float Histogram::equalize(float value) const {
     // if (value < _minValue || value > _maxValue) {
     //     LWARNING(
     //         "Equalized value is is not within domain of histogram. min: " +

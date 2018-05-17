@@ -45,12 +45,6 @@
 namespace {
     static const ImVec2 Size = ImVec2(350, 500);
 
-    //static const openspace::properties::Property::PropertyInfo MinMaxInfo = {
-    //    "MinMax",
-    //    "Minimum/Maximum value for delta time",
-    //    "This value determines the minimum and maximum value for the delta time slider."
-    //};
-
     void showTooltip(const std::string& message, double delay) {
         // Hackish way to enfore a window size for TextWrapped (SetNextWindowSize did not
         // do the trick)
@@ -78,20 +72,7 @@ namespace openspace::gui {
 
 GuiSpaceTimeComponent::GuiSpaceTimeComponent()
     : GuiComponent("SpaceTime", "Space/Time")
-    , _deltaTime(0.f)
-    , _deltaTimeUnit(static_cast<int>(TimeUnit::Second))
-    , _accelerationDelta(0.f)
-    , _slidingDelta(0.f)
-    , _firstFrame(true)
-    //, _minMaxDeltaTime(MinMaxInfo, 100000.f, 0.f, 1e8f, 1.f, 5.f)
-    //, _localMinMaxDeltatime(100000.f)
-{
-
-    //_minMaxDeltaTime.onChange([this]() {
-    //    _localMinMaxDeltatime = _minMaxDeltaTime;
-    //});
-    //addProperty(_minMaxDeltaTime);
-}
+{}
 
 void GuiSpaceTimeComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);
@@ -118,9 +99,9 @@ void GuiSpaceTimeComponent::render() {
     // Buttons for important SceneGraphNodes
     for (SceneGraphNode* n : nodes) {
         const std::vector<std::string>& tags = n->tags();
-        auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
+        const auto it = std::find(tags.begin(), tags.end(), "GUI.Interesting");
         if (it != tags.end()) {
-            bool pressed = ImGui::Button(n->guiName().c_str());
+            const bool pressed = ImGui::Button(n->guiName().c_str());
             ImGui::SameLine();
             if (pressed) {
                 OsEng.scriptEngine().queueScript(
@@ -142,7 +123,7 @@ void GuiSpaceTimeComponent::render() {
         nodeNames += n->identifier() + '\0';
     }
 
-    auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
+    const auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
     if (!nodes.empty()) {
         // Only check if we found the current focus node if we have any nodes at all
         // only then it would be a real error
@@ -150,7 +131,7 @@ void GuiSpaceTimeComponent::render() {
     }
     int currentPosition = static_cast<int>(std::distance(nodes.begin(), iCurrentFocus));
 
-    bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
+    const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('NavigationHandler.Origin', '" +
@@ -160,7 +141,7 @@ void GuiSpaceTimeComponent::render() {
     }
 
     ImGui::SameLine();
-    bool pressed = ImGui::Button("Refocus");
+    const bool pressed = ImGui::Button("Refocus");
     if (pressed) {
         // To refocus, we are first clearing the origin property before setting it back
         // to its old value. The property mechanism's onChange does not fire if the same
@@ -213,20 +194,13 @@ void GuiSpaceTimeComponent::render() {
 
     auto incrementTime = [](int days) {
         using namespace std::chrono;
-        double j2000 = OsEng.timeManager().time().j2000Seconds();
+        const double j2000 = OsEng.timeManager().time().j2000Seconds();
 
-        long long seconds = duration_cast<std::chrono::seconds>(
+        const long long seconds = duration_cast<std::chrono::seconds>(
             std::chrono::hours(24) * std::abs(days)
         ).count();
 
-        double newTime = [days, j2000, seconds](){
-            if (days < 0) {
-                return j2000 - seconds;
-            }
-            else {
-                return j2000 + seconds;
-            }
-        }();
+        const double newTime = days < 0 ? j2000 - seconds : j2000 + seconds;
 
         OsEng.scriptEngine().queueScript(
             "openspace.time.setTime(" + std::to_string(newTime) + ")",
@@ -234,18 +208,18 @@ void GuiSpaceTimeComponent::render() {
         );
     };
 
-    bool minusMonth = ImGui::Button("-Month");
+    const bool minusMonth = ImGui::Button("-Month");
     showTooltip("OBS: A month here equals 30 days.", _tooltipDelay);
     if (minusMonth) {
         incrementTime(-30);
     }
     ImGui::SameLine();
-    bool minusWeek = ImGui::Button("-Week");
+    const bool minusWeek = ImGui::Button("-Week");
     if (minusWeek) {
         incrementTime(-7);
     }
     ImGui::SameLine();
-    bool minusDay = ImGui::Button("-Day");
+    const bool minusDay = ImGui::Button("-Day");
     if (minusDay) {
         incrementTime(-1);
     }
@@ -253,7 +227,7 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
 
-    bool nowDay = ImGui::Button("Now");
+    const bool nowDay = ImGui::Button("Now");
     if (nowDay) {
         std::string nowTime = Time::now().UTC();
         // UTC returns a string of the type YYYY MMM DDTHH:mm:ss.xxx
@@ -271,17 +245,17 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
 
 
-    bool plusDay = ImGui::Button("+Day");
+    const bool plusDay = ImGui::Button("+Day");
     if (plusDay) {
         incrementTime(1);
     }
     ImGui::SameLine();
-    bool plusWeek = ImGui::Button("+Week");
+    const bool plusWeek = ImGui::Button("+Week");
     if (plusWeek) {
         incrementTime(7);
     }
     ImGui::SameLine();
-    bool plusMonth = ImGui::Button("+Month");
+    const bool plusMonth = ImGui::Button("+Month");
     if (plusMonth) {
         incrementTime(30);
     }
@@ -290,12 +264,12 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
-        float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
+        float dt = static_cast<float>(OsEng.timeManager().time().deltaTime());
 
         if (_firstFrame) {
-            std::pair<double, std::string> dt = simplifyTime(deltaTime);
-            _deltaTime = static_cast<float>(dt.first);
-            _deltaTimeUnit = static_cast<int>(timeUnitFromString(dt.second.c_str()));
+            const std::pair<double, std::string>& dtInfo = simplifyTime(dt);
+            _deltaTime = static_cast<float>(dtInfo.first);
+            _deltaTimeUnit = timeUnitFromString(dtInfo.second.c_str());
 
             _timeUnits = std::accumulate(
                 openspace::TimeUnits.begin(),
@@ -310,11 +284,7 @@ void GuiSpaceTimeComponent::render() {
         }
 
         _deltaTime = static_cast<float>(
-            convertTime(
-                deltaTime,
-                TimeUnit::Second,
-                static_cast<TimeUnit>(_deltaTimeUnit)
-            )
+            convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit))
         );
 
         bool valueChanged = ImGui::InputFloat(
@@ -327,11 +297,13 @@ void GuiSpaceTimeComponent::render() {
         );
         ImGui::SameLine();
 
+        int deltaTimeUnit = static_cast<int>(_deltaTimeUnit);
         bool unitChanged = ImGui::Combo(
             "##inputUnit",
-            &_deltaTimeUnit,
+            &deltaTimeUnit,
             _timeUnits.c_str()
         );
+        _deltaTimeUnit = static_cast<TimeUnit>(deltaTimeUnit);
 
         if (valueChanged) {
             // If the value changed, we want to change the delta time to the new value
@@ -352,10 +324,7 @@ void GuiSpaceTimeComponent::render() {
             // value to the new unit
 
             _deltaTime = static_cast<float>(
-                convertTime(
-                    deltaTime,
-                    TimeUnit::Second,
-                    static_cast<TimeUnit>(_deltaTimeUnit)
+                convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit)
                 )
             );
         }
@@ -372,7 +341,7 @@ void GuiSpaceTimeComponent::render() {
 
     if (accelerationDeltaChanged || ImGui::IsItemActive() || ImGui::IsItemClicked()) {
         // We want the value to change by _accelerationDelta every 100 ms real world time
-        double newDeltaTime = convertTime(
+        const double newDeltaTime = convertTime(
             _deltaTime + _accelerationDelta * OsEng.windowWrapper().deltaTime() * 10,
             static_cast<TimeUnit>(_deltaTimeUnit),
             TimeUnit::Second
@@ -390,7 +359,7 @@ void GuiSpaceTimeComponent::render() {
     _deltaTime -= _slidingDelta;
 
     bool firstSlidingValue = _slidingDelta == 0.f;
-    bool slidingDeltaChanged = ImGui::SliderFloat(
+    const bool slidingDeltaChanged = ImGui::SliderFloat(
         "Delta Time Slider",
         &_slidingDelta,
         -100.f,
@@ -404,7 +373,7 @@ void GuiSpaceTimeComponent::render() {
             _oldDeltaTime = _deltaTime;
         }
 
-        double newDeltaTime = convertTime(
+        const double newDeltaTime = convertTime(
             _deltaTime + _slidingDelta,
             static_cast<TimeUnit>(_deltaTimeUnit),
             TimeUnit::Second
@@ -427,9 +396,9 @@ void GuiSpaceTimeComponent::render() {
     }
 
 
-    bool isPaused = OsEng.timeManager().time().paused();
+    const bool isPaused = OsEng.timeManager().time().paused();
 
-    bool pauseChanged = ImGui::Button(
+    const bool pauseChanged = ImGui::Button(
         isPaused ? "Resume" : "Pause",
         { ImGui::GetWindowWidth() - 7.5f, 0.f }
     );
@@ -440,7 +409,7 @@ void GuiSpaceTimeComponent::render() {
         );
     }
 
-    bool minusDs = ImGui::Button("-1d/s");
+    const bool minusDs = ImGui::Button("-1d/s");
     if (minusDs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
@@ -449,7 +418,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool minusHs = ImGui::Button("-1h/s");
+    const bool minusHs = ImGui::Button("-1h/s");
     if (minusHs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-60 * 60) + ")",
@@ -458,7 +427,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool minusMs = ImGui::Button("-1min/s");
+    const bool minusMs = ImGui::Button("-1min/s");
     if (minusMs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-60) + ")",
@@ -467,7 +436,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool minusSs = ImGui::Button("-1s/s");
+    const bool minusSs = ImGui::Button("-1s/s");
     if (minusSs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-1) + ")",
@@ -476,7 +445,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool zero = ImGui::Button("0");
+    const bool zero = ImGui::Button("0");
     if (zero) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(0) + ")",
@@ -486,7 +455,7 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SameLine();
 
 
-    bool plusSs = ImGui::Button("+1s/s");
+    const bool plusSs = ImGui::Button("+1s/s");
     if (plusSs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(1) + ")",
@@ -495,7 +464,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool plusMs = ImGui::Button("1min/s");
+    const bool plusMs = ImGui::Button("1min/s");
     if (plusMs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(60) + ")",
@@ -504,7 +473,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool plusHs = ImGui::Button("1h/s");
+    const bool plusHs = ImGui::Button("1h/s");
     if (plusHs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(60 * 60) + ")",
@@ -513,7 +482,7 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
-    bool plusDs = ImGui::Button("1d/s");
+    const bool plusDs = ImGui::Button("1d/s");
     if (plusDs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
@@ -523,7 +492,6 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SameLine();
 
     ImGui::End();
-
 }
 
 } // namespace openspace gui

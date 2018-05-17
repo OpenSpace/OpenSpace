@@ -25,43 +25,20 @@
 #ifndef __OPENSPACE_MODULE_ISWA___ISWAMANAGER___H__
 #define __OPENSPACE_MODULE_ISWA___ISWAMANAGER___H__
 
+#include <openspace/properties/propertyowner.h>
 #include <ghoul/designpattern/singleton.h>
-#include <ghoul/designpattern/event.h>
 
-#include <memory>
-#include <map>
-#include <future>
-#include <ghoul/glm.h>
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-
-
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
-#endif // WIN32
-
-#include <ccmc/Kameleon.h>
-
-#ifdef WIN32
-#pragma warning (pop)
-#endif
-
-#endif
-
-
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/downloadmanager.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/time.h>
+#include <ghoul/designpattern/event.h>
+#include <future>
+#include <set>
+#include <string>
 
+namespace ccmc { class Kameleon; }
 
 namespace openspace {
+
+namespace scripting { struct LuaLibrary; }
 
 class IswaBaseGroup;
 class IswaCygnet;
@@ -92,8 +69,7 @@ struct MetadataFuture {
 };
 
 
-class IswaManager : public ghoul::Singleton<IswaManager>,
-                    public properties::PropertyOwner
+class IswaManager : public ghoul::Singleton<IswaManager>, public properties::PropertyOwner
 {
     friend class ghoul::Singleton<IswaManager>;
 
@@ -111,10 +87,10 @@ public:
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
     std::string iswaUrl(int id,
-        double timestamp = OsEng.timeManager().time().j2000Seconds(),
+        double timestamp /*= OsEng.timeManager().time().j2000Seconds()*/,
         std::string type = "image");
 
-    std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
+    std::shared_ptr<IswaBaseGroup> iswaGroup(const std::string& name);
 
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
     std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
@@ -143,7 +119,6 @@ private:
     void fillCygnetInfo(std::string jsonString);
     void registerGroup(std::string groupName, std::string type);
 
-    std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
     std::map<int, std::string> _geom;
 

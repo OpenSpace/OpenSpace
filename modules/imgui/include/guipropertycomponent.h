@@ -27,12 +27,9 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-#include <openspace/properties/property.h>
 #include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-
 #include <ghoul/misc/boolean.h>
-
 #include <functional>
 #include <string>
 #include <vector>

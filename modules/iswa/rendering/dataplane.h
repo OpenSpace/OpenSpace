@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
 
 #include <modules/iswa/rendering/datacygnet.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
@@ -38,12 +39,11 @@ class DataPlane : public DataCygnet {
 friend class IswaBaseGroup;
 public:
      DataPlane(const ghoul::Dictionary& dictionary);
-     ~DataPlane();
+     ~DataPlane() = default;
 
      void initialize() override;
 
 private:
-
     /**
      * Creates a plane geometry
      */

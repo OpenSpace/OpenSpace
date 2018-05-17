@@ -27,7 +27,13 @@
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-
+#include <ghoul/opengl/texture.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
+#include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
 #ifdef __clang__
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push

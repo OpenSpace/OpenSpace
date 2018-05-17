@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/boxgeometry.h>

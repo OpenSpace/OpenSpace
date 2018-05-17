@@ -53,7 +53,7 @@ protected:
     void setUniforms() override;
     std::vector<float*> textureData() override;
 
-    std::shared_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<PowerScaledSphere> _sphere;
     float _radius;
 };
 

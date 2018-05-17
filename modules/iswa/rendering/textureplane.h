@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_ISWA___TEXTUREPLANE___H__
 
 #include <modules/iswa/rendering/texturecygnet.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 

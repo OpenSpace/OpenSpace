@@ -31,6 +31,9 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/scriptengine.h>
+
 namespace {
     using json = nlohmann::json;
     const ImVec2 WindowSize = ImVec2(350, 500);

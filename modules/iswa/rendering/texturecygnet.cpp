@@ -24,6 +24,8 @@
 
 #include <modules/iswa/rendering/texturecygnet.h>
 
+#include <modules/iswa/util/iswamanager.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {

@@ -26,7 +26,9 @@
 #define __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/vectorproperty.h>
+
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace ghoul { class Dictionary; }
 

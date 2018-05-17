@@ -66,7 +66,7 @@ public:
     void print() const;
     void generateEqualizer();
     Histogram equalize();
-    float equalize (float);
+    float equalize(float) const;
     float entropy();
     std::vector<char> getBinaryData() const;
 
