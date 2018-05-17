@@ -52,6 +52,8 @@ private:
     bool _autoDomainBounds = false;
     glm::vec3 _lowerDomainBound;
     glm::vec3 _upperDomainBound;
+
+    bool _factorRSquared = false;
 };
 
 } // namespace openspace::kameleon
