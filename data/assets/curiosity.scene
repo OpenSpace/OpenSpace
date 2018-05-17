@@ -14,7 +14,8 @@ assetHelper.requestAll(asset, 'scene/digitaluniverse')
 asset.request('customization/globebrowsing')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
-local marsAsset = asset.require('scene/solarsystem/planets/mars/mars')
+local marsAsset  = asset.require('scene/solarsystem/planets/mars/mars')
+local MSLAsset   = asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
 asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 
@@ -44,8 +45,8 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        --Focus = CuriosityModelAsset.CuriosityModel.Name,
-        Focus = marsAsset.Mars.Identifier,
+        Focus = MSLAsset.CuriosityModel.Identifier,
+        --Focus = marsAsset.Mars.Identifier,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })

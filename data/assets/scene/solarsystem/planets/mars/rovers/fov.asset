@@ -1,0 +1,208 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+
+local MardiOffset    = { 0.0, 0.0, 0.0 }
+local MahliOffset    = { 0.0, 0.0, 0.0 }
+local MastCamLOffset = { 0.0, 0.0, 0.0 }
+local MastCamROffset = { 0.0, 0.0, 0.0 }
+local NavCamLAOffset = { 0.0, 0.0, 0.0 }
+local ChemCamOffset  = { 0.0, 0.0, 0.0 }
+local HazCamOffset   = { 0.0, 0.0, 0.0 }
+local MahliOffset    = { 0.0, 0.0, 0.0 }
+
+
+local Mardi = {
+    Name = "Mardi",
+    Parent = transforms.Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "MARS DESCENT IMAGER",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = MardiOffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local Mahli = {
+    Name = "Mahli",
+    Parent = Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "MARS HAND LENS IMAGER",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = MahliOffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local MastCam_left = {
+    Name = "MastCam_left",
+    Parent = Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "MAST CAMERA",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = MastCamLOffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+local MastCam_right = {
+    Name = "MastCam_right",
+    Parent = Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "REMOTE SENSING MAST",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = MastCamROffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+-- Not included, navcam_blb, right_a and b
+local NavCam_leftA = {
+    Name = "NavCam_leftA",
+    Parent = Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "NAVIGATION CAMERA",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = NavCamOffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+
+local CHEMCAM_RMI = {
+    Name = "CHEMCAM_RMI",
+    Parent = Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "CHEMISTRY CAMERA REMOTE MICRO-IMAGER",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = ChemCamOffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+-- Also possible to implement for hblb, hbra, hbrb, hfla, hflb, hfra, hfrb (same instrument name for all)
+local HazCam_BleftA = {
+    Name = "HazCam_BleftA",
+    Parent = Curiosity.Name,
+    Renderable = {
+        Type  = "RenderableFov",
+        Body  = "MARS SCIENCE LABORATORY",
+        Frame = "MSL_ROVER",
+        RGB   = { 0.8, 0.7, 0.7 },
+        Instrument = {
+            Name       = "HAZARD AVOIDANCE CAMERA",
+            Method     = "ELLIPSOID",
+            Aberration = "NONE"
+        },
+        PotentialTargets = { "MARS", "IAU_MARS", "MARS BARYCENTER", "Mars" }
+        --LineWidth = 3.0,
+        --StandOffDistance = 1.0
+    },
+    Transform = {
+        Translation = {
+            Type = "StaticTranslation",
+            Position = HazCamOffset
+        }
+    },
+    GuiPath = "/Solar System/Missions/Rosetta"
+}
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, {
+	Mardi,
+	Mahli,
+	MastCam_left,
+	MastCam_right,
+	NavCam_leftA,
+	CHEMNN_RMI,
+	HazCam_BleftA
+})

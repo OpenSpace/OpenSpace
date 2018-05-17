@@ -49,12 +49,27 @@ local landingSite = {
     }
 }
 
+local MSL_Location = {
+    Identifier = "MSL_Location",
+    Parent =  landingSite.Identifier,
+    --Transform = {
+    --    Scale = {
+    --         Type = "StaticScale",
+    --         Scale = 10.0
+    --    }
+    --},
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+
 
 ---- ROBOTIC ARM RA ----
 
 local RA_Base_Location = {
     Identifier = "RA_Base_Location",
-    Parent = landingSite.Identifier,
+    Parent = MSL_Location.Identifier,
     Transform = {   
         Translation = {
             Type = "StaticTranslation",
@@ -183,7 +198,7 @@ local RA_Mahli_Location = {
 ---- MASTCAM RSM ----
 local RSM_ZERO_AZ_Location = {
     Identifier = "RSM_ZERO_AZ_Location",
-    Parent = landingSite.Identifier,
+    Parent = MSL_Location.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -245,7 +260,7 @@ local RSM_EL_Location = {
 
 local HGA_AZ_Location = {
     Identifier = "HGA_AZ_Location",
-    Parent = landingSite.Identifier,
+    Parent = MSL_Location.Identifier,
     Transform = {   
         Rotation = {
             Type = "SpiceRotation",
@@ -287,7 +302,7 @@ local HGA_EL_Location = {
 
 local SAM_Cover_1_Location = {
     Identifier = "SAM_Cover_1_Location",
-    Parent = landingSite.Identifier,
+    Parent = MSL_Location.Identifier,
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -295,7 +310,7 @@ local SAM_Cover_1_Location = {
 
 local SAM_Cover_2_Location = {
     Identifier = "SAM_Cover_2_Location",
-    Parent = landingSite.Identifier,
+    Parent = MSL_Location.Identifier,
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -303,17 +318,262 @@ local SAM_Cover_2_Location = {
 
 local CHEMIN_Location = {
     Identifier = "CHEMIN_Location",
-    Parent = landingSite.Identifier,
+    Parent = MSL_Location.Identifier,
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
 }
 
 
+---- Wheels ----
+
+local Wheel_base_Location = {
+    Identifier = "Wheel_base_Location",
+    Parent = MSL_Location.Identifier,
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+-- Left side --
+local Leg_1A_L_Location = {
+    Identifier = "Leg_1A_L_Location",
+    Parent = Wheel_base_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.185, -0.75, -0.22}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Leg_1B_L_Location = {
+    Identifier = "Leg_1B_L_Location",
+    Parent = Leg_1A_L_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, 0.0}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+-- Right now, same as Wheel_Leg_2_R
+local Leg_2_L_Location = {
+    Identifier = "Leg_2_L_Location",
+    Parent = Leg_1B_L_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {-0.74, 0.0, 0.24}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wrist_F_L = {
+    Identifier = "Wrist_F_L",
+    Parent = Leg_1A_L_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.882, -0.26, 0.2}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wheel_F_L_Location = {
+    Identifier = "Wheel_F_L_Location",
+    Parent = Wrist_F_L.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, 0.45}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wheel_C_L_Location = {
+    Identifier = "Wheel_C_L_Location",
+    Parent = Leg_2_L_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.45, -0.4, 0.4}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+
+local Wrist_B_L_Location = {
+    Identifier = "Wrist_B_L_Location",
+    Parent = Leg_2_L_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {-0.62, -0.27, 0.0}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+
+local Wheel_B_L_Location = {
+    Identifier = "Wheel_B_L_Location",
+    Parent = Wrist_B_L_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, -0.0, 0.42}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+
+
+
+-- Right Side --
+
+local Leg_1A_R_Location = {
+    Identifier = "Leg_1A_R_Location",
+    Parent = Wheel_base_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.185, 0.75, -0.22}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Leg_1B_R_Location = {
+    Identifier = "Leg_1B_R_Location",
+    Parent = Leg_1A_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, 0.0}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Leg_2_R_Location = {
+    Identifier = "Leg_2_R_Location",
+    Parent = Leg_1A_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {-0.74, 0.0, 0.24}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wrist_F_R_Location = {
+    Identifier = "Wrist_F_R_Location",
+    Parent = Leg_1A_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.882, 0.26, 0.2}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+
+local Wheel_F_R_Location = {
+    Identifier = "Wheel_F_R_Location",
+    Parent = Wrist_F_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, 0.45}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wheel_C_R_Location = {
+    Identifier = "Wheel_C_R_Location",
+    Parent = Leg_2_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.45, 0.4, 0.4}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wrist_B_R_Location = {
+    Identifier = "Wrist_B_R_Location",
+    Parent = Leg_2_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {-0.62, 0.27, 0.0}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local Wheel_B_R_Location = {
+    Identifier = "Wheel_B_R_Location",
+    Parent = Wrist_B_R_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.0, 0.42}
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
     correctRotation,
     centerMars,
     landingSite,
+    MSL_Location,
     RA_Base_Location,
     RA_Shoulder_AZ_Location,
     RA_Shoulder_EL_Location,
@@ -330,6 +590,26 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     HGA_EL_Location,
     SAM_Cover_1_Location,
     SAM_Cover_2_Location,
-    CHEMIN_Location
+    CHEMIN_Location,
+
+    Wheel_base_Location,
+    Leg_1A_L_Location,
+    Leg_1B_L_Location,
+    Leg_2_L_Location,
+    Wrist_F_L,
+    Wheel_F_L_Location,
+    Wheel_C_L_Location,
+    Wrist_B_L_Location,
+    Wheel_B_L_Location,
+
+    Leg_1A_R_Location,
+    Leg_1B_R_Location,
+    Leg_2_R_Location,
+    Wrist_F_R_Location,
+    Wheel_F_R_Location,
+    Wheel_C_R_Location,
+    Wrist_B_R_Location,
+    Wheel_B_R_Location
+
 })
 
