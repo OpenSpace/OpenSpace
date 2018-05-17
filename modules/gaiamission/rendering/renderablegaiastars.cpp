@@ -1397,7 +1397,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // TODO: Figure out how to use properly! (Re-building fucked up)
         //long long maxStarsInStream = _gpuMemoryBudgetInBytes / (_nRenderValuesPerStar * sizeof(GLfloat));
         long long maxStarsInStream = maxNodesInStream;
-        _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxStarsInStream));
+        _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
 
         bool datasetFitInMemory = (_totalDatasetSizeInBytes < _cpuRamBudgetInBytes);
 

@@ -70,8 +70,8 @@ private:
     const size_t POS_SIZE = 3;
     const size_t COL_SIZE = 2;
     const size_t VEL_SIZE = 3;
-    const float MAX_GPU_MEMORY_PERCENT = 0.95f;
-    const float MAX_CPU_RAM_PERCENT = 0.75f;
+    const float MAX_GPU_MEMORY_PERCENT = 0.7f;
+    const float MAX_CPU_RAM_PERCENT = 0.5f;
 
     enum FileReaderOption {
         Fits = 0,
