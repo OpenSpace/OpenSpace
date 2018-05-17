@@ -111,7 +111,7 @@ private:
     size_t MAX_STARS_PER_NODE = 20000; 
 
     const int DEFAULT_INDEX = -1;
-    const float MIN_TOTAL_PIXELS_LOD = 50.0; // Will be multiplied by depth.
+    const float MIN_TOTAL_PIXELS_LOD = 250.0;
     const std::string BINARY_SUFFIX = ".bin"; 
 
     size_t getChildIndex(const float& posX, const float& posY, const float& posZ,

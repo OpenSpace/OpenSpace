@@ -49,6 +49,7 @@ OctreeManager::OctreeManager()
     , _rebuildBuffer(false)
     , _useVBO(false)
     , _streamOctree(false)
+    , _datasetFitInMemory(false)
     , _cpuRamBudget(0)
     , _ssboStarStreamBudget(0)
     , _parentNodeOfCamera(8)
@@ -359,6 +360,28 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4& m
         innerRebuild = true;
     }
 
+    // Check if entire tree is too small to see, and if so remove it. 
+    std::vector<glm::dvec4> corners(8);
+    float fMaxDist = static_cast<float>(MAX_DIST);
+    for (int i = 0; i < 8; ++i) {
+        float x = (i % 2 == 0) ? fMaxDist : -fMaxDist;
+        float y = (i % 4 < 2) ? fMaxDist : -fMaxDist;
+        float z = (i < 4) ? fMaxDist : -fMaxDist;
+        glm::dvec3 pos = glm::dvec3(x, y, z) * 1000.0 * distanceconstants::Parsec;
+        corners[i] = glm::dvec4(pos, 1.0);
+    }
+    if (!_culler->isVisible(corners, mvp)) return renderData;
+    glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
+    float totalPixels = nodeSize.x * nodeSize.y;
+    if (totalPixels < MIN_TOTAL_PIXELS_LOD * 2) {
+        // Remove LOD from first layer of children.
+        for (int i = 0; i < 8; ++i) {
+            auto tmpData = removeNodeFromCache(_root->Children[i], deltaStars);
+            renderData.insert(tmpData.begin(), tmpData.end());
+        }
+        return renderData;
+    }
+
     for (size_t i = 0; i < 8; ++i) {
         auto tmpData = checkNodeIntersection(_root->Children[i], mvp, screenSize, deltaStars, 
             option);
@@ -540,9 +563,9 @@ int OctreeManager::readNodeFromFile(std::ifstream& inFileStream,
             auto posEnd = fetchedData.begin() + (starsInNode * POS_SIZE);
             auto colEnd = posEnd + (starsInNode * COL_SIZE);
             auto velEnd = colEnd + (starsInNode * VEL_SIZE);
-            node->posData = std::move(std::vector<float>(fetchedData.begin(), posEnd));
-            node->colData = std::move(std::vector<float>(posEnd, colEnd));
-            node->velData = std::move(std::vector<float>(colEnd, velEnd));
+            node->posData = std::vector<float>(fetchedData.begin(), posEnd);
+            node->colData = std::vector<float>(posEnd, colEnd);
+            node->velData = std::vector<float>(colEnd, velEnd);
         }
     }
 
@@ -679,9 +702,9 @@ void OctreeManager::fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node) {
         auto posEnd = readData.begin() + (starsInNode * POS_SIZE);
         auto colEnd = posEnd + (starsInNode * COL_SIZE);
         auto velEnd = colEnd + (starsInNode * VEL_SIZE);
-        node->posData = std::move(std::vector<float>(readData.begin(), posEnd));
-        node->colData = std::move(std::vector<float>(posEnd, colEnd));
-        node->velData = std::move(std::vector<float>(colEnd, velEnd));
+        node->posData = std::vector<float>(readData.begin(), posEnd);
+        node->colData = std::vector<float>(posEnd, colEnd);
+        node->velData = std::vector<float>(colEnd, velEnd);
 
         // Keep track of nodes that are loaded and update CPU RAM budget.
         node->isLoaded = true;
@@ -827,7 +850,7 @@ void OctreeManager::sliceNodeLodCache(std::shared_ptr<OctreeNode> node) {
         node->magOrder.resize(MAX_STARS_PER_NODE);
 
         // Ordered map contain the MAX_STARS_PER_NODE brightest stars in all children!
-        for (auto &[absMag, placement] : node->magOrder) {
+        for (auto const &[absMag, placement] : node->magOrder) {
             auto posBegin = node->posData.begin() + placement * POS_SIZE;
             auto colBegin = node->colData.begin() + placement * COL_SIZE;
             auto velBegin = node->velData.begin() + placement * VEL_SIZE;
@@ -898,8 +921,8 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
     int& deltaStars, gaiamission::RenderOption option) {
 
     auto fetchedData = std::map<int, std::vector<float>>();
-    glm::vec3 debugPos;
-    int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
+    //glm::vec3 debugPos;
+    //int depth  = static_cast<int>(log2( MAX_DIST / node->halfDimension ));
 
     // Calculate the corners of the node. 
     std::vector<glm::dvec4> corners(8);
@@ -912,7 +935,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
             : node->originZ - node->halfDimension;
         glm::dvec3 pos = glm::dvec3(x, y, z) * 1000.0 * distanceconstants::Parsec;
         corners[i] = glm::dvec4(pos, 1.0);
-        debugPos = glm::vec3(x, y, z);
+        //debugPos = glm::vec3(x, y, z);
     }
 
     // Check if node is visible from camera. If not then return early.
@@ -928,11 +951,10 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
         glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
         float totalPixels = nodeSize.x * nodeSize.y;
 
-        // Check if we should return any LOD cache data. 
-        // Multiply MinPixels with depth for smoother culling. 
-        // TODO: Improve LOD checks and construction! Use numStars?
-        // TODO: Move to a function?
-        /*if (totalPixels < cbrt(node->numStars) ) {
+        // Check if we should return any LOD cache data. If we're streaming a big dataset 
+        // from files and inner node is visible and loaded, then it should be rendered!
+        if (totalPixels < MIN_TOTAL_PIXELS_LOD || 
+            (_streamOctree && !_datasetFitInMemory && node->isLoaded)) {
 
             // Get correct insert index from stack if node didn't exist already. 
             // Otherwise we will overwrite the old data. Key merging is not a problem here. 
@@ -951,7 +973,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
                 fetchedData[node->bufferIndex] = constructInsertData(node, option, deltaStars);
             }
             return fetchedData;
-        }*/
+        }
     }
     // Return node data if node is a leaf.
     else {
