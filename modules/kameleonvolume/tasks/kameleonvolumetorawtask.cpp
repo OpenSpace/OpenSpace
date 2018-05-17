@@ -35,6 +35,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 
+#include <ghoul/glm.h>
+
 #include <fstream>
 
 namespace {
@@ -43,6 +45,7 @@ namespace {
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
     constexpr const char* KeyDimensions = "Dimensions";
     constexpr const char* KeyVariable = "Variable";
+    constexpr const char* KeyFactorRSquared = "FactorRSquared";
     constexpr const char* KeyTime = "Time";
     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
@@ -77,6 +80,9 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     if (!dictionary.getValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound)) {
         _autoDomainBounds = true;
     }
+    if (dictionary.hasValue<std::string>(KeyFactorRSquared)) {
+        _factorRSquared = true;
+    }
 }
 
 std::string KameleonVolumeToRawTask::description() {
@@ -107,6 +113,15 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         _variable,
         _lowerDomainBound,
         _upperDomainBound);
+
+    if (_factorRSquared) {
+        std::cout << "Multiplying variable by r^2\n";
+
+        // Multiply value of each data point by r coordinate squared
+        rawVolume->forEachVoxel([&](glm::uvec3 coords, float value) {
+            rawVolume->set(coords, value * coords.x * coords.x);
+        });
+    }
 
     progressCallback(0.5f);
 

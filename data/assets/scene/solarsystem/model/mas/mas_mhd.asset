@@ -12,7 +12,7 @@ local Mas_MHD = {
         Renderable = {
             Type = "RenderableTimeVaryingVolume",
             StepSize = 0.001,
-            TransferFunction = asset.localResource("transferfunctions/mas_mhd.txt"),
+            TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
             SourceDirectory = "${DATA}/mas/raw",
             LowerValueBound = 0,
             UpperValueBound = 1,
@@ -31,7 +31,7 @@ local Mas_MHD = {
             },
             Scale = {
                 Type = "StaticScale",
-                Scale = 0.8 * sunRadius
+                Scale = 1.0 * sunRadius
             }
         },
         GUI = {

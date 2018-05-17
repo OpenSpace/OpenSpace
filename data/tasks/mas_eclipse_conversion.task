@@ -1,12 +1,11 @@
-return {
-    {
-        Type = "KameleonVolumeToRawTask",
-        Input = "${DATA}/mas/mas_merged_step_101.cdf",
-        Variable = "rho",
-        Dimensions = {100, 100, 128},
-        LowerDomainBound = {1, -90, 0},
-        UpperDomainBound = {25, 90, 360},
-        RawVolumeOutput = "${DATA}/mas/raw/mas_merged_step_101.cdf.rawvolume",
-        DictionaryOutput = "${DATA}/mas/raw/mas_merged_step_101.cdf.dictionary"
-    }
-}
+return {{
+    Type = "KameleonVolumeToRawTask",
+    Input = "${DATA}/mas/mas_merged_step_101.cdf",
+    Variable = "rho",
+    FactorRSquared = "true", 
+    Dimensions = {100, 100, 128},
+    LowerDomainBound = {1, -90, 0},
+    UpperDomainBound = {15, 90, 360},
+    RawVolumeOutput = "${DATA}/mas/raw/mas_merged_step_101.cdf.rawvolume",
+    DictionaryOutput = "${DATA}/mas/raw/mas_merged_step_101.cdf.dictionary"
+}}
