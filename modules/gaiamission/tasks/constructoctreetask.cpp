@@ -495,13 +495,13 @@ bool ConstructOctreeTask::checkAllFilters(const std::vector<float>& filterValues
     return (_filterPosX && filterStar(_posX, filterValues[0])) ||
         (_filterPosY && filterStar(_posY, filterValues[1])) ||
         (_filterPosZ && filterStar(_posZ, filterValues[2])) ||
-        (_filterGMag && filterStar(_gMag, filterValues[3])) ||
+        (_filterGMag && filterStar(_gMag, filterValues[3], 20.f)) ||
         (_filterBpRp && filterStar(_bpRp, filterValues[4])) ||
         (_filterVelX && filterStar(_velX, filterValues[5])) ||
         (_filterVelY && filterStar(_velY, filterValues[6])) ||
         (_filterVelZ && filterStar(_velZ, filterValues[7])) ||
-        (_filterBpMag && filterStar(_bpMag, filterValues[8])) ||
-        (_filterRpMag && filterStar(_rpMag, filterValues[9])) ||
+        (_filterBpMag && filterStar(_bpMag, filterValues[8], 20.f)) ||
+        (_filterRpMag && filterStar(_rpMag, filterValues[9], 20.f)) ||
         (_filterBpG && filterStar(_bpG, filterValues[10])) ||
         (_filterGRp && filterStar(_gRp, filterValues[11])) ||
         (_filterRa && filterStar(_ra, filterValues[12])) ||
@@ -518,14 +518,15 @@ bool ConstructOctreeTask::checkAllFilters(const std::vector<float>& filterValues
         (_filterRvError && filterStar(_rvError, filterValues[23]));
 }
 
-bool ConstructOctreeTask::filterStar(const glm::vec2& range, const float& filterValue) {
+bool ConstructOctreeTask::filterStar(const glm::vec2& range, const float& filterValue, 
+    const float& normValue) {
     
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue =< min (when min != 0.0) or filterValue >= max (when max != 0.0).
     return (fabs(range.x - range.y) < FLT_EPSILON &&
-        fabs(range.x - filterValue) < FLT_EPSILON) &&
-        !(fabs(range.x) > FLT_EPSILON && filterValue > range.x) &&
-        !(fabs(range.y) > FLT_EPSILON && filterValue < range.y);
+        fabs(range.x - filterValue) < FLT_EPSILON) ||
+        (fabs(range.x - normValue) > FLT_EPSILON && filterValue <= range.x) ||
+        (fabs(range.y - normValue) > FLT_EPSILON && filterValue >= range.y);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {
@@ -543,16 +544,17 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeyInFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "If SingleFileInput is set to true then this specifies the path to a single BIN file "
-                "containing a full dataset. Otherwise this specifies the path to a folder with multiple "
-                "BIN files containing subsets of sorted star data.",
+                "If SingleFileInput is set to true then this specifies the path to a single "
+                "BIN file containing a full dataset. Otherwise this specifies the path to "
+                "a folder with multiple BIN files containing subsets of sorted star data.",
             },
             {
                 KeyOutFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "If SingleFileInput is set to true then this specifies the output file name (including "
-                "full path). Otherwise this specifies the path to the folder which to save all files.",
+                "If SingleFileInput is set to true then this specifies the output file "
+                "name (including full path). Otherwise this specifies the path to the "
+                "folder which to save all files.",
             },
             {
                 KeyMaxDist,
@@ -570,9 +572,9 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 KeySingleFileInput,
                 new BoolVerifier,
                 Optional::Yes,
-                "If true then task will read from a single file and output a single binary file "
-                "with the full Octree. If false then task will read all files in specified folder and "
-                "output multiple files for the Octree."
+                "If true then task will read from a single file and output a single binary "
+                "file with the full Octree. If false then task will read all files in "
+                "specified folder and output multiple files for the Octree."
             },
             {
                 KeyFilterPosX,
@@ -606,9 +608,9 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with G mean magnitude values between ]min, max[ "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "will be inserted into Octree (if min is set to 20.0 it is read as -Inf, " 
+                "if max is set to 20.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away. Default GMag = 20.0 if no value existed."
             },
             {
                 KeyFilterBpRp,
@@ -651,18 +653,18 @@ documentation::Documentation ConstructOctreeTask::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Bp mean magnitude values between ]min, max[ "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "will be inserted into Octree (if min is set to 20.0 it is read as -Inf, " 
+                "if max is set to 20.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away. Default BpMag = 20.0 if no value existed."
             },
             {
                 KeyFilterRpMag,
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 "If defined then only stars with Rp mean magnitude values between ]min, max[ "
-                "will be inserted into Octree (if min is set to 0.0 it is read as -Inf, " 
-                "if max is set to 0.0 it is read as +Inf). If min = max then all values "
-                "equal min|max will be filtered away."
+                "will be inserted into Octree (if min is set to 20.0 it is read as -Inf, " 
+                "if max is set to 20.0 it is read as +Inf). If min = max then all values "
+                "equal min|max will be filtered away. Default RpMag = 20.0 if no value existed."
             },
             {
                 KeyFilterBpG,

@@ -86,6 +86,7 @@ public:
     size_t maxDist() const;
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
+    size_t numFreeSpotsInBuffer() const;
     long long cpuRamBudget() const;
     long long ssboStarStreamBudget() const;
 

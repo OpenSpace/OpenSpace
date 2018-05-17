@@ -726,6 +726,11 @@ size_t OctreeManager::maxStarsPerNode() const {
 size_t OctreeManager::biggestChunkIndexInUse() const {
     return _biggestChunkIndexInUse;
 }
+// Return the number of free spots left for chunks in buffer. 
+size_t OctreeManager::numFreeSpotsInBuffer() const {
+    return _freeSpotsInBuffer.size();
+}
+
 
 // Return current CPU RAM budget [Bytes]. 
 long long OctreeManager::cpuRamBudget() const {
@@ -926,7 +931,8 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
         // Check if we should return any LOD cache data. 
         // Multiply MinPixels with depth for smoother culling. 
         // TODO: Improve LOD checks and construction! Use numStars?
-        if (totalPixels < MIN_TOTAL_PIXELS_LOD * depth) {
+        // TODO: Move to a function?
+        /*if (totalPixels < cbrt(node->numStars) ) {
 
             // Get correct insert index from stack if node didn't exist already. 
             // Otherwise we will overwrite the old data. Key merging is not a problem here. 
@@ -945,7 +951,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
                 fetchedData[node->bufferIndex] = constructInsertData(node, option, deltaStars);
             }
             return fetchedData;
-        }
+        }*/
     }
     // Return node data if node is a leaf.
     else {

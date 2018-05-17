@@ -835,7 +835,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
         // Update SSBO Star Stream Budget property.
-        _ssboStreamBudgetProperty.set(static_cast<float>(_octreeManager->ssboStarStreamBudget()));
+        //_ssboStreamBudgetProperty.set(static_cast<float>(_octreeManager->ssboStarStreamBudget()));
+        _ssboStreamBudgetProperty.set(static_cast<float>(_octreeManager->numFreeSpotsInBuffer()));
 
         // Keep streaming memeory size to a minimum.
         //long long memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
@@ -1301,7 +1302,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
         // TODO: Figure out how to use properly! (Re-building fucked up)
         //long long maxStarsInStream = _gpuMemoryBudgetInBytes / (_nRenderValuesPerStar * sizeof(GLfloat));
         long long maxStarsInStream = maxNodesInStream;
-        _ssboStreamBudgetProperty.setMaxValue(static_cast<float>(_maxStreamingBudgetInBytes));
+        //_ssboStreamBudgetProperty.setMaxValue(static_cast<float>(_maxStreamingBudgetInBytes));
+        _ssboStreamBudgetProperty.setMaxValue(static_cast<float>(maxStarsInStream));
 
         bool datasetFitInMemory = (_totalDatasetSizeInBytes < _cpuRamBudgetInBytes);
 

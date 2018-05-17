@@ -61,7 +61,8 @@ private:
      * Star is filtered either if min = max = filterValue or 
      * if filterValue =< min (when min != 0.0) or filterValue >= max (when max != 0.0).
      */
-    bool filterStar(const glm::vec2& range, const float& filterValue);
+    bool filterStar(const glm::vec2& range, const float& filterValue, 
+        const float& normValue =  0.f);
     
     std::string _inFileOrFolderPath;
     std::string _outFileOrFolderPath;
