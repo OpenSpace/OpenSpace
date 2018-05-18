@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#pragma optimize ("", off)
+#include <fstream>
+
 #include <openspace/scene/scene.h>
 
 #include <openspace/openspace.h>
@@ -34,6 +37,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -56,6 +60,8 @@
 #include <vector>
 
 #include "scene_lua.inl"
+
+std::fstream ff("d:/test.csv", std::fstream::out);
 
 namespace {
     constexpr const char* _loggerCat = "Scene";
@@ -121,7 +127,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     // Just try to remove all properties; if the property doesn't exist, the
     // removeInterpolation will not do anything
     for (properties::Property* p : node->properties()) {
-        removeInterpolation(p);
+        removePropertyInterpolation(p);
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
@@ -441,31 +447,30 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
     return rawNodePointer;
 }
 
-void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
+void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
                              ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
-    ghoul_precondition(durationSeconds > 0.0, "durationSeconds must be positive");
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
     ghoul_postcondition(
         std::find_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [prop](const InterpolationInfo& info) {
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [prop](const PropertyInterpolationInfo& info) {
                 return info.prop == prop && !info.isExpired;
             }
-        ) != _interpolationInfos.end(),
+        ) != _propertyInterpolationInfos.end(),
         "A new interpolation record exists for p that is not expired"
     );
 
     ghoul::EasingFunc<float> func =
-        easingFunction == ghoul::EasingFunction::Linear
-         ?
+        (easingFunction == ghoul::EasingFunction::Linear) ?
         nullptr :
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    for (std::vector<InterpolationInfo>::iterator it = _interpolationInfos.begin();
-        it != _interpolationInfos.end();
+    for (std::vector<PropertyInterpolationInfo>::iterator it = _propertyInterpolationInfos.begin();
+        it != _propertyInterpolationInfos.end();
         ++it)
     {
         if (it->prop == prop) {
@@ -478,50 +483,85 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
         }
     }
 
-    InterpolationInfo i;
+    PropertyInterpolationInfo i;
     i.prop = prop;
     i.beginTime = std::chrono::steady_clock::now();
     i.durationSeconds = durationSeconds;
     i.easingFunction = func;
 
-    _interpolationInfos.push_back(std::move(i));
+    _propertyInterpolationInfos.push_back(std::move(i));
 }
 
-void Scene::removeInterpolation(properties::Property* prop) {
+void Scene::removePropertyInterpolation(properties::Property* prop) {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_postcondition(
         std::find_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [prop](const InterpolationInfo& info) {
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [prop](const PropertyInterpolationInfo& info) {
                 return info.prop == prop;
             }
-        ) == _interpolationInfos.end(),
+        ) == _propertyInterpolationInfos.end(),
         "No interpolation record exists for prop"
     );
 
-    _interpolationInfos.erase(
+    _propertyInterpolationInfos.erase(
         std::remove_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [prop](const InterpolationInfo& info) { return info.prop == prop; }
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [prop](const PropertyInterpolationInfo& info) { return info.prop == prop; }
         ),
-        _interpolationInfos.end()
+        _propertyInterpolationInfos.end()
     );
 }
+
+void Scene::addTimeInterpolation(double targetTime, double durationSeconds) {
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+
+    if (!_timeInterpolationInfo) {
+        _timeInterpolationInfo = std::make_unique<TimeInterpolationInfo>();
+    }
+
+    TimeInterpolationInfo& i = *_timeInterpolationInfo;
+
+    i.beginTime = std::chrono::steady_clock::now();
+    i.durationSeconds = durationSeconds;
+
+    if (durationSeconds >= 2.f) {
+        i.easingTime = 1.f;
+    }
+    else {
+        i.easingTime = i.durationSeconds * 0.25f;
+    }
+
+    i.interpolationStart = OsEng.timeManager().time().j2000Seconds();
+    i.interpolationEnd = targetTime;
+
+    OsEng.timeManager().time().setPause(false);
+}
+
+void Scene::removeTimeInterpolation() {
+    _timeInterpolationInfo = nullptr;
+}
+
 
 void Scene::updateInterpolations() {
     using namespace std::chrono;
     auto now = steady_clock::now();
 
-    for (InterpolationInfo& i : _interpolationInfos) {
+    // First, let's update the properties
+    for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
         long long usPassed = duration_cast<std::chrono::microseconds>(
             now - i.beginTime
         ).count();
 
-        float t = static_cast<float>(
-            static_cast<double>(usPassed) /
-            static_cast<double>(i.durationSeconds * 1000000)
+        const float t = glm::clamp(
+            static_cast<float>(
+                static_cast<double>(usPassed) /
+                static_cast<double>(i.durationSeconds * 1000000)
+            ),
+            0.f,
+            1.f
         );
 
         // @FRAGILE(abock): This method might crash if someone deleted the property
@@ -530,21 +570,149 @@ void Scene::updateInterpolations() {
         //                  SceneGraphNodes. This is true in general, but if Propertys are
         //                  created and destroyed often by the SceneGraphNode, this might
         //                  become a problem.
-        i.prop->interpolateValue(glm::clamp(t, 0.f, 1.f), i.easingFunction);
+        i.prop->interpolateValue(t, i.easingFunction);
 
-        i.isExpired = (t >= 1.f);
+        i.isExpired = (t == 1.f);
     }
 
-    _interpolationInfos.erase(
+    _propertyInterpolationInfos.erase(
         std::remove_if(
-            _interpolationInfos.begin(),
-            _interpolationInfos.end(),
-            [](const InterpolationInfo& i) {
+            _propertyInterpolationInfos.begin(),
+            _propertyInterpolationInfos.end(),
+            [](const PropertyInterpolationInfo& i) {
                 return i.isExpired;
             }
         ),
-        _interpolationInfos.end()
+        _propertyInterpolationInfos.end()
     );
+
+
+    // Then update the time interpolation
+    if (_timeInterpolationInfo) {
+        TimeInterpolationInfo& i = *_timeInterpolationInfo;
+        long long usPassed = duration_cast<std::chrono::microseconds>(
+            now - i.beginTime
+        ).count();
+
+        const double t = glm::clamp(
+            static_cast<double>(usPassed) / (i.durationSeconds * 1000000.0),
+            0.0,
+            1.0
+        );
+
+        if (t == 1.f) {
+            OsEng.timeManager().time().setDeltaTime(0.0);
+            _timeInterpolationInfo = nullptr;
+
+            return;
+        }
+
+        //
+        // t_1: duration
+        // e  : target time
+        // s  : start time
+        // a  : easing duration on each side
+        //
+        // dt  ^
+        //     |
+        //     |                          f
+        //  x  |    ----------------------
+        //     |   /.                    .\
+        //     |  / .                    . \
+        //     | /  .                    .  \
+        //     |/   .                    .   \
+        //     ---------------------------------->    t
+        //     0    a                      a  t_1
+        //
+        //  int_0^{t_1} f(t) dt = e - s
+        //  t_1*x - ax = e-s
+        //  x(t_1 - a) = e-s
+        //  x = (e-s)/(t_1-a)
+        //
+
+        const double e = i.interpolationEnd;
+        const double s = i.interpolationStart;
+        const float t1 = i.durationSeconds;
+        const float a = i.easingTime;
+        const double aprime = a / t1;
+
+        const double x = (e - s) / (t1 - a);
+
+        // Middle part as default
+        double targetDelta = x;
+
+        // First triangle
+        if (t <= aprime) {
+            const double localT = t / aprime;
+            targetDelta = localT * x;
+        }
+        double f = 0.0;
+        double g = 0.0;
+        double wb = targetDelta;
+        // Last triangle
+        if (t >= (1.f - aprime)) {
+            // 0 if t at aprime,   1 if t == 1
+            const double localT = (t - (1.0 - aprime)) / (aprime);
+
+            // First estimate of target delta
+            targetDelta = (1 - localT) * x;
+            
+            wb = targetDelta;
+
+            //// Easing time that is remaining
+            const double remainingEasingTime = (1.0 - localT) * a;              // real
+
+            const double currentTime = OsEng.timeManager().time().j2000Seconds(); // ingame
+            //const double currentDelta = OsEng.timeManager().time().deltaTime(); // ingame/real
+            //
+            const double remainingTime = e - currentTime; // ingame
+
+            // Times 2 since we will steadily decrease the delta time in upcoming frames,
+            // thus effectively halving the remaining time
+            const double localTargetDelta = (remainingTime / remainingEasingTime) * 2.0;
+
+            const double diff = targetDelta - localTargetDelta;
+
+            // 0.5 since we steadily decrease the delta time in upcoming frames
+            f = localTargetDelta;
+            g = diff;
+            
+            targetDelta -= 0.75 * diff;
+            
+
+
+            //const double remainingArea = remainingTime * currentDelta * 0.5;
+
+
+        }
+
+        //if (t >= (1.f - aprime)) {
+        //    if (i.firstEaseOut) {
+        //        i.deltaSummation = 0.0;
+        //        i.firstEaseOut = false;
+        //    }
+        //    const double localT = (t - (1.f - aprime)) / (aprime);
+        //    targetDelta = (1 - localT) * x;
+
+        //    const double expectedArea = x * aprime * 0.5;
+        //    const double currentArea = i.deltaSummation + (1.0 - t) * targetDelta * 0.5;
+
+        //    const double delta = expectedArea - currentArea;
+
+        //    targetDelta += delta ;
+
+        //    LINFOC("expected", std::to_string(expectedArea));
+        //    LINFOC("current_have", std::to_string(i.deltaSummation));
+        //    LINFOC("current_will", std::to_string((1.0 - t) * targetDelta * 0.5));
+        //    LINFOC("current", std::to_string(currentArea));
+        //    LINFOC("===", "===");
+        //}
+
+
+        ff << targetDelta << ',' << f << ',' << g << ',' << wb << '\n';
+        OsEng.timeManager().time().setDeltaTime(targetDelta);
+        //i.deltaSummation += targetDelta * OsEng.windowWrapper().averageDeltaTime();
+    }
 }
 
 void Scene::writeSceneLicenseDocumentation(const std::string& path) const {

@@ -107,6 +107,7 @@ bool Time::togglePause() {
 
 void Time::setTime(std::string time, bool requireJump) {
     _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+
     _timeJumped = requireJump;
 }
 

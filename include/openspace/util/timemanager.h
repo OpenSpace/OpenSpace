@@ -54,6 +54,8 @@ public:
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+
+
 private:
     bool _shouldSetTime = false;
     Time _timeNextFrame;

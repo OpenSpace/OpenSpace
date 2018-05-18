@@ -24,6 +24,8 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/fmt.h>
 #include <ctime>
 
@@ -120,25 +122,53 @@ int time_setTime(lua_State* L) {
         return luaL_error(L, "bad argument (%s)", 1, msg);
     }
 
-    const bool isNumber = (lua_isnumber(L, -1) != 0);
-    const bool isString = (lua_isstring(L, -1) != 0);
+    const bool isNumber = (lua_isnumber(L, 1) != 0);
+    const bool isString = (lua_isstring(L, 1) != 0);
     if (!isNumber && !isString) {
-        const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
-                                lua_typename(L, LUA_TNUMBER),
-                                lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
+        const char* msg = lua_pushfstring(
+            L,
+            "%s or %s expected, got %s",
+            lua_typename(L, LUA_TNUMBER),
+            lua_typename(L, LUA_TSTRING),
+            luaL_typename(L, -1)
+        );
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
-    if (isNumber) {
-        double value = lua_tonumber(L, -1);
-        OsEng.timeManager().time().setTime(value);
-        return 0;
+
+    if (lua_gettop(L) == 1) {
+        if (isNumber) {
+            double value = lua_tonumber(L, 1);
+            OsEng.timeManager().time().setTime(value);
+            return 0;
+        }
+        if (isString) {
+            const char* time = lua_tostring(L, 1);
+            OsEng.timeManager().time().setTime(time);
+            return 0;
+        }
+        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     }
-    if (isString) {
-        const char* time = lua_tostring(L, -1);
-        OsEng.timeManager().time().setTime(time);
-        return 0;
+    else {
+        int nArguments = lua_gettop(L);
+        if (nArguments != 2) {
+            return luaL_error(
+                L,
+                "bad number of arguments, expected 1 or 3, got %i",
+                nArguments
+            );
+        }
+
+        double targetTime;
+        if (lua_isnumber(L, 1)) {
+            targetTime = lua_tonumber(L, 1);
+        }
+        else {
+            targetTime = Time::convertTime(lua_tostring(L, 1));
+        }
+
+        const double duration = lua_tonumber(L, 2);
+        OsEng.renderEngine().scene()->addTimeInterpolation(targetTime, duration);
     }
-    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
