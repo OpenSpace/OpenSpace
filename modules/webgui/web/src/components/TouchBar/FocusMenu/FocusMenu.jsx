@@ -10,6 +10,7 @@ import styles from './FocusMenu.scss';
 import OverViewButton from './OverViewButton';
 import {throttle} from "lodash/function";
 import { fromStringToArray } from '../../../utils/storyHelpers';
+import { UpdateDeltaTimeNow } from '../../../utils/timeHelpers';
 
 const UpdateDelayMs = 1000;
 
@@ -41,6 +42,7 @@ class FocusMenu extends Component {
   }
 
   onChangeOrigin(origin) {
+    UpdateDeltaTimeNow(1);
     this.props.ChangePropertyValue(this.props.originNode.Description, origin.origin);
   }
 

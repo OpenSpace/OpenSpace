@@ -12,6 +12,7 @@ export const realtime = () => {
 
 export const now = () => {
   setDate(new Date());
+  UpdateDeltaTimeNow(1);
 };
 
 // Spice, that is handling the time parsing in OpenSpace does not support
