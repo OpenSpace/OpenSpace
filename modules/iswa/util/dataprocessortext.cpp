@@ -24,10 +24,10 @@
 
 #include <modules/iswa/util/dataprocessortext.h>
 
-#include <sstream>
 #include <openspace/properties/selectionproperty.h>
-#include <algorithm>
 #include <openspace/util/histogram.h>
+#include <algorithm>
+#include <sstream>
 
 namespace openspace {
 
@@ -35,7 +35,7 @@ DataProcessorText::DataProcessorText() : DataProcessor() {}
 
 DataProcessorText::~DataProcessorText() {}
 
-std::vector<std::string> DataProcessorText::readMetadata(std::string data,
+std::vector<std::string> DataProcessorText::readMetadata(const std::string& data,
                                                          glm::size3_t& dimensions)
 {
     if (data.empty()) {
@@ -80,7 +80,7 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data,
     return options;
 }
 
-void DataProcessorText::addDataValues(std::string data,
+void DataProcessorText::addDataValues(const std::string& data,
                                       properties::SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
@@ -138,7 +138,7 @@ void DataProcessorText::addDataValues(std::string data,
     add(optionValues, sum);
 }
 
-std::vector<float*> DataProcessorText::processData(std::string data,
+std::vector<float*> DataProcessorText::processData(const std::string& data,
                                                    properties::SelectionProperty& options,
                                                                  glm::size3_t& dimensions)
 {

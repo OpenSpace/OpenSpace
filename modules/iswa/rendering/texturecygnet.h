@@ -38,10 +38,9 @@ namespace openspace {
 class TextureCygnet : public IswaCygnet {
 public:
     TextureCygnet(const ghoul::Dictionary& dictionary);
-    ~TextureCygnet();
+    ~TextureCygnet() = default;
 
 protected:
-
     bool updateTexture() override;
     bool downloadTextureResource(double timestamp) override;
     bool readyToRender() const override;

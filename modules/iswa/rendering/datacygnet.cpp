@@ -154,7 +154,7 @@ bool DataCygnet::downloadTextureResource(double timestamp) {
     }
 
     std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(
-        _data->id,
+        _data.id,
         timestamp
     );
 
@@ -224,13 +224,13 @@ void DataCygnet::setTextureUniforms() {
 
     if (activeTransferfunctions == 1) {
         tfUnits[0].activate();
-        _transferFunctions[0]->bind();
+        _transferFunctions[0].bind();
         _shader->setUniform("transferFunctions[0]", tfUnits[0]);
     } else {
         for (int option : selectedOptions) {
-            if (_transferFunctions[option]) {
+            if (_transferFunctions.size() >= option) {
                 tfUnits[j].activate();
-                _transferFunctions[option]->bind();
+                _transferFunctions[option].bind();
                 _shader->setUniform(
                     "transferFunctions[" + std::to_string(j) + "]",
                     tfUnits[j]
@@ -251,29 +251,23 @@ void DataCygnet::setTextureUniforms() {
 void DataCygnet::readTransferFunctions(std::string tfPath) {
     std::ifstream tfFile(absPath(std::move(tfPath)));
 
-    std::vector<std::shared_ptr<TransferFunction>> tfs;
+    std::vector<TransferFunction> tfs;
 
     if (tfFile.is_open()) {
         std::string line;
         while (getline(tfFile, line)) {
-            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(
-                absPath(line)
-            );
-            if (tf) {
-                tfs.push_back(tf);
-            }
+            tfs.emplace_back(absPath(line));
         }
 
         tfFile.close();
     }
 
     if (!tfs.empty()) {
-        _transferFunctions.clear();
-        _transferFunctions = tfs;
+        _transferFunctions = std::move(tfs);
     }
 }
 
-void DataCygnet::fillOptions(std::string& source) {
+void DataCygnet::fillOptions(const std::string& source) {
     std::vector<std::string> options = _dataProcessor->readMetadata(
         source,
         _textureDimensions
@@ -285,7 +279,7 @@ void DataCygnet::fillOptions(std::string& source) {
     }
 
     if (_group) {
-        IswaDataGroup* g = dynamic_cast<IswaDataGroup*>(_group.get());
+        IswaDataGroup* g = dynamic_cast<IswaDataGroup*>(_group);
 
         g->registerOptions(_dataOptions.options());
         _dataOptions.setValue(g->dataOptionsValue());
@@ -296,20 +290,20 @@ void DataCygnet::fillOptions(std::string& source) {
 
 void DataCygnet::setPropertyCallbacks() {
     _normValues.onChange([this]() {
-        _dataProcessor->normValues(_normValues.value());
+        _dataProcessor->normValues(_normValues);
         updateTexture();
     });
 
     _useLog.onChange([this]() {
-        _dataProcessor->useLog(_useLog.value());
+        _dataProcessor->useLog(_useLog);
         updateTexture();
     });
 
     _useHistogram.onChange([this]() {
-        _dataProcessor->useHistogram(_useHistogram.value());
+        _dataProcessor->useHistogram(_useHistogram);
         updateTexture();
-        if (_autoFilter.value()) {
-            _backgroundValues.setValue(_dataProcessor->filterValues());
+        if (_autoFilter) {
+            _backgroundValues = _dataProcessor->filterValues();
         }
     });
 
@@ -321,17 +315,17 @@ void DataCygnet::setPropertyCallbacks() {
     });
 
     _transferFunctionsFile.onChange([this]() {
-        readTransferFunctions(_transferFunctionsFile.value());
+        readTransferFunctions(_transferFunctionsFile);
     });
 }
 
 void DataCygnet::subscribeToGroup() {
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary>> groupEvent = _group->groupEvent();
+    ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "dataOptionsChanged",
-        [&](ghoul::Dictionary dict) {
+        [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event dataOptionsChanged");
             if (dict.hasKeyAndValue<std::vector<int>>("dataOptions")) {
                 _dataOptions = dict.value<std::vector<int>>("dataOptions");
@@ -339,10 +333,10 @@ void DataCygnet::subscribeToGroup() {
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "normValuesChanged",
-        [&](ghoul::Dictionary dict) {
+        [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event normValuesChanged");
             if (dict.hasKeyAndValue<glm::vec2>("normValues")) {
                 _normValues = dict.value<glm::vec2>("normValues");
@@ -350,10 +344,10 @@ void DataCygnet::subscribeToGroup() {
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "backgroundValuesChanged",
-        [&](ghoul::Dictionary dict) {
+        [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event backgroundValuesChanged");
             if (dict.hasKeyAndValue<glm::vec2>("backgroundValues")) {
                 _backgroundValues = dict.value<glm::vec2>("backgroundValues");
@@ -361,16 +355,16 @@ void DataCygnet::subscribeToGroup() {
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "transferFunctionsChanged",
-        [&](ghoul::Dictionary dict) {
+        [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event transferFunctionsChanged");
             _transferFunctionsFile = dict.value<std::string>("transferFunctions");
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "useLogChanged",
         [&](const ghoul::Dictionary& dict) {
@@ -379,28 +373,28 @@ void DataCygnet::subscribeToGroup() {
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "useHistogramChanged",
-        [&](ghoul::Dictionary dict) {
+        [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event useHistogramChanged");
             _useHistogram = dict.value<bool>("useHistogram");
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "autoFilterChanged",
-        [&](ghoul::Dictionary dict) {
+        [&](const ghoul::Dictionary& dict) {
             LDEBUG(identifier() + " Event autoFilterChanged");
             _autoFilter = dict.value<bool>("autoFilter");
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "updateGroup",
-        [&](ghoul::Dictionary) {
+        [&](const ghoul::Dictionary&) {
             LDEBUG(identifier() + " Event updateGroup");
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();

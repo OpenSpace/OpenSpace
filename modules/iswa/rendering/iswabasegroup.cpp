@@ -63,7 +63,6 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     addProperty(_alpha);
     addProperty(_delete);
 
-    _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary>>();
     registerProperties();
 }
 
@@ -75,11 +74,11 @@ bool IswaBaseGroup::isType(const std::string& type) const {
 
 void IswaBaseGroup::updateGroup() {
     LDEBUG("Group " + identifier() + " published updateGroup");
-    _groupEvent->publish("updateGroup", ghoul::Dictionary());
+    _groupEvent.publish("updateGroup", ghoul::Dictionary());
 }
 
 void IswaBaseGroup::clearGroup() {
-    _groupEvent->publish("clearGroup", ghoul::Dictionary());
+    _groupEvent.publish("clearGroup", ghoul::Dictionary());
     LDEBUG("Group " + identifier() + " published clearGroup");
     unregisterProperties();
 }
@@ -88,25 +87,19 @@ std::shared_ptr<DataProcessor> IswaBaseGroup::dataProcessor() {
     return _dataProcessor;
 }
 
-std::shared_ptr<ghoul::Event<ghoul::Dictionary>> IswaBaseGroup::groupEvent() {
+ghoul::Event<ghoul::Dictionary>& IswaBaseGroup::groupEvent() {
     return _groupEvent;
 }
 
 void IswaBaseGroup::registerProperties() {
     _enabled.onChange([this]() {
         LDEBUG("Group " + identifier() + " published enabledChanged");
-        _groupEvent->publish(
-            "enabledChanged",
-            ghoul::Dictionary({{"enabled", _enabled}})
-        );
+        _groupEvent.publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled}}));
     });
 
     _alpha.onChange([this]() {
         LDEBUG("Group " + identifier() + " published alphaChanged");
-        _groupEvent->publish(
-            "alphaChanged",
-            ghoul::Dictionary({{"alpha", _alpha}})
-        );
+        _groupEvent.publish("alphaChanged", ghoul::Dictionary({ { "alpha", _alpha } }));
     });
 
 

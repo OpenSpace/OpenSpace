@@ -109,7 +109,7 @@ IswaDataGroup::~IswaDataGroup() {}
 void IswaDataGroup::registerProperties() {
     _useLog.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useLogChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "useLogChanged",
             ghoul::Dictionary({ { "useLog", _useLog.value() } })
         );
@@ -117,7 +117,7 @@ void IswaDataGroup::registerProperties() {
 
     _useHistogram.onChange([this]() {
         LDEBUG("Group " + identifier() + " published useHistogramChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "useHistogramChanged",
             ghoul::Dictionary({ { "useHistogram", _useHistogram.value() } })
         );
@@ -137,7 +137,7 @@ void IswaDataGroup::registerProperties() {
             _backgroundValues.setVisibility(properties::Property::Visibility::All);
             //_backgroundValues.setVisible(true);
         }
-        _groupEvent->publish(
+        _groupEvent.publish(
             "autoFilterChanged",
             ghoul::Dictionary({ { "autoFilter", _autoFilter.value() } })
         );
@@ -145,7 +145,7 @@ void IswaDataGroup::registerProperties() {
 
     _normValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published normValuesChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "normValuesChanged",
             ghoul::Dictionary({ { "normValues", _normValues.value() } })
         );
@@ -153,7 +153,7 @@ void IswaDataGroup::registerProperties() {
 
     _backgroundValues.onChange([this]() {
         LDEBUG("Group " + identifier() + " published backgroundValuesChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "backgroundValuesChanged",
             ghoul::Dictionary({ { "backgroundValues", _backgroundValues.value() } })
         );
@@ -161,7 +161,7 @@ void IswaDataGroup::registerProperties() {
 
     _transferFunctionsFile.onChange([this]() {
         LDEBUG("Group " + identifier() + " published transferFunctionsChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "transferFunctionsChanged",
             ghoul::Dictionary({ { "transferFunctions", _transferFunctionsFile.value() } })
         );
@@ -171,7 +171,7 @@ void IswaDataGroup::registerProperties() {
         LDEBUG("Group " + identifier() + " published dataOptionsChanged");
         ghoul::Dictionary dict;
         dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());
-        _groupEvent->publish("dataOptionsChanged", dict);
+        _groupEvent.publish("dataOptionsChanged", dict);
     });
 }
 

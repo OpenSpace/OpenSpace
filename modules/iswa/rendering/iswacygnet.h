@@ -29,6 +29,7 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/rendering/transferfunction.h>
 #include <ghoul/glm.h>
 #include <chrono>
 #include <future>
@@ -39,51 +40,46 @@ namespace openspace {
 class IswaBaseGroup;
 class TransferFunction;
 
-struct Metadata {
-    int id;
-    int updateTime;
-    std::string groupName;
-    std::string path;
-    std::string parent;
-    std::string frame;
-    glm::vec3 gridMin;
-    glm::vec3 gridMax;
-    glm::vec3 offset;
-    glm::vec3 scale;
-    glm::vec4 spatialScale;
-    std::string scaleVariable;
-    std::string coordinateType;
-};
-
 class IswaCygnet : public Renderable {
 
 public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
-    ~IswaCygnet();
+    virtual ~IswaCygnet();
 
-    void initialize() override;
-    void deinitialize() override;
-    virtual bool isReady() const override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+    bool isReady() const override;
+
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
 protected:
+    struct Metadata {
+        int id;
+        int updateTime;
+        std::string groupName;
+        std::string path;
+        std::string parent;
+        std::string frame;
+        glm::vec3 gridMin;
+        glm::vec3 gridMax;
+        glm::vec3 offset;
+        glm::vec3 scale;
+        glm::vec4 spatialScale;
+        std::string scaleVariable;
+        std::string coordinateType;
+    };
+
     void enabled(bool enabled);
 
     /**
-     * Registers the properties that are equal in all IswaCygnets
-     * regardless of being part of a group or not
+     * Registers the properties that are equal in all IswaCygnets regardless of being part
+     * of a group or not
      */
     virtual void registerProperties();
     virtual void unregisterProperties();
     void initializeTime();
     void initializeGroup();
-    /**
-     * Creates the shader program. Concrete IswaCygnets must set
-     * _vsPath, _fsPath and _programName before this function in called.
-     * @return true if successful creation
-     */
-    bool createShader();
 
     // Subclass interface
     // ==================
@@ -92,27 +88,31 @@ protected:
     virtual void renderGeometry() const = 0;
 
     /**
-     * Should create a new texture and populate the _textures vector
-     * @return true if update was successfull
+     * Should create a new texture and populate the _textures vector.
+     *
+     * \return \c true if update was successful
      */
     virtual bool updateTexture() = 0;
     /**
-     * Is called before updateTexture. For IswaCygnets getting data
-     * from a http request, this function should get the dataFile
-     * from the future object.
-     * @return true if update was successfull
+     * Is called before updateTexture. For IswaCygnets getting data from a HTTP request,
+     * this function should get the dataFile from the future object.
+     *
+     * \return \c true if update was successful
      */
     virtual bool updateTextureResource() = 0;
     /**
-     * should send a http request to get the resource it needs to create
-     * a texture. For Texture cygnets, this should be an image. For DataCygnets,
-     * this should be the data file.
-     * @return true if update was successfull
+     * Should send a HTTP request to get the resource it needs to create a texture. For
+     * Texture cygnets, this should be an image. For DataCygnets, this should be the data
+     * file.
+     *
+     * \return \c true if update was successful
      */
     virtual bool downloadTextureResource(double timestamp) = 0;
+
     virtual bool readyToRender() const = 0;
-     /**
-     * should set all uniforms needed to render
+
+    /**
+     * Should set all uniforms needed to render
      */
     virtual void setUniforms() = 0;
 
@@ -121,26 +121,19 @@ protected:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-
-    std::shared_ptr<Metadata> _data;
-
-    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
-    std::future<DownloadManager::MemoryFile> _futureObject;
-
-    std::shared_ptr<IswaBaseGroup> _group;
-
     bool _textureDirty = false;
 
-    // Must be set by children.
-    std::string _vsPath;
-    std::string _fsPath;
-    std::string _programName;
+    std::vector<TransferFunction> _transferFunctions;
+    std::future<DownloadManager::MemoryFile> _futureObject;
 
-    // to rotate objects with fliped texture coordniates
+    IswaBaseGroup* _group = nullptr;
+
+    Metadata _data;
+
+    // to rotate objects with flipped texture coordinates
     glm::mat4 _rotation = glm::mat4(1.f); 
 
 private:
-    bool destroyShader();
     glm::dmat3 _stateMatrix;
 
     double _openSpaceTime;
@@ -149,7 +142,6 @@ private:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     int _minRealTimeUpdateInterval;
-
 };
 
 } //namespace openspace

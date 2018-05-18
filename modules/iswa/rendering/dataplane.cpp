@@ -24,22 +24,27 @@
 
 #include <modules/iswa/rendering/dataplane.h>
 
-#include <modules/iswa/util/dataprocessortext.h>
-#include <ghoul/opengl/programobject.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
+#include <modules/iswa/util/dataprocessortext.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace openspace {
 
-DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
-    :DataCygnet(dictionary)
-{
-    _programName = "DataPlaneProgram";
-    _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
-    _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
-}
+DataPlane::DataPlane(const ghoul::Dictionary& dictionary) : DataCygnet(dictionary) {}
 
-void DataPlane::initialize() {
+void DataPlane::initializeGL() {
     IswaCygnet::initialize();
+
+    if (!_shader) {
+        _shader = OsEng.renderEngine().buildRenderProgram(
+            "DataPlaneProgram",
+            absPath("${MODULE_ISWA}/shaders/dataplane_vs.glsl"),
+            absPath("${MODULE_ISWA}/shaders/dataplane_fs.glsl")
+        );
+    }
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();
@@ -54,20 +59,16 @@ void DataPlane::initialize() {
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
-                //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
             } else {
                 _backgroundValues.setVisibility(properties::Property::Visibility::All);
-                //_backgroundValues.setVisible(true);
             }
         });
     }
 
-    readTransferFunctions(_transferFunctionsFile.value());
-
+    readTransferFunctions(_transferFunctionsFile);
     setPropertyCallbacks();
-
-    _autoFilter.setValue(true);
+    _autoFilter = true;
 }
 
 bool DataPlane::createGeometry() {
@@ -78,11 +79,11 @@ bool DataPlane::createGeometry() {
     //         GEOMETRY (quad)
     // ============================
     // GLfloat x,y, z;
-    float s = _data->spatialScale.x;
-    const GLfloat x =  s *_data->scale.x / 2.f;
-    const GLfloat y = s * _data->scale.y / 2.f;
-    const GLfloat z = s * _data->scale.z / 2.f;
-    const GLfloat w = _data->spatialScale.w;
+    float s = _data.spatialScale.x;
+    const GLfloat x =  s *_data.scale.x / 2.f;
+    const GLfloat y = s * _data.scale.y / 2.f;
+    const GLfloat z = s * _data.scale.z / 2.f;
+    const GLfloat w = _data.spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
     //   x   y               z   w  s  t
@@ -153,12 +154,12 @@ std::vector<float*> DataPlane::textureData(){
 
         // if this datacygnet has added new values then reload texture
         // for the whole group, including this datacygnet, and return after.
-        if(_group) {
+        if (_group) {
             _group->updateGroup();
             return std::vector<float*>();
         }
     }
-    // _textureDimensions = _dataProcessor->dimensions();
+    // _textureDimensions = _dataProcessor->setDimensions();
 
     std::vector<float*> d = _dataProcessor->processData(
         _dataBuffer,

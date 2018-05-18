@@ -24,10 +24,12 @@
 
 #include <modules/iswa/rendering/datasphere.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
-
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/glm.h>
 
@@ -37,16 +39,20 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     : DataCygnet(dictionary)
 {
     _radius = dictionary.value<float>("Radius");
-
-    _programName = "DataSphereProgram";
-    _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
-    _fsPath = "${MODULE_ISWA}/shaders/datasphere_fs.glsl";
 }
 
 DataSphere::~DataSphere() {}
 
-void DataSphere::initialize() {
-    IswaCygnet::initialize();
+void DataSphere::initializeGL() {
+    IswaCygnet::initializeGL();
+
+    if (!_shader) {
+        _shader = OsEng.renderEngine().buildRenderProgram(
+            "DataSphereProgram",
+            absPath("${MODULE_ISWA}/shaders/datasphere_vs.glsl"),
+            absPath("${MODULE_ISWA}/shaders/datasphere_fs.glsl")
+        );
+    }
 
     // Rotate 90 degrees because of the texture coordinates in PowerScaledSphere
     _rotation = glm::rotate(_rotation, glm::half_pi<float>(), glm::vec3(1.f, 0.f, 0.f));
@@ -61,7 +67,7 @@ void DataSphere::initialize() {
             // If autofiler is selected, use _dataProcessor to set backgroundValues
             // and unregister backgroundvalues property.
             if (_autoFilter) {
-                _backgroundValues =  _dataProcessor->filterValues();
+                _backgroundValues = _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
@@ -72,7 +78,7 @@ void DataSphere::initialize() {
         });
     }
 
-    readTransferFunctions(_transferFunctionsFile.value());
+    readTransferFunctions(_transferFunctionsFile);
 
     setPropertyCallbacks();
     _useHistogram = true;
@@ -115,7 +121,7 @@ std::vector<float*> DataSphere::textureData() {
             return std::vector<float*>();
         }
     }
-    // _textureDimensions = _dataProcessor->dimensions();
+    // _textureDimensions = _dataProcessor->setDimensions();
     return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 

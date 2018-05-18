@@ -88,7 +88,7 @@ void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile,
 void IswaKameleonGroup::registerProperties() {
     _resolution.onChange([this]() {
         LDEBUG("Group " + identifier() + " published resolutionChanged");
-        _groupEvent->publish(
+        _groupEvent.publish(
             "resolutionChanged",
             ghoul::Dictionary({ { "resolution", _resolution.value() } })
         );
@@ -188,10 +188,7 @@ void IswaKameleonGroup::changeCdf(std::string path) {
     clearFieldlines();
     updateFieldlineSeeds();
 
-    _groupEvent->publish(
-        "cdfChanged",
-        ghoul::Dictionary({ { "path", std::move(path)} })
-    );
+    _groupEvent.publish("cdfChanged", ghoul::Dictionary({ { "path", std::move(path) } }));
 }
 
 } //namespace openspace

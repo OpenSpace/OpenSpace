@@ -43,6 +43,8 @@ public:
         TfChangedCallback tfChangedCallback = TfChangedCallback());
     ~TransferFunction();
 
+    TransferFunction(TransferFunction&& rhs) = default;
+
     void setPath(const std::string& filepath);
     ghoul::opengl::Texture& getTexture();
     void bind();

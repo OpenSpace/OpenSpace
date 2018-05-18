@@ -36,7 +36,7 @@ DataProcessorJson::DataProcessorJson() : DataProcessor() {}
 
 DataProcessorJson::~DataProcessorJson() {}
 
-std::vector<std::string> DataProcessorJson::readMetadata(std::string data,
+std::vector<std::string> DataProcessorJson::readMetadata(const std::string& data,
                                                          glm::size3_t& dimensions)
 {
     std::vector<std::string> options = std::vector<std::string>();
@@ -61,7 +61,7 @@ std::vector<std::string> DataProcessorJson::readMetadata(std::string data,
     return options;
 }
 
-void DataProcessorJson::addDataValues(std::string data,
+void DataProcessorJson::addDataValues(const std::string& data,
                                       properties::SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
@@ -84,7 +84,7 @@ void DataProcessorJson::addDataValues(std::string data,
                 const json& col = row.at(y);
                 const int colsize = static_cast<int>(col.size());
 
-                for(int x = 0; x < colsize; ++x) {
+                for (int x = 0; x < colsize; ++x) {
                     const float value = col.at(x);
                     optionValues[i].push_back(value);
                     _min[i] = std::min(_min[i], value);
@@ -98,7 +98,7 @@ void DataProcessorJson::addDataValues(std::string data,
     }
 }
 
-std::vector<float*> DataProcessorJson::processData(std::string data,
+std::vector<float*> DataProcessorJson::processData(const std::string& data,
                                                 properties::SelectionProperty& optionProp,
                                                                  glm::size3_t& dimensions)
 {

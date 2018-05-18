@@ -26,14 +26,15 @@
 #define __OPENSPACE_MODULE_ISWA___DATAPLANE___H__
 
 #include <modules/iswa/rendering/datacygnet.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
 /**
- * DataPlane is a concrete IswaCygnet with data files as its input source.
- * The class handles creation, destruction and rendering of a plane geometry.
- * It also specifies what uniforms to use and what GUI properties it needs.
+ * DataPlane is a concrete IswaCygnet with data files as its input source. The class
+ * handles creation, destruction and rendering of a plane geometry. It also specifies what
+ * uniforms to use and what GUI properties it needs.
  */
 class DataPlane : public DataCygnet {
 friend class IswaBaseGroup;
@@ -41,7 +42,7 @@ public:
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane() = default;
 
-     void initialize() override;
+     void initializeGL() override;
 
 private:
     /**

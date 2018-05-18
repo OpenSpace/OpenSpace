@@ -23,13 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/iswa/rendering/screenspacecygnet.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/util/time.h>
+
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/timemanager.h>
 
 namespace openspace {
 
@@ -52,19 +50,15 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
         std::chrono::system_clock::now().time_since_epoch()
     );
     _lastUpdateRealTime = _realTime;
-     _minRealTimeUpdateInterval = 100;
+    _minRealTimeUpdateInterval = 100;
 
-    _delete.onChange([this](){
+    _delete.onChange([this]() {
         OsEng.scriptEngine().queueScript(
             "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     });
-        // IswaManager::ref().deleteIswaCygnet(name());});
-
 }
-
-ScreenSpaceCygnet::~ScreenSpaceCygnet() {}
 
 void ScreenSpaceCygnet::update() {
     _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
@@ -72,11 +66,10 @@ void ScreenSpaceCygnet::update() {
         std::chrono::system_clock::now().time_since_epoch()
     );
 
-    bool timeToUpdate =
-        (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateTime &&
-        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    bool timeToUpdate = fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _updateTime &&
+           (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval;
 
-    if ((OsEng.timeManager().time().timeJumped() || timeToUpdate )) {
+    if (OsEng.timeManager().time().timeJumped() || timeToUpdate ) {
         _texturePath = IswaManager::ref().iswaUrl(
             _cygnetId,
             OsEng.timeManager().time().j2000Seconds()
@@ -85,4 +78,5 @@ void ScreenSpaceCygnet::update() {
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 }
-}
+
+} // namespace openspace

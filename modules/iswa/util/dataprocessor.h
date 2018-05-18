@@ -39,17 +39,19 @@ namespace properties { class SelectionProperty; }
 class Histogram;
 
 class DataProcessor {
-    friend class IswaBaseGroup;
+    //friend class IswaBaseGroup;
 
 public:
     DataProcessor() = default;
-    virtual ~DataProcessor();
+    virtual ~DataProcessor() = default;
 
-    virtual std::vector<std::string> readMetadata(std::string data,
+    virtual std::vector<std::string> readMetadata(const std::string& data,
         glm::size3_t& dimensions) = 0;
-    virtual void addDataValues(std::string data,
+
+    virtual void addDataValues(const std::string& data,
         properties::SelectionProperty& dataOptions) = 0;
-    virtual std::vector<float*> processData(std::string data,
+
+    virtual std::vector<float*> processData(const std::string& data,
         properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
@@ -62,14 +64,17 @@ public:
 
 protected:
     float processDataPoint(float value, int option);
+
     float normalizeWithStandardScore(float value, float mean, float sd,
-        glm::vec2 normalizationValues = glm::vec2(1.f, 1.f));
+        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
+
     float unnormalizeWithStandardScore(float value, float mean, float sd,
-        glm::vec2 normalizationValues = glm::vec2(1.f, 1.f));
+        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
 
     void initializeVectors(int numOptions);
     void calculateFilterValues(const std::vector<int>& selectedOptions);
-    void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
+    void add(const std::vector<std::vector<float>>& optionValues,
+        const std::vector<float>& sum);
 
     glm::size3_t _dimensions;
     bool _useLog = false;

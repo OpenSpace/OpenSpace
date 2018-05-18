@@ -25,13 +25,11 @@
 #include <modules/iswa/util/dataprocessor.h>
 
 #include <openspace/util/histogram.h>
-
 #include <algorithm>
 #include <fstream>
+#include <numeric>
 
 namespace openspace {
-
-DataProcessor::~DataProcessor() {}
 
 void DataProcessor::useLog(bool useLog) {
     _useLog = useLog;
@@ -67,50 +65,40 @@ float DataProcessor::processDataPoint(float value, int option) {
         return 0.f;
     }
     const Histogram& histogram = *_histograms[option];
-    float mean = (1.f / _numValues[option]) * _sum[option];
-    float sd = _standardDeviation[option];
+    const float mean = (1.f / _numValues[option]) * _sum[option];
+    const float sd = _standardDeviation[option];
 
-    float v;
     if (_useHistogram) {
-        v = histogram.equalize(
+        return histogram.equalize(
             normalizeWithStandardScore(value, mean, sd, _histNormValues)
         ) / 512.f;
     } else {
-        v = normalizeWithStandardScore(value, mean, sd, _normValues);
+        return normalizeWithStandardScore(value, mean, sd, _normValues);
     }
-
-    // float v = normalizeWithStandardScore(value, mean, sd, _normValues);
-    return v;
 }
 
 float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd,
-                                                glm::vec2 normalizationValues)
+                                                const glm::vec2& normalizationValues)
 {
-    float zScoreMin = normalizationValues.x; //10.0f;//_normValues.x;
-    float zScoreMax = normalizationValues.y; //10.0f;//_normValues.y;
+    float zScoreMin = normalizationValues.x;
+    float zScoreMax = normalizationValues.y;
     float standardScore = ( value - mean ) / sd;
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
     //return and normalize
-    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );
+    return ( standardScore + zScoreMin ) / (zScoreMin + zScoreMax );
 }
 
 float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean,
-                                                  float sd, glm::vec2 normalizationValues)
+                                                  float sd,
+                                                  const glm::vec2& normalizationValues)
 {
     float zScoreMin = normalizationValues.x;
     float zScoreMax = normalizationValues.y;
 
     float value = standardScore * (zScoreMax + zScoreMin) - zScoreMin;
     value = value * sd + mean;
-
-    // std::cout << value << std::endl;
     return value;
-    // float standardScore = ( value - mean ) / sd;
-    // // Clamp intresting values
-    // standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
-    // //return and normalize
-    // return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );
 }
 
 void DataProcessor::initializeVectors(int numOptions) {
@@ -151,7 +139,7 @@ void DataProcessor::calculateFilterValues(const std::vector<int>& selectedOption
                 Histogram& histogram = *_histograms[option];
 
                 filterMid = histogram.highestBinValue(_useHistogram);
-                filterWidth = mean+histogram.binWidth();
+                filterWidth = mean + histogram.binWidth();
 
                 filterMid = normalizeWithStandardScore(
                     filterMid,
@@ -159,7 +147,7 @@ void DataProcessor::calculateFilterValues(const std::vector<int>& selectedOption
                     standardDeviation,
                     _normValues
                 );
-                filterWidth = fabs(0.5f-normalizeWithStandardScore(
+                filterWidth = fabs(0.5f - normalizeWithStandardScore(
                     filterWidth,
                     mean,
                     standardDeviation,
@@ -178,22 +166,22 @@ void DataProcessor::calculateFilterValues(const std::vector<int>& selectedOption
     }
 }
 
-void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
-                        std::vector<float>& sum)
+void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
+                        const std::vector<float>& sum)
 {
     const int numOptions = static_cast<int>(optionValues.size());
 
     for (int i = 0; i < numOptions; ++i) {
-        std::vector<float> values = optionValues[i];
+        const std::vector<float>& values = optionValues[i];
         const int numValues = static_cast<int>(values.size());
 
-        float variance = 0.f;
         const float mean = sum[i] / numValues;
-
-        for (int j = 0; j < numValues; ++j) {
-            variance += pow(values[j] - mean, 2);
-        }
-
+        const float variance = std::accumulate(
+            values.begin(),
+            values.end(),
+            0.f,
+            [mean](float l, float r) { return l + pow(r - mean, 2); }
+        );
         const float standardDeviation = sqrt(variance / numValues);
 
         const float oldStandardDeviation = _standardDeviation[i];
@@ -239,7 +227,6 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues,
                 _histNormValues
             );
             //unnormalize histMin, histMax
-            // min = std::min(min, histMin)
             std::unique_ptr<Histogram> newHist = std::make_unique<Histogram>(
                 std::min(min, normalizeWithStandardScore(
                     unNormHistMin,

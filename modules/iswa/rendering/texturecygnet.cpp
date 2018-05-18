@@ -40,10 +40,10 @@ TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     registerProperties();
 }
 
-TextureCygnet::~TextureCygnet() {}
-
 bool TextureCygnet::updateTexture() {
-    auto texture = ghoul::io::TextureReader::ref().loadTexture(
+    using namespace ghoul;
+
+    std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         _imageFile.format
@@ -51,12 +51,12 @@ bool TextureCygnet::updateTexture() {
 
     if (texture) {
         LDEBUG(fmt::format(
-            "Loaded texture from image iswa cygnet with id: '{}'", _data->id
+            "Loaded texture from image iswa cygnet with id: '{}'", _data.id
         ));
         texture->uploadTexture();
         // Textures of planets looks much smoother with AnisotropicMipMap
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-        _textures[0]  = std::move(texture);
+        texture->setFilter(opengl::Texture::FilterMode::LinearMipMap);
+        _textures[0] = std::move(texture);
     }
 
     return false;
@@ -72,7 +72,7 @@ bool TextureCygnet::downloadTextureResource(double timestamp) {
     }
 
     std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(
-        _data->id,
+        _data.id,
         timestamp
     );
 
@@ -84,11 +84,10 @@ bool TextureCygnet::downloadTextureResource(double timestamp) {
     return false;
 }
 
-bool TextureCygnet::updateTextureResource(){
-
+bool TextureCygnet::updateTextureResource() {
     // if The future is done then get the new imageFile
     DownloadManager::MemoryFile imageFile;
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+    if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         imageFile = _futureObject.get();
 
         if (imageFile.corrupted) {
@@ -105,7 +104,7 @@ bool TextureCygnet::updateTextureResource(){
 }
 
 bool TextureCygnet::readyToRender() const {
-    return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
+    return isReady() && ((!_textures.empty()) && _textures[0]);
 }
 
 } //namespace openspace

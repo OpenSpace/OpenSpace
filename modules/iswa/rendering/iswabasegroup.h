@@ -47,7 +47,7 @@ public:
     virtual void clearGroup();
 
     std::shared_ptr<DataProcessor> dataProcessor();
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary>> groupEvent();
+    ghoul::Event<ghoul::Dictionary>& groupEvent();
 
 protected:
     void registerProperties();
@@ -57,7 +57,7 @@ protected:
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary>> _groupEvent;
+    ghoul::Event<ghoul::Dictionary> _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 
     bool _registered = false;

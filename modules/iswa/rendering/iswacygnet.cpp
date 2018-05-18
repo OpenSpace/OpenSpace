@@ -28,7 +28,6 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/transferfunction.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/time.h>
@@ -67,8 +66,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setGuiName(name);
 
-    _data = std::make_shared<Metadata>();
-
     float renderableId;
     dictionary.getValue("Id", renderableId);
     float updateTime;
@@ -79,28 +76,28 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("GridMin", min);
     glm::vec3 max;
     dictionary.getValue("GridMax", max);
-    dictionary.getValue("Frame",_data->frame);
-    dictionary.getValue("CoordinateType", _data->coordinateType);
+    dictionary.getValue("Frame",_data.frame);
+    dictionary.getValue("CoordinateType", _data.coordinateType);
     float xOffset;
     dictionary.getValue("XOffset", xOffset);
 
-    dictionary.getValue("Group", _data->groupName);
+    dictionary.getValue("Group", _data.groupName);
 
-    _data->id = static_cast<int>(renderableId);
-    _data->updateTime = static_cast<int>(updateTime);
-    _data->spatialScale = spatialScale;
-    _data->gridMin = min;
-    _data->gridMax = max;
+    _data.id = static_cast<int>(renderableId);
+    _data.updateTime = static_cast<int>(updateTime);
+    _data.spatialScale = spatialScale;
+    _data.gridMin = min;
+    _data.gridMax = max;
 
     glm::vec3 scale = glm::vec3((max.x - min.x), (max.y - min.y), (max.z - min.z));
-    _data->scale = scale;
+    _data.scale = scale;
 
     glm::vec3 offset = glm::vec3(
         (min.x + (std::abs(min.x) + std::abs(max.x)) / 2.f) + xOffset,
         (min.y + (std::abs(min.y) + std::abs(max.y)) / 2.f),
         (min.z + (std::abs(min.z) + std::abs(max.z)) / 2.f)
     );
-    _data->offset = offset;
+    _data.offset = offset;
 
     addProperty(_alpha);
     addProperty(_delete);
@@ -108,10 +105,10 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 
 IswaCygnet::~IswaCygnet() {}
 
-void IswaCygnet::initialize() {
+void IswaCygnet::initializeGL() {
     _textures.push_back(nullptr);
 
-    if (!_data->groupName.empty()) {
+    if (!_data.groupName.empty()) {
         initializeGroup();
     } else {
         _delete.onChange([this]() {
@@ -125,25 +122,28 @@ void IswaCygnet::initialize() {
 
     initializeTime();
     createGeometry();
-    createShader();
     downloadTextureResource(OsEng.timeManager().time().j2000Seconds());
 }
 
-void IswaCygnet::deinitialize() {
-    if (!_data->groupName.empty()) {
-        _group->groupEvent()->unsubscribe(identifier());
+void IswaCygnet::deinitializeGL() {
+    if (!_data.groupName.empty()) {
+        _group->groupEvent().unsubscribe(identifier());
     }
 
     unregisterProperties();
     destroyGeometry();
-    destroyShader();
+
+    if (_shader) {
+        OsEng.renderEngine().removeRenderProgram(_shader.get());
+        _shader = nullptr;
+    }
 }
 
 bool IswaCygnet::isReady() const {
     return !_shader;
 }
 
-void IswaCygnet::render(const RenderData& data, RendererTasks&){
+void IswaCygnet::render(const RenderData& data, RendererTasks&) {
     if (!readyToRender()) {
         return;
     }
@@ -154,11 +154,11 @@ void IswaCygnet::render(const RenderData& data, RendererTasks&){
             transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
     }
-    transform = transform*_rotation;
+    transform = transform * _rotation;
 
     psc position = data.position + transform * glm::vec4(
-        _data->spatialScale.x * _data->offset,
-        _data->spatialScale.w
+        _data.spatialScale.x * _data.offset,
+        _data.spatialScale.w
     );
 
     // Activate shader
@@ -190,13 +190,13 @@ void IswaCygnet::update(const UpdateData&) {
         std::chrono::system_clock::now().time_since_epoch()
     );
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(
-        _data->frame,
+        _data.frame,
         "GALACTIC",
         _openSpaceTime
     );
 
     const bool timeToUpdate =
-        (fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data->updateTime &&
+        (fabs(_openSpaceTime - _lastUpdateOpenSpaceTime) >= _data.updateTime &&
         (_realTime.count() - _lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if (_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
@@ -206,29 +206,21 @@ void IswaCygnet::update(const UpdateData&) {
         }
     }
 
-    if (_textureDirty && _data->updateTime != 0 && timeToUpdate) {
+    if (_textureDirty && _data.updateTime != 0 && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
 
         double clockwiseSign = (OsEng.timeManager().time().deltaTime() > 0) ? 1.0 : -1.0;
-        downloadTextureResource(_openSpaceTime + clockwiseSign * _data->updateTime);
+        downloadTextureResource(_openSpaceTime + clockwiseSign * _data.updateTime);
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
     if (!_transferFunctions.empty()) {
-        for (const std::shared_ptr<TransferFunction>& tf : _transferFunctions) {
-            tf->update();
+        for (TransferFunction& tf : _transferFunctions) {
+            tf.update();
         }
     }
-}
-
-bool IswaCygnet::destroyShader() {
-    if (_shader) {
-        OsEng.renderEngine().removeRenderProgram(_shader.get());
-        _shader = nullptr;
-    }
-    return true;
 }
 
 void IswaCygnet::enabled(bool enabled) {
@@ -251,25 +243,13 @@ void IswaCygnet::initializeTime() {
     _minRealTimeUpdateInterval = 100;
 }
 
-bool IswaCygnet::createShader() {
-    if (!_shader) {
-        _shader = OsEng.renderEngine().buildRenderProgram(
-            _programName,
-            absPath(_vsPath),
-            absPath(_fsPath)
-        );
-    }
-    return true;
-}
-
 void IswaCygnet::initializeGroup() {
-    _group = IswaManager::ref().iswaGroup(_data->groupName);
+    _group = IswaManager::ref().iswaGroup(_data.groupName);
 
     //Subscribe to enable and delete property
-    const std::shared_ptr<ghoul::Event<ghoul::Dictionary>>& groupEvent =
-        _group->groupEvent();
+    ghoul::Event<ghoul::Dictionary>& groupEvent = _group->groupEvent();
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "enabledChanged",
         [&](const ghoul::Dictionary& dict) {
@@ -278,7 +258,7 @@ void IswaCygnet::initializeGroup() {
         }
     );
 
-    groupEvent->subscribe(
+    groupEvent.subscribe(
         identifier(),
         "alphaChanged",
         [&](const ghoul::Dictionary& dict) {
@@ -287,7 +267,7 @@ void IswaCygnet::initializeGroup() {
         }
     );
 
-    groupEvent->subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
+    groupEvent.subscribe(identifier(), "clearGroup", [&](ghoul::Dictionary) {
         LDEBUG(identifier() + " Event clearGroup");
         OsEng.scriptEngine().queueScript(
             "openspace.removeSceneGraphNode('" + identifier() + "')",

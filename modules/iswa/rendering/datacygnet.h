@@ -37,9 +37,9 @@ namespace openspace {
 class DataProcessor;
 
 /**
- * This class abstracts away the the loading of data and creation of
- * textures for all data cygnets. It specifies the interface that needs to
- * be implemented for all concrete subclasses
+ * This class abstracts away the the loading of data and creation of textures for all data
+ * cygnets. It specifies the interface that needs to be implemented for all concrete
+ * subclasses
  */
 class DataCygnet : public IswaCygnet {
 public:
@@ -48,10 +48,10 @@ public:
 
 protected:
     bool updateTexture() override;
-    void fillOptions(std::string& source);
+    void fillOptions(const std::string& source);
 
     /**
-     * loads the transferfunctions specified in tfPath into _transferFunctions list.
+     * Loads the transferfunctions specified in tfPath into _transferFunctions list.
      *
      * \param tfPath Path to transfer function file
      */
