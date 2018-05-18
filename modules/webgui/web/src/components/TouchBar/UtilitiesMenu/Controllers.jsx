@@ -6,10 +6,11 @@ import { OriginKey, SetGoToGeoScript, ValuePlaceholder, ScaleKey } from '../../.
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
 import { changePropertyValue, startListening } from '../../../api/Actions';
 import DateController from './DateController';
-import TimeController from './TimeController';
+import TimePlayerController from './TimePlayerController';
 import SightsController from './SightsController';
 import ScaleController from './ScaleController';
 import DataManager from '../../../api/DataManager';
+import { UpdateDeltaTimeNow } from '../../../utils/timeHelpers';
 
 class Controllers extends Component {
   constructor(props) {
@@ -30,6 +31,7 @@ class Controllers extends Component {
   }
 
   onChangeSight(selected) {
+    UpdateDeltaTimeNow(1);
     // Check if the sight is on the current focus, otherwise change focus node
     if (this.props.originNode !== selected.planet) {
       this.props.ChangePropertyValue(this.props.originNode.Description, selected.planet);
@@ -56,7 +58,7 @@ class Controllers extends Component {
     return (
       <div style={{ display: 'flex' }}>
         { (story && story.timecontroller !== 'false') &&
-          <TimeController />
+          <TimePlayerController />
         }
         {(story && story.datecontroller !== 'false') &&
         <DateController

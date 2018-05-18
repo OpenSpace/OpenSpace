@@ -40,7 +40,9 @@ public:
     void setBrowser(const CefRefPtr<CefBrowser> &browser);
     void setBrowserInstance(const std::shared_ptr<BrowserInstance> & browserInstance);
     void detachBrowser();
-    bool touchEventCallback(double, double);
+    void touchPressCallback(double x, double y);
+    void touchReleaseCallback(double x, double y);
+    bool hasContentCallback(double, double);
 
 private:
 #if !defined(WIN32)

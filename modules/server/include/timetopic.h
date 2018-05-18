@@ -41,6 +41,7 @@ private:
     nlohmann::json currentTime();
     nlohmann::json deltaTime();
 
+    bool _isDone;
     int _timeCallbackHandle;
     int _deltaTimeCallbackHandle;
     std::chrono::system_clock::time_point _lastUpdateTime;

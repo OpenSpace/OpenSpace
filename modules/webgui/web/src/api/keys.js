@@ -56,3 +56,9 @@ export const defaultStory = 'story_default';
 export const OverlimitKey = 'Modules.WebGui.StoryHandler.OverviewLimit';
 // key for scale property
 export const ScaleKey = `Scene.${ValuePlaceholder}.Scale.Scale`;
+// keys for timePlayerController
+export const FastRewind = 'fast_rewind';
+export const Rewind = 'rewind';
+export const Play = 'play';
+export const Forward = 'forward';
+export const FastForward = 'fast_forward';
