@@ -708,9 +708,6 @@ void RenderEngine::renderDashboard() {
 
 void RenderEngine::postDraw() {
     Time& currentTime = OsEng.timeManager().time();
-    if (currentTime.timeJumped()) {
-        currentTime.setTimeJumped(false);
-    }
 
     if (_shouldTakeScreenshot) {
         // We only create the directory here, as we don't want to spam the users

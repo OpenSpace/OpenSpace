@@ -141,6 +141,9 @@ ParallelPeer::ParallelPeer()
 
 ParallelPeer::~ParallelPeer() {
     disconnect();
+    if (_timeJumpCallback != -1) {
+        OsEng.timeManager().removeTimeJumpCallback(_timeJumpCallback);
+    }
 }
 
 void ParallelPeer::connect() {
@@ -302,11 +305,12 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& messageContent) 
 
         OsEng.timeManager().removeKeyframesAfter(kf._timestamp);
         Time time(kf._time);
-        time.setDeltaTime(kf._dt);
-        time.setPause(kf._paused);
-        time.setTimeJumped(kf._requiresTimeJump);
+        TimeKeyframeData timeKeyframeData;
+        timeKeyframeData.time = time;
+        timeKeyframeData.delta = kf._dt;
+        timeKeyframeData.jump = kf._requiresTimeJump;
 
-        OsEng.timeManager().addKeyframe(kf._timestamp, time);
+        OsEng.timeManager().addKeyframe(kf._timestamp, timeKeyframeData);
         break;
     }
     case datamessagestructures::Type::ScriptData: {
@@ -474,9 +478,6 @@ void ParallelPeer::preSynchronization() {
     }
 
     if (status() == ParallelConnection::Status::Host) {
-        if (OsEng.timeManager().time().timeJumped()) {
-            _timeJumped = true;
-        }
         double now = OsEng.windowWrapper().applicationTime();
 
         if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
@@ -498,6 +499,15 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
         _status = status;
         _timeJumped = true;
         _connectionEvent->publish("statusChanged");
+    }
+    if (_status == ParallelConnection::Status::Host) {
+        OsEng.timeManager().addTimeJumpCallback([this]() {
+            _timeJumped = true;
+        });
+    } else {
+        if (_timeJumpCallback != -1) {
+            OsEng.timeManager().removeTimeJumpCallback(_timeJumpCallback);
+        }
     }
 }
 
@@ -576,8 +586,7 @@ void ParallelPeer::sendTimeKeyframe() {
 
     Time& time = OsEng.timeManager().time();
 
-    kf._dt = time.deltaTime();
-    kf._paused = time.paused();
+    kf._dt = OsEng.timeManager().isPaused() ? 0 : OsEng.timeManager().deltaTime();
     kf._requiresTimeJump = _timeJumped;
     kf._time = time.j2000Seconds();
 

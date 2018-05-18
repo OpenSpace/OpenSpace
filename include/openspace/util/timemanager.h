@@ -35,6 +35,13 @@
 
 namespace openspace {
 
+struct TimeKeyframeData {
+    Time time;
+    double delta;
+    bool pause = false;
+    bool jump = false;
+};
+
 class TimeManager {
 public:
     using CallbackHandle = int;
@@ -43,32 +50,53 @@ public:
     Time& time();
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
-    void addKeyframe(double timestamp, Time kf);
-    void removeKeyframesBefore(double timestamp);
-    void removeKeyframesAfter(double timestamp);
+    void addKeyframe(double timestamp, TimeKeyframeData kf);
+    void removeKeyframesBefore(double timestamp, bool inclusive = false);
+    void removeKeyframesAfter(double timestamp, bool inclusive = false);
     void clearKeyframes();
     void setTimeNextFrame(Time t);
     size_t nKeyframes() const;
 
+    double deltaTime() const;
+    void setDeltaTime(double deltaTime, double interpolationDuration = 0.0);
+
+    void setPause(bool pause, double interpolationDuration = 0.0);
+    bool togglePause(double interpolationDuration = 0.0);
+    bool isPaused() const;
+
     CallbackHandle addTimeChangeCallback(TimeChangeCallback cb);
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
+    CallbackHandle addTimeJumpCallback(TimeChangeCallback cb);
+
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
-
-
+    void removeTimeJumpCallback(CallbackHandle handle);
 private:
+    void progressTime(double dt);
+    void applyKeyframe(const Keyframe<TimeKeyframeData>& keyframe);
+    void interpolate(
+        const Keyframe<TimeKeyframeData>& past,
+        const Keyframe<TimeKeyframeData>& future,
+        double time);
+
+    bool _timePaused = false;
+    double _deltaTime = 1.0;
+
     bool _shouldSetTime = false;
     Time _timeNextFrame;
-    Timeline<Time> _timeline;
+
+    double _lastTime = 0;
+    double _lastDeltaTime = 0;
+
+    Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
-    void consumeKeyframes(double dt);
+
     double _latestConsumedTimestamp;
     int _nextCallbackHandle = 0;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
-    double _lastTime = 0;
-    double _lastDeltaTime = 0;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
 };
 
 } // namespace openspace

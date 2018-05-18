@@ -45,18 +45,12 @@ double Time::convertTime(const std::string& time) {
 
 Time::Time(double secondsJ2000)
     : _time(secondsJ2000)
-    , _dt(1.0)
 {}
 
 
 Time::Time(const Time& other)
     : _time(other._time)
-    , _dt(other._dt)
-    , _timeJumped(other._timeJumped)
-    , _timePaused(other._timePaused)
-{
-
-}
+{}
 
 Time Time::now() {
     Time now;
@@ -69,46 +63,21 @@ Time Time::now() {
     return now;
 }
 
-void Time::setTime(double value, bool requireJump) {
+void Time::setTime(double value) {
     _time = value;
-    _timeJumped = requireJump;
 }
 
 double Time::j2000Seconds() const {
     return _time;
 }
 
-double Time::advanceTime(double tickTime) {
-    if (_timePaused) {
-        return _time;
-    }
-    else {
-        _time += _dt * tickTime;
-    }
+double Time::advanceTime(double delta) {
+    _time += delta;
     return _time;
 }
 
-void Time::setDeltaTime(double deltaT) {
-    _dt = deltaT;
-}
-
-double Time::deltaTime() const {
-    return _dt;
-}
-
-void Time::setPause(bool pause) {
-    _timePaused = pause;
-}
-
-bool Time::togglePause() {
-    _timePaused = !_timePaused;
-    return _timePaused;
-}
-
-void Time::setTime(std::string time, bool requireJump) {
+void Time::setTime(std::string time) {
     _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
-
-    _timeJumped = requireJump;
 }
 
 std::string Time::UTC() const {
@@ -136,18 +105,6 @@ std::string Time::ISO8601() const {
 
     datetime.replace(4, 5, "-" + MM + "-");
     return datetime;
-}
-
-bool Time::timeJumped() const {
-    return _timeJumped;
-}
-
-void Time::setTimeJumped(bool jumped) {
-    _timeJumped = jumped;
-}
-
-bool Time::paused() const {
-    return _timePaused;
 }
 
 scripting::LuaLibrary Time::luaLibrary() {

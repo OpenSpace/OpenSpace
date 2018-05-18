@@ -182,7 +182,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    double t = OsEng.timeManager().time().deltaTime();
+    double t = OsEng.timeManager().deltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
@@ -193,18 +193,21 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
 
+    std::string pauseText = OsEng.timeManager().isPaused() ? " (Paused)" : "";
+
     penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
-        "Simulation increment: %.1f %s / second",
+        "Simulation increment: %.1f %s / second%s",
         deltaTime.first,
-        deltaTime.second.c_str()
+        deltaTime.second.c_str(),
+        pauseText
     );
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = OsEng.timeManager().time().deltaTime();
+    double t = OsEng.timeManager().deltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);

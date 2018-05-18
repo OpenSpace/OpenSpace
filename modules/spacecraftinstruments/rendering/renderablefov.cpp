@@ -1322,7 +1322,8 @@ void RenderableFov::update(const UpdateData& data) {
         _drawFOV = ImageSequencer::ref().instrumentActive(_instrument.name);
     }
 
-    if (_drawFOV && !data.time.paused()) {
+    // TODO: figure out if time has changed
+    if (_drawFOV /* && time changed */) {
         auto t = determineTarget(data.time.j2000Seconds());
         std::string target = t.first;
         bool inFOV = t.second;

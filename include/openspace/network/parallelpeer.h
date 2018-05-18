@@ -27,6 +27,7 @@
 
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/numericalproperty.h>
@@ -129,6 +130,8 @@ private:
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 
     ParallelConnection _connection;
+
+    TimeManager::CallbackHandle _timeJumpCallback = -1;
 };
 
 } // namespace openspace

@@ -48,7 +48,7 @@ int time_setDeltaTime(lua_State* L) {
     if (isNumber) {
         double value = lua_tonumber(L, -1);
         lua_pop(L, 1);
-        OsEng.timeManager().time().setDeltaTime(value);
+        OsEng.timeManager().setDeltaTime(value, 0.5);
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
         return 0;
     }
@@ -70,7 +70,7 @@ int time_setDeltaTime(lua_State* L) {
  * Returns the delta time by calling the Time::deltaTime method
  */
 int time_deltaTime(lua_State* L) {
-    lua_pushnumber(L, OsEng.timeManager().time().deltaTime());
+    lua_pushnumber(L, OsEng.timeManager().deltaTime());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
     return 1;
 }
@@ -83,7 +83,7 @@ int time_deltaTime(lua_State* L) {
 int time_togglePause(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_togglePause");
 
-    OsEng.timeManager().time().togglePause();
+    OsEng.timeManager().togglePause(0.5f);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
@@ -98,7 +98,7 @@ int time_setPause(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setPause");
 
     bool pause = lua_toboolean(L, -1) == 1;
-    OsEng.timeManager().time().setPause(pause);
+    OsEng.timeManager().setPause(pause, 0.5f);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;

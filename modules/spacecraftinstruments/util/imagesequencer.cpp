@@ -272,9 +272,11 @@ float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) cons
 bool ImageSequencer::getImagePaths(std::vector<Image>& captures, std::string projectee,
                                    std::string instrumentRequest, double sinceTime)
 {
+    // TODO: Check how this works with time jumps
+
     // check if this instance is either in range or
     // a valid candidate to recieve data
-    if (!instrumentActive(instrumentRequest) && !OsEng.timeManager().time().timeJumped())
+    if (!instrumentActive(instrumentRequest))
     {
         return false;
     }

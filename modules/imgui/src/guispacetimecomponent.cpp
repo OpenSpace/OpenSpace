@@ -228,7 +228,7 @@ void GuiSpaceTimeComponent::render() {
         }();
 
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setTime(" + std::to_string(newTime) + ")",
+            "openspace.time.setTime(" + std::to_string(newTime) + ", 1)",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
@@ -289,7 +289,7 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
-        float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
+        float deltaTime = static_cast<float>(OsEng.timeManager().deltaTime());
 
         if (_firstFrame) {
             std::pair<double, std::string> dt = simplifyTime(deltaTime);
@@ -426,7 +426,7 @@ void GuiSpaceTimeComponent::render() {
     }
 
 
-    bool isPaused = OsEng.timeManager().time().paused();
+    bool isPaused = OsEng.timeManager().isPaused();
 
     bool pauseChanged = ImGui::Button(
         isPaused ? "Resume" : "Pause",

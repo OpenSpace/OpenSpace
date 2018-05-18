@@ -518,6 +518,21 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 void Scene::addTimeInterpolation(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
+    Time currentTime = OsEng.timeManager().time();
+    Time newTime(targetTime);
+    double delta = OsEng.timeManager().deltaTime();
+
+    double now = OsEng.windowWrapper().applicationTime();
+    bool pause = OsEng.timeManager().isPaused();
+
+    TimeKeyframeData current = { currentTime, delta, pause, false };
+    TimeKeyframeData next = { newTime, delta, pause, false };
+
+    OsEng.timeManager().clearKeyframes();
+    OsEng.timeManager().addKeyframe(now, current);
+    OsEng.timeManager().addKeyframe(now + durationSeconds, next);
+
+    /*
     if (!_timeInterpolationInfo) {
         _timeInterpolationInfo = std::make_unique<TimeInterpolationInfo>();
     }
@@ -537,7 +552,7 @@ void Scene::addTimeInterpolation(double targetTime, double durationSeconds) {
     i.interpolationStart = OsEng.timeManager().time().j2000Seconds();
     i.interpolationEnd = targetTime;
 
-    OsEng.timeManager().time().setPause(false);
+    OsEng.timeManager().time().setPause(false);*/
 }
 
 void Scene::removeTimeInterpolation() {
@@ -601,7 +616,7 @@ void Scene::updateInterpolations() {
         );
 
         if (t == 1.f) {
-            OsEng.timeManager().time().setDeltaTime(0.0);
+            OsEng.timeManager().setDeltaTime(0.0);
             _timeInterpolationInfo = nullptr;
 
             return;
@@ -710,7 +725,7 @@ void Scene::updateInterpolations() {
 
 
         ff << targetDelta << ',' << f << ',' << g << ',' << wb << '\n';
-        OsEng.timeManager().time().setDeltaTime(targetDelta);
+        OsEng.timeManager().setDeltaTime(targetDelta);
         //i.deltaSummation += targetDelta * OsEng.windowWrapper().averageDeltaTime();
     }
 }
