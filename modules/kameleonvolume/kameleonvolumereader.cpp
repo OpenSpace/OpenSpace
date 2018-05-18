@@ -103,17 +103,19 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         lowerDomainBound,
         upperDomainBound,
         min,
-        max
+        max,
+        false
     );
 }
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                             const glm::uvec3 & dimensions,
-                                                              const std::string& variable,
-                                                              const glm::vec3& lowerBound,
-                                                              const glm::vec3& upperBound,
-                                                                          float& minValue,
-                                                                    float& maxValue) const
+                                                            const std::string & variable,
+                                                            const glm::vec3 & lowerBound,
+                                                            const glm::vec3 & upperBound,
+                                                            float& minValue,
+                                                            float& maxValue,
+                                                            bool factorRSquared) const
 {
     minValue = std::numeric_limits<float>::max();
     maxValue = -std::numeric_limits<float>::max();
@@ -134,10 +136,24 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         const glm::vec3 coordsZeroToOne = coords / dims;
         const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = interpolate(variable, volumeCoords);
+        float value = interpolate(variable, volumeCoords);
 
-        minValue = glm::min(minValue, data[index]);
-        maxValue = glm::max(maxValue, data[index]);
+        // Multiply value by the squared first coordinate
+        // (radial distance in case of spherical)
+        if (factorRSquared) {
+            
+            // value *= coords.x * coords.x;
+            value *= volumeCoords.x * volumeCoords.x;
+        }
+
+        if (value < minValue) {
+            minValue = value;
+        }
+        if (value > maxValue) {
+            maxValue = value;
+        }
+
+        data[index] = value;
     }
 
     return volume;

@@ -58,9 +58,13 @@ public:
         const glm::vec3& lowerDomainBound, const glm::vec3& upperDomainBound) const;
 
     std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerBound, const glm::vec3& upperBound, float& minValue,
-        float& maxValue) const;
+        const glm::uvec3& dimensions,
+        const std::string& variable,
+        const glm::vec3& lowerBound,
+        const glm::vec3& upperBound,
+        float& minValue,
+        float& maxValue,
+        bool factorRSquared) const;
 
     ghoul::Dictionary readMetaData() const;
 

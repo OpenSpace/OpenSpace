@@ -16,8 +16,6 @@ local Mas_MHD = {
             SourceDirectory = "${DATA}/mas/raw",
             LowerValueBound = 0,
             UpperValueBound = 1,
-            MinValue = 0,
-            MaxValue = 55941,
             GridType = "Spherical",
             SecondsBefore = 50*365*24*60*60, -- 50 years before
             SecondsAfter = 50*365*24*60*60, -- 50 years after
@@ -31,7 +29,7 @@ local Mas_MHD = {
             },
             Scale = {
                 Type = "StaticScale",
-                Scale = 1.0 * sunRadius
+                Scale = 9.0 * sunRadius
             }
         },
         GUI = {
