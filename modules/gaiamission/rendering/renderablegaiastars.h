@@ -154,7 +154,6 @@ private:
     int _nStarsToRender;
     bool _firstDrawCalls;
     glm::dquat _previousCameraRotation;
-    bool _initialDataFilesLoaded;
     bool _useVBO;
     long long _cpuRamBudgetInBytes;
     long long _totalDatasetSizeInBytes;

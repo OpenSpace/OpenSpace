@@ -28,6 +28,7 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <queue>
 #include <mutex>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -52,6 +53,7 @@ public:
         size_t numStars;
         bool isLeaf;
         bool isLoaded;
+        bool hasLoadedDescendant;
         std::mutex loadingLock;
         int bufferIndex;
         unsigned long long octreePositionIndex;
@@ -62,13 +64,13 @@ public:
 
     void initOctree(const long long& cpuRamBudget = 0, int maxDist = 0, 
         int maxStarsPerNode = 0);
-    void initBufferIndexStack(const long long& maxStarsOrNodes, bool useVBO, 
+    void initBufferIndexStack(const long long& maxNodes, bool useVBO, 
         bool datasetFitInMemory);
     void insert(const std::vector<float>& starValues);
     void sliceLodData(size_t branchIndex = 8);
     void printStarsPerNode() const;
 
-    void fetchSurroundingNodes(const glm::dvec3& cameraPos, const glm::dvec3& cameraViewDir);
+    void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes);
     std::map<int, std::vector<float>> traverseData(const glm::mat4& mvp, 
         const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option);
 
@@ -90,7 +92,6 @@ public:
     size_t biggestChunkIndexInUse() const;
     size_t numFreeSpotsInBuffer() const;
     long long cpuRamBudget() const;
-    long long ssboStarStreamBudget() const;
 
 private:
     const size_t POS_SIZE = 3;
@@ -148,6 +149,14 @@ private:
         bool recursive);
     void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
 
+    void removeNodesFromRam(const std::vector<unsigned long long>& nodesToRemove);
+    /**
+     * Removes data in specified node from main memory and updates budget and flags 
+     * accordingly.
+     */
+    void removeNode(std::shared_ptr<OctreeManager::OctreeNode> node);
+    void propagateUnloadedNodes(std::vector<std::shared_ptr<OctreeNode>> ancestorNodes);
+
     std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
         gaiamission::RenderOption option, int& deltaStars);
 
@@ -155,6 +164,8 @@ private:
     std::unique_ptr<OctreeCuller> _culler;
     std::stack<int> _freeSpotsInBuffer;
     std::set<int> _removedKeysInPrevCall;
+
+    std::queue<unsigned long long> _leastRecentlyFetchedNodes;
 
     size_t _totalDepth;
     size_t _numLeafNodes;
@@ -168,7 +179,7 @@ private:
     bool _streamOctree;
     bool _datasetFitInMemory;
     long long _cpuRamBudget;
-    long long _ssboStarStreamBudget;
+    long long _maxCpuRamBudget;
     unsigned long long _parentNodeOfCamera;
     std::string _streamFolderPath;
 
