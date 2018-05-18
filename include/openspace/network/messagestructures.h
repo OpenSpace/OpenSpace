@@ -217,6 +217,7 @@ struct ScriptMessage {
     }
 
     std::string _script;
+    double _timestamp;
 
     void serialize(std::vector<char> &buffer){
         buffer.insert(buffer.end(), _script.begin(), _script.end());

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/sessionRecording.h>
-#include <openspace/network/externInteraction.h>
+#include <openspace/interaction/externInteraction.h>
 
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
@@ -36,19 +36,21 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#include "parallelpeer_lua.inl"
+#include "../network/parallelpeer_lua.inl"
 
-
+namespace {
+    const char* _loggerCat = "ExternInteraction";
+}
 
 namespace openspace {
 
-void SessionRecording::startRecording(std::string filename) {
-    if( _state == playback ) {
-        closePlaybackFile();
+bool SessionRecording::startRecording(std::string filename) {
+    if( _state == sessionState::playback ) {
+        _playbackFile.close();
     }
-    _state = recording;
+    _state = sessionState::recording;
     _recordFile.open(filename);
-    if( ! _recordFile.is_open() || ! _recordFile.is_good() )
+    if( ! _recordFile.is_open() || ! _recordFile.good() )
     {
         LERROR(fmt::format("Unable to open file {} for keyframe recording", filename.c_str()));
         return false;
@@ -57,15 +59,16 @@ void SessionRecording::startRecording(std::string filename) {
 }
 
 void SessionRecording::stopRecording() {
-    if( _state == recording )
-        _state = idle;
+    if( _state == sessionState::recording )
+        _state = sessionState::idle;
     _recordFile.close();
 }
     
-void SessionRecording::startPlayback(std::string filename) {
+bool SessionRecording::startPlayback(std::string filename) {
     _playbackLineNum = 1;
-    std::ifstream _playbackFile.open(filename, std::ifstream::in);
-    if( ! _playbackFile.is_open() || ! _playbackFile.is_good() )
+    _playbackFilename = filename;
+    _playbackFile.open(_playbackFilename, std::ifstream::in);
+    if( ! _playbackFile.is_open() || ! _playbackFile.good() )
     {
         LERROR(fmt::format("Unable to open file {} for keyframe playback", filename.c_str()));
         return false;
@@ -84,7 +87,7 @@ void SessionRecording::saveCameraKeyframe() {
     datamessagestructures::CameraKeyframe kf;
     _externInteract.generateCameraKeyframe(kf);
     
-    std::stringstream keyframeLine = "camera ";
+    std::stringstream keyframeLine = std::stringstream("camera ");
     //Add simulation timestamp and timestamp relative to recording start
     keyframeLine << kf._timestamp << " ";
     keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
@@ -103,7 +106,7 @@ void SessionRecording::saveCameraKeyframe() {
         keyframeLine << "- ";
     keyframeLine << kf._focusNode;
     
-    saveKeyframeToFile(keyframeLine.s_str());
+    saveKeyframeToFile(keyframeLine.str());
 }
 
 void SessionRecording::saveTimeKeyframe() {
@@ -111,7 +114,7 @@ void SessionRecording::saveTimeKeyframe() {
     datamessagestructures::TimeKeyframe kf;
     _externInteract.generateTimeKeyframe(kf);
 
-    std::stringstream keyframeLine = "time ";
+    std::stringstream keyframeLine = std::stringstream("time ");
     //Add simulation timestamp and timestamp relative to recording start
     keyframeLine << kf._timestamp << " ";
     keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
@@ -128,32 +131,32 @@ void SessionRecording::saveTimeKeyframe() {
 
     keyframeLine << kf._time;
     
-    saveKeyframeToFile(keyframeLine.s_str());
+    saveKeyframeToFile(keyframeLine.str());
 }
 
 void SessionRecording::saveScript(std::string scriptToSave) {
     datamessagestructures::ScriptMessage sm;
-    _externInteract.generateScriptMessage(sm, script);
+    _externInteract.generateScriptMessage(sm, scriptToSave);
 
-    std::stringstream keyframeLine = "script ";
+    std::stringstream keyframeLine = std::stringstream("script ");
     //Add simulation timestamp and timestamp relative to recording start
-    keyframeLine << kf._timestamp << " ";
-    keyframeLine << (kf._timestamp - _timestampRecordStarted) << " ";
+    keyframeLine << sm._timestamp << " ";
+    keyframeLine << (sm._timestamp - _timestampRecordStarted) << " ";
     
     keyframeLine << scriptToSave;
     
-    saveKeyframeToFile(keyframeLine.s_str());
+    saveKeyframeToFile(keyframeLine.str());
 }
 
 void SessionRecording::preSynchronization() {
-    if( _state == recording ) {
+    if( _state == sessionState::recording ) {
         saveCameraKeyframe();
         saveTimeKeyframe();
     }
 }
 
 bool SessionRecording::isRecording() {
-    return (_state == recording);
+    return (_state == sessionState::recording);
 }
 
 void SessionRecording::playbackAddEntriesToTimeline() {
@@ -164,29 +167,19 @@ void SessionRecording::playbackAddEntriesToTimeline() {
         std::string entryType;
         if( ! (iss >> entryType) ) {
             LERROR(fmt::format("Error reading entry type @ line {} of playback file {}",
-                _playbackLineNum, filename.c_str()));
+                _playbackLineNum, _playbackFilename.c_str()));
             break;
         }
 
-        switch (entryType) {
-            case "camera":
-                playbackCamera(line);
-                break;
-                
-            case "time":
-                playbackTimeChange(line);
-                break;
-                
-            case "script":
-                playbackScript(line);
-                break;
-                
-            default:
-                break;
-        }
+        if( entryType.compare("camera") == 0 )
+            playbackCamera(line);
+        else if( entryType.compare("time") == 0 )
+            playbackTimeChange(line);
+        else if( entryType.compare("script") == 0 )
+            playbackScript(line);
     }
     LINFO(fmt::format("Finished parsing {} entries from playback file {}",
-        _playbackLineNum - 1, _filename.c_str()));
+        _playbackLineNum - 1, _playbackFilename.c_str()));
 }
     
 void SessionRecording::playbackCamera(std::string& entry) {

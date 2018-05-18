@@ -159,7 +159,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _moduleEngine(new ModuleEngine)
     , _networkEngine(new NetworkEngine)
     , _parallelPeer(new ParallelPeer)
-    , _sessionRecorder(new SessionRecording)
+    , _sessionRecording(new SessionRecording)
     , _renderEngine(new RenderEngine)
     , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
@@ -1706,8 +1706,8 @@ ParallelPeer& OpenSpaceEngine::parallelPeer() {
 }
     
 SessionRecording& OpenSpaceEngine::sessionRecording() {
-    ghoul_assert(_sessionRecorder, "SessionRecording must not be nullptr");
-    return *_sessionRecorder();
+    ghoul_assert(_sessionRecording, "SessionRecording must not be nullptr");
+    return *_sessionRecording();
 }
 
 RenderEngine& OpenSpaceEngine::renderEngine() {

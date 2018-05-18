@@ -37,26 +37,35 @@ namespace openspace {
     
 class SessionRecording  {
 public:
-    enum {
-        idle,
+    enum class sessionState {
+        idle = 0,
         recording,
         playback
-    } sessionState;
+    };
     SessionRecording();
-    void startRecording();
+    bool startRecording(std::string filename);
     void stopRecording();
     void recordCamera();
     void recordTimeChange();
     void recordScript();
     void saveScript(std::string scriptToSave);
     bool isRecording();
+    bool startPlayback(std::string filename);
+    void saveCameraKeyframe();
+    void saveTimeKeyframe();
+    void preSynchronization();
+    void playbackAddEntriesToTimeline();
+    void playbackCamera(std::string& entry);
+    void playbackTimeChange(std::string& entry);
+    void playbackScript(std::string& entry);
     
 private:
     ExternInteraction _externInteract;
     bool _isRecording = false;
     double _timestampRecordStarted;
     void saveKeyframeToFile(std::string entry);
-    sessionState _state = idle;
+    sessionState _state = sessionState::idle;
+    std::string _playbackFilename;
     std::ifstream _playbackFile;
     std::ofstream _recordFile;
     int _playbackLineNum = 1;

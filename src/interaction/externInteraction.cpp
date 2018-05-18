@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/network/externInteraction.h>
+#include <openspace/interaction/externInteraction.h>
 
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
@@ -35,12 +35,12 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#include "parallelpeer_lua.inl"
+#include "../network/parallelpeer_lua.inl"
 
 namespace {
 const uint32_t ProtocolVersion = 3;
 const size_t MaxLatencyDiffs = 64;
-const char* _loggerCat = "ParallelPeer";
+const char* _loggerCat = "ExternInteraction";
 
 static const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
     "BufferTime",
@@ -71,21 +71,8 @@ static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
 namespace openspace {
 
 ExternInteraction::ExternInteraction()
-    : properties::PropertyOwner({ "ParallelPeer", "Parallel Peer" })
-    , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
-    , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
-    , _lastTimeKeyframeTimestamp(0)
-    , _lastCameraKeyframeTimestamp(0)
+    : properties::PropertyOwner({ "ExternInteration", "ExternInteraction" })
 {
-    addProperty(_bufferTime);
-
-    addProperty(_timeKeyframeInterval);
-    addProperty(_cameraKeyframeInterval);
-    addProperty(_timeTolerance);
-
-    _connectionEvent = std::make_shared<ghoul::Event<>>();
 }
 
 void ExternInteraction::cameraInteraction(datamessagestructures::CameraKeyframe kf) {
@@ -143,7 +130,6 @@ void ExternInteraction::generateTimeKeyframe(datamessagestructures::TimeKeyframe
     
     kf._dt = time.deltaTime();
     kf._paused = time.paused();
-    kf._requiresTimeJump = _timeJumped;
     kf._time = time.j2000Seconds();
     
     // Timestamp as current runtime of OpenSpace instance

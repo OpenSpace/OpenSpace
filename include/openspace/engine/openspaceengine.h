@@ -52,6 +52,7 @@ class LuaConsole;
 class ModuleEngine;
 class NetworkEngine;
 class ParallelPeer;
+class SessionRecording;
 class RenderEngine;
 class Scene;
 class SyncEngine;
@@ -129,7 +130,7 @@ public:
     LoadingScreen& loadingScreen();
     NetworkEngine& networkEngine();
     ParallelPeer& parallelPeer();
-    SessionRecorder& sessionRecording();
+    SessionRecording& sessionRecording();
     RenderEngine& renderEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();

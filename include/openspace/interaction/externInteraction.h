@@ -34,7 +34,7 @@
 
 namespace openspace {
 
-class ExternInteraction  {
+class ExternInteraction : public properties::PropertyOwner {
 public:
     ExternInteraction();
     void cameraInteraction(datamessagestructures::CameraKeyframe kf);
