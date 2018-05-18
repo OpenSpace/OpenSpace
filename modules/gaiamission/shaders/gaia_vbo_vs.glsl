@@ -48,9 +48,36 @@ uniform mat4 projection;
 uniform float time; 
 uniform int renderOption;
 
+uniform vec2 posXThreshold;
+uniform vec2 posYThreshold;
+uniform vec2 posZThreshold;
+uniform vec2 gMagThreshold;
+uniform vec2 bpRpThreshold;
+
 
 void main() {
     vs_brightness = in_brightness;
+
+    // Check if we should filter this star by position.
+    bool filterStar = false;
+    if ( (abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
+        (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
+        (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
+        (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
+        (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
+        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
+        ( renderOption != RENDEROPTION_STATIC && (
+        (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
+        (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
+        (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
+        (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
+        (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) || 
+        (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))) ) {
+        // Discard star in geometry shader.
+        vs_gPosition = vec4(0.0);    
+        gl_Position = vec4(0.0);
+        return;
+    }
 
     // Convert kiloParsec to meter.
     vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);

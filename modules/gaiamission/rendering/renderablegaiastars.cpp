@@ -195,6 +195,55 @@ namespace {
         "Current remaining memory budget [in number of chunks] on the GPU for streaming "
         "additional stars."
     };
+
+    static const openspace::properties::Property::PropertyInfo LodPixelThresholdInfo = {
+        "LodPixelThreshold",
+        "LOD Pixel Threshold",
+        "The number of total pixels a nodes AABB can have in screen space before its "
+        "parent is fetched as LOD cache."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FilterPosXInfo = {
+        "FilterPosX",
+        "PosX Threshold",
+        "If defined then only stars with Position X values between [min, max] "
+        "will be rendered (if min is set to 0.0 it is read as -Inf, "
+        "if max is set to 0.0 it is read as +Inf). Measured in kiloParsec."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FilterPosYInfo = {
+        "FilterPosY",
+        "PosY Threshold",
+        "If defined then only stars with Position Y values between [min, max] "
+        "will be rendered (if min is set to 0.0 it is read as -Inf, "
+        "if max is set to 0.0 it is read as +Inf). Measured in kiloParsec."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FilterPosZInfo = {
+        "FilterPosZ",
+        "PosZ Threshold",
+        "If defined then only stars with Position Z values between [min, max] "
+        "will be rendered (if min is set to 0.0 it is read as -Inf, "
+        "if max is set to 0.0 it is read as +Inf). Measured in kiloParsec."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FilterGMagInfo = {
+        "FilterGMag",
+        "GMag Threshold",
+        "If defined then only stars with G mean magnitude values between [min, max] "
+        "will be rendered (if min is set to 20.0 it is read as -Inf, "
+        "if max is set to 20.0 it is read as +Inf). If min = max then all values "
+        "equal min|max will be filtered away."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FilterBpRpInfo = {
+        "FilterBpRp",
+        "Bp-Rp Threshold",
+        "If defined then only stars with Bp-Rp color values between [min, max] "
+        "will be rendered (if min is set to 0.0 it is read as -Inf, "
+        "if max is set to 0.0 it is read as +Inf). If min = max then all values "
+        "equal min|max will be filtered away."
+    };
 }  // namespace
 
 namespace openspace {
@@ -317,6 +366,42 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new StringListVerifier,
                 Optional::Yes,
                 ColumnNamesInfo.description
+            },
+            {
+                LodPixelThresholdInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                LodPixelThresholdInfo.description
+            },
+            {
+                FilterPosXInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterPosXInfo.description
+            },
+            {
+                FilterPosYInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterPosYInfo.description
+            },
+            {
+                FilterPosZInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterPosZInfo.description
+            },
+            {
+                FilterGMagInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterGMagInfo.description
+            },
+            {
+                FilterBpRpInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterBpRpInfo.description
             }
         }
     };
@@ -338,7 +423,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _luminosityMultiplier(LuminosityMultiplierInfo, 1200.f, 1.f, 100000.f)
+    , _luminosityMultiplier(LuminosityMultiplierInfo, 35.f, 1.f, 1000.f)
     , _magnitudeBoost(MagnitudeBoostInfo, 25.f, 0.f, 100.f)
     , _cutOffThreshold(CutOffThresholdInfo, 38.f, 0.f, 50.f)
     , _sharpness(SharpnessInfo, 1.45f, 0.f, 5.f)
@@ -346,6 +431,12 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _closeUpBoostDist(CloseUpBoostDistInfo, 300.f, 1.f, 1000.f)
     , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
     , _tmPointSigma(TmPointSigmaInfo, 1.0, 0.1, 3.0)
+    , _lodPixelThreshold(LodPixelThresholdInfo, 250.0, 0.0, 5000.0)
+    , _posXThreshold(FilterPosXInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
+    , _posYThreshold(FilterPosYInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
+    , _posZThreshold(FilterPosZInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
+    , _gMagThreshold(FilterGMagInfo, glm::vec2(20.0), glm::vec2(-10.0), glm::vec2(30.0))
+    , _bpRpThreshold(FilterBpRpInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(30.0))
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
@@ -538,6 +629,42 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             );
     }
 
+    if (dictionary.hasKey(LodPixelThresholdInfo.identifier)) {
+        _lodPixelThreshold = static_cast<float>(
+            dictionary.value<double>(LodPixelThresholdInfo.identifier)
+            );
+    }
+
+    if (dictionary.hasKey(FilterPosXInfo.identifier)) {
+        glm::vec2 posXValue = dictionary.value<glm::vec2>(FilterPosXInfo.identifier);
+        _posXThreshold.set(posXValue);
+    }
+    addProperty(_posXThreshold);
+
+    if (dictionary.hasKey(FilterPosYInfo.identifier)) {
+        glm::vec2 posYValue = dictionary.value<glm::vec2>(FilterPosYInfo.identifier);
+        _posXThreshold.set(posYValue);
+    }
+    addProperty(_posYThreshold);
+
+    if (dictionary.hasKey(FilterPosZInfo.identifier)) {
+        glm::vec2 posZValue = dictionary.value<glm::vec2>(FilterPosZInfo.identifier);
+        _posZThreshold.set(posZValue);
+    }
+    addProperty(_posZThreshold);
+
+    if (dictionary.hasKey(FilterGMagInfo.identifier)) {
+        glm::vec2 gMagValue = dictionary.value<glm::vec2>(FilterGMagInfo.identifier);
+        _gMagThreshold.set(gMagValue);
+    }
+    addProperty(_gMagThreshold);
+
+    if (dictionary.hasKey(FilterBpRpInfo.identifier)) {
+        glm::vec2 bpRpValue = dictionary.value<glm::vec2>(FilterBpRpInfo.identifier);
+        _bpRpThreshold.set(bpRpValue);
+    }
+    addProperty(_bpRpThreshold);
+
     // Only add properties correlated to fits files if we're actually reading from a fits file.
     if (_fileReaderOption == FileReaderOption::Fits) {
         if (dictionary.hasKey(FirstRowInfo.identifier)) {
@@ -604,6 +731,7 @@ void RenderableGaiaStars::initializeGL() {
     addProperty(_colorTexturePath);
     addProperty(_luminosityMultiplier);
     addProperty(_cutOffThreshold);
+    addProperty(_lodPixelThreshold);
 
     // Construct shader program depending on user-defined shader option.
     const int option = _shaderOption;
@@ -719,6 +847,12 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
     _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+
+    _uniformCache.posXThreshold = _program->uniformLocation("posXThreshold");
+    _uniformCache.posYThreshold = _program->uniformLocation("posYThreshold");
+    _uniformCache.posZThreshold = _program->uniformLocation("posZThreshold");
+    _uniformCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+    _uniformCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
 
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
 
@@ -841,7 +975,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     const int renderOption = _renderOption;
     int deltaStars = 0;
     auto updateData = _octreeManager->traverseData(modelViewProjMat, screenSize, deltaStars, 
-        gaiamission::RenderOption(renderOption));
+        gaiamission::RenderOption(renderOption), _lodPixelThreshold);
 
     // Update number of rendered stars.
     _nStarsToRender += deltaStars;
@@ -1061,6 +1195,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.viewScaling, viewScaling);
     _program->setUniform(_uniformCache.cutOffThreshold, _cutOffThreshold);
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
+
+    // Send filterValues.
+    _program->setUniform(_uniformCache.posXThreshold, _posXThreshold);
+    _program->setUniform(_uniformCache.posYThreshold, _posYThreshold);
+    _program->setUniform(_uniformCache.posZThreshold, _posZThreshold);
+    _program->setUniform(_uniformCache.gMagThreshold, _gMagThreshold);
+    _program->setUniform(_uniformCache.bpRpThreshold, _bpRpThreshold);
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
@@ -1336,6 +1477,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.cutOffThreshold = _program->uniformLocation("cutOffThreshold");
         _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
+        // Filter uniforms:
+        _uniformCache.posXThreshold = _program->uniformLocation("posXThreshold");
+        _uniformCache.posYThreshold = _program->uniformLocation("posYThreshold");
+        _uniformCache.posZThreshold = _program->uniformLocation("posZThreshold");
+        _uniformCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+        _uniformCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
     }
 
     if (_programTM->isDirty() || _shadersAreDirty) {

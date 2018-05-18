@@ -47,7 +47,6 @@ return {
         --FilterPmdecError = {0.0, 0.0},
         --FilterRv = {0.0, 0.0},
         --FilterRvError = {0.0, 0.0},
-    }
     },
     --{
     --    Type = "ReadSpeckTask",

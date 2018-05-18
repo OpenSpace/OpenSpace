@@ -90,7 +90,7 @@ void main() {
     luminosity /= observedDistance; //pow(observedDistance, 2.0);
 
     // Multiply our color with the luminosity as well as a user-controlled property.
-    color *= luminosity * luminosityMultiplier; //pow(luminosityMultiplier, 2.0);
+    color *= luminosity * pow(luminosityMultiplier, 2.0);
 
     // Decrease contributing brightness for stars in central cluster.
     if ( ge_cameraDistFromSun > ge_starDistFromSun ) {

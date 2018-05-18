@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -120,6 +121,12 @@ private:
     properties::FloatProperty _closeUpBoostDist;
     properties::IntProperty _tmPointFilterSize;
     properties::FloatProperty _tmPointSigma;
+    properties::FloatProperty _lodPixelThreshold;
+    properties::Vec2Property _posXThreshold;
+    properties::Vec2Property _posYThreshold;
+    properties::Vec2Property _posZThreshold;
+    properties::Vec2Property _gMagThreshold;
+    properties::Vec2Property _bpRpThreshold;
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
@@ -137,7 +144,8 @@ private:
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
         screenSize, psfTexture, time, colorTexture, nChunksToRender, valuesPerStar, 
-        maxStarsPerNode) _uniformCache;
+        maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
+        bpRpThreshold) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize, filterSize, sigma) _uniformCacheTM;

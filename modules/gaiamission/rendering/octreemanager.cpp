@@ -338,10 +338,12 @@ void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstPare
 // Builds render data structure by traversing the Octree and checking for intersection 
 // with view frustum. Every vector in map contains data for one node.  
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4& mvp, 
-    const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option) {
+    const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option, 
+    const float& lodPixelThreshold) {
 
     auto renderData = std::map<int, std::vector<float>>();
     bool innerRebuild = false;
+    _minTotalPixelsLod = lodPixelThreshold;
 
     // Reclaim indices from previous render call. 
     for (auto removedKey = _removedKeysInPrevCall.rbegin();
@@ -384,7 +386,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4& m
     if (!_culler->isVisible(corners, mvp)) return renderData;
     glm::vec2 nodeSize = _culler->getNodeSizeInPixels(screenSize);
     float totalPixels = nodeSize.x * nodeSize.y;
-    if (totalPixels < MIN_TOTAL_PIXELS_LOD * 2) {
+    if (totalPixels < _minTotalPixelsLod * 2) {
         // Remove LOD from first layer of children.
         for (int i = 0; i < 8; ++i) {
             auto tmpData = removeNodeFromCache(_root->Children[i], deltaStars);
@@ -963,7 +965,7 @@ void OctreeManager::storeStarData(std::shared_ptr<OctreeNode> node,
 
     // If LOD is growing too large then sort it and resize to [chunk size] to avoid too 
     // much RAM usage and increase threshold for adding new stars.
-    if (node->magOrder.size() > MAX_STARS_PER_NODE * 3) {
+    if (node->magOrder.size() > MAX_STARS_PER_NODE * 2) {
         std::sort(node->magOrder.begin(), node->magOrder.end());
         node->magOrder.resize(MAX_STARS_PER_NODE);
     }
@@ -1042,7 +1044,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
         // from files and inner node is visible and loaded, then it should be rendered
         // (as long as it doesn't have loaded children because then we should traverse to
         // lowest loaded level and render it instead)!
-        if (totalPixels < MIN_TOTAL_PIXELS_LOD || (_streamOctree && !_datasetFitInMemory 
+        if (totalPixels < _minTotalPixelsLod || (_streamOctree && !_datasetFitInMemory
             && node->isLoaded && !node->hasLoadedDescendant)) {
 
             // Get correct insert index from stack if node didn't exist already. 

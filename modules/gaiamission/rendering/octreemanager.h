@@ -72,7 +72,8 @@ public:
 
     void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes);
     std::map<int, std::vector<float>> traverseData(const glm::mat4& mvp, 
-        const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option);
+        const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option, 
+        const float& lodPixelThreshold);
 
     std::vector<float> getAllData(gaiamission::RenderOption option);
     void clearAllData(int branchIndex = -1);
@@ -114,7 +115,6 @@ private:
     size_t MAX_STARS_PER_NODE = 20000; 
 
     const int DEFAULT_INDEX = -1;
-    const float MIN_TOTAL_PIXELS_LOD = 250.0;
     const std::string BINARY_SUFFIX = ".bin"; 
 
     size_t getChildIndex(const float& posX, const float& posY, const float& posZ,
@@ -149,6 +149,10 @@ private:
         bool recursive);
     void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
 
+    /**
+    * Loops though all nodes in <nodesToremove> and removes them. Also checks if any
+    * ancestor should change the <hasLoadedDescendant> flag.
+    */
     void removeNodesFromRam(const std::vector<unsigned long long>& nodesToRemove);
     /**
      * Removes data in specified node from main memory and updates budget and flags 
@@ -172,6 +176,7 @@ private:
     size_t _numInnerNodes;
     size_t _biggestChunkIndexInUse;
     size_t _valuesPerStar;
+    float _minTotalPixelsLod;
     
     size_t _maxStackSize;
     bool _rebuildBuffer;
