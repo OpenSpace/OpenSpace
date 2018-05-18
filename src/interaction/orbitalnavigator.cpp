@@ -336,23 +336,22 @@ void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaT
         // the focus node make it possible for the user to manually zoom in even closer
         // or to zoom further out 
         if (_flyTo) {
-            if (distFromCameraToFocus > (focusLimit + planetRadius/10.0))
-                camPos = zoomToFocusNode(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit);
-            else 
-                _flyTo = false; 
+            if (distFromCameraToFocus > focusLimit) {
+                camPos = moveCameraAlongVector(camPos, distFromCameraToFocus, camPosToCenterPosDiff, focusLimit, _flyTo);
+            }
+            else {
+                _flyTo = false;
+            }
         }
 
         // Zoom away from the focus node until the entire solar system is in the camera view
         if (_overview) {
             WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
             float overviewLimit = module.storyHandler.overviewLimit();
-
             _flyTo = false;
 
-            if (length(camPos) <= overviewLimit) {
-                camPos = zoomToFocusNode(camPos, overviewLimit, -camPosToCenterPosDiff, length(camPos));
-                if (length(camPos) > overviewLimit*0.9)
-                    _overview = false;
+            if (distFromCameraToFocus <= overviewLimit) {
+                camPos = moveCameraAlongVector(camPos, distFromCameraToFocus, -camPosToCenterPosDiff, overviewLimit, _flyTo);
             }
             else {
                 _overview = false;
@@ -724,14 +723,22 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime,
     return cameraPosition + rotationDiffVec3;
 }       
 
-glm::dvec3 OrbitalNavigator::zoomToFocusNode(const glm::dvec3& camPos,
+glm::dvec3 OrbitalNavigator::moveCameraAlongVector(const glm::dvec3& camPos,
                                              const double distFromCameraToFocus,
                                              const glm::dvec3 camPosToCenterPosDiff,
-                                             const double focusLimit) const
+                                             const double focusLimit,
+                                             const bool _flyTo) const
 {
+    double velocityFactor = 0;
+
     // Calculate and truncate the factor which determines the velocity of the 
     // camera movement towards the focus node
-    double velocityFactor = (1 - focusLimit/distFromCameraToFocus) * _velocitySensitivity;
+    if (_flyTo) {
+        velocityFactor = (1 - ((focusLimit*0.9) / distFromCameraToFocus)) * _velocitySensitivity;
+    }
+    else {
+        velocityFactor = (1 - (distFromCameraToFocus / (focusLimit*1.1))) * _velocitySensitivity;
+    }
     velocityFactor = (double)((int)(velocityFactor * 1000)) / 1000;
 
     // Return the updated camera position

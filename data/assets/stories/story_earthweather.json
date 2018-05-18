@@ -1,6 +1,6 @@
 {
   "storyidentifier":"story_earthweather",
-  "overviewlimit": "0.2e+12",
+  "overviewlimit": "1.0e+9",
   "focusbuttons": "\"Earth\"",
   "timecontroller": "true",
   "datecontroller":  [

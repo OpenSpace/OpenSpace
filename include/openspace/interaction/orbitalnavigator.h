@@ -166,16 +166,18 @@ private:
         const SurfacePositionHandle& positionHandle) const;
 
     /**
-    * Translates the camera in such a way that it zooms in on the current focusNode.
+    * Moves the camera along a vector, camPosToCenterPosDiff, until it reaches the focusLimit.
     * The velocity of the zooming depend on distFromCameraToFocus and the final frame
-    * where to camera stops moving depends on the radius of the focusNode.
-    * \returns a new position of the camera, closer to the focusNode than the previous 
+    * where the camera stops moving depends on the distance set in the variable focusLimit.
+    * The bool determines whether to move/fly towards the focus node or away from it.
+    * \returns a new position of the camera, closer to the focusLimit than the previous 
     * position.
     */
-    glm::dvec3 zoomToFocusNode(const glm::dvec3& camPos, 
-                               const double distFromCameraToFocus,
-                               const glm::dvec3 camPosToCenterPosDiff,
-                               const double focusLimit) const;
+    glm::dvec3 moveCameraAlongVector(const glm::dvec3& camPos,
+                                     const double distFromCameraToFocus,
+                                     const glm::dvec3 camPosToCenterPosDiff,
+                                     const double focusLimit,
+                                     const bool _flyTo) const;
 
     /*
      * Adds rotation to the camera position so that it follows the rotation of the focus

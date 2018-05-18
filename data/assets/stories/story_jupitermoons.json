@@ -1,6 +1,6 @@
 {
   "storyidentifier":"story_jupitermoons",
-  "overviewlimit": "2e+12",
+  "overviewlimit": "5.0e+9",
   "focusbuttons": "\"Jupiter\", \"Io\", \"Europa\", \"Ganymede\", \"Callisto\"",
   "timecontroller": "true",
   "datecontroller": "false",
