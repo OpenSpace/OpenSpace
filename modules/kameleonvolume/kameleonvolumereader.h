@@ -65,7 +65,8 @@ public:
         const glm::vec3& lowerBound,
         const glm::vec3& upperBound,
         float& minValue,
-        float& maxValue) const;
+        float& maxValue,
+        bool factorRSquared) const;
 
     ghoul::Dictionary readMetaData() const;
 

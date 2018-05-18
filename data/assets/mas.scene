@@ -1,10 +1,8 @@
 local assetHelper = asset.require('util/asset_helper')
 local sceneHelper = asset.require('util/scene_helper')
 local propertyHelper = asset.require('util/property_helper')
+
 asset.require('util/default_dashboard')
-
-
--- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
@@ -12,11 +10,8 @@ assetHelper.requestAll(asset, 'scene/digitaluniverse')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
--- asset.request('customization/globebrowsing')
-
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
--- local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas_mhd')
 
 -- This causes crash because the renderable is not removed properly before the next frame
@@ -57,7 +52,7 @@ local Keybindings = {
         Command = toggleMas(),
         Documentation = "Toggle mas asset on/off",
         Local = false
-    }
+    },
 }
 
 asset.onInitialize(function ()
@@ -68,10 +63,6 @@ asset.onInitialize(function ()
     openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);
 
     openspace.setDefaultGuiSorting()
-
-    -- openspace.globebrowsing.loadWMSServersFromFile(
-    --     openspace.absPath("${DATA}/globebrowsing_servers.lua")
-    -- )
 
     openspace.markInterestingNodes({
         "Mas_MHD"
@@ -89,7 +80,7 @@ asset.onInitialize(function ()
 
     openspace.navigation.setCameraState({
         Focus = masMhdAsset.Mas_MHD.Identifier,
-        Position = { 10000000000, 10000000000, 10000000000 },
+        Position = { 100000000000.0, 0, 0 },
         Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
 

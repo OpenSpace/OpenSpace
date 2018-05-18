@@ -86,7 +86,8 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         lowerDomainBound,
         upperDomainBound,
         min,
-        max
+        max,
+        false
     );
 }
 
@@ -96,7 +97,8 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                             const glm::vec3 & lowerBound,
                                                             const glm::vec3 & upperBound,
                                                             float& minValue,
-                                                            float& maxValue) const
+                                                            float& maxValue,
+                                                            bool factorRSquared) const
 {
     minValue = FLT_MAX;
     maxValue = FLT_MIN;
@@ -124,14 +126,24 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         glm::vec3 coordsZeroToOne = coords / dims;
         glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = sample(volumeCoords);
+        float value = sample(volumeCoords);
 
-        if (data[index] < minValue) {
-            minValue = data[index];
+        // Multiply value by the squared first coordinate
+        // (radial distance in case of spherical)
+        if (factorRSquared) {
+            
+            // value *= coords.x * coords.x;
+            value *= volumeCoords.x * volumeCoords.x;
         }
-        if (data[index] > maxValue) {
-            maxValue = data[index];
+
+        if (value < minValue) {
+            minValue = value;
         }
+        if (value > maxValue) {
+            maxValue = value;
+        }
+
+        data[index] = value;
     }
 
     return volume;

@@ -108,20 +108,16 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
             reader.maxValue(variables[2]));
     }
 
+    float volumeMinValue, volumeMaxValue;
     std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
         _lowerDomainBound,
-        _upperDomainBound);
-
-    if (_factorRSquared) {
-        std::cout << "Multiplying variable by r^2\n";
-
-        // Multiply value of each data point by r coordinate squared
-        rawVolume->forEachVoxel([&](glm::uvec3 coords, float value) {
-            rawVolume->set(coords, value * coords.x * coords.x);
-        });
-    }
+        _upperDomainBound,
+        volumeMinValue,
+        volumeMaxValue,
+        _factorRSquared
+    );
 
     progressCallback(0.5f);
 
@@ -147,11 +143,13 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     outputMetadata.setValue<float>(
         KeyMinValue,
-        static_cast<float>(reader.minValue(_variable))
+        static_cast<float>(volumeMinValue)
+        // static_cast<float>(reader.minValue(_variable))
     );
     outputMetadata.setValue<float>(
         KeyMaxValue,
-        static_cast<float>(reader.maxValue(_variable))
+        static_cast<float>(volumeMaxValue)
+        // static_cast<float>(reader.maxValue(_variable))
     );
     outputMetadata.setValue<std::string>(
         KeyVisUnit,
