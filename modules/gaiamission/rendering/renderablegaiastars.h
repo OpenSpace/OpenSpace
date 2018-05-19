@@ -127,6 +127,7 @@ private:
     properties::Vec2Property _posZThreshold;
     properties::Vec2Property _gMagThreshold;
     properties::Vec2Property _bpRpThreshold;
+    properties::Vec2Property _distThreshold;
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
@@ -144,8 +145,10 @@ private:
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
         screenSize, psfTexture, time, colorTexture, nChunksToRender, valuesPerStar, 
-        maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
-        bpRpThreshold) _uniformCache;
+        maxStarsPerNode) _uniformCache;
+
+    UniformCache(posXThreshold, posYThreshold, posZThreshold, gMagThreshold, 
+        bpRpThreshold, distThreshold) _uniformFilterCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize, filterSize, sigma) _uniformCacheTM;

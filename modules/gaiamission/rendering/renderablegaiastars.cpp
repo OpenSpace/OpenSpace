@@ -244,6 +244,14 @@ namespace {
         "if max is set to 0.0 it is read as +Inf). If min = max then all values "
         "equal min|max will be filtered away."
     };
+
+    static const openspace::properties::Property::PropertyInfo FilterDistInfo = {
+        "FilterDist",
+        "Dist Threshold",
+        "If defined then only stars with Distances values between [min, max] "
+        "will be rendered (if min is set to 0.0 it is read as -Inf, "
+        "if max is set to 0.0 it is read as +Inf). Measured in kParsec."
+    };
 }  // namespace
 
 namespace openspace {
@@ -402,6 +410,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 FilterBpRpInfo.description
+            },
+            {
+                FilterDistInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterDistInfo.description
             }
         }
     };
@@ -437,6 +451,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _posZThreshold(FilterPosZInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
     , _gMagThreshold(FilterGMagInfo, glm::vec2(20.0), glm::vec2(-10.0), glm::vec2(30.0))
     , _bpRpThreshold(FilterBpRpInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(30.0))
+    , _distThreshold(FilterDistInfo, glm::vec2(0.0), glm::vec2(0.0), glm::vec2(100.0))
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
@@ -665,6 +680,12 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     }
     addProperty(_bpRpThreshold);
 
+    if (dictionary.hasKey(FilterDistInfo.identifier)) {
+        glm::vec2 distValue = dictionary.value<glm::vec2>(FilterDistInfo.identifier);
+        _distThreshold.set(distValue);
+    }
+    addProperty(_distThreshold);
+
     // Only add properties correlated to fits files if we're actually reading from a fits file.
     if (_fileReaderOption == FileReaderOption::Fits) {
         if (dictionary.hasKey(FirstRowInfo.identifier)) {
@@ -848,11 +869,12 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
 
-    _uniformCache.posXThreshold = _program->uniformLocation("posXThreshold");
-    _uniformCache.posYThreshold = _program->uniformLocation("posYThreshold");
-    _uniformCache.posZThreshold = _program->uniformLocation("posZThreshold");
-    _uniformCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
-    _uniformCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+    _uniformFilterCache.posXThreshold = _program->uniformLocation("posXThreshold");
+    _uniformFilterCache.posYThreshold = _program->uniformLocation("posYThreshold");
+    _uniformFilterCache.posZThreshold = _program->uniformLocation("posZThreshold");
+    _uniformFilterCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+    _uniformFilterCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+    _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
 
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
 
@@ -1197,11 +1219,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
 
     // Send filterValues.
-    _program->setUniform(_uniformCache.posXThreshold, _posXThreshold);
-    _program->setUniform(_uniformCache.posYThreshold, _posYThreshold);
-    _program->setUniform(_uniformCache.posZThreshold, _posZThreshold);
-    _program->setUniform(_uniformCache.gMagThreshold, _gMagThreshold);
-    _program->setUniform(_uniformCache.bpRpThreshold, _bpRpThreshold);
+    _program->setUniform(_uniformFilterCache.posXThreshold, _posXThreshold);
+    _program->setUniform(_uniformFilterCache.posYThreshold, _posYThreshold);
+    _program->setUniform(_uniformFilterCache.posZThreshold, _posZThreshold);
+    _program->setUniform(_uniformFilterCache.gMagThreshold, _gMagThreshold);
+    _program->setUniform(_uniformFilterCache.bpRpThreshold, _bpRpThreshold);
+    _program->setUniform(_uniformFilterCache.distThreshold, _distThreshold);
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
@@ -1478,11 +1501,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
         // Filter uniforms:
-        _uniformCache.posXThreshold = _program->uniformLocation("posXThreshold");
-        _uniformCache.posYThreshold = _program->uniformLocation("posYThreshold");
-        _uniformCache.posZThreshold = _program->uniformLocation("posZThreshold");
-        _uniformCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
-        _uniformCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+        _uniformFilterCache.posXThreshold = _program->uniformLocation("posXThreshold");
+        _uniformFilterCache.posYThreshold = _program->uniformLocation("posYThreshold");
+        _uniformFilterCache.posZThreshold = _program->uniformLocation("posZThreshold");
+        _uniformFilterCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+        _uniformFilterCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+        _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
     }
 
     if (_programTM->isDirty() || _shadersAreDirty) {
