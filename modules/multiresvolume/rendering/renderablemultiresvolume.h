@@ -32,9 +32,11 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
 
 // Forward declare to minimize dependencies

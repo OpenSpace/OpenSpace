@@ -83,56 +83,57 @@ public:
     void close();
 
     float* uniformSampledValues(const std::string& var,
-        const glm::size3_t& outDimensions);
+        const glm::size3_t& outDimensions) const;
 
     float* uniformSliceValues(const std::string& var, const glm::size3_t& outDimensions,
-        const float& zSlice);
+        const float& zSlice) const;
 
     float* uniformSampledVectorValues(const std::string& xVar, const std::string& yVar,
-        const std::string& zVar, const glm::size3_t& outDimensions);
+        const std::string& zVar, const glm::size3_t& outDimensions) const;
 
     Fieldlines classifiedFieldLines(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const std::vector<glm::vec3>& seedPoints,
-        float stepSize);
+        float stepSize) const;
 
     Fieldlines fieldLines(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const std::vector<glm::vec3>& seedPoints, float stepSize,
-        const glm::vec4& color);
+        const glm::vec4& color) const;
 
     Fieldlines lorentzTrajectories(const std::vector<glm::vec3>& seedPoints,
-        const glm::vec4& color, float stepsize);
+        const glm::vec4& color, float stepsize) const;
 
-    glm::vec3 modelBarycenterOffset();
-    glm::vec4 modelBarycenterOffsetScaled();
-    glm::vec3 modelScale();
-    glm::vec4 modelScaleScaled();
-    glm::vec3 gridMax();
-    glm::vec3 gridMin();
-    std::string variableUnit(const std::string& variable);
+    glm::vec3 modelBarycenterOffset() const;
+    glm::vec4 modelBarycenterOffsetScaled() const;
+    glm::vec3 modelScale() const;
+    glm::vec4 modelScaleScaled() const;
+    const glm::vec3& gridMax() const;
+    const glm::vec3& gridMin() const;
+    std::string variableUnit(const std::string& variable) const;
 
-    std::tuple<std::string, std::string, std::string> gridUnits();
+    std::tuple<std::string, std::string, std::string> gridUnits() const;
 
-    Model model();
-    GridType gridType();
-    std::string parent();
-    std::string frame();
-    std::vector<std::string> variables();
-    std::vector<std::string> loadedVariables();
+    Model model() const;
+    GridType gridType() const;
+    std::string parent() const;
+    std::string frame() const;
+    std::vector<std::string> variables() const;
+    std::vector<std::string> loadedVariables() const;
 
 private:
     using TraceLine = std::vector<glm::vec3>;
+
     TraceLine traceCartesianFieldline(const std::string& xVar, const std::string& yVar,
         const std::string& zVar, const glm::vec3& seedPoint, float stepSize,
-        TraceDirection direction, FieldlineEnd& end);
+        TraceDirection direction, FieldlineEnd& end) const;
 
     TraceLine traceLorentzTrajectory(const glm::vec3& seedPoint, float stepsize,
-        float eCharge);
+        float eCharge) const;
 
-    void getGridVariables(std::string& x, std::string& y, std::string& z);
+    void getGridVariables(std::string& x, std::string& y, std::string& z) const;
     GridType gridType(const std::string& x, const std::string& y,
-        const std::string& z);
-    Model modelType();
-    glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd);
+        const std::string& z) const;
+    Model modelType() const;
+    glm::vec4 classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEnd) const;
 
     ccmc::Kameleon* _kameleon = nullptr;
     ccmc::Model* _model = nullptr;

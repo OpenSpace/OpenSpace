@@ -447,7 +447,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         std::string zVariable = _vectorFieldInfo.value<std::string>(v3);
 
         KameleonWrapper kw(fileName);
-        return kw.getClassifiedFieldLines(
+        return kw.classifiedFieldLines(
             xVariable,
             yVariable,
             zVariable,
@@ -458,7 +458,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
 
     if (lorentzForce) {
         KameleonWrapper kw(fileName);
-        return kw.getLorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
+        return kw.lorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
 
     ghoul_assert(false, "Should not reach this");

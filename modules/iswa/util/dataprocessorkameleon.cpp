@@ -49,7 +49,7 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(const std::string& 
         initializeKameleonWrapper(path);
     }
 
-    std::vector<std::string> opts = _kw->getVariables();
+    std::vector<std::string> opts = _kw->variables();
     opts.erase(
         std::remove_if(
             opts.begin(),
@@ -87,7 +87,7 @@ void DataProcessorKameleon::addDataValues(const std::string& path,
 
     for (int i = 0; i < numOptions; ++i) {
         //0.5 to gather interesting values for the normalization/histograms.
-        float* values = _kw->getUniformSliceValues(
+        float* values = _kw->uniformSliceValues(
             options[i].description,
             _dimensions,
             0.5f
@@ -129,7 +129,7 @@ std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
 
     std::vector<float*> dataOptions(numOptions, nullptr);
     for (int option : selectedOptions) {
-        dataOptions[option] = _kw->getUniformSliceValues(
+        dataOptions[option] = _kw->uniformSliceValues(
             options[option].description,
             dimensions,
             _slice

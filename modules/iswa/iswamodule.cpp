@@ -39,6 +39,7 @@
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
 
+#include <modules/iswa/util/iswamanager.h>
 #include <openspace/scripting/lualibrary.h>
 
 namespace openspace {
