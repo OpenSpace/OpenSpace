@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/gaiamission/rendering/renderoption.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringlistproperty.h>
@@ -73,21 +72,6 @@ private:
     const size_t VEL_SIZE = 3;
     const float MAX_GPU_MEMORY_PERCENT = 0.7f;
     const float MAX_CPU_RAM_PERCENT = 0.5f;
-
-    enum FileReaderOption {
-        Fits = 0,
-        Speck = 1,
-        BinaryRaw = 2,
-        BinaryOctree = 3,
-        StreamOctree = 4
-    };
-    
-    enum ShaderOption {
-        Point_SSBO = 0,
-        Point_VBO = 1,
-        Billboard_SSBO = 2,
-        Billboard_VBO = 3
-    };
     
     bool readDataFile();
     int readFitsFile(const std::string& filePath);

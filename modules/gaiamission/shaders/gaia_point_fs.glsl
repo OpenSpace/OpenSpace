@@ -28,7 +28,7 @@
 
 layout (location = 0) out vec4 outColor;
 
-// Keep in sync with renderoption.h:RenderOption enum
+// Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
 const int RENDEROPTION_MOTION = 2; 

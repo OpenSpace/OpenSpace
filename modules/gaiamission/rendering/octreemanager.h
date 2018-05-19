@@ -32,7 +32,7 @@
 #include <mutex>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <modules/gaiamission/rendering/renderoption.h>
+#include <modules/gaiamission/rendering/gaiaoptions.h>
 
 namespace openspace {
 
@@ -111,8 +111,8 @@ private:
     // DR2_rv [7.2M] - A MAX_DIST of 15 kPc works fine with down to 10 kSPN.
     // DR2_subset [42.9M] - A MAX_DIST of 100 kPc works fine with down to 20 kSPN.
     // DR2_full [1.7B] - A MAX_DIST of 1000 kPc works fine with down to 100 kSPN.
-    size_t MAX_DIST = 100; // [kPc]
-    size_t MAX_STARS_PER_NODE = 20000; 
+    size_t MAX_DIST = 2; // [kPc]
+    size_t MAX_STARS_PER_NODE = 2000; 
 
     const int DEFAULT_INDEX = -1;
     const std::string BINARY_SUFFIX = ".bin"; 

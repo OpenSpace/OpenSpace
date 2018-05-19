@@ -34,7 +34,7 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaiamission/rendering/octreemanager.h>
-#include <modules/gaiamission/rendering/renderoption.h>
+#include <modules/gaiamission/rendering/gaiaoptions.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
@@ -505,28 +505,28 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
-        { FileReaderOption::Fits, "Fits" },
-        { FileReaderOption::Speck, "Speck" },
-        { FileReaderOption::BinaryRaw, "BinaryRaw" },
-        { FileReaderOption::BinaryOctree, "BinaryOctree" },
-        { FileReaderOption::StreamOctree, "StreamOctree" }
+        { gaiamission::FileReaderOption::Fits, "Fits" },
+        { gaiamission::FileReaderOption::Speck, "Speck" },
+        { gaiamission::FileReaderOption::BinaryRaw, "BinaryRaw" },
+        { gaiamission::FileReaderOption::BinaryOctree, "BinaryOctree" },
+        { gaiamission::FileReaderOption::StreamOctree, "StreamOctree" }
         });
     if (dictionary.hasKey(FileReaderOptionInfo.identifier)) {
         const std::string fileReaderOption = dictionary.value<std::string>(FileReaderOptionInfo.identifier);
         if (fileReaderOption == "Fits") {
-            _fileReaderOption = FileReaderOption::Fits;
+            _fileReaderOption = gaiamission::FileReaderOption::Fits;
         }
         else if (fileReaderOption == "Speck") {
-            _fileReaderOption = FileReaderOption::Speck;
+            _fileReaderOption = gaiamission::FileReaderOption::Speck;
         }
         else if (fileReaderOption == "BinaryRaw") {
-            _fileReaderOption = FileReaderOption::BinaryRaw;
+            _fileReaderOption = gaiamission::FileReaderOption::BinaryRaw;
         }
         else if (fileReaderOption == "BinaryOctree") {
-            _fileReaderOption = FileReaderOption::BinaryOctree;
+            _fileReaderOption = gaiamission::FileReaderOption::BinaryOctree;
         }
         else {
-            _fileReaderOption = FileReaderOption::StreamOctree;
+            _fileReaderOption = gaiamission::FileReaderOption::StreamOctree;
         }
     }
 
@@ -551,24 +551,24 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_renderOption);
 
     _shaderOption.addOptions({
-        { ShaderOption::Point_SSBO, "Point_SSBO" },
-        { ShaderOption::Point_VBO, "Point_VBO" },
-        { ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
-        { ShaderOption::Billboard_VBO, "Billboard_VBO" }
+        { gaiamission::ShaderOption::Point_SSBO, "Point_SSBO" },
+        { gaiamission::ShaderOption::Point_VBO, "Point_VBO" },
+        { gaiamission::ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
+        { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" }
         });
     if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
         const std::string shaderOption = dictionary.value<std::string>(ShaderOptionInfo.identifier);
         if (shaderOption == "Point_SSBO") {
-            _shaderOption = ShaderOption::Point_SSBO;
+            _shaderOption = gaiamission::ShaderOption::Point_SSBO;
         }
         else if (shaderOption == "Point_VBO") {
-            _shaderOption = ShaderOption::Point_VBO;
+            _shaderOption = gaiamission::ShaderOption::Point_VBO;
         }
         else if (shaderOption == "Billboard_SSBO") {
-            _shaderOption = ShaderOption::Billboard_SSBO;
+            _shaderOption = gaiamission::ShaderOption::Billboard_SSBO;
         }
         else {
-            _shaderOption = ShaderOption::Billboard_VBO;
+            _shaderOption = gaiamission::ShaderOption::Billboard_VBO;
         }
     }
     _shaderOption.onChange([&] { _buffersAreDirty = true; _shadersAreDirty = true; });
@@ -687,7 +687,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_distThreshold);
 
     // Only add properties correlated to fits files if we're actually reading from a fits file.
-    if (_fileReaderOption == FileReaderOption::Fits) {
+    if (_fileReaderOption == gaiamission::FileReaderOption::Fits) {
         if (dictionary.hasKey(FirstRowInfo.identifier)) {
             _firstRow = static_cast<int>(dictionary.value<double>(FirstRowInfo.identifier));
         }
@@ -757,7 +757,7 @@ void RenderableGaiaStars::initializeGL() {
     // Construct shader program depending on user-defined shader option.
     const int option = _shaderOption;
     switch (option) {
-    case ShaderOption::Point_SSBO: {
+    case gaiamission::ShaderOption::Point_SSBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -780,7 +780,7 @@ void RenderableGaiaStars::initializeGL() {
         addProperty(_tmPointSigma);
         break;
     }
-    case ShaderOption::Point_VBO: {
+    case gaiamission::ShaderOption::Point_VBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -800,7 +800,7 @@ void RenderableGaiaStars::initializeGL() {
         addProperty(_tmPointSigma);
         break;
     }
-    case ShaderOption::Billboard_SSBO: {
+    case gaiamission::ShaderOption::Billboard_SSBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -830,7 +830,7 @@ void RenderableGaiaStars::initializeGL() {
         //addProperty(_pointSpreadFunctionTexturePath);
         break;
     }
-    case ShaderOption::Billboard_VBO: {
+    case gaiamission::ShaderOption::Billboard_VBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -983,7 +983,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     else _firstDrawCalls = false;
 
     // Update which nodes that are stored in memory as the camera moves around (if streaming).
-    if (_fileReaderOption == FileReaderOption::StreamOctree) {
+    if (_fileReaderOption == gaiamission::FileReaderOption::StreamOctree) {
         glm::dvec3 cameraPos = data.camera.positionVec3();
         //glm::dvec3 cameraViewDir = data.camera.viewDirectionWorldSpace();
         size_t chunkSizeInBytes = _chunkSize * sizeof(GLfloat);
@@ -1012,7 +1012,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Switch rendering technique depending on user-defined shader option.
     const int shaderOption = _shaderOption;
-    if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
+    if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
+        || shaderOption == gaiamission::ShaderOption::Point_SSBO) {
 
         //------------------------ RENDER WITH SSBO ---------------------------
         // Update SSBO Index array with accumulated stars in all chunks.
@@ -1235,18 +1236,18 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     GLsizei nShaderCalls = _nStarsToRender;
 
     switch (shaderOption) {
-    case ShaderOption::Point_SSBO: {
+    case gaiamission::ShaderOption::Point_SSBO: {
         _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
         _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
         _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
         break;
     }
-    case ShaderOption::Point_VBO: {
+    case gaiamission::ShaderOption::Point_VBO: {
         // Specify how many potential stars we have to render.
         nShaderCalls = maxStarsPerNode * nChunksToRender;
         break;
     }
-    case ShaderOption::Billboard_SSBO: {
+    case gaiamission::ShaderOption::Billboard_SSBO: {
         _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
         _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
         _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
@@ -1265,7 +1266,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.psfTexture, psfUnit);
         break;
     }
-    case ShaderOption::Billboard_VBO: {
+    case gaiamission::ShaderOption::Billboard_VBO: {
         _program->setUniform(_uniformCache.closeUpBoostDist,
             _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
         );
@@ -1314,7 +1315,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _fboTexture->bind();
     _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
 
-    if (shaderOption == ShaderOption::Point_SSBO || shaderOption == ShaderOption::Point_VBO) {
+    if (shaderOption == gaiamission::ShaderOption::Point_SSBO
+        || shaderOption == gaiamission::ShaderOption::Point_VBO) {
         _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
         _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
         _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
@@ -1377,7 +1379,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _program = nullptr;
         }
         switch (shaderOption) {
-        case ShaderOption::Point_SSBO: {
+        case gaiamission::ShaderOption::Point_SSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -1406,7 +1408,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
-        case ShaderOption::Point_VBO: {
+        case gaiamission::ShaderOption::Point_VBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -1425,7 +1427,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
-        case ShaderOption::Billboard_SSBO: {
+        case gaiamission::ShaderOption::Billboard_SSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -1462,7 +1464,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
             break;
         }
-        case ShaderOption::Billboard_VBO: {
+        case gaiamission::ShaderOption::Billboard_VBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -1516,8 +1518,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _programTM = nullptr;
         }
         switch (shaderOption) {
-        case ShaderOption::Point_SSBO:
-        case ShaderOption::Point_VBO: {
+        case gaiamission::ShaderOption::Point_SSBO:
+        case gaiamission::ShaderOption::Point_VBO: {
             _programTM = renderEngine.buildRenderProgram("ToneMapping",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
@@ -1529,8 +1531,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
             break;
         }
-        case ShaderOption::Billboard_SSBO:
-        case ShaderOption::Billboard_VBO: {
+        case gaiamission::ShaderOption::Billboard_SSBO:
+        case gaiamission::ShaderOption::Billboard_VBO: {
             _programTM = renderEngine.buildRenderProgram("ToneMapping",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
@@ -1574,7 +1576,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
 
         // ------------------ RENDER WITH SSBO -----------------------
-        if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
+        if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
+            || shaderOption == gaiamission::ShaderOption::Point_SSBO) {
             _useVBO = false;
 
             // Trigger a rebuild of buffer data from octree. With SSBO we won't fill the chunks.
@@ -1909,31 +1912,31 @@ bool RenderableGaiaStars::readDataFile() {
     LINFO("Loading data file: " + _file);
 
     switch (fileReaderOption) {
-    case FileReaderOption::Fits: {
+    case gaiamission::FileReaderOption::Fits: {
 
         // Read raw fits file and construct Octree.  
         nReadStars = readFitsFile(_file);
         break;
     }
-    case FileReaderOption::Speck: {
+    case gaiamission::FileReaderOption::Speck: {
 
         // Read raw speck file and construct Octree. 
         nReadStars = readSpeckFile(_file);
         break;
     }
-    case FileReaderOption::BinaryRaw: {
+    case gaiamission::FileReaderOption::BinaryRaw: {
 
         // Stars are stored in an ordered binary file.
         nReadStars = readBinaryRawFile(_file);
         break;
     }
-    case FileReaderOption::BinaryOctree: {
+    case gaiamission::FileReaderOption::BinaryOctree: {
 
         // Octree already constructed and stored as a binary file. 
         nReadStars = readBinaryOctreeFile(_file);
         break;
     }
-    case FileReaderOption::StreamOctree: {
+    case gaiamission::FileReaderOption::StreamOctree: {
 
         // Read Octree structure from file, without data.
         nReadStars = readBinaryOctreeStructureFile(_file);

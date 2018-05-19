@@ -25,7 +25,6 @@
 #include <modules/gaiamission/rendering/octreemanager.h>
 
 #include <modules/gaiamission/rendering/octreeculler.h>
-#include <modules/gaiamission/rendering/renderoption.h>
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
