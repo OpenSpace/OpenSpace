@@ -73,11 +73,40 @@ private:
     const float MAX_GPU_MEMORY_PERCENT = 0.7f;
     const float MAX_CPU_RAM_PERCENT = 0.5f;
     
+    /**
+     * Reads data file in format defined by FileReaderOption.
+      \returns true if data was successfully read.
+     */
     bool readDataFile();
+
+    /**
+     * Reads a FITS file by using FitsFileReader.readFitsFile() and constructs an octree.
+     * \returns the number of stars read.
+     */
     int readFitsFile(const std::string& filePath);
+
+    /**
+     * Read a SPECK file by using FitsFileReader.readSpeckFile() and constructs an octree.
+     * \returns the number of stars read.
+     */
     int readSpeckFile(const std::string& filePath);
+
+    /**
+     * Reads a preprocessed binary file and constructs an octree.
+     * \returns the number of stars read.
+     */
     int readBinaryRawFile(const std::string& filePath);
+
+    /**
+     * Reads a pre-constructed octree, with all data, from a binary file.
+     * \returns the number of stars read.
+     */
     int readBinaryOctreeFile(const std::string& filePath);
+
+    /**
+     * Reads the structure of a pre-constructed octree from a binary file, without any data.
+     * \returns the number of stars read.
+     */
     int readBinaryOctreeStructureFile(const std::string& folderPath);
 
 
@@ -106,6 +135,7 @@ private:
     properties::IntProperty _tmPointFilterSize;
     properties::FloatProperty _tmPointSigma;
     properties::FloatProperty _lodPixelThreshold;
+
     properties::Vec2Property _posXThreshold;
     properties::Vec2Property _posYThreshold;
     properties::Vec2Property _posZThreshold;

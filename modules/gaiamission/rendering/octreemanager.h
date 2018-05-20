@@ -62,28 +62,101 @@ public:
     OctreeManager();
     ~OctreeManager();
 
+    /**
+     * Initializes a one layer Octree with root and 8 children that covers all stars.
+     * \param maxDist together with \param maxstarsPerNode (if defined) determines the 
+     * depth of the tree as well as how many nodes will be created.
+     */
     void initOctree(const long long& cpuRamBudget = 0, int maxDist = 0, 
         int maxStarsPerNode = 0);
+
+    /**
+     * Initializes a stack of size \param maxNodes that keeps track of all free spot in 
+     * buffer stream. Can be used to trigger a rebuild of buffer(s).
+     * \param useVBO defines if VBO or SSBO is used as buffer(s).
+     * \param datasetFitInMemory defines if streaming of nodes during runtime will be used.
+     */
     void initBufferIndexStack(const long long& maxNodes, bool useVBO, 
         bool datasetFitInMemory);
+
+    /**
+     * Inserts star values in correct position in Octree. Makes use of a recursive 
+     * traversal strategy. Internally calls <code>insertInNode()</code>
+     */
     void insert(const std::vector<float>& starValues);
+
+    /**
+     * Slices LOD data so only the MAX_STARS_PER_NODE brightest stars are stored in inner
+     * nodes. If \param branchIndex is defined then only that branch will be sliced.
+     * Calls <code>sliceNodeLodCache()</code> internally.
+     */
     void sliceLodData(size_t branchIndex = 8);
+
+    /**
+     * Prints the whole tree structure, including number of stars per node, number of 
+     * nodes, tree depth and if node is a leaf.
+     * Calls <code>printStarsPerNode(node, prefix)</code> internally.
+     */
     void printStarsPerNode() const;
 
+    /**
+     * Used while streaming nodes from files. Checks if any nodes need to be loaded or
+     * unloaded. If entire dataset fits in RAM then the whole dataset will be loaded 
+     * asynchronously. Otherwise only nodes close to the camera will be fetched.
+     * When RAM stars to fill up least-recently used nodes will start to unload.
+     * Calls <code>findAndFetchNeighborNode()</code> and 
+     * <code>removeNodesFromRam()</code> internally.
+     */
     void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes);
+
+    /**
+     * Builds render data structure by traversing the Octree and checking for intersection
+     * with view frustum. Every vector in map contains data for one node. The corresponding
+     * integer key is the index where chunk should be inserted into streaming buffer.
+     * Calls <code>checkNodeIntersection()</code> for every branch. \param deltaStars 
+     * keeps track of how many stars that were added/removed this render call.
+     */
     std::map<int, std::vector<float>> traverseData(const glm::mat4& mvp, 
         const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option, 
         const float& lodPixelThreshold);
 
+    /** 
+     * Builds full render data structure by traversing all leaves in the Octree.
+     */
     std::vector<float> getAllData(gaiamission::RenderOption option);
+
+    /** 
+     * Removes all data from Octree, or only from a specific branch if specified.
+     * \param branchIndex defined which branch to clear if defined.
+     */
     void clearAllData(int branchIndex = -1);
 
+    /**
+     * Write entire Octree structure to a binary file. \param writeData defines if data 
+     * should be included or if only structure should be written to the file.
+     * Calls <code>writeNodeToFile()</code> which recursively writes all nodes.
+     */
     void writeToFile(std::ofstream& outFileStream, bool writeData);
+
+    /**
+     * Read a constructed Octree from a file. \returns the total number of (distinct) stars
+     * read. \param readData defines if full data or only structure should be read.
+     * Calls <code>readNodeFromFile()</code> which recursively reads all nodes.
+     */
     int readFromFile(std::ifstream& inFileStream, bool readData, 
         const std::string& folderPath = std::string());
 
+    /**
+     * Write specified part of Octree to multiple files, including all data.
+     * \param branchIndex defines which branch to write. 
+     * Clears specified branch after writing is done.
+     * Calls <code>writeNodeToMultipleFiles()</code> for the specified branch.
+     */
     void writeToMultipleFiles(const std::string& outFolderPath, size_t branchIndex);
 
+    /**
+     * Getters.
+     */
     size_t numLeafNodes() const;
     size_t numInnerNodes() const;
     size_t totalNodes() const;
@@ -92,6 +165,10 @@ public:
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
     size_t numFreeSpotsInBuffer() const;
+
+    /**
+     * \returns current CPU RAM budget in bytes.
+     */
     long long cpuRamBudget() const;
 
 private:
@@ -109,66 +186,173 @@ private:
     // DR1_TGAS [2M] - A MAX_DIST of 5 kPc works fine with down to 1 kSPN.
     // DR1_full [1.2B] - A MAX_DIST of 10 kPc works fine with most SPN.
     // DR2_rv [7.2M] - A MAX_DIST of 15 kPc works fine with down to 10 kSPN.
-    // DR2_subset [42.9M] - A MAX_DIST of 100 kPc works fine with down to 20 kSPN.
-    // DR2_full [1.7B] - A MAX_DIST of 1000 kPc works fine with down to 100 kSPN.
+    // DR2_subset [42.9M] - A MAX_DIST of 100 kPc works fine with 20 kSPN.
+    // DR2_full [1.7B] - A MAX_DIST of 250 kPc works fine with 150 kSPN.
     size_t MAX_DIST = 2; // [kPc]
     size_t MAX_STARS_PER_NODE = 2000; 
 
     const int DEFAULT_INDEX = -1;
     const std::string BINARY_SUFFIX = ".bin"; 
 
+    /**
+     * \returns the correct index of child node. Maps [1,1,1] to 0 and [-1,-1,-1] to 7.
+     */
     size_t getChildIndex(const float& posX, const float& posY, const float& posZ,
         const float& origX = 0.0, const float& origY = 0.0, const float& origZ = 0.0);
+
+    /**
+     * Private help function for <code>insert()</code>. Inserts star into node if leaf and
+     * numStars < MAX_STARS_PER_NODE. If a leaf goes above the threshold it is subdivided 
+     * into 8 new nodes. 
+     * If node is an inner node, then star is stores in LOD cache if it is among the 
+     * brightest stars in all children. 
+     */
     bool insertInNode(std::shared_ptr<OctreeNode> node,
         const std::vector<float>& starValues, int depth = 1);
+
+    /**
+     * Slices LOD cache data in node to the MAX_STARS_PER_NODE brightest stars. This needs 
+     * to be called after the last star has been inserted into Octree but before it is 
+     * saved to file(s). Slices all descendants recursively.
+     */
     void sliceNodeLodCache(std::shared_ptr<OctreeNode> node);
+
+    /**
+     * Private help function for <code>insertInNode()</code>. Stores star data in node and 
+     * keeps track of the brightest stars all children.
+     */
     void storeStarData(std::shared_ptr<OctreeNode> node, 
         const std::vector<float>& starValues);
+
+    /**
+     * Private help function for <code>printStarsPerNode()</code>. \returns an accumulated
+     * string containing all descendant nodes.
+     */
     std::string printStarsPerNode(std::shared_ptr<OctreeNode> node, 
         const std::string& prefix) const;
+
+    /**
+     * Private help function for <code>traverseData()</code>. Recursively checks which 
+     * nodes intersect with the view frustum (interpreted as an AABB) and decides if data 
+     * should be optimized away or not. Keeps track of which nodes that are visible and 
+     * loaded (if streaming). \param deltaStars keeps track of how many stars that were 
+     * added/removed this render call.
+     */
     std::map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
         const glm::mat4& mvp, const glm::vec2& screenSize, int& deltaStars, 
         gaiamission::RenderOption option);
+
+    /**
+     * Checks if specified node existed in cache, and removes it if that's the case.
+     * If node is an inner node then all children will be checked recursively as well as 
+     * long as \param recursive is not set to false. \param deltaStars keeps track of how 
+     * many stars that were removed.
+     */
     std::map<int, std::vector<float>> removeNodeFromCache(std::shared_ptr<OctreeNode> node, 
         int& deltaStars, bool recursive = true);
+
+    /**
+     * Get data in node and its descendants regardless if they are visible or not.
+     */
     std::vector<float> getNodeData(std::shared_ptr<OctreeNode> node, 
         gaiamission::RenderOption option);
+
+    /**
+     * Clear data from node and its descendants and shrink vectors to deallocate memory.
+     */
     void clearNodeData(std::shared_ptr<OctreeNode> node);
+
+    /**
+     * Contruct default children nodes for specified node.
+     */
     void createNodeChildren(std::shared_ptr<OctreeNode> node);
+
+    /**
+     * Checks if node should be inserted into stream or not. \returns true if it should, 
+     * (i.e. it doesn't already exists, there is room for it in the buffer and node data
+     * is loaded if streaming). \returns false otherwise.
+     */
     bool updateBufferIndex(std::shared_ptr<OctreeNode> node);
 
+    /**
+     * Node should be inserted into stream. This function \returns the data to be inserted.
+     * If VBOs are used then the chunks will be appended by zeros, otherwise only the star 
+     * data corresponding to RenderOption \param option will be inserted. \param deltaStars
+     * keeps track of how many stars that were added.
+     */
+    std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node,
+        gaiamission::RenderOption option, int& deltaStars);
+
+    /**
+     * Write a node to outFileStream. \param writeData defines if data should be included 
+     * or if only structure should be written.
+     */
     void writeNodeToFile(std::ofstream& outFileStream, 
         std::shared_ptr<OctreeNode> node, bool writeData);
+
+    /**
+     * Read a node from file and its potential children. \param readData defines if full 
+     * data or only structure should be read.
+     * \returns accumulated sum of all read stars in node and its descendants.
+     */
     int readNodeFromFile(std::ifstream& inFileStream, 
         std::shared_ptr<OctreeNode> node, bool readData);
 
+    /**
+     * Write node data to a file. \param outFilePrefix specifies the accumulated path
+     * and name of the file. If \param threadWrites is set to true then one new thread 
+     * will be created for each child to write its descendents.
+     */
     void writeNodeToMultipleFiles(const std::string& outFilePrefix, 
         std::shared_ptr<OctreeNode> node, bool threadWrites);
+
+    /**
+     * Finds the neighboring node on the same level (or a higher level if there is no
+     * corresponding level) in the specified direction. Also fetches data from found node 
+     * if it's not already loaded.
+     */
     void findAndFetchNeighborNode(const unsigned long long& firstParentId, int x, int y, int z);
+    
+    /** 
+     * Fetches data from all children of \param parentNode, as long as it's not already 
+     * fetched, it exists and it can fit in RAM. If \param recursive is true then all 
+     * descendants will be fetched as well.
+     * Calls <code>fetchNodeDataFromFile()</code> for every child that passes the tests.
+     */
     void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode, 
         bool recursive);
+
+    /**
+     * Fetches data for specified node from file.
+     * OBS! Only call if node file exists (i.e. node has any data, node->numStars > 0) 
+     * and is not already loaded.
+     */
     void fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node);
 
     /**
-    * Loops though all nodes in <nodesToremove> and removes them. Also checks if any
-    * ancestor should change the <hasLoadedDescendant> flag.
+    * Loops though all nodes in \param nodesToRemove and clears them from RAM. 
+    * Also checks if any ancestor should change the <code>hasLoadedDescendant</code> flag
+    * by calling <code>propagateUnloadedNodes()</code> with all ancestors.
     */
     void removeNodesFromRam(const std::vector<unsigned long long>& nodesToRemove);
+
     /**
-     * Removes data in specified node from main memory and updates budget and flags 
+     * Removes data in specified node from main memory and updates RAM budget and flags 
      * accordingly.
      */
     void removeNode(std::shared_ptr<OctreeManager::OctreeNode> node);
-    void propagateUnloadedNodes(std::vector<std::shared_ptr<OctreeNode>> ancestorNodes);
 
-    std::vector<float> constructInsertData(std::shared_ptr<OctreeNode> node, 
-        gaiamission::RenderOption option, int& deltaStars);
+    /**
+     * Loops through \param ancestorNodes backwards and checks if parent node has any 
+     * loaded descendants left. If not, then flag <code>hasLoadedDescendant</code> will be
+     * set to false for that parent node and next parent in line will be checked.
+     */
+    void propagateUnloadedNodes(std::vector<std::shared_ptr<OctreeNode>> ancestorNodes);
 
     std::shared_ptr<OctreeNode> _root;
     std::unique_ptr<OctreeCuller> _culler;
     std::stack<int> _freeSpotsInBuffer;
     std::set<int> _removedKeysInPrevCall;
-
     std::queue<unsigned long long> _leastRecentlyFetchedNodes;
 
     size_t _totalDepth;

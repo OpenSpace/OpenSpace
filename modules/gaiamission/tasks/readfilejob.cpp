@@ -66,7 +66,8 @@ void ReadFileJob::execute() {
     int nNullArr = 0;
     size_t nColumnsRead = _allColumns.size();
     if (nColumnsRead != _nDefaultCols) {
-        LINFO("Additional columns will be read! Consider add column in code for significant speedup!");
+        LINFO("Additional columns will be read! Consider add column in code for "
+            "significant speedup!");
     }
 
     // Copy columns to local variables.
@@ -158,7 +159,7 @@ void ReadFileJob::execute() {
         }*/
 
         // Store magnitude render value. (Set default to high mag = low brightness)
-        values[idx++] = std::isnan(meanMagG[i]) ? 20.f : meanMagG[i]; // Mean G-band Magnitude
+        values[idx++] = std::isnan(meanMagG[i]) ? 20.f : meanMagG[i]; // Mean G-band Mag
 
         // Store color render value. (Default value is bluish stars)
         values[idx++] = std::isnan(bp_rp[i]) ? 0.f : bp_rp[i]; // Bp-Rp Color
@@ -205,8 +206,8 @@ void ReadFileJob::execute() {
         }
 
         // Store additional parameters to filter by.
-        values[idx++] = std::isnan(meanMagBp[i]) ? 20.f : meanMagBp[i]; // Mean Bp-band Magnitude
-        values[idx++] = std::isnan(meanMagRp[i]) ? 20.f : meanMagRp[i]; // Mean Rp-band Magnitude
+        values[idx++] = std::isnan(meanMagBp[i]) ? 20.f : meanMagBp[i]; // Mean Bp-band Mag
+        values[idx++] = std::isnan(meanMagRp[i]) ? 20.f : meanMagRp[i]; // Mean Rp-band Mag
         values[idx++] = std::isnan(bp_g[i]) ? 0.f : bp_g[i]; // Bp-G Color 
         values[idx++] = std::isnan(g_rp[i]) ? 0.f : g_rp[i]; // G-Rp Color
         values[idx++] = ra[i];

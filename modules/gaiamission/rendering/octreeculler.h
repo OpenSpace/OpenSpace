@@ -28,6 +28,8 @@
 #include <modules/globebrowsing/geometry/aabb.h>
 #include <vector>
 
+// TODO: Move /geometry/* to libOpenSpace so as not to depend on globebrowsing.
+
 namespace openspace {
 
 /**
@@ -35,8 +37,6 @@ namespace openspace {
 *
 * The frustum culling uses a 2D axis aligned bounding box for the OctreeNode in
 * screen space. 
-* 
-* TODO (adaal): Move /geometry/* to libOpenSpace so as not to depend on globebrowsing.
 */
 
 class OctreeCuller {
@@ -49,10 +49,24 @@ public:
     OctreeCuller(globebrowsing::AABB3 viewFrustum);
     ~OctreeCuller();
 
+    /**
+     * \returns true if any part of the node is visible in the current view. 
+     */
     bool isVisible(const std::vector<glm::dvec4>& corners, const glm::mat4& mvp);
-    glm::vec2 getNodeSizeInPixels(const glm::vec2& screenSize);
+
+    /**
+     * \returns the size [in pixels] of the node in clipping space.
+     */
+    glm::vec2 getNodeSizeInPixels(const std::vector<glm::dvec4>& corners, 
+        const glm::mat4& mvp, const glm::vec2& screenSize);
 
 private:
+   
+    /** 
+     * Creates an axis-aligned bounding box containing all \param corners in clipping space. 
+     */
+    void createNodeBounds(const std::vector<glm::dvec4>& corners, const glm::mat4& mvp);
+    
     const globebrowsing::AABB3 _viewFrustum;
     globebrowsing::AABB3 _nodeBounds;
 };

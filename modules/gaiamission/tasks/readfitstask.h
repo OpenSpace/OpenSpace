@@ -38,18 +38,33 @@ class ReadFitsTask : public Task {
 public:
     ReadFitsTask(const ghoul::Dictionary& dictionary);
     virtual ~ReadFitsTask();
-    
+
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
     static documentation::Documentation Documentation();
 
 private:
     const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values
-    //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 500.000 stars with 18 values
+    //const size_t MAX_SIZE_BEFORE_WRITE = 9000000; // ~34MB -> 0,5 stars with 18 values
 
+    /**
+     *  Reads a single FITS file and stores ordered star data in one binary file.
+     */
     void readSingleFitsFile(const Task::ProgressCallback& progressCallback);
+
+    /**
+     * Reads all FITS files in a folder with multiple threads and stores ordered star 
+     * data into 8 binary files.
+     */
     void readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback);
-    int writeOctantToFile(const std::vector<float>& data, int index, 
+
+    /**
+     * Writes \param data to octant [\param index] file.
+     * \param isFirstWrite defines if this is the first write to specified octant, if so
+     * the file is created, otherwise the accumulated data is appended to the end of the 
+     * file. 
+     */
+    int writeOctantToFile(const std::vector<float>& data, int index,
         std::vector<bool>& isFirstWrite, int nValuesPerStar);
 
     std::string _inFileOrFolderPath;
