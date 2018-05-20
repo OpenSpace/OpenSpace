@@ -30,8 +30,8 @@ local GaiaModel = {
         ColorTexture = textures .. "/gaia-baked.png"
     },
     GUI = {
-        Name = "Gaia Model",
-        Path = "/GaiaMission/GaiaModel"
+        Name = "Model",
+        Path = "/GaiaMission/Gaia Model"
     }
 }
 

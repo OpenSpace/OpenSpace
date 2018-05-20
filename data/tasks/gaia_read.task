@@ -5,15 +5,6 @@ return {
         OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_24col/",
         SingleFileProcess = false,
         ThreadsToUse = 8,
-        FilterColumnNames = {
-            --"Gaia_Parallax_Err",
-            --"Gaia_Proper_Motion_RA",
-            --"Gaia_Proper_Motion_RA_Err",
-            --"Gaia_Proper_Motion_Dec",
-            --"Gaia_Proper_Motion_Dec_Err",
-            --"Tycho_B_Mag_Err",
-            --"Tycho_V_Mag_Err"
-        }
     },
     {
         Type = "ConstructOctreeTask",
