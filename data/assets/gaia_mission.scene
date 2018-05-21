@@ -50,7 +50,6 @@ asset.onInitialize(function ()
     
     openspace.setDefaultGuiSorting()
 
-    -- Mark the Gaia Instrument Model (and a few stars?) as interesting nodes
     openspace.markInterestingNodes({
        "GaiaModel", "Earth", "Sun"
     })
@@ -67,7 +66,6 @@ asset.onInitialize(function ()
 
     openspace.navigation.setCameraState({
         Focus = GaiaModelAsset.GaiaModel.Identifier,
-        --Position = { 10.0, 10.0, 10.0 },
         Position = { 10000000000000.0, 10000000000000.0, 10000000000000.0 },
         Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
     })

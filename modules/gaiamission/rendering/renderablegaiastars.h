@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/gaiamission/rendering/renderoption.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringlistproperty.h>
@@ -73,27 +72,41 @@ private:
     const size_t VEL_SIZE = 3;
     const float MAX_GPU_MEMORY_PERCENT = 0.7f;
     const float MAX_CPU_RAM_PERCENT = 0.5f;
-
-    enum FileReaderOption {
-        Fits = 0,
-        Speck = 1,
-        BinaryRaw = 2,
-        BinaryOctree = 3,
-        StreamOctree = 4
-    };
     
-    enum ShaderOption {
-        Point_SSBO = 0,
-        Point_VBO = 1,
-        Billboard_SSBO = 2,
-        Billboard_VBO = 3
-    };
-    
+    /**
+     * Reads data file in format defined by FileReaderOption.
+      \returns true if data was successfully read.
+     */
     bool readDataFile();
+
+    /**
+     * Reads a FITS file by using FitsFileReader.readFitsFile() and constructs an octree.
+     * \returns the number of stars read.
+     */
     int readFitsFile(const std::string& filePath);
+
+    /**
+     * Read a SPECK file by using FitsFileReader.readSpeckFile() and constructs an octree.
+     * \returns the number of stars read.
+     */
     int readSpeckFile(const std::string& filePath);
+
+    /**
+     * Reads a preprocessed binary file and constructs an octree.
+     * \returns the number of stars read.
+     */
     int readBinaryRawFile(const std::string& filePath);
+
+    /**
+     * Reads a pre-constructed octree, with all data, from a binary file.
+     * \returns the number of stars read.
+     */
     int readBinaryOctreeFile(const std::string& filePath);
+
+    /**
+     * Reads the structure of a pre-constructed octree from a binary file, without any data.
+     * \returns the number of stars read.
+     */
     int readBinaryOctreeStructureFile(const std::string& folderPath);
 
 
@@ -122,11 +135,13 @@ private:
     properties::IntProperty _tmPointFilterSize;
     properties::FloatProperty _tmPointSigma;
     properties::FloatProperty _lodPixelThreshold;
+
     properties::Vec2Property _posXThreshold;
     properties::Vec2Property _posYThreshold;
     properties::Vec2Property _posZThreshold;
     properties::Vec2Property _gMagThreshold;
     properties::Vec2Property _bpRpThreshold;
+    properties::Vec2Property _distThreshold;
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
@@ -144,8 +159,10 @@ private:
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
         magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
         screenSize, psfTexture, time, colorTexture, nChunksToRender, valuesPerStar, 
-        maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
-        bpRpThreshold) _uniformCache;
+        maxStarsPerNode) _uniformCache;
+
+    UniformCache(posXThreshold, posYThreshold, posZThreshold, gMagThreshold, 
+        bpRpThreshold, distThreshold) _uniformFilterCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize, filterSize, sigma) _uniformCacheTM;

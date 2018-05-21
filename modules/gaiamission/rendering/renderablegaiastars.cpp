@@ -34,7 +34,7 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaiamission/rendering/octreemanager.h>
-#include <modules/gaiamission/rendering/renderoption.h>
+#include <modules/gaiamission/rendering/gaiaoptions.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/templatefactory.h>
@@ -64,11 +64,11 @@ namespace {
         "This value tells the renderable what format the input data file has. "
         "'Fits' will read a FITS file, construct an Octree from it and render full data. "
         "'Speck' will read a SPECK file, construct an Octree from it and render full data. "
-        "'BinaryRaw' will read a preprocessed binary file with ordered star data, construct "
-        "and Octree and render it. "
-        "'BinaryOctree' will read a constructed Octree from binary file and render full data. "
-        "'StreamOctree' will read an index file with full Octree structure and them stream nodes "
-        "during runtime. Suited for bigger datasets."
+        "'BinaryRaw' will read a preprocessed binary file with ordered star data, "
+        "construct an Octree and render it. 'BinaryOctree' will read a constructed Octree "
+        "from binary file and render full data. 'StreamOctree' will read an index file "
+        "with full Octree structure and then stream nodes during runtime. "
+        "(This option is suited for bigger datasets.)"
     };
 
     static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
@@ -82,11 +82,11 @@ namespace {
     static const openspace::properties::Property::PropertyInfo ShaderOptionInfo = {
         "ShaderOption",
         "Shader Option",
-        "This value determines which shaders to use while rendering. If 'Point_*' is chosen "
-        "then gl_Points will be rendered and then spread out with a bloom filter. If 'Billboard_*' "
-        "is chosen then the geometry shaders will generate screen-faced billboards for all stars. "
-        "For '*_SSBO' the data will be stored in Shader Storage Buffer Objects will '*_VBO' uses "
-        "Vertex Buffer Objects for the streaming."
+        "This value determines which shaders to use while rendering. If 'Point_*' is "
+        "chosen then gl_Points will be rendered and then spread out with a bloom filter. "
+        "If 'Billboard_*' is chosen then the geometry shaders will generate screen-faced "
+        "billboards for all stars. For '*_SSBO' the data will be stored in Shader Storage "
+        "Buffer Objects while '*_VBO' uses Vertex Buffer Objects for the streaming."
     };
     
     static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
@@ -99,14 +99,14 @@ namespace {
     static const openspace::properties::Property::PropertyInfo LuminosityMultiplierInfo = {
         "LuminosityMultiplier",
         "Luminosity Multiplier",
-        "Factor by which to multiply the luminosity with. [Works only in Color mode!]"
+        "Factor by which to multiply the luminosity with. [Works in Color and Motion modes]"
     };
 
     static const openspace::properties::Property::PropertyInfo MagnitudeBoostInfo = {
         "MagnitudeBoost",
         "Magnitude Boost",
         "Sets what percent of the star magnitude that will be used as boost to star size. "
-        "[Works only in Color mode!]"
+        "[Works only with billboards in Color and Motion modes]"
     };
 
     static const openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
@@ -120,31 +120,34 @@ namespace {
     static const openspace::properties::Property::PropertyInfo SharpnessInfo = {
         "Sharpness",
         "Sharpness",
-        "Adjust star sharpness"
+        "Adjust star sharpness. [Works only with billboards]"
     };
 
     static const openspace::properties::Property::PropertyInfo BillboardSizeInfo = {
         "BillboardSize",
         "Billboard Size",
-        "Set the billboard size of all stars"
+        "Set the billboard size of all stars. [Works only with billboards]"
     };
 
     static const openspace::properties::Property::PropertyInfo CloseUpBoostDistInfo = {
         "CloseUpBoostDist",
         "Close-Up Boost Distance [pc]",
         "Set the distance where stars starts to increase in size. Unit is Parsec."
+        "[Works only with billboards]"
     };
 
     static const openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
         "FilterSize",
         "Filter Size [px]",
         "Set the filter size in pixels used in tonemapping for point splatting rendering."
+        "[Works only with points]"
     };
 
     static const openspace::properties::Property::PropertyInfo TmPointSigmaInfo = {
         "Sigma",
         "Normal Distribution Sigma",
-        "Set the normal distribution sigma used in tonemapping for point splatting rendering."
+        "Set the normal distribution sigma used in tonemapping for point splatting "
+        "rendering. [Works only with points]"
     };
 
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
@@ -159,6 +162,7 @@ namespace {
         "First Row to Read",
         "Defines the first row that will be read from the specified FITS file."
         "No need to define if data already has been processed."
+        "[Works only with FileReaderOption::Fits]"
     };
 
     static const openspace::properties::Property::PropertyInfo LastRowInfo = {
@@ -167,6 +171,7 @@ namespace {
         "Defines the last row that will be read from the specified FITS file."
         "Has to be equal to or greater than FirstRow. No need to define if "
         "data already has been processed."
+        "[Works only with FileReaderOption::Fits]"
     };
 
     static const openspace::properties::Property::PropertyInfo ColumnNamesInfo = {
@@ -175,6 +180,7 @@ namespace {
         "A list of strings with the names of all the columns that are to be "
         "read from the specified FITS file. No need to define if data already "
         "has been processed."
+        "[Works only with FileReaderOption::Fits]"
     };
 
     static const openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
@@ -199,7 +205,7 @@ namespace {
     static const openspace::properties::Property::PropertyInfo LodPixelThresholdInfo = {
         "LodPixelThreshold",
         "LOD Pixel Threshold",
-        "The number of total pixels a nodes AABB can have in screen space before its "
+        "The number of total pixels a nodes AABB can have in clipping space before its "
         "parent is fetched as LOD cache."
     };
 
@@ -243,6 +249,14 @@ namespace {
         "will be rendered (if min is set to 0.0 it is read as -Inf, "
         "if max is set to 0.0 it is read as +Inf). If min = max then all values "
         "equal min|max will be filtered away."
+    };
+
+    static const openspace::properties::Property::PropertyInfo FilterDistInfo = {
+        "FilterDist",
+        "Dist Threshold",
+        "If defined then only stars with Distances values between [min, max] "
+        "will be rendered (if min is set to 0.0 it is read as -Inf, "
+        "if max is set to 0.0 it is read as +Inf). Measured in kParsec."
     };
 }  // namespace
 
@@ -402,6 +416,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 new Vector2Verifier<double>,
                 Optional::Yes,
                 FilterBpRpInfo.description
+            },
+            {
+                FilterDistInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                FilterDistInfo.description
             }
         }
     };
@@ -414,7 +434,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _dataIsDirty(true)
     , _buffersAreDirty(true)
     , _shadersAreDirty(false)
-    , _fileReaderOption(FileReaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _fileReaderOption(FileReaderOptionInfo, 
+        properties::OptionProperty::DisplayType::Dropdown)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _shaderOption(ShaderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _pointSpreadFunctionTexturePath(PsfTextureInfo)
@@ -437,6 +458,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _posZThreshold(FilterPosZInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
     , _gMagThreshold(FilterGMagInfo, glm::vec2(20.0), glm::vec2(-10.0), glm::vec2(30.0))
     , _bpRpThreshold(FilterBpRpInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(30.0))
+    , _distThreshold(FilterDistInfo, glm::vec2(0.0), glm::vec2(0.0), glm::vec2(100.0))
     , _firstRow(FirstRowInfo, 0, 0, 2539913) // DR1-max: 2539913
     , _lastRow(LastRowInfo, 0, 0, 2539913)
     , _columnNamesList(ColumnNamesInfo)
@@ -490,28 +512,29 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
-        { FileReaderOption::Fits, "Fits" },
-        { FileReaderOption::Speck, "Speck" },
-        { FileReaderOption::BinaryRaw, "BinaryRaw" },
-        { FileReaderOption::BinaryOctree, "BinaryOctree" },
-        { FileReaderOption::StreamOctree, "StreamOctree" }
+        { gaiamission::FileReaderOption::Fits, "Fits" },
+        { gaiamission::FileReaderOption::Speck, "Speck" },
+        { gaiamission::FileReaderOption::BinaryRaw, "BinaryRaw" },
+        { gaiamission::FileReaderOption::BinaryOctree, "BinaryOctree" },
+        { gaiamission::FileReaderOption::StreamOctree, "StreamOctree" }
         });
     if (dictionary.hasKey(FileReaderOptionInfo.identifier)) {
-        const std::string fileReaderOption = dictionary.value<std::string>(FileReaderOptionInfo.identifier);
+        const std::string fileReaderOption = 
+            dictionary.value<std::string>(FileReaderOptionInfo.identifier);
         if (fileReaderOption == "Fits") {
-            _fileReaderOption = FileReaderOption::Fits;
+            _fileReaderOption = gaiamission::FileReaderOption::Fits;
         }
         else if (fileReaderOption == "Speck") {
-            _fileReaderOption = FileReaderOption::Speck;
+            _fileReaderOption = gaiamission::FileReaderOption::Speck;
         }
         else if (fileReaderOption == "BinaryRaw") {
-            _fileReaderOption = FileReaderOption::BinaryRaw;
+            _fileReaderOption = gaiamission::FileReaderOption::BinaryRaw;
         }
         else if (fileReaderOption == "BinaryOctree") {
-            _fileReaderOption = FileReaderOption::BinaryOctree;
+            _fileReaderOption = gaiamission::FileReaderOption::BinaryOctree;
         }
         else {
-            _fileReaderOption = FileReaderOption::StreamOctree;
+            _fileReaderOption = gaiamission::FileReaderOption::StreamOctree;
         }
     }
 
@@ -521,7 +544,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaiamission::RenderOption::Motion, "Motion" }
     });
     if (dictionary.hasKey(RenderOptionInfo.identifier)) {
-        const std::string renderOption = dictionary.value<std::string>(RenderOptionInfo.identifier);
+        const std::string renderOption = 
+            dictionary.value<std::string>(RenderOptionInfo.identifier);
         if (renderOption == "Static") {
             _renderOption = gaiamission::RenderOption::Static;
         }
@@ -536,24 +560,25 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_renderOption);
 
     _shaderOption.addOptions({
-        { ShaderOption::Point_SSBO, "Point_SSBO" },
-        { ShaderOption::Point_VBO, "Point_VBO" },
-        { ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
-        { ShaderOption::Billboard_VBO, "Billboard_VBO" }
+        { gaiamission::ShaderOption::Point_SSBO, "Point_SSBO" },
+        { gaiamission::ShaderOption::Point_VBO, "Point_VBO" },
+        { gaiamission::ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
+        { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" }
         });
     if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
-        const std::string shaderOption = dictionary.value<std::string>(ShaderOptionInfo.identifier);
+        const std::string shaderOption = 
+            dictionary.value<std::string>(ShaderOptionInfo.identifier);
         if (shaderOption == "Point_SSBO") {
-            _shaderOption = ShaderOption::Point_SSBO;
+            _shaderOption = gaiamission::ShaderOption::Point_SSBO;
         }
         else if (shaderOption == "Point_VBO") {
-            _shaderOption = ShaderOption::Point_VBO;
+            _shaderOption = gaiamission::ShaderOption::Point_VBO;
         }
         else if (shaderOption == "Billboard_SSBO") {
-            _shaderOption = ShaderOption::Billboard_SSBO;
+            _shaderOption = gaiamission::ShaderOption::Billboard_SSBO;
         }
         else {
-            _shaderOption = ShaderOption::Billboard_VBO;
+            _shaderOption = gaiamission::ShaderOption::Billboard_VBO;
         }
     }
     _shaderOption.onChange([&] { _buffersAreDirty = true; _shadersAreDirty = true; });
@@ -665,8 +690,14 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     }
     addProperty(_bpRpThreshold);
 
-    // Only add properties correlated to fits files if we're actually reading from a fits file.
-    if (_fileReaderOption == FileReaderOption::Fits) {
+    if (dictionary.hasKey(FilterDistInfo.identifier)) {
+        glm::vec2 distValue = dictionary.value<glm::vec2>(FilterDistInfo.identifier);
+        _distThreshold.set(distValue);
+    }
+    addProperty(_distThreshold);
+
+    // Only add properties correlated to fits files if we're reading from a fits file.
+    if (_fileReaderOption == gaiamission::FileReaderOption::Fits) {
         if (dictionary.hasKey(FirstRowInfo.identifier)) {
             _firstRow = static_cast<int>(dictionary.value<double>(FirstRowInfo.identifier));
         }
@@ -736,7 +767,7 @@ void RenderableGaiaStars::initializeGL() {
     // Construct shader program depending on user-defined shader option.
     const int option = _shaderOption;
     switch (option) {
-    case ShaderOption::Point_SSBO: {
+    case gaiamission::ShaderOption::Point_SSBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -759,7 +790,7 @@ void RenderableGaiaStars::initializeGL() {
         addProperty(_tmPointSigma);
         break;
     }
-    case ShaderOption::Point_VBO: {
+    case gaiamission::ShaderOption::Point_VBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -779,7 +810,7 @@ void RenderableGaiaStars::initializeGL() {
         addProperty(_tmPointSigma);
         break;
     }
-    case ShaderOption::Billboard_SSBO: {
+    case gaiamission::ShaderOption::Billboard_SSBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -809,7 +840,7 @@ void RenderableGaiaStars::initializeGL() {
         //addProperty(_pointSpreadFunctionTexturePath);
         break;
     }
-    case ShaderOption::Billboard_VBO: {
+    case gaiamission::ShaderOption::Billboard_VBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -848,11 +879,12 @@ void RenderableGaiaStars::initializeGL() {
     _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
     _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
 
-    _uniformCache.posXThreshold = _program->uniformLocation("posXThreshold");
-    _uniformCache.posYThreshold = _program->uniformLocation("posYThreshold");
-    _uniformCache.posZThreshold = _program->uniformLocation("posZThreshold");
-    _uniformCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
-    _uniformCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+    _uniformFilterCache.posXThreshold = _program->uniformLocation("posXThreshold");
+    _uniformFilterCache.posYThreshold = _program->uniformLocation("posYThreshold");
+    _uniformFilterCache.posZThreshold = _program->uniformLocation("posZThreshold");
+    _uniformFilterCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+    _uniformFilterCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+    _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
 
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
 
@@ -870,11 +902,13 @@ void RenderableGaiaStars::initializeGL() {
         " - nCurrentAvailMemoryInKB: " + std::to_string(nCurrentAvailMemoryInKB));
     
     // Set ceiling for video memory to use in streaming.
-    float currentVidMem = static_cast<float>(static_cast<long long>(nCurrentAvailMemoryInKB) * 1024);
+    float currentVidMem = static_cast<float>(
+        static_cast<long long>(nCurrentAvailMemoryInKB) * 1024);
     _gpuMemoryBudgetInBytes = static_cast<long long>(currentVidMem * MAX_GPU_MEMORY_PERCENT);
 
     // Set ceiling for how much of the installed CPU RAM to use for streaming. 
-    long long installedRam = static_cast<long long>(CpuCap.installedMainMemory()) * 1024 * 1024;
+    long long installedRam = static_cast<long long>(
+        CpuCap.installedMainMemory()) * 1024 * 1024;
     _cpuRamBudgetInBytes = static_cast<long long>(
         static_cast<float>(installedRam) * MAX_CPU_RAM_PERCENT);
     _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes));
@@ -953,7 +987,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
 
     // Wait until camera has stabilized before we traverse the Octree/stream from files.
-    float rotationDiff = abs(length(_previousCameraRotation) - length(data.camera.rotationQuaternion()));
+    float rotationDiff = abs(length(_previousCameraRotation) - 
+        length(data.camera.rotationQuaternion()));
     if (_firstDrawCalls && rotationDiff > 1e-10) {
         _previousCameraRotation = data.camera.rotationQuaternion();
         return;
@@ -961,7 +996,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     else _firstDrawCalls = false;
 
     // Update which nodes that are stored in memory as the camera moves around (if streaming).
-    if (_fileReaderOption == FileReaderOption::StreamOctree) {
+    if (_fileReaderOption == gaiamission::FileReaderOption::StreamOctree) {
         glm::dvec3 cameraPos = data.camera.positionVec3();
         //glm::dvec3 cameraViewDir = data.camera.viewDirectionWorldSpace();
         size_t chunkSizeInBytes = _chunkSize * sizeof(GLfloat);
@@ -990,7 +1025,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Switch rendering technique depending on user-defined shader option.
     const int shaderOption = _shaderOption;
-    if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
+    if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
+        || shaderOption == gaiamission::ShaderOption::Point_SSBO) {
 
         //------------------------ RENDER WITH SSBO ---------------------------
         // Update SSBO Index array with accumulated stars in all chunks.
@@ -1000,7 +1036,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Update vector with accumulated indices.
         for (auto &[offset, subData] : updateData) {
-            int newValue = (subData.size() / _nRenderValuesPerStar) + _accumulatedIndices[offset];
+            int newValue = (subData.size() / _nRenderValuesPerStar) + 
+                _accumulatedIndices[offset];
             int changeInValue = newValue - _accumulatedIndices[offset + 1];
             _accumulatedIndices[offset + 1] = newValue;
             // Propagate change.
@@ -1028,21 +1065,18 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         // Use orphaning strategy for data SSBO.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
 
-        // Keep streaming memeory size to a minimum.
-        //long long memoryQuery = nChunksToRender * maxStarsPerNode * _nRenderValuesPerStar * sizeof(GLfloat);
-        //long long streamingBudgetInBytes = std::min(memoryQuery, _maxStreamingBudgetInBytes - indexBufferSize);
-        long long streamingBudgetInBytes = _maxStreamingBudgetInBytes;
-
         glBufferData(
             GL_SHADER_STORAGE_BUFFER,
-            streamingBudgetInBytes,
+            _maxStreamingBudgetInBytes,
             nullptr,
             GL_STREAM_DRAW
         );
 
-        // Update SSBO with one insert per chunk/node. The key in map holds the offset index.
+        // Update SSBO with one insert per chunk/node. 
+        // The key in map holds the offset index.
         for (auto &[offset, subData] : updateData) {
-            // We don't need to fill chunk with zeros anymore! Just check if we have any values to update.
+            // We don't need to fill chunk with zeros for SSBOs! 
+            // Just check if we have any values to update.
             if (!subData.empty()) {
                 std::vector<float> vectorData(subData.begin(), subData.end());
                 int dataSize = vectorData.size();
@@ -1067,8 +1101,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
         float posMemoryShare = static_cast<float>(POS_SIZE) / _nRenderValuesPerStar;
         int posChunkSize = maxStarsPerNode * POS_SIZE;
-        //long long posMemoryQuery = nChunksToRender * posChunkSize * sizeof(GLfloat);
-        long long posStreamingBudget = static_cast<long long>(_maxStreamingBudgetInBytes * posMemoryShare);
+        long long posStreamingBudget = static_cast<long long>(
+            _maxStreamingBudgetInBytes * posMemoryShare);
 
         // Use buffer orphaning to update a subset of total data.
         glBufferData(
@@ -1078,10 +1112,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             GL_STREAM_DRAW
         );
 
-        // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+        // Update buffer with one insert per chunk/node. 
+        //The key in map holds the offset index.
         for (auto &[offset, subData] : updateData) {
-            // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
-            // Only required when removing nodes because chunks are filled up in octree fetch on add.
+            // Fill chunk by appending zeroes so we overwrite possible earlier values.
+            // Only required when removing nodes because chunks are filled up in octree 
+            // fetch on add.
             std::vector<float> vectorData(subData.begin(), subData.end());
             vectorData.resize(posChunkSize, 0.f);
             glBufferSubData(
@@ -1097,7 +1133,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
             float colMemoryShare = static_cast<float>(COL_SIZE) / _nRenderValuesPerStar;
             int colChunkSize = maxStarsPerNode * COL_SIZE;
-            //long long colMemoryQuery = nChunksToRender * colChunkSize * sizeof(GLfloat);
             long long colStreamingBudget = static_cast<long long>(
                 _maxStreamingBudgetInBytes * colMemoryShare);
 
@@ -1109,9 +1144,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 GL_STREAM_DRAW
             );
 
-            // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+            // Update buffer with one insert per chunk/node. 
+            //The key in map holds the offset index.
             for (auto &[offset, subData] : updateData) {
-                // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+                // Fill chunk by appending zeroes so we overwrite possible earlier values.
                 std::vector<float> vectorData(subData.begin(), subData.end());
                 vectorData.resize(posChunkSize + colChunkSize, 0.f);
                 glBufferSubData(
@@ -1127,7 +1163,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
                 float velMemoryShare = static_cast<float>(VEL_SIZE) / _nRenderValuesPerStar;
                 int velChunkSize = maxStarsPerNode * VEL_SIZE;
-                //long long velMemoryQuery = nChunksToRender * velChunkSize * sizeof(GLfloat);
                 long long velStreamingBudget = static_cast<long long>(
                     _maxStreamingBudgetInBytes * velMemoryShare);
 
@@ -1139,9 +1174,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                     GL_STREAM_DRAW
                 );
 
-                // Update buffer with one insert per chunk/node. The key in map holds the offset index.
+                // Update buffer with one insert per chunk/node. 
+                //The key in map holds the offset index.
                 for (auto &[offset, subData] : updateData) {
-                    // Fill chunk by appending zeroes to data so we overwrite possible earlier values.
+                    // Fill chunk by appending zeroes.
                     std::vector<float> vectorData(subData.begin(), subData.end());
                     vectorData.resize(_chunkSize, 0.f);
                     glBufferSubData(
@@ -1197,11 +1233,12 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.luminosityMultiplier, _luminosityMultiplier);
 
     // Send filterValues.
-    _program->setUniform(_uniformCache.posXThreshold, _posXThreshold);
-    _program->setUniform(_uniformCache.posYThreshold, _posYThreshold);
-    _program->setUniform(_uniformCache.posZThreshold, _posZThreshold);
-    _program->setUniform(_uniformCache.gMagThreshold, _gMagThreshold);
-    _program->setUniform(_uniformCache.bpRpThreshold, _bpRpThreshold);
+    _program->setUniform(_uniformFilterCache.posXThreshold, _posXThreshold);
+    _program->setUniform(_uniformFilterCache.posYThreshold, _posYThreshold);
+    _program->setUniform(_uniformFilterCache.posZThreshold, _posZThreshold);
+    _program->setUniform(_uniformFilterCache.gMagThreshold, _gMagThreshold);
+    _program->setUniform(_uniformFilterCache.bpRpThreshold, _bpRpThreshold);
+    _program->setUniform(_uniformFilterCache.distThreshold, _distThreshold);
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
@@ -1212,18 +1249,18 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     GLsizei nShaderCalls = _nStarsToRender;
 
     switch (shaderOption) {
-    case ShaderOption::Point_SSBO: {
+    case gaiamission::ShaderOption::Point_SSBO: {
         _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
         _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
         _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
         break;
     }
-    case ShaderOption::Point_VBO: {
+    case gaiamission::ShaderOption::Point_VBO: {
         // Specify how many potential stars we have to render.
         nShaderCalls = maxStarsPerNode * nChunksToRender;
         break;
     }
-    case ShaderOption::Billboard_SSBO: {
+    case gaiamission::ShaderOption::Billboard_SSBO: {
         _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
         _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
         _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
@@ -1242,7 +1279,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.psfTexture, psfUnit);
         break;
     }
-    case ShaderOption::Billboard_VBO: {
+    case gaiamission::ShaderOption::Billboard_VBO: {
         _program->setUniform(_uniformCache.closeUpBoostDist,
             _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
         );
@@ -1291,7 +1328,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _fboTexture->bind();
     _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
 
-    if (shaderOption == ShaderOption::Point_SSBO || shaderOption == ShaderOption::Point_VBO) {
+    if (shaderOption == gaiamission::ShaderOption::Point_SSBO
+        || shaderOption == gaiamission::ShaderOption::Point_VBO) {
         _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
         _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
         _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
@@ -1354,7 +1392,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _program = nullptr;
         }
         switch (shaderOption) {
-        case ShaderOption::Point_SSBO: {
+        case gaiamission::ShaderOption::Point_SSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -1367,8 +1405,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
             _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
-            // If rebuild was triggered by switching ShaderOption then ssboBinding may not have 
-            //been initialized yet. Binding will happen in later in buffersAredirty.
+            // If rebuild was triggered by switching ShaderOption then ssboBinding may not 
+            // have been initialized yet. Binding will happen in later in buffersAredirty.
             if (!_shadersAreDirty) {
                 _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
                 _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
@@ -1383,7 +1421,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
-        case ShaderOption::Point_VBO: {
+        case gaiamission::ShaderOption::Point_VBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -1402,7 +1440,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
-        case ShaderOption::Billboard_SSBO: {
+        case gaiamission::ShaderOption::Billboard_SSBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
@@ -1422,8 +1460,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
             _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
 
-            // If rebuild was triggered by switching ShaderOption then ssboBinding may not have 
-            //been initialized yet. Binding will happen in later in buffersAredirty.
+            // If rebuild was triggered by switching ShaderOption then ssboBinding may not 
+            // have been initialized yet. Binding will happen in later in buffersAredirty.
             if (!_shadersAreDirty) {
                 _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
                 _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
@@ -1439,7 +1477,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
             break;
         }
-        case ShaderOption::Billboard_VBO: {
+        case gaiamission::ShaderOption::Billboard_VBO: {
             _program = ghoul::opengl::ProgramObject::Build(
                 "GaiaStar",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
@@ -1478,11 +1516,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _uniformCache.luminosityMultiplier = _program->uniformLocation("luminosityMultiplier");
         _uniformCache.colorTexture = _program->uniformLocation("colorTexture");
         // Filter uniforms:
-        _uniformCache.posXThreshold = _program->uniformLocation("posXThreshold");
-        _uniformCache.posYThreshold = _program->uniformLocation("posYThreshold");
-        _uniformCache.posZThreshold = _program->uniformLocation("posZThreshold");
-        _uniformCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
-        _uniformCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+        _uniformFilterCache.posXThreshold = _program->uniformLocation("posXThreshold");
+        _uniformFilterCache.posYThreshold = _program->uniformLocation("posYThreshold");
+        _uniformFilterCache.posZThreshold = _program->uniformLocation("posZThreshold");
+        _uniformFilterCache.gMagThreshold = _program->uniformLocation("gMagThreshold");
+        _uniformFilterCache.bpRpThreshold = _program->uniformLocation("bpRpThreshold");
+        _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
     }
 
     if (_programTM->isDirty() || _shadersAreDirty) {
@@ -1492,8 +1531,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _programTM = nullptr;
         }
         switch (shaderOption) {
-        case ShaderOption::Point_SSBO:
-        case ShaderOption::Point_VBO: {
+        case gaiamission::ShaderOption::Point_SSBO:
+        case gaiamission::ShaderOption::Point_VBO: {
             _programTM = renderEngine.buildRenderProgram("ToneMapping",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
@@ -1505,8 +1544,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
             break;
         }
-        case ShaderOption::Billboard_SSBO:
-        case ShaderOption::Billboard_VBO: {
+        case gaiamission::ShaderOption::Billboard_SSBO:
+        case gaiamission::ShaderOption::Billboard_VBO: {
             _programTM = renderEngine.buildRenderProgram("ToneMapping",
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
                 absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
@@ -1537,24 +1576,31 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Calculate memory budgets. 
         _chunkSize = _octreeManager->maxStarsPerNode() * _nRenderValuesPerStar;
-        long long totalChunkSizeInBytes = _octreeManager->totalNodes() * _chunkSize * sizeof(GLfloat);
-        _maxStreamingBudgetInBytes = std::min(totalChunkSizeInBytes, _gpuMemoryBudgetInBytes);
-        long long maxNodesInStream = _maxStreamingBudgetInBytes / (_chunkSize * sizeof(GLfloat));
+        long long totalChunkSizeInBytes = 
+            _octreeManager->totalNodes() * _chunkSize * sizeof(GLfloat);
+        _maxStreamingBudgetInBytes = 
+            std::min(totalChunkSizeInBytes, _gpuMemoryBudgetInBytes);
+        long long maxNodesInStream = 
+            _maxStreamingBudgetInBytes / (_chunkSize * sizeof(GLfloat));
         
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
         bool datasetFitInMemory = (_totalDatasetSizeInBytes < _cpuRamBudgetInBytes);
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
-            " - Max streaming budget (in bytes): " + std::to_string(_maxStreamingBudgetInBytes) +
+            " - Max streaming budget (in bytes): " + 
+            std::to_string(_maxStreamingBudgetInBytes) +
             " - Max nodes in stream: " + std::to_string(maxNodesInStream));
 
 
         // ------------------ RENDER WITH SSBO -----------------------
-        if (shaderOption == ShaderOption::Billboard_SSBO || shaderOption == ShaderOption::Point_SSBO) {
+        if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
+            || shaderOption == gaiamission::ShaderOption::Point_SSBO) {
             _useVBO = false;
 
-            // Trigger a rebuild of buffer data from octree. With SSBO we won't fill the chunks.
-            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO, datasetFitInMemory);
+            // Trigger a rebuild of buffer data from octree. 
+            // With SSBO we won't fill the chunks.
+            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO, 
+                datasetFitInMemory);
             _nStarsToRender = 0;
 
             // Generate SSBO Buffers and bind them. 
@@ -1564,11 +1610,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             if (_ssboIdx == 0) {
                 glGenBuffers(1, &_ssboIdx);
-                LDEBUG(fmt::format("Generating Index Shader Storage Buffer Object id '{}'", _ssboIdx));
+                LDEBUG(fmt::format("Generating Index Shader Storage Buffer Object id '{}'",
+                    _ssboIdx));
             }
             if (_ssboData == 0) {
                 glGenBuffers(1, &_ssboData);
-                LDEBUG(fmt::format("Generating Data Shader Storage Buffer Object id '{}'", _ssboData));
+                LDEBUG(fmt::format("Generating Data Shader Storage Buffer Object id '{}'", 
+                    _ssboData));
             }
 
             // Bind SSBO blocks to our shader positions.
@@ -1577,7 +1625,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
                 ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboIdxBinding->bindingNumber(), _ssboIdx);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboIdxBinding->bindingNumber(), 
+                _ssboIdx);
             _program->setSsboBinding("ssbo_idx_data", _ssboIdxBinding->bindingNumber());
 
             // Combined SSBO with all data.
@@ -1585,7 +1634,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             _ssboDataBinding = std::make_unique<ghoul::opengl::BufferBinding<
                 ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboDataBinding->bindingNumber(), _ssboData);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _ssboDataBinding->bindingNumber(), 
+                _ssboData);
             _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
 
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -1593,8 +1643,10 @@ void RenderableGaiaStars::update(const UpdateData&) {
         else { // ------------------ RENDER WITH VBO -----------------------
             _useVBO = true;
 
-            // Trigger a rebuild of buffer data from octree. With VBO we will fill the chunks.
-            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO, datasetFitInMemory);
+            // Trigger a rebuild of buffer data from octree. 
+            // With VBO we will fill the chunks.
+            _octreeManager->initBufferIndexStack(maxNodesInStream, _useVBO, 
+                datasetFitInMemory);
             _nStarsToRender = 0;
 
             // Generate VAO and VBOs
@@ -1604,15 +1656,18 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             if (_vboPos == 0) {
                 glGenBuffers(1, &_vboPos);
-                LDEBUG(fmt::format("Generating Position Vertex Buffer Object id '{}'", _vboPos));
+                LDEBUG(fmt::format("Generating Position Vertex Buffer Object id '{}'",
+                    _vboPos));
             }
             if (_vboCol == 0) {
                 glGenBuffers(1, &_vboCol);
-                LDEBUG(fmt::format("Generating Color Vertex Buffer Object id '{}'", _vboCol));
+                LDEBUG(fmt::format("Generating Color Vertex Buffer Object id '{}'",
+                    _vboCol));
             }
             if (_vboVel == 0) {
                 glGenBuffers(1, &_vboVel);
-                LDEBUG(fmt::format("Generating Velocity Vertex Buffer Object id '{}'", _vboVel));
+                LDEBUG(fmt::format("Generating Velocity Vertex Buffer Object id '{}'",
+                    _vboVel));
             }
 
             // Bind our different VBOs to our vertex array layout. 
@@ -1765,7 +1820,9 @@ void RenderableGaiaStars::update(const UpdateData&) {
             // Generate a new texture and attach it to our FBO. 
             glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA32F,
+                glm::uvec3(screenSize, 1), 
+                ghoul::opengl::Texture::Format::RGBA, 
+                GL_RGBA32F,
                 GL_FLOAT
                 );
             _fboTexture->uploadTexture();
@@ -1847,9 +1904,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (OsEng.windowWrapper().windowHasResized()) {
         // Update FBO texture resolution if we haven't already.
         glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
-        if ( glm::any(glm::notEqual(_fboTexture->dimensions(), glm::uvec3(screenSize, 1.0)))) {
+        if ( glm::any(glm::notEqual(
+            _fboTexture->dimensions(), glm::uvec3(screenSize, 1.0)))) {
+
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(screenSize, 1), ghoul::opengl::Texture::Format::RGBA, GL_RGBA32F,
+                glm::uvec3(screenSize, 1), 
+                ghoul::opengl::Texture::Format::RGBA, 
+                GL_RGBA32F,
                 GL_FLOAT
                 );
             _fboTexture->uploadTexture();
@@ -1885,31 +1946,31 @@ bool RenderableGaiaStars::readDataFile() {
     LINFO("Loading data file: " + _file);
 
     switch (fileReaderOption) {
-    case FileReaderOption::Fits: {
+    case gaiamission::FileReaderOption::Fits: {
 
         // Read raw fits file and construct Octree.  
         nReadStars = readFitsFile(_file);
         break;
     }
-    case FileReaderOption::Speck: {
+    case gaiamission::FileReaderOption::Speck: {
 
         // Read raw speck file and construct Octree. 
         nReadStars = readSpeckFile(_file);
         break;
     }
-    case FileReaderOption::BinaryRaw: {
+    case gaiamission::FileReaderOption::BinaryRaw: {
 
         // Stars are stored in an ordered binary file.
         nReadStars = readBinaryRawFile(_file);
         break;
     }
-    case FileReaderOption::BinaryOctree: {
+    case gaiamission::FileReaderOption::BinaryOctree: {
 
         // Octree already constructed and stored as a binary file. 
         nReadStars = readBinaryOctreeFile(_file);
         break;
     }
-    case FileReaderOption::StreamOctree: {
+    case gaiamission::FileReaderOption::StreamOctree: {
 
         // Read Octree structure from file, without data.
         nReadStars = readBinaryOctreeStructureFile(_file);
@@ -1932,8 +1993,8 @@ int RenderableGaiaStars::readFitsFile(const std::string& filePath) {
     int nReadValuesPerStar = 0;
 
     FitsFileReader fitsFileReader(false);
-    std::vector<float> fullData = fitsFileReader.readFitsFile(filePath, nReadValuesPerStar, _firstRow, 
-        _lastRow, _columnNames);
+    std::vector<float> fullData = fitsFileReader.readFitsFile(filePath, nReadValuesPerStar,
+        _firstRow, _lastRow, _columnNames);
 
     // Insert stars into octree.
     for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
@@ -1980,7 +2041,8 @@ int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
         fileStream.read(reinterpret_cast<char*>(&nReadValuesPerStar), sizeof(int32_t));
 
         fullData.resize(nValues);
-        fileStream.read(reinterpret_cast<char*>(&fullData[0]), nValues * sizeof(fullData[0]));
+        fileStream.read(reinterpret_cast<char*>(&fullData[0]), 
+            nValues * sizeof(fullData[0]));
 
         // Insert stars into octree.
         for (size_t i = 0; i < fullData.size(); i += nReadValuesPerStar) {
@@ -1988,7 +2050,6 @@ int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
             auto last = fullData.begin() + i + renderValues;
             std::vector<float> starValues(first, last);
 
-            //TODO: Filter?
             _octreeManager->insert(starValues);
         }
         _octreeManager->sliceLodData();
@@ -1997,7 +2058,8 @@ int RenderableGaiaStars::readBinaryRawFile(const std::string& filePath) {
         fileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file '{}' for loading raw binary file!", filePath));
+        LERROR(fmt::format("Error opening file '{}' for loading raw binary file!", 
+            filePath));
         return nReadStars;
     }
     return nReadStars;
@@ -2013,7 +2075,8 @@ int RenderableGaiaStars::readBinaryOctreeFile(const std::string& filePath) {
         fileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!", filePath));
+        LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!", 
+            filePath));
         return nReadStars;
     }
     return nReadStars;
@@ -2030,7 +2093,8 @@ int RenderableGaiaStars::readBinaryOctreeStructureFile(const std::string& folder
         fileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!", indexFile));
+        LERROR(fmt::format("Error opening file '{}' for loading binary Octree file!",
+            indexFile));
         return nReadStars;
     }
     return nReadStars;

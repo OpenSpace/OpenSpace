@@ -112,9 +112,8 @@ ReadFitsTask::~ReadFitsTask() {}
 std::string ReadFitsTask::description() {
     return "Read the specified fits file (or all fits files in specified folder): " + 
         _inFileOrFolderPath + "\n and write raw star data into: " + _outFileOrFolderPath + 
-        "\n. All columns required for default rendering parameters will always be read but user can "
-        "define which columns to read for filtering in ConstructOctreeTask later. Threshold for "
-        "filtering are defined in 'gaia_octree.task'.";
+        "\n. All columns required for default rendering and filtering parameters will "
+        "always be read but user can define additional filter columns to read.";
 }
 
 void ReadFitsTask::perform(const Task::ProgressCallback& progressCallback) {
@@ -136,8 +135,8 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     int32_t nValuesPerStar = 0;
 
     FitsFileReader fileReader(false);
-    std::vector<float> fullData = fileReader.readFitsFile(_inFileOrFolderPath, nValuesPerStar, _firstRow,
-        _lastRow, _filterColumnNames);
+    std::vector<float> fullData = fileReader.readFitsFile(_inFileOrFolderPath, 
+        nValuesPerStar, _firstRow, _lastRow, _filterColumnNames);
 
     progressCallback(0.8f);
 
@@ -145,7 +144,8 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
     if (outFileStream.good()) {
 
         int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO("Writing " + std::to_string(nValues) + " values to file: " + _outFileOrFolderPath);
+        LINFO("Writing " + std::to_string(nValues) + " values to file: " +
+            _outFileOrFolderPath);
         LINFO("Number of values per star: " + std::to_string(nValuesPerStar));
 
         if (nValues == 0) {
@@ -160,11 +160,13 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file.", _outFileOrFolderPath));
+        LERROR(fmt::format("Error opening file: {} as output data file.", 
+            _outFileOrFolderPath));
     }
 }
 
-void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& progressCallback) {
+void ReadFitsTask::readAllFitsFilesFromFolder(
+    const Task::ProgressCallback& progressCallback) {
     std::vector<std::vector<float>> octants(8);
     std::vector<bool> isFirstWrite(8, true);
     size_t finishedJobs = 0;
@@ -183,7 +185,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
     size_t nInputFiles = allInputFiles.size();
     LINFO("Files to read: " + std::to_string(nInputFiles));
 
-    // Define what columns to read. Append additional filter parameters to default rendering parameters.
+    // Define what columns to read.
     _allColumnNames = std::vector<std::string>();
     // Read in the order of table in file.
     auto defaultColumnNames = std::vector<std::string>({
@@ -206,8 +208,11 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
         "radial_velocity",
         "radial_velocity_error",
         });
-    _allColumnNames.insert(_allColumnNames.end(), defaultColumnNames.begin(), defaultColumnNames.end());
-    _allColumnNames.insert(_allColumnNames.end(), _filterColumnNames.begin(), _filterColumnNames.end());
+    _allColumnNames.insert(_allColumnNames.end(), defaultColumnNames.begin(), 
+        defaultColumnNames.end());
+    // Append additional filter parameters to default rendering parameters.
+    _allColumnNames.insert(_allColumnNames.end(), _filterColumnNames.begin(), 
+        _filterColumnNames.end());
 
     std::string allNames = "Columns to read: \n";
     for (auto colName : _allColumnNames) {
@@ -226,8 +231,9 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
-        auto readFileJob = std::make_shared<gaiamission::ReadFileJob>(fileToRead, _allColumnNames, 
-            _firstRow, _lastRow, nDefaultColumns, nValuesPerStar, fitsFileReader);
+        auto readFileJob = std::make_shared<gaiamission::ReadFileJob>(fileToRead, 
+            _allColumnNames, _firstRow, _lastRow, nDefaultColumns, nValuesPerStar, 
+            fitsFileReader);
         concurrentjobManager.enqueueJob(readFileJob);
     }
 
@@ -243,11 +249,13 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback& prog
             
             for (int i = 0; i < 8; ++i) {
                 // Add read values to global octant and check if it's time to write!
-                octants[i].insert(octants[i].end(), (*newOctant)[i].begin(), (*newOctant)[i].end());
+                octants[i].insert(octants[i].end(), (*newOctant)[i].begin(), 
+                    (*newOctant)[i].end());
                 if (octants[i].size() > MAX_SIZE_BEFORE_WRITE || finishedJobs == nInputFiles) {
 
                     // Write to file!
-                    totalStars += writeOctantToFile(octants[i], i, isFirstWrite, nValuesPerStar);
+                    totalStars += writeOctantToFile(octants[i], i, isFirstWrite,
+                        nValuesPerStar);
 
                     octants[i].clear();
                     octants[i].shrink_to_fit();
@@ -274,7 +282,8 @@ int ReadFitsTask::writeOctantToFile(const std::vector<float>& octantData, int in
         // If this is the first write then write number of values per star!
         if (isFirstWrite[index]) {
             LINFO("First write for Octant_" + std::to_string(index));
-            fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+            fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), 
+                sizeof(int32_t));
             isFirstWrite[index] = false;
         }
 
@@ -307,25 +316,25 @@ documentation::Documentation ReadFitsTask::Documentation() {
                 KeyInFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "If SingleFileProcess is set to true then this specifies the path to a single FITS "
-                "file that will be read. Otherwise it specifies the path to a folder with multiple "
-                "FITS files that are to be read.",
+                "If SingleFileProcess is set to true then this specifies the path to a "
+                "single FITS file that will be read. Otherwise it specifies the path to a "
+                "folder with multiple FITS files that are to be read.",
             },
             {
                 KeyOutFileOrFolderPath,
                 new StringVerifier,
                 Optional::No,
-                "If SingleFileProcess is set to true then this specifies the name (including entire "
-                "path) to the output file. Otherwise it specifies the path to the output folder "
-                "which to export binary star data to.",
+                "If SingleFileProcess is set to true then this specifies the name "
+                "(including entire path) to the output file. Otherwise it specifies the "
+                "path to the output folder which to export binary star data to.",
             },
             {
                 KeySingleFileProcess,
                 new BoolVerifier,
                 Optional::Yes,
-                "If true then task will read from a single FITS file and output a single binary file. "
-                "If false then task will read all files in specified folder and output multiple files "
-                "sorted by location."
+                "If true then task will read from a single FITS file and output a single "
+                "binary file. If false then task will read all files in specified folder "
+                "and output multiple files sorted by location."
             },
             {
                 KeyThreadsToUse,
@@ -351,9 +360,9 @@ documentation::Documentation ReadFitsTask::Documentation() {
                 KeyFilterColumnNames,
                 new StringListVerifier,
                 Optional::Yes,
-                "A list of strings with the names of all the additional columns that are to be "
-                "read from the specified FITS file(s). These columns can be used for filtering "
-                "while constructing Octree later.",
+                "A list of strings with the names of all the additional columns that are "
+                "to be read from the specified FITS file(s). These columns can be used "
+                "for filtering while constructing Octree later.",
             },
 
         }

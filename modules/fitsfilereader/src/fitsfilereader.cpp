@@ -119,16 +119,13 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
     return nullptr;
 }
 
-// Read specified table columns from fits file. 
-// If readAll variable is set to true the entire table will be read before the 
-// selected columns, which makes the function take a lot longer if it's a big file. 
-// If no HDU index is given the currentExtension will be read from. 
 template<typename T>
 std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
     const std::vector<std::string>& columnNames, int startRow, int endRow, 
     int hduIdx, bool readAll) {
 
-    // We need to lock reading when using multithreads because CCfits can't handle multiple I/O drivers.
+    // We need to lock reading when using multithreads because CCfits can't handle 
+    // multiple I/O drivers.
     _mutex.lock();
 
     try {
@@ -170,14 +167,14 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
     return nullptr;
 }
 
-std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValuesPerStar, int firstRow, 
-    int lastRow, std::vector<std::string> filterColumnNames, int multiplier) {
+std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValuesPerStar, 
+    int firstRow, int lastRow, std::vector<std::string> filterColumnNames, int multiplier) {
     
     std::vector<float> fullData;
     srand(1234567890);
     if (firstRow <= 0) firstRow = 1;
 
-    // Define what columns to read. Append additional filter parameters to default rendering parameters.
+    // Define what columns to read.
     auto allColumnNames = std::vector<std::string>({
         "Position_X",
         "Position_Y",
@@ -188,9 +185,18 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
         "Gaia_Parallax",
         "Gaia_G_Mag",
         "Tycho_B_Mag",
-        "Tycho_V_Mag"
+        "Tycho_V_Mag",
+        "Gaia_Parallax_Err", 
+        "Gaia_Proper_Motion_RA", 
+        "Gaia_Proper_Motion_RA_Err",
+        "Gaia_Proper_Motion_Dec",
+        "Gaia_Proper_Motion_Dec_Err",
+        "Tycho_B_Mag_Err",
+        "Tycho_V_Mag_Err"
         });
-    allColumnNames.insert(allColumnNames.end(), filterColumnNames.begin(), filterColumnNames.end());
+    // Append additional filter parameters to default rendering parameters.
+    allColumnNames.insert(allColumnNames.end(), filterColumnNames.begin(), 
+            filterColumnNames.end());
 
     std::string allNames = "Columns to read: \n";
     for (auto colName : allColumnNames) {
@@ -211,7 +217,8 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     size_t nColumnsRead = allColumnNames.size();
     size_t defaultCols = 17; // Number of columns that are copied by predefined code.  
     if (nColumnsRead != defaultCols) {
-        LINFO("Additional columns will be read! Consider add column in code for significant speedup!");
+        LINFO("Additional columns will be read! Consider add column in code for "
+            "significant speedup!");
     }
     // Declare how many values to save per star
     nValuesPerStar = nColumnsRead + 1; // +1 for B-V color value.
@@ -231,7 +238,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
     std::vector<float> tycho_b = std::move(tableContent[allColumnNames[8]]);
     std::vector<float> tycho_v = std::move(tableContent[allColumnNames[9]]);
 
-    // Default filter parameters - must follow the same order as Lua script!
+    // Default filter parameters
     // Additional filter parameters are handled as well but slows down reading tremendously!
     std::vector<float> parallax_err = std::move(tableContent[allColumnNames[10]]);
     std::vector<float> pr_mot_ra = std::move(tableContent[allColumnNames[11]]);

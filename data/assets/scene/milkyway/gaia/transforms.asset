@@ -19,8 +19,8 @@ local GaiaPosition = {
 
     },
     GUI = {
-        Name = "Gaia Model Position",
-        Path = "/GaiaMission/GaiaModel"
+        Name = "Position",
+        Path = "/GaiaMission/Gaia Model"
     }
 }
 

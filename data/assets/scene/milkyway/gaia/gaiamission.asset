@@ -1,4 +1,5 @@
 local assetHelper = asset.require("util/asset_helper")
+asset.require('./trail')
 
 local textures = asset.syncedResource({
     Name = "Stars Textures",
@@ -44,6 +45,7 @@ local GaiaMission = {
         FilterPosZ = {0.0, 0.0},
         FilterGMag = {20.0, 20.0},
         FilterBpRp = {0.0, 0.0},
+        FilterDist = {0.0, 0.0},
     },
     GUI = {
         Name = "Gaia Mission",

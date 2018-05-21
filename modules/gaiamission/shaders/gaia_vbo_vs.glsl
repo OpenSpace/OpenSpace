@@ -26,7 +26,7 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with renderoption.h:RenderOption enum
+// Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
 const int RENDEROPTION_MOTION = 2; 
@@ -53,19 +53,20 @@ uniform vec2 posYThreshold;
 uniform vec2 posZThreshold;
 uniform vec2 gMagThreshold;
 uniform vec2 bpRpThreshold;
-
+uniform vec2 distThreshold;
 
 void main() {
     vs_brightness = in_brightness;
 
     // Check if we should filter this star by position.
-    bool filterStar = false;
     if ( (abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) || 
         (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) || 
         (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
         (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
         (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
+        (abs(distThreshold.x) > EPS && length(in_position) < distThreshold.x) || 
+        (abs(distThreshold.y) > EPS && length(in_position) > distThreshold.y) ||
         ( renderOption != RENDEROPTION_STATIC && (
         (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
         (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 

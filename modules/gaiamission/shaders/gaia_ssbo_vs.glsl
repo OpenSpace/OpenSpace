@@ -26,7 +26,7 @@
 
 #include "floatoperations.glsl"
 
-// Keep in sync with renderoption.h:RenderOption enum
+// Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
 const int RENDEROPTION_MOTION = 2; 
@@ -63,6 +63,7 @@ uniform vec2 posYThreshold;
 uniform vec2 posZThreshold;
 uniform vec2 gMagThreshold;
 uniform vec2 bpRpThreshold;
+uniform vec2 distThreshold;
 
 // Use binary search to find the chunk containing our star ID.
 int findChunkId(int left, int right, int id) {
@@ -115,7 +116,9 @@ void main() {
         (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
         (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
-        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ) {
+        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ||
+        (abs(distThreshold.x) > EPS && length(in_position) < distThreshold.x) || 
+        (abs(distThreshold.y) > EPS && length(in_position) > distThreshold.y) ) {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);

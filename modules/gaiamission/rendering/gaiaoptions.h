@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GAIAMISSION___RENDEROPTION___H__
-#define __OPENSPACE_MODULE_GAIAMISSION___RENDEROPTION___H__
+#ifndef __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
+#define __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__
 
 
 namespace openspace::gaiamission {
@@ -34,6 +34,21 @@ namespace openspace::gaiamission {
         Motion = 2
     };
 
+    enum FileReaderOption {
+        Fits = 0,
+        Speck = 1,
+        BinaryRaw = 2,
+        BinaryOctree = 3,
+        StreamOctree = 4
+    };
+
+    enum ShaderOption {
+        Point_SSBO = 0,
+        Point_VBO = 1,
+        Billboard_SSBO = 2,
+        Billboard_VBO = 3
+    };
+
 } // namespace openspace::gaiamission
 
-#endif // __OPENSPACE_MODULE_GAIAMISSION___RENDEROPTION___H__
+#endif // __OPENSPACE_MODULE_GAIAMISSION___GAIAOPTIONS___H__

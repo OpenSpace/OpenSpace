@@ -1,0 +1,31 @@
+local assetHelper = asset.require('util/asset_helper')
+local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+
+
+local GaiaTrail = {
+    Identifier = "GaiaTrail",
+    Parent = earthTransforms.EarthBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "MOON",
+            Observer = "EARTH BARYCENTER",
+        },
+        Color = { 0.0, 0.8, 0.7 },
+        ShowFullTrail = false,
+        StartTime = "2013 DEC 19 09:55:00",
+        EndTime = "2019 JUN 20 05:55:00",
+        PointSize = 5,
+        SampleInterval = 2400,
+        TimeStampSubsampleFactor = 4,
+        EnableFade = false,
+        Rendering = "Lines"
+    },
+    GUI = {
+        Name = "Trail",
+        Path = "/GaiaMission/Gaia Model"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaTrail } )

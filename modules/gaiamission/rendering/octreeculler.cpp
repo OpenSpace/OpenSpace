@@ -35,36 +35,41 @@ namespace openspace {
 
 OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
-    , _nodeBounds(globebrowsing::AABB3())
 {   }
 
 OctreeCuller::~OctreeCuller() {   }
 
-// Returns true if any part of the node is visible in the current view. 
 bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners, const glm::mat4& mvp) {
     
-    // Create a bounding box in screen space from node boundaries.
+    createNodeBounds(corners, mvp);
+
+    return _viewFrustum.intersects(_nodeBounds);
+}
+
+glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners, 
+    const glm::mat4& mvp, const glm::vec2& screenSize) {
+
+    createNodeBounds(corners, mvp);
+
+    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
+    glm::vec3 size = _nodeBounds.size() / 2.f;
+    size = glm::abs(size); 
+    return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
+}
+
+void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners, 
+    const glm::mat4& mvp) {
+
+    // Create a bounding box in clipping space from node boundaries.
     _nodeBounds = globebrowsing::AABB3();
 
     for (size_t i = 0; i < 8; ++i) {
         glm::dvec4 cornerClippingSpace = mvp * corners[i];
 
-        glm::dvec3 ndc = glm::dvec3(
-            (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
-        );
+        glm::dvec3 ndc
+              = glm::dvec3((1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace);
         _nodeBounds.expand(ndc);
     }
-
-    return _viewFrustum.intersects(_nodeBounds);
-}
-
- //Returns the size [in pixels] of the node in screen space. 
-glm::vec2 OctreeCuller::getNodeSizeInPixels(const glm::vec2& screenSize) {
-    // Use the same AABB as before {created in isVisible()}. 
-    // Screen space is mapped to [-1, 1] so divide by 2 and multiply with screen size.
-    glm::vec3 size = _nodeBounds.size() / 2.f;
-    size = glm::abs(size); 
-    return glm::vec2(size.x * screenSize.x, size.y * screenSize.y);
 }
 
 } // namespace openspace
