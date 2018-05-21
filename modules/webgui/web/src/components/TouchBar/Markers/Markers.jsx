@@ -79,7 +79,7 @@ class Markers extends Component {
 
         const planetRadius = Number(screenSpaceRadius[i].Value);
         let size = planetRadius * 0.1;
-        const showInfo = planetRadius > 25;
+        const showInfo = (planetRadius > 25 && outsideCircle);
 
         if (size >= 3) size = 3;
         if (size <= 1.5) size = 1.5;

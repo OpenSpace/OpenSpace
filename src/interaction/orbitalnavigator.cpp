@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/webgui/webguimodule.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
@@ -124,6 +125,11 @@ namespace {
         "Overview",
         "Determines whether to zoom out to an overview or not."
     };
+    static const openspace::properties::Property::PropertyInfo OrientationInfo = {
+        "Orientation",
+        "Orientation",
+        "Determines whether to change the orientation of the focus node or not."
+    };
     static const openspace::properties::Property::PropertyInfo ApplyOverviewInfo = {
         "ApplyOverview",
         "Apply overview ",
@@ -201,6 +207,7 @@ OrbitalNavigator::OrbitalNavigator()
     , _velocitySensitivity(VelocityZoomControlInfo, 0.05f, 0.001f, 0.1f)
     , _flyTo(FlyToNodeInfo, true)
     , _overview(OverviewInfo, false)
+    , _changeOrientation(OrientationInfo, true)
     , _applyOverview(ApplyOverviewInfo)
     ,_applyFlyTo(ApplyFlyToInfo)
     , _mouseSensitivity(MouseSensitivityInfo, 15.0f, 1.0f, 50.f)
@@ -281,6 +288,7 @@ OrbitalNavigator::OrbitalNavigator()
     addProperty(_velocitySensitivity);
     addProperty(_flyTo);
     addProperty(_overview);
+    addProperty(_changeOrientation);
 
     addProperty(_useAdaptiveStereoscopicDepth);
     addProperty(_staticViewScaleExponent);
@@ -303,6 +311,8 @@ void OrbitalNavigator::updateStatesFromInput(const InputState& inputState,
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaTime){
+    GlobeBrowsingModule& module = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
+
     if (_focusNode) {
         // Read the current state of the camera
         glm::dvec3 camPos = camera.positionVec3();
@@ -462,6 +472,25 @@ void OrbitalNavigator::updateCameraStateFromStates(Camera& camera, double deltaT
             camera.setScaling(glm::pow(10.f, _staticViewScaleExponent));
         }
     }
+    
+    // Change orientation such that the planet's north pole is upwards, i.e.
+    // the planet is oriented such that it is not tilted in an incorrect way
+    if (_changeOrientation) {
+        double longitude = 15.0;
+        double latitude = 10.0;
+
+        module.goToGeo(longitude, latitude);
+        glm::dvec3 prevCamPos = camera.positionVec3();
+
+        // Looking at the "NIGTH"-side of the focus node
+        if (length(_focusNode->worldPosition()) < length(camera.positionVec3())) {
+            module.goToGeo(longitude, latitude-180);
+            if (length(prevCamPos) < length(camera.positionVec3())) {
+                module.goToGeo(longitude, latitude);
+            }
+        }
+        _changeOrientation = false;
+    }
 }
 
 glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& camPos,
@@ -486,6 +515,7 @@ void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
 
     _focusNode = focusNode;
     _flyTo = true;
+    _changeOrientation = true;
 
     if (focusNode != nullptr) {
         _previousFocusNodePosition = focusNode->worldPosition();

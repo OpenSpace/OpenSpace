@@ -92,6 +92,7 @@ private:
     properties::FloatProperty _velocitySensitivity;
     properties::BoolProperty _flyTo;
     properties::BoolProperty _overview;
+    properties::BoolProperty _changeOrientation;
     properties::TriggerProperty _applyOverview;
     properties::TriggerProperty _applyFlyTo;
     properties::FloatProperty _mouseSensitivity;
