@@ -4,14 +4,14 @@
   "focusbuttons": "\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\"",
   "timecontroller": "true",
   "datecontroller":  "false",
-  "sighscontroller" : "false",
+  "sightscontroller" : "false",
   "start": {
     "planet": "Earth",
     "time": "openspace.time.currentWallTime()",
     "location": {
       "latitude": "40.758701",
       "longitude": "-111.876183",
-      "attitude": "20000000"
+      "altitude": "20000000"
     }
   }
 }

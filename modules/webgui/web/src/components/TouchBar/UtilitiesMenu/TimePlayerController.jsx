@@ -14,6 +14,8 @@ class TimePlayerController extends Component {
   constructor(props) {
     super(props);
 
+    this.mounted = false;
+
     this.state = {
       paused: false,
       time: new Date(),
@@ -34,6 +36,7 @@ class TimePlayerController extends Component {
 
 
   componentDidMount() {
+    this.mounted = true;
     // subscribe to data
     this.state.subscriptionIdCurrent = DataManager
       .subscribe(CurrenTimeKey, this.currentTimeCallback, TopicTypes.time);
@@ -42,10 +45,12 @@ class TimePlayerController extends Component {
   }
 
   componentWillUnmount() {
+    // TODO this.mounted is a quick fix, because the unsubsciption of time does not work
+    this.mounted = false;
     // Unsubscribe to data
-    DataManager.unsubscribe(CurrenTimeKey, this.state.subscriptionIdCurrent);
-    DataManager.unsubscribe(DeltaTime, this.state.subscriptionIdDelta);
-    this.setState({ subscriptionIdCurrent: -1, subscriptionIdDelta: -1 });
+    // DataManager.unsubscribe(CurrenTimeKey, this.state.subscriptionIdCurrent);
+    // DataManager.unsubscribe(DeltaTime, this.state.subscriptionIdDelta);
+    // this.setState({ subscriptionIdCurrent: -1, subscriptionIdDelta: -1 });
   }
 
   get time() {
@@ -53,13 +58,17 @@ class TimePlayerController extends Component {
   }
 
   setDate(time) {
-    this.setState({ time });
-    timeHelpers.setDate(time);
+    if (this.mounted) {
+      this.setState({ time });
+      timeHelpers.setDate(time);
+    }
   }
 
   setSimulationSpeed(speed) {
-    timeHelpers.UpdateDeltaTimeNow(speed);
-    this.setState({ paused: false });
+    if (this.mounted) {
+      timeHelpers.UpdateDeltaTimeNow(speed);
+      this.setState({ paused: false });
+    }
   }
 
   deltaTimeCallback(message) {
@@ -86,8 +95,10 @@ class TimePlayerController extends Component {
   }
 
   currentTimeCallback(message) {
-    const time = new Date(timeHelpers.DateStringWithTimeZone(message.time));
-    this.setState({ time });
+    if (this.mounted) {
+      const time = new Date(timeHelpers.DateStringWithTimeZone(message.time));
+      this.setState({ time });
+    }
   }
 
   clickPlayer(e) {

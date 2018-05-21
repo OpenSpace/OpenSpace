@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import { OriginKey, SetGoToGeoScript, ValuePlaceholder, ScaleKey } from '../../../api/keys';
 import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
-import { changePropertyValue, startListening } from '../../../api/Actions';
+import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
 import DateController from './DateController';
 import TimePlayerController from './TimePlayerController';
 import SightsController from './SightsController';
@@ -30,13 +30,19 @@ class Controllers extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.scaleNodes.forEach(scaleNode =>
+      this.props.StopListening(scaleNode.Description.Identifier),
+    );
+  }
+
   onChangeSight(selected) {
     UpdateDeltaTimeNow(1);
     // Check if the sight is on the current focus, otherwise change focus node
     if (this.props.originNode !== selected.planet) {
       this.props.ChangePropertyValue(this.props.originNode.Description, selected.planet);
     }
-    const script = SetGoToGeoScript.replace(ValuePlaceholder, `${selected.location.latitude}, ${selected.location.longitude}, ${selected.location.attitude}`);
+    const script = SetGoToGeoScript.replace(ValuePlaceholder, `${selected.location.latitude}, ${selected.location.longitude}, ${selected.location.altitude}`);
     DataManager.runScript(script);
   }
 
@@ -65,9 +71,9 @@ class Controllers extends Component {
           dateList={story.datecontroller}
           onChangeSight={this.onChangeSight}
         />}
-        {(story && story.sighscontroller !== 'false') &&
+        {(story && story.sightscontroller !== 'false') &&
         <SightsController
-          sightsList={story.sighscontroller}
+          sightsList={story.sightscontroller}
           onChangeSight={this.onChangeSight}
         />}
         {(story && story.scaleplanets) &&
@@ -120,6 +126,9 @@ const mapDispatchToProps = dispatch => ({
   StartListening: (URI) => {
     dispatch(startListening(URI));
   },
+  StopListening: (URI) => {
+    dispatch(stopListening(URI));
+  },
 });
 
 Controllers = connect(
@@ -136,6 +145,7 @@ Controllers.propTypes = {
   })),
   ChangePropertyValue: PropTypes.func,
   StartListening: PropTypes.func,
+  StopListening: PropTypes.func,
   scaleNodes: PropTypes.objectOf(PropTypes.shape({
     Value: PropTypes.string,
     Description: PropTypes.string,
@@ -149,6 +159,7 @@ Controllers.defaultProps = {
   story: {},
   ChangePropertyValue: () => {},
   StartListening: () => {},
+  StopListening: () => {},
 };
 
 export default Controllers;

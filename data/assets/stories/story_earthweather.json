@@ -11,7 +11,7 @@
       "location": {
         "latitude": "24.555059",
         "longitude": "-81.779984",
-        "attitude": "10000000"
+        "altitude": "10000000"
       }
     },
     {
@@ -21,7 +21,7 @@
       "location": {
         "latitude": "29.951065",
         "longitude": "-90.071533",
-        "attitude": "10000000"
+        "altitude": "10000000"
       }
     },
     {
@@ -31,18 +31,18 @@
       "location": {
         "latitude": "18.073099",
         "longitude": "-63.082199",
-        "attitude": "10000000"
+        "altitude": "10000000"
       }
     }
   ],
-  "sighscontroller" : "false",
+  "sightscontroller" : "false",
   "start": {
     "planet": "Earth",
     "time": "openspace.time.currentWallTime()",
     "location": {
       "latitude": "40.758701",
       "longitude": "-111.876183",
-      "attitude": "20000000"
+      "altitude": "20000000"
     }
   },
   "hideplanets": ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]

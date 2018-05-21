@@ -11,7 +11,7 @@
       "location": {
         "latitude": "24.555059",
         "longitude": "-81.779984",
-        "attitude": "10000000"
+        "altitude": "10000000"
       }
     },
     {
@@ -21,7 +21,7 @@
       "location": {
         "latitude": "29.951065",
         "longitude": "-90.071533",
-        "attitude": "10000000"
+        "altitude": "10000000"
       }
     },
     {
@@ -31,18 +31,18 @@
       "location": {
         "latitude": "18.073099",
         "longitude": "-63.082199",
-        "attitude": "10000000"
+        "altitude": "10000000"
       }
     }
   ],
-  "sighscontroller" : [
+  "sightscontroller" : [
     {
       "info": "Norrköping",
       "planet": "Earth",
       "location": {
         "latitude": "58.5877",
         "longitude": "16.1924",
-        "attitude": "1000000"
+        "altitude": "1000000"
       }
     },
     {
@@ -51,7 +51,7 @@
       "location": {
         "latitude": "-13.96",
         "longitude": "55.58",
-        "attitude": "3000000"
+        "altitude": "3000000"
       }
     },
     {
@@ -60,7 +60,7 @@
       "location": {
         "latitude": "40.758701",
         "longitude": "-111.876183",
-        "attitude": "1000000"
+        "altitude": "1000000"
       }
     },
     {
@@ -69,7 +69,7 @@
       "location": {
         "latitude": "40.730610",
         "longitude": "-73.935242",
-        "attitude": "1000000"
+        "altitude": "1000000"
       }
     }
   ],
@@ -79,7 +79,7 @@
     "location": {
       "latitude": "-13.96",
       "longitude": "55.58",
-      "attitude": "20000000"
+      "altitude": "20000000"
     }
   }
 }

@@ -4,14 +4,14 @@
   "focusbuttons": "\"Jupiter\", \"Io\", \"Europa\", \"Ganymede\", \"Callisto\"",
   "timecontroller": "true",
   "datecontroller": "false",
-  "sighscontroller" : "false",
+  "sightscontroller" : "false",
   "start": {
     "planet": "Jupiter",
     "time": "openspace.time.currentWallTime()",
     "location": {
       "latitude": "-10",
       "longitude": "-10",
-      "attitude": "9000000000000000000000000"
+      "altitude": "9000000000000000000000000"
     }
   },
   "hideplanets": ["Mercury", "Venus", "Earth", "Mars", "Saturn", "Uranus", "Neptune"],
