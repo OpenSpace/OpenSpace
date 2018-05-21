@@ -445,9 +445,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                             }
                             strncpy(lEntry.feature, token, 256);
                             strtok(NULL, ","); // Target is not used
-                            lEntry.diameter = atof(strtok(NULL, ","));
-                            lEntry.latitude = atof(strtok(NULL, ","));
-                            lEntry.longitude = atof(strtok(NULL, ","));
+                            lEntry.diameter = static_cast<float>(atof(strtok(NULL, ",")));
+                            lEntry.latitude = static_cast<float>(atof(strtok(NULL, ",")));
+                            lEntry.longitude = static_cast<float>(atof(strtok(NULL, ",")));
                             char * coordinateSystem = strtok(NULL, ",");
 
                             if (strstr(coordinateSystem, "West") != NULL) {
