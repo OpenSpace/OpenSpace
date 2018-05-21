@@ -11,7 +11,7 @@ local Mas_MHD = {
         Parent = sunTransforms.SolarSystemBarycenter.Identifier,
         Renderable = {
             Type = "RenderableTimeVaryingVolume",
-            StepSize = 0.001,
+            StepSize = 0.002,
             TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
             SourceDirectory = "${DATA}/mas/raw",
             LowerValueBound = 0,
@@ -29,7 +29,7 @@ local Mas_MHD = {
             },
             Scale = {
                 Type = "StaticScale",
-                Scale = 9.0 * sunRadius
+                Scale = 4.0 * sunRadius
             }
         },
         GUI = {

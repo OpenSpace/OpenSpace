@@ -2,11 +2,11 @@ width 2048
 lower 0.0
 upper 1.0
 
-mappingkey 0.005        255 220 180     0
-mappingkey 0.06         90  180 255     60
+mappingkey 0.005        0   54 135        1
+mappingkey 0.06         0   67 168       10
 mappingkey 0.1          90  180 255     70
-mappingkey 0.2          90  180 255      80
-mappingkey 0.3          90  180 255     90
+mappingkey 0.2          90  180 255     100
+mappingkey 0.3          90  180 255     150
 mappingkey 0.4          47  93  183     255
 mappingkey 0.5          92  177 242     255
 mappingkey 0.6          137 223 255     255
