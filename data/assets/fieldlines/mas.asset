@@ -26,7 +26,6 @@ local MAS = {
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
-        -- TracingMethod = "PreTracedBinary",
         SourceFolder = MASPaths.Sun,
         InputFileType = "osfls",
         -- StartStateOffset = 309,
@@ -35,25 +34,29 @@ local MAS = {
             masDensityColorTable,
             masVelocityColorTable,
         },
-        DefaultColor = { 0.4, 0.15, 0.4, 1.0 },
+        DefaultColor = { 0.8, 0.8, 0.8, 0.5 },
         ColorTableMinMax = {
             { 0, 1000000 },
             { 100, 2000 }
         },
-        ExtraMinMaxLimits = {
-            { -1, 10000000 },
-            { 0, 5000 }
-        },
-        RadialDomainLimits = { 1, 5 },
-        CartesianDomainLimits = {
-            { -2.5, 2.5 },
-            { -2.5, 2.5 },
-            { -2.5, 2.5}
-        },
+        -- ExtraMinMaxLimits = {
+        --     { -1, 10000000 },
+        --     { 0, 5000 }
+        -- },
+        -- RadialDomainLimits = { 0, 30 },
+        -- CartesianDomainLimits = {
+        --     { -20.5, 20.5 },
+        --     { -20.5, 20.5 },
+        --     { -20.5, 20.5}
+        -- },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 50*365*24*60*60, -- 50 years before
         SecondsAfter = 50*365*24*60*60, -- 50 years after
+        SimulationModel = "mas",
+        -- MaskingRanges = {
+        --     {-1000, 1000},
+        -- } 
     },
     GUI = {
         Name = "Fieldlines MAS"
@@ -66,7 +69,7 @@ local MAS = {
         },
         Scale = {
             Type = "StaticScale",
-            Scale = 0.04 * sunRadius
+            Scale = sunRadius
         }
     }
 } 
@@ -78,7 +81,7 @@ local MAS = {
 --     Renderable = {
 --         Type = "RenderableFieldlinesSequence",
 --         -- TracingMethod = "PreTracedBinary",
---         SourceFolder = "C:/Users/CCMC/data/fieldlines_json/mas/",
+--         SourceFolder = "C:/Users/CCMC/data/fieldlines_json/mas_multiple_timesteps/JSON/",
 --         InputFileType = "json",
 --         -- StartStateOffset = 309,
 --         -- MaxNumStates = 1,
@@ -102,7 +105,7 @@ local MAS = {
 --             { -2.5, 2.5}
 --         },
 --         LoadAtRuntime = true,
---         OutputFolder = "C:/Users/CCMC/data/fieldlines_binaries/mas/",
+--         OutputFolder = "C:/Users/CCMC/data/fieldlines_binaries/mas_multiple_timesteps/",
 --         SimulationModel = "mas",
 --         ScaleToMeters = 1.0,
 --         SecondsBefore = 50*365*24*60*60, -- 50 years before
