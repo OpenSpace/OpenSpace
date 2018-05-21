@@ -36,8 +36,9 @@ class SubscriptionTopic : public Topic {
 public:
     SubscriptionTopic();
     ~SubscriptionTopic();
-    void handleJson(nlohmann::json json);
-    bool isDone();
+
+    void handleJson(nlohmann::json json) override;
+    bool isDone() const override;
 
 private:
     bool _requestedResourceIsSubscribable;

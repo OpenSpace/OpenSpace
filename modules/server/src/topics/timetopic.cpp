@@ -27,6 +27,8 @@
 #include "modules/server/include/connection.h"
 #include "modules/server/include/timetopic.h"
 #include <chrono>
+#include <ghoul/logging/logmanager.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
 const char* _loggerCat = "TimeTopic";
@@ -59,7 +61,7 @@ TimeTopic::~TimeTopic() {
     }
 }
 
-bool TimeTopic::isDone() {
+bool TimeTopic::isDone() const {
     return false;
 }
 

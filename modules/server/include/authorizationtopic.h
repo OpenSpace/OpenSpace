@@ -25,21 +25,19 @@
 #ifndef __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
 #define __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
 
-#include <ctime>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
+#include <modules/server/include/topic.h>
 
-#include "topic.h"
-#include "connection.h"
+#include <modules/server/include/connection.h>
+#include <ext/json/json.hpp>
 
 namespace openspace {
 
 class AuthorizationTopic : public Topic {
 public:
-    AuthorizationTopic();
-    void handleJson(nlohmann::json json);
-    bool isDone();
+    AuthorizationTopic() = default;
+
+    void handleJson(nlohmann::json json) override;
+    bool isDone() const override;
 
     /* https://httpstatuses.com/ */
     enum class StatusCode : int {
@@ -54,9 +52,9 @@ public:
     };
 
 private:
-    bool _isAuthenticated;
+    bool _isAuthenticated = false;
 
-    const std::string getKey() const;
+    const std::string passKey() const;
     bool authorize(const std::string key);
     nlohmann::json message(const std::string &message,
         StatusCode statusCode = StatusCode::NotImplemented);

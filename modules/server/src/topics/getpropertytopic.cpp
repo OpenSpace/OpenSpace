@@ -34,6 +34,7 @@
 #include <openspace/scene/scene.h>
 #include <modules/server/include/getpropertytopic.h>
 #include <modules/volume/transferfunctionhandler.h>
+#include <openspace/engine/openspaceengine.h>
 
 using nlohmann::json;
 
@@ -51,7 +52,7 @@ namespace openspace {
 GetPropertyTopic::GetPropertyTopic()
         : Topic() {}
 
-bool GetPropertyTopic::isDone() {
+bool GetPropertyTopic::isDone() const {
     return true;
 }
 

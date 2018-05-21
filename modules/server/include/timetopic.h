@@ -34,8 +34,9 @@ class TimeTopic : public Topic {
 public:
     TimeTopic();
     ~TimeTopic();
-    void handleJson(nlohmann::json json);
-    bool isDone();
+
+    void handleJson(nlohmann::json json) override;
+    bool isDone() const override;
 
 private:
     nlohmann::json currentTime();

@@ -44,6 +44,8 @@ struct LinePoint {
     glm::vec4 color;
 };
 
+std::tuple<std::string, std::string, std::string> gridVariables(ccmc::Model* model);
+
 class KameleonWrapper {
 public:
     enum class Model {
@@ -112,6 +114,9 @@ public:
 
     std::tuple<std::string, std::string, std::string> gridUnits() const;
 
+    std::tuple<std::string, std::string, std::string> gridVariables() const;
+
+
     Model model() const;
     GridType gridType() const;
     std::string parent() const;
@@ -129,7 +134,6 @@ private:
     TraceLine traceLorentzTrajectory(const glm::vec3& seedPoint, float stepsize,
         float eCharge) const;
 
-    void getGridVariables(std::string& x, std::string& y, std::string& z) const;
     GridType gridType(const std::string& x, const std::string& y,
         const std::string& z) const;
     Model modelType() const;

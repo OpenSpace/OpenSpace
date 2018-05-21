@@ -32,6 +32,12 @@
 #include <modules/server/include/timetopic.h>
 #include <modules/server/include/triggerpropertytopic.h>
 #include <openspace/engine/configuration.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocketserver.h>
+#include <ext/json/json.hpp>
+#include <fmt/format.h>
+#include <include/openspace/engine/openspaceengine.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "ServerModule: Connection";
@@ -57,7 +63,6 @@ namespace openspace {
 Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address)
     : _socket(s)
     , _address(address)
-    , _isAuthorized(false)
 {
     _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);

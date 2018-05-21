@@ -28,7 +28,6 @@
 #include <openspace/util/task.h>
 
 #include <ghoul/glm.h>
-
 #include <string>
 
 namespace openspace {
@@ -37,8 +36,10 @@ namespace kameleonvolume {
 class KameleonVolumeToRawTask : public Task {
 public:
     KameleonVolumeToRawTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation documentation();
 
 private:
@@ -49,7 +50,7 @@ private:
     std::string _variable;
     std::string _units;
     glm::uvec3 _dimensions;
-    bool _autoDomainBounds;
+    bool _autoDomainBounds = false;
     glm::vec3 _lowerDomainBound;
     glm::vec3 _upperDomainBound;
 };

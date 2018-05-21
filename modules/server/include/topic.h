@@ -41,7 +41,7 @@ public:
     nlohmann::json wrappedError(std::string message = "Could not complete request.",
         int code = 500);
     virtual void handleJson(nlohmann::json json) = 0;
-    virtual bool isDone() = 0;
+    virtual bool isDone() const = 0;
 
 protected:
     size_t _topicId;
@@ -52,8 +52,9 @@ class BounceTopic : public Topic {
 public:
     BounceTopic() : Topic() {};
     ~BounceTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return false; }
+
+    void handleJson(nlohmann::json json) override;
+    bool isDone() const override { return false; }
 };
 
 } // namespace openspace

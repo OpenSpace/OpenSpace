@@ -57,7 +57,7 @@ SubscriptionTopic::~SubscriptionTopic() {
     }
 }
 
-bool SubscriptionTopic::isDone() {
+bool SubscriptionTopic::isDone() const {
     return !_requestedResourceIsSubscribable || !_isSubscribedTo;
 }
 

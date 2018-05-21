@@ -26,6 +26,8 @@
 #include <ghoul/io/socket/websocket.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocketserver.h>
 
 namespace {
     const char* _loggerCat = "ServerModule";

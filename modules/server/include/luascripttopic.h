@@ -34,8 +34,9 @@ class LuaScriptTopic : public Topic {
 public:
     LuaScriptTopic() : Topic() {};
     ~LuaScriptTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return true; };
+
+    void handleJson(nlohmann::json json) override;
+    bool isDone() const override { return true; };
 };
 
 } // namespace openspace

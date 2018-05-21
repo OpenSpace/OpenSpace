@@ -34,8 +34,9 @@ class SetPropertyTopic : public Topic {
 public:
     SetPropertyTopic() : Topic() {};
     ~SetPropertyTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return true; };
+
+    void handleJson(nlohmann::json json) override;
+    bool isDone() const override { return true; };
 
 private:
     void setTime(const std::string& value);

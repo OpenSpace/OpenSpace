@@ -25,6 +25,10 @@
 #include "include/authorizationtopic.h"
 
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/openspaceengine.h>
+#include <ctime>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
 
 namespace {
     constexpr const char* _loggerCat = "AuthorizationTopic";
@@ -32,12 +36,7 @@ namespace {
 
 namespace openspace {
 
-AuthorizationTopic::AuthorizationTopic()
-    : Topic()
-    , _isAuthenticated(false)
-{};
-
-bool AuthorizationTopic::isDone() {
+bool AuthorizationTopic::isDone() const {
     return _isAuthenticated;
 }
 
@@ -67,11 +66,11 @@ void AuthorizationTopic::handleJson(nlohmann::json json) {
 };
 
 bool AuthorizationTopic::authorize(const std::string key) {
-    _isAuthenticated = key == getKey();
+    _isAuthenticated =( key == passKey());
     return _isAuthenticated;
 }
 
-const std::string AuthorizationTopic::getKey() const {
+const std::string AuthorizationTopic::passKey() const {
     return OsEng.configuration().serverPasskey;
 }
 

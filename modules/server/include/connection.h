@@ -25,17 +25,13 @@
 #ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
 #define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
 
+#include <modules/server/include/topic.h>
+#include <ghoul/misc/templatefactory.h>
 #include <memory>
 #include <string>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-#include <include/openspace/engine/openspaceengine.h>
+#include <thread>
 
-#include "topic.h"
+namespace ghoul::io { class Socket; }
 
 namespace openspace {
 
@@ -65,7 +61,7 @@ private:
 
     std::string _address;
     bool _requireAuthorization;
-    bool _isAuthorized;
+    bool _isAuthorized = false;
     std::map <TopicId, std::string> _messageQueue;
     std::map <TopicId, std::chrono::system_clock::time_point> _sentMessages;
 
