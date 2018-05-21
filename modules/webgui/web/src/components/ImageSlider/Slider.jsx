@@ -13,6 +13,7 @@ class Slider extends Component {
     this.state = {
       index: 0,
       imagePaths: [],
+      stories: {},
     };
 
     // Bind the functions in the constructor
@@ -21,10 +22,15 @@ class Slider extends Component {
     this.nextSlide = this.nextSlide.bind(this);
     this.prevSlide = this.prevSlide.bind(this);
     this.handleDotClick = this.handleDotClick.bind(this);
+    this.onChangeStory = this.onChangeStory.bind(this);
   }
 
   componentDidMount() {
     this.getSliderImages();
+  }
+
+  onChangeStory(story) {
+    this.props.changeStory(story);
   }
 
   getSliderImages() {
@@ -40,6 +46,8 @@ class Slider extends Component {
 
     // Import all icon images from the given directory
     const stories = importAll(require.context('../../../../../../sync/url/story_images/files', false, /\.(png|jpe?g|svg)$/));
+    const json = require('../../../../../../data/assets/stories/stories.json');
+    this.setState({ stories: json });
 
     // Push images from stories object into images array
     for (let i = 0; i < Object.keys(stories).length; i++) {
@@ -66,10 +74,15 @@ class Slider extends Component {
   renderSlides() {
     // Map an imagePath to every Slide
     return (this.state.imagePaths.map((image, i) => {
+      const identifier = (image.split('/img/').pop()).slice(0, -4);
+      const storyInfo = Object.values(this.state.stories.stories)
+        .find(story => story.identifier === identifier);
       if (i === this.state.index) {
         return (<Slide
           key={image}
           image={this.state.imagePaths[Object.keys(this.state.imagePaths)[i]]}
+          storyInfo={storyInfo}
+          onChangeStory={this.onChangeStory}
         />);
       }
     }));
@@ -93,5 +106,9 @@ class Slider extends Component {
     );
   }
 }
+
+Slider.propTypes = {
+  changeStory: PropTypes.func.isRequired,
+};
 
 export default Slider;

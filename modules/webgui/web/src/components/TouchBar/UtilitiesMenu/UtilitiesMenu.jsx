@@ -1,6 +1,6 @@
 import React from 'react';
 import HelpButton from './HelpButton';
-import HomeButton from './HomeButton';
+import HomeButtonContainer from './HomeButtonContainer';
 import Controllers from './Controllers';
 
 import styles from './UtilitiesMenu.scss';
@@ -8,7 +8,7 @@ import styles from './UtilitiesMenu.scss';
 
 const UtilitiesMenu = () => (
   <div className={styles.UtilitiesMenu}>
-    <HomeButton />
+    <HomeButtonContainer />
     <HelpButton />
     <Controllers />
   </div>

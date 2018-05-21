@@ -18,6 +18,9 @@ import {
   OverlimitKey, ScaleKey,
 } from '../api/keys';
 import DataManager from '../api/DataManager';
+import Slider from '../components/ImageSlider/Slider';
+import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
+
 
 class OnTouchGui extends Component {
   constructor(props) {
@@ -26,6 +29,7 @@ class OnTouchGui extends Component {
     this.changeStory = this.changeStory.bind(this);
     this.setStory = this.setStory.bind(this);
     this.toggleHidePlanet = this.toggleHidePlanet.bind(this);
+    this.getDeveloperButtons = this.getDeveloperButtons.bind(this);
   }
 
   componentDidMount() {
@@ -45,6 +49,23 @@ class OnTouchGui extends Component {
         this.addStoryTree(storyIdentifierNode.Value);
       }
     }
+    if (this.props.reset) {
+      UpdateDeltaTimeNow(1);
+      this.setStory(defaultStory);
+    }
+  }
+
+  // Buttons for developers to change story
+  getDeveloperButtons() {
+    return (
+      <div style={{ width: '200px', display: 'flex', flexDirection: 'column' }}>
+        <button onClick={this.changeStory} id={defaultStory}>Default Story</button>
+        <button onClick={this.changeStory} id={'story_solarsystem'}>Solar System Story</button>
+        <button onClick={this.changeStory} id={'story_example'}>Example Story</button>
+        <button onClick={this.changeStory} id={'story_earthweather'}>Earth Weather Story</button>
+        <button onClick={this.changeStory} id={'story_jupitermoons'}>Jupiter Moons Story</button>
+      </div>
+    );
   }
 
   setStory(selectedStory) {
@@ -113,14 +134,6 @@ class OnTouchGui extends Component {
   render() {
     return (
       <div className={styles.app}>
-        <div style={{ width: '200px', display: 'flex', flexDirection: 'column' }}>
-          <button onClick={this.changeStory} id={defaultStory}>Default Story</button>
-          <button onClick={this.changeStory} id={'story_solarsystem'}>Solar System Story</button>
-          <button onClick={this.changeStory} id={'story_example'}>Example Story</button>
-          <button onClick={this.changeStory} id={'story_earthweather'}>Earth Weather Story</button>
-          <button onClick={this.changeStory} id={'story_jupitermoons'}>Jupiter Moons Story</button>
-        </div>
-
         { this.props.connectionLost && (
           <Overlay>
             <Error>
@@ -129,8 +142,8 @@ class OnTouchGui extends Component {
           </Overlay>
         )}
         {(this.props.storyIdentifierNode.length !== 0 &&
-          this.props.storyIdentifierNode.Value !== defaultStory) &&
-            <TouchBar />
+          this.props.storyIdentifierNode.Value !== defaultStory)
+          ? <TouchBar /> : <Slider changeStory={this.setStory} />
         }
       </div>
     );
@@ -169,6 +182,7 @@ const mapStateToProps = (state) => {
     storyIdentifierNode,
     connectionLost: state.connection.connectionLost,
     story,
+    reset: state.storyTree.reset,
     focusNode,
     overViewNode,
     scaleNodes,
@@ -213,6 +227,7 @@ OnTouchGui.propTypes = {
   overViewNode: PropTypes.objectOf(PropTypes.shape({})),
   scaleNodes: PropTypes.objectOf(PropTypes.shape({})),
   connectionLost: PropTypes.bool,
+  reset: PropTypes.bool,
 };
 
 OnTouchGui.defaultProps = {
@@ -230,6 +245,7 @@ OnTouchGui.defaultProps = {
   overViewNode: {},
   scaleNodes: {},
   connectionLost: null,
+  reset: null,
 };
 
 export default OnTouchGui;

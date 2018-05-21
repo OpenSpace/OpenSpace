@@ -8,6 +8,7 @@ asset.syncedResource({
     Identifier = "planet_icons",
     Url = {
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/earth.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/moon.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/jupiter.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/mars.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/icons/solarsystem/mercury.png",
@@ -28,10 +29,10 @@ asset.syncedResource({
     Name = "Stories",
     Identifier = "story_images",
     Url = {
-        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story1.png",
-        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story2.png",
-        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story3.png",
-        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/Story4.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_solarsystem.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_jupitermoons.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_earthweather.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_example.png",
     },
     UseHash = false
 })

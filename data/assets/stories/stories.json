@@ -1,0 +1,29 @@
+{
+  "stories": [
+    {
+          "title": "Default",
+          "info": "Default story",
+          "identifier": "story_default"
+      },
+      {
+          "title": "Explore the Solar System",
+          "info": "The Solar System is the gravitationally bound system comprising the Sun and the objects that orbit it, either directly or indirectly. Of the objects that orbit the Sun directly, the largest eight are the planets, with the remainder being smaller objects, such as dwarf planets and small Solar System bodies. Of the objects that orbit the Sun indirectly, the moons, two are larger than the smallest planet, Mercury.",
+          "identifier": "story_solarsystem"
+      },
+      {
+          "title": "Explore Jupiter and it's moons",
+          "info": "There are 69 known moons of Jupiter. This gives Jupiter the largest number of moons with reasonably stable orbits of any planet in the Solar System. The most massive of the moons are the four Galilean moons, which were independently discovered in 1610 by Galileo Galilei and Simon Marius and were the first objects found to orbit a body that was neither Earth nor the Sun.",
+          "identifier": "story_jupitermoons"
+      },
+      {
+          "title": "Explore weather and events on Earth",
+          "info": "Earth is the third planet from the Sun and the only object in the Universe known to harbor life. According to radiometric dating and other sources of evidence, Earth formed over 4.5 billion years ago. Earth's gravity interacts with other objects in space, especially the Sun and the Moon, Earth's only natural satellite. Earth revolves around the Sun in 365.26 days, a period known as an Earth year. During this time, Earth rotates about its axis about 366.26 times.",
+          "identifier": "story_earthweather"
+      },
+      {
+        "title": "Example of things to do!",
+        "info": "Example story",
+        "identifier": "story_example"
+      }
+    ]
+}

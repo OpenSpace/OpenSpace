@@ -7,28 +7,26 @@ import styles from './Slide.scss';
 class Slide extends Component {
   constructor(props) {
     super(props);
-    
+
     this.handleStory = this.handleStory.bind(this);
   }
 
   handleStory(e) {
-    // console.log('Picked story', e.target.id);
-    //** TODO: Functionality when picking a story **//
+    this.props.onChangeStory(e.target.id);
   }
 
   render() {
-    const { image } = this.props;
-    const name = (this.props.image.split("/img/").pop()).slice(0, -4);
+    const { image, storyInfo } = this.props;
 
     return (
       <div className={styles.Container}>
-        <img src={this.props.image} className={styles.Slide} alt={'Story'} />
+        <img src={image} className={styles.Slide} alt={'Story'} />
         <div className={styles.StoryInfo}>
-          <CenteredLabel className={styles.StoryName}>{name}</CenteredLabel>
-          <CenteredLabel className={styles.Description}>Description about story goes here.</CenteredLabel>
-          <StoryButton 
+          <CenteredLabel className={styles.StoryName}>{storyInfo.title}</CenteredLabel>
+          <CenteredLabel className={styles.Description}>{storyInfo.info}</CenteredLabel>
+          <StoryButton
             pickStory={this.handleStory}
-            storyName={name}
+            storyIdentifier={storyInfo.identifier}
           />
         </div>
       </div>
@@ -38,6 +36,11 @@ class Slide extends Component {
 
 Slide.propTypes = {
   image: PropTypes.string.isRequired,
+  onChangeStory: PropTypes.func.isRequired,
+  storyInfo: PropTypes.shape({
+    title: PropTypes.string,
+    info: PropTypes.string,
+  }).isRequired,
 };
 
 export default Slide;
