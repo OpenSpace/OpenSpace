@@ -85,6 +85,11 @@ public:
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
         properties::BoolProperty labelsEnabled;
+        properties::IntProperty labelsFontSize;
+        properties::IntProperty labelsMaxSize;
+        properties::IntProperty labelsMinSize;
+        properties::FloatProperty labelsSize;
+        properties::FloatProperty labelsMinHeight;
     };
 
     // Shadow structure

@@ -181,6 +181,36 @@ namespace {
         "Enables and disables the rendering of labels on the globe surface from "
         "the csv label file"
     };
+
+    static const openspace::properties::Property::PropertyInfo LabelsFontSizeInfo = {
+        "LabelsFontSize",
+        "Labels Font Size",
+        "Font size for the rendering labels. This is different fromt text size."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsMaxSizeInfo = {
+        "LabelsMaxSize",
+        "Labels Maximum Text Size",
+        "Maximum label size"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsMinSizeInfo = {
+        "LabelsMinSize",
+        "Labels Minimum Text Size",
+        "Minimum label size"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsSizeInfo = {
+        "LabelsSize",
+        "Labels Size",
+        "Labels Size"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsMinHeightInfo = {
+        "LabelsMinHeight",
+        "Labels Minimum Height",
+        "Labels Minimum Height"
+    };
 } // namespace
 
 using namespace openspace::properties;
@@ -213,7 +243,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
         FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
-        BoolProperty(LabelsInfo, false)
+        BoolProperty(LabelsInfo, false),
+        IntProperty(LabelsFontSizeInfo, 30, 1, 50),
+        IntProperty(LabelsMaxSizeInfo, 300, 10, 1000),
+        IntProperty(LabelsMinSizeInfo, 30, 1, 100),
+        FloatProperty(LabelsSizeInfo, 2.5, 0, 30),
+        FloatProperty(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
     })
     , _debugPropertyOwner({ "Debug" })
 {
@@ -270,6 +305,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
     addProperty(_generalProperties.labelsEnabled);
+    addProperty(_generalProperties.labelsFontSize);
+    addProperty(_generalProperties.labelsSize);
+    addProperty(_generalProperties.labelsMinHeight);
 
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -422,7 +460,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                                 *this, 
                                 lEntry.latitude, 
                                 lEntry.longitude, 
-                                lEntry.diameter + 100.f
+                                lEntry.diameter
                             );
 
                             labels.labelsArray.push_back(lEntry);
@@ -440,7 +478,20 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                 if (!labels.labelsArray.empty()) {
                     _generalProperties.labelsEnabled.set(true);
                     _chunkedLodGlobe->setLabels(labels);
+                    _chunkedLodGlobe->enableLabelsRendering(true);
                     _labelsDataPresent = true;
+                    _generalProperties.labelsEnabled.onChange([&]() {
+                        _chunkedLodGlobe->enableLabelsRendering(_generalProperties.labelsEnabled);
+                    });
+                    _generalProperties.labelsFontSize.onChange([&]() {
+                        _chunkedLodGlobe->setFontSize(_generalProperties.labelsFontSize);
+                    });
+                    _generalProperties.labelsSize.onChange([&]() {
+                        _chunkedLodGlobe->setLabelsSize(_generalProperties.labelsSize);
+                    });
+                    _generalProperties.labelsMinHeight.onChange([&]() {
+                        _chunkedLodGlobe->setLabelsMinHeight(_generalProperties.labelsMinHeight);
+                    });
                 }
             }
             catch (const std::fstream::failure& e) {

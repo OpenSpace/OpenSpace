@@ -72,6 +72,10 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(owner, RIGHT_HEMISPHERE_INDEX)))
     , _layerManager(layerManager)
     , _shadersNeedRecompilation(true)
+    , _labelsEnabled(false)
+    , _fontSize(30)
+    , _labelsSize(2.5f)
+    , _labelsMinHeight(100.f)
 {
     auto geometry = std::make_shared<SkirtedGrid>(
         static_cast<unsigned int>(segmentsPerPatch),
@@ -288,7 +292,6 @@ void ChunkedLodGlobe::recompileShaders() {
 
 void ChunkedLodGlobe::initializeFonts() {
     if (_font == nullptr) {
-        size_t _fontSize = 30;
         _font = OsEng.fontManager().font(
             "Mono",
             static_cast<float>(_fontSize),
@@ -300,6 +303,30 @@ void ChunkedLodGlobe::initializeFonts() {
 
 void ChunkedLodGlobe::setLabels(RenderableGlobe::Labels & labels) {
     _labels = std::move(labels);
+}
+
+void ChunkedLodGlobe::setFontSize(const int size) {
+    _fontSize = std::move(size);
+    if (_font) {
+        _font = OsEng.fontManager().font(
+            "Mono",
+            static_cast<float>(_fontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+    }
+}
+
+void ChunkedLodGlobe::enableLabelsRendering(const bool enable) {
+    _labelsEnabled = std::move(enable);
+}
+
+void ChunkedLodGlobe::setLabelsSize(const float size) {
+    _labelsSize = std::move(size);
+}
+
+void ChunkedLodGlobe::setLabelsMinHeight(const float height) {
+    _labelsMinHeight = std::move(height);
 }
 
 void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
@@ -347,11 +374,13 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
     stats.i["chunk globe render time"] = ms2 - millis;
 
-    // JCC: Render labels
-    glm::dmat4 invMVP = glm::inverse(mvp);
-    glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
-    glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
-    renderLabels(data, mvp, orthoRight, orthoUp, 1.0);
+    // Render labels
+    if (_labelsEnabled) {
+        glm::dmat4 invMVP = glm::inverse(mvp);
+        glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
+        glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
+        renderLabels(data, mvp, orthoRight, orthoUp, 1.0);
+    }
 }
 
 void ChunkedLodGlobe::renderLabels(const RenderData& data,
@@ -363,16 +392,19 @@ void ChunkedLodGlobe::renderLabels(const RenderData& data,
     // first position
     // second text
     for (const RenderableGlobe::LabelEntry lEntry: _labels.labelsArray) {
+        glm::vec3 position = lEntry.geoPosition;
+        position += _labelsMinHeight;
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,
-            lEntry.geoPosition,
+            //lEntry.geoPosition,
+            position,
             textColor,
             //pow(10.0, _textSize.value()),
-            pow(10.0, 2.5),
+            powf(2.f, _labelsSize),
             //_textMinSize,
             //_textMaxSize,
-            4.0,
-            500.0,
+            4,
+            500,
             modelViewProjectionMatrix,
             orthoRight,
             orthoUp,

@@ -125,6 +125,26 @@ public:
      */
     void setLabels(RenderableGlobe::Labels & labels);
 
+    /**
+     * Set the Font Size for the rendered labels.
+     */
+    void setFontSize(const int size);
+
+    /**
+     * Enables/Disables labels rendering.
+     */
+    void enableLabelsRendering(const bool enable);
+
+    /**
+     * Labels's size.
+     */
+    void setLabelsSize(const float size);
+
+    /**
+     * Labels minimum height on planet's surface.
+     */
+    void setLabelsMinHeight(const float height);
+
     const int minSplitDepth;
     const int maxSplitDepth;
 
@@ -163,6 +183,10 @@ private:
     bool _shadersNeedRecompilation;
 
     // Label Rendering
+    bool _labelsEnabled;
+    int _fontSize;
+    float _labelsSize;
+    float _labelsMinHeight;
     RenderableGlobe::Labels _labels;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
