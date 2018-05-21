@@ -22,32 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
 
-#include <openspace/util/timemanager.h>
-#include <openspace/query/query.h>
-#include "topic.h"
-#include "connection.h"
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
-class property;
-class SubscriptionTopic : public Topic {
+
+class LuaScriptTopic : public Topic {
 public:
-    SubscriptionTopic();
-    ~SubscriptionTopic();
+    LuaScriptTopic() = default;
+    virtual ~LuaScriptTopic() = default;
 
-    void handleJson(nlohmann::json json) override;
+    void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
-
-private:
-    bool _requestedResourceIsSubscribable;
-    bool _isSubscribedTo;
-    int _onChangeHandle;
-    int _onDeleteHandle;
-    properties::Property* _prop;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__

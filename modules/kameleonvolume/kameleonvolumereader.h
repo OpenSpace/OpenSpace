@@ -76,7 +76,7 @@ public:
     std::vector<std::string> variableNames() const;
     std::vector<std::string> variableAttributeNames() const;
     std::vector<std::string> globalAttributeNames() const;
-    std::tuple<std::string, std::string, std::string> gridVariableNames() const;
+    std::array<std::string, 3> gridVariableNames() const;
 
 private:
     static void addAttributeToDictionary(ghoul::Dictionary& dictionary,

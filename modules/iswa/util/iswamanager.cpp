@@ -403,15 +403,11 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         glm::vec3   max     = kw.gridMax();
 
 
-        std::tuple<std::string, std::string, std::string> gridUnits =
-                                                                    kw.gridUnits();
+        std::array<std::string, 3> gridUnits = kw.gridUnits();
 
         glm::vec4 spatialScale;
         std::string coordinateType;
-        if (std::get<0>(gridUnits) == "R" &&
-            std::get<1>(gridUnits) == "R" &&
-            std::get<2>(gridUnits) == "R")
-        {
+        if (gridUnits[0] == "R" && gridUnits[1] == "R" && gridUnits[2] == "R") {
             spatialScale.x = 6.371f;
             spatialScale.y = 6.371f;
             spatialScale.z = 6.371f;

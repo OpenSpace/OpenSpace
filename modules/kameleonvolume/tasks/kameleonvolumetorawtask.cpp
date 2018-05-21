@@ -148,7 +148,7 @@ std::string KameleonVolumeToRawTask::description() {
 void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCallback) {
     KameleonVolumeReader reader(_inputPath);
 
-    std::vector<std::string> variables = reader.gridVariableNames();
+    std::array<std::string, 3> variables = reader.gridVariableNames();
 
     if (variables.size() == 3 && _autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
@@ -168,7 +168,8 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         _dimensions,
         _variable,
         _lowerDomainBound,
-        _upperDomainBound);
+        _upperDomainBound
+    );
 
     progressCallback(0.5f);
 
@@ -187,23 +188,14 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         time.pop_back();
     }
 
-    outputMetadata.setValue<std::string>(KeyTime, time);
-    outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
-    outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
-    outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
+    outputMetadata.setValue(KeyTime, time);
+    outputMetadata.setValue(KeyDimensions, glm::vec3(_dimensions));
+    outputMetadata.setValue(KeyLowerDomainBound, _lowerDomainBound);
+    outputMetadata.setValue(KeyUpperDomainBound, _upperDomainBound);
 
-    outputMetadata.setValue<float>(
-        KeyMinValue,
-        static_cast<float>(reader.minValue(_variable))
-    );
-    outputMetadata.setValue<float>(
-        KeyMaxValue,
-        static_cast<float>(reader.maxValue(_variable))
-    );
-    outputMetadata.setValue<std::string>(
-        KeyVisUnit,
-        static_cast<std::string>(reader.getVisUnit(_variable))
-    );
+    outputMetadata.setValue(KeyMinValue, static_cast<float>(reader.minValue(_variable)));
+    outputMetadata.setValue(KeyMaxValue, static_cast<float>(reader.maxValue(_variable)));
+    outputMetadata.setValue<std::string>(KeyVisUnit, reader.getVisUnit(_variable));
 
     ghoul::DictionaryLuaFormatter formatter;
     std::string metadataString = formatter.format(outputMetadata);

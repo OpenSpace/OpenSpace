@@ -369,24 +369,24 @@ void RenderableKameleonVolume::loadCdf(const std::string& path) {
         _upperValueBound = static_cast<float>(reader.maxValue(_variable));
     }
 
-    std::tuple<std::string, std::string, std::string> variables = reader.gridVariableNames();
+    std::array<std::string, 3> variables = reader.gridVariableNames();
 
     if (_autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
-            reader.minValue(std::get<0>(variables)),
-            reader.minValue(std::get<1>(variables)),
-            reader.minValue(std::get<2>(variables))
+            reader.minValue(variables[0]),
+            reader.minValue(variables[1]),
+            reader.minValue(variables[2])
         );
 
         _upperDomainBound = glm::vec3(
-            reader.maxValue(std::get<0>(variables)),
-            reader.maxValue(std::get<1>(variables)),
-            reader.maxValue(std::get<2>(variables))
+            reader.maxValue(variables[0]),
+            reader.maxValue(variables[1]),
+            reader.maxValue(variables[2])
         );
     }
 
     if (_autoGridType) {
-        if (std::get<0>(variables) == "r" && std::get<0>(variables) == "theta" && std::get<0>(variables) == "phi") {
+        if (variables[0] == "r" && variables[0] == "theta" && variables[0] == "phi") {
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
         }
         else {

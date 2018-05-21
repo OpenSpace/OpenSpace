@@ -22,31 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
 
-#include <openspace/util/timemanager.h>
-#include "topic.h"
+#include <modules/server/include/topics/topic.h>
+
+namespace openspace::properties { class Property; }
 
 namespace openspace {
 
-class TimeTopic : public Topic {
+class SubscriptionTopic : public Topic {
 public:
-    TimeTopic();
-    ~TimeTopic();
+    SubscriptionTopic() = default;
+    ~SubscriptionTopic();
 
-    void handleJson(nlohmann::json json) override;
+    void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
 private:
-    nlohmann::json currentTime();
-    nlohmann::json deltaTime();
+    const int UnsetCallbackHandle = -1;
 
-    int _timeCallbackHandle;
-    int _deltaTimeCallbackHandle;
-    std::chrono::system_clock::time_point _lastUpdateTime;
+    bool _requestedResourceIsSubscribable = false;
+    bool _isSubscribedTo = false;
+    int _onChangeHandle = UnsetCallbackHandle;
+    int _onDeleteHandle = UnsetCallbackHandle;
+    properties::Property* _prop = nullptr;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__

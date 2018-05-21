@@ -22,23 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
 
-#include <ext/json/json.hpp>
-#include <modules/server/include/topic.h>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class TriggerPropertyTopic : public Topic {
+class SetPropertyTopic : public Topic {
 public:
-    TriggerPropertyTopic() : Topic() {};
-    ~TriggerPropertyTopic() {};
+    SetPropertyTopic() = default;
+    virtual ~SetPropertyTopic() = default;
 
-    void handleJson(nlohmann::json json) override;
-    bool isDone() const override { return true; };
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
 } // namespace
 
-#endif // __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__

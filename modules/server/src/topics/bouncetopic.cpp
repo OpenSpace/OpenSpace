@@ -22,28 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
+#include <modules/server/include/topics/bouncetopic.h>
 
-#include <openspace/query/query.h>
-#include "topic.h"
-#include "connection.h"
+#include <modules/server/include/connection.h>
 
 namespace openspace {
 
-class GetPropertyTopic : public Topic {
-public:
-    GetPropertyTopic();
-    ~GetPropertyTopic() {};
-
-    void handleJson(nlohmann::json json) override;
-    bool isDone() const override;
-
-private:
-    nlohmann::json getAllProperties();
-    nlohmann::json getPropertyFromKey(const std::string& key);
+void BounceTopic::handleJson(const nlohmann::json& json) {
+    _connection->sendJson(json);
 };
 
-} // namespace openspace
+bool BounceTopic::isDone() const {
+    return false;
+}
 
-#endif // __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
+} // namespace openspace

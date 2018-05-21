@@ -30,8 +30,7 @@
 #include <ghoul/glm.h>
 #include <string>
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 class KameleonVolumeToRawTask : public Task {
 public:
@@ -45,7 +44,7 @@ public:
 private:
     std::string _inputPath;
     std::string _rawVolumeOutputPath;
-    std::string  _dictionaryOutputPath;
+    std::string _dictionaryOutputPath;
 
     std::string _variable;
     std::string _units;
@@ -55,7 +54,6 @@ private:
     glm::vec3 _upperDomainBound;
 };
 
-} // namespace kameleon
-} // namespace openspace
+} // namespace openspace::kameleon
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETORAWTASK___H__

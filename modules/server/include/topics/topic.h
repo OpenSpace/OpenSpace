@@ -37,24 +37,15 @@ public:
     virtual ~Topic() = default;
 
     void initialize(Connection* connection, size_t topicId);
-    nlohmann::json wrappedPayload(const nlohmann::json &payload) const;
+    nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
     nlohmann::json wrappedError(std::string message = "Could not complete request.",
         int code = 500);
-    virtual void handleJson(nlohmann::json json) = 0;
+    virtual void handleJson(const nlohmann::json& json) = 0;
     virtual bool isDone() const = 0;
 
 protected:
     size_t _topicId;
     Connection* _connection;
-};
-
-class BounceTopic : public Topic {
-public:
-    BounceTopic() : Topic() {};
-    ~BounceTopic() {};
-
-    void handleJson(nlohmann::json json) override;
-    bool isDone() const override { return false; }
 };
 
 } // namespace openspace

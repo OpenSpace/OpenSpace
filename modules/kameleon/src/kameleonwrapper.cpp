@@ -54,7 +54,7 @@ namespace {
 
 namespace openspace {
 
-std::tuple<std::string, std::string, std::string> gridVariables(ccmc::Model* model) {
+std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     // get the grid system string
     std::string grid = model->getGlobalAttribute("grid_system_1").getAttributeString();
 
@@ -122,7 +122,10 @@ bool KameleonWrapper::open(const std::string& filename) {
         _model = _kameleon->model;
         _interpolator = _model->createNewInterpolator();
 
-        std::tie(_xCoordVar, _yCoordVar, _zCoordVar) = gridVariables();
+        std::array<std::string, 3> v = gridVariables();
+        _xCoordVar = v[0];
+        _yCoordVar = v[1];
+        _zCoordVar = v[2];
         _type = modelType();
 
         LDEBUG(fmt::format("x: {}", _xCoordVar));
@@ -694,12 +697,9 @@ glm::vec3 KameleonWrapper::modelBarycenterOffset() const {
 }
 
 glm::vec4 KameleonWrapper::modelBarycenterOffsetScaled() const {
-    const std::tuple<std::string, std::string, std::string>& units = gridUnits();
+    const std::array<std::string, 3>& units = gridUnits();
     glm::vec4 offset = glm::vec4(modelBarycenterOffset(), 1.f);
-    if (std::get<0>(units) == "R" &&
-        std::get<1>(units) == "R" &&
-        std::get<2>(units) == "R")
-    {
+    if (units[0] == "R" && units[1] == "R" && units[2] == "R") {
         offset.x *= 6.371f;
         offset.y *= 6.371f;
         offset.z *= 6.371f;
@@ -722,22 +722,16 @@ glm::vec3 KameleonWrapper::modelScale() const {
 }
 
 glm::vec4 KameleonWrapper::modelScaleScaled() const {
-    const std::tuple<std::string, std::string, std::string>& units = gridUnits();
+    const std::array<std::string, 3>& units = gridUnits();
     glm::vec4 scale = glm::vec4(modelScale(), 1.0);
-    if (std::get<0>(units) == "R" &&
-        std::get<1>(units) == "R" &&
-        std::get<2>(units) == "R")
-    {
+    if (units[0] == "R" && units[1] == "R" && units[2] == "R") {
         // Earth radius
         scale.x *= 6.371f;
         scale.y *= 6.371f;
         scale.z *= 6.371f;
         scale.w = 6;
     }
-    else if (std::get<0>(units) == "m" &&
-             std::get<1>(units) == "radian" &&
-             std::get<2>(units) == "radian")
-    {
+    else if (units[0] == "m" && units[1] == "radian" & units[2] == "radian") {
         // For spherical coordinate systems the radius is in meter
         scale.w = -log10(1.f / _max.x);
     }
@@ -757,12 +751,12 @@ std::string KameleonWrapper::variableUnit(const std::string& variable) const {
     return _model->getVariableAttribute(variable, "units").getAttributeString();
 }
 
-std::tuple<std::string, std::string, std::string> KameleonWrapper::gridUnits() const {
-    return std::make_tuple(
+std::array<std::string, 3> KameleonWrapper::gridUnits() const {
+    return {
         variableUnit(_xCoordVar),
         variableUnit(_yCoordVar),
         variableUnit(_zCoordVar)
-    );
+    };
 }
 
 KameleonWrapper::Model KameleonWrapper::model() const {
@@ -970,7 +964,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
     return trajectory;
 }
 
-std::tuple<std::string, std::string, std::string> KameleonWrapper::gridVariables() const {
+std::array<std::string, 3> KameleonWrapper::gridVariables() const {
     return openspace::gridVariables(_model);
 }
 

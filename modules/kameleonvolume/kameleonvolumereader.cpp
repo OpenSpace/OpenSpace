@@ -165,9 +165,7 @@ std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
     return attributeNames;
 }
 
-std::tuple<std::string, std::string, std::string>
-KameleonVolumeReader::gridVariableNames() const
-{
+std::array<std::string, 3> KameleonVolumeReader::gridVariableNames() const {
     return openspace::gridVariables(_kameleon.model);
 }
 

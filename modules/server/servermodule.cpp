@@ -23,21 +23,21 @@
  ****************************************************************************************/
 
 #include <modules/server/servermodule.h>
-#include <ghoul/io/socket/websocket.h>
+
+#include <modules/server/include/connection.h>
+#include <modules/server/include/topics/topic.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* _loggerCat = "ServerModule";
-}
+    constexpr const char* _loggerCat = "ServerModule";
+} // namespace
 
 namespace openspace {
 
-ServerModule::ServerModule()
-    : OpenSpaceModule(ServerModule::Name)
-{}
+ServerModule::ServerModule() : OpenSpaceModule(ServerModule::Name) {}
 
 ServerModule::~ServerModule() {
     disconnectAll();
@@ -53,11 +53,13 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     // Temporary hard coded addresses and ports.
     tcpServer->listen("localhost", 8000);
     wsServer->listen("localhost", 8001);
-    LDEBUG(fmt::format("TCP Server listening on {}:{}",
-        tcpServer->address(), tcpServer->port()));
+    LDEBUG(fmt::format(
+        "TCP Server listening on {}:{}",tcpServer->address(), tcpServer->port()
+    ));
 
-    LDEBUG(fmt::format("WS Server listening on {}:{}",
-        wsServer->address(), wsServer->port()));
+    LDEBUG(fmt::format(
+        "WS Server listening on {}:{}", wsServer->address(), wsServer->port()
+    ));
 
     _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
@@ -70,15 +72,17 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 
 void ServerModule::preSync() {
     // Set up new connections.
-    for (auto& server : _servers) {
-        std::shared_ptr<ghoul::io::Socket> socket;
+    for (std::unique_ptr<ghoul::io::SocketServer>& server : _servers) {
+        std::unique_ptr<ghoul::io::Socket> socket;
         while ((socket = server->nextPendingSocket())) {
             socket->startStreams();
-            std::shared_ptr<Connection> connection =
-                std::make_shared<Connection>(socket, server->address());
-            connection->setThread(
-                std::thread([this, connection] () { handleConnection(connection); })
+            std::shared_ptr<Connection> connection = std::make_shared<Connection>(
+                std::move(socket),
+                server->address()
             );
+            connection->setThread(std::thread(
+                [this, connection] () { handleConnection(connection); }
+            ));
             _connections.push_back({ std::move(connection), false });
         }
     }
@@ -91,29 +95,29 @@ void ServerModule::preSync() {
 }
 
 void ServerModule::cleanUpFinishedThreads() {
-    for (auto& connectionData : _connections) {
-        std::shared_ptr<Connection>& connection = connectionData.connection;
-        if (!connection->socket() || !connection->socket()->isConnected()) {
-            if (connection->thread().joinable()) {
-                connection->thread().join();
-                connectionData.markedForRemoval = true;
+    for (ConnectionData& connectionData : _connections) {
+        Connection& connection = *connectionData.connection;
+        if (!connection.socket() || !connection.socket()->isConnected()) {
+            if (connection.thread().joinable()) {
+                connection.thread().join();
+                connectionData.isMarkedForRemoval = true;
             }
         }
     }
     _connections.erase(std::remove_if(
         _connections.begin(),
         _connections.end(),
-        [](const auto& connectionData) {
-            return connectionData.markedForRemoval;
+        [](const ConnectionData& connectionData) {
+            return connectionData.isMarkedForRemoval;
         }
     ), _connections.end());
 }
 
 void ServerModule::disconnectAll() {
-    for (auto& connectionData : _connections) {
-        std::shared_ptr<Connection>& connection = connectionData.connection;
-        if (connection->socket() && connection->socket()->isConnected()) {
-            connection->socket()->disconnect(
+    for (ConnectionData& connectionData : _connections) {
+        Connection& connection = *connectionData.connection;
+        if (connection.socket() && connection.socket()->isConnected()) {
+            connection.socket()->disconnect(
                 static_cast<int>(ghoul::io::WebSocket::ClosingReason::ClosingAll)
             );
         }
@@ -124,17 +128,14 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
     std::string messageString;
     while (connection->socket()->getMessage(messageString)) {
         std::lock_guard<std::mutex> lock(_messageQueueMutex);
-        _messageQueue.push_back(Message({
-            connection,
-            std::move(messageString)
-        }));
+        _messageQueue.push_back({ connection, std::move(messageString) });
     }
 }
 
 void ServerModule::consumeMessages() {
     std::lock_guard<std::mutex> lock(_messageQueueMutex);
-    while (_messageQueue.size() > 0) {
-        Message m = _messageQueue.front();
+    while (!_messageQueue.empty()) {
+        const Message& m = _messageQueue.front();
         _messageQueue.pop_front();
         if (std::shared_ptr<Connection> c = m.connection.lock()) {
             c->handleMessage(m.messageString);

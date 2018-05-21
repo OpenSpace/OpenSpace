@@ -27,7 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
-#include <tuple>
+#include <array>
 #include <string>
 #include <vector>
 
@@ -44,7 +44,7 @@ struct LinePoint {
     glm::vec4 color;
 };
 
-std::tuple<std::string, std::string, std::string> gridVariables(ccmc::Model* model);
+std::array<std::string, 3> gridVariables(ccmc::Model* model);
 
 class KameleonWrapper {
 public:
@@ -112,9 +112,9 @@ public:
     const glm::vec3& gridMin() const;
     std::string variableUnit(const std::string& variable) const;
 
-    std::tuple<std::string, std::string, std::string> gridUnits() const;
+    std::array<std::string, 3> gridUnits() const;
 
-    std::tuple<std::string, std::string, std::string> gridVariables() const;
+    std::array<std::string, 3> gridVariables() const;
 
 
     Model model() const;

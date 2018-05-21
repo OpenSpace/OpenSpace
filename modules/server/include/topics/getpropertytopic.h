@@ -22,44 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
 
-#include <modules/server/include/topic.h>
-
-#include <modules/server/include/connection.h>
-#include <ext/json/json.hpp>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class AuthorizationTopic : public Topic {
+class GetPropertyTopic : public Topic {
 public:
-    AuthorizationTopic() = default;
+    GetPropertyTopic() = default;
+    virtual ~GetPropertyTopic() = default;
 
-    void handleJson(nlohmann::json json) override;
+    void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
-    /* https://httpstatuses.com/ */
-    enum class StatusCode : int {
-        OK            = 200,
-        Accepted      = 202,
-
-        BadRequest    = 400,
-        Unauthorized  = 401,
-        NotAcceptable = 406,
-
-        NotImplemented = 501
-    };
-
 private:
-    bool _isAuthenticated = false;
-
-    const std::string passKey() const;
-    bool authorize(const std::string key);
-    nlohmann::json message(const std::string &message,
-        StatusCode statusCode = StatusCode::NotImplemented);
+    nlohmann::json allProperties();
+    nlohmann::json propertyFromKey(const std::string& key);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__

@@ -22,54 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
-#define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#ifndef __OPENSPACE_MODULE_SERVER___BOUNCETOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___BOUNCETOPIC___H__
 
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <memory>
-#include <string>
-#include <thread>
-
-namespace ghoul::io { class Socket; }
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-using TopicId = size_t;
+class Connection;
 
-class Topic;
-
-class Connection {
+class BounceTopic : public Topic {
 public:
-    Connection(std::unique_ptr<ghoul::io::Socket> s, const std::string &address);
+    BounceTopic() = default;
+    virtual ~BounceTopic() = default;
 
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
-    void handleJson(const nlohmann::json& json);
-    void sendJson(const nlohmann::json& json);
-    void setAuthorized(bool status);
-
-    bool isAuthorized() const;
-
-    ghoul::io::Socket* socket();
-    std::thread& thread();
-    void setThread(std::thread&& thread);
-
-private:
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::unique_ptr<ghoul::io::Socket> _socket;
-    std::thread _thread;
-
-    std::string _address;
-    bool _requireAuthorization;
-    bool _isAuthorized = false;
-    std::map<TopicId, std::string> _messageQueue;
-    std::map<TopicId, std::chrono::system_clock::time_point> _sentMessages;
-
-    bool isWhitelisted() const;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#endif // __OPENSPACE_MODULE_SERVER___BOUNCETOPIC___H__

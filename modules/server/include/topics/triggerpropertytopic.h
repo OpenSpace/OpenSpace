@@ -22,23 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
 
-#include <ext/json/json.hpp>
-#include <modules/server/include/topic.h>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class LuaScriptTopic : public Topic {
+class TriggerPropertyTopic : public Topic {
 public:
-    LuaScriptTopic() : Topic() {};
-    ~LuaScriptTopic() {};
+    TriggerPropertyTopic() = default;
+    virtual ~TriggerPropertyTopic() = default;
 
-    void handleJson(nlohmann::json json) override;
-    bool isDone() const override { return true; };
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
-} // namespace openspace
+} // namespace
 
-#endif // __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
