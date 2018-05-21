@@ -90,9 +90,6 @@ HorizonsTranslation::HorizonsTranslation()
          });
         readHorizonsTextFile(_horizonsTextFile);
     });
-
-    // Read specified file and store it in memory. 
-    readHorizonsTextFile(_horizonsTextFile);
 }
 
 HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
@@ -106,6 +103,9 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 
     _horizonsTextFile = 
         absPath(dictionary.value<std::string>(HorizonsTextFileInfo.identifier));
+
+    // Read specified file and store it in memory. 
+    readHorizonsTextFile(_horizonsTextFile);
 }
 
 glm::dvec3 HorizonsTranslation::position(const Time& time) const {
@@ -114,7 +114,7 @@ glm::dvec3 HorizonsTranslation::position(const Time& time) const {
     auto firstAfter = _timeline.firstKeyframeAfter(time.j2000Seconds(), false);
     double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
     double timeDiff = time.j2000Seconds() - lastBefore->timestamp;
-    double diff = timeDiff / timelineDiff;
+    double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
 
     glm::dvec3 dir = firstAfter->data - lastBefore->data;
     glm::dvec3 interpolatedPos = lastBefore->data + dir * diff;
@@ -142,13 +142,12 @@ void HorizonsTranslation::readHorizonsTextFile(const std::string& _horizonsTextF
 
     // Read data line by line until $$EOE (i.e. End Of Ephemerides).
     // Skip the rest of the file. 
+    std::getline(fileStream, line);
     while (line[0] != '$') {
-        std::getline(fileStream, line);
         std::stringstream str(line);
         std::string date;
         std::string time;
         float range = 0;
-        float rangeDelta = 0;
         float gLon = 0;
         float gLat = 0;
         
@@ -156,14 +155,14 @@ void HorizonsTranslation::readHorizonsTextFile(const std::string& _horizonsTextF
         // YYYY-MM-DD 
         // HH:MM:SS 
         // Range-to-observer (km)
-        // Range-delta (km/s)
+        // Range-delta (km/s) -- suppressed!
         // Galactic Longitude (degrees)
         // Galactic Latitude (degrees)
-        str >> date >> time >> range >> rangeDelta >> gLon >> gLat;
+        str >> date >> time >> range >> gLon >> gLat;
 
         // Convert date and time to seconds after 2000 
         // and pos to Galactic positions in meter from Observer.
-        std::string timeString = date + "T" + time;
+        std::string timeString = date + " " + time;
         double timeInJ2000 = Time::convertTime(timeString);
         glm::dvec3 gPos = glm::dvec3(
             1000 * range * cos(glm::radians(gLat)) * cos(glm::radians(gLon)),
@@ -173,7 +172,10 @@ void HorizonsTranslation::readHorizonsTextFile(const std::string& _horizonsTextF
 
         // Add position to stored timeline. 
         _timeline.addKeyframe(timeInJ2000, gPos);
+
+        std::getline(fileStream, line);
     }
+    fileStream.close();
 }
 
 } // namespace openspace

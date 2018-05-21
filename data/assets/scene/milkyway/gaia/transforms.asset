@@ -2,21 +2,21 @@ local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 
 
+local trail = asset.syncedResource({
+    Name = "Gaia Trail",
+    Type = "HttpSynchronization",
+    Identifier = "gaia_trail",
+    Version = 1
+})
+
 local GaiaPosition = {
     Identifier = "GaiaPosition",
     Parent = earthTransforms.EarthBarycenter.Identifier,
     Transform = {
         Translation = {
-            Type = "SpiceTranslation",
-            Target = "MOON",
-            Observer = "EARTH BARYCENTER",
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = trail .. "/gaia_orbit_horizons.dat"
         },
-        Rotation = {
-            Type = "SpiceRotation",
-            SourceFrame = "IAU_MOON",
-            DestinationFrame = "GALACTIC"
-        },
-
     },
     GUI = {
         Name = "Position",

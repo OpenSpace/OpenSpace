@@ -9,7 +9,7 @@ local textures = asset.syncedResource({
     Version = 1
 })
 
-local models = asset.syncedResource({
+local model = asset.syncedResource({
     Name = "Gaia Model",
     Type = "HttpSynchronization",
     Identifier = "gaia_model",
@@ -25,7 +25,7 @@ local GaiaModel = {
         Body = "GAIA",
         Geometry = {
             Type = "MultiModelGeometry",
-            GeometryFile = models .. "/gaia.obj"
+            GeometryFile = model .. "/gaia.obj"
         }, 
         ColorTexture = textures .. "/gaia-baked.png"
     },
