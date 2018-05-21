@@ -28,7 +28,7 @@ ENLILPaths = {
 asset.require('./fieldlines/enlil')
 
 MASPaths = {
-    Sun = FieldLineBasePath .. "mas/"
+    Sun = FieldLineBasePath .. "mas_multiple_timesteps/"
 }
 asset.require('./fieldlines/mas')
 
@@ -43,16 +43,39 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
         Documentation = "Shows or hides the entire user interface",
         Local = true
     },
+    {
+        Key = "F5",
+        Command = "openspace.time.setTime('2000 JUL 14 08:33:37.100');",
+        Documentation = "Jumps to first of the MAS-fieldline timesteps",
+        Local = true
+    },
+    {
+        Key = "F6",
+        Command = "openspace.time.setTime('2012 JUL 01 00:07:00.000');",
+        Documentation = "Jumps to first of the Enlil-fieldline timesteps",
+        Local = true
+    },
+    {
+        Key = "F8",
+        Command = propertyHelper.invert('Scene.SunGlare.renderable.Enabled'),
+        Documentation = "Toggles the Sun glare",
+        Local = true
+    },
 }
 
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+
+local sunRadius = 695508000
+
 
 asset.onInitialize(function ()
-    openspace.time.setTime("2012 JUL 01 00:00:00.000")
+
+    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+    openspace.setPropertyValue('Scene.SunGlare.renderable.Enabled', false)
 
     sceneHelper.bindKeys(Keybindings)
-
     openspace.setDefaultGuiSorting()
 
     openspace.globebrowsing.loadWMSServersFromFile(
@@ -64,12 +87,12 @@ asset.onInitialize(function ()
     })
 
     openspace.navigation.setCameraState({
-        Focus = earthAsset.Earth.Identifier,
-        Position = { 0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+        Focus = sunAsset.Sun.Identifier,
+        Position = { 80*sunRadius, 80*sunRadius, 0 },
+        Rotation = { 0.0, 0.0, 0.7, 0.0 },
     })
 
-    openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
+    -- openspace.globebrowsing.goToGeo(58.5877, 16.1924, 20000000)
 end)
 
 asset.onDeinitialize(function ()
