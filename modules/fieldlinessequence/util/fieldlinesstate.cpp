@@ -29,6 +29,7 @@
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
+#include <iostream>
 
 namespace {
     constexpr const char* _loggerCat = "FieldlinesState";
@@ -152,14 +153,14 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 
     const char* sData  = "data";
     const char* sTrace = "trace";
+    const char* sIndex = "index";
 
     // ----- EXTRACT THE EXTRA QUANTITY NAMES & TRIGGER TIME (same for all lines) ----- //
     {
         const char* sTime = "time";
         const json& jTmp = *(jFile.begin()); // First field line in the file
         
-        //_triggerTime = Time::convertTime(jTmp[sTime]);
-        _triggerTime = Time::convertTime("2012 JUL 01 00:01:00"); // Temporary for MAS-fieldlines
+        _triggerTime = Time::convertTime(jTmp[sTime]);
 
         const char* sColumns = "columns";
         const json::value_type& variableNameVec = jTmp[sTrace][sColumns];
@@ -187,33 +188,62 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
     for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
         // The 'data' field in the 'trace' variable contains all vertex positions and the
         // extra quantities. Each element is an array related to one vertex point.
-        const std::vector<std::vector<float>>& jData = (*lineIter)[sTrace][sData];
-        const size_t nPoints = jData.size();
 
-        for (size_t j = 0; j < nPoints; ++j) {
-            const std::vector<float>& variables = jData[j];
 
-            // Expects the x, y and z variables to be stored first!
-            const size_t xIdx = 0;
-            const size_t yIdx = 1;
-            const size_t zIdx = 2;
+        // This if-else statement is a very crude, temporary fix for MAS-fieldlines 
+        // their data-value sometimes contain floats instead of arrays.
+        if ((*lineIter)[sTrace][sData][0] == 0.0 || (*lineIter)[sTrace][sData][3] == 0.0)
+        {
+            auto jData = (*lineIter)[sTrace][sData];
+            // In this case, jData only contains (what should be) 4 ints instead 
+            // of n nr. of arrays. This means that the nPoints is a constant, 1 (one)
+            // const size_t nPoints = jData.size();
+
             _vertexPositions.push_back(
                 coordToMeters * glm::vec3(
-                    variables[xIdx],
-                    variables[yIdx],
-                    variables[zIdx]
+                    jData[0],
+                    jData[1],
+                    jData[2]
                 )
             );
 
-            // Add the extra quantites. Stored in the same array as the x,y,z variables.
-            // Hence index of the first extra quantity = 3
-            for (size_t xtraIdx = 3, k = 0 ; k < nExtras; ++k, ++xtraIdx) {
-                _extraQuantities[k].push_back(variables[xtraIdx]);
+            for (size_t xtraIdx = 3, k = 0; k < nExtras; ++k, ++xtraIdx) {
+                _extraQuantities[k].push_back(jData[xtraIdx]);
             }
+            _lineCount.push_back(static_cast<GLsizei>(1));
+            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+            lineStartIdx += 1;
         }
-        _lineCount.push_back(static_cast<GLsizei>(nPoints));
-        _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
-        lineStartIdx += nPoints;
+        else {
+            const std::vector<std::vector<float>>& jData = (*lineIter)[sTrace][sData];
+
+            const size_t nPoints = jData.size();
+
+            for (size_t j = 0; j < nPoints; ++j) {
+                const std::vector<float>& variables = jData[j];
+
+                // Expects the x, y and z variables to be stored first!
+                const size_t xIdx = 0;
+                const size_t yIdx = 1;
+                const size_t zIdx = 2;
+                _vertexPositions.push_back(
+                    coordToMeters * glm::vec3(
+                        variables[xIdx],
+                        variables[yIdx],
+                        variables[zIdx]
+                    )
+                );
+
+                // Add the extra quantites. Stored in the same array as the x,y,z variables.
+                // Hence index of the first extra quantity = 3
+                for (size_t xtraIdx = 3, k = 0; k < nExtras; ++k, ++xtraIdx) {
+                    _extraQuantities[k].push_back(variables[xtraIdx]);
+                }
+            }
+            _lineCount.push_back(static_cast<GLsizei>(nPoints));
+            _lineStart.push_back(static_cast<GLsizei>(lineStartIdx));
+            lineStartIdx += nPoints;
+        }
     }
     return true;
 }
