@@ -7,7 +7,7 @@ import styles from './StoryButton.scss';
 
 const StoryButton = ({ pickStory, storyIdentifier }) => (
   <div className={styles.StoryButton} onClick={pickStory} id={storyIdentifier} role="button" tabIndex="0">
-    <SmallLabel id={storyIdentifier}>Tap here to explore</SmallLabel>
+    <SmallLabel style={{ fontSize: '1.5rem' }} id={storyIdentifier}>Tap here to explore</SmallLabel>
   </div>
 );
 
