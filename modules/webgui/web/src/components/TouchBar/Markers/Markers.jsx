@@ -56,10 +56,10 @@ class Markers extends Component {
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties,
       distFromCamToNodeProperties, infoIcons, screenSpaceRadius,
+      currentFocusNode, focusNodeName,
     } = this.props;
 
     // Get current focus node, its screen space position and its screen space radius
-    const currentFocusNode = nodes.find(node => node.identifier === this.props.focusNodeName);
     const focusNodePos = jsonToLuaTable(currentFocusNode.properties.find(property => property.id === 'ScreenSpacePosition').Value).split(',');
     const focusNodeRadius = Number(currentFocusNode.properties.find(property => property.id === 'ScreenSizeRadius').Value);
 
@@ -68,7 +68,7 @@ class Markers extends Component {
       if (screenVisibilityProperties[i].Value === 'true') {
         let outsideCircle = true;
         // Check if node is behind the focus node or not, show label if not behind focus node
-        if (node.identifier !== this.props.focusNodeName) {
+        if (node.identifier !== focusNodeName) {
           outsideCircle = Markers
             .outsideCircle(Number(focusNodePos[0]), Number(focusNodePos[1]),
               focusNodeRadius, Number(screenSpacePos[0]), Number(screenSpacePos[1]));
@@ -107,7 +107,8 @@ class Markers extends Component {
   render() {
     return (
       <div className={'Markers'}>
-        {this.props.screenSpaceProperties.length > 0 && this.createInfoMarkers()}
+        {(this.props.screenSpaceProperties.length > 0 && this.props.currentFocusNode)
+          && this.createInfoMarkers()}
       </div>
     );
   }
@@ -122,6 +123,7 @@ const mapStateToProps = (state) => {
   let infoIcons = {};
   const screenSpaceRadius = [];
   let focusNodeName = '';
+  let currentFocusNode = {};
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners
@@ -142,6 +144,7 @@ const mapStateToProps = (state) => {
     });
 
     focusNodeName = traverseTreeWithURI(state.propertyTree, OriginKey).Value;
+    currentFocusNode = nodes.find(node => node.identifier === focusNodeName);
   }
 
   if (state.fetchData.length > 0) {
@@ -156,6 +159,7 @@ const mapStateToProps = (state) => {
     infoIcons,
     screenSpaceRadius,
     focusNodeName,
+    currentFocusNode,
   };
 };
 
@@ -195,6 +199,7 @@ Markers.propTypes = {
     info: PropTypes.string,
   })),
   nodes: PropTypes.arrayOf(PropTypes.shape({})),
+  currentFocusNode: PropTypes.arrayOf(PropTypes.shape({})),
   focusNodeName: PropTypes.string,
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,
@@ -208,6 +213,7 @@ Markers.defaultProps = {
   screenSpaceRadius: [],
   infoIcons: [],
   Description: [],
+  currentFocusNode: [],
   Value: '',
   focusNodeName: '',
   StopListening: null,

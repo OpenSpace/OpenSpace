@@ -106,7 +106,7 @@ class OnTouchGui extends Component {
         });
       }
       const startPosition = json.start.location;
-      const goToGeoScript = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.latitude}, ${startPosition.longitude}, ${startPosition.attitude}`);
+      const goToGeoScript = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.latitude}, ${startPosition.longitude}, ${startPosition.altitude}`);
       const setTimeScript = SetTimeScript.replace(ValuePlaceholder, `${json.start.time}`);
 
       DataManager.runScript(setTimeScript);
@@ -132,6 +132,7 @@ class OnTouchGui extends Component {
   }
 
   render() {
+    // {this.getDeveloperButtons()}
     return (
       <div className={styles.app}>
         { this.props.connectionLost && (
