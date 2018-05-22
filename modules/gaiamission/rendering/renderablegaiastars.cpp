@@ -1829,7 +1829,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             LDEBUG("Generating Framebuffer Texture!");
         }
         // Bind render texture to FBO. 
-        // TODO: Should I have a depth buffer as well for Fragment depth in 2nd pass!?
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
         glBindTexture(GL_TEXTURE_2D, *_fboTexture);
         glFramebufferTexture(
