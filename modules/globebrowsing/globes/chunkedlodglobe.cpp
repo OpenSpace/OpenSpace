@@ -76,6 +76,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     , _fontSize(30)
     , _labelsSize(2.5f)
     , _labelsMinHeight(100.f)
+    , _labelsColor(1.f)
 {
     auto geometry = std::make_shared<SkirtedGrid>(
         static_cast<unsigned int>(segmentsPerPatch),
@@ -329,6 +330,10 @@ void ChunkedLodGlobe::setLabelsMinHeight(const float height) {
     _labelsMinHeight = std::move(height);
 }
 
+void ChunkedLodGlobe::setLabelsColor(const glm::vec4 & color) {
+    _labelsColor = std::move(color);
+}
+
 void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     
     // Calculate the MVP matrix
@@ -387,7 +392,7 @@ void ChunkedLodGlobe::renderLabels(const RenderData& data,
     const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
     const glm::dvec3& orthoUp, float fadeInVariable) {
     
-    glm::vec4 textColor = glm::vec4(1.0, 1.0, 0.0, 1.0);
+    glm::vec4 textColor = _labelsColor;
     textColor.a *= fadeInVariable;
     // first position
     // second text
@@ -399,7 +404,6 @@ void ChunkedLodGlobe::renderLabels(const RenderData& data,
             //lEntry.geoPosition,
             position,
             textColor,
-            //pow(10.0, _textSize.value()),
             powf(2.f, _labelsSize),
             //_textMinSize,
             //_textMaxSize,

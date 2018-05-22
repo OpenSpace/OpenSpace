@@ -145,6 +145,11 @@ public:
      */
     void setLabelsMinHeight(const float height);
 
+    /**
+    * Labels color.
+    */
+    void setLabelsColor(const glm::vec4 & color);
+
     const int minSplitDepth;
     const int maxSplitDepth;
 
@@ -189,6 +194,7 @@ private:
     float _labelsMinHeight;
     RenderableGlobe::Labels _labels;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
+    glm::vec4 _labelsColor;
 };
 
 } // namespace openspace::globebrowsing

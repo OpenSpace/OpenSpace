@@ -216,6 +216,12 @@ namespace {
         "Labels Minimum Height",
         "Labels Minimum Height"
     };
+
+    static const openspace::properties::Property::PropertyInfo LabelsColorInfo = {
+        "LabelsColor",
+        "Labels Color",
+        "Labels Color"
+    };
 } // namespace
 
 using namespace openspace::properties;
@@ -253,7 +259,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         IntProperty(LabelsMaxSizeInfo, 300, 10, 1000),
         IntProperty(LabelsMinSizeInfo, 30, 1, 100),
         FloatProperty(LabelsSizeInfo, 2.5, 0, 30),
-        FloatProperty(LabelsMinHeightInfo, 100.0, 0.0, 10000.0)
+        FloatProperty(LabelsMinHeightInfo, 100.0, 0.0, 10000.0),
+        Vec4Property(LabelsColorInfo, glm::vec4(1.f, 1.f, 0.f, 1.f), 
+            glm::vec4(0.f), glm::vec4(1.f))
     })
     , _debugPropertyOwner({ "Debug" })
 {
@@ -313,6 +321,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.labelsFontSize);
     addProperty(_generalProperties.labelsSize);
     addProperty(_generalProperties.labelsMinHeight);
+    _generalProperties.labelsColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_generalProperties.labelsColor);
 
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -437,17 +447,41 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                 _generalProperties.labelsEnabled.set(true);
                 _chunkedLodGlobe->setLabels(_labels);
                 _chunkedLodGlobe->enableLabelsRendering(true);
+                
                 _generalProperties.labelsEnabled.onChange([&]() {
                     _chunkedLodGlobe->enableLabelsRendering(_generalProperties.labelsEnabled);
                 });
+                
                 _generalProperties.labelsFontSize.onChange([&]() {
                     _chunkedLodGlobe->setFontSize(_generalProperties.labelsFontSize);
                 });
+
+                if (labelsDictionary.hasKey(LabelsSizeInfo.identifier)) {
+                    float size = static_cast<float>(labelsDictionary.value<double>(LabelsSizeInfo.identifier));
+                    _chunkedLodGlobe->setLabelsSize(size);
+                    _generalProperties.labelsSize.set(size);
+                }
+                
                 _generalProperties.labelsSize.onChange([&]() {
                     _chunkedLodGlobe->setLabelsSize(_generalProperties.labelsSize);
                 });
+                
                 _generalProperties.labelsMinHeight.onChange([&]() {
                     _chunkedLodGlobe->setLabelsMinHeight(_generalProperties.labelsMinHeight);
+                });
+
+                /*_generalProperties.labelsMaxHeight.onChange([&]() {
+                    _chunkedLodGlobe->setLabelsMaxHeight(_generalProperties.labelsMaxHeight);
+                });*/
+
+                if (labelsDictionary.hasKey(LabelsColorInfo.identifier)) {
+                    _labelsColor = labelsDictionary.value<glm::vec4>(LabelsColorInfo.identifier);
+                    _chunkedLodGlobe->setLabelsColor(_labelsColor);
+                }
+                
+                _generalProperties.labelsColor.onChange([&]() {
+                    _labelsColor = _generalProperties.labelsColor;
+                    _chunkedLodGlobe->setLabelsColor(_labelsColor);
                 });
             }
         }

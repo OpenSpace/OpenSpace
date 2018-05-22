@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 #include <ghoul/glm.h>
 
@@ -92,6 +93,7 @@ public:
         properties::IntProperty labelsMinSize;
         properties::FloatProperty labelsSize;
         properties::FloatProperty labelsMinHeight;
+        properties::Vec4Property labelsColor;
     };
 
     // Shadow structure
@@ -180,6 +182,7 @@ private:
     // Labels
     bool _labelsDataPresent;
     Labels _labels;
+    glm::vec4 _labelsColor;
 };
 
 } // namespace openspace::globebrowsing

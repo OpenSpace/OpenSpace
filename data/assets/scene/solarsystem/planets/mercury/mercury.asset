@@ -63,8 +63,9 @@ local Mercury = {
         },
         Labels = {
             FileName = "Mercury.labels",
-            Size = 20.0,
-            ProximityEnabled = false
+            LabelsSize = 9.0,
+            ProximityEnabled = false,
+            LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
