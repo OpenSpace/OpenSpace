@@ -60,6 +60,12 @@ local Mercury = {
         SegmentsPerPatch = 64,
         Layers = {
             ColorLayers = color_layers
+        },
+        Labels = {
+            FileName = "Mercury.labels",
+            LabelsSize = 9.0,
+            ProximityEnabled = false,
+            LabelsColor = {1.0, 1.0, 0.0, 1.0}
         }
     },
     Tag = { "planet_solarSystem", "planet_terrestrial" },

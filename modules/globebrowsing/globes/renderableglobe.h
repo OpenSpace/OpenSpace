@@ -33,6 +33,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec4property.h>
+
+#include <ghoul/glm.h>
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
 namespace openspace {
@@ -84,6 +87,13 @@ public:
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
         properties::FloatProperty orenNayarRoughness;
+        properties::BoolProperty labelsEnabled;
+        properties::IntProperty labelsFontSize;
+        properties::IntProperty labelsMaxSize;
+        properties::IntProperty labelsMinSize;
+        properties::FloatProperty labelsSize;
+        properties::FloatProperty labelsMinHeight;
+        properties::Vec4Property labelsColor;
     };
 
     // Shadow structure
@@ -95,6 +105,19 @@ public:
         glm::dvec3 sourceCasterVec;
         glm::dvec3 casterPositionVec;
         bool isShadowing;
+    };
+
+    // Labels Structures
+    struct LabelEntry {
+        char feature[256];
+        float diameter;
+        float latitude;
+        float longitude;
+        glm::vec3 geoPosition;
+    };
+    struct Labels {
+        std::string filename;
+        std::vector<LabelEntry> labelsArray;
     };
 
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -126,7 +149,13 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override;
+        const glm::dvec3& targetModelSpace) override;
+
+private:
+    bool loadLabelsData(const std::string& file);
+    bool readLabelsFile(const std::string& file);
+    bool loadCachedFile(const std::string& file);
+    bool saveCachedFile(const std::string& file) const;
 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
@@ -149,6 +178,11 @@ private:
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
+
+    // Labels
+    bool _labelsDataPresent;
+    Labels _labels;
+    glm::vec4 _labelsColor;
 };
 
 } // namespace openspace::globebrowsing

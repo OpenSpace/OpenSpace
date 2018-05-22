@@ -53,7 +53,7 @@ public:
     void goToGeo(double latitude, double longitude);
     void goToGeo(double latitude, double longitude, double altitude);
 
-    glm::vec3 cartesianCoordinatesFromGeo(globebrowsing::RenderableGlobe& globe,
+    glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
         double latitude, double longitude, double altitude);
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();

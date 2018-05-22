@@ -357,8 +357,8 @@ void GlobeBrowsingModule::goToGeo(double latitude, double longitude,
 }
 
 glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
-                                                    globebrowsing::RenderableGlobe& globe,
-                                       double latitude, double longitude, double altitude)
+    const globebrowsing::RenderableGlobe& globe,
+    double latitude, double longitude, double altitude)
 {
     using namespace globebrowsing;
 

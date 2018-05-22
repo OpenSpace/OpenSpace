@@ -28,8 +28,20 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
+
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <fstream>
+#include <cstdlib>
 
 namespace {
+    constexpr const char* _loggerCat = "RenderableGlobe";
     constexpr const char* keyFrame = "Frame";
     constexpr const char* keyRadii = "Radii";
     constexpr const char* keySegmentsPerPatch = "SegmentsPerPatch";
@@ -37,6 +49,10 @@ namespace {
     constexpr const char* keyShadowGroup = "ShadowGroup";
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
+    constexpr const char* keyLabels = "Labels";
+    constexpr const char* keyLabelsFileName = "FileName";
+
+    constexpr int8_t CurrentCacheVersion = 1;
 
     static const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
@@ -163,6 +179,49 @@ namespace {
         "orenNayarRoughness",
         "" // @TODO Missing documentation
     };
+
+    static const openspace::properties::Property::PropertyInfo LabelsInfo = {
+        "Labels",
+        "Labels Enabled",
+        "Enables and disables the rendering of labels on the globe surface from "
+        "the csv label file"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsFontSizeInfo = {
+        "LabelsFontSize",
+        "Labels Font Size",
+        "Font size for the rendering labels. This is different fromt text size."
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsMaxSizeInfo = {
+        "LabelsMaxSize",
+        "Labels Maximum Text Size",
+        "Maximum label size"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsMinSizeInfo = {
+        "LabelsMinSize",
+        "Labels Minimum Text Size",
+        "Minimum label size"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsSizeInfo = {
+        "LabelsSize",
+        "Labels Size",
+        "Labels Size"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsMinHeightInfo = {
+        "LabelsMinHeight",
+        "Labels Minimum Height",
+        "Labels Minimum Height"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LabelsColorInfo = {
+        "LabelsColor",
+        "Labels Color",
+        "Labels Color"
+    };
 } // namespace
 
 using namespace openspace::properties;
@@ -194,7 +253,15 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(EclipseHardShadowsInfo, false),
         FloatProperty(LodScaleFactorInfo, 10.f, 1.f, 50.f),
         FloatProperty(CameraMinHeightInfo, 100.f, 0.f, 1000.f),
-        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
+        FloatProperty(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f),
+        BoolProperty(LabelsInfo, false),
+        IntProperty(LabelsFontSizeInfo, 30, 1, 50),
+        IntProperty(LabelsMaxSizeInfo, 300, 10, 1000),
+        IntProperty(LabelsMinSizeInfo, 30, 1, 100),
+        FloatProperty(LabelsSizeInfo, 2.5, 0, 30),
+        FloatProperty(LabelsMinHeightInfo, 100.0, 0.0, 10000.0),
+        Vec4Property(LabelsColorInfo, glm::vec4(1.f, 1.f, 0.f, 1.f), 
+            glm::vec4(0.f), glm::vec4(1.f))
     })
     , _debugPropertyOwner({ "Debug" })
 {
@@ -250,6 +317,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.lodScaleFactor);
     addProperty(_generalProperties.cameraMinHeight);
     addProperty(_generalProperties.orenNayarRoughness);
+    addProperty(_generalProperties.labelsEnabled);
+    addProperty(_generalProperties.labelsFontSize);
+    addProperty(_generalProperties.labelsSize);
+    addProperty(_generalProperties.labelsMinHeight);
+    _generalProperties.labelsColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_generalProperties.labelsColor);
 
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -357,6 +430,62 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             }
         }
     }
+
+    // Reads labels' file and build cache file if necessary
+    _labelsDataPresent = false;
+    ghoul::Dictionary labelsDictionary;
+    bool successLabels = dictionary.getValue(keyLabels, labelsDictionary);
+    if (successLabels) {
+        std::string labelsFile;
+        successLabels = labelsDictionary.getValue(keyLabelsFileName, labelsFile);
+        // DEBUG:
+        //std::cout << "========== File Name: " << absPath(labelsFile) << " ===========" << std::endl;
+        if (successLabels) {
+            _labelsDataPresent = true;
+            bool loadSuccess = loadLabelsData(absPath(labelsFile));
+            if (loadSuccess) {
+                _generalProperties.labelsEnabled.set(true);
+                _chunkedLodGlobe->setLabels(_labels);
+                _chunkedLodGlobe->enableLabelsRendering(true);
+                
+                _generalProperties.labelsEnabled.onChange([&]() {
+                    _chunkedLodGlobe->enableLabelsRendering(_generalProperties.labelsEnabled);
+                });
+                
+                _generalProperties.labelsFontSize.onChange([&]() {
+                    _chunkedLodGlobe->setFontSize(_generalProperties.labelsFontSize);
+                });
+
+                if (labelsDictionary.hasKey(LabelsSizeInfo.identifier)) {
+                    float size = static_cast<float>(labelsDictionary.value<double>(LabelsSizeInfo.identifier));
+                    _chunkedLodGlobe->setLabelsSize(size);
+                    _generalProperties.labelsSize.set(size);
+                }
+                
+                _generalProperties.labelsSize.onChange([&]() {
+                    _chunkedLodGlobe->setLabelsSize(_generalProperties.labelsSize);
+                });
+                
+                _generalProperties.labelsMinHeight.onChange([&]() {
+                    _chunkedLodGlobe->setLabelsMinHeight(_generalProperties.labelsMinHeight);
+                });
+
+                /*_generalProperties.labelsMaxHeight.onChange([&]() {
+                    _chunkedLodGlobe->setLabelsMaxHeight(_generalProperties.labelsMaxHeight);
+                });*/
+
+                if (labelsDictionary.hasKey(LabelsColorInfo.identifier)) {
+                    _labelsColor = labelsDictionary.value<glm::vec4>(LabelsColorInfo.identifier);
+                    _chunkedLodGlobe->setLabelsColor(_labelsColor);
+                }
+                
+                _generalProperties.labelsColor.onChange([&]() {
+                    _labelsColor = _generalProperties.labelsColor;
+                    _chunkedLodGlobe->setLabelsColor(_labelsColor);
+                });
+            }
+        }
+    }
 }
 
 void RenderableGlobe::initializeGL() {
@@ -369,6 +498,10 @@ void RenderableGlobe::initializeGL() {
     // Recompile the shaders directly so that it is not done the first time the render
     // function is called.
     _chunkedLodGlobe->recompileShaders();
+
+    if (_labelsDataPresent) {
+        _chunkedLodGlobe->initializeFonts();
+    }
 }
 
 void RenderableGlobe::deinitializeGL() {
@@ -472,6 +605,10 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
     return _savedCamera;
 }
 
+void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
+    _savedCamera = camera;
+}
+
 SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
                                                        const glm::dvec3& targetModelSpace)
 {
@@ -501,8 +638,155 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     };
 }
 
-void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
-    _savedCamera = camera;
+bool RenderableGlobe::loadLabelsData(const std::string& file) {
+    bool success = true;
+    if (_labelsDataPresent) {
+        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+            ghoul::filesystem::File(file),
+            "RenderableGlobe|" + identifier(),
+            ghoul::filesystem::CacheManager::Persistent::Yes
+        );
+
+        bool hasCachedFile = FileSys.fileExists(cachedFile);
+        if (hasCachedFile) {
+            LINFO(fmt::format(
+                "Cached file '{}' used for labels file '{}'",
+                cachedFile,
+                file
+            ));
+
+            success = loadCachedFile(cachedFile);
+            if (success) {
+                return true;
+            }
+            else {
+                FileSys.cacheManager()->removeCacheFile(file);
+                // Intentional fall-through to the 'else' to generate the cache
+                // file for the next run
+            }
+        }
+        else {
+            LINFO(fmt::format("Cache for labels file '{}' not found", file));
+        }
+        LINFO(fmt::format("Loading labels file '{}'", file));
+
+        success = readLabelsFile(file);
+        if (!success) {
+            return false;
+        }
+
+        success &= saveCachedFile(cachedFile);
+    }
+    return success;
+}
+
+bool RenderableGlobe::readLabelsFile(const std::string& file) {
+    try {
+        std::fstream csvLabelFile(file);
+        if (!csvLabelFile.good()) {
+            LERROR(fmt::format("Failed to open labels file '{}'", file));
+            return false;
+        }
+        if (csvLabelFile.is_open()) {
+            char line[4096];
+            _labels.labelsArray.clear();
+            while (!csvLabelFile.eof()) {
+                csvLabelFile.getline(line, 4090);
+                if (strnlen(line, 4090) > 10) {
+                    LabelEntry lEntry;
+                    char *token = strtok(line, ",");
+                    // First line is just the Header
+                    if (strcmp(token, "Feature_Name") == 0) {
+                        continue;
+                    }
+                    strncpy(lEntry.feature, token, 256);
+                    strtok(NULL, ","); // Target is not used
+                    lEntry.diameter = static_cast<float>(atof(strtok(NULL, ",")));
+                    lEntry.latitude = static_cast<float>(atof(strtok(NULL, ",")));
+                    lEntry.longitude = static_cast<float>(atof(strtok(NULL, ",")));
+                    char * coordinateSystem = strtok(NULL, ",");
+
+                    if (strstr(coordinateSystem, "West") != NULL) {
+                        lEntry.longitude = 360.0f - lEntry.longitude;
+                    }
+
+                    GlobeBrowsingModule* _globeBrowsingModule =
+                        OsEng.moduleEngine().module<openspace::GlobeBrowsingModule>();
+                    lEntry.geoPosition = _globeBrowsingModule->cartesianCoordinatesFromGeo(
+                        *this,
+                        lEntry.latitude,
+                        lEntry.longitude,
+                        lEntry.diameter
+                    );
+
+                    _labels.labelsArray.push_back(lEntry);
+                }
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    catch (const std::fstream::failure& e) {
+        LERROR(fmt::format("Failed reading labels file '{}'", file));
+        LERROR(e.what());
+        return false;
+    }
+}
+
+bool RenderableGlobe::loadCachedFile(const std::string& file) {
+    std::ifstream fileStream(file, std::ifstream::binary);
+    if (fileStream.good()) {
+        int8_t version = 0;
+        fileStream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
+        if (version != CurrentCacheVersion) {
+            LINFO("The format of the cached file has changed: deleting old cache");
+            fileStream.close();
+            FileSys.deleteFile(file);
+            return false;
+        }
+
+        int32_t nValues = 0;
+        fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+        _labels.labelsArray.resize(nValues);
+        
+        fileStream.read(reinterpret_cast<char*>(&_labels.labelsArray[0]),
+            nValues * sizeof(_labels.labelsArray[0]));
+      
+        bool success = fileStream.good();
+        return success;
+    }
+    else {
+        LERROR(fmt::format("Error opening file '{}' for loading cache file", file));
+        return false;
+    }
+}
+
+bool RenderableGlobe::saveCachedFile(const std::string& file) const {
+    
+    std::ofstream fileStream(file, std::ofstream::binary);
+    if (fileStream.good()) {
+        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t));
+
+        int32_t nValues = static_cast<int32_t>(_labels.labelsArray.size());
+        if (nValues == 0) {
+            LERROR("Error writing cache: No values were loaded");
+            return false;
+        }
+        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+
+        size_t nBytes = nValues * sizeof(_labels.labelsArray[0]);
+        fileStream.write(reinterpret_cast<const char*>(&_labels.labelsArray[0]), nBytes);
+
+        bool success = fileStream.good();
+        return success;
+    }
+    else {
+        LERROR(fmt::format("Error opening file '{}' for save cache file", file));
+        return false;
+    }
 }
 
 } // namespace openspace::globebrowsing

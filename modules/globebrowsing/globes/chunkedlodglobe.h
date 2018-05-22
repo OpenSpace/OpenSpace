@@ -29,6 +29,9 @@
 
 #include <modules/globebrowsing/other/statscollector.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+
+#include <ghoul/font/fontrenderer.h>
 
 #include <memory>
 
@@ -112,6 +115,41 @@ public:
      */
     void recompileShaders();
 
+    /**
+     * Creates and initializes the default font used on the labels.
+     */
+    void initializeFonts();
+    
+    /**
+     * Add the label info to be rendered on the globe surface. 
+     */
+    void setLabels(RenderableGlobe::Labels & labels);
+
+    /**
+     * Set the Font Size for the rendered labels.
+     */
+    void setFontSize(const int size);
+
+    /**
+     * Enables/Disables labels rendering.
+     */
+    void enableLabelsRendering(const bool enable);
+
+    /**
+     * Labels's size.
+     */
+    void setLabelsSize(const float size);
+
+    /**
+     * Labels minimum height on planet's surface.
+     */
+    void setLabelsMinHeight(const float height);
+
+    /**
+    * Labels color.
+    */
+    void setLabelsColor(const glm::vec4 & color);
+
     const int minSplitDepth;
     const int maxSplitDepth;
 
@@ -121,6 +159,8 @@ public:
 
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
+    void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     static const GeodeticPatch COVERAGE;
     static const TileIndex LEFT_HEMISPHERE_INDEX;
@@ -146,6 +186,15 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
 
     bool _shadersNeedRecompilation;
+
+    // Label Rendering
+    bool _labelsEnabled;
+    int _fontSize;
+    float _labelsSize;
+    float _labelsMinHeight;
+    RenderableGlobe::Labels _labels;
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    glm::vec4 _labelsColor;
 };
 
 } // namespace openspace::globebrowsing

@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
 #include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
@@ -43,9 +44,13 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 
 #include <openspace/util/time.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 
 #include <math.h>
 
@@ -67,6 +72,11 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(owner, RIGHT_HEMISPHERE_INDEX)))
     , _layerManager(layerManager)
     , _shadersNeedRecompilation(true)
+    , _labelsEnabled(false)
+    , _fontSize(30)
+    , _labelsSize(2.5f)
+    , _labelsMinHeight(100.f)
+    , _labelsColor(1.f)
 {
     auto geometry = std::make_shared<SkirtedGrid>(
         static_cast<unsigned int>(segmentsPerPatch),
@@ -281,7 +291,57 @@ void ChunkedLodGlobe::recompileShaders() {
     _shadersNeedRecompilation = false;
 }
 
+void ChunkedLodGlobe::initializeFonts() {
+    if (_font == nullptr) {
+        _font = OsEng.fontManager().font(
+            "Mono",
+            static_cast<float>(_fontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+    }
+}
+
+void ChunkedLodGlobe::setLabels(RenderableGlobe::Labels & labels) {
+    _labels = std::move(labels);
+}
+
+void ChunkedLodGlobe::setFontSize(const int size) {
+    _fontSize = std::move(size);
+    if (_font) {
+        _font = OsEng.fontManager().font(
+            "Mono",
+            static_cast<float>(_fontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
+    }
+}
+
+void ChunkedLodGlobe::enableLabelsRendering(const bool enable) {
+    _labelsEnabled = std::move(enable);
+}
+
+void ChunkedLodGlobe::setLabelsSize(const float size) {
+    _labelsSize = std::move(size);
+}
+
+void ChunkedLodGlobe::setLabelsMinHeight(const float height) {
+    _labelsMinHeight = std::move(height);
+}
+
+void ChunkedLodGlobe::setLabelsColor(const glm::vec4 & color) {
+    _labelsColor = std::move(color);
+}
+
 void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
+    
+    // Calculate the MVP matrix
+    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        viewTransform;
+    glm::dmat4 mvp = vp * _owner.modelTransform();
+
     stats.startNewRecord();
     if (_shadersNeedRecompilation) {
         _renderer->recompileShaders(_owner);
@@ -294,12 +354,6 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
 
     _leftRoot->updateChunkTree(data);
     _rightRoot->updateChunkTree(data);
-
-    // Calculate the MVP matrix
-    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-                    viewTransform;
-    glm::dmat4 mvp = vp * _owner.modelTransform();
 
     // Render function
     auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
@@ -324,7 +378,48 @@ void ChunkedLodGlobe::render(const RenderData& data, RendererTasks&) {
     auto duration2 = std::chrono::system_clock::now().time_since_epoch();
     auto ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
     stats.i["chunk globe render time"] = ms2 - millis;
+
+    // Render labels
+    if (_labelsEnabled) {
+        glm::dmat4 invMVP = glm::inverse(mvp);
+        glm::dvec3 orthoRight = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(1.0, 0.0, 0.0, 0.0))));
+        glm::dvec3 orthoUp = glm::dvec3(glm::normalize(glm::dvec3(invMVP * glm::dvec4(0.0, 1.0, 0.0, 0.0))));
+        renderLabels(data, mvp, orthoRight, orthoUp, 1.0);
+    }
 }
+
+void ChunkedLodGlobe::renderLabels(const RenderData& data,
+    const glm::dmat4& modelViewProjectionMatrix, const glm::dvec3& orthoRight,
+    const glm::dvec3& orthoUp, float fadeInVariable) {
+    
+    glm::vec4 textColor = _labelsColor;
+    textColor.a *= fadeInVariable;
+    // first position
+    // second text
+    for (const RenderableGlobe::LabelEntry lEntry: _labels.labelsArray) {
+        glm::vec3 position = lEntry.geoPosition;
+        position += _labelsMinHeight;
+        ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
+            *_font,
+            //lEntry.geoPosition,
+            position,
+            textColor,
+            powf(2.f, _labelsSize),
+            //_textMinSize,
+            //_textMaxSize,
+            4,
+            500,
+            modelViewProjectionMatrix,
+            orthoRight,
+            orthoUp,
+            data.camera.positionVec3(),
+            data.camera.lookUpVectorWorldSpace(),
+            0,
+            "%s",
+            lEntry.feature
+        );
+    }
+ }
 
 void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
     if (_owner.debugProperties().showChunkBounds ||
