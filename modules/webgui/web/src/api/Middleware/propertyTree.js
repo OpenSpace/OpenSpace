@@ -79,7 +79,9 @@ export const updateBackend = store => next => (action) => {
     case actionTypes.startListeningToNode: {
       const nodeToListen = helperFunctions
         .traverseTreeWithURI(state.propertyTree, action.payload.URI);
-      if (nodeToListen.listeners === 1) {
+      // If not subscribing on the property start subscribing
+      // subscriptons are reused if not anything has changed
+      if (subscriptionIds[action.payload.URI] === undefined) {
         startSubscription(action.payload.URI, store);
       }
       break;
