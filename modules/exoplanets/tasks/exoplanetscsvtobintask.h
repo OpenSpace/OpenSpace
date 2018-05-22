@@ -85,10 +85,6 @@ private:
     	float RSTARUPPER;
     	float RSTARLOWER;
     	float URSTAR;
-    	//float TEFF;
-    	//float TEFFUPPER;
-    	//float TEFFLOWER;
-    	//float UTEFF;
     	double TT;
     	float TTUPPER;
     	float TTLOWER;
