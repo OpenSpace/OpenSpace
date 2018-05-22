@@ -34,6 +34,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
+#include <ghoul/glm.h>
+
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
 namespace openspace {
     class AtmosphereDeferredcaster;
@@ -145,7 +147,13 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override;
+        const glm::dvec3& targetModelSpace) override;
+
+private:
+    bool loadLabelsData(const std::string& file);
+    bool readLabelsFile(const std::string& file);
+    bool loadCachedFile(const std::string& file);
+    bool saveCachedFile(const std::string& file) const;
 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
@@ -171,6 +179,7 @@ private:
 
     // Labels
     bool _labelsDataPresent;
+    Labels _labels;
 };
 
 } // namespace openspace::globebrowsing
