@@ -15,19 +15,22 @@ local colorLUT = asset.syncedResource({
     Version = 1
 })
 
---local stars = asset.syncedResource({
---    Name = "Gaia Stars Data File",
---    Type = "HttpSynchronization",
---    Identifier = "gaia_stars",
---    Version = 1
---})
-local stars = "E:/gaia_sync_data"
+-- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
+local torrentStars = asset.syncedResource({
+    Name = "Gaia DR2 RV Octree",
+    Type = "TorrentSynchronization",
+    Identifier = "gaia_stars",
+    Magnet = "magnet:?xt=urn:btih:a9baaeda82673a46b737b86b1cb419d345331caf&dn=DR2_rv_Octree[10kSPN,20dist]"
+})
+
+local localStars = "E:/gaia_sync_data"
 
 local GaiaMission = {
     Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = stars .. "/DR2_full_Octree[150kSPN,250dist]/",
+        File = torrentStars .. "/DR2_rv_Octree[10kSPN,20dist]/",
+        -- File = localStars .. "/DR2_full_Octree[150kSPN,250dist]_5p/",
         FileReaderOption = "StreamOctree", -- BinaryOctree, StreamOctree
         RenderOption = "Static",
         ShaderOption = "Point_SSBO",
@@ -58,7 +61,7 @@ local GaiaMissionFits = {
     Identifier = "GaiaMissionFits",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = stars .. "/TGAS_Octree_10kSPN.bin",
+        File = localStars .. "/TGAS_Octree_10kSPN.bin",
         FileReaderOption = "BinaryOctree",
         ColumnOption = "Static",
         Texture = textures .. "/halo.png",
@@ -75,7 +78,7 @@ local GaiaMissionSpeck = {
     Identifier = "GaiaMissionSpeck",
     Renderable = {
         Type = "RenderableGaiaStars",
-        File = stars .. "/AMNH_DR1_Octree_10kSPN.bin",
+        File = localStars .. "/AMNH_DR1_Octree_10kSPN.bin",
         FileReaderOption = "BinaryOctree",
         ColumnOption = "Static",
         Texture = textures .. "/halo.png",
