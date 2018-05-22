@@ -63,7 +63,11 @@ class SightsController extends Component {
   render() {
     return (
       <div className={Picker.Wrapper} >
-        <Picker onClick={this.togglePopover} className={`${styles.sightsController} ${this.state.showPopover ? Picker.Active : ''}`}>
+        <Picker
+          onClick={this.togglePopover}
+          className={`${styles.sightsController} ${this.state.showPopover && styles.active}
+          ${this.state.showPopover && Picker.Active}`}
+        >
           <Icon icon="place" className={buttonStyle.Icon} />
           <SmallLabel>Select sight</SmallLabel>
         </Picker>

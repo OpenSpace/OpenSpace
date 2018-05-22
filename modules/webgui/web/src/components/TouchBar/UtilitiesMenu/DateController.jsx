@@ -72,7 +72,11 @@ class DateController extends Component {
   render() {
     return (
       <div className={Picker.Wrapper}>
-        <Picker onClick={this.togglePopover} className={`${styles.dateController} ${this.state.showPopover ? Picker.Active : ''}`}>
+        <Picker
+          onClick={this.togglePopover}
+          className={`${styles.dateController}
+          ${this.state.showPopover && styles.active} ${this.state.showPopover && Picker.Active}`}
+        >
           <Icon icon="date_range" className={buttonStyle.Icon} />
           <SmallLabel>Select event</SmallLabel>
         </Picker>

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { CurrenTimeKey, DeltaTime, FastRewind, Rewind, Play, Forward, FastForward } from '../../../api/keys';
 import DataManager, { TopicTypes } from '../../../api/DataManager';
 import styles from './TimeController.scss';
+import buttonStyles from '../UtilitiesMenu/UtilitiesButtons.scss';
 import Button from '../../common/Input/Button/Button';
 import * as timeHelpers from '../../../utils/timeHelpers';
 import Icon from '../../common/Icon/Icon';
@@ -72,26 +73,28 @@ class TimePlayerController extends Component {
   }
 
   deltaTimeCallback(message) {
-    this.setState({ deltaTime: message.deltaTime });
-    // Translate delta time to a player button
-    let active = '';
-    if (message.deltaTime === 1) {
-      this.setState({ paused: false });
-      active = Play;
-    } else if (message.deltaTime === 0) {
-      this.setState({ paused: true });
-      active = Play;
-    } else if (message.deltaTime === Speed) {
-      active = Forward;
-    } else if (message.deltaTime === FastSpeed) {
-      active = FastForward;
-    } else if (message.deltaTime === -Speed) {
-      active = Rewind;
-    } else if (message.deltaTime === -FastSpeed) {
-      active = FastRewind;
-    }
+    if (this.mounted) {
+      this.setState({ deltaTime: message.deltaTime });
+      // Translate delta time to a player button
+      let active = '';
+      if (message.deltaTime === 1) {
+        this.setState({ paused: false });
+        active = Play;
+      } else if (message.deltaTime === 0) {
+        this.setState({ paused: true });
+        active = Play;
+      } else if (message.deltaTime === Speed) {
+        active = Forward;
+      } else if (message.deltaTime === FastSpeed) {
+        active = FastForward;
+      } else if (message.deltaTime === -Speed) {
+        active = Rewind;
+      } else if (message.deltaTime === -FastSpeed) {
+        active = FastRewind;
+      }
 
-    this.setState({ activePlayer: active });
+      this.setState({ activePlayer: active });
+    }
   }
 
   currentTimeCallback(message) {
@@ -131,10 +134,15 @@ class TimePlayerController extends Component {
     return (
       <div className={styles.TimeController}>
         <div className={styles.ButtonContainer}>
-          <Button block smalltext flexgrow fixedwidth onClick={timeHelpers.now}>
+          <div
+            className={buttonStyles.UtilitiesButton}
+            onClick={timeHelpers.now}
+            role="button"
+            tabIndex="0"
+          >
             <Icon icon="replay" className={styles.Icon} />
             <SmallLabel>Time</SmallLabel>
-          </Button>
+          </div>
         </div>
         <div className={styles.SimulationIncrement}>
           <div className={styles.TimeText}>

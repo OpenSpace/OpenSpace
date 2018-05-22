@@ -28,7 +28,13 @@ class HelpButton extends Component {
 
   render() {
     return (
-      <div className={`${styles.UtilitiesButton}`} onClick={this.handleClick} role="button" tabIndex="0">
+      <div
+        className={`${styles.UtilitiesButton}
+        ${this.state.showImage && styles.active}`}
+        onClick={this.handleClick}
+        role="button"
+        tabIndex="0"
+      >
         <Icon icon="help_outline" className={styles.Icon} />
         { this.state.showImage && <img src={Image} className={styles.Instructions} alt={'instructions'} />}
         <SmallLabel>Help</SmallLabel>
