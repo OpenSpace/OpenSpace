@@ -32,8 +32,11 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
+#include <glm/gtx/transform.hpp>
 
 #include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
+#include <modules/exoplanets/rendering/renderableorbitdisc.h>
 
 #include <fstream>
 #include <sstream>
@@ -117,6 +120,25 @@ std::string getStarColor(float bv){
     return colorString;
 }
 
+std::string computeRotationMatrix(float i, float bigom, float om) {
+
+    const glm::vec3 ascendingNodeAxisRot = { 0.f, 1.f, 0.f };
+    const glm::vec3 inclinationAxisRot = { 1.f, 0.f, 0.f };
+    const glm::vec3 argPeriapsisAxisRot = { 0.f, 0.f, 1.f };
+
+    const double asc = glm::radians(bigom);
+    const double inc = glm::radians(i);
+    const double per = glm::radians(om);
+
+    glm::dmat3 orbitPlaneRotation =
+        glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
+        glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
+        glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
+
+    return std::to_string(orbitPlaneRotation);
+
+}
+
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
@@ -162,17 +184,18 @@ int addExoplanetSystem(lua_State* L) {
             plna.push_back(planetname);
             plsy.push_back(p);
             found = true;
+
         }
     }
     data.close();
     lut.close();
 
 
-    if (found && !isnan(p.POSITIONX) && !p.BINARY && !isnan(p.A) && !isnan(p.PER))
+    if (found && !isnan(p.POSITIONX)  && !isnan(p.A) && !isnan(p.PER)) //&& !p.BINARY
     {
         Time epoch;
         double parsec = 0.308567756E17;
-        std::string script;
+        std::string script = "";
 
         const std::string starParent = "{"
             "Identifier = '" + starname + "',"
@@ -302,9 +325,15 @@ int addExoplanetSystem(lua_State* L) {
                     "},"
                 "}";
 
-                script += "openspace.addSceneGraphNode(" + planet + ");";
+                script = "openspace.addSceneGraphNode(" + planet + ");";
+                OsEng.scriptEngine().queueScript(
+                    script,
+                    openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                );
+                script = "";
 
             }
+                
 
             const std::string planetTrail = "{"
                 "Identifier = '" + plna[i] + "Trail',"
@@ -312,10 +341,10 @@ int addExoplanetSystem(lua_State* L) {
                 "Renderable = {"
                     "Type = 'RenderableTrailOrbit',"
                     "Period = " + std::to_string(plsy[i].PER) + ","
-                    "Resolution = 100,"
+                    "Resolution = 1000,"
                     "Translation = {"
                         "Type = 'KeplerTranslation',"
-                        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
+                        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC 
                         "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
                         "Inclination = " + std::to_string(plsy[i].I) + "," //I
                         "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
@@ -328,15 +357,97 @@ int addExoplanetSystem(lua_State* L) {
                 "},"
             "}";
 
-            script += " openspace.addSceneGraphNode(" + planetTrail + ");";
-
             OsEng.scriptEngine().queueScript(
-                script,
+                "openspace.addSceneGraphNode(" + planetTrail + ");",
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
+            
+            if(!isnan(plsy[i].AUPPER) && !isnan(plsy[i].ALOWER))
+            {
+                std::string rotation_matrix = computeRotationMatrix(plsy[i].I, plsy[i].BIGOM, plsy[i].OM);
+
+                const std::string disc = "{"
+                    "Identifier = '" + plna[i] + "Disc',"
+                    "Parent = '" + starname + "',"
+                    "Renderable = {"
+                        "Type = 'RenderableOrbitdisc',"
+                        "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/disc.png',"                                                   
+                        "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
+                        "Eccentricity = "+ std::to_string(plsy[i].ECC) +","                                               
+                        "Offset = { "+ std::to_string(plsy[i].ALOWER) +", "+ std::to_string(plsy[i].AUPPER) +" }," //min / max extend
+                        "Transparency = 0.99"
+                    "},"
+                    "Transform = {"
+                        "Rotation = {"
+                            "Type = 'StaticRotation',"
+                            "Rotation =  " + rotation_matrix + ","
+                        "}"
+                    "},"
+                "}";
+                OsEng.scriptEngine().queueScript(
+                    "openspace.addSceneGraphNode(" + disc + ");",
+                    openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                );
+
+                if(!isnan(plsy[i].ECCUPPER) && !isnan(plsy[i].ECCLOWER) && plsy[i].ECCUPPER > 0.0 && plsy[i].ECCLOWER > 0.0)
+                { 
+                    const std::string discECCLOWER = "{"
+                        "Identifier = '" + plna[i] + "discECCLOWER',"
+                        "Parent = '" + starname + "',"
+                        "Renderable = {"
+                            "Type = 'RenderableOrbitdisc',"
+                            "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/discL.png',"                                              
+                            "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
+                            "Eccentricity = "+ std::to_string(plsy[i].ECC - plsy[i].ECCLOWER) +","
+                            "Offset = { "+ std::to_string(plsy[i].ALOWER) +", "+ std::to_string(plsy[i].AUPPER) +" }," //min / max extend
+                            "Transparency = 0.98,"
+                            "Enabled = false"
+                        "},"
+                        "Transform = {"
+                            "Rotation = {"
+                                "Type = 'StaticRotation',"
+                                "Rotation =  " + rotation_matrix + ","
+                            "}"
+                        "},"
+                    "}";
+
+
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.addSceneGraphNode(" + discECCLOWER + ");",
+                        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                    );
+                
+                    const std::string discECCUPPER = "{"
+                        "Identifier = '" + plna[i] + "discECCUPPER',"
+                        "Parent = '" + starname + "',"
+                        "Renderable = {"
+                            "Type = 'RenderableOrbitdisc',"
+                            "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/discU.png',"                                              
+                            "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
+                            "Eccentricity = "+ std::to_string(plsy[i].ECC + plsy[i].ECCUPPER) +","
+                            "Offset = { "+ std::to_string(plsy[i].ALOWER) +", "+ std::to_string(plsy[i].AUPPER) +" }," //min / max extend
+                            "Transparency = 0.98,"
+                            "Enabled = false"
+                        "},"
+                        "Transform = {"
+                            "Rotation = {"
+                                "Type = 'StaticRotation',"
+                                "Rotation =  " + rotation_matrix + ","
+                            "}"
+                        "},"
+                    "}";
+
+
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.addSceneGraphNode(" + discECCUPPER + ");",
+                        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                    );
+                }
+            }
 
         }
 
+        
     }
     else
     {
@@ -387,8 +498,10 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     
     auto fTask = FactoryManager::ref().factory<Task>();
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
+    fRenderable->registerClass<RenderableOrbitdisc>("RenderableOrbitdisc");
 }
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
