@@ -20,6 +20,7 @@ import {
 import DataManager from '../api/DataManager';
 import Slider from '../components/ImageSlider/Slider';
 import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
+import { toggleShading, toggleHighResolution, toggleHidePlanet } from '../utils/storyHelpers';
 
 
 class OnTouchGui extends Component {
@@ -28,8 +29,8 @@ class OnTouchGui extends Component {
 
     this.changeStory = this.changeStory.bind(this);
     this.setStory = this.setStory.bind(this);
-    this.toggleHidePlanet = this.toggleHidePlanet.bind(this);
     this.getDeveloperButtons = this.getDeveloperButtons.bind(this);
+    this.checkStorySettings = this.checkStorySettings.bind(this);
   }
 
   componentDidMount() {
@@ -64,6 +65,7 @@ class OnTouchGui extends Component {
         <button onClick={this.changeStory} id={'story_example'}>Example Story</button>
         <button onClick={this.changeStory} id={'story_earthweather'}>Earth Weather Story</button>
         <button onClick={this.changeStory} id={'story_jupitermoons'}>Jupiter Moons Story</button>
+        <button onClick={this.changeStory} id={'story_mars'}>Mars Story</button>
       </div>
     );
   }
@@ -89,15 +91,10 @@ class OnTouchGui extends Component {
       this.props.ChangePropertyValue(focusNode.Description, json.start.planet);
       this.props.ChangePropertyValue(overViewNode.Description, json.overviewlimit);
 
-      // Check if previous story hide any nodes
-      if (this.props.story.hideplanets) {
-        this.props.story.hideplanets.forEach(planet => this.toggleHidePlanet(planet, 'true'));
-      }
-
-      // If story wants to hide planets -> hide them
-      if (json.hideplanets) {
-        json.hideplanets.forEach(planet => this.toggleHidePlanet(planet, 'false'));
-      }
+      // Check settings of the previous story and reset values
+      this.checkStorySettings(this.props.story, 'true');
+      // Check and set the settings of the current story
+      this.checkStorySettings(json, 'false');
 
       // If the previous story scaled planets -> reset value
       if (this.props.story.scaleplanets) {
@@ -105,12 +102,30 @@ class OnTouchGui extends Component {
           this.props.ChangePropertyValue(planet.Description, '1');
         });
       }
+
       const startPosition = json.start.location;
       const goToGeoScript = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.latitude}, ${startPosition.longitude}, ${startPosition.altitude}`);
       const setTimeScript = SetTimeScript.replace(ValuePlaceholder, `${json.start.time}`);
 
       DataManager.runScript(setTimeScript);
       DataManager.runScript(goToGeoScript);
+    }
+  }
+
+  // Check story settings
+  checkStorySettings(story, value) {
+    const oppositeValue = (value === 'true') ? 'false' : 'true';
+    // Check if the story hide any nodes
+    if (story.hideplanets) {
+      story.hideplanets.forEach(planet => toggleHidePlanet(planet, value));
+    }
+    // Check if the story have planets with high resolution data
+    if (story.highresplanets) {
+      story.highresplanets.forEach(planet => toggleHighResolution(planet, oppositeValue));
+    }
+    // Check if the story have planets with no shading
+    if (story.noshadingplanets) {
+      story.noshadingplanets.forEach(planet => toggleShading(planet, value));
     }
   }
 
@@ -123,12 +138,6 @@ class OnTouchGui extends Component {
 
   changeStory(e) {
     this.setStory(e.target.id);
-  }
-
-  toggleHidePlanet(planet, value) {
-    DataManager.runScript(`openspace.setPropertyValueSingle("Scene.${planet}.RenderableGlobe.Enabled", ${value})`);
-    DataManager.runScript(`openspace.setPropertyValueSingle("Scene.${planet}Trail.renderable.Enabled",${value})`);
-    DataManager.runScript(`openspace.setPropertyValueSingle("Scene.${planet}.ScreenVisibility",${value})`);
   }
 
   render() {
