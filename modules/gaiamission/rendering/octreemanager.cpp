@@ -53,6 +53,7 @@ OctreeManager::OctreeManager()
     , _maxCpuRamBudget(0)
     , _parentNodeOfCamera(8)
     , _streamFolderPath("")
+    , _traversedBranchesInRenderCall(0)
 {   }
 
 OctreeManager::~OctreeManager()
@@ -382,8 +383,19 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4& m
     }
 
     for (size_t i = 0; i < 8; ++i) {
+        if (i < _traversedBranchesInRenderCall) continue;
+
         auto tmpData = checkNodeIntersection(_root->Children[i], mvp, screenSize,
             deltaStars, option);
+
+        // Avoid freezing when switching render mode for large datasets by only fetching 
+        // one branch at a time when rebuilding buffer.
+        if (_rebuildBuffer) {
+            renderData = std::move(tmpData);
+            _traversedBranchesInRenderCall++;
+            break;
+        }
+
         // Observe that if there exists identical keys in renderData then those values in
         // tmpData will be ignored! Thus we store the removed keys until next render call!
         renderData.insert(tmpData.begin(), tmpData.end());
@@ -407,12 +419,17 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4& m
 
         // Clear potential removed keys for both VBO and SSBO!
         _removedKeysInPrevCall.clear();
-        _rebuildBuffer = false;
-        LINFO("After rebuild - Biggest Chunk: " + std::to_string(_biggestChunkIndexInUse)
-              + " _freeSpotsInBuffer.size(): "
-              + std::to_string(_freeSpotsInBuffer.size()));
-    }
 
+        LINFO("After rebuilding branch " + std::to_string(_traversedBranchesInRenderCall)
+            + " - Biggest chunk: " + std::to_string(_biggestChunkIndexInUse)
+            + " Free spots in buffer: " + std::to_string(_freeSpotsInBuffer.size()));
+
+        // End rebuild when all branches has been fetched.
+        if (_traversedBranchesInRenderCall == 8) {
+            _rebuildBuffer = false;
+            _traversedBranchesInRenderCall = 0;
+        }
+    }
     return renderData;
 }
 

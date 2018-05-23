@@ -1074,17 +1074,16 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Update SSBO with one insert per chunk/node. 
         // The key in map holds the offset index.
-        for (auto &[offset, subData] : updateData) {
+        for (auto const &[offset, subData] : updateData) {
             // We don't need to fill chunk with zeros for SSBOs! 
             // Just check if we have any values to update.
             if (!subData.empty()) {
-                std::vector<float> vectorData(subData.begin(), subData.end());
-                int dataSize = vectorData.size();
+                int dataSize = subData.size();
                 glBufferSubData(
                     GL_SHADER_STORAGE_BUFFER,
                     offset * _chunkSize * sizeof(GLfloat),
                     dataSize * sizeof(GLfloat),
-                    vectorData.data()
+                    subData.data()
                 );
             }
         }

@@ -371,6 +371,7 @@ private:
     long long _maxCpuRamBudget;
     unsigned long long _parentNodeOfCamera;
     std::string _streamFolderPath;
+    size_t _traversedBranchesInRenderCall;
 
 }; // class OctreeManager
 
