@@ -37,31 +37,48 @@ namespace openspace::luascriptfunctions {
  * Sets the delta time by calling the Time::setDeltaTime method
  */
 int time_setDeltaTime(lua_State* L) {
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
-    if (isFunction) {
-        // If the top of the stack is a function, it is ourself
-        const char* msg = lua_pushfstring(L, "method called without argument");
-        return luaL_error(L, "bad argument (%s)", msg);
-    }
-
-    const bool isNumber = (lua_isnumber(L, -1) != 0);
-    if (isNumber) {
-        double value = lua_tonumber(L, -1);
-        lua_pop(L, 1);
-        OsEng.timeManager().setDeltaTime(value, 0.5);
-        ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-        return 0;
-    }
-    else {
-        const char* msg = lua_pushfstring(
+    const int nArguments = lua_gettop(L);
+    if (nArguments == 2) {
+        const bool isNumber = (lua_isnumber(L, 2) != 0);
+        if (!isNumber) {
+            lua_settop(L, 0);
+            const char* msg = lua_pushfstring(
+                L,
+                "%s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                luaL_typename(L, -1)
+            );
+            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        }
+        const double interpolationDuration = lua_tonumber(L, 2);
+        const double newDeltaTime = lua_tonumber(L, 1);
+        OsEng.timeManager().setTargetDeltaTime(newDeltaTime, interpolationDuration);
+    } else if (nArguments == 1) {
+        const bool isNumber = (lua_isnumber(L, 1) != 0);
+        if (!isNumber) {
+            lua_settop(L, 0);
+            const char* msg = lua_pushfstring(
+                L,
+                "%s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                luaL_typename(L, -1)
+            );
+            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        }
+        const double newDeltaTime = lua_tonumber(L, 1);
+        OsEng.timeManager().setTargetDeltaTime(newDeltaTime);
+    } else {
+        lua_settop(L, 0);
+        return luaL_error(
             L,
-            "%s expected, got %s",
-            lua_typename(L, LUA_TNUMBER),
-            luaL_typename(L, -1)
+            "bad number of arguments, expected 1 or 2, got %i",
+            nArguments
         );
-        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
+    lua_settop(L, 0);
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
 }
 
 /**
@@ -81,10 +98,34 @@ int time_deltaTime(lua_State* L) {
  * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
  */
 int time_togglePause(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::time_togglePause");
+    const int nArguments = lua_gettop(L);
 
-    OsEng.timeManager().togglePause(0.5f);
+    if (nArguments == 1) {
+        const bool isNumber = (lua_isnumber(L, 1) != 0);
+        if (!isNumber) {
+            const char* msg = lua_pushfstring(
+                L,
+                "%s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                luaL_typename(L, -1)
+            );
+            return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+        }
 
+        const double interpolationDuration = lua_tonumber(L, 1);
+        OsEng.timeManager().togglePause(interpolationDuration);
+    } else if (nArguments == 0) {
+        OsEng.timeManager().togglePause();
+    } else {
+        lua_settop(L, 0);
+        return luaL_error(
+            L,
+            "bad number of arguments, expected 0 or 1, got %i",
+            nArguments
+        );
+    }
+
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -95,11 +136,36 @@ int time_togglePause(lua_State* L) {
  * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
  */
 int time_setPause(lua_State* L) {
-    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::time_setPause");
+    const int nArguments = lua_gettop(L);
 
-    bool pause = lua_toboolean(L, -1) == 1;
-    OsEng.timeManager().setPause(pause, 0.5f);
+    if (nArguments == 2) {
+        const bool isNumber = (lua_isnumber(L, 2) != 0);
+        if (!isNumber) {
+            lua_settop(L, 0);
+            const char* msg = lua_pushfstring(
+                L,
+                "%s expected, got %s",
+                lua_typename(L, LUA_TNUMBER),
+                luaL_typename(L, -1)
+            );
+            return luaL_error(L, "bad argument #%d (%s)", 2, msg);
+        }
+        const double interpolationDuration = lua_tonumber(L, 2);
+        const bool pause = lua_toboolean(L, 1) == 1;
+        OsEng.timeManager().setPause(pause, interpolationDuration);
+    } else if (nArguments == 1) {
+        const bool pause = lua_toboolean(L, 1) == 1;
+        OsEng.timeManager().setPause(pause);
+    } else {
+        lua_settop(L, 0);
+        return luaL_error(
+            L,
+            "bad number of arguments, expected 1 or 2, got %i",
+            nArguments
+        );
+    }
 
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -147,8 +213,7 @@ int time_setTime(lua_State* L) {
             return 0;
         }
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
-    }
-    else {
+    } else {
         int nArguments = lua_gettop(L);
         if (nArguments != 2) {
             return luaL_error(
@@ -161,13 +226,12 @@ int time_setTime(lua_State* L) {
         double targetTime;
         if (lua_isnumber(L, 1)) {
             targetTime = lua_tonumber(L, 1);
-        }
-        else {
+        } else {
             targetTime = Time::convertTime(lua_tostring(L, 1));
         }
 
         const double duration = lua_tonumber(L, 2);
-        OsEng.renderEngine().scene()->addTimeInterpolation(targetTime, duration);
+        OsEng.timeManager().addInterpolation(targetTime, duration);
     }
     return 0;
 }

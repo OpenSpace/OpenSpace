@@ -202,9 +202,6 @@ public:
      */
     void removePropertyInterpolation(properties::Property* prop);
 
-    void addTimeInterpolation(double targetTime, double durationSeconds);
-    void removeTimeInterpolation();
-
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
      * using the Property::interpolateValue method, passing a parameter \c t which is \c 0
@@ -256,17 +253,6 @@ private:
         bool isExpired = false;
     };
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
-
-    struct TimeInterpolationInfo {
-        std::chrono::time_point<std::chrono::steady_clock> beginTime;
-
-        float durationSeconds;
-        float easingTime;
-
-        double interpolationStart;
-        double interpolationEnd;
-    };
-    std::unique_ptr<TimeInterpolationInfo> _timeInterpolationInfo = nullptr;
 };
 
 } // namespace openspace

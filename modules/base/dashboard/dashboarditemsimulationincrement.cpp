@@ -182,7 +182,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    double t = OsEng.timeManager().deltaTime();
+    double t = OsEng.timeManager().targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
@@ -207,7 +207,7 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = OsEng.timeManager().deltaTime();
+    double t = OsEng.timeManager().targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);

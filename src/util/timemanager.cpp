@@ -29,9 +29,45 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/timeline.h>
 
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    static const openspace::properties::Property::PropertyInfo
+    DefaultInterpolationDurationInfo = {
+        "DefaultInterpolationDuration",
+        "Default Interpolation Duration",
+        "The duration taken to interpolate in time, "
+        "unless another duration is specified by lua scripts etc. (In wallclock seconds)"
+    };
+
+    const char* _loggerCat = "TimeManager";
+}
+
 namespace openspace {
 
 using datamessagestructures::TimeKeyframe;
+
+
+TimeManager::TimeManager()
+    : properties::PropertyOwner({ "TimeManager" })
+    , _defaultInterpolationDuration(DefaultInterpolationDurationInfo, 0.5f, 0.f, 5.f)
+{
+    addProperty(_defaultInterpolationDuration);
+}
+
+void TimeManager::addInterpolation(double targetTime, double durationSeconds) {
+    ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
+
+    const double now = OsEng.windowWrapper().applicationTime();
+    const bool pause = OsEng.timeManager().isPaused();
+
+    const TimeKeyframeData current = { time(), deltaTime(), pause, false };
+    const TimeKeyframeData next = { targetTime, targetDeltaTime(), pause, false };
+
+    clearKeyframes();
+    addKeyframe(now, current);
+    addKeyframe(now + durationSeconds, next);
+}
 
 void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
@@ -114,6 +150,7 @@ void TimeManager::progressTime(double dt) {
     } else if (!isPaused()) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
+        _deltaTime = _targetDeltaTime;
         time().advanceTime(dt * _deltaTime);
     }
 
@@ -148,6 +185,7 @@ void TimeManager::interpolate(
 
     const double q = (1 - t)*pastSimTime + t*futureSimTime + t*(1 - t)*(a*(1 - t) + b*t);
     time().setTime(q);
+    _deltaTime = 3*a*t*t - 4*a*t + a - 3*b*t*t + 2*b*t - pastSimTime + futureSimTime;
 
     /*
     const double secondsOffTolerance = OsEng.parallelPeer().timeTolerance();
@@ -185,7 +223,8 @@ void TimeManager::interpolate(
 void TimeManager::applyKeyframe(const Keyframe<TimeKeyframeData>& keyframe) {
     const Time& currentTime = keyframe.data.time;
     time().setTime(currentTime.j2000Seconds());
-    _deltaTime = keyframe.data.delta;
+    _targetDeltaTime = keyframe.data.delta;
+    _deltaTime = _targetDeltaTime;
 }
 
 void TimeManager::addKeyframe(double timestamp, TimeKeyframeData time) {
@@ -300,28 +339,40 @@ double TimeManager::deltaTime() const {
     return _deltaTime;
 }
 
-void TimeManager::setDeltaTime(double newDeltaTime, double interpolationDuration) {
-    if (newDeltaTime == _deltaTime) {
+double TimeManager::targetDeltaTime() const {
+    return _targetDeltaTime;
+}
+
+void TimeManager::setTargetDeltaTime(double newDeltaTime) {
+    setTargetDeltaTime(newDeltaTime, _defaultInterpolationDuration);
+}
+
+void TimeManager::setTargetDeltaTime(double newDeltaTime, double interpolationDuration) {
+    if (newDeltaTime == _targetDeltaTime) {
         return;
     }
 
     if (_timePaused) {
-        _deltaTime = newDeltaTime;
+        _targetDeltaTime = newDeltaTime;
         return;
     }
 
     const double now = OsEng.windowWrapper().applicationTime();
     Time newTime = time().j2000Seconds() +
-        (_deltaTime + newDeltaTime) * interpolationDuration / 2.0;
+        (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration;
 
     TimeKeyframeData currentKeyframe = { time(), _deltaTime, false, false };
     TimeKeyframeData futureKeyframe = { newTime, newDeltaTime, false, false };
 
-    _deltaTime = newDeltaTime;
+    _targetDeltaTime = newDeltaTime;
 
     clearKeyframes();
     addKeyframe(now, currentKeyframe);
     addKeyframe(now + interpolationDuration, futureKeyframe);
+}
+
+void TimeManager::setPause(bool pause) {
+    setPause(pause, _defaultInterpolationDuration);
 }
 
 void TimeManager::setPause(bool pause, double interpolationDuration) {
@@ -330,10 +381,12 @@ void TimeManager::setPause(bool pause, double interpolationDuration) {
     }
 
     const double now = OsEng.windowWrapper().applicationTime();
-    Time newTime = time().j2000Seconds() + _deltaTime * interpolationDuration / 2.0;
+    double targetDelta = pause ? 0.0 : _targetDeltaTime;
+    Time newTime = time().j2000Seconds() +
+        (_deltaTime + targetDelta) * 0.5 * interpolationDuration;
 
     TimeKeyframeData currentKeyframe = { time(), _deltaTime, _timePaused, false };
-    TimeKeyframeData futureKeyframe = { newTime, _deltaTime, pause, false };
+    TimeKeyframeData futureKeyframe = { newTime, _targetDeltaTime, pause, false };
     _timePaused = pause;
 
     clearKeyframes();
@@ -341,10 +394,13 @@ void TimeManager::setPause(bool pause, double interpolationDuration) {
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
 
+bool TimeManager::togglePause() {
+    return togglePause(_defaultInterpolationDuration);
+}
+
 bool TimeManager::togglePause(double interpolationDuration) {
     setPause(!_timePaused, interpolationDuration);
     return _timePaused;
 }
-
 
 } // namespace openspace

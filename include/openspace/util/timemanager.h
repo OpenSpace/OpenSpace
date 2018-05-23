@@ -32,6 +32,8 @@
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
 #include <openspace/util/syncdata.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -42,14 +44,19 @@ struct TimeKeyframeData {
     bool jump = false;
 };
 
-class TimeManager {
+class TimeManager : public properties::PropertyOwner {
 public:
+    TimeManager();
+
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
 
     Time& time();
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
+
+    void addInterpolation(double targetTime, double durationSeconds);
+
     void addKeyframe(double timestamp, TimeKeyframeData kf);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
@@ -57,11 +64,18 @@ public:
     void setTimeNextFrame(Time t);
     size_t nKeyframes() const;
 
+    double targetDeltaTime() const;
     double deltaTime() const;
-    void setDeltaTime(double deltaTime, double interpolationDuration = 0.0);
 
-    void setPause(bool pause, double interpolationDuration = 0.0);
-    bool togglePause(double interpolationDuration = 0.0);
+    void setTargetDeltaTime(double deltaTime);
+    void setTargetDeltaTime(double deltaTime, double interpolationDuration);
+
+    void setPause(bool pause);
+    void setPause(bool pause, double interpolationDuration);
+
+    bool togglePause();
+    bool togglePause(double interpolationDuration);
+
     bool isPaused() const;
 
     CallbackHandle addTimeChangeCallback(TimeChangeCallback cb);
@@ -80,7 +94,9 @@ private:
         double time);
 
     bool _timePaused = false;
-    double _deltaTime = 1.0;
+    double _targetDeltaTime = 1.0;
+    double _deltaTime = 0.0;
+    properties::FloatProperty _defaultInterpolationDuration;
 
     bool _shouldSetTime = false;
     Time _timeNextFrame;
