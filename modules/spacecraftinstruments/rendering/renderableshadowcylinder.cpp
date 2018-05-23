@@ -33,6 +33,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
+#include <openspace/util/spicemanager.h>
 
 namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
@@ -101,6 +102,19 @@ namespace {
         "This value determines the aberration method that is used to compute the shadow "
         "cylinder."
     };
+
+    glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
+        const float k = 10.f;
+        const float ds = v2.w - v1.w;
+        if (ds >= 0) {
+            float p = pow(k, -ds);
+            return glm::vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
+        }
+        else {
+            float p = pow(k, ds);
+            return glm::vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
+        }
+    }
 } // namespace
 
 namespace openspace {
@@ -199,9 +213,6 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     , _body(BodyInfo)
     , _bodyFrame(BodyFrameInfo)
     , _aberration(AberrationInfo)
-    , _shader(nullptr)
-    , _vao(0)
-    , _vbo(0)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -313,9 +324,9 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -354,21 +365,8 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
     createCylinder(data.time.j2000Seconds());
 }
 
-glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
-    float k = 10.f;
-    float ds = v2.w - v1.w;
-    if (ds >= 0) {
-        float p = pow(k, -ds);
-        return glm::vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-    }
-    else {
-        float p = pow(k, ds);
-        return glm::vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
-    }
-}
-
 void RenderableShadowCylinder::createCylinder(double time) {
-    auto res = SpiceManager::ref().terminatorEllipse(
+    SpiceManager::TerminatorEllipseResult res = SpiceManager::ref().terminatorEllipse(
         _body,
         _observer,
         _bodyFrame,
@@ -388,8 +386,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         res.terminatorPoints.end(),
         std::back_inserter(terminatorPoints),
         [](const glm::dvec3& p) {
-            PowerScaledCoordinate coord =
-                PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            psc coord = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
             coord[3] += 3;
             return coord;
         }
@@ -413,12 +410,12 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
-    psc endpoint = psc::CreatePowerScaledCoordinate(
-            vecLightSource.x,
-            vecLightSource.y,
-            vecLightSource.z
-        );
-    for (const auto& v : terminatorPoints) {
+    const psc endpoint = psc::CreatePowerScaledCoordinate(
+        vecLightSource.x,
+        vecLightSource.y,
+        vecLightSource.z
+    );
+    for (const psc& v : terminatorPoints) {
         _vertices.push_back({ v[0], v[1], v[2], v[3] });
         glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
         _vertices.push_back({ f[0], f[1], f[2], f[3] });

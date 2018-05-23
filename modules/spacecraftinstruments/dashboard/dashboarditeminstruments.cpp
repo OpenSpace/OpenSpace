@@ -29,15 +29,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-
 #include <chrono>
 
 namespace {
@@ -244,67 +241,67 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     const std::pair<double, std::string>& nextTarget = sequencer.nextTarget();
     const std::pair<double, std::string>& currentTarget = sequencer.currentTarget();
 
-    if (currentTarget.first > 0.0) {
-        using namespace std::chrono;
-        seconds tls = seconds(static_cast<int>(nextTarget.first - currentTime));
+    if (currentTarget.first <= 0.0) {
+        return;
+    }
+    using namespace std::chrono;
+    seconds tls = seconds(static_cast<int>(nextTarget.first - currentTime));
 
-        const hours tlh = duration_cast<hours>(tls);
-        tls -= tlh;
-        const minutes tlm = duration_cast<minutes>(tls);
-        tls -= tlm;
+    const hours tlh = duration_cast<hours>(tls);
+    tls -= tlh;
+    const minutes tlm = duration_cast<minutes>(tls);
+    tls -= tlm;
 
-        RenderFont(
-            *_font,
-            penPosition,
-            fmt::format(
-                "Next image: [{:02d}:{:02d}:{:02d}]",
-                tlh.count(), tlm.count(), tls.count()
-            ),
-            targetColor,
-            ghoul::fontrendering::CrDirection::Down
-        );
+    RenderFont(
+        *_font,
+        penPosition,
+        fmt::format(
+            "Next image: [{:02d}:{:02d}:{:02d}]",
+            tlh.count(), tlm.count(), tls.count()
+        ),
+        targetColor,
+        ghoul::fontrendering::CrDirection::Down
+    );
 
-        penPosition.y -= _font->height();
+    penPosition.y -= _font->height();
 
-        const std::vector<std::pair<std::string, bool>>& activeMap =
-            sequencer.activeInstruments();
+    const std::vector<std::pair<std::string, bool>>& activeMap =
+        sequencer.activeInstruments();
 
-        glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
-        glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+    glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
+    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
 
-        RenderFont(
-            *_font,
-            penPosition,
-            "Active Instruments:",
-            glm::vec4(_activeColor.value(), 1.f),
-            ghoul::fontrendering::CrDirection::Down
-        );
+    RenderFont(
+        *_font,
+        penPosition,
+        "Active Instruments:",
+        glm::vec4(_activeColor.value(), 1.f),
+        ghoul::fontrendering::CrDirection::Down
+    );
 
-        for (const std::pair<std::string, bool>& m : activeMap) {
-            if (m.second == false) {
-                RenderFont(*_font, penPosition, "| |", glm::vec4(0.3, 0.3, 0.3, 1));
-                RenderFont(
-                    *_font,
-                    penPosition,
-                    fmt::format("    {:5s}", m.first),
-                    glm::vec4(0.3, 0.3, 0.3, 1),
-                    ghoul::fontrendering::CrDirection::Down
-                );
-
+    for (const std::pair<std::string, bool>& m : activeMap) {
+        if (m.second) {
+            RenderFont(*_font, penPosition, "|", glm::vec4(0.3, 0.3, 0.3, 1));
+            if (m.first == "NH_LORRI") {
+                RenderFont(*_font, penPosition, " + ", firing);
             }
-            else {
-                RenderFont(*_font, penPosition, "|", glm::vec4(0.3, 0.3, 0.3, 1));
-                if (m.first == "NH_LORRI") {
-                    RenderFont(*_font, penPosition, " + ", firing);
-                }
-                RenderFont(*_font, penPosition, "  |", glm::vec4(0.3, 0.3, 0.3, 1));
-                RenderFont(*_font,
-                    penPosition,
-                    fmt::format("    {:5s}", m.first),
-                    glm::vec4(_activeColor.value(), 1.f),
-                    ghoul::fontrendering::CrDirection::Down
-                );
-            }
+            RenderFont(*_font, penPosition, "  |", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(*_font,
+                penPosition,
+                fmt::format("    {:5s}", m.first),
+                glm::vec4(_activeColor.value(), 1.f),
+                ghoul::fontrendering::CrDirection::Down
+            );
+        }
+        else {
+            RenderFont(*_font, penPosition, "| |", glm::vec4(0.3, 0.3, 0.3, 1));
+            RenderFont(
+                *_font,
+                penPosition,
+                fmt::format("    {:5s}", m.first),
+                glm::vec4(0.3, 0.3, 0.3, 1),
+                ghoul::fontrendering::CrDirection::Down
+            );
         }
     }
 }
@@ -357,53 +354,56 @@ glm::vec2 DashboardItemInstruments::size() const {
     std::pair<double, std::string> nextTarget = sequencer.nextTarget();
     std::pair<double, std::string> currentTarget = sequencer.currentTarget();
 
-    if (currentTarget.first > 0.0) {
-        using FR = ghoul::fontrendering::FontRenderer;
-        FR& renderer = FR::defaultRenderer();
-
-        const int timeleft = static_cast<int>(nextTarget.first - currentTime);
-
-        const int hour = timeleft / 3600;
-        int second = timeleft % 3600;
-        const int minute = second / 60;
-        second = second % 60;
-
-
-        std::string hh;
-        if (hour < 10) {
-            hh = "0";
-        }
-        std::string mm;
-        if (minute < 10) {
-            mm = "0";
-        }
-        std::string ss;
-        if (second < 10) {
-            ss = "0";
-        }
-
-        hh.append(std::to_string(hour));
-        mm.append(std::to_string(minute));
-        ss.append(std::to_string(second));
-
-        size = addToBoundingbox(
-            size,
-            renderer.boundingBox(
-                *_font,
-                fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
-            ).boundingBox
-        );
-
-        size.y += _font->height();
-
-        size = addToBoundingbox(
-            size,
-            ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
-                *_font,
-                "Active Instruments:"
-            ).boundingBox
-        );
+    if (currentTarget.first <= 0.0) {
+        return size;
     }
+
+    
+    using FR = ghoul::fontrendering::FontRenderer;
+    FR& renderer = FR::defaultRenderer();
+
+    const int timeleft = static_cast<int>(nextTarget.first - currentTime);
+
+    const int hour = timeleft / 3600;
+    int second = timeleft % 3600;
+    const int minute = second / 60;
+    second = second % 60;
+
+
+    std::string hh;
+    if (hour < 10) {
+        hh = "0";
+    }
+    std::string mm;
+    if (minute < 10) {
+        mm = "0";
+    }
+    std::string ss;
+    if (second < 10) {
+        ss = "0";
+    }
+
+    hh.append(std::to_string(hour));
+    mm.append(std::to_string(minute));
+    ss.append(std::to_string(second));
+
+    size = addToBoundingbox(
+        size,
+        renderer.boundingBox(
+            *_font,
+            fmt::format("Data acquisition adjacency: [{}:{}:{}]", hh, mm, ss)
+        ).boundingBox
+    );
+
+    size.y += _font->height();
+
+    size = addToBoundingbox(
+        size,
+        ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+            *_font,
+            "Active Instruments:"
+        ).boundingBox
+    );
     return size;
 }
 

@@ -54,8 +54,8 @@ namespace {
     constexpr const char* _loggerCat = "KameleonVolumeReader";
 
     template <typename T>
-    T globalAttribute(ccmc::Model& model, const std::string& attribute) {
-        static_assert(false);
+    T globalAttribute(ccmc::Model&, const std::string&) {
+        static_assert(sizeof(T) == 0);
     }
 
     template <>

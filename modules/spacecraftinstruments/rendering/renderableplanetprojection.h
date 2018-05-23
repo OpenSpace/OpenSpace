@@ -28,10 +28,8 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
@@ -70,14 +68,14 @@ private:
 
     properties::OptionProperty _colorTexturePaths;
     properties::StringProperty _addColorTexturePath;
-    bool _colorTextureDirty;
+    bool _colorTextureDirty = false;
 
     properties::OptionProperty _heightMapTexturePaths;
     properties::StringProperty _addHeightMapTexturePath;
-    bool _heightMapTextureDirty;
+    bool _heightMapTextureDirty = false;
 
-    ghoul::opengl::ProgramObject* _programObject;
-    ghoul::opengl::ProgramObject* _fboProgramObject;
+    ghoul::opengl::ProgramObject* _programObject = nullptr;
+    ghoul::opengl::ProgramObject* _fboProgramObject = nullptr;
     UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
         projectionFading, baseTexture, projectionTexture, heightTexture)
@@ -108,12 +106,10 @@ private:
 
     std::vector<Image> _imageTimes;
 
-    std::string _frame;
+    bool _shouldCapture = false;
 
-    bool _capture;
-
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
 };
 
 }  // namespace openspace

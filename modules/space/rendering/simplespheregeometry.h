@@ -48,7 +48,7 @@ public:
     void deinitialize() override;
     void render() override;
 
-    float boundingSphere() const;
+    float boundingSphere() const override;
 
     static documentation::Documentation Documentation();
 

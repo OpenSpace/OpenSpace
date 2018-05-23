@@ -66,19 +66,11 @@ public:
     bool depthRendertarget();
 
     std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
-        const std::string& texturePath,
-        bool isPlaceholder = false
-    );
+        const std::string& texturePath, bool isPlaceholder = false);
 
-    glm::mat4 computeProjectorMatrix(
-        const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up,
-        const glm::dmat3& instrumentMatrix,
-        float fieldOfViewY,
-        float aspectRatio,
-        float nearPlane,
-        float farPlane,
-        glm::vec3& boreSight
-    );
+    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim,
+        const glm::vec3 up, const glm::dmat3& instrumentMatrix, float fieldOfViewY,
+        float aspectRatio, float nearPlane, float farPlane, glm::vec3& boreSight);
 
     bool doesPerformProjection() const;
     bool needsClearProjection() const;
@@ -114,37 +106,37 @@ protected:
     properties::IVec2Property _textureSize;
     properties::TriggerProperty _applyTextureSize;
     bool _textureSizeDirty = false;
-    bool _mipMapDirty;
+    bool _mipMapDirty = false;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
     std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
 
-    float _projectionTextureAspectRatio;
+    float _projectionTextureAspectRatio = 1.f;
 
     std::string _instrumentID;
     std::string _projectorID;
     std::string _projecteeID;
     SpiceManager::AberrationCorrection _aberration;
     std::vector<std::string> _potentialTargets;
-    float _fovy;
-    float _aspectRatio;
+    float _fovy = -1.f;
+    float _aspectRatio = -1.f;;
 
-    GLuint _fboID;
-    GLuint _depthFboID;
+    GLuint _fboID = 0;
+    GLuint _depthFboID = 0;
 
-    GLint _defaultFBO;
-    GLint _viewport[4];
+    GLint _defaultFBO = 0;
+    GLint _viewport[4] = { 0, 0, 0, 0};
 
     struct {
-        bool isEnabled;
+        bool isEnabled = false;
         std::unique_ptr<ghoul::opengl::Texture> texture;
     } _shadowing;
 
     struct {
-        bool isEnabled;
-        GLuint fbo;
-        GLuint vao;
-        GLuint vbo;
+        bool isEnabled = false;
+        GLuint fbo = 0;
+        GLuint vao = 0;
+        GLuint vbo = 0;
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         std::unique_ptr<ghoul::opengl::Texture> texture;
         std::unique_ptr<ghoul::opengl::Texture> stencilTexture;

@@ -22,13 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__
+#define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__
 
-layout(location = 0) in vec2 in_position;
+#include <openspace/util/timerange.h>
 
-out vec2 vs_position;
+#include <string>
+#include <vector>
 
-void main() {
-    vs_position  = in_position;
-    gl_Position  = vec4(in_position, 0.0, 1.0);
-}
+namespace openspace {
+
+struct Image {
+    TimeRange timeRange;
+    std::string path;
+    std::vector<std::string> activeInstruments;
+    std::string target;
+    bool isPlaceholder = false;
+    bool projected = false;
+};
+
+struct ImageSubset {
+    TimeRange _range;
+    std::vector<Image> _subset;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__

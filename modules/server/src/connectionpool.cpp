@@ -67,7 +67,7 @@ void ConnectionPool::updateConnections() {
 void ConnectionPool::acceptNewSockets() {
     for (std::shared_ptr<ghoul::io::SocketServer>& server : _socketServers) {
         std::unique_ptr<ghoul::io::Socket> socket;
-        while (socket = server->nextPendingSocket()) {
+        while ((socket = server->nextPendingSocket())) {
             _handleSocket(*socket);
             _sockets.push_back(std::move(socket));
         }

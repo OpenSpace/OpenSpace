@@ -44,7 +44,7 @@ ServerModule::~ServerModule() {
     cleanUpFinishedThreads();
 }
 
-void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
+void ServerModule::internalInitialize(const ghoul::Dictionary&) {
     using namespace ghoul::io;
 
     std::unique_ptr<TcpSocketServer> tcpServer = std::make_unique<TcpSocketServer>();

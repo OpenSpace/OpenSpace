@@ -24,16 +24,13 @@
 
 #include <modules/spacecraftinstruments/rendering/renderableplanetprojection.h>
 
-#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/space/rendering/planetgeometry.h>
+#include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -175,18 +172,11 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     : Renderable(dict)
     , _colorTexturePaths(ColorTexturePathsInfo)
     , _addColorTexturePath(AddColorTextureInfo)
-    , _colorTextureDirty(false)
     , _heightMapTexturePaths(HeightTexturePathsInfo)
     , _addHeightMapTexturePath(AddHeightTextureInfo)
-    , _heightMapTextureDirty(false)
-    , _programObject(nullptr)
-    , _fboProgramObject(nullptr)
-    , _baseTexture(nullptr)
-    , _heightMapTexture(nullptr)
     , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f, 3.f)
     , _meridianShift(MeridianShiftInfo, false)
     , _ambientBrightness(AmbientBrightnessInfo, 0.075f, 0.f, 1.f)
-    , _capture(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -194,13 +184,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         "RenderablePlanetProjection"
     );
 
-    ghoul::Dictionary geometryDictionary;
-    bool success = dict.getValue(KeyGeometry, geometryDictionary);
-    if (success) {
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(
-            geometryDictionary
-        );
-    }
+    ghoul::Dictionary geometryDictionary = dict.value<ghoul::Dictionary>(KeyGeometry);
+    _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 
     _projectionComponent.initialize(
         identifier(),
@@ -208,13 +193,11 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     );
 
     _colorTexturePaths.addOption(0, NoImageText);
-    _colorTexturePaths.onChange([this](){
-        _colorTextureDirty = true;
-    });
+    _colorTexturePaths.onChange([this](){ _colorTextureDirty = true; });
     addProperty(_colorTexturePaths);
 
-    if (dict.hasKey(ColorTexturePathsInfo.identifier)) {
-        ghoul::Dictionary value = dict.value<ghoul::Dictionary>(
+    if (dict.hasKeyAndValue<ghoul::Dictionary>(ColorTexturePathsInfo.identifier)) {
+        const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
             ColorTexturePathsInfo.identifier
         );
 
@@ -253,14 +236,12 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
 
     _heightMapTexturePaths.addOption(0, NoImageText);
-    _heightMapTexturePaths.onChange([this]() {
-        _heightMapTextureDirty = true;
-    });
+    _heightMapTexturePaths.onChange([this]() { _heightMapTextureDirty = true; });
     addProperty(_heightMapTexturePaths);
 
 
-    if (dict.hasKey(HeightTexturePathsInfo.identifier)) {
-        ghoul::Dictionary value = dict.value<ghoul::Dictionary>(
+    if (dict.hasKeyAndValue<ghoul::Dictionary>(HeightTexturePathsInfo.identifier)) {
+        const ghoul::Dictionary& value = dict.value<ghoul::Dictionary>(
             HeightTexturePathsInfo.identifier
         );
 
@@ -400,33 +381,31 @@ void RenderablePlanetProjection::initializeGL() {
 
     //completeSuccess &= auxiliaryRendertarget();
     // SCREEN-QUAD
-    const GLfloat size = 1.f;
-    const GLfloat w = 1.f;
-    const GLfloat vertex_data[] = {
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
-        -size, size, 0.f, w, 0.f, 1.f,
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, -size, 0.f, w, 1.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
+    const GLfloat vertexData[] = {
+        -1.f, -1.f,
+         1.f,  1.f,
+        -1.f,  1.f,
+        -1.f, -1.f,
+         1.f, -1.f,
+         1.f,  1.f,
     };
 
     glGenVertexArrays(1, &_quad);
     glBindVertexArray(_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, nullptr);
+    // glEnableVertexAttribArray(1);
+    // glVertexAttribPointer(
+    //     1,
+    //     2,
+    //     GL_FLOAT,
+    //     GL_FALSE,
+    //     sizeof(GLfloat) * 2,
+    //     reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    // );
 
     glBindVertexArray(0);
 }
@@ -579,12 +558,12 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVectorCameraSpace();
 
-    if (_capture && _projectionComponent.doesPerformProjection()) {
+    if (_shouldCapture && _projectionComponent.doesPerformProjection()) {
         for (const Image& img : _imageTimes) {
             RenderablePlanetProjection::attitudeParameters(img.timeRange.start);
             imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
         }
-        _capture = false;
+        _shouldCapture = false;
     }
     attitudeParameters(_time);
     _imageTimes.clear();
@@ -746,7 +725,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         if (openspace::ImageSequencer::ref().isReady()) {
             openspace::ImageSequencer::ref().updateSequencer(time);
             if (_projectionComponent.doesPerformProjection()) {
-                _capture = openspace::ImageSequencer::ref().imagePaths(
+                _shouldCapture = openspace::ImageSequencer::ref().imagePaths(
                     _imageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),

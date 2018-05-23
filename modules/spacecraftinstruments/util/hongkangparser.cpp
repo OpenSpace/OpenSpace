@@ -54,55 +54,9 @@ namespace {
         return 0.0;
     }
 
-    double missionElapsedTimeFromEphemerisTime(double et, double metReference) {
-        const double referenceET = openspace::SpiceManager::ref().ephemerisTimeFromDate(
-            "2015-07-14T11:50:00.00"
-        );
-
-        if (et >= referenceET) {
-            return metReference + (et - referenceET);
-        }
-        else {
-            return metReference - (referenceET - et);
-        }
-    }
-
     double ephemerisTimeFromMissionElapsedTime(std::string line, double metReference) {
         std::string::size_type sz;
         return ephemerisTimeFromMissionElapsedTime(std::stod(line, &sz), metReference);
-    }
-
-    bool augmentWithSpice(openspace::Image& image, std::string spacecraft,
-                          std::vector<std::string>,
-                          std::vector<std::string> potentialTargets)
-    {
-        image.target = "VOID";
-        int exposureTime = static_cast<int>(image.timeRange.duration());
-        if (exposureTime == 0) {
-            exposureTime = 1;
-        }
-
-        for (size_t i = 0; i < potentialTargets.size(); ++i) {
-            for (size_t j = 0; j < image.activeInstruments.size(); ++j) {
-                double time = image.timeRange.start;
-                for (int k = 0; k < exposureTime; k++) {
-                    time += k;
-                    bool withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
-                        potentialTargets[i],
-                        spacecraft,
-                        image.activeInstruments[j],
-                        openspace::SpiceManager::FieldOfViewMethod::Ellipsoid,
-                        {},
-                        time
-                    );
-
-                    if (withinFOV) {
-                        image.target = potentialTargets[i];
-                    }
-                }
-            }
-        }
-        return false;
     }
 } // namespace
 

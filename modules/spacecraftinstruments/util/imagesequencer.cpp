@@ -346,21 +346,16 @@ void ImageSequencer::sortData() {
     );
 }
 
-void ImageSequencer::runSequenceParser(SequenceParser* parser) {
-    bool parserComplete = parser->create();
-    if (!parserComplete) {
-        LERROR("One or more sequence loads failed; please check mod files");
-        return;
-    }
-
+void ImageSequencer::runSequenceParser(SequenceParser& parser) {
     // get new data
     std::map<std::string, std::unique_ptr<Decoder>>& translations =
-        parser->translations();
-    std::map<std::string, ImageSubset> imageData = parser->getSubsetMap();
-    std::vector<std::pair<std::string, TimeRange>> instrumentTimes =
-        parser->getInstrumentTimes();
-    std::vector<std::pair<double, std::string>> targetTimes = parser->getTargetTimes();
-    std::vector<double> captureProgression = parser->getCaptureProgression();
+        parser.translations();
+    std::map<std::string, ImageSubset>& imageData = parser.getSubsetMap();
+    const std::vector<std::pair<std::string, TimeRange>>& instrumentTimes =
+        parser.getInstrumentTimes();
+    const std::vector<std::pair<double, std::string>>& targetTimes =
+        parser.getTargetTimes();
+    const std::vector<double>& captureProgression = parser.getCaptureProgression();
 
     // check for sanity
     if (imageData.empty() || instrumentTimes.empty() || captureProgression.empty()) {

@@ -39,16 +39,22 @@ namespace {
 
 namespace openspace {
 
-std::map<std::string, ImageSubset> SequenceParser::getSubsetMap(){
+std::map<std::string, ImageSubset>& SequenceParser::getSubsetMap() {
     return _subsetMap;
 }
-std::vector<std::pair<std::string, TimeRange>> SequenceParser::getInstrumentTimes(){
+
+const std::vector<std::pair<std::string, TimeRange>>&
+SequenceParser::getInstrumentTimes() const
+{
     return _instrumentTimes;
 }
-std::vector<std::pair<double, std::string>> SequenceParser::getTargetTimes(){
+const std::vector<std::pair<double, std::string>>&
+SequenceParser::getTargetTimes() const
+{
     return _targetTimes;
 }
-std::vector<double> SequenceParser::getCaptureProgression(){
+
+const std::vector<double>& SequenceParser::getCaptureProgression() const {
     return _captureProgression;
 }
 

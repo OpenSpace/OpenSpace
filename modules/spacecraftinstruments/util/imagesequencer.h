@@ -87,7 +87,7 @@ public:
      * Runs parser and recieves the datastructures filled by it.
      * \see SequenceParser
      */
-    void runSequenceParser(SequenceParser* parser);
+    void runSequenceParser(SequenceParser& parser);
 
     /**
      * Retrieves the next upcoming target in time.

@@ -231,9 +231,6 @@ ProjectionComponent::ProjectionComponent()
     , _textureSize(TextureSizeInfo, glm::ivec2(16), glm::ivec2(16), glm::ivec2(32768))
     , _applyTextureSize(ApplyTextureSizeInfo)
 {
-    _shadowing.isEnabled = false;
-    _dilation.isEnabled = false;
-
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
     addProperty(_projectionFading);
@@ -262,7 +259,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
     );
 
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
-        ghoul::Dictionary potentialTargets = dictionary.value<ghoul::Dictionary>(
+        const ghoul::Dictionary& potentialTargets = dictionary.value<ghoul::Dictionary>(
             keyPotentialTargets
         );
 
@@ -282,13 +279,11 @@ void ProjectionComponent::initialize(const std::string& identifier,
         _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
     }
 
-    _projectionTextureAspectRatio = 1.f;
     if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
         _projectionTextureAspectRatio =
             static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
 
-    std::vector<std::unique_ptr<SequenceParser>> parsers;
 
     if (!dictionary.hasKey(keySequenceDir)) {
         return;
@@ -313,16 +308,14 @@ void ProjectionComponent::initialize(const std::string& identifier,
     const std::string& sequenceType = dictionary.value<std::string>(keySequenceType);
     //Important: client must define translation-list in mod file IFF playbook
     if (!dictionary.hasKey(keyTranslation)) {
-        LWARNING(
-            "No playbook translation provided, make sure spice calls match playbook!"
-        );
+        LWARNING("No playbook translation provided, spice calls must match playbook!");
         return;
     }
 
     ghoul::Dictionary translationDictionary;
-    //get translation dictionary
     dictionary.getValue(keyTranslation, translationDictionary);
 
+    std::vector<std::unique_ptr<SequenceParser>> parsers;
     for (std::string& sequenceSource : sequenceSources) {
         if (sequenceType == sequenceTypePlaybook) {
             parsers.push_back(
@@ -354,10 +347,8 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 )
             );
 
-            std::string eventFile;
-            bool foundEventFile = dictionary.getValue("EventFile", eventFile);
-            if (foundEventFile) {
-                //then read playbook
+            if (dictionary.hasKey("EventFile")) {
+                std::string eventFile = dictionary.value<std::string>("EventFile");
                 parsers.push_back(
                     std::make_unique<HongKangParser>(
                         identifier,
@@ -384,15 +375,21 @@ void ProjectionComponent::initialize(const std::string& identifier,
     }
 
     for (std::unique_ptr<SequenceParser>& parser : parsers) {
-        openspace::ImageSequencer::ref().runSequenceParser(parser.get());
+        bool success = parser->create();
+        if (!success) {
+            LERROR("One or more sequence loads failed; please check mod files");
+        }
+        else {
+            ImageSequencer::ref().runSequenceParser(*parser);
+        }
     }
     parsers.clear();
 }
 
 bool ProjectionComponent::initializeGL() {
     int maxSize = OpenGLCap.max2DTextureSize();
-    glm::ivec2 size;
 
+    glm::ivec2 size;
     if (_projectionTextureAspectRatio > 1.f) {
         size.x = maxSize;
         size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);

@@ -55,8 +55,6 @@ namespace {
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
     constexpr const char* BounceTopicKey = "bounce";
-
-    constexpr const int ThrottleMessageWaitInMs = 100;
 } // namespace
 
 namespace openspace {
