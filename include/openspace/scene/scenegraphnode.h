@@ -29,6 +29,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
@@ -187,6 +188,7 @@ private:
     properties::BoolProperty _screenVisibility;
     properties::DoubleProperty _distFromCamToNode;
     properties::DoubleProperty _screenSizeRadius;
+    properties::FloatProperty _visibilityDistance;
 };
 
 } // namespace openspace

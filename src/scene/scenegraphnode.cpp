@@ -90,6 +90,11 @@ namespace {
         "ScreenSizeRadius",
         "" // @TODO Missing documentation
     };
+    static const openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
+        "VisibilityDistance",
+        "VisibilityDistance",
+        "" // @TODO Missing documentation
+    };
 
 } // namespace
 
@@ -229,11 +234,13 @@ SceneGraphNode::SceneGraphNode()
     ,_screenVisibility(properties::BoolProperty(ScreenVisibilityInfo, false))
     , _distFromCamToNode(properties::DoubleProperty(DistanceFromCamToNodeInfo, -1.0))
     ,_screenSizeRadius(properties::DoubleProperty(ScreenSizeRadiusInfo, 0))
+    ,_visibilityDistance(properties::FloatProperty(VisibilityDistanceInfo, 6e+10))
 {
     addProperty(_screenSpacePosition);
     addProperty(_screenVisibility);
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
+    addProperty(_visibilityDistance);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -575,9 +582,6 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
 
          // If the object is not in the screen, we dont want to consider it at all
         if (ndc.x >= -1.0 && ndc.x <= 1.0 && ndc.y >= -1.0 && ndc.y <= 1.0 && clipSpace.z > 0) {
-            if (!_screenVisibility) {
-                _screenVisibility.setValue(true);
-            }
 
             WindowWrapper& wrapper = OsEng.windowWrapper();
             glm::ivec2 res = wrapper.currentWindowSize();
@@ -589,28 +593,39 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
             glm::dvec3 centerToActualSurface = glm::dmat3(this->modelTransform()) * centerToActualSurfaceModelSpace;
             double planetRadius = length(centerToActualSurface);
 
-            // Calculate the planet radius to screensize pixels
-            glm::dvec3 radiusPos = worldPos + (planetRadius * normalize(cam.lookUpVectorWorldSpace()));
-            glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
-            glm::dvec3 ndc2 = clipSpaceRadius / clipSpaceRadius.w;
-            glm::ivec2 radiusScreenSpacePosition = glm::ivec2((ndc2.x + 1) * res.x / 2, (ndc2.y + 1) * res.y / 2);
-            glm::dvec2 radiusInScreenSpace = screenSpacePosition - radiusScreenSpacePosition;
-            double screenSpaceRadius = length(radiusInScreenSpace);
-
             // Distance from the camera to the node
             double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - planetRadius;
 
-            double zoomThreshold = 0.5, moveThreshold = 1, radiusThreshold= 1.5;
+            // Fix to limit the update of properties
+            if (distFromCamToNode < _visibilityDistance) {
+                 if (!_screenVisibility) {
+                    _screenVisibility.setValue(true);
+                 }
+                // Calculate the planet radius to screensize pixels
+                glm::dvec3 radiusPos = worldPos + (planetRadius * normalize(cam.lookUpVectorWorldSpace()));
+                glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) * cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
+                glm::dvec3 ndc2 = clipSpaceRadius / clipSpaceRadius.w;
+                glm::ivec2 radiusScreenSpacePosition = glm::ivec2((ndc2.x + 1) * res.x / 2, (ndc2.y + 1) * res.y / 2);
+                glm::dvec2 radiusInScreenSpace = screenSpacePosition - radiusScreenSpacePosition;
+                double screenSpaceRadius = length(radiusInScreenSpace);
 
-            if (abs(_screenSizeRadius - screenSpaceRadius) > radiusThreshold) {
-                _screenSizeRadius.setValue(screenSpaceRadius);
-            }
-            if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
-                _distFromCamToNode.setValue(distFromCamToNode);
-            }
-            if (abs(static_cast<glm::ivec2>(_screenSpacePosition).x - screenSpacePosition.x) > moveThreshold ||
+                double zoomThreshold = 0.5, moveThreshold = 1, radiusThreshold = 1.5;
+
+                if (abs(_screenSizeRadius - screenSpaceRadius) > radiusThreshold) {
+                    _screenSizeRadius.setValue(screenSpaceRadius);
+                }
+                if (abs(_distFromCamToNode - distFromCamToNode) > (zoomThreshold * distFromCamToNode)) {
+                    _distFromCamToNode.setValue(distFromCamToNode);
+                }
+                if (abs(static_cast<glm::ivec2>(_screenSpacePosition).x - screenSpacePosition.x) > moveThreshold ||
                     abs(static_cast<glm::ivec2>(_screenSpacePosition).y - screenSpacePosition.y) > moveThreshold) {
-                _screenSpacePosition.setValue(screenSpacePosition);
+                    _screenSpacePosition.setValue(screenSpacePosition);
+                }
+            }
+            else {
+                if (_screenVisibility) {
+                    _screenVisibility.setValue(false);
+                }
             }
         }
         // If not on the screen, we want to reset it or don't update it
