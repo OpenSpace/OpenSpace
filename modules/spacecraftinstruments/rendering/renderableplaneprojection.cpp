@@ -122,7 +122,7 @@ void RenderablePlaneProjection::deinitializeGL() {
 }
 
 void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
-    bool active = ImageSequencer::ref().instrumentActive(_instrument);
+    bool active = ImageSequencer::ref().isInstrumentActive(_instrument);
     if (!_hasImage || (_moving && !active))
         return;
 
@@ -152,7 +152,7 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
     double time = data.time.j2000Seconds();
-    const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(
+    const Image img = openspace::ImageSequencer::ref().latestImageForInstrument(
         _instrument
     );
 

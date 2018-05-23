@@ -30,15 +30,15 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/spicemanager.h>
-
-#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul { class Dictionary; }
-
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -59,7 +59,6 @@ public:
     void imageProjectEnd();
     void depthMapRenderBegin();
     void depthMapRenderEnd();
-
 
     void update();
 
@@ -114,7 +113,7 @@ protected:
 
     properties::IVec2Property _textureSize;
     properties::TriggerProperty _applyTextureSize;
-    bool _textureSizeDirty;
+    bool _textureSizeDirty = false;
     bool _mipMapDirty;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;

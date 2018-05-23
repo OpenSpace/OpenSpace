@@ -26,13 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    const char* KeyKernels = "Kernels";
+    constexpr const char* KeyKernels = "Kernels";
 
     static const openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
@@ -90,7 +89,7 @@ documentation::Documentation SpiceRotation::Documentation() {
 }
 
 SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame(SourceInfo) // @TODO Missing documentation
+    : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
 {
     documentation::testSpecificationAndThrow(
@@ -120,12 +119,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
 
-    auto update = [this]() {
-        requireUpdate();
-    };
-
-    _sourceFrame.onChange(update);
-    _destinationFrame.onChange(update);
+    _sourceFrame.onChange([this]() { requireUpdate(); });
+    _destinationFrame.onChange([this]() { requireUpdate(); });
 }
 
 glm::dmat3 SpiceRotation::matrix(const Time& time) const {

@@ -28,9 +28,8 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
@@ -130,13 +129,6 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _offset(OffsetInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor(NightFactorInfo, 0.33f, 0.f, 1.f)
     , _transparency(TransparencyInfo, 0.15f, 0.f, 1.f)
-    , _shader(nullptr)
-    , _texture(nullptr)
-    , _textureFile(nullptr)
-    , _textureIsDirty(false)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-    , _planeIsDirty(false)
 {
     using ghoul::filesystem::File;
 
@@ -154,7 +146,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _texturePath = absPath(dictionary.value<std::string>(TextureInfo.identifier));
     _textureFile = std::make_unique<File>(_texturePath);
 
-    if (dictionary.hasKey(OffsetInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<glm::vec2>(OffsetInfo.identifier)) {
         _offset = dictionary.value<glm::vec2>(OffsetInfo.identifier);
     }
     addProperty(_offset);
@@ -164,14 +156,14 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
 
     _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
 
-    if (dictionary.hasKey(NightFactorInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<double>(NightFactorInfo.identifier)) {
         _nightFactor = static_cast<float>(
             dictionary.value<double>(NightFactorInfo.identifier)
         );
     }
     addProperty(_nightFactor);
 
-    if (dictionary.hasKey(TransparencyInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<double>(TransparencyInfo.identifier)) {
         _transparency = static_cast<float>(
             dictionary.value<double>(TransparencyInfo.identifier)
         );
@@ -238,10 +230,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.transparency, _transparency);
 
     _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
-    _shader->setUniform(
-        _uniformCache.sunPosition,
-        _sunPosition
-    );
+    _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -282,13 +271,16 @@ void RenderableRings::update(const UpdateData& data) {
     }
 
     _sunPosition = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
-        data.modelTransform.translation;
+                   data.modelTransform.translation;
 }
 
 void RenderableRings::loadTexture() {
-    if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+    if (!_texturePath.value().empty()) {
+        using namespace ghoul::io;
+        using namespace ghoul::opengl;
+        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+            absPath(_texturePath)
+        );
 
         if (texture) {
             LDEBUGC(
@@ -309,7 +301,7 @@ void RenderableRings::loadTexture() {
 }
 
 void RenderableRings::createPlane() {
-    const GLfloat size = _size.value();
+    const GLfloat size = _size;
 
     struct VertexData {
         GLfloat x;

@@ -55,7 +55,6 @@ private:
     properties::Vec3Property _activeColor;
     properties::Vec3Property _activeFlash;
 
-
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };
 

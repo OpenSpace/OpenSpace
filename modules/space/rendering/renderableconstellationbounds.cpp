@@ -28,19 +28,14 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
-
+#include <ghoul/opengl/programobject.h>
 #include <fstream>
-
 #include "SpiceUsr.h"
-#include "SpiceZpr.h"
 
 namespace {
-    float convertHrsToRadians(float rightAscension) {
+    constexpr float convertHrsToRadians(float rightAscension) {
         // 360 degrees / 24h = 15 degrees/h
         return glm::radians(rightAscension * 15);
     }
@@ -130,15 +125,11 @@ RenderableConstellationBounds::RenderableConstellationBounds(
         "RenderableConstellationBounds"
     );
 
-    _vertexFilename.onChange([&](){
-        loadVertexFile();
-    });
+    _vertexFilename.onChange([&](){ loadVertexFile(); });
     addProperty(_vertexFilename);
     _vertexFilename = dictionary.value<std::string>(VertexInfo.identifier);
 
-    _constellationFilename.onChange([&](){
-        loadConstellationFile();
-    });
+    _constellationFilename.onChange([&](){ loadConstellationFile(); });
     addProperty(_constellationFilename);
     if (dictionary.hasKey(ConstellationInfo.identifier)) {
         _constellationFilename = dictionary.value<std::string>(
@@ -157,7 +148,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     addProperty(_constellationSelection);
 
     if (dictionary.hasKey(SelectionInfo.identifier)) {
-        const ghoul::Dictionary selection = dictionary.value<ghoul::Dictionary>(
+        const ghoul::Dictionary& selection = dictionary.value<ghoul::Dictionary>(
             SelectionInfo.identifier
         );
 
@@ -166,9 +157,9 @@ RenderableConstellationBounds::RenderableConstellationBounds(
         std::vector<int> selectedIndices;
 
         for (size_t i = 1; i <= selection.size(); ++i) {
-            const std::string s = selection.value<std::string>(std::to_string(i));
+            const std::string& s = selection.value<std::string>(std::to_string(i));
 
-            auto it = std::find_if(
+            const auto it = std::find_if(
                 options.begin(),
                 options.end(),
                 [&s](const properties::SelectionProperty::Option& o) {
@@ -243,7 +234,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     setPscUniforms(*_program.get(), data.camera, data.position);
 
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
@@ -255,11 +246,7 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     glBindVertexArray(_vao);
     for (const ConstellationBound& bound : _constellationBounds) {
         if (bound.isEnabled) {
-            glDrawArrays(
-                GL_LINE_LOOP,
-                static_cast<GLsizei>(bound.startIndex),
-                static_cast<GLsizei>(bound.nVertices)
-            );
+            glDrawArrays(GL_LINE_LOOP, bound.startIndex, bound.nVertices);
         }
     }
     glBindVertexArray(0);
@@ -311,9 +298,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             LERRORC(
                 "RenderableConstellationBounds",
                 fmt::format(
-                    "Error reading file '{}' at line #{}",
-                    fileName,
-                    currentLineNumber
+                    "Error reading file '{}' at line #{}", fileName, currentLineNumber
                 )
             );
             break;
@@ -322,14 +307,16 @@ bool RenderableConstellationBounds::loadVertexFile() {
         // Did we arrive at a new constellation?
         if (constellationName != currentBound.constellationAbbreviation) {
             // Store how many vertices we read during the active time of the constellation
-            currentBound.nVertices = (_vertexValues.size() - currentBound.startIndex);
+            currentBound.nVertices = static_cast<GLsizei>(
+                _vertexValues.size() - currentBound.startIndex
+            );
             // Store the constellation and start a new one
             _constellationBounds.push_back(currentBound);
             currentBound = ConstellationBound();
             currentBound.isEnabled = true;
             currentBound.constellationAbbreviation = constellationName;
             currentBound.constellationFullName = constellationName;
-            currentBound.startIndex = _vertexValues.size();
+            currentBound.startIndex = static_cast<GLsizei>(_vertexValues.size());
         }
 
         // The file format stores the right ascension in hours, while SPICE expects them
@@ -346,11 +333,11 @@ bool RenderableConstellationBounds::loadVertexFile() {
         radrec_c(1.0, ra, dec, rectangularValues);
 
         // Add the new vertex to our list of vertices
-        _vertexValues.push_back({{
+        _vertexValues.push_back({
             static_cast<float>(rectangularValues[0]),
             static_cast<float>(rectangularValues[1]),
             static_cast<float>(rectangularValues[2])
-        }});
+        });
         ++currentLineNumber;
     }
 
@@ -359,7 +346,9 @@ bool RenderableConstellationBounds::loadVertexFile() {
     _constellationBounds.erase(_constellationBounds.begin());
 
     // And we still have the one value that was left when we exited the loop
-    currentBound.nVertices = (_vertexValues.size() - currentBound.startIndex);
+    currentBound.nVertices = static_cast<GLsizei>(
+        _vertexValues.size() - currentBound.startIndex
+    );
     _constellationBounds.push_back(currentBound);
 
     return true;
@@ -386,7 +375,7 @@ bool RenderableConstellationBounds::loadConstellationFile() {
         std::stringstream s(line);
         s >> abbreviation;
 
-        auto it = std::find_if(
+        const auto it = std::find_if(
             _constellationBounds.begin(),
             _constellationBounds.end(),
             [abbreviation](const ConstellationBound& bound) {
@@ -421,7 +410,7 @@ void RenderableConstellationBounds::fillSelectionProperty() {
 void RenderableConstellationBounds::selectionPropertyHasChanged() {
     const std::vector<int>& values = _constellationSelection;
     // If no values are selected (the default), we want to show all constellations
-    if (values.size() == 0) {
+    if (values.empty()) {
         for (ConstellationBound& b : _constellationBounds) {
             b.isEnabled = true;
         }

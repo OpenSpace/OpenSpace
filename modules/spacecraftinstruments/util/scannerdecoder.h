@@ -33,9 +33,9 @@ class ScannerDecoder : public Decoder {
 public:
     ScannerDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual std::string getDecoderType() override;
-    virtual std::vector<std::string> getSpiceIDs();
-    std::string getStopCommand();
+    virtual const std::string& decoderType() const override;
+    virtual const std::vector<std::string>& getSpiceIDs() const;
+    const std::string& stopCommand() const;
     void setStopCommand(std::string stopCommand);
 
 private:

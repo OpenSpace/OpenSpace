@@ -396,7 +396,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
         if (openspace::ImageSequencer::ref().isReady()) {
             openspace::ImageSequencer::ref().updateSequencer(time);
             if (_projectionComponent.doesPerformProjection()) {
-                _capture = openspace::ImageSequencer::ref().getImagePaths(
+                _capture = openspace::ImageSequencer::ref().imagePaths(
                     _imageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),

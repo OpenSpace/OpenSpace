@@ -35,11 +35,11 @@ ScannerDecoder::ScannerDecoder(const ghoul::Dictionary& dictionary) : _type("SCA
         _spiceIDs.push_back(value);
     }
 }
-std::string ScannerDecoder::getDecoderType() {
+const std::string& ScannerDecoder::decoderType() const {
     return _type;
 }
 
-std::vector<std::string> ScannerDecoder::getSpiceIDs() {
+const std::vector<std::string>& ScannerDecoder::getSpiceIDs() const {
     return _spiceIDs;
 }
 

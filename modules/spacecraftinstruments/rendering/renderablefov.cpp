@@ -997,7 +997,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 void RenderableFov::computeIntercepts(const UpdateData& data, const std::string& target,
                                       bool inFOV)
 {
-    double t2 = (openspace::ImageSequencer::ref().getNextCaptureTime());
+    double t2 = (openspace::ImageSequencer::ref().nextCaptureTime());
     double diff = (t2 - data.time);
     float diffTime = 0.0;
     float interpolationStart = 7.0; //seconds before
@@ -1319,7 +1319,7 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
 void RenderableFov::update(const UpdateData& data) {
     _drawFOV = false;
     if (openspace::ImageSequencer::ref().isReady()) {
-        _drawFOV = ImageSequencer::ref().instrumentActive(_instrument.name);
+        _drawFOV = ImageSequencer::ref().isInstrumentActive(_instrument.name);
     }
 
     if (_drawFOV && !data.time.paused()) {
@@ -1330,7 +1330,7 @@ void RenderableFov::update(const UpdateData& data) {
         computeIntercepts(data, target, inFOV);
         updateGPU();
 
-        double t2 = (ImageSequencer::ref().getNextCaptureTime());
+        double t2 = (ImageSequencer::ref().nextCaptureTime());
         double diff = (t2 - data.time.j2000Seconds());
         _interpolationTime = 0.0;
         float interpolationStart = 7.0; //seconds before

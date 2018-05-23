@@ -30,23 +30,14 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/invariants.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <memory>
-#include <fstream>
-
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#endif // WIN32
-#include <math.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     constexpr const char* PlainProgramName = "PlanetProgram";
@@ -177,18 +168,8 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _colorTexturePath(ColorTextureInfo)
     , _nightTexturePath(NightTextureInfo)
     , _heightMapTexturePath(HeightTextureInfo)
-    , _programObject(nullptr)
-    , _texture(nullptr)
-    , _nightTexture(nullptr)
     , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 10.f)
-    , _geometry(nullptr)
     , _performShading(PerformShadingInfo, true)
-    , _alpha(1.f)
-    , _planetRadius(0.f)
-    , _hasNightTexture(false)
-    , _hasHeightTexture(false)
-    , _shadowEnabled(false)
-    , _time(0.f)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -198,7 +179,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     ghoul::Dictionary geomDict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
 
-    if (dictionary.hasKey(KeyRadius)) {
+    if (dictionary.hasKeyAndValue<double>(KeyRadius)) {
         // If the user specified a radius, we want to use this
         _planetRadius = static_cast<float>(dictionary.value<double>(KeyRadius));
     }
@@ -217,7 +198,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             );
         }
 
-        const std::string body = dictionary.value<std::string>(KeyBody);
+        const std::string& body = dictionary.value<std::string>(KeyBody);
 
         // If the user didn't specfify a radius, but Spice has a radius, we can use this
         glm::dvec3 radius;
@@ -231,27 +212,27 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);
 
-    if (dictionary.hasKey(ColorTextureInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<std::string>(ColorTextureInfo.identifier)) {
         _colorTexturePath = absPath(dictionary.value<std::string>(
             ColorTextureInfo.identifier
         ));
     }
 
-    if (dictionary.hasKey(NightTextureInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<std::string>(NightTextureInfo.identifier)) {
         _hasNightTexture = true;
         _nightTexturePath = absPath(dictionary.value<std::string>(
             NightTextureInfo.identifier
         ));
     }
 
-    if (dictionary.hasKey(HeightTextureInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<std::string>(HeightTextureInfo.identifier)) {
         _hasHeightTexture = true;
         _heightMapTexturePath = absPath(dictionary.value<std::string>(
             HeightTextureInfo.identifier
         ));
     }
 
-    if (dictionary.hasKey(PerformShadingInfo.identifier)) {
+    if (dictionary.hasKeyAndValue<bool>(PerformShadingInfo.identifier)) {
         _performShading = dictionary.value<bool>(PerformShadingInfo.identifier);
     }
     addProperty(_performShading);
@@ -286,12 +267,16 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         unsigned int sourceCounter = 1;
         while (success) {
             std::string sourceName;
-            success = shadowDictionary.getValue(keyShadowSource +
-                std::to_string(sourceCounter) + ".Name", sourceName);
+            success = shadowDictionary.getValue(
+                keyShadowSource + std::to_string(sourceCounter) + ".Name",
+                sourceName
+            );
             if (success) {
                 float sourceRadius;
-                success = shadowDictionary.getValue(keyShadowSource +
-                    std::to_string(sourceCounter) + ".Radius", sourceRadius);
+                success = shadowDictionary.getValue(
+                    keyShadowSource + std::to_string(sourceCounter) + ".Radius",
+                    sourceRadius
+                );
                 if (success) {
                     sourceArray.emplace_back(sourceName, sourceRadius);
                 }
@@ -299,8 +284,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                     LWARNING(fmt::format(
                         "No Radius value specified for Shadow Source Name '{}' from "
                         "'{}' planet. Disabling shadows for this planet",
-                        sourceName,
-                        identifier()
+                        sourceName, identifier()
                     ));
                     disableShadows = true;
                     break;
@@ -311,16 +295,20 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
         if (!disableShadows && !sourceArray.empty()) {
             success = true;
-            std::vector< std::pair<std::string, float > > casterArray;
+            std::vector<std::pair<std::string, float>> casterArray;
             unsigned int casterCounter = 1;
             while (success) {
                 std::string casterName;
-                success = shadowDictionary.getValue(keyShadowCaster +
-                    std::to_string(casterCounter) + ".Name", casterName);
+                success = shadowDictionary.getValue(
+                    keyShadowCaster + std::to_string(casterCounter) + ".Name",
+                    casterName
+                );
                 if (success) {
                     float casterRadius;
-                    success = shadowDictionary.getValue(keyShadowCaster +
-                        std::to_string(casterCounter) + ".Radius", casterRadius);
+                    success = shadowDictionary.getValue(
+                        keyShadowCaster + std::to_string(casterCounter) + ".Radius",
+                        casterRadius
+                    );
                     if (success) {
                         casterArray.emplace_back(casterName, casterRadius);
                     }
@@ -328,8 +316,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         LWARNING(fmt::format(
                             "No Radius value expecified for Shadow Caster Name '{}' from "
                             "'{}' planet. Disabling shadows for this planet.",
-                            casterName,
-                            identifier()
+                            casterName, identifier()
                         ));
                         disableShadows = true;
                         break;
@@ -340,12 +327,12 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             }
 
             if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
-                for (auto & source : sourceArray) {
-                    for (auto & caster : casterArray) {
+                for (std::pair<std::string, float>& source : sourceArray) {
+                    for (std::pair<std::string, float>& caster : casterArray) {
                         ShadowConfiguration sc;
                         sc.source = source;
                         sc.caster = caster;
-                        _shadowConfArray.push_back(sc);
+                        _shadowConfArray.push_back({ source, caster });
                     }
                 }
                 _shadowEnabled = true;
@@ -360,7 +347,7 @@ void RenderablePlanet::initializeGL() {
     //           the ProgramObject name in the releaseProgramObject method and release the
     //           correct one.
 
-    if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
+    if (!_programObject && _shadowEnabled && _hasNightTexture) {
         _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
             ShadowNightProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -372,7 +359,7 @@ void RenderablePlanet::initializeGL() {
             }
         );
     }
-    else if (_programObject == nullptr && _shadowEnabled) {
+    else if (!_programObject && _shadowEnabled) {
         _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
             ShadowProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -384,7 +371,7 @@ void RenderablePlanet::initializeGL() {
             }
         );
     }
-    else if (_programObject == nullptr && _hasNightTexture) {
+    else if (!_programObject && _hasNightTexture) {
         _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
             NightProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -396,7 +383,7 @@ void RenderablePlanet::initializeGL() {
             }
         );
     }
-    else if (_programObject == nullptr) {
+    else if (!_programObject) {
         _programObject = SpaceModule::ProgramObjectManager.requestProgramObject(
             PlainProgramName,
             []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -413,7 +400,8 @@ void RenderablePlanet::initializeGL() {
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    _geometry->initialize(this);
+    _geometry->initialize();
+    setBoundingSphere(_geometry->boundingSphere());
 
     // Deactivate any previously activated shader program.
     _programObject->deactivate();
@@ -434,17 +422,12 @@ void RenderablePlanet::deinitializeGL() {
         }
     );
 
-    _geometry = nullptr;
     _texture = nullptr;
     _nightTexture = nullptr;
 }
 
 bool RenderablePlanet::isReady() const {
-    bool ready = true;
-    ready &= (_programObject != nullptr);
-    ready &= (_texture != nullptr);
-    ready &= (_geometry != nullptr);
-    return ready;
+    return _programObject && _texture && _geometry;
 }
 
 glm::dmat4 RenderablePlanet::computeModelTransformMatrix(
@@ -463,17 +446,13 @@ glm::dmat4 RenderablePlanet::computeModelTransformMatrix(
     glm::dmat4 rot = glm::rotate(
         glm::dmat4(1.0),
         glm::half_pi<double>(),
-        glm::dvec3(1, 0, 0)
+        glm::dvec3(1.0, 0.0, 0.0)
     );
     glm::dmat4 roty = glm::rotate(
         glm::dmat4(1.0),
         glm::half_pi<double>(),
-        glm::dvec3(0, -1, 0)
+        glm::dvec3(0.0, -1.0, 0.0)
     );
-    //glm::dmat4 rotProp = glm::rotate(
-    //    glm::dmat4(1.0),
-    //    glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0)
-    //);
 
     return modelTransform = modelTransform * rot * roty /** rotProp*/;
 }
@@ -483,12 +462,12 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
     _programObject->activate();
 
     glm::dmat4 modelTransform = computeModelTransformMatrix(data.modelTransform);
-
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform("modelViewTransform", modelViewTransform);
-    _programObject->setUniform("modelViewProjectionTransform",
+    _programObject->setUniform(
+        "modelViewProjectionTransform",
         data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform)
     );
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
@@ -545,7 +524,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
         std::vector<ShadowRenderingStruct> shadowDataArray;
         shadowDataArray.reserve(_shadowConfArray.size());
 
-        for (const auto & shadowConf : _shadowConfArray) {
+        for (const ShadowConfiguration& shadowConf : _shadowConfArray) {
             // TO REMEMBER: all distances and lengths in world coordinates are in meters!!
             // We need to move this to view space...
             // Getting source and caster:
@@ -557,7 +536,7 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
                 _time,
                 lt
             );
-            sourcePos           *= 1000.0; // converting to meters
+            sourcePos *= 1000.0; // converting to meters
             glm::dvec3 casterPos = SpiceManager::ref().targetPosition(
                 shadowConf.caster.first,
                 "SUN",
@@ -566,8 +545,8 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
                 _time,
                 lt
             );
-            casterPos           *= 1000.0; // converting to meters
-            psc caster_pos       = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+            casterPos *= 1000.0; // converting to meters
+            psc caster_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(
                 casterPos.x,
                 casterPos.y,
                 casterPos.z
@@ -575,66 +554,66 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
             // First we determine if the caster is shadowing the current planet (all
             // calculations in World Coordinates):
-            glm::vec3 planetCasterVec = (caster_pos - data.position).vec3();
-            glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
-            float sc_length = glm::length(sourceCasterVec);
-            glm::vec3 planetCaster_proj =
-                (glm::dot(planetCasterVec, sourceCasterVec) /
-                (sc_length*sc_length)) * sourceCasterVec;
-            float d_test = glm::length(planetCasterVec - planetCaster_proj);
-            float xp_test =
-                shadowConf.caster.second * sc_length /
-                (shadowConf.source.second + shadowConf.caster.second);
-            float rp_test =
-                shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) /
-                xp_test;
+            const glm::vec3 planetCasterVec = (caster_pos - data.position).vec3();
+            const glm::vec3 sourceCasterVec = glm::vec3(casterPos - sourcePos);
+            const float sc_length = glm::length(sourceCasterVec);
+            const glm::vec3 planetCaster_proj =
+                (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) *
+                sourceCasterVec;
+            const float d_test = glm::length(planetCasterVec - planetCaster_proj);
+            const float xp_test = shadowConf.caster.second * sc_length /
+                                  (shadowConf.source.second + shadowConf.caster.second);
+            const float rp_test = shadowConf.caster.second *
+                                  (glm::length(planetCaster_proj) + xp_test) /
+                                  xp_test;
 
-            double casterDistSun = glm::length(casterPos);
-            float planetDistSun = glm::length(data.position.vec3());
+            const double casterDistSun = glm::length(casterPos);
+            const float planetDistSun = glm::length(data.position.vec3());
 
             ShadowRenderingStruct shadowData;
             shadowData.isShadowing = false;
 
-            if ( ((d_test - rp_test) < _planetRadius) &&
-                 (casterDistSun < planetDistSun) ) {
+            if (((d_test - rp_test) < _planetRadius) && (casterDistSun < planetDistSun)) {
                 // The current caster is shadowing the current planet
                 shadowData.isShadowing = true;
                 shadowData.rs = shadowConf.source.second;
                 shadowData.rc = shadowConf.caster.second;
                 shadowData.sourceCasterVec = sourceCasterVec;
                 shadowData.xp = xp_test;
-                shadowData.xu =
-                    shadowData.rc * sc_length / (shadowData.rs - shadowData.rc);
+                shadowData.xu = shadowData.rc * sc_length /
+                                (shadowData.rs - shadowData.rc);
                 shadowData.casterPositionVec = glm::vec3(casterPos);
             }
             shadowDataArray.push_back(shadowData);
         }
 
+        constexpr const char* isShadowingTemplate = "shadowDataArray[{}].isShadowing";
+        constexpr const char* xpTemplate = "shadowDataArray[{}].xp";
+        constexpr const char* xuTemplate = "shadowDataArray[{}].xu";
+        constexpr const char* rcTemplate = "shadowDataArray[{}].rc";
+        constexpr const char* sourceTemplate = "shadowDataArray[{}].sourceCasterVec";
+        constexpr const char* casterTemplate = "shadowDataArray[{}].casterPositionVec";
+
         const std::string uniformVarName("shadowDataArray[");
         unsigned int counter = 0;
-        for (const auto & sd : shadowDataArray) {
-            std::stringstream ss;
-            ss << uniformVarName << counter << "].isShadowing";
-            _programObject->setUniform(ss.str(), sd.isShadowing);
+        for (const ShadowRenderingStruct& sd : shadowDataArray) {
+            _programObject->setUniform(
+                fmt::format(isShadowingTemplate, counter),
+                sd.isShadowing
+            );
+
             if (sd.isShadowing) {
-                ss.str(std::string());
-                ss << uniformVarName << counter << "].xp";
-                _programObject->setUniform(ss.str(), sd.xp);
-                ss.str(std::string());
-                ss << uniformVarName << counter << "].xu";
-                _programObject->setUniform(ss.str(), sd.xu);
-                /*ss.str(std::string());
-                ss << uniformVarName << counter << "].rs";
-                _programObject->setUniform(ss.str(), sd.rs);*/
-                ss.str(std::string());
-                ss << uniformVarName << counter << "].rc";
-                _programObject->setUniform(ss.str(), sd.rc);
-                ss.str(std::string());
-                ss << uniformVarName << counter << "].sourceCasterVec";
-                _programObject->setUniform(ss.str(), sd.sourceCasterVec);
-                ss.str(std::string());
-                ss << uniformVarName << counter << "].casterPositionVec";
-                _programObject->setUniform(ss.str(), sd.casterPositionVec);
+                _programObject->setUniform(fmt::format(xpTemplate, counter), sd.xp);
+                _programObject->setUniform(fmt::format(xuTemplate, counter), sd.xu);
+                _programObject->setUniform(fmt::format(rcTemplate, counter), sd.rc);
+                _programObject->setUniform(
+                    fmt::format(sourceTemplate, counter),
+                    sd.sourceCasterVec
+                );
+                _programObject->setUniform(
+                    fmt::format(casterTemplate, counter),
+                    sd.casterPositionVec
+                );
             }
             counter++;
         }
@@ -645,7 +624,6 @@ void RenderablePlanet::render(const RenderData& data, RendererTasks&) {
 
     // disable shader
     _programObject->deactivate();
-
 }
 
 void RenderablePlanet::update(const UpdateData& data) {
@@ -653,57 +631,45 @@ void RenderablePlanet::update(const UpdateData& data) {
     _stateMatrix = data.modelTransform.rotation;
     _time = data.time.j2000Seconds();
 
-    if (_programObject && _programObject->isDirty())
+    if (_programObject && _programObject->isDirty()) {
         _programObject->rebuildFromFile();
+    }
 }
 
 void RenderablePlanet::loadTexture() {
     _texture = nullptr;
-    if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_colorTexturePath)
-        );
+    if (!_colorTexturePath.value().empty()) {
+        using namespace ghoul::io;
+        _texture = TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             if (_texture->numberOfChannels() == 1) {
                 _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
             }
 
-            LDEBUG(fmt::format("Loaded texture from '{}'", _colorTexturePath.value()));
+            LDEBUG(fmt::format("Loaded texture '{}'", _colorTexturePath.value()));
             _texture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than
-            // linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
         }
     }
 
     if (_hasNightTexture) {
         _nightTexture = nullptr;
-        if (_nightTexturePath.value() != "") {
-            _nightTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_nightTexturePath)
-            );
+        if (!_nightTexturePath.value().empty()) {
+            using namespace ghoul::io;
+            _nightTexture = TextureReader::ref().loadTexture(absPath(_nightTexturePath));
             if (_nightTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from '{}'",
-                    _nightTexturePath.value()
-                ));
+                LDEBUG(fmt::format("Loaded texture '{}'", _nightTexturePath.value()));
                 _nightTexture->uploadTexture();
                 _nightTexture->setFilter(
                     ghoul::opengl::Texture::FilterMode::LinearMipMap
                 );
-                //_nightTexture->setFilter(
-                //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-                //);
             }
         }
     }
 
     if (_hasHeightTexture) {
         _heightMapTexture = nullptr;
-        if (_heightMapTexturePath.value() != "") {
+        if (!_heightMapTexturePath.value().empty()) {
             _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_heightMapTexturePath)
             );
@@ -714,9 +680,6 @@ void RenderablePlanet::loadTexture() {
                 ));
                 _heightMapTexture->uploadTexture();
                 _heightMapTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                //_nightTexture->setFilter(
-                //    ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-                //);
             }
         }
     }

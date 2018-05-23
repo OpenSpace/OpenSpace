@@ -22,29 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
+
+#include <openspace/util/spicemanager.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <modules/spacecraftinstruments/util/decoder.h>
-#include <fstream>
-#include <string>
-#include <iterator>
-#include <iomanip>
-#include <limits>
-#include <sstream>
-#include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
-
-#include <modules/spacecraftinstruments/util/imagesequencer.h>
-
 #include <ghoul/misc/dictionary.h>
-
-#include <ghoul/fmt.h>
-#include <map>
-#include <string>
-#include <vector>
+#include <fstream>
 
 namespace {
     constexpr const char* _loggerCat = "InstrumentTimesParser";
@@ -64,38 +51,23 @@ InstrumentTimesParser::InstrumentTimesParser(const std::string& name,
     : _pattern("\"(.{23})\" \"(.{23})\"")
     , _name(name)
     , _fileName(sequenceSource)
-    , _target("")
-    , _detectorType("CAMERA")
 {
 
     _target = inputDict.value<std::string>(KeyTargetBody);
     ghoul::Dictionary instruments = inputDict.value<ghoul::Dictionary>(KeyInstruments);
 
-    for (const auto& instrumentKey : instruments.keys()) {
-        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(
-            instrumentKey
-        );
-        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(
-            KeyInstrumentFiles
-        );
-        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(
-            instrument,
-            KeyInstrument
-        );
+    for (const std::string& key : instruments.keys()) {
+        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(key);
+        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
+        _fileTranslation[key] = Decoder::createFromDictionary(instrument, KeyInstrument);
         for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
-            _instrumentFiles[instrumentKey].push_back(filename);
+            _instrumentFiles[key].push_back(std::move(filename));
         }
     }
 }
 
 bool InstrumentTimesParser::create() {
-    auto targetComparer = [](const std::pair<double, std::string> &a,
-        const std::pair<double, std::string> &b)->bool{
-        return a.first < b.first;
-    };
-
-
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
     if (!FileSys.directoryExists(sequenceDir)) {
@@ -105,10 +77,10 @@ bool InstrumentTimesParser::create() {
 
     for (auto it = _instrumentFiles.begin(); it != _instrumentFiles.end(); it++) {
         std::string instrumentID = it->first;
-        for (std::string filename: it->second) {
+        for (std::string filename : it->second) {
             std::string filepath = FileSys.pathByAppendingComponent(
                 sequenceDir.path(),
-                filename
+                std::move(filename)
             );
 
             if (!FileSys.fileExists(filepath)) {
@@ -142,7 +114,7 @@ bool InstrumentTimesParser::create() {
                         captureTimeRange.end =
                             SpiceManager::ref().ephemerisTimeFromDate(stop);
                     }
-                    catch (const SpiceManager::SpiceException& e){
+                    catch (const SpiceManager::SpiceException& e) {
                         LERROR(e.what());
                         successfulRead = false;
                         break;
@@ -154,15 +126,15 @@ bool InstrumentTimesParser::create() {
                     _targetTimes.push_back({ captureTimeRange.start, _target });
                     _captureProgression.push_back(captureTimeRange.start);
 
-                    Image image;
-                    image.timeRange = captureTimeRange;
-                    image.path = "";
-                    image.isPlaceholder = true;
-                    image.activeInstruments.push_back(instrumentID);
-                    image.target = _target;
-                    image.projected = false;
-
-                    _subsetMap[_target]._subset.push_back(image);
+                    Image image = {
+                        captureTimeRange,
+                        std::string(),
+                        { instrumentID },
+                        _target,
+                        true,
+                        false
+                    };
+                    _subsetMap[_target]._subset.push_back(std::move(image));
                 }
             }
             if (successfulRead){
@@ -173,12 +145,18 @@ bool InstrumentTimesParser::create() {
     }
 
     std::stable_sort(_captureProgression.begin(), _captureProgression.end());
-    //std::stable_sort(_instrumentTimes.begin(), _instrumentTimes.end());
-    std::stable_sort(_targetTimes.begin(), _targetTimes.end(), targetComparer);
+    std::stable_sort(
+        _targetTimes.begin(),
+        _targetTimes.end(),
+        [](const std::pair<double, std::string>& a,
+           const std::pair<double, std::string>& b) -> bool
+        {
+            return a.first < b.first;
+        }
+    );
 
     sendPlaybookInformation(PlaybookIdentifierName);
     return true;
 }
 
-
-}
+} // namespace openspace

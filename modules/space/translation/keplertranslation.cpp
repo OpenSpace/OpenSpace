@@ -26,21 +26,17 @@
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
-
 #include <openspace/util/updatestructures.h>
-
 #include <glm/gtx/transform.hpp>
-
-#include <math.h>
 
 namespace {
 
 template <typename T, typename Func>
-T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 100) {
+T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
     T x = 0;
     T x2 = x0;
 
-    for (int i = 0; i < maxIterations; ++i) {
+    for (int i = 0; i < maxIter; ++i) {
         x = x2;
         x2 = function(x);
         if (std::abs(x2 - x) < err) {
@@ -191,7 +187,6 @@ KeplerTranslation::KeplerTranslation()
     , _meanAnomalyAtEpoch(MeanAnomalyAtEpochInfo, 0.0, 0.0, 360.0)
     , _epoch(EpochInfo, 0.0, 0.0, 1e9)
     , _period(PeriodInfo, 0.0, 0.0, 1e6)
-    , _orbitPlaneDirty(true)
 {
     auto update = [this]() {
         _orbitPlaneDirty = true;
@@ -260,7 +255,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
     }
     else if (_eccentricity < 0.9) {
         auto solver = [this, &meanAnomaly](double x) -> double {
-            double e = _eccentricity;
+            const double e = _eccentricity;
             return x + (meanAnomaly + e * sin(x) - x) / (1.0 - e * cos(x));
         };
         return solveIteration(solver, meanAnomaly, 0.0, 6);
@@ -272,11 +267,11 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
-            double s = _eccentricity * sin(x);
-            double c = _eccentricity * cos(x);
-            double f = x - s - meanAnomaly;
-            double f1 = 1 - c;
-            double f2 = s;
+            const double s = _eccentricity * sin(x);
+            const double c = _eccentricity * cos(x);
+            const double f = x - s - meanAnomaly;
+            const double f1 = 1 - c;
+            const double f2 = s;
             return x + (-5 * f / (f1 + sign(f1) *
                 sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
         };
@@ -295,14 +290,14 @@ glm::dvec3 KeplerTranslation::position(const Time& time) const {
         _orbitPlaneDirty = false;
     }
 
-    double t = time.j2000Seconds() - _epoch;
-    double meanMotion = 2.0 * glm::pi<double>() / _period;
-    double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
-    double e = eccentricAnomaly(meanAnomaly);
+    const double t = time.j2000Seconds() - _epoch;
+    const double meanMotion = glm::two_pi<double>() / _period;
+    const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
+    const double e = eccentricAnomaly(meanAnomaly);
 
     // Use the eccentric anomaly to compute the actual location
-    double a = _semiMajorAxis / (1.0 - _eccentricity) * 1000.0;
-    glm::dvec3 p = {
+    const double a = _semiMajorAxis / (1.0 - _eccentricity) * 1000.0;
+    const glm::dvec3 p = {
         a * (cos(e) - _eccentricity),
         a * sqrt(1.0 - _eccentricity * _eccentricity) * sin(e),
         0.0
@@ -330,10 +325,9 @@ void KeplerTranslation::computeOrbitPlane() const {
     const double inc = glm::radians(_inclination.value());
     const double per = glm::radians(_argumentOfPeriapsis.value());
 
-    _orbitPlaneRotation =
-        glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
-        glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
-        glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
+    _orbitPlaneRotation = glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
+                          glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
+                          glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
 
     notifyObservers();
     _orbitPlaneDirty = false;
@@ -342,8 +336,8 @@ void KeplerTranslation::computeOrbitPlane() const {
 void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorAxis,
                                           double inclination, double ascendingNode,
                                           double argumentOfPeriapsis,
-                                          double meanAnomalyAtEpoch,
-                                          double orbitalPeriod, const std::string& epoch)
+                                          double meanAnomalyAtEpoch, double orbitalPeriod,
+                                          const std::string& epoch)
 {
     setKeplerElements(
         eccentricity,
@@ -360,8 +354,8 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
 void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorAxis,
                                           double inclination, double ascendingNode,
                                           double argumentOfPeriapsis,
-                                          double meanAnomalyAtEpoch,
-                                          double orbitalPeriod, double epoch)
+                                          double meanAnomalyAtEpoch, double orbitalPeriod,
+                                          double epoch)
 {
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;

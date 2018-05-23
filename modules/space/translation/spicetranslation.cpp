@@ -33,9 +33,9 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    const char* KeyKernels = "Kernels";
+    constexpr const char* KeyKernels = "Kernels";
 
-    const char* DefaultReferenceFrame = "GALACTIC";
+    constexpr const char* DefaultReferenceFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",

@@ -107,10 +107,8 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
 
 SimpleSphereGeometry::~SimpleSphereGeometry() {}
 
-bool SimpleSphereGeometry::initialize(Renderable* parent) {
-    bool success = PlanetGeometry::initialize(parent);
+void SimpleSphereGeometry::initialize() {
     createSphere();
-    return success;
 }
 
 void SimpleSphereGeometry::deinitialize() {
@@ -122,9 +120,13 @@ void SimpleSphereGeometry::render() {
     _sphere->render();
 }
 
+float SimpleSphereGeometry::boundingSphere() const {
+    const glm::vec3 radius = _radius;
+    return std::max(std::max(radius[0], radius[1]), radius[2]);
+}
+
 void SimpleSphereGeometry::createSphere() {
     const glm::vec3 radius = _radius.value();
-    _parent->setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
     delete _sphere;
     _sphere = new PowerScaledSphere(glm::vec4(radius, 0.0), _segments);

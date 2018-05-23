@@ -52,7 +52,7 @@ std::vector<double> SequenceParser::getCaptureProgression(){
     return _captureProgression;
 }
 
-std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::getTranslation() {
+std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::translations() {
     return _fileTranslation;
 }
 

@@ -33,9 +33,7 @@ namespace openspace {
 
 class InstrumentTimesParser : public SequenceParser {
 public:
-    InstrumentTimesParser(
-        const std::string& name,
-        const std::string& sequenceSource,
+    InstrumentTimesParser(const std::string& name, const std::string& sequenceSource,
         ghoul::Dictionary& parserDict);
 
     bool create() override;
@@ -48,11 +46,10 @@ private:
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;
-    //std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;
-    std::string _detectorType;
+    std::string _detectorType = "CAMERA";
     std::string _sequenceID;
 };
 
