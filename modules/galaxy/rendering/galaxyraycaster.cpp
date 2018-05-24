@@ -116,7 +116,7 @@ void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObje
     _textureUnit = nullptr; // release texture unit.
 }
 
-bool GalaxyRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPosition) {
+bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
     // Camera rig position in world coordinates.
     const glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
@@ -147,19 +147,19 @@ bool GalaxyRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPos
             localPosition.y < 1 && localPosition.z < 1);
 }
 
-std::string GalaxyRaycaster::getBoundsVsPath() const {
+std::string GalaxyRaycaster::boundsVertexShaderPath() const {
     return GlslBoundsVsPath;
 }
 
-std::string GalaxyRaycaster::getBoundsFsPath() const {
+std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
     return GlslBoundsFsPath;
 }
 
-std::string GalaxyRaycaster::getRaycastPath() const {
+std::string GalaxyRaycaster::raycasterPath() const {
     return GlslRaycastPath;
 }
 
-std::string GalaxyRaycaster::getHelperPath() const {
+std::string GalaxyRaycaster::helperPath() const {
     return ""; // no helper file
 }
 

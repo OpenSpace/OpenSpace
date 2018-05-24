@@ -27,30 +27,63 @@
 #include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/assetlistener.h>
+#include <openspace/scene/assetloader.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/synchronizationwatcher.h>
-#include <openspace/scripting/scriptengine.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <chrono>
-#include <fstream>
-#include <string>
-#include <thread>
-
 namespace {
-    const char* KeyAsset = "Asset";
-    const std::string _loggerCat = "SyncAssetTask";
-    std::chrono::milliseconds ProgressPollInterval(200);
+    constexpr const char* KeyAsset = "Asset";
+    constexpr const char* _loggerCat = "SyncAssetTask";
+    constexpr std::chrono::milliseconds ProgressPollInterval(200);
 } // namespace
 
 namespace openspace {
 
+documentation::Documentation SyncAssetTask::documentation() {
+    using namespace documentation;
+    return {
+        "SyncAssetTask",
+        "sync_asset_task",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("SyncAssetTask"),
+                Optional::No,
+                "The type of this task"
+            },
+            {
+                KeyAsset,
+                new StringAnnotationVerifier("A file path to an asset"),
+                Optional::No,
+                "The asset file to sync"
+            }
+        }
+    };
+}
+
+class RequestListener : public AssetListener {
+public:
+    virtual ~RequestListener() = default;
+    void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) override {
+        if (state == Asset::State::LoadingFailed) {
+            LERROR(fmt::format("Failed to load asset: {}", asset->id()));
+        }
+        if (state == Asset::State::SyncRejected) {
+            LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
+        }
+    }
+    void assetRequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
+    void assetUnrequested(std::shared_ptr<Asset>, std::shared_ptr<Asset>) override {};
+};
+
 SyncAssetTask::SyncAssetTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
+    documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
         "SyncAssetTask"
@@ -63,7 +96,7 @@ std::string SyncAssetTask::description() {
     return "Synchronize asset " + _asset;
 }
 
-void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
+void SyncAssetTask::perform(const Task::ProgressCallback& progressCallback) {
     SynchronizationWatcher watcher;
 
     scripting::ScriptEngine scriptEngine;
@@ -100,7 +133,8 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
             Asset::State state = asset->state();
             if (state == Asset::State::Unloaded ||
                 state == Asset::State::Loaded ||
-                state == Asset::State::Synchronizing) {
+                state == Asset::State::Synchronizing)
+            {
                 inProgress = true;
             }
         }
@@ -113,40 +147,5 @@ void SyncAssetTask::perform(const Task::ProgressCallback & progressCallback) {
     }
     progressCallback(1.f);
 }
-
-documentation::Documentation SyncAssetTask::documentation() {
-    using namespace documentation;
-    return {
-        "SyncAssetTask",
-        "sync_asset_task",
-        {
-            {
-                "Type",
-                new StringEqualVerifier("SyncAssetTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
-                KeyAsset,
-                new StringAnnotationVerifier("A file path to an asset"),
-                Optional::No,
-                "The asset file to sync"
-            }
-        }
-    };
-}
-
-
-void SyncAssetTask::RequestListener::assetStateChanged(std::shared_ptr<Asset> asset,
-    Asset::State state)
-{
-    if (state == Asset::State::LoadingFailed) {
-        LERROR(fmt::format("Failed to load asset: {}", asset->id()));
-    }
-    if (state == Asset::State::SyncRejected) {
-        LERROR(fmt::format("Failed to sync asset: {}", asset->id()));
-    }
-}
-
 
 } // namespace openspace

@@ -27,22 +27,21 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/volume/rawvolume.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
-#include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
-
-
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/histogram.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace {
+    class Histogram;
+    struct RenderData;
+} // namespace openspace
 
-struct RenderData;
+namespace openspace::volume {
 
-namespace volume {
+class BasicVolumeRaycaster;
+template <typename T> class RawVolume;
+class TransferFunctionHandler;
+class VolumeClipPlanes;
 
 class RenderableTimeVaryingVolume : public Renderable {
 public:
@@ -68,11 +67,11 @@ private:
         glm::vec3 lowerDomainBound;
         glm::vec3 upperDomainBound;
         std::string unit;
-        bool inRam;
-        bool onGpu;
+        bool isInRam;
+        bool isOnGpu;
         std::unique_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
-        std::shared_ptr<openspace::Histogram> histogram;
+        std::shared_ptr<Histogram> histogram;
     };
 
     Timestep* currentTimestep();
@@ -102,10 +101,8 @@ private:
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
-
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__

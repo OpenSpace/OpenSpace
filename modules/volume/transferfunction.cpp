@@ -31,6 +31,8 @@
 #include <fstream>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/opengl/texture.h>
 
 using json = nlohmann::json;
 
@@ -196,7 +198,7 @@ namespace openspace {
             json j;
             auto envIter = _envelopes.begin();
             for (; envIter != _envelopes.end(); ++envIter) {
-                j[std::distance(_envelopes.begin(), envIter)] = { envIter->getJSONEnvelope() };
+                j[std::distance(_envelopes.begin(), envIter)] = { envIter->jsonEnvelope() };
             }
             return j.dump();
         }
@@ -219,7 +221,7 @@ namespace openspace {
                     for (auto iter = _envelopes.begin(); iter != _envelopes.end(); ++iter) {
                         if (iter->isValueInEnvelope(position) && iter->isEnvelopeValid()) {
                             count++;
-                            glm::vec4 tmp = iter->getValueAtPosition(position);
+                            glm::vec4 tmp = iter->valueAtPosition(position);
                             rgbFromEnvelopes.r += tmp.r * tmp.a;
                             rgbFromEnvelopes.g += tmp.g * tmp.a;
                             rgbFromEnvelopes.b += tmp.b * tmp.a;

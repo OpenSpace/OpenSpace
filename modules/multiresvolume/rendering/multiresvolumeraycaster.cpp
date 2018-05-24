@@ -141,7 +141,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("atlasSize_" + id, atlasSize);
 }
 
-bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data,
+bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
     // Camera rig position in world coordinates.
@@ -177,19 +177,19 @@ void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
     _tfUnit = nullptr;
 }
 
-std::string MultiresVolumeRaycaster::getBoundsVsPath() const {
+std::string MultiresVolumeRaycaster::boundsVertexShaderPath() const {
     return GlslBoundsVsPath;
 }
 
-std::string MultiresVolumeRaycaster::getBoundsFsPath() const {
+std::string MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
     return GlslBoundsFsPath;
 }
 
-std::string MultiresVolumeRaycaster::getRaycastPath() const {
+std::string MultiresVolumeRaycaster::raycasterPath() const {
     return GlslRaycastPath;
 }
 
-std::string MultiresVolumeRaycaster::getHelperPath() const {
+std::string MultiresVolumeRaycaster::helperPath() const {
     return GlslHelperPath; // no helper file
 }
 

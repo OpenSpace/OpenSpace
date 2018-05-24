@@ -28,14 +28,12 @@
 #include <modules/sync/syncs/torrentsynchronization.h>
 #include <modules/sync/syncs/urlsynchronization.h>
 #include <modules/sync/tasks/syncassettask.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/resourcesynchronization.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
@@ -54,7 +52,8 @@ SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     if (configuration.hasKey(KeyHttpSynchronizationRepositories)) {
         ghoul::Dictionary dictionary = configuration.value<ghoul::Dictionary>(
-            KeyHttpSynchronizationRepositories);
+            KeyHttpSynchronizationRepositories
+        );
 
         for (const std::string& key : dictionary.keys()) {
             _synchronizationRepositories.push_back(dictionary.value<std::string>(key));
@@ -101,31 +100,29 @@ void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {
     fSynchronization->registerClass(
         "UrlSynchronization",
         [this](bool, const ghoul::Dictionary& dictionary) {
-        return new UrlSynchronization(
-            dictionary,
-            _synchronizationRoot
-        );
-    }
+            return new UrlSynchronization(
+                dictionary,
+                _synchronizationRoot
+            );
+        }
     );
 
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<SyncAssetTask>("SyncAssetTask");
 
-
-
     _torrentClient.initialize();
 
     // Deinitialize
-    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&] {
-        _torrentClient.deinitialize();
-    });
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Deinitialize,
+        [&]() { _torrentClient.deinitialize(); }
+    );
 }
 
 void SyncModule::internalDeinitialize() {
     _torrentClient.deinitialize();
 }
-
 
 std::string SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;

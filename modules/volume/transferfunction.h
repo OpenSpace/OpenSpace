@@ -29,8 +29,10 @@
 #include <modules/volume/envelope.h>
 
 namespace ghoul { class Dictionary; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace::volume {
+
 class TransferFunction {
 public:
     TransferFunction();

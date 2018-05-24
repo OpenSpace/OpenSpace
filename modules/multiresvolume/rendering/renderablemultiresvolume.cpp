@@ -28,6 +28,7 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/glm.h>
 

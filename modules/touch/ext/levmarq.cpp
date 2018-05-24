@@ -34,7 +34,7 @@ namespace {
 }
 
 // set parameters required by levmarq() to default values 
-void levmarq_init(LMstat *lmstat) {
+void levmarq_init(LMstat* lmstat) {
     lmstat->verbose = false;
     lmstat->max_it = 3000;
     lmstat->init_lambda = 1e-6;

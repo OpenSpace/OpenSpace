@@ -35,6 +35,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>

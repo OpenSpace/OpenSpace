@@ -37,6 +37,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -449,21 +450,21 @@ void FramebufferRenderer::updateRaycastData() {
     for (VolumeRaycaster* raycaster : raycasters) {
         RaycastData data = { nextId++, "Helper" };
 
-        const std::string& vsPath = raycaster->getBoundsVsPath();
-        std::string fsPath = raycaster->getBoundsFsPath();
+        const std::string& vsPath = raycaster->boundsVertexShaderPath();
+        std::string fsPath = raycaster->boundsFragmentShaderPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
         dict.setValue("fragmentPath", std::move(fsPath));
         dict.setValue("id", data.id);
 
-        std::string helperPath = raycaster->getHelperPath();
+        std::string helperPath = raycaster->helperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
             helpersDict.setValue("0", std::move(helperPath));
         }
         dict.setValue("helperPaths", std::move(helpersDict));
-        dict.setValue("raycastPath", raycaster->getRaycastPath());
+        dict.setValue("raycastPath", raycaster->raycasterPath());
 
         _raycastData[raycaster] = data;
 
@@ -1011,13 +1012,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
             glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
             glm::vec3 cameraPosition;
-            bool cameraIsInside = raycaster->cameraIsInside(
+            bool isCameraInside = raycaster->isCameraInside(
                 raycasterTask.renderData,
                 cameraPosition
             );
             ghoul::opengl::ProgramObject* raycastProgram = nullptr;
 
-            if (cameraIsInside) {
+            if (isCameraInside) {
                 raycastProgram = _insideRaycastPrograms[raycaster].get();
                 if (raycastProgram) {
                     raycastProgram->activate();
@@ -1063,7 +1064,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
                 glDisable(GL_DEPTH_TEST);
                 glDepthMask(false);
-                if (cameraIsInside) {
+                if (isCameraInside) {
                     glBindVertexArray(_screenQuad);
                     glDrawArrays(GL_TRIANGLES, 0, 6);
                     glBindVertexArray(0);

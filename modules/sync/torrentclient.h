@@ -67,11 +67,13 @@ namespace openspace {
 
 struct TorrentError : public ghoul::RuntimeError {
     /**
-    * Creates the SpecificationError exception instance.
-    * \param result The offending TestResult that is passed on
-    * \param component The component that initiated the specification test
-    * \pre \p result%'s TestResult::success must be \c false
-    */
+     * Creates the SpecificationError exception instance.
+     *
+     * \param result The offending TestResult that is passed on
+     * \param component The component that initiated the specification test
+     *
+     * \pre \p result%'s TestResult::success must be \c false
+     */
     TorrentError(std::string message);
 };
 

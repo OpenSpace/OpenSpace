@@ -25,37 +25,19 @@
 #ifndef __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
 #define __OPENSPACE_MODULE_SYNC___SYNCASSETTASK___H__
 
-#include <openspace/scene/assetlistener.h>
-
 #include <openspace/util/task.h>
 
-#include <openspace/scene/assetloader.h>
-
 #include <string>
-#include <memory>
-#include <unordered_set>
 
 namespace openspace {
 
 class SyncAssetTask : public Task {
 public:
-    class RequestListener : public AssetListener {
-    public:
-        virtual ~RequestListener() = default;
-        void assetStateChanged(std::shared_ptr<Asset> asset,
-                               Asset::State state) override;
-
-        void assetRequested(std::shared_ptr<Asset>,
-                            std::shared_ptr<Asset>) override {};
-
-        void assetUnrequested(std::shared_ptr<Asset>,
-                              std::shared_ptr<Asset>) override {};
-    };
-
     SyncAssetTask(const ghoul::Dictionary& dictionary);
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
+
     static documentation::Documentation documentation();
 
 private:

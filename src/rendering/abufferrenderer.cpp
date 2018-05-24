@@ -658,13 +658,13 @@ void ABufferRenderer::preRaycast(const RaycasterTask& raycasterTask) {
     raycaster.preRaycast(raycastData, *_resolveProgram);
 
     glm::vec3 localCameraPosition;
-    bool cameraIsInside = raycaster.cameraIsInside(renderData, localCameraPosition);
+    bool isCameraInside = raycaster.isCameraInside(renderData, localCameraPosition);
     int uniformIndex = raycastData.id + 1; // uniforms are indexed from 1 (not from 0)
     _resolveProgram->setUniform(
         "insideRaycaster" + std::to_string(uniformIndex),
-        cameraIsInside
+        isCameraInside
     );
-    if (cameraIsInside) {
+    if (isCameraInside) {
         _resolveProgram->setUniform(
             "cameraPosInRaycaster" + std::to_string(uniformIndex),
             localCameraPosition
@@ -839,7 +839,7 @@ void ABufferRenderer::updateResolveDictionary() {
         ghoul::Dictionary innerDict;
         int id = raycastPair.second.id;
         std::string namespaceName = raycastPair.second.namespaceName;
-        std::string raycastPath = raycastPair.first->getRaycastPath();
+        std::string raycastPath = raycastPair.first->raycasterPath();
 
         innerDict.setValue("id", id);
         innerDict.setValue("namespace", namespaceName);
@@ -898,7 +898,7 @@ void ABufferRenderer::updateRaycastData() {
         RaycastData data;
         data.id = nextId++;
 
-        std::string helperPath = raycaster->getHelperPath();
+        std::string helperPath = raycaster->helperPath();
         // Each new helper path generates a new namespace,
         // to avoid glsl name collisions between raycaster implementaitons.
         // Assign a new namespace or find an already created index.
@@ -919,8 +919,8 @@ void ABufferRenderer::updateRaycastData() {
         }
 
         _raycastData[raycaster] = data;
-        std::string vsPath = raycaster->getBoundsVsPath();
-        std::string fsPath = raycaster->getBoundsFsPath();
+        std::string vsPath = raycaster->boundsVertexShaderPath();
+        std::string fsPath = raycaster->boundsFragmentShaderPath();
         ghoul::Dictionary dict;
 
         // set path to the current renderer's main fragment shader

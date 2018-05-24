@@ -29,10 +29,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
-#include <ghoul/misc/defer.h>
-
 namespace {
-    const char* KeyName = "Name";
+    constexpr const char* KeyName = "Name";
 
     static const openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",
@@ -113,11 +111,8 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
         setGuiName("ScreenSpaceSpout " + std::to_string(iIdentifier));
     }
 
-    _isSpoutDirty = true;
-
     if (dictionary.hasKey(NameInfo.identifier)) {
         _spoutName = dictionary.value<std::string>(NameInfo.identifier);
-        _isSpoutDirty = true;
     }
 
     _spoutName.onChange([this]() {
@@ -128,14 +123,14 @@ ScreenSpaceSpout::ScreenSpaceSpout(const ghoul::Dictionary& dictionary)
     });
     addProperty(_spoutName);
 
-    _spoutSelection.onChange([this](){
+    _spoutSelection.onChange([this]() {
         _spoutName = _spoutSelection.option().description;
     });
     _spoutSelection.addOption(0, "");
     addProperty(_spoutSelection);
 
     _updateSelection.onChange([this]() {
-        std::string currentValue = _spoutSelection.options().empty() ?
+        const std::string& currentValue = _spoutSelection.options().empty() ?
             "" :
             _spoutSelection.option().description;
 
@@ -194,22 +189,20 @@ void ScreenSpaceSpout::update() {
         defer { _isSpoutDirty = false; };
 
         std::memset(_currentSenderName, 0, 256);
-        unsigned int width;
-        unsigned int height;
 
         _receiver->ReleaseReceiver();
-
         _receiver->GetActiveSender(_currentSenderName);
 
-        bool createSuccess = _receiver->CreateReceiver(
+        unsigned int width;
+        unsigned int height;
+        const bool hasCreated = _receiver->CreateReceiver(
             _currentSenderName,
             width,
             height
         );
-
         _objectSize = { width, height };
 
-        if (!createSuccess) {
+        if (!hasCreated) {
             LWARNINGC(
                 "ScreenSpaceSpout",
                 fmt::format("Could not create receiver for {}", _currentSenderName)
@@ -220,8 +213,7 @@ void ScreenSpaceSpout::update() {
 
     unsigned int width;
     unsigned int height;
-
-    bool receiveSuccess = _receiver->ReceiveTexture(
+    const bool receiveSuccess = _receiver->ReceiveTexture(
         _currentSenderName,
         width,
         height
@@ -243,7 +235,6 @@ void ScreenSpaceSpout::bindTexture() {
 void ScreenSpaceSpout::unbindTexture() {
     _receiver->UnBindSharedTexture();
 }
-
 
 } // namespace openspace
 

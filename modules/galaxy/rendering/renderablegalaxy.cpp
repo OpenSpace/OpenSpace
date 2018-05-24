@@ -31,6 +31,7 @@
 #include <modules/galaxy/rendering/galaxyraycaster.h>
 #include <openspace/util/boxgeometry.h>
 #include <modules/volume/rawvolume.h>
+#include <openspace/util/updatestructures.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/engine/openspaceengine.h>

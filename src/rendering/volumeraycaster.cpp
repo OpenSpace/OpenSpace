@@ -22,30 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
-#define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
-
-#include <modules/spacecraftinstruments/util/decoder.h>
-#include <string>
-#include <vector>
+#include <openspace/rendering/volumeraycaster.h>
 
 namespace openspace {
 
-class ScannerDecoder : public Decoder {
-public:
-    ScannerDecoder(const ghoul::Dictionary& dictionary);
+VolumeRaycaster::~VolumeRaycaster() {}
+void VolumeRaycaster::preRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
+void VolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
 
-    virtual const std::string& decoderType() const override;
-    const std::vector<std::string>& spiceIDs() const;
-    const std::string& stopCommand() const;
-    void setStopCommand(std::string stopCommand);
-
-private:
-    std::string _type;
-    std::string _abort;
-    std::vector<std::string> _spiceIDs;
-};
+bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
+    return false;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__

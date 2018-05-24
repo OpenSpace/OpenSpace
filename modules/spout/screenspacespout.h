@@ -61,7 +61,7 @@ private:
 
     SPOUTHANDLE _receiver;
 
-    bool _isSpoutDirty = false;
+    bool _isSpoutDirty = true;
     char _currentSenderName[256];
     bool _isFirstUpdate = true;
     bool _isErrorMessageDisplayed = false;

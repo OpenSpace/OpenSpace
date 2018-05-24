@@ -22,30 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
-#define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
+namespace openspace::volume {
 
-#include <modules/spacecraftinstruments/util/decoder.h>
-#include <string>
-#include <vector>
+template <typename ValueType>
+LinearLruCache<ValueType>::LinearLruCache(size_t capacity, size_t nIndices)
+    : _tracker()
+    , _cache(nIndices, { nullptr, _tracker.end() })
+    , _capacity(capacity)
+{}
 
-namespace openspace {
-
-class ScannerDecoder : public Decoder {
-public:
-    ScannerDecoder(const ghoul::Dictionary& dictionary);
-
-    virtual const std::string& decoderType() const override;
-    const std::vector<std::string>& spiceIDs() const;
-    const std::string& stopCommand() const;
-    void setStopCommand(std::string stopCommand);
-
-private:
-    std::string _type;
-    std::string _abort;
-    std::vector<std::string> _spiceIDs;
+template <typename ValueType>
+bool LinearLruCache<ValueType>::has(size_t key) const {
+    return _cache[key].first != nullptr;
 };
 
-} // namespace openspace
+template <typename ValueType>
+void LinearLruCache<ValueType>::set(size_t key, ValueType value) {
+    auto prev = _cache[key];
+    if (prev.first != nullptr) {
+        prev.first = value;
+        const std::list<size_t>::iterator trackerIter = prev.second;
+        _tracker.splice(_tracker.end(), _tracker, trackerIter);
+    }
+    else {
+        insert(key, value);
+    }
+}
 
-#endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
+template <typename ValueType>
+ValueType& LinearLruCache<ValueType>::use(size_t key) {
+    auto& pair = _cache[key];
+    const std::list<size_t>::iterator trackerIter = pair.second;
+    _tracker.splice(_tracker.end(), _tracker, trackerIter);
+    return pair.first;
+}
+
+template <typename ValueType>
+ValueType& LinearLruCache<ValueType>::get(size_t key) {
+    return _cache[key].first;
+}
+
+template <typename ValueType>
+void LinearLruCache<ValueType>::evict() {
+    _cache[_tracker.front()] = make_pair(nullptr, _tracker.end());
+    _tracker.pop_front();
+}
+
+template <typename ValueType>
+size_t LinearLruCache<ValueType>::capacity() const {
+    return _capacity;
+}
+
+template <typename ValueType>
+void LinearLruCache<ValueType>::insert(size_t key, const ValueType& value) {
+    if (_tracker.size() == _capacity) {
+        evict();
+    }
+    auto iter = _tracker.insert(_tracker.end(), key);
+    _cache[key] = { value, iter };
+}
+
+} // namespace openspace::volume
