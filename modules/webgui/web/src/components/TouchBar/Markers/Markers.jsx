@@ -16,12 +16,12 @@ class Markers extends Component {
 
   componentDidUpdate() {
     const {
-      nodes, screenSpaceProperties, screenVisibilityProperties,
+      focusNodes, screenSpaceProperties, screenVisibilityProperties,
       distFromCamToNodeProperties, screenSpaceRadius,
     } = this.props;
 
-    if (nodes.length > 0) {
-      nodes.forEach((node, i) => {
+    if (focusNodes.length > 0) {
+      focusNodes.forEach((node, i) => {
         if (screenSpaceProperties[i].listeners === 0) {
           this.props.StartListening(screenSpaceProperties[i].Description.Identifier);
         }
@@ -39,22 +39,24 @@ class Markers extends Component {
   }
 
   componentWillUnmount() {
-    const {
-      nodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
-      screenSpaceRadius,
-    } = this.props;
+    if (this.props.focusNodes.length > 0) {
+      const {
+        focusNodes, screenSpaceProperties, screenVisibilityProperties, distFromCamToNodeProperties,
+        screenSpaceRadius,
+      } = this.props;
 
-    nodes.forEach((node, i) => {
-      this.props.StopListening(screenSpaceProperties[i].Description.Identifier);
-      this.props.StopListening(screenVisibilityProperties[i].Description.Identifier);
-      this.props.StopListening(distFromCamToNodeProperties[i].Description.Identifier);
-      this.props.StopListening(screenSpaceRadius[i].Description.Identifier);
-    });
+      focusNodes.forEach((node, i) => {
+        this.props.StopListening(screenSpaceProperties[i].Description.Identifier);
+        this.props.StopListening(screenVisibilityProperties[i].Description.Identifier);
+        this.props.StopListening(distFromCamToNodeProperties[i].Description.Identifier);
+        this.props.StopListening(screenSpaceRadius[i].Description.Identifier);
+      });
+    }
   }
 
   createInfoMarkers() {
     const {
-      nodes, screenSpaceProperties, screenVisibilityProperties,
+      focusNodes, screenSpaceProperties, screenVisibilityProperties,
       distFromCamToNodeProperties, infoIcons, screenSpaceRadius,
       currentFocusNode, focusNodeName, story,
     } = this.props;
@@ -63,7 +65,7 @@ class Markers extends Component {
     const focusNodePos = jsonToLuaTable(currentFocusNode.properties.find(property => property.id === 'ScreenSpacePosition').Value).split(',');
     const focusNodeRadius = Number(currentFocusNode.properties.find(property => property.id === 'ScreenSizeRadius').Value);
 
-    return (nodes.map((node, i) => {
+    return (focusNodes.map((node, i) => {
       const screenSpacePos = jsonToLuaTable(screenSpaceProperties[i].Value).split(',');
       if (screenVisibilityProperties[i].Value === 'true') {
         let outsideCircle = true;
@@ -118,6 +120,7 @@ class Markers extends Component {
 const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let nodes = [];
+  let focusNodes = [];
   const screenSpaceProperties = [];
   const screenVisibilityProperties = [];
   const distFromCamToNodeProperties = [];
@@ -125,6 +128,7 @@ const mapStateToProps = (state) => {
   const screenSpaceRadius = [];
   let focusNodeName = '';
   let currentFocusNode = {};
+  const story = state.storyTree.story;
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners
@@ -133,19 +137,21 @@ const mapStateToProps = (state) => {
       nodes = [...nodes, ...node.subowners];
     });
 
-    const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
-    nodes = nodes.filter(node =>
-      (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
+    if (story.focusbuttons !== undefined) {
+      const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
+      nodes = nodes.filter(node =>
+        (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
 
-    nodes.forEach((node) => {
-      screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSpacePosition`));
-      screenVisibilityProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenVisibility`));
-      distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.DistanceFromCamToNode`));
-      screenSpaceRadius.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSizeRadius`));
-    });
+      focusNodes.forEach((node) => {
+        screenSpaceProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSpacePosition`));
+        screenVisibilityProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenVisibility`));
+        distFromCamToNodeProperties.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.DistanceFromCamToNode`));
+        screenSpaceRadius.push(traverseTreeWithURI(state.propertyTree, `Scene.${node.identifier}.ScreenSizeRadius`));
+      });
 
-    focusNodeName = traverseTreeWithURI(state.propertyTree, OriginKey).Value;
-    currentFocusNode = nodes.find(node => node.identifier === focusNodeName);
+      focusNodeName = traverseTreeWithURI(state.propertyTree, OriginKey).Value;
+      currentFocusNode = nodes.find(focusNodes => focusNodes.identifier === focusNodeName);
+    }
   }
 
   if (state.fetchData.length > 0) {
@@ -153,7 +159,7 @@ const mapStateToProps = (state) => {
     infoIcons = tmp.succeed ? tmp : {};
   }
   return {
-    nodes,
+    focusNodes,
     screenSpaceProperties,
     screenVisibilityProperties,
     distFromCamToNodeProperties,
@@ -161,7 +167,7 @@ const mapStateToProps = (state) => {
     screenSpaceRadius,
     focusNodeName,
     currentFocusNode,
-    story: state.storyTree.story,
+    story,
   };
 };
 
@@ -202,7 +208,7 @@ Markers.propTypes = {
   })),
   nodes: PropTypes.arrayOf(PropTypes.shape({})),
   currentFocusNode: PropTypes.arrayOf(PropTypes.shape({})),
-  story: PropTypes.arrayOf(PropTypes.shape({})),
+  story: PropTypes.objectOf(PropTypes.shape({})),
   focusNodeName: PropTypes.string,
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,

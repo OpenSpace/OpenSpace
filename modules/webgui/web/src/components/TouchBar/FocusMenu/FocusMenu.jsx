@@ -47,8 +47,8 @@ class FocusMenu extends Component {
   }
 
   createFocusButtons() {
-    const { nodes } = this.props;
-    const focusPicker = nodes
+    const { focusNodes } = this.props;
+    const focusPicker = focusNodes
       .map(node =>
         (<FocusButton
           key={node.identifier}
@@ -68,12 +68,12 @@ class FocusMenu extends Component {
   render() {
     return (
       <div className={styles.FocusMenu}>
-        {this.props.nodes.length> 0 &&
+        {this.props.originNode !== undefined &&
           <OverViewButton
             onApplyOverview={this.triggerChanges}
             descriptionOverview={this.props.applyOverview.Description}
           />}
-        {this.props.nodes.length > 0 && this.createFocusButtons()}
+        {this.props.focusNodes.length > 0 && this.createFocusButtons()}
       </div>
     );
   }
@@ -83,6 +83,7 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   let originNode = [];
   let nodes = [];
+  let focusNodes = [];
   let applyOverview;
   let applyFlyTo;
 
@@ -92,16 +93,18 @@ const mapStateToProps = (state) => {
       nodes = [...nodes, ...node.subowners];
     });
 
-    const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
-    nodes = nodes.filter(node =>
-      (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
+    if (state.storyTree.story.focusbuttons !== undefined) {
+      const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
+      focusNodes = nodes.filter(node =>
+        (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
+    }
 
     originNode = traverseTreeWithURI(state.propertyTree, OriginKey);
     applyOverview = traverseTreeWithURI(state.propertyTree, ApplyOverviewKey);
     applyFlyTo = traverseTreeWithURI(state.propertyTree, ApplyFlyToKey);
   }
   return {
-    nodes,
+    focusNodes,
     originNode,
     applyOverview,
     applyFlyTo,
@@ -126,7 +129,7 @@ FocusMenu = connect(
 )(FocusMenu);
 
 FocusMenu.propTypes = {
-  nodes: PropTypes.arrayOf(PropTypes.shape({
+  focusNodes: PropTypes.arrayOf(PropTypes.shape({
     identifier: PropTypes.string,
     Description: PropTypes.string,
     properties: PropTypes.arrayOf(PropTypes.object),
@@ -149,7 +152,7 @@ FocusMenu.propTypes = {
 };
 
 FocusMenu.defaultProps = {
-  nodes: [],
+  focusNodes: [],
   properties: [],
   subowners: [],
   originNode: [],
