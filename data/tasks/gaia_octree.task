@@ -1,10 +1,10 @@
 return {
     {
         Type = "ConstructOctreeTask",
-        InFileOrFolderPath = "E:/gaia_sync_data/DR2_full_24col/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree[150kSPN,250dist]_90,90/",
+        InFileOrFolderPath = "E:/gaia_sync_data/Gaia_DR2_full_24columns/",
+        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree[50kSPN,250dist]_200pc,50/",
         MaxDist = 250,
-        MaxStarsPerNode = 150000,
+        MaxStarsPerNode = 50000,
         SingleFileInput = false,
         -- Specify filter thresholds
         --FilterPosX = {0.0, 0.0},
@@ -23,8 +23,8 @@ return {
         --FilterRaError = {0.0, 0.0},
         --FilterDec = {0.0, 0.0},
         --FilterDecError = {0.0, 0.0},
-        FilterParallax = {0.0, 0.0},
-        FilterParallaxError = {0.0, 0.9},
+        FilterParallax = {5.0, 0.0}, -- = 200 closest pc
+        FilterParallaxError = {0.0, 0.5},
         --FilterPmra = {0.0, 0.0},
         --FilterPmraError = {0.0, 0.0},
         --FilterPmdec = {0.0, 0.0},
@@ -32,16 +32,4 @@ return {
         --FilterRv = {0.0, 0.0},
         --FilterRvError = {0.0, 0.0},
     },
-    {
-        Type = "ConstructOctreeTask",
-        InFileOrFolderPath = "E:/gaia_sync_data/DR2_full_24col/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree[20kSPN,200dist]_90,0/",
-        MaxDist = 200,
-        MaxStarsPerNode = 20000,
-        SingleFileInput = false,
-        -- Specify filter thresholds
-        FilterGMag = {20.0, 13.0},
-        FilterParallax = {0.0, 0.0},
-        FilterParallaxError = {0.0, 0.9},
-    }
 }

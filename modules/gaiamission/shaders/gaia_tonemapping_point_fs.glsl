@@ -35,6 +35,12 @@ uniform float sigma;
 const float M_PI = 3.141592653589793238462;
 const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
 
+float atan2(in float y, in float x)
+{
+    bool s = (abs(x) > abs(y));
+    return mix(M_PI / 2.0 - atan(x,y), atan(y,x), s);
+}
+
 Fragment getFragment() {
 
     vec4 color = vec4(0.0);
@@ -52,6 +58,9 @@ Fragment getFragment() {
     scaleFactor *= 1.0;
     dvec2 newFilterSize = filterSize / scaleFactor;
 
+    // Make use of this to switch betweeen circle and ellipse.
+    bool useCircleDist = true; 
+
 
     // Get a [filterSize x filterSize] filter around our pixel. UV is [0, 1]
     vec3 intensity = vec3(0.0);
@@ -66,9 +75,26 @@ Fragment getFragment() {
                 vec4 sIntensity = texture( renderedTexture, sPoint );
 
                 // Use normal distribution function for halo/bloom effect. 
-                float circleDist = sqrt(pow(x * scaleFactor.x, 2.0) + pow(y * scaleFactor.y, 2.0));
-                intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) * 
-                    exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
+                if (useCircleDist) {
+                    float circleDist = sqrt(pow(x * scaleFactor.x, 2.0) + pow(y * scaleFactor.y, 2.0));
+                    intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) * 
+                        exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
+                    }
+                else {
+                    // Elliptic gaussian distribution.
+                    float alpha = atan2(y, x);
+                    float sigmaX = sigma * scaleFactor.x;
+                    float sigmaY = sigma * scaleFactor.y;
+                    float a = pow(cos(alpha), 2.0) / (2 * pow(sigmaX, 2.0)) 
+                        + pow(sin(alpha), 2.0) / (2 * pow(sigmaY, 2.0));
+                    float b = sin(2 * alpha) / (4 * pow(sigmaX, 2.0)) 
+                        - sin(2 * alpha) / (4 * pow(sigmaY, 2.0));
+                    float c = pow(sin(alpha), 2.0) / (2 * pow(sigmaX, 2.0)) 
+                        + pow(cos(alpha), 2.0) / (2 * pow(sigmaY, 2.0));
+                    intensity += sIntensity.rgb * exp(-( a * pow(x * scaleFactor.x, 2.0) 
+                        + 2 * b * x * scaleFactor.x * y * scaleFactor.y
+                        + c * pow(y * scaleFactor.y, 2.0) )) / filterSize;
+                }
             }
         }
     }
