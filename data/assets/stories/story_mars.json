@@ -90,6 +90,7 @@
     }
   },
   "hideplanets": ["Mercury", "Venus", "Earth", "Jupiter", "Saturn", "Uranus", "Neptune"],
+  "hideinfoicons": ["Mars"],
   "highresplanets": ["Mars"],
   "noshadingplanets": ["Mars"]
 }

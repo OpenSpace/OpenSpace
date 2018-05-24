@@ -47,5 +47,6 @@
       "altitude": "20000000"
     }
   },
-  "hideplanets": ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
+  "hideplanets": ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"],
+  "hideinfoicons": ["Earth"]
 }

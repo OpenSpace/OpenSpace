@@ -56,7 +56,7 @@ class Markers extends Component {
     const {
       nodes, screenSpaceProperties, screenVisibilityProperties,
       distFromCamToNodeProperties, infoIcons, screenSpaceRadius,
-      currentFocusNode, focusNodeName,
+      currentFocusNode, focusNodeName, story,
     } = this.props;
 
     // Get current focus node, its screen space position and its screen space radius
@@ -79,7 +79,8 @@ class Markers extends Component {
 
         const planetRadius = Number(screenSpaceRadius[i].Value);
         let size = planetRadius * 0.1;
-        const showInfo = (planetRadius > 25 && outsideCircle);
+        const showInfo = (!node.identifier.includes(story.hideinfoicons) &&
+          planetRadius > 25 && outsideCircle);
 
         if (size >= 3) size = 3;
         if (size <= 1.5) size = 1.5;
@@ -160,6 +161,7 @@ const mapStateToProps = (state) => {
     screenSpaceRadius,
     focusNodeName,
     currentFocusNode,
+    story: state.storyTree.story,
   };
 };
 
@@ -200,6 +202,7 @@ Markers.propTypes = {
   })),
   nodes: PropTypes.arrayOf(PropTypes.shape({})),
   currentFocusNode: PropTypes.arrayOf(PropTypes.shape({})),
+  story: PropTypes.arrayOf(PropTypes.shape({})),
   focusNodeName: PropTypes.string,
   StartListening: PropTypes.func,
   StopListening: PropTypes.func,
@@ -214,6 +217,7 @@ Markers.defaultProps = {
   infoIcons: [],
   Description: [],
   currentFocusNode: [],
+  story: {},
   Value: '',
   focusNodeName: '',
   StopListening: null,
