@@ -139,7 +139,7 @@ const mapStateToProps = (state) => {
 
     if (story.focusbuttons !== undefined) {
       const focusNodesString = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
-      nodes = nodes.filter(node =>
+      focusNodes = nodes.filter(node =>
         (fromStringToArray(focusNodesString.Value).includes(node.identifier)));
 
       focusNodes.forEach((node) => {
