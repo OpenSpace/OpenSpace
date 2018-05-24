@@ -309,18 +309,22 @@ private:
     /**
      * Finds the neighboring node on the same level (or a higher level if there is no
      * corresponding level) in the specified direction. Also fetches data from found node 
-     * if it's not already loaded.
+     * if it's not already loaded. \param additionalLevelsToFetch determines if any 
+     * descendants of the found node should be fetched as well (if they exists). 
      */
-    void findAndFetchNeighborNode(const unsigned long long& firstParentId, int x, int y, int z);
+    void findAndFetchNeighborNode(const unsigned long long& firstParentId, int x, int y, 
+        int z, int additionalLevelsToFetch);
     
     /** 
      * Fetches data from all children of \param parentNode, as long as it's not already 
-     * fetched, it exists and it can fit in RAM. If \param recursive is true then all 
-     * descendants will be fetched as well.
+     * fetched, it exists and it can fit in RAM. 
+     * \param additionalLevelsToFetch determines how many levels of descendants to fetch.
+     * If it is set to 0 no additional level will be fetched.
+     * If it is set to a negative value then all descendants will be fetched recursively.
      * Calls <code>fetchNodeDataFromFile()</code> for every child that passes the tests.
      */
     void fetchChildrenNodes(std::shared_ptr<OctreeManager::OctreeNode> parentNode, 
-        bool recursive);
+        int additionalLevelsToFetch);
 
     /**
      * Fetches data for specified node from file.

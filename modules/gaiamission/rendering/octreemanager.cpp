@@ -169,7 +169,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
         // Only traverse Octree once!
         if (_parentNodeOfCamera == 8) {
             // Fetch first layer of children
-            fetchChildrenNodes(_root, false);
+            fetchChildrenNodes(_root, 0);
 
             for (int i = 0; i < 8; ++i) {
                 // Check so branch doesn't have a single layer.
@@ -179,7 +179,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                 // so it can execute independently. Thread will be destroyed when
                 // finished!
                 std::thread(&OctreeManager::fetchChildrenNodes, this, _root->Children[i],
-                    true).detach();
+                    -1).detach();
             }
             _parentNodeOfCamera = 0;
         }
@@ -208,46 +208,55 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
     if (_parentNodeOfCamera == firstParentId) return;
     _parentNodeOfCamera = firstParentId;
 
+    int additionalLevelsToFetch = 0;
+    if (_parentNodeOfCamera < 800000) additionalLevelsToFetch++;
+
     // Get the 3^3 closest parents and load all their (eventual) children.
     for (int x = -1; x <= 1; x += 1) {
         for (int y = -2; y <= 2; y += 2) {
             for (int z = -4; z <= 4; z += 4) {
                 // Fetch all stars the 216 closest leaf nodes.
-                findAndFetchNeighborNode(firstParentId, x, y, z);
+                findAndFetchNeighborNode(firstParentId, x, y, z, 
+                    additionalLevelsToFetch);
                 // Fetch LOD stars from 208 parents one and two layer(s) up.
                 if (x != 0 || y != 0 || z != 0) {
-                    findAndFetchNeighborNode(secondParentId, x, y, z);
-                    findAndFetchNeighborNode(thirdParentId, x, y, z);
+                    findAndFetchNeighborNode(secondParentId, x, y, z, 
+                        additionalLevelsToFetch + 1);
+                    findAndFetchNeighborNode(thirdParentId, x, y, z, 
+                        additionalLevelsToFetch + 2);
                 }
             }
         }
     }
 
     // Check if we should remove any nodes from RAM.
-    long long cpuRamUsedInBytes = _maxCpuRamBudget - _cpuRamBudget;
-    size_t nodesInRam = static_cast<size_t>(cpuRamUsedInBytes / chunkSizeInBytes);
-    std::vector<unsigned long long> nodesToRemove;
-    while (nodesInRam > _maxStackSize) { // TODO: Increase to _maxCpuRamBudget / 2?
-        // Dequeue nodes that were least recently fetched by findAndFetchNeighborNode.
-        nodesToRemove.push_back(_leastRecentlyFetchedNodes.front());
-        _leastRecentlyFetchedNodes.pop();
-        nodesInRam--;
-    }
-    // Use asynchronous removal.
-    if (nodesToRemove.size() > 0) {
-        std::thread(&OctreeManager::removeNodesFromRam, this, nodesToRemove).detach();
+    long long tenthOfRamBudget = _maxCpuRamBudget / 10;
+    if (_cpuRamBudget < tenthOfRamBudget) {
+        long long bytesToTenthOfRam = tenthOfRamBudget - _cpuRamBudget;
+        size_t nNodesToRemove = static_cast<size_t>(bytesToTenthOfRam / chunkSizeInBytes);
+        std::vector<unsigned long long> nodesToRemove;
+        while (nNodesToRemove > 0) {
+            // Dequeue nodes that were least recently fetched by findAndFetchNeighborNode.
+            nodesToRemove.push_back(_leastRecentlyFetchedNodes.front());
+            _leastRecentlyFetchedNodes.pop();
+            nNodesToRemove--;
+        }
+        // Use asynchronous removal.
+        if (nodesToRemove.size() > 0) {
+            std::thread(&OctreeManager::removeNodesFromRam, this, nodesToRemove).detach();
+        }
     }
 }
 
 void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstParentId,
-    int x, int y, int z) {
+    int x, int y, int z, int additionalLevelsToFetch) {
 
     unsigned long long parentId = firstParentId;
     auto indexStack = std::stack<int>();
 
     // Fetch first layer children if we're already at root.
     if (parentId == 8) {
-        fetchChildrenNodes(_root, false);
+        fetchChildrenNodes(_root, 0);
         return;
     }
 
@@ -320,7 +329,8 @@ void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstPare
     // Fetch all children nodes from found parent. Use multithreading to load files
     // asynchronously! Detach thread from main execution so it can execute independently.
     // Thread will then be destroyed when it has finished!
-    std::thread(&OctreeManager::fetchChildrenNodes, this, node, false).detach();
+    std::thread(&OctreeManager::fetchChildrenNodes, this, node, additionalLevelsToFetch)
+        .detach();
 }
 
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp, 
@@ -654,7 +664,7 @@ void OctreeManager::writeNodeToMultipleFiles(const std::string& outFilePrefix,
 }
 
 void OctreeManager::fetchChildrenNodes(
-      std::shared_ptr<OctreeManager::OctreeNode> parentNode, bool recursive) {
+    std::shared_ptr<OctreeManager::OctreeNode> parentNode, int additionalLevelsToFetch) {
 
     // Lock node to make sure nobody else are trying to load the same children.
     std::lock_guard<std::mutex> lock(parentNode->loadingLock);
@@ -669,8 +679,8 @@ void OctreeManager::fetchChildrenNodes(
         }
 
         // Fetch all Children's Children if recursive is set to true!
-        if (recursive && !parentNode->Children[i]->isLeaf) {
-            fetchChildrenNodes(parentNode->Children[i], true);
+        if (additionalLevelsToFetch != 0 && !parentNode->Children[i]->isLeaf) {
+            fetchChildrenNodes(parentNode->Children[i], --additionalLevelsToFetch);
         }
     }
 }
@@ -750,7 +760,7 @@ void OctreeManager::removeNode(std::shared_ptr<OctreeManager::OctreeNode> node) 
     // Lock node to make sure nobody else is trying to access it while removing.
     std::lock_guard<std::mutex> lock(node->loadingLock);
 
-    int nBytes = node->numStars * _valuesPerStar * sizeof(node->posData[0]);
+    int nBytes = static_cast<int>(node->numStars * _valuesPerStar * sizeof(node->posData[0]));
     // Keep track of which nodes that are loaded and update CPU RAM budget.
     node->isLoaded = false;
     _cpuRamBudget += nBytes;
