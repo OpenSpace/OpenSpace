@@ -108,7 +108,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunction->getTexture().bind();
+    _transferFunction->texture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();

@@ -99,7 +99,7 @@ void TextTileProvider::reset() {
 }
 
 Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
-    ghoul::opengl::Texture* texture = _tileCache->getTexture(_initData);
+    ghoul::opengl::Texture* texture = _tileCache->texture(_initData);
 
     // Keep track of defaultFBO and viewport to be able to reset state when done
     GLint defaultFBO;

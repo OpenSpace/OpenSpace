@@ -84,7 +84,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     });
 }
 
-ghoul::opengl::Texture& TransferFunction::getTexture() {
+ghoul::opengl::Texture& TransferFunction::texture() {
     ghoul_assert(_texture != nullptr, "Transfer function is null");
     update();
     return *_texture.get();

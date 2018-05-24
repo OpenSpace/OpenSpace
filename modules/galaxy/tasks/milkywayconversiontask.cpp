@@ -80,7 +80,7 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
                                       static_cast<glm::vec3>(rawWriter.dimensions());
 
     VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
-        sliceReader,
+        &sliceReader,
         resolutionRatio
     );
     std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =

@@ -221,7 +221,7 @@ Tile MemoryAwareTileCache::get(const ProviderTileKey& key) {
     }
 }
 
-ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
+ghoul::opengl::Texture* MemoryAwareTileCache::texture(
                                                       const TileTextureInitData& initData)
 {
     // if this texture type does not exist among the texture containers
@@ -252,33 +252,33 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     }
     else {
         const TileTextureInitData& initData = *rawTile->textureInitData;
-        Texture* texture = getTexture(initData);
+        Texture* tex = texture(initData);
 
         // Re-upload texture, either using PBO or by using RAM data
         if (rawTile->pbo != 0) {
-            texture->reUploadTextureFromPBO(rawTile->pbo);
+            tex->reUploadTextureFromPBO(rawTile->pbo);
             if (initData.shouldAllocateDataOnCPU()) {
-                if (!texture->dataOwnership()) {
+                if (!tex->dataOwnership()) {
                     _numTextureBytesAllocatedOnCPU += initData.totalNumBytes();
                 }
-                texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
+                tex->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
             }
         }
         else {
-            size_t previousExpectedDataSize = texture->expectedPixelDataSize();
+            size_t previousExpectedDataSize = tex->expectedPixelDataSize();
             ghoul_assert(
-                texture->dataOwnership(),
+                tex->dataOwnership(),
                 "Texture must have ownership of old data to avoid leaks"
             );
-            texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
-            [[ maybe_unused ]] size_t expectedDataSize = texture->expectedPixelDataSize();
+            tex->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
+            [[ maybe_unused ]] size_t expectedDataSize = tex->expectedPixelDataSize();
             const size_t numBytes = rawTile->textureInitData->totalNumBytes();
             ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
             _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
-            texture->reUploadTexture();
+            tex->reUploadTexture();
         }
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
+        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        Tile tile(tex, rawTile->tileMetaData, Tile::Status::OK);
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
         _textureContainerMap[initDataKey].second->put(key, tile);
     }

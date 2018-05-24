@@ -35,6 +35,7 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr const char* GlslRaycastPath = "${MODULE_VOLUME}/shaders/raycast.glsl";
@@ -118,7 +119,7 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunctionHandler->getTexture().bind();
+    _transferFunctionHandler->texture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();

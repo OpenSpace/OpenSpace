@@ -91,7 +91,7 @@ public:
     void setSizeEstimated(size_t estimatedSize);
     bool exist(const ProviderTileKey& key) const;
     Tile get(const ProviderTileKey& key);
-    ghoul::opengl::Texture* getTexture(const TileTextureInitData& initData);
+    ghoul::opengl::Texture* texture(const TileTextureInitData& initData);
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
     void put(const ProviderTileKey& key,
         const TileTextureInitData::HashKey& initDataKey, Tile tile);

@@ -154,7 +154,7 @@ private:
 
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;
-    bool _initialized = false;
+    bool _isInitialized = false;
 
     std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
     Tile _defaultTile = Tile(nullptr, nullptr, Tile::Status::Unavailable);

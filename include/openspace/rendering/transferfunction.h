@@ -46,7 +46,7 @@ public:
     TransferFunction(TransferFunction&& rhs) = default;
 
     void setPath(const std::string& filepath);
-    ghoul::opengl::Texture& getTexture();
+    ghoul::opengl::Texture& texture();
     void bind();
     void update();
     glm::vec4 sample(size_t t);

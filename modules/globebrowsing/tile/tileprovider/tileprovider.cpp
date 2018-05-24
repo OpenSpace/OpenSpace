@@ -53,7 +53,7 @@ TileProvider::TileProvider(const ghoul::Dictionary&)
 TileProvider::~TileProvider() {}
 
 bool TileProvider::initialize() {
-    ghoul_assert(!_initialized, "TileProvider can only be initialized once.");
+    ghoul_assert(!_isInitialized, "TileProvider can only be initialized once.");
 
     initializeDefaultTile();
 
@@ -64,7 +64,7 @@ bool TileProvider::initialize() {
         return false;
     }
 
-    _initialized = true;
+    _isInitialized = true;
     return true;
 }
 
@@ -73,12 +73,12 @@ bool TileProvider::deinitialize() {
 };
 
 float TileProvider::noDataValueAsFloat() {
-    ghoul_assert(_initialized, "TileProvider was not initialized.");
+    ghoul_assert(_isInitialized, "TileProvider was not initialized.");
     return std::numeric_limits<float>::min();
 }
 
 ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParents) {
-    ghoul_assert(_initialized, "TileProvider was not initialized.");
+    ghoul_assert(_isInitialized, "TileProvider was not initialized.");
     TileUvTransform uvTransform = {
         glm::vec2(0.f, 0.f),
         glm::vec2(1.f, 1.f)
@@ -124,7 +124,7 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 }
 
 ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
-    ghoul_assert(_initialized, "TileProvider was not initialized.");
+    ghoul_assert(_isInitialized, "TileProvider was not initialized.");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
 
     ChunkTilePile chunkTilePile(pileSize);
@@ -177,7 +177,7 @@ void TileProvider::initializeDefaultTile() {
 }
 
 unsigned int TileProvider::uniqueIdentifier() const {
-    ghoul_assert(_initialized, "TileProvider was not initialized.");
+    ghoul_assert(_isInitialized, "TileProvider was not initialized.");
 
     return _uniqueIdentifier;
 }

@@ -39,6 +39,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableKameleonVolume";

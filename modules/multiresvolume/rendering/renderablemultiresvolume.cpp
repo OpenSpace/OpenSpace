@@ -614,7 +614,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     ss.str(std::string());
     ss << "transferFunction_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_transferFunction->getTexture()));
+    program->setUniform(ss.str(), getTextureUnit(_transferFunction->texture()));
 
     ss.str(std::string());
     ss << "textureAtlas_" << getId();
@@ -647,7 +647,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 */
 /*
 std::vector<ghoul::opengl::Texture*> RenderableMultiresVolume::getTextures() {
-    std::vector<ghoul::opengl::Texture*> textures{_transferFunction->getTexture(), _atlasManager->textureAtlas()};
+    std::vector<ghoul::opengl::Texture*> textures{_transferFunction->texture(), _atlasManager->textureAtlas()};
     return textures;
 }
 

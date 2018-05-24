@@ -25,16 +25,14 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___TEXTURESLICEVOLUMEREADER___H__
 #define __OPENSPACE_MODULE_VOLUME___TEXTURESLICEVOLUMEREADER___H__
 
-#include <vector>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
-#include <memory>
 #include <modules/volume/linearlrucache.h>
-#include <map>
-#include <unordered_map>
+#include <ghoul/glm.h>
+#include <memory>
+#include <vector>
 
-namespace openspace {
-namespace volume {
+namespace ghoul::opengl { class Texture; }
+
+namespace openspace::volume {
 
 template <typename Type>
 class TextureSliceVolumeReader {
@@ -43,22 +41,23 @@ public:
 
     TextureSliceVolumeReader(std::vector<std::string> paths, size_t sliceCacheMaxItems,
         size_t sliceCacheSize);
-    virtual ~TextureSliceVolumeReader() = default;
+    virtual ~TextureSliceVolumeReader();
+
+    void initialize();
 
     VoxelType get(const glm::ivec3& coordinates) const;
     virtual glm::ivec3 dimensions() const;
-    void setPaths(const std::vector<std::string> paths);
-    void initialize();
+    void setPaths(std::vector<std::string> paths);
+
 private:
     ghoul::opengl::Texture& getSlice(int sliceIndex) const;
     std::vector<std::string> _paths;
     mutable LinearLruCache<std::shared_ptr<ghoul::opengl::Texture>> _cache;
     glm::ivec2 _sliceDimensions;
-    bool _initialized;
+    bool _isInitialized = false;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #include "textureslicevolumereader.inl"
 

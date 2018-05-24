@@ -24,56 +24,45 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 
-#include <modules/volume/rawvolumereader.h>
-#include <modules/volume/rawvolume.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/time.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <modules/volume/rawvolume.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/transferfunctionhandler.h>
-
-
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/volumegridtype.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/histogram.h>
-#include <openspace/util/boxgeometry.h>
-
+#include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
 } // namespace
 
 namespace {
-    const char* KeyDimensions = "Dimensions";
-    const char* KeyStepSize = "StepSize";
-    const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySourceDirectory = "SourceDirectory";
-    const char* KeyLowerDomainBound = "LowerDomainBound";
-    const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeySecondsBefore = "SecondsBefore";
-    const char* KeySecondsAfter = "SecondsAfter";
-    const char* KeyGridType = "GridType";
-    const char* KeyMinValue = "MinValue";
-    const char* KeyMaxValue = "MaxValue";
-    const char* KeyTime = "Time";
-    const char* KeyUnit = "VisUnit";
-    const float SecondsInOneDay = 60 * 60 * 24;
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyStepSize = "StepSize";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* KeySourceDirectory = "SourceDirectory";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyClipPlanes = "ClipPlanes";
+    constexpr const char* KeySecondsBefore = "SecondsBefore";
+    constexpr const char* KeySecondsAfter = "SecondsAfter";
+    constexpr const char* KeyGridType = "GridType";
+    constexpr const char* KeyMinValue = "MinValue";
+    constexpr const char* KeyMaxValue = "MaxValue";
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyUnit = "VisUnit";
+    constexpr const float SecondsInOneDay = 60 * 60 * 24;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
@@ -251,8 +240,6 @@ documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation(
     };
 }
 
-
-
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -348,7 +335,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         float min = t.minValue;
         float diff = t.maxValue - t.minValue;
-        float *data = t.rawVolume->data();
+        float* data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
         }
@@ -548,7 +535,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
             _raycaster->setVolumeTexture(t->texture);
             _transferFunctionHandler->setUnit(t->unit);
             _transferFunctionHandler->setMinAndMaxValue(t->minValue, t->maxValue);
-            _transferFunctionHandler->setHistogramProperty(t->histogram);
+            _transferFunctionHandler->setHistogramProperty(*t->histogram);
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }

@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumemodule.h>
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
 
+#include <modules/volume/rendering/renderabletimevaryingvolume.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
