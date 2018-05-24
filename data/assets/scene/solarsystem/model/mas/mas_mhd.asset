@@ -13,12 +13,12 @@ local Mas_MHD = {
             Type = "RenderableTimeVaryingVolume",
             StepSize = 0.002,
             TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
-            SourceDirectory = "${DATA}/mas/raw",
+            SourceDirectory = "${DATA}/mas/bastille/generated",
             LowerValueBound = 0,
             UpperValueBound = 1,
             GridType = "Spherical",
-            SecondsBefore = 50*365*24*60*60, -- 50 years before
-            SecondsAfter = 50*365*24*60*60, -- 50 years after
+            SecondsBefore = 24*60*60, 
+            SecondsAfter = 24*60*60, 
             VisUnit = "rho",
         },
         Transform = {
