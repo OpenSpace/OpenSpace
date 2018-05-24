@@ -31,7 +31,7 @@ local Keybindings = {
     },
     {
         Key = "F8",
-        Command = "openspace.time.setTime('2017 AUG 21 17:00:00');",
+        Command = "openspace.time.setTime('2000 JUL 14 08:33:37');",
         Documentation = "Set time to when eclipse data starts",
         Local = false
     },
