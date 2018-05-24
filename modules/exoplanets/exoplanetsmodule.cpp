@@ -139,6 +139,100 @@ std::string computeRotationMatrix(float i, float bigom, float om) {
 
 }
 
+std::string getCsvStarname(std::string explName) {
+    std::string csvName = explName;
+    if (explName == "GJ 3021")
+        csvName = "HD 1237";
+    else if (explName == "MOA 2009-BLG-387L")
+        csvName = "MOA-2009-BLG-387L";
+    else if (explName == "HD 126614")
+        csvName = "HD 126614 A";
+    else if (explName == "HD 27442")
+        csvName = "epsilon Ret";
+    else if (explName == "PH1")
+        csvName = "PH-1";
+    else if (explName == "gam 1 Leo")
+        csvName = "gamma Leo A";
+    else if (explName == "OGLE 2007-BLG-368L")
+        csvName = "OGLE-2007-BLG-368L";
+    else if (explName == "alf Ari")
+        csvName = "alpha Ari";
+    else if (explName == "HD 160691")
+        csvName = "mu Ara";
+    else if (explName == "OGLE 2005-BLG-169L")
+        csvName = "OGLE-05-169L";
+    else if (explName == "HD 216435")
+        csvName = "tau Gru";
+    else if (explName == "HR 810")
+        csvName = "iota Hor";
+    else if (explName == "OGLE 2005-BLG-71L")
+        csvName = "OGLE-05-071L";
+    else if (explName == "OGLE 2003-BLG-235L")
+        csvName = "OGLE235-MOA53";
+    else if (explName == "MOA 2008-BLG-310L")
+        csvName = "MOA-2008-BLG-310L";
+    else if (explName == "KOI-351")
+        csvName = "KIC 11442793";
+    else if (explName == "OGLE 2006-BLG-109L")
+        csvName = "OGLE-2006-BLG-109L";
+    else if (explName == "HD 137388 A")
+        csvName = "HD 137388";
+    else if (explName == "kap CrB")
+        csvName = "kappa CrB";
+    else if (explName == "XO-2 N")
+        csvName = "XO-2";
+    else if (explName == "eps Tau")
+        csvName = "epsilon Tau";
+    else if (explName == "eps Eri")
+        csvName = "epsilon Eri";
+    else if (explName == "KOI-12")
+        csvName = "Kepler-448";
+    else if (explName == "ome Ser")
+        csvName = "omega Ser";
+    else if (explName == "MOA 2010-BLG-477L")
+        csvName = "MOA-2010-BLG-477L";
+    else if (explName == "HD 285968")
+        csvName = "GJ 176";
+    else if (explName == "BD-17 63")
+        csvName = "HIP 2247";
+    else if (explName == "MOA 2009-BLG-266L")
+        csvName = "MOA-2009-BLG-266L";
+    else if (explName == "KOI-94")
+        csvName = "Kepler-89";
+    else if (explName == "HIP 75458")
+        csvName = "iota Dra";
+    else if (explName == "MOA 2007-BLG-400L")
+        csvName = "MOA-2007-BLG-400L";
+    else if (explName == "ups And")
+        csvName = "upsilon And";
+    else if (explName == "OGLE 2011-BLG-251L")
+        csvName = "OGLE-2011-BLG-0251";
+    else if (explName == "OGLE 2005-BLG-390L")
+        csvName = "OGLE-05-390L";
+    else if (explName == "KOI-1257")
+        csvName = "Kepler-420";
+    else if (explName == "bet Pic")
+        csvName = "beta Pic";
+    else if (explName == "gam Cep")
+        csvName = "gamma Cep";
+    else if (explName == "MOA 2007-BLG-192L")
+        csvName = "MOA-2007-BLG-192L";
+    else if (explName == "MOA 2009-BLG-319L")
+        csvName = "MOA-2009-BLG-319L";
+    else if (explName == "omi CrB")
+        csvName = "omicron CrB";
+    else if (explName == "HD 62509")
+        csvName = "beta Gem";
+    else if (explName == "eps CrB")
+        csvName = "epsilon CrB";
+    else if (explName == "omi UMa")
+        csvName = "omicron UMa";
+    else if (explName == "HD 142022 A")
+        csvName = "HD 142022";
+
+    return csvName;
+}
+
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
@@ -147,6 +241,8 @@ int addExoplanetSystem(lua_State* L) {
     const int StringLocation = -1;
     const std::string starname = luaL_checkstring(L, StringLocation);
 
+    //change expl-starname to exoplanet.csv-starname
+    std::string starname_csv = getCsvStarname(starname);
 
     std::ifstream data(absPath("${BASE}/modules/exoplanets/expl_data.bin"), std::ios::in | std::ios::binary);
     if (!data.good()) {
@@ -174,7 +270,7 @@ int addExoplanetSystem(lua_State* L) {
         std::istringstream ss(line);
         getline(ss, planetname, ',');
 
-        if (planetname.compare(0, planetname.length()-2, starname) == 0) {
+        if (planetname.compare(0, planetname.length()-2, starname_csv) == 0) {
             std::string location_s;
             getline(ss, location_s);
             long location = std::stol(location_s.c_str());
@@ -212,7 +308,33 @@ int addExoplanetSystem(lua_State* L) {
         if (!isnan(p.RSTAR))
         {
             std::string color = getStarColor(p.BMV);
- 
+
+            if (isnan(p.ECC))
+            {
+                p.ECC = 0;
+            }
+            if (isnan(p.I))
+            {
+                p.I = 90;
+            }
+            if (isnan(p.BIGOM))
+            {
+                p.BIGOM = 0;
+            }
+            if (isnan(p.OM))
+            {
+                p.OM = 90;
+            }
+            std::string epoch_string;
+            if (!isnan(p.TT)) {
+                epoch.setTime("JD " + std::to_string(p.TT));
+                epoch_string = epoch.ISO8601();
+            }
+            else {
+                epoch.setTime("JD " + std::to_string(2454970.0));
+                epoch_string = epoch.ISO8601();
+            }
+
             const std::string starGlobe = "{"
                 "Identifier = '" + starname + "Globe',"
                 "Parent = '" + starname + "',"
@@ -238,7 +360,20 @@ int addExoplanetSystem(lua_State* L) {
                             "}"
                         "}"
                     "}"
-                "}"
+                "},"
+                "Transform = {"
+                    "Translation = {"
+                        "Type = 'KeplerTranslation',"
+                        "Eccentricity = " + std::to_string(p.ECC) + "," //ECC
+                        "SemiMajorAxis = " + std::to_string(p.A) + " * 149597871 * 0.1," // 149 597 871km = 1 AU. A
+                        "Inclination = " + std::to_string(p.I) + "," //I
+                        "AscendingNode  = " + std::to_string(p.BIGOM) + "," //BIGOM
+                        "ArgumentOfPeriapsis  = " + std::to_string(p.OM) + "," //OM
+                        "MeanAnomaly = 0.0,"
+                        "Epoch = '" + epoch_string + "'," //TT. JD to YYYY MM DD hh:mm:ss
+                        "Period = " + std::to_string(p.PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "}"
+                "},"
             "}";
             
             const std::string starGlare = "{"
