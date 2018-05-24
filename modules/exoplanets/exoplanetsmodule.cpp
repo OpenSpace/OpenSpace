@@ -309,7 +309,7 @@ int addExoplanetSystem(lua_State* L) {
         {
             std::string color = getStarColor(p.BMV);
 
-            if (isnan(p.ECC))
+           /* if (isnan(p.ECC))
             {
                 p.ECC = 0;
             }
@@ -333,7 +333,7 @@ int addExoplanetSystem(lua_State* L) {
             else {
                 epoch.setTime("JD " + std::to_string(2454970.0));
                 epoch_string = epoch.ISO8601();
-            }
+            }*/
 
             const std::string starGlobe = "{"
                 "Identifier = '" + starname + "Globe',"
@@ -361,7 +361,7 @@ int addExoplanetSystem(lua_State* L) {
                         "}"
                     "}"
                 "},"
-                "Transform = {"
+                /*"Transform = {"
                     "Translation = {"
                         "Type = 'KeplerTranslation',"
                         "Eccentricity = " + std::to_string(p.ECC) + "," //ECC
@@ -373,7 +373,7 @@ int addExoplanetSystem(lua_State* L) {
                         "Epoch = '" + epoch_string + "'," //TT. JD to YYYY MM DD hh:mm:ss
                         "Period = " + std::to_string(p.PER) + "* 86400" //PER. 86 400sec = 1 day.
                     "}"
-                "},"
+                "},"*/
             "}";
             
             const std::string starGlare = "{"
@@ -381,7 +381,7 @@ int addExoplanetSystem(lua_State* L) {
                 "Parent = '" + starname + "',"
                 "Renderable = {"
                     "Type = 'RenderablePlaneImageLocal',"
-                    "Size = " + std::to_string(p.RSTAR) + " *(1.3*10^10.5)," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+                    "Size = " + std::to_string(p.RSTAR) + " * 5E9," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
                     "Billboard = true,"
                     "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
                     "BlendMode = 'Additive'"
