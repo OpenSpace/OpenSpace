@@ -116,7 +116,7 @@ public:
      * Calls <code>checkNodeIntersection()</code> for every branch. \param deltaStars 
      * keeps track of how many stars that were added/removed this render call.
      */
-    std::map<int, std::vector<float>> traverseData(const glm::mat4& mvp, 
+    std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp, 
         const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option, 
         const float& lodPixelThreshold);
 
@@ -239,7 +239,7 @@ private:
      * added/removed this render call.
      */
     std::map<int, std::vector<float>> checkNodeIntersection(std::shared_ptr<OctreeNode> node, 
-        const glm::mat4& mvp, const glm::vec2& screenSize, int& deltaStars, 
+        const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars, 
         gaiamission::RenderOption option);
 
     /**

@@ -165,7 +165,8 @@ private:
         bpRpThreshold, distThreshold) _uniformFilterCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
-    UniformCache(renderedTexture, screenSize, filterSize, sigma) _uniformCacheTM;
+    UniformCache(renderedTexture, screenSize, filterSize, sigma, 
+        projection) _uniformCacheTM;
     std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
 
     std::shared_ptr<OctreeManager> _octreeManager;

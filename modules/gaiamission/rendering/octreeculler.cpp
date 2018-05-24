@@ -39,7 +39,8 @@ OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
 
 OctreeCuller::~OctreeCuller() {   }
 
-bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners, const glm::mat4& mvp) {
+bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners, 
+    const glm::dmat4& mvp) {
     
     createNodeBounds(corners, mvp);
 
@@ -47,7 +48,7 @@ bool OctreeCuller::isVisible(const std::vector<glm::dvec4>& corners, const glm::
 }
 
 glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corners, 
-    const glm::mat4& mvp, const glm::vec2& screenSize) {
+    const glm::dmat4& mvp, const glm::vec2& screenSize) {
 
     createNodeBounds(corners, mvp);
 
@@ -58,7 +59,7 @@ glm::vec2 OctreeCuller::getNodeSizeInPixels(const std::vector<glm::dvec4>& corne
 }
 
 void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners, 
-    const glm::mat4& mvp) {
+    const glm::dmat4& mvp) {
 
     // Create a bounding box in clipping space from node boundaries.
     _nodeBounds = globebrowsing::AABB3();

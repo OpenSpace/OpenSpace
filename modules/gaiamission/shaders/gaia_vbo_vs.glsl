@@ -42,9 +42,9 @@ out vec4 vs_gPosition;
 out float vs_starDistFromSun;
 out float vs_cameraDistFromSun;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform dmat4 model;
+uniform dmat4 view;
+uniform dmat4 projection;
 uniform float time; 
 uniform int renderOption;
 
@@ -81,26 +81,26 @@ void main() {
     }
 
     // Convert kiloParsec to meter.
-    vec4 modelPosition = vec4(in_position * 1000 * Parsec, 1.0);
+    vec4 objectPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
     // Add velocity if we've read any.
     if ( renderOption == RENDEROPTION_MOTION ) {
         // Velocity is already in [m/s].
-        modelPosition.xyz += time * in_velocity;
+        objectPosition.xyz += time * in_velocity;
     }
 
     // Apply camera transforms.
-    vec4 viewPosition = view * model * modelPosition;
-    vec4 sunPosition = view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    dvec4 viewPosition = view * model * objectPosition;
+    vec4 sunPosition = vec4(view * model * vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-    vs_starDistFromSun = safeLength(modelPosition);
+    vs_starDistFromSun = safeLength(objectPosition);
     vs_cameraDistFromSun = safeLength(sunPosition);
 
     // Remove stars without position, happens when VBO chunk is stuffed with zeros.
     // Has to be done in Geometry shader because Vertices cannot be discarded here.
     if ( length(in_position) > EPS ){
-        vs_gPosition = viewPosition;    
-        gl_Position = projection * viewPosition;
+        vs_gPosition = vec4(model * objectPosition);    
+        gl_Position = vec4(projection * viewPosition);
     } else {
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);

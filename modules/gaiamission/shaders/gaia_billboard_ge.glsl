@@ -45,6 +45,10 @@ out vec2 texCoord;
 out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
 
+uniform dmat4 view;
+uniform dmat4 projection;
+//uniform dvec3 cameraUp;
+
 uniform float viewScaling;
 uniform float cutOffThreshold;
 uniform float closeUpBoostDist;
@@ -67,8 +71,10 @@ void main() {
     ge_starDistFromSun = vs_starDistFromSun[0];
     ge_cameraDistFromSun = vs_cameraDistFromSun[0];
 
+    vec4 viewPosition = vec4(view * vs_gPosition[0]);
+
     // Make closer stars look a bit bigger.
-    float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
+    float observedDistance = safeLength(viewPosition / viewScaling);
     float closeUpBoost = closeUpBoostDist / observedDistance;
     float initStarSize = billboardSize;
 
@@ -97,11 +103,25 @@ void main() {
         return;
     }
 
+    //dvec4 wCameraRight = dvec4(view[0][0], view[1][0], view[2][0], view[3][0]);
+    //dvec4 wCameraUp = dvec4(view[0][1], view[1][1], view[2][1], view[3][1]);
+    dvec4 wCameraRight = inverse(view) * vec4(1.0, 0.0, 0.0, 0.0);
+    dvec4 wCameraUp = inverse(view) * vec4(0.0, 1.0, 0.0, 0.0);
+    //dvec3 wCameraPos = dvec3(inverse(view) * dvec4(0.0, 0.0, 0.0, 1.0));
+    //dvec4 wCameraUp = dvec4(cameraUp, 0.0);
+    //dvec4 wCameraRight = dvec4(normalize(cross(cameraUp, wCameraPos)), 0.0);
+    dvec4 centerWorldPos = dvec4(vs_gPosition[0]);
+
     for (int i = 0; i < 4; i++) {
-        gl_Position = position + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
+        // Always turn the billboard towards the camera (needed for warped screen).
+        dvec4 cornerPoint = centerWorldPos
+            + wCameraRight * starSize.x * (corners[i].x - 0.5)
+            + wCameraUp * starSize.y * (corners[i].y - 0.5);
+        gl_Position = vec4(projection * view * cornerPoint);
+        //gl_Position = position + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
         gl_Position.z = 0.0;
         texCoord = corners[i];
-        ge_gPosition  = vs_gPosition[0];
+        ge_gPosition  = viewPosition;
         
         EmitVertex();
     }

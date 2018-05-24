@@ -887,6 +887,7 @@ void RenderableGaiaStars::initializeGL() {
     _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
 
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
+    _uniformCacheTM.projection = _programTM->uniformLocation("projection");
 
 
     // Find out how much GPU memory this computer has (Nvidia cards).
@@ -974,16 +975,16 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-    glm::mat4 model =
+    glm::dmat4 model =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
 
     float viewScaling = data.camera.scaling();
-    glm::mat4 view = data.camera.combinedViewMatrix();
-    glm::mat4 projection = data.camera.projectionMatrix();
+    glm::dmat4 view = data.camera.combinedViewMatrix();
+    glm::dmat4 projection = data.camera.projectionMatrix();
 
-    glm::mat4 modelViewProjMat = projection * view * model;
+    glm::dmat4 modelViewProjMat = projection * view * model;
     glm::vec2 screenSize = glm::vec2(OsEng.renderEngine().renderingResolution());
 
     // Wait until camera has stabilized before we traverse the Octree/stream from files.
@@ -998,7 +999,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Update which nodes that are stored in memory as the camera moves around (if streaming).
     if (_fileReaderOption == gaiamission::FileReaderOption::StreamOctree) {
         glm::dvec3 cameraPos = data.camera.positionVec3();
-        //glm::dvec3 cameraViewDir = data.camera.viewDirectionWorldSpace();
         size_t chunkSizeInBytes = _chunkSize * sizeof(GLfloat);
         _octreeManager->fetchSurroundingNodes(cameraPos, chunkSizeInBytes);
 
@@ -1326,6 +1326,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     fboTexUnit.activate();
     _fboTexture->bind();
     _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
+    _programTM->setUniform(_uniformCacheTM.projection, projection);
 
     if (shaderOption == gaiamission::ShaderOption::Point_SSBO
         || shaderOption == gaiamission::ShaderOption::Point_VBO) {
@@ -1555,6 +1556,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         // Common uniforms:
         _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
+        _uniformCacheTM.projection = _programTM->uniformLocation("projection");
 
         _shadersAreDirty = false;
     }

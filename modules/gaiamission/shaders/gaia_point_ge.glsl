@@ -40,6 +40,7 @@ out vec4 ge_gPosition;
 out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
 
+uniform dmat4 view;
 uniform float viewScaling;
 uniform float cutOffThreshold;
 
@@ -49,7 +50,9 @@ void main() {
     ge_starDistFromSun = vs_starDistFromSun[0];
     ge_cameraDistFromSun = vs_cameraDistFromSun[0];
 
-    float observedDistance = safeLength(vs_gPosition[0] / viewScaling);
+    vec4 viewPosition = vec4(view * vs_gPosition[0]);
+
+    float observedDistance = safeLength(viewPosition / viewScaling);
     float distThreshold = cutOffThreshold - log(observedDistance) / log(4.0);
 
     vec4 position = gl_in[0].gl_Position;
@@ -64,7 +67,7 @@ void main() {
     gl_PointSize = 1.0;
     gl_Position = position;
     gl_Position.z = 0.0;
-    ge_gPosition  = vs_gPosition[0];
+    ge_gPosition  = viewPosition;
 
     EmitVertex();
 

@@ -27,6 +27,7 @@
 in vec2 uv;
 
 uniform sampler2D renderedTexture;
+uniform dmat4 projection;
 uniform vec2 screenSize;
 uniform int filterSize;
 uniform float sigma;
@@ -39,20 +40,33 @@ Fragment getFragment() {
     vec4 color = vec4(0.0);
     
     // GL_POINTS
+    // Scale filter to compensate for curved screens.
+    vec2 screenPos = (uv - 0.5) * 2.0; // [-1, 1]
+    vec2 fov = vec2(projection[0][0], projection[1][1]);
+    vec2 scaleFactor = vec2(
+        1.0 / (1.0 + pow(screenPos.x / fov.x, 2.0)), 
+        1.0 / (1.0 + pow(screenPos.y / fov.y, 2.0))
+    );
+    // Uncomment to compare to original filterSize.
+    //scaleFactor = vec2(1.0);
+    scaleFactor *= 1.0;
+    dvec2 newFilterSize = filterSize / scaleFactor;
+
+
     // Get a [filterSize x filterSize] filter around our pixel. UV is [0, 1]
     vec3 intensity = vec3(0.0);
     vec2 pixelSize = 1.0 / screenSize;
-    int halfFilterSize = (filterSize - 1) / 2;
-    for (int y = -halfFilterSize; y <= halfFilterSize; y += 1) {
-        for (int x = -halfFilterSize; x <= halfFilterSize; x += 1) {
-            vec2 sPoint = uv + (pixelSize * vec2(x, y)); // + vec2(pixelSize / 2.0);
+    vec2 halfFilterSize = vec2(newFilterSize - 1.0) / 2.0;
+    for (float y = -halfFilterSize.y; y <= halfFilterSize.y; y += 1.0) {
+        for (float x = -halfFilterSize.x; x <= halfFilterSize.x; x += 1.0) {
+            vec2 sPoint = uv + (pixelSize * vec2(x, y));
             
             // Don't sample outside of the FBO texture.
             if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0)))) {
                 vec4 sIntensity = texture( renderedTexture, sPoint );
 
                 // Use normal distribution function for halo/bloom effect. 
-                float circleDist = sqrt(pow(x/1, 2.0) + pow(y/1, 2.0));
+                float circleDist = sqrt(pow(x * scaleFactor.x, 2.0) + pow(y * scaleFactor.y, 2.0));
                 intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) * 
                     exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
             }
@@ -64,6 +78,7 @@ Fragment getFragment() {
     if (length(intensity) < 0.01) {
         discard;
     }
+    //color = vec4(vec2(newFilterSize) / 14.0, 1.0, 1.0f);
     color = vec4(intensity, 1.0f);
 
     // Use the following to check for any intensity at all.

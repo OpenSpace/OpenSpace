@@ -323,7 +323,7 @@ void OctreeManager::findAndFetchNeighborNode(const unsigned long long& firstPare
     std::thread(&OctreeManager::fetchChildrenNodes, this, node, false).detach();
 }
 
-std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::mat4& mvp, 
+std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp, 
     const glm::vec2& screenSize, int& deltaStars, gaiamission::RenderOption option,
     const float& lodPixelThreshold) {
 
@@ -973,7 +973,7 @@ std::string OctreeManager::printStarsPerNode(std::shared_ptr<OctreeNode> node,
 }
 
 std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(
-      std::shared_ptr<OctreeNode> node, const glm::mat4& mvp, const glm::vec2& screenSize,
+      std::shared_ptr<OctreeNode> node, const glm::dmat4& mvp, const glm::vec2& screenSize,
       int& deltaStars, gaiamission::RenderOption option) {
 
     auto fetchedData = std::map<int, std::vector<float>>();
