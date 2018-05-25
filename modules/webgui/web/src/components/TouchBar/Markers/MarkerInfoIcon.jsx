@@ -33,12 +33,14 @@ class MarkerInfoIcon extends Component {
         />
         {this.state.showInfoWindow &&
         <Popover
-          style={{ position: 'absolute', transform: 'translate(120%, -50%)' }}
+          className={styles.InfoPopover}
           arrow=""
           title={identifier}
           closeCallback={() => this.toggleInfoWindow()}
         >
-          {planetInfo ? planetInfo.info : 'No data available'}
+          <p className={styles.InfoText}>
+            {planetInfo ? planetInfo.info : 'No data available'}
+          </p>
         </Popover>}
       </div>);
   }

@@ -36,5 +36,7 @@ export const actionTypes = {
 
   // actions types for story tree
   addStoryTree: 'STORY_TREE_ADD',
+  addStoryInfo: 'STORY_TREE_ADD_INFO',
+  resetStoryInfo: 'STORY_TREE_RESET_INFO',
   resetStoryTree: 'STORY_TREE_RESET',
 };

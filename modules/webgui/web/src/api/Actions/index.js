@@ -103,3 +103,16 @@ export const resetStoryTree = reset => ({
     reset,
   },
 });
+
+export const addStoryInfo = info => ({
+  type: actionTypes.addStoryInfo,
+  payload: {
+    info,
+  },
+});
+
+export const resetStoryInfo = () => ({
+  type: actionTypes.resetStoryInfo,
+  payload: {
+  },
+});

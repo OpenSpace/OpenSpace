@@ -1,0 +1,24 @@
+{
+  "planets": [
+    {
+      "planet": "Jupiter",
+      "info": "Jupiter has at least 69 moons, the four largest is the Galilean moons discovered by Galileo Galilei in 1610."
+    },
+    {
+      "planet": "Io",
+      "info": "It is the fourth-largest moon, has the highest density of all the moons, and has the least amount of water of any known astronomical object in the Solar System."
+    },
+    {
+      "planet": "Europa",
+      "info": "Europa is the smallest of the four Galilean moons orbiting Jupiter, and the sixth-closest to the planet. It is also the sixth-largest moon in the Solar System."
+    },
+    {
+      "planet": "Ganymede",
+      "info": "Ganymede is the largest and most massive moon of Jupiter and in the Solar System. The ninth largest object in the Solar System, it is the largest without a substantial atmosphere."
+    },
+    {
+      "planet": "Callisto",
+      "info": "Callisto is the second-largest moon of Jupiter, after Ganymede. At 4821 km in diameter, Callisto has about 99% the diameter of the planet Mercury but only about a third of its mass."
+    }
+  ]
+}

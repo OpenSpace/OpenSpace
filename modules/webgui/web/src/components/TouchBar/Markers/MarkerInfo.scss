@@ -9,4 +9,16 @@
     color: white;
     width: 200px;
     margin-left: -100px;
+    padding-bottom: 5px;
+}
+
+.InfoPopover {
+  position: absolute;
+  transform: translate(20%, -50%);
+  width: 300px;
+  padding: 5px;
+}
+
+.InfoText {
+  padding: 5px;
 }

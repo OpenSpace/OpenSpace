@@ -44,10 +44,16 @@ MarkerInfo.propTypes = {
   position: PropTypes.arrayOf(PropTypes.string),
   identifier: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
-  showInfo: PropTypes.bool.isRequired,
+  showInfo: PropTypes.bool,
   planetInfo: PropTypes.objectOf(PropTypes.string),
   showLabel: PropTypes.bool.isRequired,
   planetRadius: PropTypes.number.isRequired,
+};
+
+MarkerInfo.defaultProps = {
+  position: '',
+  showInfo: false,
+  planetInfo: {},
 };
 
 export default MarkerInfo;

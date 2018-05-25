@@ -81,15 +81,15 @@ class Markers extends Component {
 
         const planetRadius = Number(screenSpaceRadius[i].Value);
         let size = planetRadius * 0.1;
-        const showInfo = (!node.identifier.includes(story.hideinfoicons) &&
+        const showInfo = (!node.identifier.includes(story.hideinfoicons) && infoIcons.planets &&
           planetRadius > 25 && outsideCircle);
 
         if (size >= 3) size = 3;
         if (size <= 1.5) size = 1.5;
 
         let planetInfo;
-        if (infoIcons.data) {
-          planetInfo = infoIcons.data.planets.find(planet => planet.planet === node.identifier);
+        if (infoIcons.planets) {
+          planetInfo = infoIcons.planets.find(planet => planet.planet === node.identifier);
         }
 
         return (<MarkerInfo
@@ -150,13 +150,12 @@ const mapStateToProps = (state) => {
       });
 
       focusNodeName = traverseTreeWithURI(state.propertyTree, OriginKey).Value;
-      currentFocusNode = nodes.find(focusNodes => focusNodes.identifier === focusNodeName);
+      currentFocusNode = focusNodes.find(node => node.identifier === focusNodeName);
     }
   }
 
-  if (state.fetchData.length > 0) {
-    const tmp = (state.fetchData.find(info => info.id === infoIconKey));
-    infoIcons = tmp.succeed ? tmp : {};
+  if (state.storyTree.info.planets) {
+    infoIcons = state.storyTree.info;
   }
   return {
     focusNodes,
@@ -206,7 +205,7 @@ Markers.propTypes = {
     planet: PropTypes.string,
     info: PropTypes.string,
   })),
-  nodes: PropTypes.arrayOf(PropTypes.shape({})),
+  focusNodes: PropTypes.arrayOf(PropTypes.shape({})),
   currentFocusNode: PropTypes.arrayOf(PropTypes.shape({})),
   story: PropTypes.objectOf(PropTypes.shape({})),
   focusNodeName: PropTypes.string,
@@ -215,7 +214,7 @@ Markers.propTypes = {
 };
 
 Markers.defaultProps = {
-  nodes: [],
+  focusNodes: [],
   screenSpaceProperties: [],
   distFromCamToNodeProperties: [],
   screenVisibilityProperties: [],

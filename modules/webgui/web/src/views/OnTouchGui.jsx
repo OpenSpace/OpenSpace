@@ -8,6 +8,7 @@ import Error from '../components/common/Error/Error';
 import Overlay from '../components/common/Overlay/Overlay';
 import {
   changePropertyValue, startConnection, fetchData, addStoryTree, startListening,
+  addStoryInfo, resetStoryInfo,
 } from '../api/Actions';
 import TouchBar from '../components/TouchBar/TouchBar';
 import styles from './OnTouchGui.scss';
@@ -133,6 +134,13 @@ class OnTouchGui extends Component {
   addStoryTree(selectedStory) {
     const json = require(`../../../../../data/assets/stories/${selectedStory}.json`);
     this.props.AddStoryTree(json);
+
+    if (json.infofile) {
+      const info = require(`../../../../../data/assets/stories/${json.infofile}.json`);
+      this.props.AddStoryInfo(info);
+    } else {
+      this.props.ResetStoryInfo();
+    }
     return json;
   }
 
@@ -211,6 +219,12 @@ const mapDispatchToProps = dispatch => ({
   },
   AddStoryTree: (story) => {
     dispatch(addStoryTree(story));
+  },
+  AddStoryInfo: (info) => {
+    dispatch(addStoryInfo(info));
+  },
+  ResetStoryInfo: () => {
+    dispatch(resetStoryInfo());
   },
   StartListening: (URI) => {
     dispatch(startListening(URI));
