@@ -15,12 +15,12 @@ import { traverseTreeWithURI } from '../utils/propertyTreeHelpers';
 import {
   infoIconKey, SetGoToGeoScript, ValuePlaceholder, OriginKey, StoryIdentifierKey,
   ApplyRemoveTagKey, ApplyAddTagKey, FocusNodesListKey, SetTimeScript, defaultStory,
-  OverlimitKey, ScaleKey,
+  OverlimitKey, ScaleKey, ZoomInLimitKey,
 } from '../api/keys';
 import DataManager from '../api/DataManager';
 import Slider from '../components/ImageSlider/Slider';
 import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
-import { toggleShading, toggleHighResolution, toggleHidePlanet } from '../utils/storyHelpers';
+import { toggleShading, toggleHighResolution, toggleHidePlanet, toggleGalaxies, toggleZoomOut } from '../utils/storyHelpers';
 
 
 class OnTouchGui extends Component {
@@ -66,13 +66,14 @@ class OnTouchGui extends Component {
         <button onClick={this.changeStory} id={'story_earthweather'}>Earth Weather Story</button>
         <button onClick={this.changeStory} id={'story_jupitermoons'}>Jupiter Moons Story</button>
         <button onClick={this.changeStory} id={'story_mars'}>Mars Story</button>
+        <button onClick={this.changeStory} id={'story_galaxies'}>Galaxies Story</button>
       </div>
     );
   }
 
   setStory(selectedStory) {
     const {
-      storyIdentifierNode, applyRemoveTag, focusNodesList, applyAddTag, focusNode, overViewNode,
+      storyIdentifierNode, applyRemoveTag, focusNodesList, applyAddTag, focusNode, overViewNode, zoomInNode,
     } = this.props;
 
     // Check if the selected story is different from the OpenSpace property value
@@ -115,6 +116,7 @@ class OnTouchGui extends Component {
   // Check story settings
   checkStorySettings(story, value) {
     const oppositeValue = (value === 'true') ? 'false' : 'true';
+    const zoomLimit = (value === 'true') ? '0' : story.inzoomlimit;
     // Check if the story hide any nodes
     if (story.hideplanets) {
       story.hideplanets.forEach(planet => toggleHidePlanet(planet, value));
@@ -126,6 +128,16 @@ class OnTouchGui extends Component {
     // Check if the story have planets with no shading
     if (story.noshadingplanets) {
       story.noshadingplanets.forEach(planet => toggleShading(planet, value));
+    }
+    // Check if the story display galaxies
+    if (story.galaxies) {
+      toggleGalaxies(oppositeValue);
+    }
+    if (story.inzoomlimit) {
+      this.props.ChangePropertyValue(this.props.zoomInNode.Description, zoomLimit);
+    }
+    if (story.zoomout) {
+      toggleZoomOut(oppositeValue);
     }
   }
 
@@ -167,6 +179,7 @@ const mapStateToProps = (state) => {
   let focusNodesList = [];
   let focusNode;
   let overViewNode;
+  let zoomInNode;
   const scaleNodes = [];
   const story = state.storyTree.story;
 
@@ -177,6 +190,7 @@ const mapStateToProps = (state) => {
     focusNodesList = traverseTreeWithURI(state.propertyTree, FocusNodesListKey);
     focusNode = traverseTreeWithURI(state.propertyTree, OriginKey);
     overViewNode = traverseTreeWithURI(state.propertyTree, OverlimitKey);
+    zoomInNode = traverseTreeWithURI(state.propertyTree, ZoomInLimitKey);
 
     if (story.scaleplanets) {
       story.scaleplanets.planets.forEach((node) => {
@@ -195,6 +209,7 @@ const mapStateToProps = (state) => {
     reset: state.storyTree.reset,
     focusNode,
     overViewNode,
+    zoomInNode,
     scaleNodes,
   };
 };
@@ -235,6 +250,7 @@ OnTouchGui.propTypes = {
   focusNodesList: PropTypes.objectOf(PropTypes.shape({})),
   focusNode: PropTypes.objectOf(PropTypes.shape({})),
   overViewNode: PropTypes.objectOf(PropTypes.shape({})),
+  zoomInNode: PropTypes.objectOf(PropTypes.shape({})),
   scaleNodes: PropTypes.objectOf(PropTypes.shape({})),
   connectionLost: PropTypes.bool,
   reset: PropTypes.bool,
@@ -253,6 +269,7 @@ OnTouchGui.defaultProps = {
   focusNodesList: {},
   focusNode: {},
   overViewNode: {},
+  zoomInNode: {},
   scaleNodes: {},
   connectionLost: null,
   reset: null,

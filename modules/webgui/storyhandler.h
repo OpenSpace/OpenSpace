@@ -17,9 +17,11 @@ namespace openspace::webgui {
         void removeTags();
         void addTags();
         float overviewLimit();
+        float zoomInLimit();
 
     private:
         properties::FloatProperty _overviewLimit;
+        properties::FloatProperty _zoomInLimit;
         properties::StringProperty _storyIdentifier;
         properties::TriggerProperty _applyAddTag;
         properties::TriggerProperty _applyRemoveTag;

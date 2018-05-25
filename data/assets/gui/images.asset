@@ -32,6 +32,8 @@ asset.syncedResource({
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_solarsystem.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_jupitermoons.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_earthweather.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_mars.png",
+        "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_galaxies.png",
         "http://data.openspaceproject.com/dist/sci/mastertheses/2018/images/stories/story_example.png",
     },
     UseHash = false
