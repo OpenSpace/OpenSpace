@@ -25,14 +25,12 @@
 #include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/thread.h>
 #include <chrono>
-#include <cstring>
-#include <fstream>
-#include <stdio.h>
 #include <thread>
 
 #ifdef OPENSPACE_CURL_ENABLED

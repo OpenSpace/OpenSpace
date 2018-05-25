@@ -38,54 +38,37 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
-#include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
-#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <openspace/rendering/renderer.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/sceneinitializer.h>
-#include <openspace/scene/scenelicense.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/synchronizationwatcher.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/debugcontext.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/callbacks.h>
@@ -95,14 +78,9 @@
 #include <vld.h>
 #endif
 
-#ifdef WIN32
-#include <Windows.h>
-#endif
-
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
 #endif // __APPLE__
-
 
 #include "openspaceengine_lua.inl"
 

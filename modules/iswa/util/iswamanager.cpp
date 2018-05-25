@@ -37,6 +37,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/constexpr.h>
 #include <fstream>
@@ -393,7 +394,8 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         return "";
     }
 
-    const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
+    const std::string& extension =
+        ghoul::filesystem::File(absPath(info.path)).fileExtension();
     if (extension == "cdf") {
         KameleonWrapper kw = KameleonWrapper(absPath(info.path));
 

@@ -26,13 +26,13 @@
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
 #include <ghoul/misc/boolean.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/directory.h>
 #include <functional>
 #include <future>
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 

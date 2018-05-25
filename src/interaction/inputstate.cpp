@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/inputstate.h>
 
+#include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/fmt.h>
 #include <algorithm>
 
@@ -35,9 +36,16 @@ void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
     else if (action == KeyAction::Release) {
         // Remove all key pressings for 'key'
-        _keysDown.remove_if([key](std::pair<Key, KeyModifier> keyModPair) {
-            return keyModPair.first == key;
-        });
+        _keysDown.erase(
+            std::remove_if(
+                _keysDown.begin(),
+                _keysDown.end(),
+                [key](const std::pair<Key, KeyModifier>& keyModPair) {
+                    return keyModPair.first == key;
+                }
+            ),
+            _keysDown.end()
+        );
     }
 }
 
@@ -46,7 +54,10 @@ void InputState::mouseButtonCallback(MouseButton button, MouseAction action) {
         _mouseButtonsDown.push_back(button);
     }
     else if (action == MouseAction::Release) {
-        _mouseButtonsDown.remove(button);
+        _mouseButtonsDown.erase(
+            std::remove(_mouseButtonsDown.begin(), _mouseButtonsDown.end(), button),
+            _mouseButtonsDown.end()
+        );
     }
 }
 
@@ -62,11 +73,11 @@ void InputState::setJoystickInputStates(JoystickInputStates& states) {
     _joystickInputStates = &states;
 }
 
-const std::list<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
+const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
     return _keysDown;
 }
 
-const std::list<MouseButton>& InputState::pressedMouseButtons() const {
+const std::vector<MouseButton>& InputState::pressedMouseButtons() const {
     return _mouseButtonsDown;
 }
 

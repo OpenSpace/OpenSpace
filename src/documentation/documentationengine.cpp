@@ -28,12 +28,6 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/fmt.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <streambuf>
 
 namespace {
     constexpr const char* MainTemplateFilename = "${WEB}/documentation/main.hbs";

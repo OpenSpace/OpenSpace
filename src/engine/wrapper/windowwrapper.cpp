@@ -26,9 +26,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/exception.h>
-#include <string>
 
 namespace luascriptfunctions {
 

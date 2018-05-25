@@ -29,9 +29,6 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
-#include <cstdint>
-#include <functional>
-#include <vector>
 
 namespace openspace {
 

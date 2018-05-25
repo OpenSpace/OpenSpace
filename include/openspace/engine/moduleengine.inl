@@ -28,7 +28,7 @@ namespace openspace {
 
 template <class ModuleSubClass>
 ModuleSubClass* ModuleEngine::module() const {
-    auto it = std::find_if(_modules.begin(), _modules.end(),
+    const auto it = std::find_if(_modules.begin(), _modules.end(),
         [](const std::unique_ptr<OpenSpaceModule>& m) {
         return m->identifier() == ModuleSubClass::Name;
     });

@@ -35,6 +35,7 @@ namespace openspace {
 /**
  * WindowWrapper subclass wrapping the Simple Graphics Cluster Toolkit, forwarding all
  * method calls to the specific functions in the Engine and SGCTWindow classes.
+ *
  * \sa https://c-student.itn.liu.se/wiki/develop:sgct:sgct
  */
 class SGCTWindowWrapper : public WindowWrapper {
