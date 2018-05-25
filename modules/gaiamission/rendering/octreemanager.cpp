@@ -1200,9 +1200,9 @@ bool OctreeManager::updateBufferIndex(std::shared_ptr<OctreeNode> node) {
     // Make sure node isn't loading/unloading as we're checking isLoaded flag.
     std::lock_guard<std::mutex> lock(node->loadingLock);
 
-    // Return false if there are no more spots in our buffer.
-    // Or if we're streaming and node isn't loaded yet.
-    if (_freeSpotsInBuffer.empty() || (_streamOctree && !node->isLoaded)) {
+    // Return false if there are no more spots in our buffer, or if we're streaming and 
+    // node isn't loaded yet, or if node doesn't have any stars.
+    if (_freeSpotsInBuffer.empty() || (_streamOctree && !node->isLoaded) || 
         node->numStars == 0) {
         return false;
     }

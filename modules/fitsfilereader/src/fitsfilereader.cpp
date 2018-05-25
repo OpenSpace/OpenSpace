@@ -310,6 +310,159 @@ std::vector<float> FitsFileReader::readFitsFile(std::string filePath, int& nValu
         fullData.insert(fullData.end(), values.begin(), values.end());
     }
 
+    // Define what columns to read.
+    /*auto allColumnNames = std::vector<std::string>({
+        "ra",
+        "dec",
+        "parallax",
+        "pmra",
+        "pmdec",
+        "phot_g_mean_mag",
+        "phot_bp_mean_mag",
+        "phot_rp_mean_mag",
+        "radial_velocity",
+        });
+    // Append additional filter parameters to default rendering parameters.
+    allColumnNames.insert(allColumnNames.end(), filterColumnNames.begin(),
+        filterColumnNames.end());
+
+    std::string allNames = "Columns to read: \n";
+    for (auto colName : allColumnNames) {
+        allNames += colName + "\n";
+    }
+    LINFO(allNames);
+
+    // Read columns from FITS file. If rows aren't specified then full table will be read.
+    auto table = readTable<float>(filePath, allColumnNames, firstRow, lastRow);
+
+    if (!table) {
+        throw ghoul::RuntimeError(fmt::format("Failed to open Fits file '{}'", filePath));
+    }
+
+    int nStars = table->readRows - firstRow + 1;
+
+    int nNullArr = 0;
+    size_t nColumnsRead = allColumnNames.size();
+    size_t defaultCols = 9; // Number of columns that are copied by predefined code.  
+    if (nColumnsRead != defaultCols) {
+        LINFO("Additional columns will be read! Consider add column in code for "
+            "significant speedup!");
+    }
+    // Declare how many values to save per star
+    nValuesPerStar = 8;
+
+    // Copy columns to local variables.
+    std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
+
+    std::vector<float> ra = std::move(tableContent[allColumnNames[0]]);
+    std::vector<float> dec = std::move(tableContent[allColumnNames[1]]);
+    std::vector<float> parallax = std::move(tableContent[allColumnNames[2]]);
+    std::vector<float> pmra = std::move(tableContent[allColumnNames[3]]);
+    std::vector<float> pmdec = std::move(tableContent[allColumnNames[4]]);
+    std::vector<float> meanMagG = std::move(tableContent[allColumnNames[5]]);
+    std::vector<float> meanMagBp = std::move(tableContent[allColumnNames[6]]);
+    std::vector<float> meanMagRp = std::move(tableContent[allColumnNames[7]]);
+    std::vector<float> radial_vel = std::move(tableContent[allColumnNames[8]]);
+
+    // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
+    for (int i = 0; i < nStars; ++i) {
+        std::vector<float> values(nValuesPerStar);
+        size_t idx = 0;
+
+        // Default order for rendering:
+        // Position [X, Y, Z]
+        // Mean G-band Magnitude
+        // Bp-Rp Color
+        // Velocity [X, Y, Z]
+
+        // Return early if star doesn't have a measured position.
+        if (std::isnan(ra[i]) || std::isnan(dec[i])) {
+            nNullArr++;
+            continue;
+        }
+
+        // Store positions. Set to a default distance if parallax doesn't exist.
+        float radiusInKiloParsec = 9.0;
+        if (!std::isnan(parallax[i])) {
+            // Parallax is in milliArcseconds -> distance in kiloParsecs
+            // https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/chap_datamodel/sec_dm_main_tables/ssec_dm_gaia_source.html
+            radiusInKiloParsec = 1.0 / parallax[i];
+        }
+        // Convert to Galactic Coordinates from Galactic Lon & Lat.
+        // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
+        //values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
+        //cos(glm::radians(l_longitude[i])); // Pos X
+        //values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
+        //sin(glm::radians(l_longitude[i])); // Pos Y
+        //values[idx++] = radiusInKiloParsec * sin(glm::radians(b_latitude[i])); // Pos Z
+        
+
+        // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude.
+        glm::mat3 aPrimG = glm::mat3(
+            glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047), // Col 0
+            glm::vec3(-0.8734370902348850, -0.4448296299600112, -0.1980763734312015), // Col 1
+            glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669) // Col 2
+        );
+        glm::vec3 rICRS = glm::vec3(
+            cos(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
+            sin(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
+            sin(glm::radians(dec[i]))
+        );
+        glm::vec3 rGal = aPrimG * rICRS;
+        values[idx++] = radiusInKiloParsec * rGal.x; // Pos X
+        values[idx++] = radiusInKiloParsec * rGal.y; // Pos Y
+        values[idx++] = radiusInKiloParsec * rGal.z; // Pos Z
+
+        // Store magnitude render value. (Set default to high mag = low brightness)
+        values[idx++] = std::isnan(meanMagG[i]) ? 20.f : meanMagG[i]; // Mean G-band Mag
+
+        // Store color render value. (Default value is bluish stars)
+        values[idx++] = std::isnan(meanMagBp[i]) && std::isnan(meanMagRp[i]) ? 0.f
+            : meanMagBp[i] - meanMagRp[i]; // Bp-Rp Color
+
+                                                                                                                  // Store velocity. 
+        if (std::isnan(pmra[i])) pmra[i] = 0.f;
+        if (std::isnan(pmdec[i])) pmdec[i] = 0.f;
+
+        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b].
+        glm::vec3 uICRS = glm::vec3(
+            -sin(glm::radians(ra[i])) * pmra[i] -
+            cos(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
+            cos(glm::radians(ra[i])) * pmra[i] -
+            sin(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
+            cos(glm::radians(dec[i]))  * pmdec[i]
+        );
+        glm::vec3 pmVecGal = aPrimG * uICRS;
+
+        // Convert to Tangential vector [m/s] from Proper Motion vector [mas/yr]
+        float tanVelX = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.x;
+        float tanVelY = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.y;
+        float tanVelZ = 1000.0 * 4.74 * radiusInKiloParsec * pmVecGal.z;
+
+        // Calculate True Space Velocity [m/s] if we have the radial velocity
+        if (!std::isnan(radial_vel[i])) {
+            // Calculate Radial Velocity in the direction of the star.
+            // radial_vel is given in [km/s] -> convert to [m/s].
+            float radVelX = 1000.0 * radial_vel[i] * rGal.x;
+            float radVelY = 1000.0 * radial_vel[i] * rGal.y;
+            float radVelZ = 1000.0 * radial_vel[i] * rGal.z;
+
+            // Use Pythagoras theorem for the final Space Velocity [m/s]. 
+            values[idx++] = sqrt(pow(radVelX, 2) + pow(tanVelX, 2)); // Vel X [U]
+            values[idx++] = sqrt(pow(radVelY, 2) + pow(tanVelY, 2)); // Vel Y [V]
+            values[idx++] = sqrt(pow(radVelZ, 2) + pow(tanVelZ, 2)); // Vel Z [W]
+        }
+        // Otherwise use the vector [m/s] we got from proper motion. 
+        else {
+            radial_vel[i] = 0.f;
+            values[idx++] = tanVelX; // Vel X [U]
+            values[idx++] = tanVelY; // Vel Y [V]
+            values[idx++] = tanVelZ; // Vel Z [W]
+        }
+
+        fullData.insert(fullData.end(), values.begin(), values.end());
+    }*/
+
     LINFO(std::to_string(nNullArr) + " out of " + std::to_string(nStars) + " read stars were nullArrays.");
     LINFO("Multiplier: " + std::to_string(multiplier));
     

@@ -6,6 +6,86 @@ return {
         SingleFileProcess = false,
         ThreadsToUse = 8,
     },
+
+
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_AMNH/APOGEE_GaiaDR2okAMNH.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/APOGEE_GaiaDR2okAMNH.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_AMNH/GALAH_GaiaDR2okAMNH.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/GALAH_GaiaDR2okAMNH.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+
+
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/andromeda.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/andromeda.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/k2_dr2_1arcsec.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/k2_dr2_1arcsec.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/kepler_dr2_1arcsec.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/kepler_dr2_1arcsec.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+
+
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/Co-moving-Stars.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/Co-moving-Stars.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+
+
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/DR2_UMS.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/DR2_UMS.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/DR2_giants.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/DR2_giants.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/DR2_giants_G14.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/DR2_giants_G14.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/gaiadr2_hypatia_overlap.fits",
+    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/gaiadr2_hypatia_overlap.bin",
+    --    SingleFileProcess = true,
+    --    ThreadsToUse = 1,
+    --},
+
+
     --{
     --    Type = "ReadSpeckTask",
     --    InFileOrFolderPath = "E:/gaia_sync_data/DR1_AMNH.speck",
