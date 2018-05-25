@@ -231,7 +231,11 @@ int time_setTime(lua_State* L) {
         }
 
         const double duration = lua_tonumber(L, 2);
-        OsEng.timeManager().addInterpolation(targetTime, duration);
+        if (duration > 0) {
+            OsEng.timeManager().addInterpolation(targetTime, duration);
+        } else {
+            OsEng.timeManager().setTimeNextFrame(targetTime);
+        }
     }
     return 0;
 }

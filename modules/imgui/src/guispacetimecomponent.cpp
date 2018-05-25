@@ -289,7 +289,7 @@ void GuiSpaceTimeComponent::render() {
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 //
     {
-        float deltaTime = static_cast<float>(OsEng.timeManager().deltaTime());
+        float deltaTime = static_cast<float>(OsEng.timeManager().targetDeltaTime());
 
         if (_firstFrame) {
             std::pair<double, std::string> dt = simplifyTime(deltaTime);
@@ -378,7 +378,7 @@ void GuiSpaceTimeComponent::render() {
         );
 
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ", 0)",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
@@ -410,14 +410,14 @@ void GuiSpaceTimeComponent::render() {
         );
 
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
+            "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ", 0)",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
     if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
         if (_slidingDelta != 0.f) {
             OsEng.scriptEngine().queueScript(
-                "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
+                "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ", 0)",
                 scripting::ScriptEngine::RemoteScripting::Yes
             );
 

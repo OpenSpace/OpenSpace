@@ -352,8 +352,10 @@ void TimeManager::setTargetDeltaTime(double newDeltaTime, double interpolationDu
         return;
     }
 
-    if (_timePaused) {
+    clearKeyframes();
+    if (_timePaused || interpolationDuration <= 0.0) {
         _targetDeltaTime = newDeltaTime;
+        _deltaTime = _targetDeltaTime;
         return;
     }
 
@@ -366,7 +368,6 @@ void TimeManager::setTargetDeltaTime(double newDeltaTime, double interpolationDu
 
     _targetDeltaTime = newDeltaTime;
 
-    clearKeyframes();
     addKeyframe(now, currentKeyframe);
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
