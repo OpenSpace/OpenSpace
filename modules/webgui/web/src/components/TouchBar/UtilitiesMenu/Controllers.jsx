@@ -9,6 +9,7 @@ import DateController from './DateController';
 import TimePlayerController from './TimePlayerController';
 import SightsController from './SightsController';
 import ScaleController from './ScaleController';
+import ToggleBoolButton from './ToggleBoolButton';
 import DataManager from '../../../api/DataManager';
 import { UpdateDeltaTimeNow } from '../../../utils/timeHelpers';
 
@@ -18,6 +19,7 @@ class Controllers extends Component {
 
     this.onChangeSight = this.onChangeSight.bind(this);
     this.onChangeScale = this.onChangeScale.bind(this);
+    this.onToggleBoolProperty = this.onToggleBoolProperty.bind(this);
   }
 
   componentWillReceiveProps() {
@@ -28,12 +30,26 @@ class Controllers extends Component {
         );
       }
     }
+    if (this.props.toggleBoolNodes.length !== 0) {
+      if (this.props.toggleBoolNodes[0].listeners <= 0) {
+        this.props.toggleBoolNodes.forEach(toggleBoolNode =>
+          this.props.StartListening(toggleBoolNode.Description.Identifier),
+        );
+      }
+    }
   }
 
   componentWillUnmount() {
-    this.props.scaleNodes.forEach(scaleNode =>
-      this.props.StopListening(scaleNode.Description.Identifier),
-    );
+    if (this.props.scaleNodes.length !== 0) {
+      this.props.scaleNodes.forEach(scaleNode =>
+        this.props.StopListening(scaleNode.Description.Identifier),
+      );
+    }
+    if (this.props.toggleBoolNodes.length !== 0) {
+      this.props.toggleBoolNodes.forEach(toggleBoolNode =>
+        this.props.StopListening(toggleBoolNode.Description.Identifier),
+      );
+    }
   }
 
   onChangeSight(selected) {
@@ -56,6 +72,13 @@ class Controllers extends Component {
         this.props.ChangePropertyValue(this.props.scaleNodes[i].Description, '1');
       }
     });
+  }
+
+  onToggleBoolProperty(uri) {
+    const propertyNode = this.props.toggleBoolNodes
+      .find(property => property.Description.Identifier === uri);
+    const value = (propertyNode.Value === 'true') ? '0' : '1';
+    this.props.ChangePropertyValue(propertyNode.Description, value);
   }
 
   render() {
@@ -84,6 +107,13 @@ class Controllers extends Component {
             onChangeScale={this.onChangeScale}
           />
         }
+        {(story && story.toggleboolproperties) &&
+        <ToggleBoolButton
+          properties={story.toggleboolproperties}
+          nodes={this.props.toggleBoolNodes}
+          onToggle={this.onToggleBoolProperty}
+        />
+        }
       </div>
     );
   }
@@ -95,6 +125,7 @@ const mapStateToProps = (state) => {
   const sceneType = 'Scene';
   const story = state.storyTree.story;
   const scaleNodes = [];
+  const toggleBoolNodes = [];
 
   if (Object.keys(state.propertyTree).length !== 0) {
     const rootNodes = state.propertyTree.subowners
@@ -111,11 +142,19 @@ const mapStateToProps = (state) => {
       },
       );
     }
+
+    if (story.toggleboolproperties) {
+      story.toggleboolproperties.forEach((property) => {
+        toggleBoolNodes.push(traverseTreeWithURI(state.propertyTree, property.URI));
+      },
+      );
+    }
   }
   return {
     originNode,
     story,
     scaleNodes,
+    toggleBoolNodes,
   };
 };
 
@@ -150,12 +189,17 @@ Controllers.propTypes = {
     Value: PropTypes.string,
     Description: PropTypes.string,
   })),
+  toggleBoolNodes: PropTypes.objectOf(PropTypes.shape({
+    Value: PropTypes.string,
+    Description: PropTypes.string,
+  })),
   story: PropTypes.objectOf(PropTypes.shape({})),
 };
 
 Controllers.defaultProps = {
   originNode: [],
   scaleNodes: {},
+  toggleBoolNodes: {},
   story: {},
   ChangePropertyValue: () => {},
   StartListening: () => {},

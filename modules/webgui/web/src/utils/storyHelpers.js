@@ -34,3 +34,8 @@ export const toggleZoomOut = (value) => {
   DataManager.runScript(`openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.VelocityZoomControl', ${velocity})`);
   DataManager.runScript(`openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Overview", ${value})`);
 };
+
+// Function to reset the bool properties to the default value
+export const resetBoolProperty = (URI, value) => {
+  DataManager.runScript(`openspace.setPropertyValueSingle("${URI}", ${value})`);
+};

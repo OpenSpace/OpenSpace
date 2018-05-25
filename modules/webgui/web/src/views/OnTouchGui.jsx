@@ -21,7 +21,8 @@ import {
 import DataManager from '../api/DataManager';
 import Slider from '../components/ImageSlider/Slider';
 import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
-import { toggleShading, toggleHighResolution, toggleHidePlanet, toggleGalaxies, toggleZoomOut } from '../utils/storyHelpers';
+import { toggleShading, toggleHighResolution, toggleHidePlanet, toggleGalaxies, toggleZoomOut,
+  resetBoolProperty } from '../utils/storyHelpers';
 
 
 class OnTouchGui extends Component {
@@ -102,6 +103,12 @@ class OnTouchGui extends Component {
       if (this.props.story.scaleplanets) {
         this.props.scaleNodes.forEach((planet) => {
           this.props.ChangePropertyValue(planet.Description, '1');
+        });
+      }
+
+      if (this.props.story.toggleboolproperties) {
+        this.props.story.toggleboolproperties.forEach((property) => {
+          resetBoolProperty(property.URI, property.defaultvalue);
         });
       }
 

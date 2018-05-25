@@ -81,5 +81,17 @@
       "longitude": "55.58",
       "altitude": "20000000"
     }
-  }
+  },
+   "toggleboolproperties": [
+    {
+      "URI":"Scene.EarthTrail.renderable.Enabled",
+      "label":"Earth Trail",
+      "defaultvalue": "true"
+    },
+    {
+      "URI":"Scene.Earth.RenderableGlobe.Atmosphere",
+      "label":"Earth Atmosphere",
+      "defaultvalue": "false"
+    }
+  ]
 }
