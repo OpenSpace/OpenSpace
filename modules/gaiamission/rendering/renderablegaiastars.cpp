@@ -209,6 +209,19 @@ namespace {
         "parent is fetched as LOD cache."
     };
 
+    static const openspace::properties::Property::PropertyInfo MaxGpuMemoryPercentInfo = {
+        "MaxGpuMemoryPercent",
+        "Max GPU Memory",
+        "Sets the max percent of existing GPU memory budget that the streaming will use."
+    };
+
+    static const openspace::properties::Property::PropertyInfo MaxCpuMemoryPercentInfo = {
+        "MaxCpuMemoryPercent",
+        "Max CPU Memory",
+        "Sets the max percent of existing CPU memory budget that the streaming of files "
+        "will use."
+    };
+
     static const openspace::properties::Property::PropertyInfo FilterPosXInfo = {
         "FilterPosX",
         "PosX Threshold",
@@ -388,6 +401,18 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 LodPixelThresholdInfo.description
             },
             {
+                MaxGpuMemoryPercentInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                MaxGpuMemoryPercentInfo.description
+            },
+            {
+                MaxCpuMemoryPercentInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                MaxCpuMemoryPercentInfo.description
+            },
+            {
                 FilterPosXInfo.identifier,
                 new Vector2Verifier<double>,
                 Optional::Yes,
@@ -453,6 +478,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
     , _tmPointSigma(TmPointSigmaInfo, 1.0, 0.1, 3.0)
     , _lodPixelThreshold(LodPixelThresholdInfo, 250.0, 0.0, 5000.0)
+    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.5, 0.0, 1.0)
+    , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5, 0.0, 1.0)
     , _posXThreshold(FilterPosXInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
     , _posYThreshold(FilterPosYInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
     , _posZThreshold(FilterPosZInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
@@ -660,6 +687,27 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             );
     }
 
+    if (dictionary.hasKey(MaxGpuMemoryPercentInfo.identifier)) {
+        _maxGpuMemoryPercent = static_cast<float>(
+            dictionary.value<double>(MaxGpuMemoryPercentInfo.identifier)
+            );
+    }
+    _maxGpuMemoryPercent.onChange([&] { 
+        GLint nDedicatedVidMemoryInKB = 0;
+        glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedVidMemoryInKB);
+        float dedicatedVidMem = static_cast<float>(
+            static_cast<long long>(nDedicatedVidMemoryInKB) * 1024);
+        _gpuMemoryBudgetInBytes = static_cast<long long>(dedicatedVidMem
+            * _maxGpuMemoryPercent);
+        _buffersAreDirty = true; 
+    });
+
+    if (dictionary.hasKey(MaxCpuMemoryPercentInfo.identifier)) {
+        _maxCpuMemoryPercent = static_cast<float>(
+            dictionary.value<double>(MaxCpuMemoryPercentInfo.identifier)
+            );
+    }
+
     if (dictionary.hasKey(FilterPosXInfo.identifier)) {
         glm::vec2 posXValue = dictionary.value<glm::vec2>(FilterPosXInfo.identifier);
         _posXThreshold.set(posXValue);
@@ -763,6 +811,7 @@ void RenderableGaiaStars::initializeGL() {
     addProperty(_luminosityMultiplier);
     addProperty(_cutOffThreshold);
     addProperty(_lodPixelThreshold);
+    addProperty(_maxGpuMemoryPercent);
 
     // Construct shader program depending on user-defined shader option.
     const int option = _shaderOption;
@@ -905,13 +954,16 @@ void RenderableGaiaStars::initializeGL() {
     // Set ceiling for video memory to use in streaming.
     float currentVidMem = static_cast<float>(
         static_cast<long long>(nCurrentAvailMemoryInKB) * 1024);
-    _gpuMemoryBudgetInBytes = static_cast<long long>(currentVidMem * MAX_GPU_MEMORY_PERCENT);
+    float dedicatedVidMem = static_cast<float>(
+        static_cast<long long>(nDedicatedVidMemoryInKB) * 1024);
+    _gpuMemoryBudgetInBytes = static_cast<long long>(dedicatedVidMem
+        * _maxGpuMemoryPercent);
 
     // Set ceiling for how much of the installed CPU RAM to use for streaming. 
     long long installedRam = static_cast<long long>(
         CpuCap.installedMainMemory()) * 1024 * 1024;
     _cpuRamBudgetInBytes = static_cast<long long>(
-        static_cast<float>(installedRam) * MAX_CPU_RAM_PERCENT);
+        static_cast<float>(installedRam) * _maxCpuMemoryPercent);
     _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes));
 
     LINFO("GPU Memory Budget {bytes}: " + std::to_string(_gpuMemoryBudgetInBytes) +
@@ -1372,6 +1424,9 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 void RenderableGaiaStars::update(const UpdateData&) {
     const int shaderOption = _shaderOption;
     const int renderOption = _renderOption;
+
+    // Don't update anything if we are in the middle of a rebuild.
+    if (_octreeManager->rebuildOngoing()) return;
 
     if (_dataIsDirty) {
         LDEBUG("Regenerating data");

@@ -54,13 +54,11 @@ Fragment getFragment() {
         1.0 / (1.0 + pow(screenPos.y / fov.y, 2.0))
     );
     // Uncomment to compare to original filterSize.
-    //scaleFactor = vec2(1.0);
-    scaleFactor *= 1.0;
+    scaleFactor = vec2(1.0);
     dvec2 newFilterSize = filterSize / scaleFactor;
 
     // Make use of this to switch betweeen circle and ellipse.
-    bool useCircleDist = true; 
-
+    bool useCircleDist = true;
 
     // Get a [filterSize x filterSize] filter around our pixel. UV is [0, 1]
     vec3 intensity = vec3(0.0);

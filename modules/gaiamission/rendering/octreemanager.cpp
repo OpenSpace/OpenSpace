@@ -62,7 +62,12 @@ OctreeManager::~OctreeManager()
 void OctreeManager::initOctree(const long long& cpuRamBudget, int maxDist,
     int maxStarsPerNode) {
 
-    LDEBUG("Initializing Octree");
+    if (_root) {
+        LDEBUG("Clear existing Octree");
+        clearAllData();
+    }
+
+    LDEBUG("Initializing new Octree");
     _root = std::make_shared<OctreeNode>();
     _root->octreePositionIndex = 8;
 
@@ -223,7 +228,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                     findAndFetchNeighborNode(secondParentId, x, y, z, 
                         additionalLevelsToFetch + 1);
                     findAndFetchNeighborNode(thirdParentId, x, y, z, 
-                        additionalLevelsToFetch + 2);
+                        additionalLevelsToFetch + 1);
                 }
             }
         }
@@ -840,6 +845,10 @@ long long OctreeManager::cpuRamBudget() const {
     return _cpuRamBudget;
 }
 
+bool OctreeManager::rebuildOngoing() const {
+    return _rebuildBuffer;
+}
+
 size_t OctreeManager::getChildIndex(const float& posX, const float& posY, 
     const float& posZ, const float& origX, const float& origY, const float& origZ) {
 
@@ -1195,9 +1204,10 @@ bool OctreeManager::updateBufferIndex(std::shared_ptr<OctreeNode> node) {
     // Make sure node isn't loading/unloading as we're checking isLoaded flag.
     std::lock_guard<std::mutex> lock(node->loadingLock);
 
-    // Return false if there are no more spots in our buffer.
-    // Or if we're streaming and node isn't loaded yet.
-    if (_freeSpotsInBuffer.empty() || (_streamOctree && !node->isLoaded)) {
+    // Return false if there are no more spots in our buffer, or if we're streaming and 
+    // node isn't loaded yet, or if node doesn't have any stars.
+    if (_freeSpotsInBuffer.empty() || (_streamOctree && !node->isLoaded) || 
+        node->numStars == 0) {
         return false;
     }
 

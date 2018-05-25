@@ -109,15 +109,27 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dvec3 HorizonsTranslation::position(const Time& time) const {
-    
+    glm::dvec3 interpolatedPos = glm::dvec3(0.0);
+
     auto lastBefore = _timeline.lastKeyframeBefore(time.j2000Seconds(), true);
     auto firstAfter = _timeline.firstKeyframeAfter(time.j2000Seconds(), false);
-    double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
-    double timeDiff = time.j2000Seconds() - lastBefore->timestamp;
-    double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
+    if (lastBefore && firstAfter) {
+        // We're inbetween first and last value.
+        double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
+        double timeDiff = time.j2000Seconds() - lastBefore->timestamp;
+        double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
 
-    glm::dvec3 dir = firstAfter->data - lastBefore->data;
-    glm::dvec3 interpolatedPos = lastBefore->data + dir * diff;
+        glm::dvec3 dir = firstAfter->data - lastBefore->data;
+        interpolatedPos = lastBefore->data + dir * diff;
+    }
+    else if (lastBefore) {
+        // Requesting a time after last value. Return last known position.
+        interpolatedPos = lastBefore->data;
+    }
+    else if (firstAfter) {
+        // Requesting a time before first value. Return last known position.
+        interpolatedPos = firstAfter->data;
+    }
 
     return interpolatedPos;
 }

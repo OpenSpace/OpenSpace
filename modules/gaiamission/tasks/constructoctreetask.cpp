@@ -287,6 +287,27 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     LINFO("MAX_DIST: " + std::to_string(_octreeManager->maxDist()) +
         " - MAX_STARS_PER_NODE: " + std::to_string(_octreeManager->maxStarsPerNode()));
 
+    // Use to generate a synthetic dataset 
+    //for (float z = -1.0; z < 1.0; z += 0.05) {
+    //    for (float y = -1.0; y < 1.0; y += 0.05) {
+    //        for (float x = -1.0; x < 1.0; x += 0.05) {
+    //            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    //            std::vector<float> renderValues(8);
+    //            renderValues[0] = x + x * r;
+    //            renderValues[2] = z + y * r;
+    //            renderValues[1] = y + z * r;
+    //            renderValues[3] = 5.0 + 10 * r;
+    //            renderValues[4] = 2.0 + 10 * r;
+    //            renderValues[5] = r;
+    //            renderValues[6] = r;
+    //            renderValues[7] = r;
+    //            _octreeManager->insert(renderValues);
+    //            nTotalStars++;
+    //            nValues+=8;
+    //        }
+    //    }
+    //}
+
     std::ifstream inFileStream(_inFileOrFolderPath, std::ifstream::binary);
     if (inFileStream.good()) {
 
@@ -401,6 +422,14 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                     nFilteredStars++;
                     continue;
                 }
+                // Generate a 50/12,5 dataset (gMag <=13/>13).
+                //if ((filterStar(glm::vec2(20.0), filterValues[3], 20.f)) ||
+                //    (filterStar(glm::vec2(0.0), filterValues[16])) ||
+                //    (filterValues[3] > 13.0 && filterValues[17] > 0.125) ||
+                //    (filterValues[3] <= 13.0 && filterValues[17] > 0.5)) {
+                //    nFilteredStars++;
+                //    continue;
+                //}
 
                 // If all filters passed then insert render values into Octree.
                 std::vector<float> renderValues(filterValues.begin(),

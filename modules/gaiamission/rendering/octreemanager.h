@@ -165,6 +165,7 @@ public:
     size_t maxStarsPerNode() const;
     size_t biggestChunkIndexInUse() const;
     size_t numFreeSpotsInBuffer() const;
+    bool rebuildOngoing() const;
 
     /**
      * \returns current CPU RAM budget in bytes.
