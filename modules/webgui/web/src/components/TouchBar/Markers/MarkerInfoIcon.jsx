@@ -27,7 +27,7 @@ class MarkerInfoIcon extends Component {
       <div>
         <Icon
           onClick={() => this.toggleInfoWindow()}
-          className={styles.icon}
+          className={styles.Icon}
           icon="info_outline"
           style={positionStyles.Icon}
         />

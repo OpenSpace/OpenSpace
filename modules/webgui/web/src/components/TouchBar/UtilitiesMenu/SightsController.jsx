@@ -37,13 +37,14 @@ class SightsController extends Component {
   get sightsButtons() {
     return (this.props.sightsList.map(sight => (
       <Button
+        className={styles.sightsLabel}
         key={sight.info}
         smalltext
         block
         onClick={this.selectSight}
         id={sight.info}
       >
-        <SmallLabel id={sight.info} style={{ float: 'left' }}>
+        <SmallLabel id={sight.info} >
           {sight.planet},{sight.info}
         </SmallLabel>
       </Button>

@@ -12,6 +12,14 @@
     padding-bottom: 5px;
 }
 
+.Icon {
+  background-color:rgba(0, 0, 0, 0.01)
+}
+
+.Icon:active {
+  color: $ui-highlight-secondary;
+}
+
 .InfoPopover {
   position: absolute;
   transform: translate(20%, -50%);
