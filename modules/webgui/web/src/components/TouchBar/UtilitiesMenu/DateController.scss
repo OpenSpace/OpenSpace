@@ -25,4 +25,9 @@
 .dateButton {
   min-width: 100px;
   display: flex;
+  padding: 10px;
+}
+
+.dateButton:active {
+  color: $ui-highlight-secondary;
 }
