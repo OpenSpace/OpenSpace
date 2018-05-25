@@ -70,8 +70,6 @@ private:
     const size_t POS_SIZE = 3;
     const size_t COL_SIZE = 2;
     const size_t VEL_SIZE = 3;
-    const float MAX_GPU_MEMORY_PERCENT = 0.7f;
-    const float MAX_CPU_RAM_PERCENT = 0.5f;
     
     /**
      * Reads data file in format defined by FileReaderOption.
@@ -154,6 +152,8 @@ private:
     // LongLongProperty doesn't show up in menu, use FloatProperty instead.
     properties::FloatProperty _cpuRamBudgetProperty;
     properties::FloatProperty _gpuStreamBudgetProperty;
+    properties::FloatProperty _maxGpuMemoryPercent;
+    properties::FloatProperty _maxCpuMemoryPercent;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,

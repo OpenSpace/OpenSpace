@@ -845,6 +845,10 @@ long long OctreeManager::cpuRamBudget() const {
     return _cpuRamBudget;
 }
 
+bool OctreeManager::rebuildOngoing() const {
+    return _rebuildBuffer;
+}
+
 size_t OctreeManager::getChildIndex(const float& posX, const float& posY, 
     const float& posZ, const float& origX, const float& origY, const float& origZ) {
 
