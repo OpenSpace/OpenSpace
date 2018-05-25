@@ -32,6 +32,7 @@
 
 #include <modules/webgui/webguimodule.h>
 #include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/fmt.h>
@@ -515,7 +516,14 @@ void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
 
     _focusNode = focusNode;
     _flyTo = true;
-    _changeOrientation = true;
+
+    // If the current focusNode is a renderable globe, orientation can be set using goToGeo(),
+    // otherwise it can not
+    GlobeBrowsingModule& module = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
+    globebrowsing::RenderableGlobe* globe = module.castFocusNodeRenderableToGlobe();
+    if (globe) {
+        _changeOrientation = true;
+    }
 
     if (focusNode != nullptr) {
         _previousFocusNodePosition = focusNode->worldPosition();
