@@ -62,7 +62,12 @@ OctreeManager::~OctreeManager()
 void OctreeManager::initOctree(const long long& cpuRamBudget, int maxDist,
     int maxStarsPerNode) {
 
-    LDEBUG("Initializing Octree");
+    if (_root) {
+        LDEBUG("Clear existing Octree");
+        clearAllData();
+    }
+
+    LDEBUG("Initializing new Octree");
     _root = std::make_shared<OctreeNode>();
     _root->octreePositionIndex = 8;
 
@@ -223,7 +228,7 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                     findAndFetchNeighborNode(secondParentId, x, y, z, 
                         additionalLevelsToFetch + 1);
                     findAndFetchNeighborNode(thirdParentId, x, y, z, 
-                        additionalLevelsToFetch + 2);
+                        additionalLevelsToFetch + 1);
                 }
             }
         }
@@ -1198,6 +1203,7 @@ bool OctreeManager::updateBufferIndex(std::shared_ptr<OctreeNode> node) {
     // Return false if there are no more spots in our buffer.
     // Or if we're streaming and node isn't loaded yet.
     if (_freeSpotsInBuffer.empty() || (_streamOctree && !node->isLoaded)) {
+        node->numStars == 0) {
         return false;
     }
 
