@@ -1282,13 +1282,16 @@ void TouchInteraction::step(double dt) {
 
             WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
             float overviewLimit = module.storyHandler.overviewLimit();
+            float zoomInLimit = module.storyHandler.zoomInLimit();
 
             //Apply the velocity to update camera position
             if (length(_vel.zoom*dt) < distToSurface &&
                  length(centerToCamera + directionToCenter*_vel.zoom*dt)
                  > planetBoundaryRadius &&
                     length(centerToCamera + directionToCenter * _vel.zoom*dt)
-                    < overviewLimit)
+                    < overviewLimit  &&
+                        length(centerToCamera + directionToCenter * _vel.zoom*dt)
+                        > zoomInLimit)
             {
                 camPos += directionToCenter * _vel.zoom * dt;
             }

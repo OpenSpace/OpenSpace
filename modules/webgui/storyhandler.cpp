@@ -11,6 +11,11 @@ namespace {
         "OverviewLimit",
         "Determines the overview limit for the overview button."
     };
+    static const openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
+        "ZoomInLimit",
+        "ZoomInLimit",
+        "Determines the limit for zooming in."
+    };
     static const openspace::properties::Property::PropertyInfo StoryIdentifierInfo = {
         "StoryIdentifier",
         "StoryIdentifier",
@@ -38,12 +43,14 @@ namespace {
 namespace openspace::webgui {
     StoryHandler::StoryHandler() : properties::PropertyOwner({ "StoryHandler" })
         , _overviewLimit(OverviewLimitInfo, 0.0)
+        , _zoomInLimit(ZoomInLimitInfo, 0.0)
         , _storyIdentifier(StoryIdentifierInfo, "story_default")
         , _applyAddTag(ApplyAddTagInfo)
         , _applyRemoveTag(ApplyRemoveTagInfo)
         , _focusNodesList(FocusNodesListInfo, std::string(""))
     {
         addProperty(_overviewLimit);
+        addProperty(_zoomInLimit);
         addProperty(_storyIdentifier);
         addProperty(_applyAddTag);
         addProperty(_applyRemoveTag);
@@ -69,6 +76,10 @@ namespace openspace::webgui {
 
     float StoryHandler::overviewLimit() {
         return _overviewLimit;
+    };
+
+    float StoryHandler::zoomInLimit() {
+        return _zoomInLimit;
     };
 };// namespace
 

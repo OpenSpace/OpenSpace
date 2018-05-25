@@ -54,6 +54,8 @@ export const FocusNodesListKey = 'Modules.WebGui.StoryHandler.FocusNodesList';
 export const defaultStory = 'story_default';
 // key for overview limit
 export const OverlimitKey = 'Modules.WebGui.StoryHandler.OverviewLimit';
+// key for zoom in limit
+export const ZoomInLimitKey = 'Modules.WebGui.StoryHandler.ZoomInLimit';
 // key for scale property
 export const ScaleKey = `Scene.${ValuePlaceholder}.Scale.Scale`;
 // keys for timePlayerController

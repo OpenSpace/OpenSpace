@@ -1,6 +1,8 @@
 {
   "storyidentifier": "story_default",
   "overviewlimit": "-1",
+  "inzoomlimit": "0",
+  "zoomout": "false",
   "focusbuttons": " ",
   "focusbuttonslist": [],
   "timecontroller": "false",

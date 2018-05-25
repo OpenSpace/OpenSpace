@@ -26,6 +26,11 @@
           "identifier": "story_mars"
       },
       {
+          "title": "Explore the Galaxies",
+          "info": "A galaxy is a gravitationally bound system of stars, stellar remnants, interstellar gas, dust, and dark matter. The word galaxy is derived from the Greek galaxias, literally \"milky\", a reference to the Milky Way. Galaxies range in size from dwarfs with just a few hundred million stars to giants with one hundred trillion stars, each orbiting its galaxy's center of mass. Galaxies are categorized according to their visual morphology as elliptical, spiral, or irregular. Many galaxies are thought to have black holes at their active centers.",
+          "identifier": "story_galaxies"
+      },
+      {
         "title": "Example of things to do!",
         "info": "Example story",
         "identifier": "story_example"
