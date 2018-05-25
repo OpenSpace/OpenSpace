@@ -1387,20 +1387,22 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_program->isDirty() || _shadersAreDirty) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        if (_program) {
-            renderEngine.removeRenderProgram(_program.get());
-            _program = nullptr;
-        }
+
         switch (shaderOption) {
         case gaiamission::ShaderOption::Point_SSBO: {
-            _program = ghoul::opengl::ProgramObject::Build(
-                "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
-            );
-            _program->rebuildFromFile();
-
+            std::unique_ptr<ghoul::opengl::ProgramObject> program =
+                ghoul::opengl::ProgramObject::Build(
+                    "GaiaStar",
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+                );
+            if (program) {
+                if (_program) {
+                    renderEngine.removeRenderProgram(_program.get());
+                }
+                _program = std::move(program);
+            }
             _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
             _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
             _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
@@ -1422,13 +1424,19 @@ void RenderableGaiaStars::update(const UpdateData&) {
             break;
         }
         case gaiamission::ShaderOption::Point_VBO: {
-            _program = ghoul::opengl::ProgramObject::Build(
-                "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
-            );
-            _program->rebuildFromFile();
+            std::unique_ptr<ghoul::opengl::ProgramObject> program =
+                ghoul::opengl::ProgramObject::Build(
+                    "GaiaStar",
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_fs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_point_ge.glsl")
+                );
+            if (program) {
+                if (_program) {
+                    renderEngine.removeRenderProgram(_program.get());
+                }
+                _program = std::move(program);
+            }
 
             if (hasProperty(&_magnitudeBoost)) removeProperty(_magnitudeBoost);
             if (hasProperty(&_sharpness)) removeProperty(_sharpness);
@@ -1441,13 +1449,19 @@ void RenderableGaiaStars::update(const UpdateData&) {
             break;
         }
         case gaiamission::ShaderOption::Billboard_SSBO: {
-            _program = ghoul::opengl::ProgramObject::Build(
-                "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
-            );
-            _program->rebuildFromFile();
+            std::unique_ptr<ghoul::opengl::ProgramObject> program =
+                ghoul::opengl::ProgramObject::Build(
+                    "GaiaStar",
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                );
+            if (program) {
+                if (_program) {
+                    renderEngine.removeRenderProgram(_program.get());
+                }
+                _program = std::move(program);
+            }
 
             _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
@@ -1478,13 +1492,19 @@ void RenderableGaiaStars::update(const UpdateData&) {
             break;
         }
         case gaiamission::ShaderOption::Billboard_VBO: {
-            _program = ghoul::opengl::ProgramObject::Build(
-                "GaiaStar",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
-            );
-            _program->rebuildFromFile();
+            std::unique_ptr<ghoul::opengl::ProgramObject> program =
+                ghoul::opengl::ProgramObject::Build(
+                    "GaiaStar",
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_vbo_vs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                );
+            if (program) {
+                if (_program) {
+                    renderEngine.removeRenderProgram(_program.get());
+                }
+                _program = std::move(program);
+            }
 
             _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
@@ -1526,18 +1546,21 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
     if (_programTM->isDirty() || _shadersAreDirty) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        if (_programTM) {
-            renderEngine.removeRenderProgram(_programTM.get());
-            _programTM = nullptr;
-        }
+
         switch (shaderOption) {
         case gaiamission::ShaderOption::Point_SSBO:
         case gaiamission::ShaderOption::Point_VBO: {
-            _programTM = renderEngine.buildRenderProgram("ToneMapping",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
-            );
-            _programTM->rebuildFromFile();
+            std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
+                renderEngine.buildRenderProgram("ToneMapping",
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_point_fs.glsl")
+                );
+            if (programTM) {
+                if (_programTM) {
+                    renderEngine.removeRenderProgram(_programTM.get());
+                }
+                _programTM = std::move(programTM);
+            }
 
             _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
             _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
@@ -1546,11 +1569,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         case gaiamission::ShaderOption::Billboard_SSBO:
         case gaiamission::ShaderOption::Billboard_VBO: {
-            _programTM = renderEngine.buildRenderProgram("ToneMapping",
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
-                absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
-            );
-            _programTM->rebuildFromFile();
+            std::unique_ptr<ghoul::opengl::ProgramObject> programTM =
+                renderEngine.buildRenderProgram("ToneMapping",
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_vs.glsl"),
+                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_tonemapping_billboard_fs.glsl")
+                );
+            if (programTM) {
+                if (_programTM) {
+                    renderEngine.removeRenderProgram(_programTM.get());
+                }
+                _programTM = std::move(programTM);
+            }
             break;
         }
         }
