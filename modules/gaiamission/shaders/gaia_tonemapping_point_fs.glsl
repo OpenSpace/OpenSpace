@@ -58,7 +58,7 @@ Fragment getFragment() {
     dvec2 newFilterSize = filterSize / scaleFactor;
 
     // Make use of this to switch betweeen circle and ellipse.
-    bool useCircleDist = true;
+    bool useCircleDist = false;
 
     // Get a [filterSize x filterSize] filter around our pixel. UV is [0, 1]
     vec3 intensity = vec3(0.0);
@@ -80,9 +80,12 @@ Fragment getFragment() {
                     }
                 else {
                     // Elliptic gaussian distribution.
-                    float alpha = atan2(y, x);
-                    float sigmaX = sigma * scaleFactor.x;
-                    float sigmaY = sigma * scaleFactor.y;
+                    vec2 pixelPos = screenPos / pixelSize;
+                    float alpha = atan2(pixelPos.y, pixelPos.x);
+                    //float r =  sqrt(pow(x * scaleFactor.x, 2.0) + pow(y * scaleFactor.y, 2.0));
+                    float widthScale = min(scaleFactor.x, scaleFactor.y);
+                    float sigmaX = sigma / widthScale;
+                    float sigmaY = sigma;
                     float a = pow(cos(alpha), 2.0) / (2 * pow(sigmaX, 2.0)) 
                         + pow(sin(alpha), 2.0) / (2 * pow(sigmaY, 2.0));
                     float b = sin(2 * alpha) / (4 * pow(sigmaX, 2.0)) 
