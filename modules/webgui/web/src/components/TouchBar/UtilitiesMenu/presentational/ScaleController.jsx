@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
-import buttonStyle from './UtilitiesButtons.scss';
+import SmallLabel from '../../../common/SmallLabel/SmallLabel';
+import buttonStyle from './../style/UtilitiesButtons.scss';
 
 const ScaleController = props =>
   (
@@ -20,6 +20,6 @@ ScaleController.propTypes = {
   onChangeScale: PropTypes.func.isRequired,
   scale: PropTypes.string.isRequired,
   info: PropTypes.string.isRequired,
-}
+};
 
 export default ScaleController;

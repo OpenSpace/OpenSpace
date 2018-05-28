@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Icon from '../../common/Icon/Icon';
 import styles from './MarkerInfo.scss';
 import Popover from '../../common/Popover/Popover';
@@ -45,5 +46,11 @@ class MarkerInfoIcon extends Component {
       </div>);
   }
 }
+
+MarkerInfoIcon.PropTypes = {
+  positionStyles: PropTypes.objectOf(PropTypes.shape({})).isRequired,
+  identifier: PropTypes.string.isRequired,
+  planetInfo: PropTypes.objectOf(PropTypes.shape({})).isRequired,
+};
 
 export default MarkerInfoIcon;

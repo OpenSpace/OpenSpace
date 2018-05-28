@@ -84,13 +84,13 @@
   },
    "toggleboolproperties": [
     {
-      "URI":"Scene.EarthTrail.renderable.Enabled",
-      "label":"Earth Trail",
+      "URI":"Scene.MarsTrail.renderable.Enabled",
+      "label":"Mars Trail",
       "defaultvalue": "true"
     },
     {
-      "URI":"Scene.Earth.RenderableGlobe.Atmosphere",
-      "label":"Earth Atmosphere",
+      "URI":"Scene.Mars.RenderableGlobe.Atmosphere",
+      "label":"Mars Atmosphere",
       "defaultvalue": "false"
     }
   ]

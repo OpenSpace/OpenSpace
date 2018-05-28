@@ -108,7 +108,7 @@ public:
     void clearDependencies();
     void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
 
-    void getScreenSpacePositon(RenderData& newData);
+    void getScreenSpaceData(RenderData& newData);
 
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace);

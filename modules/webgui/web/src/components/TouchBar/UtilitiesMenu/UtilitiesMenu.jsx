@@ -1,11 +1,10 @@
 import React from 'react';
-import HelpButton from './HelpButton';
-import HomeButtonContainer from './HomeButtonContainer';
-import Controllers from './Controllers';
+import HelpButton from './presentational/HelpButton';
+import HomeButtonContainer from './containers/HomeButtonContainer';
+import InfoButtonController from './containers/InfoButtonContainer';
+import Controllers from './containers/Controllers';
 
-import styles from './UtilitiesMenu.scss';
-import InfoButtonController from './InfoButtonContainer';
-
+import styles from './style/UtilitiesMenu.scss';
 
 const UtilitiesMenu = () => (
   <div className={styles.UtilitiesMenu}>

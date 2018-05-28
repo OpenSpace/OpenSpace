@@ -14,16 +14,15 @@ import TouchBar from '../components/TouchBar/TouchBar';
 import styles from './OnTouchGui.scss';
 import { traverseTreeWithURI } from '../utils/propertyTreeHelpers';
 import {
-  infoIconKey, SetGoToGeoScript, ValuePlaceholder, OriginKey, StoryIdentifierKey,
-  ApplyRemoveTagKey, ApplyAddTagKey, FocusNodesListKey, SetTimeScript, defaultStory,
+  infoIconKey, ValuePlaceholder, OriginKey, StoryIdentifierKey,
+  ApplyRemoveTagKey, ApplyAddTagKey, FocusNodesListKey, defaultStory,
   OverlimitKey, ScaleKey, ZoomInLimitKey,
 } from '../api/keys';
-import DataManager from '../api/DataManager';
 import Slider from '../components/ImageSlider/Slider';
 import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
 import { toggleShading, toggleHighResolution, toggleHidePlanet, toggleGalaxies, toggleZoomOut,
-  resetBoolProperty } from '../utils/storyHelpers';
-import DeveloperMenu from '../components/TouchBar/UtilitiesMenu/DeveloperMenu';
+  resetBoolProperty, setStoryStart } from '../utils/storyHelpers';
+import DeveloperMenu from '../components/TouchBar/UtilitiesMenu/presentational/DeveloperMenu';
 
 const KEYCODE_D = 68;
 
@@ -72,7 +71,7 @@ class OnTouchGui extends Component {
 
   setStory(selectedStory) {
     const {
-      storyIdentifierNode, applyRemoveTag, focusNodesList, applyAddTag, focusNode, overViewNode, zoomInNode,
+      storyIdentifierNode, applyRemoveTag, focusNodesList, applyAddTag, focusNode, overViewNode,
     } = this.props;
 
     // Check if the selected story is different from the OpenSpace property value
@@ -90,55 +89,45 @@ class OnTouchGui extends Component {
       this.props.ChangePropertyValue(applyAddTag.Description, '');
       this.props.ChangePropertyValue(focusNode.Description, json.start.planet);
       this.props.ChangePropertyValue(overViewNode.Description, json.overviewlimit);
+      setStoryStart(json.start.location, json.start.time);
 
       // Check settings of the previous story and reset values
       this.checkStorySettings(this.props.story, 'true');
       // Check and set the settings of the current story
       this.checkStorySettings(json, 'false');
 
-      // If the previous story scaled planets -> reset value
+      // If the previous story scaled planets reset value
       if (this.props.story.scaleplanets) {
         this.props.scaleNodes.forEach((planet) => {
           this.props.ChangePropertyValue(planet.Description, '1');
         });
       }
-
+      // If the previous story toggled bool properties reset them to default value
       if (this.props.story.toggleboolproperties) {
         this.props.story.toggleboolproperties.forEach((property) => {
           resetBoolProperty(property.URI, property.defaultvalue);
         });
       }
-
-      const startPosition = json.start.location;
-      const goToGeoScript = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.latitude}, ${startPosition.longitude}, ${startPosition.altitude}`);
-      const setTimeScript = SetTimeScript.replace(ValuePlaceholder, `${json.start.time}`);
-
-      DataManager.runScript(setTimeScript);
-      DataManager.runScript(goToGeoScript);
     }
   }
 
-  // Check story settings
   checkStorySettings(story, value) {
     const oppositeValue = (value === 'true') ? 'false' : 'true';
-    const zoomLimit = (value === 'true') ? '0' : story.inzoomlimit;
-    // Check if the story hide any nodes
+
     if (story.hideplanets) {
       story.hideplanets.forEach(planet => toggleHidePlanet(planet, value));
     }
-    // Check if the story have planets with high resolution data
     if (story.highresplanets) {
       story.highresplanets.forEach(planet => toggleHighResolution(planet, oppositeValue));
     }
-    // Check if the story have planets with no shading
     if (story.noshadingplanets) {
       story.noshadingplanets.forEach(planet => toggleShading(planet, value));
     }
-    // Check if the story display galaxies
     if (story.galaxies) {
       toggleGalaxies(oppositeValue);
     }
     if (story.inzoomlimit) {
+      const zoomLimit = (value === 'true') ? '0' : story.inzoomlimit;
       this.props.ChangePropertyValue(this.props.zoomInNode.Description, zoomLimit);
     }
     if (story.zoomout) {
@@ -275,6 +264,8 @@ OnTouchGui.propTypes = {
   ChangePropertyValue: PropTypes.func,
   StartListening: PropTypes.func,
   AddStoryTree: PropTypes.func,
+  AddStoryInfo: PropTypes.func,
+  ResetStoryInfo: PropTypes.func,
   storyIdentifierNode: PropTypes.objectOf(PropTypes.shape({})),
   story: PropTypes.objectOf(PropTypes.shape({})),
   applyRemoveTag: PropTypes.objectOf(PropTypes.shape({})),
@@ -294,6 +285,8 @@ OnTouchGui.defaultProps = {
   ChangePropertyValue: () => {},
   StartListening: () => {},
   AddStoryTree: () => {},
+  AddStoryInfo: () => {},
+  ResetStoryInfo: () => {},
   storyIdentifierNode: {},
   story: {},
   applyRemoveTag: {},

@@ -5,7 +5,7 @@ import MarkerInfo from './MarkerInfo';
 import { traverseTreeWithURI, jsonToLuaTable } from '../../../utils/propertyTreeHelpers';
 import { startListening, stopListening } from '../../../api/Actions/index';
 import { fromStringToArray } from '../../../utils/storyHelpers';
-import { infoIconKey, OriginKey, FocusNodesListKey } from '../../../api/keys';
+import { OriginKey, FocusNodesListKey } from '../../../api/keys';
 
 class Markers extends Component {
   // Check if the point [x,y] is outside the circle with the center [centerX,centerY] and radius r

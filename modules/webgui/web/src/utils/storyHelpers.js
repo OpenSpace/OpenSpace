@@ -1,7 +1,16 @@
 import DataManager from '../api/DataManager';
+import { SetGoToGeoScript, ValuePlaceholder, SetTimeScript } from '../api/keys';
 
 // Function for converting the focus node list to an array
 export const fromStringToArray = string => string.replace(/['"]+/g, '').split(', ');
+
+// Function to set the time and location for the start of a story
+export const setStoryStart = (startPosition, startTime) => {
+  const goToGeoScript = SetGoToGeoScript.replace(ValuePlaceholder, `${startPosition.latitude}, ${startPosition.longitude}, ${startPosition.altitude}`);
+  const setTimeScript = SetTimeScript.replace(ValuePlaceholder, `${startTime}`);
+  DataManager.runScript(setTimeScript);
+  DataManager.runScript(goToGeoScript);
+};
 
 // Function to toggle the shading on a planet, value = 'true' equals shading enabled
 export const toggleShading = (planet, value) => {

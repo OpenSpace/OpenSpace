@@ -57,12 +57,20 @@ class Slider extends Component {
 
   // Set the state to the next slide
   nextSlide() {
-    this.setState({ index: this.state.index + 1 });
+    if (this.state.index !== this.state.imagePaths.length - 1) {
+      this.setState({ index: this.state.index + 1 });
+    } else {
+      this.setState({ index: 0 });
+    }
   }
 
   // Set the state to the previous slide
   prevSlide() {
-    this.setState({ index: this.state.index - 1 });
+    if (this.state.index !== 0) {
+      this.setState({ index: this.state.index - 1 });
+    } else {
+      this.setState({ index: this.state.imagePaths.length - 1 });
+    }
   }
 
   // Handle the click of a dot
@@ -99,9 +107,8 @@ class Slider extends Component {
           imagePaths={this.state.imagePaths}
           dotClick={this.handleDotClick}
         />
-        { this.state.index < this.state.imagePaths.length - 1 ?
-          <RightArrow nextSlide={this.nextSlide} /> : null }
-        { this.state.index > 0 ? <LeftArrow prevSlide={this.prevSlide} /> : null }
+        <RightArrow nextSlide={this.nextSlide} />
+        <LeftArrow prevSlide={this.prevSlide} />
       </div>
     );
   }

@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { OriginKey, SetGoToGeoScript, ValuePlaceholder, ScaleKey } from '../../../api/keys';
-import { traverseTreeWithURI } from '../../../utils/propertyTreeHelpers';
-import { changePropertyValue, startListening, stopListening } from '../../../api/Actions';
-import DateController from './DateController';
-import TimePlayerController from './TimePlayerController';
-import SightsController from './SightsController';
-import ScaleController from './ScaleController';
-import ToggleBoolButton from './ToggleBoolButton';
-import DataManager from '../../../api/DataManager';
-import { UpdateDeltaTimeNow } from '../../../utils/timeHelpers';
+import { OriginKey, SetGoToGeoScript, ValuePlaceholder, ScaleKey } from '../../../../api/keys';
+import { traverseTreeWithURI } from '../../../../utils/propertyTreeHelpers';
+import { changePropertyValue, startListening, stopListening } from '../../../../api/Actions';
+import DateController from './../presentational/DateController';
+import TimePlayerController from './../presentational/TimePlayerController';
+import SightsController from './../presentational/SightsController';
+import ScaleController from './../presentational/ScaleController';
+import ToggleBoolButton from './../presentational/ToggleBoolButton';
+import DataManager from '../../../../api/DataManager';
+import { UpdateDeltaTimeNow } from '../../../../utils/timeHelpers';
 
 class Controllers extends Component {
   constructor(props) {

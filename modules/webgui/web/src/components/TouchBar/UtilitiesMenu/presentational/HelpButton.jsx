@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import Icon from '../../common/Icon/Icon';
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
-import Image from '../../../../../../../sync/url/images/files/instructions.png';
+import Icon from '../../../common/Icon/Icon';
+import SmallLabel from '../../../common/SmallLabel/SmallLabel';
+import Image from '../../../../../../../../sync/url/images/files/instructions.png';
 
-import styles from './UtilitiesButtons.scss';
+import styles from './../style/UtilitiesButtons.scss';
 
 class HelpButton extends Component {
   constructor(props) {

@@ -80,11 +80,6 @@ namespace {
         "DistanceFromCamToNode",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo StoryIdentifierInfo = {
-        "StoryIdentifier",
-        "StoryIdentifier",
-        "" // @TODO Missing documentation
-    };
     static const openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
@@ -431,7 +426,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
         else
             _renderable->render(newData, tasks);
-            getScreenSpacePositon(newData);
+            getScreenSpaceData(newData);
     }
 
     // evaluate all the children, tail-recursive function(?)
@@ -564,12 +559,9 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     }
 }
 
-void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
+void SceneGraphNode::getScreenSpaceData(RenderData& newData) {
    
     std::vector<std::string> tags = this->tags();
-
-    //LDEBUG(fmt::format("STORY IDENTIFIER {}", _scene->storyIdentifier()));
-
     const std::string tag = "Story.Interesting";
 
     if (std::find(tags.begin(), tags.end(), tag) != tags.end()) {
@@ -609,7 +601,7 @@ void SceneGraphNode::getScreenSpacePositon(RenderData& newData) {
                 glm::dvec2 radiusInScreenSpace = screenSpacePosition - radiusScreenSpacePosition;
                 double screenSpaceRadius = length(radiusInScreenSpace);
 
-                double zoomThreshold = 0.5, moveThreshold = 1, radiusThreshold = 1.5;
+                double zoomThreshold = 0.5, moveThreshold = 1, radiusThreshold = 2;
 
                 if (abs(_screenSizeRadius - screenSpaceRadius) > radiusThreshold) {
                     _screenSizeRadius.setValue(screenSpaceRadius);

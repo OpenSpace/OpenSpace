@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import {CurrenTimeKey, DeltaTime} from '../../../api/keys';
-import DataManager, {TopicTypes} from "../../../api/DataManager";
-import styles from './TimeController.scss';
-import Button from "../../common/Input/Button/Button";
-import * as timeHelpers from "../../../utils/timeHelpers";
-import ScaleInput from "../../common/Input/ScaleInput/ScaleInput";
+import { CurrenTimeKey, DeltaTime } from '../../../../api/keys';
+import DataManager, { TopicTypes } from '../../../../api/DataManager';
+import styles from './../style/TimeController.scss';
+import Button from '../../../common/Input/Button/Button';
+import * as timeHelpers from '../../../../utils/timeHelpers';
+import ScaleInput from '../../../common/Input/ScaleInput/ScaleInput';
 
 class TimeController extends Component {
   constructor(props) {
@@ -51,10 +51,17 @@ class TimeController extends Component {
     return this.state.time.toUTCString();
   }
 
-  /**
-   * Callback for subscription
-   * @param message [object] - message object sent from Subscription
-   */
+  setSimulationSpeed(value) {
+    this.beforeAdjust = this.beforeAdjust || this.state.deltaTime;
+    const simulationSpeed = (value ** 5);
+    timeHelpers.UpdateDeltaTimeNow(this.beforeAdjust * simulationSpeed);
+  }
+
+  setDate(time) {
+    this.setState({ time });
+    timeHelpers.setDate(time);
+  }
+
   currentTimeCallback(message) {
     const time = new Date(timeHelpers.DateStringWithTimeZone(message.time));
     if (this.mounted) {
@@ -68,20 +75,9 @@ class TimeController extends Component {
     }
   }
 
-  setDate(time) {
-    this.setState({ time });
-    timeHelpers.setDate(time);
-  }
-
-  handleOnTogglePause(){
+  handleOnTogglePause() {
     timeHelpers.togglePause();
-    this.setState({paused: !this.state.paused});
-  }
-
-  setSimulationSpeed(value) {
-    this.beforeAdjust = this.beforeAdjust || this.state.deltaTime;
-    const simulationSpeed = (value ** 5);
-    timeHelpers.UpdateDeltaTimeNow(this.beforeAdjust * simulationSpeed);
+    this.setState({ paused: !this.state.paused });
   }
 
   render() {
@@ -104,7 +100,7 @@ class TimeController extends Component {
             label="Simulation Speed"
             min={-10}
             max={10}
-            saveValue={true}
+            saveValue
             onChange={this.setSimulationSpeed}
           />
         </div>

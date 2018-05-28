@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import InfoButton from './InfoButton';
+import InfoButton from './../presentational/InfoButton';
 
 class InfoButtonController extends Component {
   constructor(props) {

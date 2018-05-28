@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styles from './UtilitiesButtons.scss';
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
+import styles from './../style/UtilitiesButtons.scss';
+import SmallLabel from '../../../common/SmallLabel/SmallLabel';
 
 class ToggleBoolButton extends Component {
   constructor(props) {
@@ -45,17 +45,16 @@ class ToggleBoolButton extends Component {
 }
 
 ToggleBoolButton.propTypes = {
-  properties: PropTypes.objectOf(PropTypes.shape({})),
-  nodes: PropTypes.objectOf(PropTypes.shape({
+  properties: PropTypes.arrayOf(PropTypes.shape({})),
+  nodes: PropTypes.arrayOf(PropTypes.shape({
     Value: PropTypes.string,
-    Description: PropTypes.string,
   })),
   onToggle: PropTypes.func,
 };
 
 ToggleBoolButton.defaultProps = {
-  properties: {},
-  nodes: {},
+  properties: [],
+  nodes: [],
   onToggle: () => {},
 };
 

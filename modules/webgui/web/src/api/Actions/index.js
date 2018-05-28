@@ -83,11 +83,11 @@ export const fetchDataDone = (data, id) => ({
   },
 });
 
-export const fetchDataFailed = (id) => ({
+export const fetchDataFailed = id => ({
   type: actionTypes.fetchDataFailed,
   payload: {
     id,
-  }
+  },
 });
 
 export const addStoryTree = story => ({

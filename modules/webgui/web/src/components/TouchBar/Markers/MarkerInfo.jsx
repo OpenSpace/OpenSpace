@@ -1,44 +1,42 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import SmallLabel from '../../common/SmallLabel/SmallLabel';
 import styles from './MarkerInfo.scss';
 import MarkerInfoIcon from './MarkerInfoIcon';
 
-class MarkerInfo extends Component {
-  render() {
-    const { position, size, showInfo, identifier, showLabel, planetRadius } = this.props;
+const MarkerInfo = (props) => {
+  const { position, size, showInfo, identifier, showLabel, planetRadius, planetInfo } = props;
 
-    const positionStyles = {
-      MarkerInfo: {
-        left: `${position[0]}px`,
-        bottom: `calc(${position[1]}px + ${planetRadius}px)`,
-      },
-      Icon: {
-        fontSize: `${size}em`,
-      },
-      Text: {
-        fontSize: `${size / 2}em`,
-      },
-    };
+  const positionStyles = {
+    MarkerInfo: {
+      left: `${position[0]}px`,
+      bottom: `calc(${position[1]}px + ${planetRadius}px)`,
+    },
+    Icon: {
+      fontSize: `${size}em`,
+    },
+    Text: {
+      fontSize: `${size / 2}em`,
+    },
+  };
 
-    return (
-      <div className={styles.MarkerInfo} style={positionStyles.MarkerInfo}>
-        {showInfo &&
+  return (
+    <div className={styles.MarkerInfo} style={positionStyles.MarkerInfo}>
+      {showInfo &&
         <MarkerInfoIcon
           identifier={identifier}
           positionStyles={positionStyles}
-          planetInfo={this.props.planetInfo}
+          planetInfo={planetInfo}
         />}
-        {showLabel &&
+      {showLabel &&
         <SmallLabel
           style={positionStyles.Text}
         >
           {identifier}
         </SmallLabel>}
-      </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 MarkerInfo.propTypes = {
   position: PropTypes.arrayOf(PropTypes.string),

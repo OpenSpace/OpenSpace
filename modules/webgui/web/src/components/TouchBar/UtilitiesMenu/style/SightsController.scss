@@ -1,6 +1,6 @@
-@import "../../../styles/all";
+@import "../../../../styles/all";
 
-.dateController {
+.sightsController {
   display: flex;
   flex-direction: column;
   min-width: 110px;
@@ -12,22 +12,16 @@
   border-bottom: 3px solid $ui-highlight-secondary;
 }
 
-.date {
-  float:left;
-  width: 60px;
-  margin-right: 20px;
-}
-
-.label {
-  float: left;
-}
-
-.dateButton {
-  min-width: 100px;
+.sightsLabel {
   display: flex;
+  justify-content: flex-start;
   padding: 10px;
 }
 
-.dateButton:active {
+.sightsLabel:last-child {
+  padding: 10px;
+}
+
+.sightsLabel:active {
   color: $ui-highlight-secondary;
 }

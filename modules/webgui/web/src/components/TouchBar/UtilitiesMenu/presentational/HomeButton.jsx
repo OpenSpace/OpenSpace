@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Icon from '../../common/Icon/Icon';
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
-import styles from './UtilitiesButtons.scss';
+import Icon from '../../../common/Icon/Icon';
+import SmallLabel from '../../../common/SmallLabel/SmallLabel';
+import styles from './../style/UtilitiesButtons.scss';
 
 const HomeButton = props => (
   <div

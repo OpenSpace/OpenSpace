@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
-import Icon from '../../common/Icon/Icon';
-import Popover from '../../common/Popover/Popover';
-import Picker from '../../BottomBar/Picker';
-import Button from '../../common/Input/Button/Button';
-import * as timeHelpers from '../../../utils/timeHelpers';
+import SmallLabel from '../../../common/SmallLabel/SmallLabel';
+import Icon from '../../../common/Icon/Icon';
+import Popover from '../../../common/Popover/Popover';
+import Picker from '../../../BottomBar/Picker';
+import Button from '../../../common/Input/Button/Button';
+import * as timeHelpers from '../../../../utils/timeHelpers';
 
-import buttonStyle from './UtilitiesButtons.scss';
-import styles from './DateController.scss';
+import buttonStyle from './../style/UtilitiesButtons.scss';
+import styles from './../style/DateController.scss';
 
 class DateController extends Component {
   constructor(props) {

@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { CurrenTimeKey, DeltaTime, FastRewind, Rewind, Play, Forward, FastForward } from '../../../api/keys';
-import DataManager, { TopicTypes } from '../../../api/DataManager';
-import styles from './TimeController.scss';
-import buttonStyles from '../UtilitiesMenu/UtilitiesButtons.scss';
-import Button from '../../common/Input/Button/Button';
-import * as timeHelpers from '../../../utils/timeHelpers';
-import Icon from '../../common/Icon/Icon';
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
+import { CurrenTimeKey, DeltaTime, FastRewind, Rewind, Play, Forward, FastForward } from '../../../../api/keys';
+import DataManager, { TopicTypes } from '../../../../api/DataManager';
+import styles from './../style/TimeController.scss';
+import buttonStyles from './../style/UtilitiesButtons.scss';
+import * as timeHelpers from '../../../../utils/timeHelpers';
+import Icon from '../../../common/Icon/Icon';
+import SmallLabel from '../../../common/SmallLabel/SmallLabel';
 
 const FastSpeed = 86400;
 const Speed = 3600;
@@ -76,24 +75,15 @@ class TimePlayerController extends Component {
     if (this.mounted) {
       this.setState({ deltaTime: message.deltaTime });
       // Translate delta time to a player button
-      let active = '';
-      if (message.deltaTime === 1) {
-        this.setState({ paused: false });
-        active = Play;
-      } else if (message.deltaTime === 0) {
-        this.setState({ paused: true });
-        active = Play;
-      } else if (message.deltaTime === Speed) {
-        active = Forward;
-      } else if (message.deltaTime === FastSpeed) {
-        active = FastForward;
-      } else if (message.deltaTime === -Speed) {
-        active = Rewind;
-      } else if (message.deltaTime === -FastSpeed) {
-        active = FastRewind;
+      switch (message.deltaTime) {
+        case 1: this.setState({ paused: false, activePlayer: Play }); break;
+        case 0: this.setState({ paused: true, activePlayer: Play }); break;
+        case Speed: this.setState({ activePlayer: Forward }); break;
+        case -Speed: this.setState({ activePlayer: Rewind }); break;
+        case FastSpeed: this.setState({ activePlayer: FastForward }); break;
+        case -FastSpeed: this.setState({ activePlayer: FastRewind }); break;
+        default: break;
       }
-
-      this.setState({ activePlayer: active });
     }
   }
 
@@ -107,26 +97,17 @@ class TimePlayerController extends Component {
   clickPlayer(e) {
     this.setState({ activePlayer: e.target.id });
     switch (e.target.id) {
-      case FastRewind:
-        this.setSimulationSpeed(-FastSpeed);
-        break;
-      case Rewind:
-        this.setSimulationSpeed(-Speed);
-        break;
+      case FastRewind: this.setSimulationSpeed(-FastSpeed); break;
+      case Rewind: this.setSimulationSpeed(-Speed); break;
       case Play:
         if (this.state.deltaTime !== 0) {
           this.setState({ paused: true });
           timeHelpers.UpdateDeltaTimeNow(0);
         } else this.setSimulationSpeed(1);
         break;
-      case Forward:
-        this.setSimulationSpeed(Speed);
-        break;
-      case FastForward:
-        this.setSimulationSpeed(FastSpeed);
-        break;
-      default:
-        break;
+      case Forward: this.setSimulationSpeed(Speed); break;
+      case FastForward: this.setSimulationSpeed(FastSpeed); break;
+      default: break;
     }
   }
 
