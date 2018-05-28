@@ -26,10 +26,9 @@
 #define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
 #include <openspace/network/messagestructures.h>
+#include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/exception.h>
 #include <vector>
-
-namespace ghoul::io { class TcpSocket; }
 
 namespace openspace {
 

@@ -33,7 +33,7 @@ local Earth = {
                                 FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
                                     "VIIRS_SNPP_CorrectedReflectance_TrueColor",
                                     "2015-11-24",
-                                    "Yesterday",
+                                    "Today",
                                     "1d",
                                     "250m",
                                     "jpg"

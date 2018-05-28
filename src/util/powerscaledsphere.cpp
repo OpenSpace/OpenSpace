@@ -40,11 +40,6 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
 {
-    static_assert(
-        sizeof(Vertex) == 64,
-        "The size of the Vertex needs to be 64 for performance"
-    );
-
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
     const float r = radius[0];
@@ -129,9 +124,6 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
 {
-    static_assert(sizeof(Vertex) == 64,
-        "The size of the Vertex needs to be 64 for performance");
-
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
 

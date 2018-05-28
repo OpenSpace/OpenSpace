@@ -60,7 +60,7 @@ private:
     Timeline<Time> _timeline;
     SyncData<Time> _currentTime;
     void consumeKeyframes(double dt);
-    double _latestConsumedTimestamp;
+    double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;

@@ -29,10 +29,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>

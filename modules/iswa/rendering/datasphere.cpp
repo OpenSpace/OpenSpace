@@ -26,6 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/rendering/iswabasegroup.h>

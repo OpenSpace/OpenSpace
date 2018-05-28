@@ -50,6 +50,9 @@ public:
 
 private:
     struct Peer {
+        //Peer(size_t id_, std::string name_, ParallelConnection parallelConnection_,
+            //ParallelConnection::Status status_, std::thread )
+
         size_t id;
         std::string name;
         ParallelConnection parallelConnection;

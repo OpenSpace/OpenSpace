@@ -27,8 +27,12 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
 #include <openspace/engine/openspaceengine.h>
-#include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/fmt.h>
+#include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocket.h>
+#include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace {

@@ -32,6 +32,7 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "WebBrowser";

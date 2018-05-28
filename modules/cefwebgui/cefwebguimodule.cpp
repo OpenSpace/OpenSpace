@@ -31,6 +31,8 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <modules/cefwebgui/include/guirenderhandler.h>
+#include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "CefWebGui";

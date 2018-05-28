@@ -25,6 +25,7 @@
 #include <openspace/network/parallelserver.h>
 
 #include <ghoul/fmt.h>
+#include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
 #include <functional>
 

@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "LayerManager";

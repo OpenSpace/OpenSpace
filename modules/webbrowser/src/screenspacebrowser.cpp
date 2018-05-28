@@ -29,6 +29,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 namespace {

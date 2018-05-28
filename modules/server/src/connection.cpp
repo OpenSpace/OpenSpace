@@ -35,6 +35,7 @@
 #include <modules/server/include/topics/triggerpropertytopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
+#include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/logging/logmanager.h>

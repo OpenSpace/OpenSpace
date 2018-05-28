@@ -27,6 +27,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/logging/logmanager.h>
 #include <glm/gtx/transform.hpp>
 
 namespace {

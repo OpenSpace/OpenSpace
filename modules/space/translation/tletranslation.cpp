@@ -27,6 +27,7 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <chrono>
 #include <fstream>
 #include <vector>
 

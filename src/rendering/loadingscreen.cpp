@@ -26,6 +26,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>

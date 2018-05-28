@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "LayerGroup";

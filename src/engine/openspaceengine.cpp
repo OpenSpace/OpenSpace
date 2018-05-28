@@ -277,7 +277,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
-        _engine->_commandlineParser->displayHelp();
+        _engine->_commandlineParser->displayHelp(std::cout);
         requestClose = true;
         return;
     }

@@ -37,6 +37,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
+#include <ghoul/logging/logmanager.h>
 
 using nlohmann::json;
 
