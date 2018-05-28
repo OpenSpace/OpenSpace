@@ -7,7 +7,6 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/stringlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace::webgui {
 
@@ -19,7 +18,6 @@ namespace openspace::webgui {
         void addTags();
         float overviewLimit();
         float zoomInLimit();
-        bool storyStyleActive();
 
     private:
         properties::FloatProperty _overviewLimit;
@@ -28,7 +26,6 @@ namespace openspace::webgui {
         properties::TriggerProperty _applyAddTag;
         properties::TriggerProperty _applyRemoveTag;
         properties::StringProperty _focusNodesList;
-        properties::BoolProperty _storyStyleActive;
 
     }; // namespace openspace webgui
 };

@@ -50,7 +50,7 @@ export const hideDevInfoOnScreen = (value) => {
   DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", ${!value})`);
   DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.Framerate.Enabled", ${!value})`);
   DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.ParallelConnection.Enabled", ${!value})`);
-  DataManager.runScript(`openspace.setPropertyValueSingle("Modules.WebGui.StoryHandler.StoryStyleActive", ${value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.Distance.StoryStyleActive", ${value})`);
 };
 
 // Function to show or hide distance from camera to focus on screen.

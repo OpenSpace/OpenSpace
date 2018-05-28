@@ -23,11 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/base/dashboard/dashboarditemdistance.h>
-#include <modules/webgui/webguimodule.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -99,6 +97,12 @@ namespace {
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used as a destination "
         "to convert the meters into."
+    };
+
+    static const openspace::properties::Property::PropertyInfo StoryStyleActiveInfo = {
+        "StoryStyleActive",
+        "StoryStyleActive",
+        "This property is true when a story is active and it will affect the styling in the GUI."
     };
 
     std::vector<std::string> unitList() {
@@ -189,6 +193,7 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
     , _doSimplification(SimplificationInfo, true)
+    , _storyStyleActive(StoryStyleActiveInfo, false)
     , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _source{
         properties::OptionProperty(
@@ -212,6 +217,8 @@ DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
         dictionary,
         "DashboardItemDistance"
     );
+
+    addProperty(_storyStyleActive);
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
         _fontName = dictionary.value<std::string>(FontNameInfo.identifier);
@@ -435,8 +442,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
-    if (module.storyHandler.storyStyleActive()) {
+    if (_storyStyleActive) {
         penPosition.y -= (_font->height() * 6);
         penPosition.x = 40;
     }

@@ -38,11 +38,6 @@ namespace {
         "FocusNodesList",
         "Contains a string with all the wanted focus nodes listed for the current story."
     };
-    static const openspace::properties::Property::PropertyInfo StoryStyleActiveInfo = {
-        "StoryStyleActive",
-        "StoryStyleActive",
-        "This property is true when a story is active and it will affect the styling in the GUI."
-    };
 }
 
 namespace openspace::webgui {
@@ -53,7 +48,7 @@ namespace openspace::webgui {
         , _applyAddTag(ApplyAddTagInfo)
         , _applyRemoveTag(ApplyRemoveTagInfo)
         , _focusNodesList(FocusNodesListInfo, std::string(""))
-        , _storyStyleActive(StoryStyleActiveInfo, false)
+
     {
         addProperty(_overviewLimit);
         addProperty(_zoomInLimit);
@@ -61,7 +56,6 @@ namespace openspace::webgui {
         addProperty(_applyAddTag);
         addProperty(_applyRemoveTag);
         addProperty(_focusNodesList);
-        addProperty(_storyStyleActive);
 
         _applyAddTag.onChange([this]() {addTags(); });
         _applyRemoveTag.onChange([this]() {removeTags(); });
@@ -89,8 +83,5 @@ namespace openspace::webgui {
         return _zoomInLimit;
     };
 
-    bool StoryHandler::storyStyleActive() {
-        return _storyStyleActive;
-    };
 };// namespace
 
