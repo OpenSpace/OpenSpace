@@ -1,0 +1,22 @@
+@import "../../../styles/all";
+
+.menuContainer {
+    left: calc(100% - 200px);
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    background-color: black;
+}
+
+.developerButtons {
+    background-color: $ui-background-solid;
+  }
+  
+.active {
+    background-color: rgba(black, 0.5);
+    border-bottom: 3px solid $ui-highlight-secondary;
+    color:  $ui-highlight-secondary;
+}

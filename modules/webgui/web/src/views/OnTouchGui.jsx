@@ -23,21 +23,29 @@ import Slider from '../components/ImageSlider/Slider';
 import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
 import { toggleShading, toggleHighResolution, toggleHidePlanet, toggleGalaxies, toggleZoomOut,
   resetBoolProperty } from '../utils/storyHelpers';
+import DeveloperMenu from '../components/TouchBar/UtilitiesMenu/DeveloperMenu';
 
+const KEYCODE_D = 68;
 
 class OnTouchGui extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      developerMode: false,
+    };
+
     this.changeStory = this.changeStory.bind(this);
     this.setStory = this.setStory.bind(this);
-    this.getDeveloperButtons = this.getDeveloperButtons.bind(this);
     this.checkStorySettings = this.checkStorySettings.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.toggleDeveloperMode = this.toggleDeveloperMode.bind(this);
   }
 
   componentDidMount() {
     this.props.StartConnection();
     this.props.FetchData(infoIconKey);
+    document.addEventListener('keydown', this.handleKeyPress);
   }
 
   componentDidUpdate() {
@@ -58,19 +66,8 @@ class OnTouchGui extends Component {
     }
   }
 
-  // Buttons for developers to change story
-  getDeveloperButtons() {
-    return (
-      <div style={{ width: '200px', display: 'flex', flexDirection: 'column' }}>
-        <button onClick={this.changeStory} id={defaultStory}>Default Story</button>
-        <button onClick={this.changeStory} id={'story_solarsystem'}>Solar System Story</button>
-        <button onClick={this.changeStory} id={'story_example'}>Example Story</button>
-        <button onClick={this.changeStory} id={'story_earthweather'}>Earth Weather Story</button>
-        <button onClick={this.changeStory} id={'story_jupitermoons'}>Jupiter Moons Story</button>
-        <button onClick={this.changeStory} id={'story_mars'}>Mars Story</button>
-        <button onClick={this.changeStory} id={'story_galaxies'}>Galaxies Story</button>
-      </div>
-    );
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyPress);
   }
 
   setStory(selectedStory) {
@@ -167,8 +164,17 @@ class OnTouchGui extends Component {
     this.setStory(e.target.id);
   }
 
+  handleKeyPress(e) {
+    if (e.keyCode === KEYCODE_D) {
+      this.toggleDeveloperMode();
+    }
+  }
+
+  toggleDeveloperMode() {
+    this.setState({ developerMode: !this.state.developerMode });
+  }
+
   render() {
-    // {this.getDeveloperButtons()}
     return (
       <div className={styles.app}>
         { this.props.connectionLost && (
@@ -178,6 +184,11 @@ class OnTouchGui extends Component {
             </Error>
           </Overlay>
         )}
+        {this.state.developerMode &&
+          <DeveloperMenu
+            changeStory={this.changeStory}
+            storyIdentifier={this.props.storyIdentifierNode.Value}
+          />}
         {(this.props.storyIdentifierNode.length !== 0 &&
           this.props.storyIdentifierNode.Value !== defaultStory)
           ? <TouchBar /> : <Slider changeStory={this.setStory} />
