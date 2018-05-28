@@ -25,13 +25,10 @@
 #include <openspace/util/httprequest.h>
 
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/thread.h>
-#include <chrono>
-#include <cstring>
-#include <stdio.h>
 
 #ifdef OPENSPACE_CURL_ENABLED
 #ifdef WIN32

@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationgenerator.h>
 #include <ghoul/designpattern/singleton.h>
 
+#include <openspace/documentation/documentation.h>
 #include <ghoul/misc/exception.h>
 
 namespace openspace::documentation {

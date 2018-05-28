@@ -30,10 +30,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
-
 #include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
 
 namespace openspace::interaction {
 
@@ -48,16 +45,16 @@ void KeyframeNavigator::updateCamera(Camera& camera) {
                                               _cameraPoseTimeline.firstKeyframeAfter(now);
     const Keyframe<CameraPose>* prevKeyframe =
                                               _cameraPoseTimeline.lastKeyframeBefore(now);
-    double nextTime = 0;
-    double prevTime = 0;
-    double t = 0;
 
+    double nextTime = 0.0;
     if (nextKeyframe) {
         nextTime = nextKeyframe->timestamp;
     } else {
         return;
     }
 
+    double prevTime = 0.0;
+    double t = 0.0;
     if (prevKeyframe) {
         prevTime = prevKeyframe->timestamp;
         t = (now - prevTime) / (nextTime - prevTime);

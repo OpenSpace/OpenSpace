@@ -24,11 +24,11 @@
 
 #include <openspace/properties/vector/vec4property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/glm.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-
 #include <limits>
+#include <sstream>
 
 namespace {
 

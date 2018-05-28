@@ -33,13 +33,9 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     constexpr const char* KeyType = "Type";

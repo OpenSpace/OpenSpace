@@ -27,8 +27,6 @@
 
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/synchronizationwatcher.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -62,7 +60,7 @@ public:
     * Regular asset constructor
     */
     Asset(AssetLoader* loader, SynchronizationWatcher* watcher,
-        ghoul::filesystem::File assetPath);
+        std::string assetPath);
 
     ~Asset() = default;
 

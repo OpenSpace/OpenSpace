@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/raycasterlistener.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>

@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace::luascriptfunctions {
 
 /**
@@ -53,15 +55,13 @@ int bindKey(lua_State* L) {
         return luaL_error(L, error.c_str());
     }
 
-    std::string documentation = nArguments == 3 ?
-        ghoul::lua::value<std::string>(L, 3) :
-        "";
+    std::string doc = (nArguments == 3) ? ghoul::lua::value<std::string>(L, 3) : "";
 
     OsEng.keyBindingManager().bindKey(
         iKey.key,
         iKey.modifier,
         std::move(command),
-        std::move(documentation)
+        std::move(doc)
     );
 
     lua_settop(L, 0);
@@ -94,15 +94,13 @@ int bindKeyLocal(lua_State* L) {
         return luaL_error(L, error.c_str());
     }
 
-    std::string documentation = nArguments == 3 ?
-        ghoul::lua::value<std::string>(L, 3) :
-        "";
+    std::string doc = nArguments == 3 ? ghoul::lua::value<std::string>(L, 3) : "";
 
     OsEng.keyBindingManager().bindKeyLocal(
         iKey.key,
         iKey.modifier,
         std::move(command),
-        std::move(documentation)
+        std::move(doc)
     );
 
     lua_settop(L, 0);
@@ -136,11 +134,11 @@ int getKeyBindings(lua_State* L) {
         lua_pushnumber(L, i);
 
         lua_createtable(L, 2, 0);
-        lua_pushstring(L, "Command");
-        lua_pushstring(L, it.second.command.c_str());
+        ghoul::lua::push(L, "Command");
+        ghoul::lua::push(L, it.second.command);
         lua_settable(L, -3);
-        lua_pushstring(L, "Remote");
-        lua_pushboolean(L, it.second.synchronization);
+        ghoul::lua::push(L, "Remote");
+        ghoul::lua::push(L, static_cast<bool>(it.second.synchronization));
         lua_settable(L, -3);
 
         lua_settable(L, -3);

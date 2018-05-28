@@ -26,8 +26,7 @@
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
 #include <openspace/util/timeline.h>
-#include <openspace/network/parallelpeer.h>
-
+#include <openspace/network/messagestructures.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 

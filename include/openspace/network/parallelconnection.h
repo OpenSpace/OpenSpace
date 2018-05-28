@@ -26,8 +26,10 @@
 #define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
 #include <openspace/network/messagestructures.h>
-#include <ghoul/io/socket/tcpsocket.h>
+#include <ghoul/misc/exception.h>
 #include <vector>
+
+namespace ghoul::io { class TcpSocket; }
 
 namespace openspace {
 
@@ -76,7 +78,7 @@ public:
 
     bool isConnectedOrConnecting() const;
     void sendDataMessage(const ParallelConnection::DataMessage& dataMessage);
-    bool sendMessage(const  ParallelConnection::Message& message);
+    bool sendMessage(const ParallelConnection::Message& message);
     void disconnect();
     ghoul::io::TcpSocket* socket();
 

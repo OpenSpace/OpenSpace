@@ -24,16 +24,13 @@
 
 #include <openspace/scripting/scriptengine.h>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-//#include <ghoul/misc/exception.h>
-
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
-
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <fstream>
 
 #include "scriptengine_lua.inl"

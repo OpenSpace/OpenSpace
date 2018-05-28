@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/logmanager.h>
 #include <gdal.h>
 
 #include <cpl_conv.h>

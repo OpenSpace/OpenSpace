@@ -27,8 +27,8 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/misc.h>
-
 #include <limits>
+#include <sstream>
 
 namespace {
 

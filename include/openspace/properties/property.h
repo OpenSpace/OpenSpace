@@ -25,11 +25,8 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
-#include <openspace/properties/propertydelegate.h>
-
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
-
 #include <functional>
 #include <string>
 

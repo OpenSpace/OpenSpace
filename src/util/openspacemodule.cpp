@@ -30,10 +30,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <algorithm>
 
 #include <openspace/modulepath.h>
 
-#include <algorithm>
 
 namespace {
     constexpr const char* _loggerCat = "OpenSpaceModule";

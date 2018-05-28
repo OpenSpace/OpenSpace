@@ -38,6 +38,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/dashboarditem.h>
@@ -62,9 +63,11 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>

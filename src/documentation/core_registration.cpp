@@ -33,6 +33,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>

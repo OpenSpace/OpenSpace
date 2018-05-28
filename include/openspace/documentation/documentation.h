@@ -27,7 +27,6 @@
 
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
-
 #include <memory>
 #include <string>
 #include <vector>

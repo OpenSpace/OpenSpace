@@ -27,8 +27,10 @@
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <ghoul/fmt.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace {

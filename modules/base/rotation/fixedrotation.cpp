@@ -29,6 +29,7 @@
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 
 namespace {

@@ -26,17 +26,12 @@
 #define __OPENSPACE_CORE___POWERSCALEDSCALAR___H__
 
 #include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <iostream>
 
 namespace openspace {
 
 class PowerScaledScalar {
 public:
-    // constructors
-    PowerScaledScalar();
+    PowerScaledScalar() = default;
     PowerScaledScalar(const glm::vec2 &v);
     PowerScaledScalar(float f1, float f2);
     static PowerScaledScalar CreatePSS(double d1);
@@ -49,13 +44,13 @@ public:
     // operator overloading
     PowerScaledScalar& operator=(const PowerScaledScalar& rhs);
     PowerScaledScalar& operator+=(const PowerScaledScalar& rhs);
-    const PowerScaledScalar operator+(const PowerScaledScalar& rhs) const;
+    const PowerScaledScalar& operator+(const PowerScaledScalar& rhs) const;
     PowerScaledScalar& operator-=(const PowerScaledScalar& rhs);
-    const PowerScaledScalar operator-(const PowerScaledScalar& rhs) const;
+    const PowerScaledScalar& operator-(const PowerScaledScalar& rhs) const;
     PowerScaledScalar& operator*=(const PowerScaledScalar& rhs);
-    const PowerScaledScalar operator*(const PowerScaledScalar& rhs) const;
-    PowerScaledScalar& operator*=(const float& rhs);
-    const PowerScaledScalar operator*(const float& rhs) const;
+    const PowerScaledScalar& operator*(const PowerScaledScalar& rhs) const;
+    PowerScaledScalar& operator*=(float rhs);
+    const PowerScaledScalar& operator*(float rhs) const;
     float& operator[](unsigned int idx);
     float operator[](unsigned int idx) const;
 
@@ -83,7 +78,7 @@ public:
 
 private:
     // float vector used when returning float values
-    glm::vec2 _data;
+    glm::vec2 _data = glm::vec2(0.f);
 };
 
 typedef PowerScaledScalar pss;

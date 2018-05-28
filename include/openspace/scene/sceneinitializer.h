@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___SCENEINITIALIZER___H__
 
 #include <openspace/util/threadpool.h>
-#include <mutex>
 #include <unordered_set>
 #include <vector>
 

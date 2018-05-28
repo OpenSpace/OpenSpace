@@ -36,6 +36,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* KeyFontMono = "Mono";

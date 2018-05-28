@@ -23,52 +23,37 @@
  ****************************************************************************************/
 
 #include <openspace/util/powerscaledcoordinate.h>
+
 #include <openspace/util/powerscaledscalar.h>
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-
 namespace {
-    const double k = 10.0;
+    constexpr const double k = 10.0;
 } // namespace
 
 namespace openspace {
 
-
-PowerScaledCoordinate::PowerScaledCoordinate()
-    : _vec(0.f)
-{
-}
-
-PowerScaledCoordinate::PowerScaledCoordinate(PowerScaledCoordinate&& rhs)
-{
+PowerScaledCoordinate::PowerScaledCoordinate(PowerScaledCoordinate&& rhs) {
     _vec = std::move(rhs._vec);
 }
 
-PowerScaledCoordinate::PowerScaledCoordinate(glm::vec4 v)
-{
+PowerScaledCoordinate::PowerScaledCoordinate(glm::vec4 v) {
     _vec = std::move(v);
 }
 
-PowerScaledCoordinate::PowerScaledCoordinate(glm::vec3 v)
-{
-    _vec = glm::vec4(v[0], v[1], v[2], 0.f);
+PowerScaledCoordinate::PowerScaledCoordinate(glm::vec3 v) {
+    _vec = glm::vec4(v, 0.f);
 }
 
-
-PowerScaledCoordinate::PowerScaledCoordinate(float f1, float f2, float f3, float f4)
-{
+PowerScaledCoordinate::PowerScaledCoordinate(float f1, float f2, float f3, float f4) {
     _vec = glm::vec4(f1, f2, f3, f4);
 }
 
 PowerScaledCoordinate::PowerScaledCoordinate(const PowerScaledCoordinate& rhs) {
     _vec = rhs._vec;
-
 }
 
 PowerScaledCoordinate
-      PowerScaledCoordinate::CreatePowerScaledCoordinate(double d1, double d2, double d3)
+PowerScaledCoordinate::CreatePowerScaledCoordinate(double d1, double d2, double d3)
 {
     char buff[600];
 

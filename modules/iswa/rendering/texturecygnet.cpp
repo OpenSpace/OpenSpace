@@ -25,8 +25,9 @@
 #include <modules/iswa/rendering/texturecygnet.h>
 
 #include <modules/iswa/util/iswamanager.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr const char* _loggerCat = "TextureCygnet";

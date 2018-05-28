@@ -27,7 +27,6 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
 #include <ghoul/misc/templatefactory.h>
 
 namespace {

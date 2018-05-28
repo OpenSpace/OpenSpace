@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/designpattern/event.h>
 #include <atomic>
+#include <deque>
 #include <mutex>
 #include <string>
 #include <thread>

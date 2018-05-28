@@ -24,24 +24,18 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
-#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/keyframenavigator.h>
+#include <openspace/interaction/inputstate.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/util/camera.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtx/quaternion.hpp>
-
 #include <fstream>
 
 namespace {
@@ -124,7 +118,6 @@ void NavigationHandler::setFocusNode(SceneGraphNode* node) {
 
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
-    //setFocusNode(_camera->parent());
 }
 
 void NavigationHandler::resetCameraDirection() {

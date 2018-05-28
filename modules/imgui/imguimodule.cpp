@@ -29,10 +29,12 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 

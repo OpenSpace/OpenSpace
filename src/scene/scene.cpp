@@ -24,40 +24,18 @@
 
 #include <openspace/scene/scene.h>
 
-#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/invariants.h>
-#include <ghoul/misc/threadpool.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <algorithm>
-#include <chrono>
-#include <iostream>
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <ghoul/opengl/programobject.h>
-#include <iterator>
-#include <fstream>
 #include <string>
 #include <stack>
-#include <unordered_map>
-#include <vector>
 
 #include "scene_lua.inl"
 

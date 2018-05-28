@@ -30,6 +30,7 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/misc/sharedmemory.h>
+#include <array>
 #include <numeric>
 
 namespace {

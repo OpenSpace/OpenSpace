@@ -233,11 +233,11 @@ TouchInteraction::TouchInteraction()
     , _zoomSensitivity(ZoomSensitivityInfo, 1.025f, 1.0f, 1.1f)
     , _zoomSensitivityDistanceThreshold(
         ZoomSensitivityDistanceThresholdInfo,
-        0.05,
-        0.01,
-        0.25
+        0.05f,
+        0.01f,
+        0.25f
     )
-    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -924,7 +924,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         return ROT;
     }
     else {
-        float avgDistance = std::abs(dist - lastDist) / list.at(0).getMotionSpeed();
+        float avgDistance = static_cast<float>(
+            std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
+        );
         // if average distance between 3 fingers are constant we have panning
         if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
             return PAN;

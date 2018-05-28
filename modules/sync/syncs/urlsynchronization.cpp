@@ -25,19 +25,19 @@
 #include <modules/sync/syncs/urlsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <sstream>
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 #include <numeric>
 #include <memory>
-#include <cstdio>
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr const char* KeyUrl = "Url";

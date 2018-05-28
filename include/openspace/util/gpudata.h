@@ -31,6 +31,9 @@
 #include <string>
 #include <memory>
 
+// @TODO:  This class should disappear as it doesn't server much of a purpose and only
+//         complicates local reasoning
+
 namespace openspace {
 
 /**

@@ -170,7 +170,9 @@ void JoystickCameraStates::setAxisMapping(int axis, AxisType mapping,
 {
     ghoul_assert(axis < JoystickInputState::MaxAxes, "axis must be < MaxAxes");
 
-    _axisMapping[axis] = { mapping, shouldInvert, shouldNormalize };
+    _axisMapping[axis].type = mapping;
+    _axisMapping[axis].invert = shouldInvert;
+    _axisMapping[axis].normalize = shouldNormalize;
 }
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(int axis) const {

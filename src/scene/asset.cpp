@@ -26,6 +26,8 @@
 
 #include <openspace/scene/assetloader.h>
 #include <ghoul/fmt.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <algorithm>
@@ -72,13 +74,13 @@ Asset::Asset(AssetLoader* loader, SynchronizationWatcher* syncWatcher)
 {}
 
 Asset::Asset(AssetLoader* loader, SynchronizationWatcher* syncWatcher,
-             ghoul::filesystem::File assetPath
+             std::string assetPath
 )
     : _state(State::Unloaded)
     , _loader(loader)
     , _synchronizationWatcher(syncWatcher)
     , _hasAssetPath(true)
-    , _assetPath(assetPath)
+    , _assetPath(std::move(assetPath))
 {}
 
 std::string Asset::resolveLocalResource(std::string resourceName) {

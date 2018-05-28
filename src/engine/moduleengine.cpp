@@ -27,6 +27,7 @@
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
+#include <ghoul/logging/logmanager.h>
 
 #include "moduleengine_lua.inl"
 

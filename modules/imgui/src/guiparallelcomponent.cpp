@@ -28,6 +28,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/network/messagestructures.h>

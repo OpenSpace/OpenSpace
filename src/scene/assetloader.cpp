@@ -24,16 +24,17 @@
 
 #include <openspace/scene/assetloader.h>
 
-#include <openspace/util/resourcesynchronization.h>
 #include <openspace/scene/assetlistener.h>
+#include <openspace/util/resourcesynchronization.h>
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/defer.h>
-#include <ghoul/filesystem/filesystem.h>
 
-#include <ghoul/fmt.h>
 
 #include "assetloader_lua.inl"
 

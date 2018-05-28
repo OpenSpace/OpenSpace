@@ -22,9 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
-
 namespace openspace::properties {
 
     // The following macros can be used to quickly generate the necessary PropertyDelegate
@@ -195,22 +192,10 @@ ghoul::any TemplateProperty<T>::get() const {
 
 template <typename T>
 void TemplateProperty<T>::set(ghoul::any value) {
-    try {
-        T v = ghoul::any_cast<T>(std::move(value));
-        if (v != _value) {
-            _value = std::move(v);
-            notifyChangeListeners();
-        }
-    }
-    catch (ghoul::bad_any_cast&) {
-        LERRORC(
-            "TemplateProperty",
-            fmt::format(
-                "Illegal cast from '{}' to '{}'",
-                value.type().name(),
-                typeid(T).name()
-            )
-        );
+    T v = ghoul::any_cast<T>(std::move(value));
+    if (v != _value) {
+        _value = std::move(v);
+        notifyChangeListeners();
     }
 }
 

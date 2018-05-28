@@ -24,16 +24,8 @@
 
 #include <openspace/scene/scenelicense.h>
 
-#include <openspace/openspace.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-
-#include <fstream>
-#include <sstream>
 
 namespace {
     constexpr const char* LicenseKeyName = "Name";

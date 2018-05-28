@@ -25,8 +25,6 @@
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/misc.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>

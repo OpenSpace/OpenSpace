@@ -28,14 +28,8 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace {
     constexpr const char* KeyType = "Type";

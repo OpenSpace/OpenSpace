@@ -27,8 +27,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/keys.h>
 #include <ghoul/glm.h>
+#include <sstream>
 
 #include "keybindingmanager_lua.inl"
 
@@ -67,7 +67,7 @@ void KeyBindingManager::resetKeyBindings() {
 }
 
 void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
-                                      std::string luaCommand, std::string documentation)
+                                     std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
         { key, modifier },
@@ -80,7 +80,7 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
 }
 
 void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
-                                 std::string luaCommand, std::string documentation)
+                                std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
         { key, modifier },

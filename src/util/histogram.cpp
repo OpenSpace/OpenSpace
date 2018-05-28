@@ -25,8 +25,6 @@
 #include <openspace/util/histogram.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <cmath>
-#include <cassert>
 
 namespace {
     constexpr const char* _loggerCat = "Histogram";
@@ -39,7 +37,6 @@ Histogram::Histogram(float minValue, float maxValue, int numBins, float* data)
     , _minValue(minValue)
     , _maxValue(maxValue)
     , _data(data)
-    , _numValues(0)
 {
     if (!data) {
         _data = new float[numBins];

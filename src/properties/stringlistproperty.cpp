@@ -26,7 +26,6 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-
 #include <numeric>
 
 namespace {

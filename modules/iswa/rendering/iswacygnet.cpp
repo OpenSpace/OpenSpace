@@ -36,6 +36,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/designpattern/event.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 

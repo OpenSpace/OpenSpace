@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* keyFrame = "Frame";

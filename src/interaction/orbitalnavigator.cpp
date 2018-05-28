@@ -26,11 +26,6 @@
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/rendering/renderable.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {

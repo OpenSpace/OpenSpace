@@ -25,12 +25,13 @@
 #ifndef __OPENSPACE_CORE___SCRIPTENGINE___H__
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
-#include <openspace/util/syncdata.h>
+#include <openspace/util/syncable.h>
 #include <openspace/documentation/documentationgenerator.h>
 
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
+#include <mutex>
 
 namespace openspace { class SyncBuffer; }
 

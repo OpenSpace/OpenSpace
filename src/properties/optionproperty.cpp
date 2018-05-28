@@ -25,6 +25,8 @@
 
 #include <openspace/properties/optionproperty.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace {
     constexpr const char* _loggerCat = "OptionProperty";
 } // namespace

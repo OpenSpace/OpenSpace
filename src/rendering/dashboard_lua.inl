@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/screenspacedashboard.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace::luascriptfunctions {
 

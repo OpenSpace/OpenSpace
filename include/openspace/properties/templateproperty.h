@@ -27,6 +27,8 @@
 
 #include <openspace/properties/property.h>
 
+#include <openspace/properties/propertydelegate.h>
+
 namespace openspace::properties {
 
 /**

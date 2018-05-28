@@ -24,8 +24,9 @@
 
 #include <openspace/util/powerscaledsphere.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 
 namespace {
     constexpr const char* _loggerCat = "PowerScaledSphere";
@@ -34,16 +35,15 @@ namespace {
 namespace openspace {
 
 PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segments)
-    : _vaoID(0)
-    , _vBufferID(0)
-    , _iBufferID(0)
-    , _isize(6 * segments * segments)
+    : _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
 {
-    static_assert(sizeof(Vertex) == 64,
-                  "The size of the Vertex needs to be 64 for performance");
+    static_assert(
+        sizeof(Vertex) == 64,
+        "The size of the Vertex needs to be 64 for performance"
+    );
 
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
@@ -124,10 +124,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
 
 // Alternative Constructor for using accurate triaxial ellipsoid
 PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
-    : _vaoID(0)
-    , _vBufferID(0)
-    , _iBufferID(0)
-    , _isize(6 * segments * segments)
+    : _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
@@ -253,16 +250,9 @@ bool PowerScaledSphere::initialize() {
     glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
     glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
-    );
     glVertexAttribPointer(
         1,
         2,
@@ -271,6 +261,8 @@ bool PowerScaledSphere::initialize() {
         sizeof(Vertex),
         reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
     );
+
+    glEnableVertexAttribArray(2);
     glVertexAttribPointer(
         2,
         3,

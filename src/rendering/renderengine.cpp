@@ -26,37 +26,39 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/openspaceengine.h>
+//#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/navigationhandler.h>
+#include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/dashboard.h>
-#include <openspace/rendering/dashboarditem.h>
+//#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/rendering/renderer.h>
+//#include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
+//#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/camera.h>
-#include <openspace/util/time.h>
+//#include <openspace/util/camera.h>
+//#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
-#include <openspace/util/syncdata.h>
+//#include <openspace/util/syncdata.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/glm.h>
+//#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/font.h>
+//#include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
@@ -76,9 +78,6 @@
 #ifdef GHOUL_USE_STB_IMAGE
 #include <ghoul/io/texture/texturereaderstb.h>
 #endif // GHOUL_USE_STB_IMAGE
-
-#include <array>
-#include <stack>
 
 #include "renderengine_lua.inl"
 

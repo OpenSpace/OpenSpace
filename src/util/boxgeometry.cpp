@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/boxgeometry.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <string>
 

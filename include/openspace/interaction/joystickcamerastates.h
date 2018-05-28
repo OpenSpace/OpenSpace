@@ -63,7 +63,6 @@ public:
         float deadzone = 0.f;
     };
 
-
     JoystickCameraStates(double sensitivity, double velocityScaleFactor);
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;

@@ -26,12 +26,14 @@
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
 #include <openspace/scene/asset.h>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 struct lua_State;
 
+namespace ghoul::filesystem { class Directory; }
 namespace ghoul::lua { class LuaState; }
 
 namespace openspace {

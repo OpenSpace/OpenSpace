@@ -23,13 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/factorymanager.h>
-#include <openspace/openspace.h>
 
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-#include <iterator>
-#include <fstream>
 #include <sstream>
 
 namespace {

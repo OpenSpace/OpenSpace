@@ -83,8 +83,16 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         int iCorner0 = cornersInLines[i * 2];
         int iCorner1 = cornersInLines[i * 2 + 1];
 
-        glm::vec3 corner0 = glm::vec3(iCorner0 % 2, (iCorner0 / 2) % 2, iCorner0 / 4) - halfSize;
-        glm::vec3 corner1 = glm::vec3(iCorner1 % 2, (iCorner1 / 2) % 2, iCorner1 / 4) - halfSize;
+        glm::vec3 corner0 = glm::vec3(
+            iCorner0 % 2,
+            (iCorner0 / 2) % 2,
+            iCorner0 / 4
+        ) - halfSize;
+        glm::vec3 corner1 = glm::vec3(
+            iCorner1 % 2,
+            (iCorner1 / 2) % 2,
+            iCorner1 / 4
+        ) - halfSize;
 
         glm::vec3 line = corner1 - corner0;
 
@@ -110,7 +118,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
         float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
         float cosA = glm::dot(vector1, vectorI);
-        angles[i - 1] = std::pair<int, float>(i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)));
+        angles[i - 1] = { i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)) };
     }
 
     // Sort the vectors by angle in the plane

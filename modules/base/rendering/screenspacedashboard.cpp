@@ -33,6 +33,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     static const openspace::properties::Property::PropertyInfo UseMainInfo = {

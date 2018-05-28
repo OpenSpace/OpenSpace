@@ -28,6 +28,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* LoggerCat = "ScreenSpaceSpout";

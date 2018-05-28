@@ -25,8 +25,7 @@
 #ifndef __OPENSPACE_CORE___HTTPREQUEST___H__
 #define __OPENSPACE_CORE___HTTPREQUEST___H__
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/directory.h>
+#include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <condition_variable>
 #include <fstream>
@@ -34,6 +33,9 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+// @TODO:  This class is a diamond-of-death;  maybe some redesign to make the things into
+//         components, rather than inheritance?
 
 #ifdef _MSC_VER
 #pragma warning(push)

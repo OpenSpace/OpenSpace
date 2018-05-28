@@ -420,22 +420,10 @@ std::string NumericalProperty<T>::jsonValue() const {
 
 template <typename T>
 void NumericalProperty<T>::setInterpolationTarget(ghoul::any value) {
-    try {
-        T v = ghoul::any_cast<T>(std::move(value));
+    T v = ghoul::any_cast<T>(std::move(value));
 
-        _interpolationStart = TemplateProperty<T>::_value;
-        _interpolationEnd = std::move(v);
-    }
-    catch (ghoul::bad_any_cast&) {
-        LERRORC(
-            "TemplateProperty",
-            fmt::format(
-                "Illegal cast from '{}' to '{}'",
-                value.type().name(),
-                typeid(T).name()
-            )
-        );
-    }
+    _interpolationStart = TemplateProperty<T>::_value;
+    _interpolationEnd = std::move(v);
 }
 
 template <typename T>

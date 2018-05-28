@@ -28,20 +28,19 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
 #include <modules/spacecraftinstruments/util/labelparser.h>
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
     constexpr const char* keyPotentialTargets = "PotentialTargets";

@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace::globebrowsing {
 

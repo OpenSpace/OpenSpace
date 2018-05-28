@@ -28,6 +28,7 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/logging/logmanager.h>
 #include <fstream>
 
 namespace {

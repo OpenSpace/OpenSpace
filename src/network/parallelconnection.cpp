@@ -25,8 +25,8 @@
 #include <openspace/network/parallelconnection.h>
 
 #include <ghoul/fmt.h>
+#include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
-#include <cstdint>
 
 namespace {
     constexpr const uint32_t ProtocolVersion = 3;

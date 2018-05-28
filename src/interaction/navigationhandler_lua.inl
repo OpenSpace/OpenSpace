@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/joystickcamerastates.h>
 #include <numeric>
 
 namespace openspace::luascriptfunctions {

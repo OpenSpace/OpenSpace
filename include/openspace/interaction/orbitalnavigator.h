@@ -25,16 +25,14 @@
 #ifndef __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
 #define __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/delayedvariable.h>
-#include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
-
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <ghoul/glm.h>
 #include <glm/gtx/quaternion.hpp>
 
@@ -45,6 +43,8 @@ namespace openspace {
 } // namespace
 
 namespace openspace::interaction {
+
+class InputState;
 
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
