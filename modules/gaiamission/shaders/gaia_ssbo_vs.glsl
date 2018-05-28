@@ -117,8 +117,11 @@ void main() {
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
         (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
         (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ||
-        (abs(distThreshold.x) > EPS && length(in_position) < distThreshold.x) || 
-        (abs(distThreshold.y) > EPS && length(in_position) > distThreshold.y) ) {
+        (abs(distThreshold.x - distThreshold.y) < EPS 
+            && abs(length(in_position) - distThreshold.y) < EPS) ||
+        (abs(distThreshold.x - distThreshold.y) > EPS && 
+        ((abs(distThreshold.x) > EPS && length(in_position) < distThreshold.x) || 
+        (abs(distThreshold.y) > EPS && length(in_position) > distThreshold.y))) ) {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);

@@ -288,25 +288,43 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         " - MAX_STARS_PER_NODE: " + std::to_string(_octreeManager->maxStarsPerNode()));
 
     // Use to generate a synthetic dataset 
-    //for (float z = -1.0; z < 1.0; z += 0.05) {
-    //    for (float y = -1.0; y < 1.0; y += 0.05) {
-    //        for (float x = -1.0; x < 1.0; x += 0.05) {
-    //            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    //            std::vector<float> renderValues(8);
-    //            renderValues[0] = x + x * r;
-    //            renderValues[2] = z + y * r;
-    //            renderValues[1] = y + z * r;
-    //            renderValues[3] = 5.0 + 10 * r;
-    //            renderValues[4] = 2.0 + 10 * r;
-    //            renderValues[5] = r;
-    //            renderValues[6] = r;
-    //            renderValues[7] = r;
-    //            _octreeManager->insert(renderValues);
-    //            nTotalStars++;
-    //            nValues+=8;
-    //        }
-    //    }
-    //}
+    /*for (float z = -1.0; z < 1.0; z += 0.05) {
+        for (float y = -1.0; y < 1.0; y += 0.05) {
+            for (float x = -1.0; x < 1.0; x += 0.05) {
+                float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+                std::vector<float> renderValues(8);
+                renderValues[0] = x; // + x * r;
+                renderValues[2] = z; // + y * r;
+                renderValues[1] = y; // + z * r;
+                renderValues[3] = 5.0; // + 10 * r;
+                renderValues[4] = 2.0; // + 10 * r;
+                renderValues[5] = r;
+                renderValues[6] = r;
+                renderValues[7] = r;
+                _octreeManager->insert(renderValues);
+                nTotalStars++;
+                nValues+=8;
+            }
+        }
+    }
+
+   for (float phi = -180.0; phi < 180.0; phi += 10.0) {
+        for (float theta = -90.0; theta <= 90.0; theta += 10.0) {
+            float r = 1.0;
+            std::vector<float> renderValues(8);
+            renderValues[0] = r * sin(glm::radians(theta)) * cos(glm::radians(phi));
+            renderValues[2] = r * sin(glm::radians(theta)) * sin(glm::radians(phi));
+            renderValues[1] = r * cos(glm::radians(theta));
+            renderValues[3] = 5.0;
+            renderValues[4] = 2.0;
+            renderValues[5] = r;
+            renderValues[6] = r;
+            renderValues[7] = r;
+            _octreeManager->insert(renderValues);
+            nTotalStars++;
+            nValues += 8;
+        }
+    }*/
 
     std::ifstream inFileStream(_inFileOrFolderPath, std::ifstream::binary);
     if (inFileStream.good()) {

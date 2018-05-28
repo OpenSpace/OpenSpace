@@ -80,18 +80,18 @@ Fragment getFragment() {
                     }
                 else {
                     // Elliptic gaussian distribution.
-                    vec2 pixelPos = screenPos / pixelSize;
-                    float alpha = atan2(pixelPos.y, pixelPos.x);
+                    float alpha = atan2(screenPos.y, screenPos.x);
                     //float r =  sqrt(pow(x * scaleFactor.x, 2.0) + pow(y * scaleFactor.y, 2.0));
                     float widthScale = min(scaleFactor.x, scaleFactor.y);
-                    float sigmaX = sigma / widthScale;
-                    float sigmaY = sigma;
-                    float a = pow(cos(alpha), 2.0) / (2 * pow(sigmaX, 2.0)) 
-                        + pow(sin(alpha), 2.0) / (2 * pow(sigmaY, 2.0));
-                    float b = sin(2 * alpha) / (4 * pow(sigmaX, 2.0)) 
-                        - sin(2 * alpha) / (4 * pow(sigmaY, 2.0));
-                    float c = pow(sin(alpha), 2.0) / (2 * pow(sigmaX, 2.0)) 
-                        + pow(cos(alpha), 2.0) / (2 * pow(sigmaY, 2.0));
+                    float heightScale = max(scaleFactor.x, scaleFactor.y);
+                    float sigmaWidth = sigma / widthScale;
+                    float sigmaHeight = sigma / heightScale;
+                    float a = pow(cos(alpha), 2.0) / (2 * pow(sigmaWidth, 2.0)) 
+                        + pow(sin(alpha), 2.0) / (2 * pow(sigmaHeight, 2.0));
+                    float b = sin(2 * alpha) / (4 * pow(sigmaWidth, 2.0)) 
+                        - sin(2 * alpha) / (4 * pow(sigmaHeight, 2.0));
+                    float c = pow(sin(alpha), 2.0) / (2 * pow(sigmaWidth, 2.0)) 
+                        + pow(cos(alpha), 2.0) / (2 * pow(sigmaHeight, 2.0));
                     intensity += sIntensity.rgb * exp(-( a * pow(x * scaleFactor.x, 2.0) 
                         + 2 * b * x * scaleFactor.x * y * scaleFactor.y
                         + c * pow(y * scaleFactor.y, 2.0) )) / filterSize;
