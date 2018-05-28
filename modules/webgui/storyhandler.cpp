@@ -48,6 +48,7 @@ namespace openspace::webgui {
         , _applyAddTag(ApplyAddTagInfo)
         , _applyRemoveTag(ApplyRemoveTagInfo)
         , _focusNodesList(FocusNodesListInfo, std::string(""))
+
     {
         addProperty(_overviewLimit);
         addProperty(_zoomInLimit);
@@ -81,5 +82,6 @@ namespace openspace::webgui {
     float StoryHandler::zoomInLimit() {
         return _zoomInLimit;
     };
+
 };// namespace
 

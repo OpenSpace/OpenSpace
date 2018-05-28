@@ -53,6 +53,8 @@ public:
 
     static documentation::Documentation Documentation();
 
+    bool storyStyleActive();
+
 private:
     enum Type {
         Node = 0,
@@ -74,6 +76,7 @@ private:
     properties::FloatProperty _fontSize;
     properties::BoolProperty _doSimplification;
     properties::OptionProperty _requestedUnit;
+    properties::BoolProperty _storyStyleActive;
 
 
 

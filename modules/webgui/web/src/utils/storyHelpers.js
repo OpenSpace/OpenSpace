@@ -37,14 +37,32 @@ export const toggleGalaxies = (value) => {
 };
 
 // Function to zoom out once a story is picked, value = 'true' equals overview enabled,
-// anda a slower velocity is used
+// and a slower velocity is used
 export const toggleZoomOut = (value) => {
   const velocity = (value === 'true') ? 0.02 : 0.04;
-  DataManager.runScript(`openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.VelocityZoomControl', ${velocity})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.VelocityZoomControl", ${velocity})`);
   DataManager.runScript(`openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.Overview", ${value})`);
 };
 
 // Function to reset the bool properties to the default value
 export const resetBoolProperty = (URI, value) => {
   DataManager.runScript(`openspace.setPropertyValueSingle("${URI}", ${value})`);
+}
+
+// Function to hide logs and information on screen.
+// The distance from camera to focus will still be displayed.
+export const hideDevInfoOnScreen = (value) => {
+  DataManager.runScript(`openspace.setPropertyValueSingle("RenderEngine.ShowVersion", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("RenderEngine.ShowCamera", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("RenderEngine.ShowLog", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.Date.Enabled", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.SimulationIncrement.Enabled", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.Framerate.Enabled", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.ParallelConnection.Enabled", ${!value})`);
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.Distance.StoryStyleActive", ${value})`);
+};
+
+// Function to show or hide distance from camera to focus on screen.
+export const showDistanceOnScreen = (value) => {
+  DataManager.runScript(`openspace.setPropertyValueSingle("Dashboard.Distance.Enabled", ${value})`);
 };

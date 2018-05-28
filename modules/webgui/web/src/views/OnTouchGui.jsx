@@ -21,7 +21,7 @@ import {
 import Slider from '../components/ImageSlider/Slider';
 import { UpdateDeltaTimeNow } from '../utils/timeHelpers';
 import { toggleShading, toggleHighResolution, toggleHidePlanet, toggleGalaxies, toggleZoomOut,
-  resetBoolProperty, setStoryStart } from '../utils/storyHelpers';
+  resetBoolProperty, setStoryStart, hideDevInfoOnScreen, showDistanceOnScreen } from '../utils/storyHelpers';
 import DeveloperMenu from '../components/TouchBar/UtilitiesMenu/presentational/DeveloperMenu';
 
 const KEYCODE_D = 68;
@@ -44,7 +44,11 @@ class OnTouchGui extends Component {
   componentDidMount() {
     this.props.StartConnection();
     this.props.FetchData(infoIconKey);
+
     document.addEventListener('keydown', this.handleKeyPress);
+
+    hideDevInfoOnScreen(true);
+    showDistanceOnScreen(false);
   }
 
   componentDidUpdate() {
@@ -81,6 +85,14 @@ class OnTouchGui extends Component {
       // If the previous story was the default there is no tags to remove
       if (storyIdentifierNode.Value !== defaultStory) {
         this.props.ChangePropertyValue(applyRemoveTag.Description, '');
+      }
+
+      // If the current story is the default - hide distance info on screen
+      if (selectedStory === defaultStory) {
+        showDistanceOnScreen(false);
+      }
+      else {
+        showDistanceOnScreen(true);
       }
 
       // Set all the story specific properties
@@ -161,6 +173,12 @@ class OnTouchGui extends Component {
 
   toggleDeveloperMode() {
     this.setState({ developerMode: !this.state.developerMode });
+
+    if (this.state.developerMode === true) {
+      hideDevInfoOnScreen(false);
+    } else {
+      hideDevInfoOnScreen(true);
+    }
   }
 
   render() {
@@ -178,6 +196,7 @@ class OnTouchGui extends Component {
             changeStory={this.changeStory}
             storyIdentifier={this.props.storyIdentifierNode.Value}
           />}
+        <p className={styles.storyTitle}> {this.props.story.storytitle} </p>
         {(this.props.storyIdentifierNode.length !== 0 &&
           this.props.storyIdentifierNode.Value !== defaultStory)
           ? <TouchBar /> : <Slider changeStory={this.setStory} />
