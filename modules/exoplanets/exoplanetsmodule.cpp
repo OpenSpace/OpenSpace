@@ -31,6 +31,7 @@
 #include <openspace/util/time.h>
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/transform.hpp>
@@ -44,6 +45,8 @@
 #include <string>
 
 namespace openspace {
+
+const char* _loggerCat = "exoplanets";
 
 using namespace exoplanets;
 
@@ -309,32 +312,6 @@ int addExoplanetSystem(lua_State* L) {
         {
             std::string color = getStarColor(p.BMV);
 
-           /* if (isnan(p.ECC))
-            {
-                p.ECC = 0;
-            }
-            if (isnan(p.I))
-            {
-                p.I = 90;
-            }
-            if (isnan(p.BIGOM))
-            {
-                p.BIGOM = 0;
-            }
-            if (isnan(p.OM))
-            {
-                p.OM = 90;
-            }
-            std::string epoch_string;
-            if (!isnan(p.TT)) {
-                epoch.setTime("JD " + std::to_string(p.TT));
-                epoch_string = epoch.ISO8601();
-            }
-            else {
-                epoch.setTime("JD " + std::to_string(2454970.0));
-                epoch_string = epoch.ISO8601();
-            }*/
-
             const std::string starGlobe = "{"
                 "Identifier = '" + starname + "Globe',"
                 "Parent = '" + starname + "',"
@@ -361,19 +338,6 @@ int addExoplanetSystem(lua_State* L) {
                         "}"
                     "}"
                 "},"
-                /*"Transform = {"
-                    "Translation = {"
-                        "Type = 'KeplerTranslation',"
-                        "Eccentricity = " + std::to_string(p.ECC) + "," //ECC
-                        "SemiMajorAxis = " + std::to_string(p.A) + " * 149597871 * 0.1," // 149 597 871km = 1 AU. A
-                        "Inclination = " + std::to_string(p.I) + "," //I
-                        "AscendingNode  = " + std::to_string(p.BIGOM) + "," //BIGOM
-                        "ArgumentOfPeriapsis  = " + std::to_string(p.OM) + "," //OM
-                        "MeanAnomaly = 0.0,"
-                        "Epoch = '" + epoch_string + "'," //TT. JD to YYYY MM DD hh:mm:ss
-                        "Period = " + std::to_string(p.PER) + "* 86400" //PER. 86 400sec = 1 day.
-                    "}"
-                "},"*/
             "}";
             
             const std::string starGlare = "{"
@@ -524,8 +488,14 @@ int addExoplanetSystem(lua_State* L) {
                     openspace::scripting::ScriptEngine::RemoteScripting::Yes
                 );
 
+                
                 if(!isnan(plsy[i].ECCUPPER) && !isnan(plsy[i].ECCLOWER) && plsy[i].ECCUPPER > 0.0 && plsy[i].ECCLOWER > 0.0)
                 { 
+                    double lower_ecc = plsy[i].ECC - plsy[i].ECCLOWER;
+                    if (lower_ecc < 0.0)
+                    {
+                        lower_ecc = 0.0;
+                    }
                     const std::string discECCLOWER = "{"
                         "Identifier = '" + plna[i] + "discECCLOWER',"
                         "Parent = '" + starname + "',"
@@ -533,7 +503,7 @@ int addExoplanetSystem(lua_State* L) {
                             "Type = 'RenderableOrbitdisc',"
                             "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/discL.png',"                                              
                             "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
-                            "Eccentricity = "+ std::to_string(plsy[i].ECC - plsy[i].ECCLOWER) +","
+                            "Eccentricity = "+ std::to_string(lower_ecc) +","
                             "Offset = { "+ std::to_string(plsy[i].ALOWER) +", "+ std::to_string(plsy[i].AUPPER) +" }," //min / max extend
                             "Transparency = 0.98,"
                             "Enabled = false"
@@ -552,6 +522,11 @@ int addExoplanetSystem(lua_State* L) {
                         openspace::scripting::ScriptEngine::RemoteScripting::Yes
                     );
                 
+                    double upper_ecc = plsy[i].ECC + plsy[i].ECCUPPER;
+                    if (upper_ecc > 1.0)
+                    {
+                        upper_ecc = 1.0;
+                    }
                     const std::string discECCUPPER = "{"
                         "Identifier = '" + plna[i] + "discECCUPPER',"
                         "Parent = '" + starname + "',"
@@ -559,7 +534,7 @@ int addExoplanetSystem(lua_State* L) {
                             "Type = 'RenderableOrbitdisc',"
                             "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/discU.png',"                                              
                             "Size = " + std::to_string(plsy[i].A) + " * 149597870700," // 149 597 870 700 m = 1 AU. A
-                            "Eccentricity = "+ std::to_string(plsy[i].ECC + plsy[i].ECCUPPER) +","
+                            "Eccentricity = "+ std::to_string(upper_ecc)+","
                             "Offset = { "+ std::to_string(plsy[i].ALOWER) +", "+ std::to_string(plsy[i].AUPPER) +" }," //min / max extend
                             "Transparency = 0.98,"
                             "Enabled = false"
@@ -605,6 +580,22 @@ int removeExoplanetSystem(lua_State* L) {
     return 0;
 }
 
+int showSpectograph(lua_State* L) {
+
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg') }";
+
+    std::string script = "openspace.addScreenSpaceRenderableLocal("+luaTable+");";
+    OsEng.scriptEngine().queueScript(
+        script,
+        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    );
+
+    return 0;
+}
+
+
+
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 
     scripting::LuaLibrary res;
@@ -623,6 +614,13 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             {},
             "string",
             "Removes the nodes from the scene graph of the exoplanet system."
+        },
+        {
+            "showSpectograph",
+            &showSpectograph,
+            {},
+            "",
+            "Shows spectograph."
         }
 
     };
