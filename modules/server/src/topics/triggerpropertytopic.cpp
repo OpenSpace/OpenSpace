@@ -31,7 +31,7 @@
 
 namespace {
     constexpr const char* PropertyKey = "property";
-    constexpr const char* ValueKey = "value";
+    //constexpr const char* ValueKey = "value";
     constexpr const char* _loggerCat = "TriggerPropertyTopic";
 } // namespace
 
