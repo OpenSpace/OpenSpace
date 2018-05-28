@@ -11,3 +11,11 @@
   width: 100vw;
 }
 
+.storyTitle {
+  font-size: 3em;
+  font-family: $font-family;
+  color: $text-color-focus;
+  position: absolute;
+  top: 20px;
+  left: 40px;
+}

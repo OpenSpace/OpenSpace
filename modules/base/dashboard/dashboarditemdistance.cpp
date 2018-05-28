@@ -23,9 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/base/dashboard/dashboarditemdistance.h>
+#include <modules/webgui/webguimodule.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -433,7 +435,15 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         dist = { convertedD, nameForDistanceUnit(unit, convertedD != 1.0) };
     }
 
-    penPosition.y -= _font->height();
+    WebGuiModule& module = *(OsEng.moduleEngine().module<WebGuiModule>());
+    if (module.storyHandler.storyStyleActive()) {
+        penPosition.y -= (_font->height() * 6);
+        penPosition.x = 40;
+    }
+    else {
+        penPosition.y -= _font->height();
+    }
+
     RenderFont(
         *_font,
         penPosition,
