@@ -28,4 +28,7 @@ export const actionTypes = {
   toggleActiveEnvelope: 'TRANSFERFUNCTION_TOGGLE_ACTIVE_ENVELOPE',
   toggleActivePoint: 'TRANSFERFUNCTION_TOGGLE_ACTIVE_POINT',
   setClickablePoint: 'TRANSFERFUNCTION_TOGGLE_CLICKABLE_POINT',
+
+  // action types for data loader
+  toggleDataLoaderActivated: 'DATA_LOADER_TOGGLE_ACTIVATED',
 };
