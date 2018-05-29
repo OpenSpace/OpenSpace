@@ -17,5 +17,32 @@
       "altitude": "2.0e+7"
     }
   },
-  "galaxies": "true"
+  "galaxies": "true",
+  "toggleboolproperties": [
+    {
+      "URI":"Scene.Abell.renderable.Enabled",
+      "label":"Abell Galaxy Clusters",
+      "defaultvalue": "false"
+    },
+    {
+      "URI":"Scene.SloanDigitalSkySurvey.renderable.Enabled",
+      "label":"Sloan Digital Sky Survey",
+      "defaultvalue": "true"
+    },
+    {
+      "URI":"Scene.2MASS.renderable.Enabled",
+      "label":"2MASS Galaxies",
+      "defaultvalue": "false"
+    },
+    {
+      "URI":"Scene.GalaxySuperclusters.renderable.Enabled",
+      "label":"Galaxy Superclusters",
+      "defaultvalue": "false"
+    },
+    {
+      "URI":"Scene.TullyGalaxies.renderable.Enabled",
+      "label":"Tully Galaxies",
+      "defaultvalue": "false"
+    }
+  ]
 }
