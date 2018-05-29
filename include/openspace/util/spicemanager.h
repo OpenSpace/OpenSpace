@@ -715,6 +715,10 @@ public:
         const std::string& destinationFrame, double ephemerisTimeFrom,
         double ephemerisTimeTo) const;
 
+
+    //returns the gimbal angle for spacecrafts
+    double getEulerAngle(glm::dmat3 transformMatrix);
+
     /// The structure returned by the #fieldOfView methods
     struct FieldOfViewResult {
         /// The rough shape of the returned field of view

@@ -86,15 +86,21 @@ local RA_Base_Location = {
     }
 }
 
+
 --AZ
 local RA_Shoulder_AZ_Location = {
     Identifier = "RA_Shoulder_AZ_Location",
     Parent = RA_Base_Location.Identifier,
     Transform = {   
         Rotation = {
-            Type = "SpiceRotation",
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RA_BASE",
             DestinationFrame = "MSL_RA_SHOULDER_AZ",
+            RotationAxisSpice = 3,
+            RotationAxisStatic = 0,
+            RotationAngle = 0.0,
+            RotationDirectionSpice = true,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         }
     },
@@ -103,15 +109,21 @@ local RA_Shoulder_AZ_Location = {
     }
 }
 
+--inga rotationer!!
 ----EL
 local RA_Shoulder_EL_Location = {
     Identifier = "RA_Shoulder_EL_Location",
     Parent = RA_Shoulder_AZ_Location.Identifier,
     Transform = {
         Rotation = {
-            Type = "SpiceRotation",
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RA_SHOULDER_AZ",
             DestinationFrame = "MSL_RA_SHOULDER_EL",
+            RotationAxisSpice = 2,
+            RotationAxisStatic = 0,
+            RotationAngle = 0.0,
+            RotationDirectionSpice = true,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         },
         Translation = {
@@ -130,9 +142,14 @@ local RA_Elbow_Location = {
     Parent = RA_Shoulder_EL_Location.Identifier,
     Transform = {
         Rotation = {
-            Type = "SpiceRotation",
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RA_SHOULDER_EL",
             DestinationFrame = "MSL_RA_ELBOW",
+            RotationAxisSpice = 2,
+            RotationAxisStatic = 0,
+            RotationAngle = 0.0,
+            RotationDirectionSpice = false,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         },
         Translation = {
@@ -151,9 +168,14 @@ local RA_Wrist_Location = {
     Parent = RA_Elbow_Location.Identifier,
     Transform = {
         Rotation = {
-            Type = "SpiceRotation",
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RA_ELBOW",
             DestinationFrame = "MSL_RA_WRIST",
+            RotationAxisSpice = 2,
+            RotationAxisStatic = 2,
+            RotationAngle = 1.5708,
+            RotationDirectionSpice = false,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         },
         Translation = {
@@ -173,9 +195,14 @@ local RA_Turret_Location = {
     Parent = RA_Wrist_Location.Identifier,
     Transform = {
         Rotation = {
-            Type = "SpiceRotation",
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RA_TURRET",
             DestinationFrame = "MSL_MAHLI_REF",
+            RotationAxisSpice = 1,
+            RotationAxisStatic = 1,
+            RotationAngle = 0.882,
+            RotationDirectionSpice = true,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         },
         Translation = {
@@ -215,9 +242,14 @@ local RSM_AZ_Location = {
     Parent = RSM_ZERO_AZ_Location.Identifier,
     Transform = {
         Rotation = {
-            Type = "SpiceRotation",
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RSM_ZERO_AZ",
             DestinationFrame = "MSL_RSM_AZ",
+            RotationAxisSpice = 0,
+            RotationAxisStatic = 3,
+            RotationAngle = 3.1590,
+            RotationDirectionSpice = true,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         }
     },
@@ -242,10 +274,15 @@ local RSM_EL_Location = {
             Type = "StaticTranslation",
             Position = {0.0, 0.0, -0.664}
         },
-        Rotation = {
-            Type = "SpiceRotation",
+        Rotation = {  
+            Type = "AdvancedSpiceRotation",
             SourceFrame = "MSL_RSM_ZERO_EL",
             DestinationFrame = "MSL_RSM_EL",
+            RotationAxisSpice = 0,
+            RotationAxisStatic = 2,
+            RotationAngle = 1.5708,
+            RotationDirectionSpice = true,
+            RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         }
     },

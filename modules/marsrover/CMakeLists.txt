@@ -35,6 +35,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.h
+
+
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
 
@@ -50,6 +53,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.cpp
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp

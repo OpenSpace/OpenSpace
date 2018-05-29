@@ -22,33 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MARSROVER___MARSROVERMODULE___H__
-#define __OPENSPACE_MODULE_MARSROVER___MARSROVERMODULE___H__
+#ifndef __OPENSPACE_MODULE_SPACE___ADVANCEDSPICEROTATION___H__
+#define __OPENSPACE_MODULE_SPACE___ADVANCEDSPICEROTATION___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
-#include <ghoul/opengl/programobjectmanager.h>
-
+#include <string>
 
 namespace openspace {
 
-class MarsroverModule : public OpenSpaceModule {
+namespace documentation { struct Documentation; }
+
+class AdvancedSpiceRotation : public Rotation {
 public:
-    constexpr static const char* Name = "Marsrover";
+    AdvancedSpiceRotation(const ghoul::Dictionary& dictionary);
+    const glm::dmat3& matrix() const;
 
-    MarsroverModule();
-    virtual ~MarsroverModule() = default;
+    glm::dmat3 matrix(const Time& time) const override;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    std::vector<scripting::LuaLibrary> luaLibraries() const override;
+	glm::dmat3 getRotationMatrix(int axis, bool posDirection, double radians) const;
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+private:
+    properties::StringProperty _sourceFrame;
+    properties::StringProperty _destinationFrame;
 
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
+    properties::IntProperty  _rotationAxisSPICE;
+    properties::IntProperty  _rotationAxisCorrection;
+    properties::FloatProperty _rotationAngle;
+    properties::BoolProperty  _rotationDir1;
+    properties::BoolProperty  _rotationDir2;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_MARSROVER___MARSROVER___H__
+#endif // __OPENSPACE_MODULE_SPACE___ADVANCEDSPICEROTATION___H__
