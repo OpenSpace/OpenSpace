@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { toggleActivated } from '../../api/Actions/dataLoaderActions';
+import { toggleActivated } from '../../../api/Actions/dataLoaderActions';
 
-import TabMenuItem from '../common/TabMenu/TabMenuItem';
-import Label from '../common/Label/Label';
+import TabMenuItem from '../../common/TabMenu/TabMenuItem';
+import Label from '../../common/Label/Label';
 
 import styles from './ToggleDataLoader.scss';
 
