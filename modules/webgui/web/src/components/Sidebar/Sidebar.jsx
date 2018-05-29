@@ -4,7 +4,7 @@ import TabMenu from '../common/TabMenu/TabMenu';
 import SystemMenu from '../SystemMenu/SystemMenu';
 import TabMenuItem from '../common/TabMenu/TabMenuItem';
 import Icon from '../common/Icon/Icon';
-import SmallLabel from '../common/SmallLabel/SmallLabel';
+import Label from '../common/Label/Label';
 import ScenePane from './ScenePane';
 import SettingsPane from './SettingsPane';
 
@@ -48,11 +48,11 @@ class Sidebar extends React.Component {
           <SystemMenu />
           <TabMenuItem active={this.isActive('scene')} onClick={this.selectView('scene')}>
             <Icon className={styles.icon} icon="layers" />
-            <SmallLabel>Scene</SmallLabel>
+            <Label>Scene</Label>
           </TabMenuItem>
           <TabMenuItem active={this.isActive('settings')} onClick={this.selectView('settings')}>
             <Icon className={styles.icon} icon="settings" />
-            <SmallLabel>Settings</SmallLabel>
+            <Label size='small'>Settings</Label>
           </TabMenuItem>
         </TabMenu>
       </section>

@@ -2,10 +2,10 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import SmallLabel from './SmallLabel';
+import Label from './Label';
 /* globals module */
 
-storiesOf('SmallLabel', module)
-  .add('no options', () => (<SmallLabel>Hello</SmallLabel>))
+storiesOf('Label', module)
+  .add('no options', () => (<Label>Hello</Label>))
   .add('with some props', () => (
-    <SmallLabel style={{ color: 'red' }} onClick={action('clicked')}>Click me!</SmallLabel>));
+    <Label style={{ color: 'red' }} onClick={action('clicked')}>Click me!</Label>));

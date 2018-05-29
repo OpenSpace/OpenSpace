@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import DataManager, { TopicTypes } from '../../api/DataManager';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Popover from '../common/Popover/Popover';
-import SmallLabel from '../common/SmallLabel/SmallLabel';
+import Label from '../common/Label/Label';
 import Button from '../common/Input/Button/Button';
 import Calendar from '../common/Calendar/Calendar';
 import Picker from './Picker';
@@ -135,7 +135,7 @@ class TimePicker extends Component {
                 { this.time }
               </LoadingString>
             </span>
-            <SmallLabel>Date</SmallLabel>
+            <Label size='small'>Date</Label>
           </div>
         </Picker>
 

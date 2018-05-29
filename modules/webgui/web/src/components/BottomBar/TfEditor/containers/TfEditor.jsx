@@ -12,7 +12,7 @@ import styles from '../style/TfEditor.scss';
 import ColorPicker from './ColorPicker';
 import Button from '../../../common/Input/Button/Button';
 import Select from '../../../common/Input/Select/Select';
-import SmallLabel from '../../../common/SmallLabel/SmallLabel';
+import Label from '../../../common/Label/Label';
 
 class TfEditor extends Component {
   constructor(props) {
@@ -86,7 +86,7 @@ class TfEditor extends Component {
             <Picker onClick={this.toggleTfEditor} className={(showTfEditor ? styles.Active : '')}>
               <div className={styles.FlexColumn}>
                 <TfIcon className={styles.iconImage} />
-                <SmallLabel>Tf-Editor</SmallLabel>
+                <Label size='small'>Tf-Editor</Label>
               </div>
             </Picker>
             <div>

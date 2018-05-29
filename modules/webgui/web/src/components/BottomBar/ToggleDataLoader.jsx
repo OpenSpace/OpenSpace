@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { toggleActivated } from '../../api/Actions/dataLoaderActions';
 
-import TabMenuItem from '../Sidebar/TabMenu/TabMenuItem';
+import TabMenuItem from '../common/TabMenu/TabMenuItem';
+import Label from '../common/Label/Label';
 
 import styles from './ToggleDataLoader.scss';
 
@@ -12,7 +13,9 @@ let ToggleDataLoader = (props) => {
 
   return (
     <TabMenuItem active={activated} onClick={() => props.toggleActivated(!activated)}>
-      <div className={`${styles.label}`}>DATA LOADER</div>
+      <div className={`${styles.container}`}>
+        <Label size='medium'>DATA LOADER</Label>
+      </div>
     </TabMenuItem>
   );
 };

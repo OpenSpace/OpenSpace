@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import SmallLabel from '../../common/SmallLabel/SmallLabel';
+import Label from '../../common/Label/Label';
 import Icon from '../../common/Icon/Icon';
 import LoadingString from '../../common/LoadingString/LoadingString';
 import Picker from '../Picker';
@@ -80,7 +80,7 @@ class OriginPicker extends Component {
                 { this.origin }
               </LoadingString>
             </span>
-            <SmallLabel>Focus</SmallLabel>
+            <Label>Focus</Label>
           </div>
         </Picker>
         { showPopover && (
