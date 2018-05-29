@@ -10,9 +10,11 @@ import App from './App';
 
 /* global document */
 
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 const store = createStore(
   openspaceApp,
-  middleware,
+  composeEnhancers(middleware)
 );
 
 const render = (Component) => {
