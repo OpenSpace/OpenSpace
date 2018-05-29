@@ -8,6 +8,9 @@
   margin: 0;
   padding: 0;
   width: 100vw;
+
+  // Remove for production?
+  background-color: black;
 }
 
 .Grid__Left {
