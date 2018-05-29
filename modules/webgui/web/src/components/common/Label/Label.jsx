@@ -3,15 +3,6 @@ import PropTypes from 'prop-types';
 
 import styles from './Label.scss';
 
-// const validateSize = (size) => {
-//   const acceptedValues = ['small', 'medium', 'large'];
-//   acceptedValues.map(v, {
-//     
-//   })
-//   
-// }
-// 
-
 const getClassNames = (size) => {
   let classes = styles.base
 
