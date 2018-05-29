@@ -28,7 +28,7 @@ function(build_webgui_source target_name)
     add_custom_command(
         TARGET ${target_name} POST_BUILD
         COMMAND ${NPM_COMMAND} install
-        COMMAND ${NPM_COMMAND} run lint
+#        COMMAND ${NPM_COMMAND} run lint
 #        COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBGUI_MODULE_PATH}/web/dist "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui"
 #        COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBGUI_MODULE_PATH}/web/dist/static "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui/static"
         WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/web
