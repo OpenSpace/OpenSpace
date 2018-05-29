@@ -3,15 +3,17 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { toggleActivated } from '../../api/Actions/dataLoaderActions';
 
+import TabMenuItem from '../Sidebar/TabMenu/TabMenuItem';
+
 import styles from './ToggleDataLoader.scss';
 
 let ToggleDataLoader = (props) => {
   const { activated } = props;
 
   return (
-    <div className={`${styles.loader}`} onClick={() => props.toggleActivated(!activated)}>
-      { activated ? 'Hide data loader' : 'Show data loader'}
-    </div>
+    <TabMenuItem active={activated} onClick={() => props.toggleActivated(!activated)}>
+      <div className={`${styles.label}`}>DATA LOADER</div>
+    </TabMenuItem>
   );
 };
 

@@ -1,8 +1,8 @@
 import React from 'react';
 
-import TabMenu from './TabMenu/TabMenu';
+import TabMenu from '../common/TabMenu/TabMenu';
 import SystemMenu from '../SystemMenu/SystemMenu';
-import TabMenuItem from './TabMenu/TabMenuItem';
+import TabMenuItem from '../common/TabMenu/TabMenuItem';
 import Icon from '../common/Icon/Icon';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
 import ScenePane from './ScenePane';
