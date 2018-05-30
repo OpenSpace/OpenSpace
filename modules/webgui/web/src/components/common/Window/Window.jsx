@@ -16,7 +16,7 @@ const Window = (props) => {
           width: size.width,
           height: size.height,
         }}
-        {...excludeKeys(props, 'children title callback className')}
+        {...excludeKeys(props, 'children title closeCallback className position')}
       >
         <header className="header">
           <div className={styles.title}>

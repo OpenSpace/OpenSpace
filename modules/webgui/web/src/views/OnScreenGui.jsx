@@ -10,6 +10,7 @@ import Overlay from '../components/common/Overlay/Overlay';
 import About from './About/About';
 import Stack from '../components/common/Stack/Stack';
 import { startConnection } from '../api/Actions';
+import DataLoader from '../components/DataLoader/DataLoader'
 
 class OnScreenGui extends Component {
   constructor(props) {
@@ -50,6 +51,7 @@ class OnScreenGui extends Component {
           <Sidebar />
         </section>
         <section className={styles.Grid__Right}>
+          <DataLoader />
           <BottomBar />
         </section>
       </div>
