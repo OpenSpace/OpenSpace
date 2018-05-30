@@ -3,6 +3,8 @@
 /bin/
 /build/
 /cache/
+/data/.internal/*
+!/data/.internal/readme.md
 /doc
 /documentation
 /ext/SGCT
