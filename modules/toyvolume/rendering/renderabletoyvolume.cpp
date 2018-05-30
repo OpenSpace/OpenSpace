@@ -31,37 +31,37 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    const openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    const openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "" // @TODO Missing documentation

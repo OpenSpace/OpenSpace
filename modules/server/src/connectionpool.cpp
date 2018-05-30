@@ -39,7 +39,7 @@ ConnectionPool::~ConnectionPool() {
 }
 
 void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
-    _socketServers.push_back(server);
+    _socketServers.push_back(std::move(server));
 }
 
 void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {

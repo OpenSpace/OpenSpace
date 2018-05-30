@@ -61,33 +61,33 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 
-    static const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
+    const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all points."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each point."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "This value is used to define the color of the astronomical object."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorMapInfo = {
+    const openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
         "The path to the color map file of the astronomical onject."

@@ -120,7 +120,7 @@ private:
         std::vector<std::string> potentialTargets;
     } _instrument;
 
-    float _interpolationTime;
+    float _interpolationTime = 0.f;
 
     struct RenderInformation {
         // Differentiating different vertex types

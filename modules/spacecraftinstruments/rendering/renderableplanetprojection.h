@@ -102,7 +102,7 @@ private:
     glm::dmat3 _instrumentMatrix;
     glm::vec3 _boresight;
 
-    double _time;
+    double _time = -std::numeric_limits<double>::max();
 
     std::vector<Image> _imageTimes;
 

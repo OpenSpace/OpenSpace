@@ -52,30 +52,30 @@ LabelParser::LabelParser(std::string name, std::string fileName,
     // get the different instrument types
     const std::vector<std::string>& decoders = translationDictionary.keys();
     // for each decoder (assuming might have more if hong makes changes)
-    for (size_t i = 0; i < decoders.size(); ++i) {
+    for (const std::string& decoderStr : decoders) {
         ghoul::Dictionary typeDictionary;
-        translationDictionary.getValue(decoders[i], typeDictionary);
+        translationDictionary.getValue(decoderStr, typeDictionary);
 
         //create dictionary containing all {playbookKeys , spice IDs}
-        if (decoders[i] == "Instrument") {
+        if (decoderStr == "Instrument") {
             // for each playbook call -> create a Decoder object
             const std::vector<std::string>& keys = typeDictionary.keys();
-            for (size_t j = 0; j < keys.size(); ++j) {
-                std::string currentKey = decoders[i] + "." + keys[j];
+            for (const std::string& key : keys) {
+                std::string currentKey = decoderStr + "." + key;
 
                 ghoul::Dictionary decoderDictionary =
                     translationDictionary.value<ghoul::Dictionary>(currentKey);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDictionary,
-                    decoders[i]
+                    decoderStr
                 );
                 // insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
-                _fileTranslation[keys[j]] = std::move(decoder);
+                _fileTranslation[key] = std::move(decoder);
             }
         }
-        if (decoders[i] == "Target") {
+        if (decoderStr == "Target") {
             ghoul::Dictionary specsOfInterestDictionary;
             typeDictionary.getValue(keySpecs, specsOfInterestDictionary);
 
@@ -89,16 +89,16 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             typeDictionary.getValue(keyConvert, convertDictionary);
 
             const std::vector<std::string>& keys = convertDictionary.keys();
-            for (size_t j = 0; j < keys.size(); j++) {
+            for (const std::string& key : keys) {
                 ghoul::Dictionary itemDictionary;
-                convertDictionary.getValue(keys[j], itemDictionary);
+                convertDictionary.getValue(key, itemDictionary);
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     itemDictionary,
-                    decoders[i]
+                    decoderStr
                 );
                 // insert decoder to map - this will be used in the parser to determine
                 // behavioral characteristics of each instrument
-                _fileTranslation[keys[j]] = std::move(decoder);
+                _fileTranslation[key] = std::move(decoder);
             };
         }
     }
@@ -137,7 +137,7 @@ bool LabelParser::create() {
     }
 
     std::string previousTarget;
-    std::string lblName = "";
+    std::string lblName;
 
 
     using Recursive = ghoul::filesystem::Directory::Recursive;

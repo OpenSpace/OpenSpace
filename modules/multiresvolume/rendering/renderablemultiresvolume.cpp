@@ -80,79 +80,79 @@ namespace {
         "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
+    const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
+    const openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
+    const openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
+    const openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
+    const openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo LoopInfo = {
+    const openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SelectorNameInfo = {
+    const openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StatsToFileInfo = {
+    const openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
+    const openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingInfo = {
+    const openspace::properties::Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    const openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    const openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation

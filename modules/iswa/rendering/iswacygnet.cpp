@@ -43,12 +43,12 @@
 namespace {
     constexpr const char* _loggerCat = "IswaCygnet";
 
-    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+    const openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "" // @TODO Missing documentation
     };
-    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+    const openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "" // @TODO Missing documentation

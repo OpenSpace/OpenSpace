@@ -224,8 +224,9 @@ float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) cons
     return -1.f;
 }
 
-bool ImageSequencer::imagePaths(std::vector<Image>& captures, std::string projectee,
-                                   std::string instrumentRequest, double sinceTime)
+bool ImageSequencer::imagePaths(std::vector<Image>& captures,
+                                const std::string& projectee,
+                                const std::string& instrumentRequest, double sinceTime)
 {
     // check if this instance is either in range or
     // a valid candidate to recieve data
@@ -402,13 +403,11 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
 
         // IFF images have same time as mission planned capture, erase that event
         // from 'predicted event file' (mission-playbook)
-        for (size_t i = 0; i < source.size(); ++i) {
-            for (size_t j = 0; j < destination.size(); ++j) {
-                double diff = std::abs(
-                    source[i].timeRange.start - destination[j].timeRange.start
-                );
+        for (Image& i : source) {
+            for (const Image& j : destination) {
+                const double diff = std::abs(i.timeRange.start - j.timeRange.start);
                 if (diff < epsilon) {
-                    source.erase(source.begin() + i);
+                    source.erase(source.begin() + 1);
                 }
             }
         }

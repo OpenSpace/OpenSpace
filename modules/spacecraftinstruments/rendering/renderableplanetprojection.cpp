@@ -300,7 +300,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_ambientBrightness);
 }
 
-RenderablePlanetProjection::~RenderablePlanetProjection() {}
+RenderablePlanetProjection::~RenderablePlanetProjection() {} // NOLINT
 
 void RenderablePlanetProjection::initializeGL() {
     _programObject =

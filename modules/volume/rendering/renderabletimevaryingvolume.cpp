@@ -65,85 +65,85 @@ namespace {
     constexpr const char* KeyUnit = "VisUnit";
     constexpr const float SecondsInOneDay = 60 * 60 * 24;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    const openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "gridType",
         "Grid Type",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
+    const openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
         "secondsBefore",
         "Seconds before",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
+    const openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "secondsAfter",
         "Seconds after",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
+    const openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "sourceDirectory",
         "Source Directory",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "transferFunctionPath",
         "Transfer Function Path",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
+    const openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
         "triggerTimeJump",
         "Jump",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
+    const openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "jumpToTimestep",
         "Jump to timestep",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
+    const openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
         "currentTimestep",
         "Current timestep",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    const openspace::properties::Property::PropertyInfo OpacityInfo = {
         "opacity",
         "Opacity",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo rNormalizationInfo = {
+    const openspace::properties::Property::PropertyInfo rNormalizationInfo = {
         "rNormalization",
         "Radius normalization",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
+    const openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
         "rUpperBound",
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo lowerValueBoundInfo = {
+    const openspace::properties::Property::PropertyInfo lowerValueBoundInfo = {
         "lowerValueBound",
         "Lower value bound",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo upperValueBoundInfo = {
+    const openspace::properties::Property::PropertyInfo upperValueBoundInfo = {
         "upperValueBound",
         "Upper value bound",
         "" // @TODO Missing documentation

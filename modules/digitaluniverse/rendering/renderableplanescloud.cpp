@@ -65,97 +65,96 @@ namespace {
         BlendModeAdditive
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all points."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each point."
     };
 
-    static const openspace::properties::Property::PropertyInfo TextColorInfo = {
+    const openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
         "The text color for the astronomical object."
     };
 
-    static const openspace::properties::Property::PropertyInfo TextSizeInfo = {
+    const openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
         "The text size for the astronomical object labels."
     };
 
-    static const openspace::properties::Property::PropertyInfo LabelFileInfo = {
+    const openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
+    const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+    const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
         "TextMaxSize",
         "Text Max Size",
         "The maximum size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
         "Enables/Disables the drawing of the astronomical objects."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo =
-    {
+    const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
     };
 
-    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    const openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
         "This determines the blending mode that is applied to this plane."
     };
 
-    static const openspace::properties::Property::PropertyInfo TexturePathInfo = {
+    const openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture Path",
         "This value specifies the path for the textures in disk."
     };
 
-    static const openspace::properties::Property::PropertyInfo LuminosityInfo = {
+    const openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity variable",
         "Datavar variable to control the luminosity/size of the astronomical objects."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleLuminosityInfo = {
+    const openspace::properties::Property::PropertyInfo ScaleLuminosityInfo = {
         "ScaleLuminosity",
         "ScaleLuminosity variable",
         "Scaling control for the luminosity/size of the astronomical objects."
     };
 
-    static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+    const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOptionInfo",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+    const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
@@ -163,13 +162,13 @@ namespace {
         "fading-in."
     };
 
-    static const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+    const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
         "Enables/Disables the Fade-in effect."
     };
 
-    static const openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
+    const openspace::properties::Property::PropertyInfo PlaneMinSizeInfo = {
         "PlaneMinSize",
         "Plane Min Size in Pixels",
         "The min size (in pixels) for the plane representing the astronomical "

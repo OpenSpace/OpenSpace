@@ -456,7 +456,7 @@ void RenderableFov::initializeGL() {
         1,
         GL_INT,
         sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color)) // NOLINT
     );
 
     // Orthogonal Plane
@@ -486,7 +486,7 @@ void RenderableFov::initializeGL() {
         1,
         GL_INT,
         sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color)) // NOLINT
     );
 
     glBindVertexArray(0);
@@ -903,10 +903,10 @@ void RenderableFov::update(const UpdateData& data) {
 
         const double t2 = (ImageSequencer::ref().nextCaptureTime());
         const double diff = (t2 - data.time.j2000Seconds());
-        _interpolationTime = 0.0;
-        const float interpolationStart = 7.0; //seconds before
+        _interpolationTime = 0.f;
+        const float interpolationStart = 7.f; //seconds before
         if (diff <= interpolationStart) {
-            _interpolationTime = static_cast<float>(1.0 - (diff / interpolationStart));
+            _interpolationTime = static_cast<float>(1.f - (diff / interpolationStart));
         }
 
         if (diff < 0.0) {

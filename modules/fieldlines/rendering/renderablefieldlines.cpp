@@ -70,32 +70,32 @@ namespace {
     constexpr const int SeedPointSourceFile = 0;
     constexpr const int SeedPointSourceTable = 1;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         KeyFieldlinesStepSize,
         //"StepSize",
         "Fieldline Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo Classification = {
+    const openspace::properties::Property::PropertyInfo Classification = {
         KeyFieldlinesClassification,
         "Fieldline Classification",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
+    const openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
         "Fieldline Color",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
+    const openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
         "Source",
         "SeedPoint Source",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
+    const openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
         "SourceFile",
         "SeedPoint File",
         "" // @TODO Missing documentation

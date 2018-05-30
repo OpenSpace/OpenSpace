@@ -99,7 +99,7 @@ private:
     glm::vec3 _boresight;
 
     std::vector<Image> _imageTimes;
-    double _time;
+    double _time = -std::numeric_limits<double>::max();
 
     bool _shouldCapture = false;
 

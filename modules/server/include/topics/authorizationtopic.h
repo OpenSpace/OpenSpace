@@ -37,7 +37,7 @@ public:
     bool isDone() const override;
 
 private:
-    bool authorize(const std::string key);
+    bool authorize(const std::string& key);
 
     bool _isAuthenticated = false;
 };

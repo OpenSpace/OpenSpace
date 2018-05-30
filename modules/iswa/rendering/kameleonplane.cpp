@@ -56,19 +56,19 @@ namespace {
     using json = nlohmann::json;
     constexpr const char* _loggerCat = "KameleonPlane";
 
-    static const openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+    const openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline Seedpoints",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    const openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SliceInfo = {
+    const openspace::properties::Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "" // @TODO Missing documentation

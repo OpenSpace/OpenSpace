@@ -44,8 +44,7 @@ using nlohmann::json;
 namespace openspace {
 
 TimeTopic::TimeTopic()
-    : Topic()
-    , _lastUpdateTime(std::chrono::system_clock::now())
+    : _lastUpdateTime(std::chrono::system_clock::now())
 {
     LDEBUG("Starting new time subscription");
 }

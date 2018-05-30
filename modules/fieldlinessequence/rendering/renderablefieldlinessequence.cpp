@@ -86,99 +86,99 @@ namespace {
     constexpr const char* ValueInputFileTypeOsfls = "osfls";
 
     // --------------------------------- Property Info -------------------------------- //
-    static const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
+    const openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "colorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density."
     };
-    static const openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
+    const openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "colorQuantity",
         "Quantity to Color By",
         "Quantity used to color lines if the 'By Quantity' color method is selected."
     };
-    static const openspace::properties::Property::PropertyInfo ColorQuantityMinInfo = {
+    const openspace::properties::Property::PropertyInfo ColorQuantityMinInfo = {
         "colorQuantityMin",
         "ColorTable Min Value",
         "Value to map to the lowest end of the color table."
     };
-    static const openspace::properties::Property::PropertyInfo ColorQuantityMaxInfo = {
+    const openspace::properties::Property::PropertyInfo ColorQuantityMaxInfo = {
         "colorQuantityMax",
         "ColorTable Max Value",
         "Value to map to the highest end of the color table."
     };
-    static const openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
+    const openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "colorTablePath",
         "Path to Color Table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring."
     };
-    static const openspace::properties::Property::PropertyInfo ColorUniformInfo = {
+    const openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "uniform",
         "Uniform Line Color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'."
     };
-    static const openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
+    const openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "aBlendingEnabled",
         "Additive Blending",
         "Activate/deactivate additive blending."
     };
-    static const openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
+    const openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "domainEnabled",
         "Domain Limits",
         "Enable/Disable domain limits"
     };
-    static const openspace::properties::Property::PropertyInfo DomainXInfo = {
+    const openspace::properties::Property::PropertyInfo DomainXInfo = {
         "limitsX",
         "X-limits",
         "Valid range along the X-axis. [Min, Max]"
     };
-    static const openspace::properties::Property::PropertyInfo DomainYInfo = {
+    const openspace::properties::Property::PropertyInfo DomainYInfo = {
         "limitsY",
         "Y-limits",
         "Valid range along the Y-axis. [Min, Max]"
     };
-    static const openspace::properties::Property::PropertyInfo DomainZInfo = {
+    const openspace::properties::Property::PropertyInfo DomainZInfo = {
         "limitsZ",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max]"
     };
-    static const openspace::properties::Property::PropertyInfo DomainRInfo = {
+    const openspace::properties::Property::PropertyInfo DomainRInfo = {
         "limitsR",
         "Radial limits",
         "Valid radial range. [Min, Max]"
     };
-    static const openspace::properties::Property::PropertyInfo FlowColorInfo = {
+    const openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "color",
         "Color",
         "Color of particles."
     };
-    static const openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
+    const openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "flowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow."
     };
-    static const openspace::properties::Property::PropertyInfo FlowReversedInfo = {
+    const openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "reversed",
         "Reversed Flow",
         "Toggle to make the flow move in the opposite direction."
     };
-    static const openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "particleSize",
         "Particle Size",
         "Size of the particles."
     };
-    static const openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
+    const openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "particleSpacing",
         "Particle Spacing",
         "Spacing inbetween particles."
     };
-    static const openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
+    const openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "speed",
         "Speed",
         "Speed of the flow."
     };
-    static const openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
+    const openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "maskingEnabled",
         "Masking",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
@@ -186,27 +186,27 @@ namespace {
         "temperature is between 10 and 20 degrees. Also used for masking out line "
         "topologies like solar wind & closed lines."
     };
-    static const openspace::properties::Property::PropertyInfo MaskingMinInfo = {
+    const openspace::properties::Property::PropertyInfo MaskingMinInfo = {
         "maskingMinLimit",
         "Lower Limit",
         "Lower limit of the valid masking range"
     };
-    static const openspace::properties::Property::PropertyInfo MaskingMaxInfo = {
+    const openspace::properties::Property::PropertyInfo MaskingMaxInfo = {
         "maskingMaxLimit",
         "Upper Limit",
         "Upper limit of the valid masking range"
     };
-    static const openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
+    const openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "maskingQuantity",
         "Quantity used for Masking",
         "Quantity used for masking."
     };
-    static const openspace::properties::Property::PropertyInfo OriginButtonInfo = {
+    const openspace::properties::Property::PropertyInfo OriginButtonInfo = {
         "focusCameraOnParent",
         "Focus Camera",
         "Focus camera on parent."
     };
-    static const openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
+    const openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "timeJumpToStart",
         "Jump to Start Of Sequence",
         "Performs a time jump to the start of the sequence."

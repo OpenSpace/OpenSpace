@@ -32,31 +32,31 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo VisibilityInfo = {
+    const openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    const openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Size",
         "Marker radius",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Marker transparency",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ThicknessInfo = {
+    const openspace::properties::Property::PropertyInfo ThicknessInfo = {
         "Thickness",
         "Marker thickness",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    const openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
 } // namespace
@@ -85,7 +85,7 @@ TouchMarker::TouchMarker()
     addProperty(_color);
 }
 
-TouchMarker::~TouchMarker() {}
+TouchMarker::~TouchMarker() {} // NOLINT
 
 void TouchMarker::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
@@ -164,7 +164,7 @@ void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor>& list) {
         GL_FLOAT,
         GL_FALSE,
         0,
-        0
+        nullptr
     );
 }
 

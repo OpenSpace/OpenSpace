@@ -38,43 +38,43 @@ namespace {
     constexpr const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
-    static const openspace::properties::Property::PropertyInfo UseLogInfo = {
+    const openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use Logarithm",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto Contrast",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto Filter",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo NormalizeValues = {
+    const openspace::properties::Property::PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize Values",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    const openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background Values",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer Functions",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data Options",
         "" // @TODO Missing documentation

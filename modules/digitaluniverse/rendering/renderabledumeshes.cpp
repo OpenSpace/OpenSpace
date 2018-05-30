@@ -62,85 +62,84 @@ namespace {
     constexpr const int8_t CurrentCacheVersion = 1;
     constexpr const double PARSEC = 0.308567756E17;
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all point."
     };
 
-    /*static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
-        "ScaleFactor",
-        "Scale Factor",
-        "This value is used as a multiplicative factor that is applied to the apparent "
-        "size of each point."
-    };*/
+    //const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    //    "ScaleFactor",
+    //    "Scale Factor",
+    //    "This value is used as a multiplicative factor that is applied to the apparent "
+    //    "size of each point."
+    //};
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "This value is used to define the color of the astronomical object."
     };
 
-    static const openspace::properties::Property::PropertyInfo TextColorInfo = {
+    const openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
         "The text color for the astronomical object."
     };
 
-    static const openspace::properties::Property::PropertyInfo TextSizeInfo = {
+    const openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
         "The text size for the astronomical object labels."
     };
 
-    static const openspace::properties::Property::PropertyInfo LabelFileInfo = {
+    const openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
+    const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+    const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
         "TextMaxSize",
         "Text Max Size",
         "The maximum size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
         "Enables/Disables the drawing of the astronomical objects."
     };
 
-    static const openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+    const openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
         "Determines whether labels should be drawn or hidden."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransformationMatrixInfo =
-    {
+    const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
     };
 
-    static const openspace::properties::Property::PropertyInfo MeshColorInfo = {
+    const openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
         "The defined colors for the meshes to be rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+    const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOptionInfo",
         "Render Option",
         "Debug option for rendering of billboards and texts."

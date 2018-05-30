@@ -160,7 +160,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     addProperty(_performShading);
 }
 
-RenderableModelProjection::~RenderableModelProjection() {}
+RenderableModelProjection::~RenderableModelProjection() {} // NOLINT
 
 bool RenderableModelProjection::isReady() const {
     return (_programObject != nullptr) && (_baseTexture != nullptr) &&

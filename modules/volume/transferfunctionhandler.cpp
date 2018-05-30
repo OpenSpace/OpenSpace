@@ -29,38 +29,37 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
         "TransferFunction",
         "All the envelopes used in the transfer function"
     };
 
-    static const openspace::properties::Property::PropertyInfo HistogramInfo = {
+    const openspace::properties::Property::PropertyInfo HistogramInfo = {
         "Histogram",
         "Histogram",
         "All the data"
     };
 
-    static const openspace::properties::Property::PropertyInfo DataUnitInfo = {
+    const openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
         "DataUnit",
         "Unit of the data"
     };
 
-    static const openspace::properties::Property::PropertyInfo MinValueInfo = {
+    const openspace::properties::Property::PropertyInfo MinValueInfo = {
         "MinValue",
         "MinValue",
         "Minimum value in the data"
     };
 
-    static const openspace::properties::Property::PropertyInfo MaxValueInfo = {
+    const openspace::properties::Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
         "MaxValue",
         "Maximum value in the data"
     };
 
-    static const openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo =
-    {
+    const openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
         "Save Transfer Function",
         "Save your transfer function"

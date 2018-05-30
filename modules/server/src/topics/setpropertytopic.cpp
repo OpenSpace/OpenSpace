@@ -58,11 +58,11 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             }
         }
     }
-    catch (std::out_of_range& e) {
+    catch (const std::out_of_range& e) {
         LERROR("Could not set property -- key or value is missing in payload");
         LERROR(e.what());
     }
-    catch (ghoul::RuntimeError e) {
+    catch (const ghoul::RuntimeError& e) {
         LERROR("Could not set property -- runtime error:");
         LERROR(e.what());
     }

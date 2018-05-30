@@ -41,9 +41,9 @@ class Topic;
 
 class Connection {
 public:
-    Connection(std::unique_ptr<ghoul::io::Socket> s, const std::string &address);
+    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address);
 
-    void handleMessage(std::string message);
+    void handleMessage(const std::string& message);
     void sendMessage(const std::string& message);
     void handleJson(const nlohmann::json& json);
     void sendJson(const nlohmann::json& json);

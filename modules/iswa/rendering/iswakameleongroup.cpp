@@ -35,13 +35,13 @@ namespace {
     constexpr const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
-    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    const openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
+    const openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline Seedpoints",
         "" // @TODO Missing documentation

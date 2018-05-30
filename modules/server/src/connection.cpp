@@ -60,9 +60,9 @@ namespace {
 
 namespace openspace {
 
-Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, const std::string &address)
+Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address)
     : _socket(std::move(s))
-    , _address(address)
+    , _address(std::move(address))
 {
     ghoul_assert(_socket, "Socket must not be nullptr");
 
@@ -79,7 +79,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, const std::string &
     _requireAuthorization = OsEng.configuration().doesRequireSocketAuthentication;
 }
 
-void Connection::handleMessage(std::string message) {
+void Connection::handleMessage(const std::string& message) {
     try {
         nlohmann::json j = nlohmann::json::parse(message.c_str());
         try {
@@ -162,8 +162,8 @@ void Connection::sendMessage(const std::string& message) {
     _socket->putMessage(message);
 }
 
-void Connection::sendJson(const nlohmann::json& j) {
-    sendMessage(j.dump());
+void Connection::sendJson(const nlohmann::json& json) {
+    sendMessage(json.dump());
 }
 
 bool Connection::isAuthorized() const {

@@ -85,7 +85,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
             // for each playbook call -> create a Decoder object
             const std::vector<std::string>& keys = typeDictionary.keys();
             for (const std::string& key : keys) {
-                std::string currentKey = decoderType + "." + key;
+                const std::string& currentKey = decoderType + "." + key;
 
                 ghoul::Dictionary decoderDictionary;
                 translationDictionary.getValue(currentKey, decoderDictionary);

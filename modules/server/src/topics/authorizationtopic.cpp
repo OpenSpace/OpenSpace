@@ -83,7 +83,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     }
 };
 
-bool AuthorizationTopic::authorize(const std::string key) {
+bool AuthorizationTopic::authorize(const std::string& key) {
     _isAuthenticated = (key == OsEng.configuration().serverPasskey);
     return _isAuthenticated;
 }
