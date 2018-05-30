@@ -95,7 +95,10 @@ KeyWithModifier stringToKey(std::string str) {
         [&m](const std::string& s) {
             const auto itMod = KeyModifierMapping.find(s);
             if (itMod != KeyModifierMapping.end()) {
-                m |= itMod->second;
+                m = static_cast<KeyModifier>(
+                    static_cast<std::underlying_type_t<KeyModifier>>(m) |
+                    static_cast<std::underlying_type_t<KeyModifier>>(itMod->second)
+                );
             }
             else {
                 LERROR(fmt::format("Unknown modifier key '{}'", s));
