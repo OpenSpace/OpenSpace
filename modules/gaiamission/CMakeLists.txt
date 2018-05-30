@@ -52,6 +52,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_vbo_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_ssbo_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_nofbo_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_billboard_ge.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gaia_point_fs.glsl

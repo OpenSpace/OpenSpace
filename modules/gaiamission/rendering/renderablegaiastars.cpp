@@ -311,7 +311,8 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
             {
                 ShaderOptionInfo.identifier,
                 new StringInListVerifier({
-                    "Point_SSBO", "Point_VBO", "Billboard_SSBO", "Billboard_VBO"
+                    "Point_SSBO", "Point_VBO", "Billboard_SSBO", "Billboard_VBO", 
+                    "Billboard_SSBO_noFBO"
                 }),
                 Optional::Yes,
                 ShaderOptionInfo.description
@@ -590,7 +591,8 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         { gaiamission::ShaderOption::Point_SSBO, "Point_SSBO" },
         { gaiamission::ShaderOption::Point_VBO, "Point_VBO" },
         { gaiamission::ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
-        { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" }
+        { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" },
+        { gaiamission::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
         });
     if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
         const std::string shaderOption = 
@@ -604,8 +606,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         else if (shaderOption == "Billboard_SSBO") {
             _shaderOption = gaiamission::ShaderOption::Billboard_SSBO;
         }
-        else {
+        else if (shaderOption == "Billboard_VBO") {
             _shaderOption = gaiamission::ShaderOption::Billboard_VBO;
+        }
+        else {
+            _shaderOption = gaiamission::ShaderOption::Billboard_SSBO_noFBO;
         }
     }
     _shaderOption.onChange([&] { _buffersAreDirty = true; _shadersAreDirty = true; });
@@ -889,6 +894,29 @@ void RenderableGaiaStars::initializeGL() {
         //addProperty(_pointSpreadFunctionTexturePath);
         break;
     }
+    case gaiamission::ShaderOption::Billboard_SSBO_noFBO: {
+        _program = renderEngine.buildRenderProgram("GaiaStar",
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_nofbo_fs.glsl"),
+            absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+        );
+        _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
+        _uniformCache.sharpness = _program->uniformLocation("sharpness");
+        _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
+        _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
+        _uniformCache.screenSize = _program->uniformLocation("screenSize");
+        _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
+
+        _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
+        _uniformCache.valuesPerStar = _program->uniformLocation("valuesPerStar");
+        _uniformCache.nChunksToRender = _program->uniformLocation("nChunksToRender");
+
+        addProperty(_magnitudeBoost);
+        addProperty(_sharpness);
+        addProperty(_billboardSize);
+        addProperty(_closeUpBoostDist);
+        break;
+    }
     case gaiamission::ShaderOption::Billboard_VBO: {
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
@@ -1078,7 +1106,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Switch rendering technique depending on user-defined shader option.
     const int shaderOption = _shaderOption;
     if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
-        || shaderOption == gaiamission::ShaderOption::Point_SSBO) {
+        || shaderOption == gaiamission::ShaderOption::Point_SSBO
+        || shaderOption == gaiamission::ShaderOption::Billboard_SSBO_noFBO) {
 
         //------------------------ RENDER WITH SSBO ---------------------------
         // Update SSBO Index array with accumulated stars in all chunks.
@@ -1311,7 +1340,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         nShaderCalls = maxStarsPerNode * nChunksToRender;
         break;
     }
-    case gaiamission::ShaderOption::Billboard_SSBO: {
+    case gaiamission::ShaderOption::Billboard_SSBO: 
+    case gaiamission::ShaderOption::Billboard_SSBO_noFBO: {
         _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
         _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
         _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
@@ -1350,9 +1380,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     }
     }
 
-    // Render to FBO.
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (shaderOption != gaiamission::ShaderOption::Billboard_SSBO_noFBO) {
+        // Render to FBO.
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
     
     //glEnable(GL_PROGRAM_POINT_SIZE);
     // A non-zero named vao MUST ALWAYS be bound!
@@ -1368,30 +1400,32 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     //glDisable(GL_PROGRAM_POINT_SIZE);
     _program->deactivate();
 
-    // Use ToneMapping shaders and render to default FBO again!
-    _programTM->activate();
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (shaderOption != gaiamission::ShaderOption::Billboard_SSBO_noFBO) { 
+        // Use ToneMapping shaders and render to default FBO again!
+        _programTM->activate();
 
-    ghoul::opengl::TextureUnit fboTexUnit;
-    fboTexUnit.activate();
-    _fboTexture->bind();
-    _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
-    _programTM->setUniform(_uniformCacheTM.projection, projection);
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (shaderOption == gaiamission::ShaderOption::Point_SSBO
-        || shaderOption == gaiamission::ShaderOption::Point_VBO) {
-        _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
-        _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
-        _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
+        ghoul::opengl::TextureUnit fboTexUnit;
+        fboTexUnit.activate();
+        _fboTexture->bind();
+        _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
+        _programTM->setUniform(_uniformCacheTM.projection, projection);
+
+        if (shaderOption == gaiamission::ShaderOption::Point_SSBO
+            || shaderOption == gaiamission::ShaderOption::Point_VBO) {
+            _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
+            _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
+            _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
+        }
+
+        glBindVertexArray(_vaoQuad);
+        glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
+        glBindVertexArray(0);
+
+        _programTM->deactivate();
     }
-
-    glBindVertexArray(_vaoQuad);
-    glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
-    glBindVertexArray(0);
-
-    _programTM->deactivate();
 
     glDepthMask(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1503,14 +1537,25 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             break;
         }
-        case gaiamission::ShaderOption::Billboard_SSBO: {
-            std::unique_ptr<ghoul::opengl::ProgramObject> program =
-                ghoul::opengl::ProgramObject::Build(
-                    "GaiaStar",
-                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
-                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
-                    absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
-                );
+        case gaiamission::ShaderOption::Billboard_SSBO:
+        case gaiamission::ShaderOption::Billboard_SSBO_noFBO: {
+            std::unique_ptr<ghoul::opengl::ProgramObject> program;
+            if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO) {
+                program = ghoul::opengl::ProgramObject::Build(
+                        "GaiaStar",
+                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
+                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                    );
+            }
+            else {
+                program = renderEngine.buildRenderProgram("GaiaStar",
+                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_ssbo_vs.glsl"),
+                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_nofbo_fs.glsl"),
+                        absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
+                    );
+            }
+
             if (program) {
                 if (_program) {
                     renderEngine.removeRenderProgram(_program.get());
@@ -1679,7 +1724,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // ------------------ RENDER WITH SSBO -----------------------
         if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
-            || shaderOption == gaiamission::ShaderOption::Point_SSBO) {
+            || shaderOption == gaiamission::ShaderOption::Point_SSBO
+            || shaderOption == gaiamission::ShaderOption::Billboard_SSBO_noFBO) {
             _useVBO = false;
 
             // Trigger a rebuild of buffer data from octree. 

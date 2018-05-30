@@ -46,7 +46,8 @@ namespace openspace::gaiamission {
         Point_SSBO = 0,
         Point_VBO = 1,
         Billboard_SSBO = 2,
-        Billboard_VBO = 3
+        Billboard_VBO = 3,
+        Billboard_SSBO_noFBO = 4
     };
 
 } // namespace openspace::gaiamission
