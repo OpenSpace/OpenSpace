@@ -608,7 +608,8 @@ void OctreeManager::writeToMultipleFiles(const std::string& outFolderPath,
 
     // Write entire branch to disc, with one file per node.
     std::string outFilePrefix = outFolderPath + std::to_string(branchIndex);
-    writeNodeToMultipleFiles(outFilePrefix, _root->Children[branchIndex], true);
+    // More threads doesn't make it much faster, disk speed still the limiter.
+    writeNodeToMultipleFiles(outFilePrefix, _root->Children[branchIndex], false);
 
     // Clear all data in branch.
     LINFO("Clear all data from branch " + std::to_string(branchIndex) + " in Octree!");

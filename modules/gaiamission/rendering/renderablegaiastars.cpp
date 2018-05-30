@@ -479,7 +479,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
     , _tmPointSigma(TmPointSigmaInfo, 1.0, 0.1, 3.0)
     , _lodPixelThreshold(LodPixelThresholdInfo, 250.0, 0.0, 5000.0)
-    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.5, 0.0, 1.0)
+    , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45, 0.0, 1.0)
     , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5, 0.0, 1.0)
     , _posXThreshold(FilterPosXInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
     , _posYThreshold(FilterPosYInfo, glm::vec2(0.0), glm::vec2(-10.0), glm::vec2(10.0))
@@ -698,13 +698,25 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             );
     }
     _maxGpuMemoryPercent.onChange([&] { 
+        
+        if (_ssboData != 0) {
+            glDeleteBuffers(1, &_ssboData);
+            glGenBuffers(1, &_ssboData);
+            LDEBUG(fmt::format("Re-generating Data Shader Storage Buffer Object id '{}'",
+                _ssboData));
+        }
+
+        // Find out our new budget. Use dedicated video memory instead of current 
+        // available to always be consistant with previous call(s).
         GLint nDedicatedVidMemoryInKB = 0;
         glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedVidMemoryInKB);
         float dedicatedVidMem = static_cast<float>(
             static_cast<long long>(nDedicatedVidMemoryInKB) * 1024);
+
         _gpuMemoryBudgetInBytes = static_cast<long long>(dedicatedVidMem
             * _maxGpuMemoryPercent);
         _buffersAreDirty = true; 
+        _maxStreamingBudgetInBytes = 0;
     });
 
     if (dictionary.hasKey(MaxCpuMemoryPercentInfo.identifier)) {
@@ -980,8 +992,6 @@ void RenderableGaiaStars::initializeGL() {
         " - nCurrentAvailMemoryInKB: " + std::to_string(nCurrentAvailMemoryInKB));
     
     // Set ceiling for video memory to use in streaming.
-    float currentVidMem = static_cast<float>(
-        static_cast<long long>(nCurrentAvailMemoryInKB) * 1024);
     float dedicatedVidMem = static_cast<float>(
         static_cast<long long>(nDedicatedVidMemoryInKB) * 1024);
     _gpuMemoryBudgetInBytes = static_cast<long long>(dedicatedVidMem
@@ -1770,6 +1780,36 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
 
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+            // Deallocate VBO Buffers if any existed.
+            if (_vboPos != 0) {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
+                glBufferData(
+                    GL_ARRAY_BUFFER,
+                    0,
+                    nullptr,
+                    GL_STREAM_DRAW
+                );
+            }
+            if (_vboCol != 0) {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
+                glBufferData(
+                    GL_ARRAY_BUFFER,
+                    0,
+                    nullptr,
+                    GL_STREAM_DRAW
+                );
+            }
+            if (_vboVel != 0) {
+                glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
+                glBufferData(
+                    GL_ARRAY_BUFFER,
+                    0,
+                    nullptr,
+                    GL_STREAM_DRAW
+                );
+            }
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
         else { // ------------------ RENDER WITH VBO -----------------------
             _useVBO = true;
@@ -1894,6 +1934,27 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
+
+            // Deallocate SSBO buffers if they existed.
+            if (_ssboIdx != 0) {
+                glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
+                glBufferData(
+                    GL_SHADER_STORAGE_BUFFER,
+                    0,
+                    nullptr,
+                    GL_STREAM_DRAW
+                );
+            }
+            if (_ssboData != 0) {
+                glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
+                glBufferData(
+                    GL_SHADER_STORAGE_BUFFER,
+                    0,
+                    nullptr,
+                    GL_STREAM_DRAW
+                );
+            }
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         }
         
         // Generate VAO and VBO for Quad.
