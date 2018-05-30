@@ -40,7 +40,8 @@ Fragment getFragment() {
     vec4 color = vec4(0.0);
     
     // GL_POINTS
-    // Scale filter components to compensate for a skewed frustum!
+
+    // Use frustum params to be able to compensate for a skewed frustum (in a dome).
     float near = float(projection[3][2] / (projection[2][2] - 1.0));
     float left = float(near * (projection[2][0] - 1.0) / projection[0][0]);
     float right = float(near * (projection[2][0] + 1.0) / projection[0][0]);
@@ -48,17 +49,24 @@ Fragment getFragment() {
     float bottom = float(near * (projection[2][1] - 1.0) / projection[1][1]);
     
     // Find screenPos in skewed frustum. uv is [0, 1]
-    //vec2 screenPos = (uv - 0.5) * 2.0; // [-1, 1]
     vec2 screenPos = uv * vec2(right - left, top - bottom) + vec2(left, bottom); 
-    vec2 screenOrigo = vec2(-left, -bottom) / vec2(right - left, top - bottom);
-    vec2 scaleFactor = vec2(
+
+    // Find our elliptic scale factors by trigonometric approximation. 
+    float beta = atan(length(screenPos) / near);
+    vec2 sigmaScaleFactor = vec2( 1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0)); 
+
+    // Scale filter size depending on screen pos.
+    vec2 filterScaleFactor = vec2(
         pow(screenPos.x / near, 2.0),  
         pow(screenPos.y / near, 2.0)  
     );
-    scaleFactor *= 0.5;
+
+    // Use to ignore scaling.
+    //filterScaleFactor = vec2(0.0);
 
     // Use the following to find the origo in a skewed frustum.
     //Fragment origoFrag;
+    //vec2 screenOrigo = vec2(-left, -bottom) / vec2(right - left, top - bottom);
     //if (abs(screenOrigo.x - uv.x) > 0.0005 && abs(screenOrigo.y - uv.y) > 0.0005) {
     //    origoFrag.color = vec4(0.0);
     //} else {
@@ -66,50 +74,66 @@ Fragment getFragment() {
     //}
     //return origoFrag;
 
-    // Uncomment to compare to original filterSize.
-    //scaleFactor = vec2(1.0);
+    // Uncomment to compare to original filterSize (assumes origo in center of screen).
+    //screenPos = (uv - 0.5) * 2.0; // [-1, 1]
+    //filterScaleFactor = vec2(
+    //    pow(screenPos.x, 2.0),  
+    //    pow(screenPos.y, 2.0)  
+    //);
 
-    // Make use of this to switch betweeen circle and ellipse.
+    // Make use of the following flag this to toggle betweeen circular and elliptic distribution.
     bool useCircleDist = false;
 
-    // Scale filter.
-    int newFilterSize = int(filterSize * (1 + length(scaleFactor)));
+    // Apply scaling on bloom filter.
+    vec2 newFilterSize = vec2(filterSize) * (1.0 + length(filterScaleFactor));
 
-    // Get a [filterSize x filterSize] filter around our pixel. UV is [0, 1]
+    // Calculate params for a rotated Elliptic Gaussian distribution.
+    float sigmaMajor;
+    float sigmaMinor;
+    float a;
+    float b;
+    float c;
+    if (!useCircleDist) {
+        float alpha = atan(screenPos.y, screenPos.x);
+        // Apply scaling on sigma.
+        sigmaMajor = sigma * sigmaScaleFactor.y;
+        sigmaMinor = sigma * sigmaScaleFactor.x;
+
+        a = pow(cos(alpha), 2.0) / (2 * pow(sigmaMajor, 2.0)) 
+            + pow(sin(alpha), 2.0) / (2 * pow(sigmaMinor, 2.0)) ;
+        b = sin(2 * alpha) / (4 * pow(sigmaMajor, 2.0)) 
+            - sin(2 * alpha) / (4 * pow(sigmaMinor, 2.0)) ;
+        c = pow(sin(alpha), 2.0) / (2 * pow(sigmaMajor, 2.0))  
+            + pow(cos(alpha), 2.0) / (2 * pow(sigmaMinor, 2.0)) ;
+    }
+
+    // Get a [newFilterSize x newFilterSize] filter around our pixel. UV is [0, 1]
     vec3 intensity = vec3(0.0);
     vec2 pixelSize = 1.0 / screenSize;
-    int halfFilterSize = newFilterSize - 1 / 2;
-    for (int y = -halfFilterSize; y <= halfFilterSize; y += 1) {
-        for (int x = -halfFilterSize; x <= halfFilterSize; x += 1) {
-            vec2 sPoint = uv + (pixelSize * vec2(x, y));
+    ivec2 halfFilterSize = ivec2((newFilterSize - 1.0) / 2.0);
+    for (int y = -halfFilterSize.y; y <= halfFilterSize.y; y += 1) {
+        for (int x = -halfFilterSize.x; x <= halfFilterSize.x; x += 1) {
+            vec2 sPoint = uv + (pixelSize * ivec2(x, y));
+
+            // Calculate the contribution of this pixel (elliptic gaussian distribution).
+            float pixelWeight = exp(-( a * pow(x, 2.0) + 2 * b * x * y + c * pow(y, 2.0) ));
             
-            // Don't sample outside of the FBO texture.
-            if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0)))) {
+            // Only sample inside FBO texture and if the pixel will contribute to final color.
+            if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0))) 
+                && pixelWeight > 0.001) {
                 vec4 sIntensity = texture( renderedTexture, sPoint );
 
                 // Use normal distribution function for halo/bloom effect. 
                 if (useCircleDist) {
-                    float circleDist = sqrt(pow(x / (1 + length(scaleFactor)), 2.0)
-                        + pow(y / (1 + length(scaleFactor)), 2.0));
+                    float circleDist = sqrt(pow(x / (1 + length(filterScaleFactor)), 2.0)
+                        + pow(y / (1 + length(filterScaleFactor)), 2.0));
                     intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) * 
                         exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
                     }
                 else {
-                    // Elliptic gaussian distribution.
-                    float alpha = atan(sPoint.y - screenOrigo.y, sPoint.x - screenOrigo.x);
-                    //alpha = M_PI / 4;
-                    float sigmaWidth = sigma * (1 + length(scaleFactor));
-                    float sigmaHeight = sigma;
-
-                    float a = pow(cos(alpha), 2.0) / (2 * pow(sigmaWidth, 2.0)) 
-                        + pow(sin(alpha), 2.0) / (2 * pow(sigmaHeight, 2.0)) ;
-                    float b = sin(2 * alpha) / (4 * pow(sigmaWidth, 2.0)) 
-                        - sin(2 * alpha) / (4 * pow(sigmaHeight, 2.0)) ;
-                    float c = pow(sin(alpha), 2.0) / (2 * pow(sigmaWidth, 2.0))  
-                        + pow(cos(alpha), 2.0) / (2 * pow(sigmaHeight, 2.0)) ;
-                    intensity += sIntensity.rgb * exp(-( a * pow(x / (1 + length(sigmaWidth)), 2.0)
-                        + 2 * b * x / (1 + length(sigmaWidth)) * y / (1 + length(sigmaHeight))
-                        + c * pow(y / (1 + length(sigmaHeight)), 2.0) )) / newFilterSize;
+                    // Divide contribution by area of ellipse.
+                    intensity += sIntensity.rgb * pixelWeight 
+                        / (M_PI * sigmaScaleFactor.x * sigmaScaleFactor.y);
                 }
             }
         }
@@ -122,6 +146,8 @@ Fragment getFragment() {
     }
 
     color = vec4(intensity, 1.0f);
+    //color = vec4(vec3(atan(screenPos.y, screenPos.x) + M_PI) / (2 * M_PI), 1.0f);
+    //color = vec4(vec2(filterScaleFactor), 1.0, 1.0f);
 
     // Use the following to check for any intensity at all.
     //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
