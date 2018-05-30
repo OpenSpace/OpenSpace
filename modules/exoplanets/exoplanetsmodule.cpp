@@ -70,6 +70,11 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fTask, "No task factory existed");
     fTask->registerClass<ExoplanetsCsvToBinTask>("ExoplanetsCsvToBinTask");
     fRenderable->registerClass<RenderableOrbitdisc>("RenderableOrbitdisc");
+
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
+        _discoveryMethods = std::make_unique<openspace::exoplanets::DiscoveryMethods>();
+        addPropertySubOwner(*_discoveryMethods);
+    });
 }
 
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {

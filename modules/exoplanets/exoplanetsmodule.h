@@ -25,8 +25,12 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSMODULE___H__
 
+
+
 #include <openspace/util/openspacemodule.h>
 #include <openspace/documentation/documentation.h>
+
+#include <modules/exoplanets/discoverymethods/discoverymethods.h>
 
 namespace openspace {
 
@@ -43,6 +47,7 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
+    std::unique_ptr<openspace::exoplanets::DiscoveryMethods> _discoveryMethods;
 
 };
 
