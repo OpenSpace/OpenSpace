@@ -118,7 +118,7 @@ KeyBindingManager::keyBinding(const std::string& key) const
     KeyWithModifier k = stringToKey(key);
     auto itRange = _keyLua.equal_range(k);
     for (auto it = itRange.first; it != itRange.second; ++it) {
-        result.push_back({ it->first, it->second });
+        result.emplace_back(it->first, it->second);
     }
     return result;
 }

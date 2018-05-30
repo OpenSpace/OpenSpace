@@ -35,7 +35,7 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    const openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
@@ -108,7 +108,7 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
     }
 }
 
-ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
+ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {} // NOLINT
 
 void ScreenSpaceImageOnline::update() {
     if (_textureIsDirty) {
@@ -159,7 +159,7 @@ void ScreenSpaceImageOnline::update() {
 }
 
 std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageToMemory(
-    std::string url)
+                                                                   const std::string& url)
 {
     return OsEng.downloadManager().fetchFile(
         url,

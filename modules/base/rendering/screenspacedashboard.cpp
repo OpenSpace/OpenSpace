@@ -36,7 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo UseMainInfo = {
+    const openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
@@ -58,7 +58,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const int type = lua_type(L, 2);
     if (type != LUA_TTABLE) {
-        return luaL_error(L, "Expected argument of type 'table'");
+        return luaL_error(L, "Expected argument of type 'table'"); // NOLINT
     }
 
     ghoul::Dictionary d;
@@ -73,11 +73,12 @@ int addDashboardItemToScreenSpace(lua_State* L) {
     ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
-        return luaL_error(L, "Provided name is not a ScreenSpace item");
+        return luaL_error(L, "Provided name is not a ScreenSpace item"); // NOLINT
     }
 
     ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
+        // NOLINTNEXTLINE
         return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
     }
 
@@ -98,11 +99,12 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
-        return luaL_error(L, "Provided name is not a ScreenSpace item");
+        return luaL_error(L, "Provided name is not a ScreenSpace item"); // NOLINT
     }
 
     ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
+        // NOLINTNEXTLINE
         return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
     }
 

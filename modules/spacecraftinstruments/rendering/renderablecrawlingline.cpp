@@ -156,7 +156,7 @@ void RenderableCrawlingLine::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(VBOData),
-        reinterpret_cast<void*>(offsetof(VBOData, color))
+        reinterpret_cast<void*>(offsetof(VBOData, color)) // NOLINT
     );
 
     glBindVertexArray(0);

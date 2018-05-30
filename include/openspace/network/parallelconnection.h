@@ -54,7 +54,7 @@ public:
 
     struct Message {
         Message() = default;
-        Message(MessageType t, const std::vector<char>& c);
+        Message(MessageType t, std::vector<char> c);
 
         MessageType type;
         std::vector<char> content;
@@ -62,7 +62,7 @@ public:
 
     struct DataMessage {
         DataMessage() = default;
-        DataMessage(datamessagestructures::Type t, const std::vector<char>& c);
+        DataMessage(datamessagestructures::Type t, std::vector<char> c);
 
         datamessagestructures::Type type;
         std::vector<char> content;

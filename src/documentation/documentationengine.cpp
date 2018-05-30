@@ -137,15 +137,15 @@ std::string generateJsonDocumentation(const Documentation& d) {
     std::stringstream result;
     result << "{";
 
-    result << "\"name\": \"" << d.name << "\",";
-    result << "\"id\": \"" << d.id << "\",";
-    result << "\"entries\": [";
+    result << R"("name": ")" << d.name << "\",";
+    result << R"("id": ")" << d.id << "\",";
+    result << R"("entries": [)";
     for (const DocumentationEntry& p : d.entries) {
-        result << "{";
-        result << "\"key\": \"" << p.key << "\",";
-        result << "\"optional\": " << (p.optional ? "true" : "false") << ",";
-        result << "\"type\": \"" << p.verifier->type() << "\",";
-        result << "\"documentation\": \"" << escapedJson(p.documentation) << "\",";
+        result << '{';
+        result << R"("key": ")" << p.key << "\",";
+        result << R"("optional": )" << (p.optional ? "true" : "false") << ',';
+        result << R"("type": ")" << p.verifier->type() << "\",";
+        result << R"("documentation": ")" << escapedJson(p.documentation) << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -158,24 +158,24 @@ std::string generateJsonDocumentation(const Documentation& d) {
             );
 
             if (it == documentations.end()) {
-                result << "\"reference\": { \"found\": false }";
+                result << R"("reference": { "found": false })";
             } else {
-                result << "\"reference\": {"
-                    << "\"found\": true,"
-                    << "\"name\": \"" << it->name << "\","
-                    << "\"identifier\": \"" << rv->identifier << "\""
-                    << "}";
+                result << R"("reference": {)"
+                    << R"("found": true,)"
+                    << R"("name": ")" << it->name << "\","
+                    << R"("identifier": ")" << rv->identifier << '\"'
+                    << '}';
             }
         }
         else if (tv) {
             std::string json = generateJsonDocumentation({ "", "", tv->documentations });
             // We have a TableVerifier, so we need to recurse
-            result << "\"restrictions\": " << json;
+            result << R"("restrictions": )" << json;
         }
         else {
-            result << "\"description\": \"" << p.verifier->documentation() << "\"";
+            result << R"("description": ")" << p.verifier->documentation() << '\"';
         }
-        result << "}";
+        result << '}';
         if (&p != &d.entries.back()) {
             result << ", ";
         }
@@ -275,22 +275,22 @@ std::string DocumentationEngine::generateJson() const {
     return json.str();
 }
 
-void DocumentationEngine::addDocumentation(Documentation doc) {
-    if (doc.id.empty()) {
-        _documentations.push_back(std::move(doc));
+void DocumentationEngine::addDocumentation(Documentation documentation) {
+    if (documentation.id.empty()) {
+        _documentations.push_back(std::move(documentation));
     }
     else {
         auto it = std::find_if(
             _documentations.begin(),
             _documentations.end(),
-            [doc](const Documentation& d) { return doc.id == d.id; }
+            [documentation](const Documentation& d) { return documentation.id == d.id; }
         );
 
         if (it != _documentations.end()) {
-            throw DuplicateDocumentationException(std::move(doc));
+            throw DuplicateDocumentationException(std::move(documentation));
         }
         else {
-            _documentations.push_back(std::move(doc));
+            _documentations.push_back(std::move(documentation));
         }
     }
 }

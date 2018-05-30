@@ -47,9 +47,9 @@ namespace {
 
 namespace openspace {
 
-Scene::InvalidSceneError::InvalidSceneError(const std::string& error,
-    const std::string& comp)
-    : ghoul::RuntimeError(error, comp)
+Scene::InvalidSceneError::InvalidSceneError(const std::string& msg,
+                                            const std::string& comp)
+    : ghoul::RuntimeError(msg, comp)
 {}
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
@@ -343,12 +343,12 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
     return _topologicallySortedNodes;
 }
 
-SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
+SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 
-    const std::string& nodeIdentifier = dict.value<std::string>(KeyIdentifier);
-    const bool hasParent = dict.hasKey(KeyParent);
+    const std::string& nodeIdentifier = nodeDictionary.value<std::string>(KeyIdentifier);
+    const bool hasParent = nodeDictionary.hasKey(KeyParent);
 
     if (_nodesByIdentifier.find(nodeIdentifier) != _nodesByIdentifier.end()) {
         LERROR(fmt::format(
@@ -360,7 +360,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
 
     SceneGraphNode* parent = nullptr;
     if (hasParent) {
-        const std::string parentIdentifier = dict.value<std::string>(KeyParent);
+        const std::string parentIdentifier = nodeDictionary.value<std::string>(KeyParent);
         parent = sceneGraphNode(parentIdentifier);
         if (!parent) {
             // TODO: Throw exception
@@ -371,19 +371,22 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
         }
     }
 
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
+    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
+        nodeDictionary
+    );
     if (!node) {
         // TODO: Throw exception
         LERROR("Could not create node from dictionary: " + nodeIdentifier);
     }
 
-    if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
-        if (!dict.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
+    if (nodeDictionary.hasKey(SceneGraphNode::KeyDependencies)) {
+        if (!nodeDictionary.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies))
+        {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
         ghoul::Dictionary nodeDependencies;
-        dict.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+        nodeDictionary.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
 
         const std::vector<std::string>& keys = nodeDependencies.keys();
         for (const std::string& key : keys) {
@@ -447,14 +450,11 @@ void Scene::addInterpolation(properties::Property* prop, float durationSeconds,
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    for (std::vector<InterpolationInfo>::iterator it = _interpolationInfos.begin();
-        it != _interpolationInfos.end();
-        ++it)
-    {
-        if (it->prop == prop) {
-            it->beginTime = std::chrono::steady_clock::now();
-            it->durationSeconds = durationSeconds;
-            it->easingFunction = func;
+    for (InterpolationInfo& info : _interpolationInfos) {
+        if (info.prop == prop) {
+            info.beginTime = std::chrono::steady_clock::now();
+            info.durationSeconds = durationSeconds;
+            info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
             return;

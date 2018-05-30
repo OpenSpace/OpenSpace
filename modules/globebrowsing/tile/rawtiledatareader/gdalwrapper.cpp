@@ -40,14 +40,14 @@
 namespace {
     constexpr const char* _loggerCat = "GdalWrapper";
 
-    static const openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
+    const openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
         "the logmanager. If this value is disabled, any error will be ignored."
     };
 
-    static const openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
+    const openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "

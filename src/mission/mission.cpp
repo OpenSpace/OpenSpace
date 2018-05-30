@@ -83,12 +83,12 @@ documentation::Documentation MissionPhase::Documentation() {
     };
 }
 
-MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
-    _name = dict.value<std::string>(KeyName);
-    dict.getValue(KeyDescription, _description);
+MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
+    _name = dictionary.value<std::string>(KeyName);
+    dictionary.getValue(KeyDescription, _description);
 
     ghoul::Dictionary childDicts;
-    if (dict.getValue(KeyPhases, childDicts)) {
+    if (dictionary.getValue(KeyPhases, childDicts)) {
         // This is a nested mission phase
         _subphases.reserve(childDicts.size());
         for (size_t i = 0; i < childDicts.size(); ++i) {
@@ -112,7 +112,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
 
         // user may specify an overall time range. In that case expand this timerange.
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
+        if (dictionary.getValue(KeyTimeRange, timeRangeDict)) {
             TimeRange overallTimeRange(timeRangeDict);
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
                 throw ghoul::RuntimeError(
@@ -131,7 +131,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
     else {
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
+        if (dictionary.getValue(KeyTimeRange, timeRangeDict)) {
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
         }
         else {

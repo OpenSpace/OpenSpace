@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    const openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "

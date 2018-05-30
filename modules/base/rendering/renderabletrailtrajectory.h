@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <array>
 
 namespace openspace {
 
@@ -77,12 +78,12 @@ private:
     /// Dirty flag to determine whether the stride information needs to be changed
     bool _subsamplingIsDirty = true;
 
-    std::array<TrailVBOLayout, 2> _auxiliaryVboData;
+    std::array<TrailVBOLayout, 2> _auxiliaryVboData = {};
 
     /// The conversion of the _startTime into the internal time format
-    double _start;
+    double _start = 0.0;
     /// The conversion of the _endTime into the internal time format
-    double _end;
+    double _end = 0.0;
 };
 
 } // namespace openspace

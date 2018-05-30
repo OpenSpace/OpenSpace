@@ -208,7 +208,7 @@ void ABufferRenderer::update() {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } catch (const ghoul::RuntimeError e) {
+            } catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
         }
@@ -858,7 +858,7 @@ void ABufferRenderer::updateResolveDictionary() {
     }
 
     dict.setValue("helperPaths", helperPathsDict);
-    dict.setValue("raycastingEnabled", _raycastData.size() > 0);
+    dict.setValue("raycastingEnabled", !_raycastData.empty());
     dict.setValue("storeSorted", true);
     dict.setValue("nRaycasters", static_cast<unsigned long long>(_raycastData.size()));
 
@@ -904,7 +904,7 @@ void ABufferRenderer::updateRaycastData() {
         // to avoid glsl name collisions between raycaster implementaitons.
         // Assign a new namespace or find an already created index.
 
-        if (helperPath == "") {
+        if (helperPath.empty()) {
             data.namespaceName = "NAMESPACE_" + std::to_string(nextNamespaceIndex++);
         } else {
             auto iter = namespaceIndices.find(helperPath);

@@ -33,7 +33,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "

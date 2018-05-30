@@ -136,7 +136,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
 
     file
         << "\t" << "<script id=\"" << DataId
-        << "\" type=\"text/application/json\">" << '\n'
+        << R"(" type="text/application/json">)" << '\n'
         << json << '\n'
         << "\t" << "</script>" << '\n';
 
@@ -161,7 +161,7 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
 }
 
 std::string escapedJson(const std::string& text) {
-    std::string jsonString = "";
+    std::string jsonString;
     for (const char& c : text) {
         switch (c) {
         case '\t':

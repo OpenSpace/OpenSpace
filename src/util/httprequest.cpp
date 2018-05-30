@@ -59,14 +59,14 @@ size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData) {
     return nBytes;
 }
 
-int progressCallback(void* userData, int64_t nTotalBytes, int64_t nDownloadedBytes,
-                     int64_t, int64_t)
+int progressCallback(void* userData, int64_t nTotalDownloadBytes,
+                     int64_t nDownloadedBytes, int64_t, int64_t)
 {
     HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
     return r->_onProgress(
         HttpRequest::Progress{
             true,
-            static_cast<size_t>(nTotalBytes),
+            static_cast<size_t>(nTotalDownloadBytes),
             static_cast<size_t>(nDownloadedBytes)
         }
     );
@@ -112,26 +112,29 @@ void HttpRequest::perform(RequestOptions opt) {
         return;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, _url.c_str());
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, _url.c_str()); // NOLINT
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
 
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this); // NOLINT
+    // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlfunctions::headerCallback);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this); // NOLINT
+    // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlfunctions::writeCallback);
 
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this); // NOLINT
+    // NOLINTNEXTLINE
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlfunctions::progressCallback);
 
     if (opt.requestTimeoutSeconds > 0) {
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, opt.requestTimeoutSeconds); // NOLINT
     }
 
     CURLcode res = curl_easy_perform(curl);
     if (res == CURLE_OK) {
         long responseCode;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode); // NOLINT
         if (responseCode == StatusCodeOk) {
             setReadyState(ReadyState::Success);
         } else {
@@ -401,7 +404,6 @@ std::mutex HttpFileDownload::_directoryCreationMutex;
 
 SyncHttpMemoryDownload::SyncHttpMemoryDownload(std::string url)
     : SyncHttpDownload(std::move(url))
-    , HttpMemoryDownload()
 {}
 
 SyncHttpFileDownload::SyncHttpFileDownload(std::string url, std::string destinationPath,

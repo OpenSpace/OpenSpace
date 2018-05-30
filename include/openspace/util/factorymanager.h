@@ -51,11 +51,11 @@ public:
          * Constructor for FactoryNotFoundError, the \p type is a human-readable (-ish)
          * type descriptor for the type <code>T</code> for the TemplateFactory that could
          * not be found.
-         * \param type The type <code>T</code> for the <code>TemplateFactory<T></code>
+         * \param t The type <code>T</code> for the <code>TemplateFactory<T></code>
          * that could not be found
-         * \pre \p type must not be empty
+         * \pre \p t must not be empty
          */
-        explicit FactoryNotFoundError(std::string type);
+        explicit FactoryNotFoundError(std::string t);
 
         /// The type describing the ghoul::TemplateFactory that could not be found
         std::string type;

@@ -33,8 +33,8 @@ namespace openspace {
 
 class InstrumentTimesParser : public SequenceParser {
 public:
-    InstrumentTimesParser(const std::string& name, const std::string& sequenceSource,
-        ghoul::Dictionary& parserDict);
+    InstrumentTimesParser(std::string name, std::string sequenceSource,
+        ghoul::Dictionary& inputDict);
 
     bool create() override;
 

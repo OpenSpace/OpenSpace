@@ -154,7 +154,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)) // NOLINT
     );
     glVertexAttribPointer(
         2,
@@ -162,7 +162,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)) // NOLINT
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);

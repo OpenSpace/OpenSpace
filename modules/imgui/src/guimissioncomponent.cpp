@@ -34,7 +34,7 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    static const ImVec2 Size = ImVec2(350, 500);
+    const ImVec2 Size = ImVec2(350, 500);
 
     void renderMission(const openspace::Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the

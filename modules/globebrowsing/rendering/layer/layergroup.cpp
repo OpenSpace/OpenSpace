@@ -31,7 +31,7 @@ namespace {
     constexpr const char* _loggerCat = "LayerGroup";
     constexpr const char* KeyFallback = "Fallback";
 
-    static const openspace::properties::Property::PropertyInfo BlendTileInfo = {
+    const openspace::properties::Property::PropertyInfo BlendTileInfo = {
         "BlendTileLevels",
         "Blend between levels",
         "If this value is enabled, images between different levels are interpolated, "

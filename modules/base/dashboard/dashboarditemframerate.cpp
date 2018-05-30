@@ -36,20 +36,20 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo FrametimeInfo = {
+    const openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
         "This value determines the units in which the frame time is displayed."

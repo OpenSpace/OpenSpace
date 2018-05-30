@@ -126,7 +126,7 @@ public:
 
     float boundingSphere() const;
 
-    SceneGraphNode* childNode(const std::string& name);
+    SceneGraphNode* childNode(const std::string& identifier);
 
     const PerformanceRecord& performanceRecord() const;
 

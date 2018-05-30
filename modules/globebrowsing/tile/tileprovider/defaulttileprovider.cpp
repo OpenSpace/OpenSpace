@@ -40,14 +40,14 @@ namespace {
     constexpr const char* KeyPreCacheLevel = "PreCacheLevel";
     constexpr const char* KeyPadTiles = "PadTiles";
 
-    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider."
     };
 
-    static const openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
+    const openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
         "TilePixelSize",
         "Tile Pixel Size",
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
@@ -85,7 +85,6 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
         tilePixelSize = static_cast<int>(pixelSize);
     }
 
-    _padTiles = true;
     dictionary.getValue<bool>(KeyPadTiles, _padTiles);
 
     TileTextureInitData initData(LayerManager::getTileTextureInitData(
@@ -115,13 +114,13 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tr)
-    : _asyncTextureDataProvider(tr)
+DefaultTileProvider::DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader)
+    : _asyncTextureDataProvider(std::move(reader))
     , _filePath(FilePathInfo, "")
     , _tilePixelSize(TilePixelSizeInfo, 32, 32, 2048)
 {}
 
-DefaultTileProvider::~DefaultTileProvider() {}
+DefaultTileProvider::~DefaultTileProvider() {} // NOLINT
 
 void DefaultTileProvider::update() {
     if (_asyncTextureDataProvider) {
@@ -201,7 +200,7 @@ void DefaultTileProvider::initTexturesFromLoadedData() {
         if (tile) {
             const cache::ProviderTileKey key = { tile->tileIndex, uniqueIdentifier() };
             ghoul_assert(!_tileCache->exist(key), "Tile must not be existing in cache");
-            _tileCache->createTileAndPut(key, tile);
+            _tileCache->createTileAndPut(key, *tile);
         }
     }
 }

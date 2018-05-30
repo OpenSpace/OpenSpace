@@ -29,7 +29,7 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
+    const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
         "RollFriction",
         "Roll Friction",
         "If this is enabled, a small friction is applied to the rolling part of the "
@@ -37,7 +37,7 @@ namespace {
         "is disabled, the camera will roll forever."
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
+    const openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
         "RotationalFriction",
         "Rotational Friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
@@ -45,7 +45,7 @@ namespace {
         "is disabled, the camera will rotate forever."
     };
 
-    static const openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
+    const openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
         "ZoomFriction",
         "Zoom Friction",
         "If this is enabled, a small friction is applied to the zoom part of the camera "
@@ -53,21 +53,21 @@ namespace {
         "disabled, the camera will zoom in or out forever."
     };
 
-    static const openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
+    const openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse Sensitivity",
         "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have."
     };
 
-    static const openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
+    const openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick Sensitivity",
         "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
         "the sensitivity is the less impact a joystick motion will have."
     };
 
-    static const openspace::properties::Property::PropertyInfo FrictionInfo = {
+    const openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction Factor",
         "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
@@ -75,13 +75,13 @@ namespace {
         "faster the camera movements will stop."
     };
 
-    static const openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
+    const openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
         "FollowFocusNodeRotationDistance",
         "Follow focus node rotation distance",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+    const openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
         "Minimum allowed distance",
         "" // @TODO Missing documentation

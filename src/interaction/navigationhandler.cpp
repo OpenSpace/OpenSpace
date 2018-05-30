@@ -45,7 +45,7 @@ namespace {
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyRotation = "Rotation";
 
-    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+    const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Origin",
         "The name of the scene graph node that is the origin of the camera interaction. "
@@ -53,7 +53,7 @@ namespace {
         "towards this object. Any scene graph node can be the origin node."
     };
 
-    static const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
+    const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
@@ -95,6 +95,8 @@ NavigationHandler::NavigationHandler()
     addProperty(_useKeyFrameInteraction);
     addPropertySubOwner(*_orbitalNavigator);
 }
+
+NavigationHandler::~NavigationHandler() {} // NOLINT
 
 void NavigationHandler::initialize() {
     OsEng.parallelPeer().connectionEvent().subscribe(

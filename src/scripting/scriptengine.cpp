@@ -239,12 +239,14 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
             LERROR(fmt::format("Library name '{}' specifies a string", name));
             break;
         case LUA_TTABLE: {
-            if (hasLibrary(name))
+            if (hasLibrary(name)) {
                 LERROR(fmt::format(
                     "Library with name '{}' has been registered before", name
                 ));
-            else
+            }
+            else {
                 LERROR(fmt::format("Library name '{}' specifies a table", name));
+            }
             break;
         }
         case LUA_TFUNCTION:

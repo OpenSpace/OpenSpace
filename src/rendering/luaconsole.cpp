@@ -66,52 +66,52 @@ namespace {
     // when horizontal scrolling is required.
     constexpr const int NVisibleCharsAfterCursor = 5;
 
-    const static openspace::properties::Property::PropertyInfo VisibleInfo = {
+    const openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is Visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out."
     };
 
-    const static openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
+    const openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
         "RemoteScripting",
         "Remote scripting",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remove instances."
     };
 
-    const static openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
+    const openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
         "Sets the background color of the console."
     };
 
-    const static openspace::properties::Property::PropertyInfo HighlightColorInfo = {
+    const openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight Color",
         "Sets the color of the lines below the console."
     };
 
-    const static openspace::properties::Property::PropertyInfo SeparatorColorInfo = {
+    const openspace::properties::Property::PropertyInfo SeparatorColorInfo = {
         "SeparatorColor",
         "Separator Color",
         "Sets the color of the separator between the history part and the entry part of "
         "the console."
     };
 
-    const static openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
+    const openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
         "Sets the text color of the entry area of the console."
     };
 
-    const static openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
+    const openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History Text Color",
         "Sets the text color of the history area of the console."
     };
 
-    const static openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
+    const openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History Length",
         "Determines the length of the history in number of lines."
@@ -193,6 +193,8 @@ LuaConsole::LuaConsole()
     addProperty(_historyTextColor);
 }
 
+LuaConsole::~LuaConsole() {} // NOLINT
+
 void LuaConsole::initialize() {
     const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -231,7 +233,7 @@ void LuaConsole::initialize() {
     }
 
     _commands = _commandsHistory;
-    _commands.push_back("");
+    _commands.emplace_back("");
     _activeCommand = _commands.size() - 1;
 
     _program = ghoul::opengl::ProgramObject::Build(
@@ -472,7 +474,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 
         // Some clean up after the execution of the command
         _commands = _commandsHistory;
-        _commands.push_back("");
+        _commands.emplace_back("");
         _activeCommand = _commands.size() - 1;
         _inputPosition = 0;
         return true;
@@ -637,7 +639,7 @@ void LuaConsole::update() {
     const FontRenderer::BoundingBoxInformation& bbox =
         FontRenderer::defaultRenderer().boundingBox(
             *_historyFont,
-            std::string(nLines, '\n').c_str()
+            std::string(nLines, '\n')
         );
 
     // Update the full height and the target height.
@@ -853,7 +855,7 @@ void LuaConsole::render() {
         );
 
         const FontRenderer::BoundingBoxInformation bbox =
-            FontRenderer::defaultRenderer().boundingBox(*_font, text.c_str());
+            FontRenderer::defaultRenderer().boundingBox(*_font, text);
 
         return glm::vec2(
             loc.x + res.x - bbox.boundingBox.x - 10.f,

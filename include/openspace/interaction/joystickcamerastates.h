@@ -79,7 +79,7 @@ public:
 
 
     void bindButtonCommand(int button, std::string command, JoystickAction action,
-        ButtonCommandRemote local, std::string documentation);
+        ButtonCommandRemote remote, std::string documentation);
     void clearButtonCommand(int button);
     std::vector<std::string> buttonCommand(int button) const;
 

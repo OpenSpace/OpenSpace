@@ -64,7 +64,7 @@ public:
         ResourceSynchronization::StateChangeCallback callback
     );
 
-    void unwatchSynchronization(WatchHandle watch);
+    void unwatchSynchronization(WatchHandle watchHandle);
 
     void notify();
 

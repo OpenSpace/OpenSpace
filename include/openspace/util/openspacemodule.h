@@ -154,7 +154,7 @@ protected:
     const ModuleEngine* moduleEngine() const;
 
 private:
-    const ModuleEngine* _moduleEngine;
+    const ModuleEngine* _moduleEngine = nullptr;
 };
 
 } // namespace openspace

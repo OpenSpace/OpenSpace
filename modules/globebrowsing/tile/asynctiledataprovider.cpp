@@ -40,17 +40,17 @@ namespace {
     constexpr const char* _loggerCat = "AsyncTileDataProvider";
 } // namespace
 
-AsyncTileDataProvider::AsyncTileDataProvider(const std::string& name,
-    const std::shared_ptr<RawTileDataReader> rawTileDataReader)
-    : _name(name)
-    , _rawTileDataReader(rawTileDataReader)
+AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
+                               const std::shared_ptr<RawTileDataReader> rawTileDataReader)
+    : _name(std::move(name))
+    , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
 {
     _globeBrowsingModule = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
 
-AsyncTileDataProvider::~AsyncTileDataProvider() {}
+AsyncTileDataProvider::~AsyncTileDataProvider() {} // NOLINT
 
 std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::rawTileDataReader() const {
     return _rawTileDataReader;
@@ -184,7 +184,7 @@ void AsyncTileDataProvider::update() {
             // Clean all finished jobs
             rawTiles();
             // Only allow resetting if there are no jobs currently running
-            if (_enqueuedTileRequests.size() == 0) {
+            if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::Yes);
                 LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
             }
@@ -194,7 +194,7 @@ void AsyncTileDataProvider::update() {
             // Clean all finished jobs
             rawTiles();
             // Only allow resetting if there are no jobs currently running
-            if (_enqueuedTileRequests.size() == 0) {
+            if (_enqueuedTileRequests.empty()) {
                 performReset(ResetRawTileDataReader::No);
                 LINFO(fmt::format("Tile data reader '{}' reset successfully", _name));
             }
@@ -236,7 +236,7 @@ bool AsyncTileDataProvider::shouldBeDeleted() {
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
-    ghoul_assert(_enqueuedTileRequests.size() == 0, "No enqueued requests left");
+    ghoul_assert(_enqueuedTileRequests.empty(), "No enqueued requests left");
 
     // Re-initialize PBO container
     if (_globeBrowsingModule->tileCache()->shouldUsePbo()) {

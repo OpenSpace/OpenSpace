@@ -24,19 +24,16 @@
 
 #include <openspace/util/time.h>
 
-#include <time.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
-#include "time_lua.inl"
-
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
-
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <mutex>
 #include <ghoul/misc/assert.h>
+#include <mutex>
+
+#include "time_lua.inl"
 
 namespace openspace {
 
@@ -47,13 +44,6 @@ double Time::convertTime(const std::string& time) {
 
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
 
-
-Time::Time(const Time& other)
-    : _time(other._time)
-    , _dt(other._dt)
-    , _timeJumped(other._timeJumped)
-    , _timePaused(other._timePaused)
-{}
 
 Time Time::now() {
     Time now;
@@ -68,8 +58,8 @@ Time Time::now() {
     return now;
 }
 
-void Time::setTime(double value, bool requireJump) {
-    _time = value;
+void Time::setTime(double j2000Seconds, bool requireJump) {
+    _time = j2000Seconds;
     _timeJumped = requireJump;
 }
 
@@ -117,20 +107,46 @@ std::string Time::ISO8601() const {
     std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
     const std::string& month = datetime.substr(5, 3);
 
-    std::string MM = "";
-    if (month == "JAN")      MM = "01";
-    else if (month == "FEB") MM = "02";
-    else if (month == "MAR") MM = "03";
-    else if (month == "APR") MM = "04";
-    else if (month == "MAY") MM = "05";
-    else if (month == "JUN") MM = "06";
-    else if (month == "JUL") MM = "07";
-    else if (month == "AUG") MM = "08";
-    else if (month == "SEP") MM = "09";
-    else if (month == "OCT") MM = "10";
-    else if (month == "NOV") MM = "11";
-    else if (month == "DEC") MM = "12";
-    else ghoul_assert(false, "Bad month");
+    std::string MM;
+    if (month == "JAN") {
+        MM = "01";
+    }
+    else if (month == "FEB") {
+        MM = "02";
+    }
+    else if (month == "MAR") {
+        MM = "03";
+    }
+    else if (month == "APR") {
+        MM = "04";
+    }
+    else if (month == "MAY") {
+        MM = "05";
+    }
+    else if (month == "JUN") {
+        MM = "06";
+    }
+    else if (month == "JUL") {
+        MM = "07";
+    }
+    else if (month == "AUG") {
+        MM = "08";
+    }
+    else if (month == "SEP") {
+        MM = "09";
+    }
+    else if (month == "OCT") {
+        MM = "10";
+    }
+    else if (month == "NOV") {
+        MM = "11";
+    }
+    else if (month == "DEC") {
+        MM = "12";
+    }
+    else {
+        ghoul_assert(false, "Bad month");
+    }
 
     datetime.replace(4, 5, "-" + MM + "-");
     return datetime;

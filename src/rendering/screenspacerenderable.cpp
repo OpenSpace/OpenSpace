@@ -42,13 +42,13 @@ namespace {
     constexpr const char* KeyTag = "Tag";
     constexpr const float PlaneDepth = -2.f;
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether this sceen space plane will be visible or not."
     };
 
-    static const openspace::properties::Property::PropertyInfo FlatScreenInfo = {
+    const openspace::properties::Property::PropertyInfo FlatScreenInfo = {
         "FlatScreen",
         "Flat Screen specification",
         "This value determines whether the location of this screen space plane will be "
@@ -59,21 +59,21 @@ namespace {
         "useful in a planetarium environment."
     };
 
-    static const openspace::properties::Property::PropertyInfo EuclideanPositionInfo = {
+    const openspace::properties::Property::PropertyInfo EuclideanPositionInfo = {
         "EuclideanPosition",
         "Euclidean coordinates",
         "This value determines the position of this screen space plane in Euclidean "
         "two-dimensional coordinates."
     };
 
-    static const openspace::properties::Property::PropertyInfo SphericalPositionInfo = {
+    const openspace::properties::Property::PropertyInfo SphericalPositionInfo = {
         "SphericalPosition",
         "Spherical coordinates",
         "This value determines the position of this screen space plane in a spherical "
         "coordinate system."
     };
 
-    static const openspace::properties::Property::PropertyInfo DepthInfo = {
+    const openspace::properties::Property::PropertyInfo DepthInfo = {
         "Depth",
         "Depth value",
         "This value determines the depth of the plane. This value does not change the "
@@ -82,7 +82,7 @@ namespace {
         "value."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleInfo = {
+    const openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale value",
         "This value determines a scale factor for the plane. The default size of a plane "
@@ -90,7 +90,7 @@ namespace {
         "the image being displayed."
     };
 
-    static const openspace::properties::Property::PropertyInfo AlphaInfo = {
+    const openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Transparency",
         "This value determines the transparency of the screen space plane. If this value "
@@ -98,7 +98,7 @@ namespace {
         "completely transparent."
     };
 
-    static const openspace::properties::Property::PropertyInfo DeleteInfo = {
+    const openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "If this property is triggered, this screen space plane is removed from the "
@@ -345,7 +345,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_delete);
 }
 
-ScreenSpaceRenderable::~ScreenSpaceRenderable() {}
+ScreenSpaceRenderable::~ScreenSpaceRenderable() {} // NOLINT
 
 bool ScreenSpaceRenderable::initialize() {
     return true;

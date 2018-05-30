@@ -176,7 +176,7 @@ SceneGraphNode::SceneGraphNode()
     }
 {}
 
-SceneGraphNode::~SceneGraphNode() {}
+SceneGraphNode::~SceneGraphNode() {} // NOLINT
 
 void SceneGraphNode::initialize() {
     LDEBUG(fmt::format("Initialize: {}", identifier()));
@@ -704,13 +704,14 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& identifier) {
     if (this->identifier() == identifier) {
         return this;
     }
-    else
+    else {
         for (std::unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(identifier);
             if (tmp) {
                 return tmp;
             }
         }
+    }
     return nullptr;
 }
 

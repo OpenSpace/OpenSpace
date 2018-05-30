@@ -52,20 +52,20 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue(lua_State* state,          \
-                                                              TYPE value);               \
+                                                              const TYPE& value);        \
                                                                                          \
     template <>                                                                          \
     int PropertyDelegate<TemplateProperty<TYPE>>::typeLua();                             \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(const std::string& value,  \
                                                               bool& success);            \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
     bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
-                                                            TYPE inValue);
+                                                            const TYPE& inValue);
 
 
 // CLASS_NAME = The string that the Property::className() should return as well as the
@@ -103,18 +103,18 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* l,      \
-                                                                      bool& successful)  \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* state,  \
+                                                                      bool& success)     \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(l, successful);                                \
+        return FROM_LUA_LAMBDA_EXPRESSION(state, success);                               \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* l,        \
-                                                                    TYPE value)          \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toLuaValue<TYPE>(lua_State* state,    \
+                                                                    const TYPE& value)   \
     {                                                                                    \
-        return TO_LUA_LAMBDA_EXPRESSION(l, value);                                       \
+        return TO_LUA_LAMBDA_EXPRESSION(state, value);                                   \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -124,18 +124,18 @@ namespace openspace::properties {
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(std::string value,         \
-                                                              bool& successful)          \
+    TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromString(const std::string& value,  \
+                                                                 bool& success)          \
     {                                                                                    \
-        return FROM_STRING_LAMBDA_EXPRESSION(value, successful);                         \
+        return FROM_STRING_LAMBDA_EXPRESSION(value, success);                            \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
-    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outVal,         \
-                                                            TYPE inVal)                  \
+    bool PropertyDelegate<TemplateProperty<TYPE>>::toString(std::string& outValue,       \
+                                                            const TYPE& inValue)         \
     {                                                                                    \
-        return TO_STRING_LAMBDA_EXPRESSION(outVal, inVal);                               \
+        return TO_STRING_LAMBDA_EXPRESSION(outValue, inValue);                           \
     }                                                                                    \
 
 

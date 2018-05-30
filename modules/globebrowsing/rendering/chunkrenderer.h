@@ -82,8 +82,8 @@ private:
     void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
     ghoul::opengl::ProgramObject* getActivatedProgramWithTileData(
-        std::shared_ptr<LayerShaderManager> layeredShaderManager,
-        std::shared_ptr<GPULayerManager> gpuLayerManager, const Chunk& chunk);
+        LayerShaderManager& layeredShaderManager, GPULayerManager& gpuLayerManager,
+        const Chunk& chunk);
 
     void calculateEclipseShadows(const Chunk& chunk,
         ghoul::opengl::ProgramObject* programObject, const RenderData& data);

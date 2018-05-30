@@ -58,10 +58,10 @@ TransferFunction::TransferFunction(const std::string& filepath,
     : _filepath(filepath)
 {
     setPath(filepath);
-    setCallback(tfChangedCallback);
+    setCallback(std::move(tfChangedCallback));
 }
 
-TransferFunction::~TransferFunction() {}
+TransferFunction::~TransferFunction() {} // NOLINT
 
 void TransferFunction::setPath(const std::string& filepath) {
     if (_file) {
@@ -145,21 +145,21 @@ void TransferFunction::setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture>
             for(int i = 0; i < 4; ++i) {
                 iss >> rgba[i];
             }
-            mappingKeys.push_back({intensity, rgba});
+            mappingKeys.emplace_back(intensity, rgba);
         }
     }
     in.close();
 
-    if (mappingKeys.size() < 1) {
+    if (mappingKeys.empty()) {
         return;
     }
 
     if (mappingKeys.front().position > lower) {
-        mappingKeys.insert(mappingKeys.begin(), {lower,mappingKeys.front().color});
+        mappingKeys.insert(mappingKeys.begin(), {lower, mappingKeys.front().color});
     }
 
     if (mappingKeys.back().position < upper) {
-        mappingKeys.push_back({upper,mappingKeys.back().color});
+        mappingKeys.emplace_back(upper, mappingKeys.back().color);
     }
 
     // allocate new float array with zeros

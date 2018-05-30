@@ -47,7 +47,7 @@ PixelBuffer::~PixelBuffer() {
 
 void* PixelBuffer::mapBuffer(Access access) {
     void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, static_cast<GLenum>(access));
-    _isMapped = dataPtr ? true : false;
+    _isMapped = dataPtr != nullptr;
     return dataPtr;
 }
 

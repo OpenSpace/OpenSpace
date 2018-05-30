@@ -70,7 +70,7 @@ U PropertyDelegate<T>::fromLuaValue(lua_State*, bool&) {
 
 template <typename T>
 template <typename U>
-bool PropertyDelegate<T>::toLuaValue(lua_State*, U) {
+bool PropertyDelegate<T>::toLuaValue(lua_State*, const U&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toLuaValue specialization");
     return false;
@@ -85,7 +85,7 @@ int PropertyDelegate<T>::typeLua() {
 
 template <typename T>
 template <typename U>
-bool PropertyDelegate<T>::toString(std::string&, U) {
+bool PropertyDelegate<T>::toString(std::string&, const U&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::toString specialization");
     return false;
@@ -93,7 +93,7 @@ bool PropertyDelegate<T>::toString(std::string&, U) {
 
 template <typename T>
 template <typename U>
-U PropertyDelegate<T>::fromString(std::string, bool&) {
+U PropertyDelegate<T>::fromString(const std::string&, bool&) {
     static_assert(sizeof(T) == 0,
         "Unimplemented PropertyDelegate::fromString specialization");
 }

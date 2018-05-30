@@ -30,10 +30,10 @@
 namespace openspace::globebrowsing {
 
 void GPUTileUvTransform::setValue(ghoul::opengl::ProgramObject* programObject,
-                                  const TileUvTransform& tileUvTransform)
+                                  const TileUvTransform& uvTransform)
 {
-    _gpuUvOffset.setValue(programObject, tileUvTransform.uvOffset);
-    _gpuUvScale.setValue(programObject, tileUvTransform.uvScale);
+    _gpuUvOffset.setValue(programObject, uvTransform.uvOffset);
+    _gpuUvScale.setValue(programObject, uvTransform.uvScale);
 }
 
 void GPUTileUvTransform::bind(ghoul::opengl::ProgramObject* programObject,

@@ -35,12 +35,12 @@ FrustumCuller::FrustumCuller(AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
 {}
 
-bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
+bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
     // Calculate the MVP matrix
     const glm::dmat4 modelTransform = chunk.owner().modelTransform();
-    const glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    const glm::dmat4 viewTransform = glm::dmat4(renderData.camera.combinedViewMatrix());
     const glm::dmat4 modelViewProjectionTransform = glm::dmat4(
-        data.camera.sgctInternal.projectionMatrix()
+        renderData.camera.sgctInternal.projectionMatrix()
     ) * viewTransform * modelTransform;
 
     const std::vector<glm::dvec4>& corners = chunk.boundingPolyhedronCorners();

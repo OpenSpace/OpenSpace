@@ -31,7 +31,7 @@
 
 namespace openspace::globebrowsing {
 
-GPULayerGroup::~GPULayerGroup() {}
+GPULayerGroup::~GPULayerGroup() {} // NOLINT
 
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)

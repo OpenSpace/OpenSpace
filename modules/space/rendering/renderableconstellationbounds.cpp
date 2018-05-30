@@ -42,14 +42,14 @@ namespace {
     }
 
 
-    static const openspace::properties::Property::PropertyInfo VertexInfo = {
+    const openspace::properties::Property::PropertyInfo VertexInfo = {
         "File",
         "Vertex File Path",
         "The file pointed to with this value contains the vertex locations of the "
         "constellations."
     };
 
-    static const openspace::properties::Property::PropertyInfo ConstellationInfo = {
+    const openspace::properties::Property::PropertyInfo ConstellationInfo = {
         "ConstellationFile",
         "Constellation File Path",
         "Specifies the file that contains the mapping between constellation "
@@ -57,14 +57,14 @@ namespace {
         "abbreviations are used as the full names."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color of constellation lines",
         "Specifies the color of the constellation lines. The lines are always drawn at "
         "full opacity."
     };
 
-    static const openspace::properties::Property::PropertyInfo SelectionInfo = {
+    const openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
         "The constellations that are selected are displayed on the celestial sphere."
@@ -117,8 +117,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     , _constellationFilename(ConstellationInfo)
     , _color(ColorInfo, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _constellationSelection(SelectionInfo)
-    , _vao(0)
-    , _vbo(0)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -232,7 +230,7 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
-    setPscUniforms(*_program.get(), data.camera, data.position);
+    setPscUniforms(*_program, data.camera, data.position);
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *

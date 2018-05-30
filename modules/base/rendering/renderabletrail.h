@@ -157,7 +157,7 @@ private:
     properties::OptionProperty _renderingModes;
 
     /// Program object used to render the data stored in RenderInformation
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _programObject = nullptr;
 
     UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
         vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase) _uniformCache;

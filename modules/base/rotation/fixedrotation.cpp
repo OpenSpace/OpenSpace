@@ -37,7 +37,7 @@ namespace {
     constexpr const char* KeyYAxis = "YAxis";
     constexpr const char* KeyZAxis = "ZAxis";
 
-    static const openspace::properties::Property::PropertyInfo EnableInfo = {
+    const openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
@@ -45,7 +45,7 @@ namespace {
         "undefined behavior."
     };
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
@@ -54,7 +54,7 @@ namespace {
         "vectors."
     };
 
-    static const openspace::properties::Property::PropertyInfo ObjectInfo = {
+    const openspace::properties::Property::PropertyInfo ObjectInfo = {
         "Object",
         "Focus Object",
         "This is the object that the axis will focus on. This object must name an "
@@ -62,7 +62,7 @@ namespace {
         "stay fixed to the current position of that object."
     };
 
-    static const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
+    const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
         "InvertObject",
         "Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -70,14 +70,14 @@ namespace {
         "referenced object."
     };
 
-    static const openspace::properties::Property::PropertyInfo VectorInfo = {
+    const openspace::properties::Property::PropertyInfo VectorInfo = {
         "Vector",
         "Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
-    static const openspace::properties::Property::PropertyInfo OrthogonalVectorInfo = {
+    const openspace::properties::Property::PropertyInfo OrthogonalVectorInfo = {
         "Orthogonal",
         "Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -85,7 +85,7 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    static const openspace::properties::Property::PropertyInfo AttachedInfo = {
+    const openspace::properties::Property::PropertyInfo AttachedInfo = {
         "Attached",
         "Attached Node",
         "This is the name of the node that this rotation is attached to, this value is "

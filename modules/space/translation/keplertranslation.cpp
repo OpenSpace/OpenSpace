@@ -48,7 +48,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
     return x2;
 }
 
-    static const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    const openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
@@ -56,7 +56,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "are not supported."
     };
 
-    static const openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
+    const openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
         "SemiMajorAxis",
         "Semi-major axis",
         "This value determines the semi-major axis, that is the distance of the object "
@@ -64,7 +64,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "apoapsis)."
     };
 
-    static const openspace::properties::Property::PropertyInfo InclinationInfo = {
+    const openspace::properties::Property::PropertyInfo InclinationInfo = {
         "Inclination",
         "Inclination",
         "This value determines the degrees of inclination, or the angle of the orbital "
@@ -72,7 +72,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "central body."
     };
 
-    static const openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
+    const openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
         "AscendingNode",
         "Right ascension of ascending Node",
         "This value determines the right ascension of the ascending node in degrees, "
@@ -80,28 +80,28 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "the horizonal reference plane intersect."
     };
 
-    static const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
+    const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
         "Argument of Periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
         "position on the orbit that is closest to the orbiting body."
     };
 
-    static const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
+    const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
         "MeanAnomaly",
         "Mean anomaly at epoch",
         "This value determines the mean anomaly at the epoch in degrees, which "
         "determines the initial location of the object along the orbit at epoch."
     };
 
-    static const openspace::properties::Property::PropertyInfo EpochInfo = {
+    const openspace::properties::Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
         "This value determines the epoch for which the initial location is defined in "
         "the form of YYYY MM DD HH:mm:ss."
     };
 
-    static const openspace::properties::Property::PropertyInfo PeriodInfo = {
+    const openspace::properties::Property::PropertyInfo PeriodInfo = {
         "Period",
         "Orbit period",
         "Specifies the orbital period (in seconds)."
@@ -179,8 +179,7 @@ documentation::Documentation KeplerTranslation::Documentation() {
 }
 
 KeplerTranslation::KeplerTranslation()
-    : Translation()
-    , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
+    : _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
     , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
     , _inclination(InclinationInfo, 0.0, 0.0, 360.0)
     , _ascendingNode(AscendingNodeInfo, 0.0, 0.0, 360.0)

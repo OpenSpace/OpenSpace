@@ -538,12 +538,11 @@ void FramebufferRenderer::updateDeferredcastData() {
         _deferredcastData[caster] = data;
 
         try {
-            ghoul::Dictionary deferredDict = dict;
             _deferredcastPrograms[caster] = ghoul::opengl::ProgramObject::Build(
                 "Deferred " + std::to_string(data.id) + " raycast",
                 absPath(vsPath),
                 absPath(deferredShaderPath),
-                deferredDict
+                dict
             );
 
             _deferredcastPrograms[caster]->setIgnoreSubroutineUniformLocationError(

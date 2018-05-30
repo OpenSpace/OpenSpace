@@ -46,14 +46,14 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     BooleanType(PadTiles);
 
-    LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
+    LayerManager(const ghoul::Dictionary& layerGroupsDict);
 
     void initialize();
     void deinitialize();
 
     std::shared_ptr<Layer> addLayer(layergroupid::GroupID groupId,
-        ghoul::Dictionary layerDict);
-    void deleteLayer(layergroupid::GroupID groupId, std::string layerName);
+        const ghoul::Dictionary& layerDict);
+    void deleteLayer(layergroupid::GroupID groupId, const std::string& layerName);
 
     const LayerGroup& layerGroup(size_t groupId);
     const LayerGroup& layerGroup(layergroupid::GroupID);
@@ -63,7 +63,7 @@ public:
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups() const;
 
     void update();
-    void reset(bool includingDisabled = false);
+    void reset(bool includeDisabled = false);
 
     static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
         PadTiles padTiles, size_t preferredTileSize = 0);

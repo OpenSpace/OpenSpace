@@ -68,7 +68,7 @@ std::string SceneLicenseWriter::generateJson() const {
 
     json << "]";
 
-    std::string jsonString = "";
+    std::string jsonString;
     for (const char& c : json.str()) {
         if (c == '\'') {
             jsonString += "\\'";

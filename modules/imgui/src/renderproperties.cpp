@@ -146,7 +146,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
     case OptionProperty::DisplayType::Dropdown: {
         // The order of the options does not have to correspond with the value of the
         // option
-        std::string nodeNames = "";
+        std::string nodeNames;
         for (const OptionProperty::Option& o : options) {
             nodeNames += o.description + '\0';
         }
@@ -184,7 +184,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     if (ImGui::TreeNode(name.c_str())) {
@@ -228,7 +228,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     StringProperty* p = static_cast<StringProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     const std::string value = p->value();
@@ -267,7 +267,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     StringListProperty* p = static_cast<StringListProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     std::string value;

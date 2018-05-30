@@ -88,7 +88,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     while (currentOwner) {
         std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
-            identifier = ownerId + "." + identifier;
+            identifier = ownerId + "." + identifier; // NOLINT
         }
         currentOwner = currentOwner->owner();
     }
@@ -103,7 +103,7 @@ bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any) {}
+void Property::set(ghoul::any) {} // NOLINT
 
 bool Property::setLuaValue(lua_State*) {
     return false;
@@ -130,7 +130,7 @@ std::string Property::getStringValue() const {
     return value;
 }
 
-bool Property::setStringValue(std::string) {
+bool Property::setStringValue(std::string) { // NOLINT
     return false;
 }
 
@@ -171,7 +171,7 @@ void Property::setReadOnly(bool state) {
 
 void Property::setViewOption(std::string option, bool value) {
     _metaData.setValue(
-        _metaDataKeyViewPrefix + option,
+        _metaDataKeyViewPrefix + std::move(option),
         value,
         ghoul::Dictionary::CreateIntermediate::Yes
     );
@@ -301,7 +301,7 @@ std::string Property::generateMetaDataJsonDescription() const {
     };
     Visibility visibility = static_cast<Visibility>(
         _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility));
-    std::string vis = VisibilityConverter.at(visibility);
+    const std::string& vis = VisibilityConverter.at(visibility);
 
     bool isReadOnly = false;
     if (_metaData.hasKey(MetaDataKeyReadOnly)) {
@@ -324,9 +324,9 @@ std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 
-void Property::setInterpolationTarget(ghoul::any) {}
+void Property::setInterpolationTarget(ghoul::any) {} // NOLINT
 void Property::setLuaInterpolationTarget(lua_State*) {}
-void Property::setStringInterpolationTarget(std::string) {}
+void Property::setStringInterpolationTarget(std::string) {} // NOLINT
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

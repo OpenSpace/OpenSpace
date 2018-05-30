@@ -136,29 +136,29 @@ public:
     std::vector<Property*> propertiesRecursive() const;
 
     /**
-     * Retrieves a Property identified by \p URI from this PropertyOwner. If \p URI does
+     * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
      * not contain a <code>.</code> the identifier must refer to a Property directly owned
      * by this PropertyOwner. If the identifier contains one or more <code>.</code>, the
      * first part of the name will be recursively extracted and used as a name for a
      * sub-owner and only the last part of the identifier is referring to a Property owned
      * by PropertyOwner named by the second-but-last name.
      *
-     * \param URI The identifier of the Property that should be extracted
+     * \param uri The identifier of the Property that should be extracted
      * \return If the Property cannot be found, \c nullptr is returned, otherwise the
      *         pointer to the Property is returned
      */
-    Property* property(const std::string& URI) const;
+    Property* property(const std::string& uri) const;
 
     /**
-     * This method checks if a Property with the provided \p URI exists in this
+     * This method checks if a Property with the provided \p uri exists in this
      * PropertyOwner (or any sub-owner). If the identifier contains one or more
      * <code>.</code>, the first part of the name will be recursively extracted and is
      * used as a name for a sub-owner and only the last part of the identifier is
      * referring to a Property owned by PropertyOwner named by the second-but-last name.
      *
-     * \return \c true if the \p URI refers to a Property; \c false otherwise.
+     * \return \c true if the \p uri refers to a Property; \c false otherwise.
      */
-    bool hasProperty(const std::string& URI) const;
+    bool hasProperty(const std::string& uri) const;
 
     void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
     PropertyOwner* owner() const { return _owner; }
@@ -174,33 +174,34 @@ public:
 
     /**
      * This method returns the direct sub-owner of this PropertyOwner with the provided
-     * \p name. This means that <code>name</code> cannot contain any <code>.</code> as
-     * this character is not allowed in PropertyOwner names. If the \p name does not name
-     * a valid sub-owner of this PropertyOwner, a \c nullptr will be returned.
+     * \p identifier. This means that <code>identifier</code> cannot contain any
+     * <code>.</code> as this character is not allowed in PropertyOwner names. If the
+     * \p name does not name a valid sub-owner of this PropertyOwner, a \c nullptr will be
+     * returned.
      *
-     * \param name The name of the sub-owner that should be returned
+     * \param identifier The identifier of the sub-owner that should be returned
      * \return The PropertyOwner with the given \p name, or \c nullptr
      */
-    PropertyOwner* propertySubOwner(const std::string& name) const;
+    PropertyOwner* propertySubOwner(const std::string& identifier) const;
 
     /**
-     * Returns \c true if this PropertyOwner owns a sub-owner with the provided \p name;
-     * returns \c false otherwise.
+     * Returns \c true if this PropertyOwner owns a sub-owner with the provided
+     * \p identifier; returns \c false otherwise.
      *
-     * \param name The name of the sub-owner that should be looked up
-     * \return \c true if this PropertyOwner owns a sub-owner with the provided \p name;
-     *         returns \c false otherwise
+     * \param identifier The identifier of the sub-owner that should be looked up
+     * \return \c true if this PropertyOwner owns a sub-owner with the provided
+     *         \p identifier; returns \c false otherwise
      */
-    bool hasPropertySubOwner(const std::string& name) const;
+    bool hasPropertySubOwner(const std::string& identifier) const;
 
     /**
      * This method converts a provided \p groupID, used by the Propertys, into a
-     * human-readable \p name which can be used by some external application.
+     * human-readable \p identifier which can be used by some external application.
      *
-     * \param groupID The group identifier whose human-readable name should be set
-     * \param name The human-readable name for the group identifier
+     * \param groupID The group identifier whose human-readable identifier should be set
+     * \param identifier The human-readable name for the group identifier
      */
-    void setPropertyGroupName(std::string groupID, std::string name);
+    void setPropertyGroupName(std::string groupID, std::string identifier);
 
     /**
      * Returns the human-readable name for the \p groupID for the Propertys of this

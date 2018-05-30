@@ -30,10 +30,10 @@
 
 namespace openspace::globebrowsing {
 
-ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
+ChunkNode::ChunkNode(Chunk chunk, ChunkNode* parent)
     : _parent(parent)
     , _children({ {nullptr, nullptr, nullptr, nullptr} })
-    , _chunk(chunk)
+    , _chunk(std::move(chunk))
 {}
 
 bool ChunkNode::isRoot() const {
@@ -85,7 +85,7 @@ void ChunkNode::breadthFirst(const std::function<void(const ChunkNode&)>& f) con
 
     // Loop through nodes in breadths first order
     Q.push(this);
-    while (Q.size() > 0) {
+    while (!Q.empty()) {
         const ChunkNode* node = Q.front();
         Q.pop();
 
@@ -107,7 +107,7 @@ void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>&
 
     // Loop through nodes in breadths first order
     Q.push(this);
-    while (Q.size() > 0) {
+    while (!Q.empty()) {
         const ChunkNode* node = Q.front();
         Q.pop();
 
@@ -126,7 +126,7 @@ void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>&
     }
 
     // Loop through all nodes in stack, this will be reversed breadth first
-    while (S.size() > 0) {
+    while (!S.empty()) {
         f(*S.top());
         S.pop();
     }

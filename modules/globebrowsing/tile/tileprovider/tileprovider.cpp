@@ -50,7 +50,7 @@ TileProvider::TileProvider(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "tileProvider" })
 {}
 
-TileProvider::~TileProvider() {}
+TileProvider::~TileProvider() {} // NOLINT
 
 bool TileProvider::initialize() {
     ghoul_assert(!_isInitialized, "TileProvider can only be initialized once.");

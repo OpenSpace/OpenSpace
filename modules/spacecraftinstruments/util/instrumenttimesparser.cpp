@@ -45,12 +45,11 @@ namespace {
 
 namespace openspace {
 
-InstrumentTimesParser::InstrumentTimesParser(const std::string& name,
-                                             const std::string& sequenceSource,
+InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string sequenceSource,
                                              ghoul::Dictionary& inputDict)
     : _pattern("\"(.{23})\" \"(.{23})\"")
-    , _name(name)
-    , _fileName(sequenceSource)
+    , _name(std::move(name))
+    , _fileName(std::move(sequenceSource))
 {
 
     _target = inputDict.value<std::string>(KeyTargetBody);
@@ -75,9 +74,11 @@ bool InstrumentTimesParser::create() {
         return false;
     }
 
-    for (auto it = _instrumentFiles.begin(); it != _instrumentFiles.end(); it++) {
-        std::string instrumentID = it->first;
-        for (std::string filename : it->second) {
+    using K = std::string;
+    using V = std::vector<std::string>;
+    for (const std::pair<const K, V>& p : _instrumentFiles) {
+        const std::string& instrumentID = p.first;
+        for (std::string filename : p.second) {
             std::string filepath = FileSys.pathByAppendingComponent(
                 sequenceDir.path(),
                 std::move(filename)
@@ -123,7 +124,7 @@ bool InstrumentTimesParser::create() {
                     instrumentActiveTimeRange.include(captureTimeRange);
 
                     //_instrumentTimes.push_back({ instrumentID, timeRange });
-                    _targetTimes.push_back({ captureTimeRange.start, _target });
+                    _targetTimes.emplace_back(captureTimeRange.start, _target);
                     _captureProgression.push_back(captureTimeRange.start);
 
                     Image image = {
@@ -139,7 +140,7 @@ bool InstrumentTimesParser::create() {
             }
             if (successfulRead){
                 _subsetMap[_target]._range.include(instrumentActiveTimeRange);
-                _instrumentTimes.push_back({ instrumentID, instrumentActiveTimeRange });
+                _instrumentTimes.emplace_back(instrumentID, instrumentActiveTimeRange);
             }
         }
     }

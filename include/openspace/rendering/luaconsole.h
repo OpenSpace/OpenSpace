@@ -46,6 +46,7 @@ namespace openspace {
 class LuaConsole : public properties::PropertyOwner {
 public:
     LuaConsole();
+    ~LuaConsole();
 
     void initialize();
     void deinitialize();
@@ -91,8 +92,8 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _historyFont;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     UniformCache(res, color, height, ortho) _uniformCache;
 };

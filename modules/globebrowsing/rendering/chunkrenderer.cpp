@@ -47,8 +47,8 @@ namespace openspace::globebrowsing {
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager,
                              Ellipsoid& ellipsoid)
-    : _grid(grid)
-    , _layerManager(layerManager)
+    : _grid(std::move(grid))
+    , _layerManager(std::move(layerManager))
     , _ellipsoid(ellipsoid)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
@@ -67,7 +67,7 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
     _localGpuLayerManager = std::make_shared<GPULayerManager>();
 }
 
-ChunkRenderer::~ChunkRenderer() {}
+ChunkRenderer::~ChunkRenderer() {} // NOLINT
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
     // A little arbitrary with 10 but it works
@@ -93,23 +93,23 @@ void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
 }
 
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
-                                 std::shared_ptr<LayerShaderManager> layeredShaderManager,
-                                 std::shared_ptr<GPULayerManager> gpuLayerManager,
-                                 const Chunk& chunk)
+                                                 LayerShaderManager& layeredShaderManager,
+                                                         GPULayerManager& gpuLayerManager, 
+                                                                       const Chunk& chunk)
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
     // Now the shader program can be accessed
-    ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
+    ghoul::opengl::ProgramObject* programObject = layeredShaderManager.programObject();
 
-    if (layeredShaderManager->updatedSinceLastCall()) {
-        gpuLayerManager->bind(programObject, *_layerManager);
+    if (layeredShaderManager.updatedSinceLastCall()) {
+        gpuLayerManager.bind(programObject, *_layerManager);
     }
 
     // Activate the shader program
     programObject->activate();
 
-    gpuLayerManager->setValue(programObject, *_layerManager, tileIndex);
+    gpuLayerManager.setValue(programObject, *_layerManager, tileIndex);
 
     // The length of the skirts is proportional to its size
     programObject->setUniform(
@@ -351,8 +351,8 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
 
 void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data) {
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
-        _globalLayerShaderManager,
-        _globalGpuLayerManager,
+        *_globalLayerShaderManager,
+        *_globalGpuLayerManager,
         chunk
     );
     if (!programObject) {
@@ -443,8 +443,8 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
 
 void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
-        _localLayerShaderManager,
-        _localGpuLayerManager,
+        *_localLayerShaderManager,
+        *_localGpuLayerManager,
         chunk
     );
     if (!programObject) {
@@ -514,7 +514,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
         data.camera.sgctInternal.projectionMatrix()
     );
 
-    if (_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().size() > 0) {
+    if (!_layerManager->layerGroup(layergroupid::HeightLayers).activeLayers().empty()) {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
             "heightScale",

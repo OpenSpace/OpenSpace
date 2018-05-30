@@ -76,7 +76,7 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     rawTile->imageData = dataDestination;
     rawTile->error = worstError;
-    rawTile->tileIndex = tileIndex;
+    rawTile->tileIndex = std::move(tileIndex);
 
     rawTile->textureInitData = std::make_shared<TileTextureInitData>(_initData);
 

@@ -42,7 +42,7 @@ public:
     LuaRotation();
     LuaRotation(const ghoul::Dictionary& dictionary);
 
-    glm::dmat3 matrix(const Time& data) const override;
+    glm::dmat3 matrix(const Time& time) const override;
 
     static documentation::Documentation Documentation();
 

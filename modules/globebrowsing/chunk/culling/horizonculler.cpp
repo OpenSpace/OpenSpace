@@ -31,7 +31,7 @@
 
 namespace openspace::globebrowsing::culling {
 
-bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
+bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
     // Calculations are done in the reference frame of the globe. Hence, the camera
     // position needs to be transformed with the inverse model matrix
     const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
@@ -39,18 +39,18 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
     const GeodeticPatch& patch = chunk.surfacePatch();
     const float maxHeight = chunk.boundingHeights().max;
-    const glm::dvec3 globePosition = glm::dvec3(0,0,0); // In model space it is 0
+    const glm::dvec3 globePos = glm::dvec3(0,0,0); // In model space it is 0
     const double minimumGlobeRadius = ellipsoid.minimumRadius();
 
-    const glm::dvec3 cameraPosition = glm::dvec3(
-        inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1)
+    const glm::dvec3 cameraPos = glm::dvec3(
+        inverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1)
     );
 
-    const glm::dvec3 globeToCamera = cameraPosition;
+    const glm::dvec3 globeToCamera = cameraPos;
 
     const Geodetic2 cameraPositionOnGlobe = ellipsoid.cartesianToGeodetic2(globeToCamera);
     const Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
-    glm::dvec3 objectPosition = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
+    glm::dvec3 objectPos = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
 
     // objectPosition is closest in latlon space but not guaranteed to be closest in
     // castesian coordinates. Therefore we compare it to the corners and pick the
@@ -63,19 +63,13 @@ bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     };
 
     for (int i = 0; i < 4; ++i) {
-        const double distance = glm::length(cameraPosition - corners[i]);
-        if (distance < glm::length(cameraPosition - objectPosition)) {
-            objectPosition = corners[i];
+        const double distance = glm::length(cameraPos - corners[i]);
+        if (distance < glm::length(cameraPos - objectPos)) {
+            objectPos = corners[i];
         }
     }
 
-    return isCullable(
-        cameraPosition,
-        globePosition,
-        objectPosition,
-        maxHeight,
-        minimumGlobeRadius
-    );
+    return isCullable(cameraPos, globePos, objectPos, maxHeight, minimumGlobeRadius);
 }
 
 bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,

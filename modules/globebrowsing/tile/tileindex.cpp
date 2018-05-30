@@ -44,12 +44,6 @@ TileIndex::TileIndex(int x_, int y_, int level_)
     , level(level_)
 {}
 
-TileIndex::TileIndex(const TileIndex& other)
-    : x(other.x)
-    , y(other.y)
-    , level(other.level)
-{}
-
 TileIndex::TileIndex(const Geodetic2& point, int level_)
     : level(level_)
 {
@@ -179,8 +173,8 @@ std::string TileIndex::toString() const {
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const TileIndex& ci) {
-    os << "{ x = " << ci.x << ", y = " << ci.y << ", level = " << ci.level << " }";
+std::ostream& operator<<(std::ostream& os, const TileIndex& ti) {
+    os << "{ x = " << ti.x << ", y = " << ti.y << ", level = " << ti.level << " }";
     return os;
 }
 

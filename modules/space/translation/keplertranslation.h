@@ -42,7 +42,7 @@ namespace openspace {
 class KeplerTranslation : public Translation {
 public:
     struct RangeError : public ghoul::RuntimeError {
-        explicit RangeError(std::string offender);
+        explicit RangeError(std::string off);
 
         std::string offender;
     };

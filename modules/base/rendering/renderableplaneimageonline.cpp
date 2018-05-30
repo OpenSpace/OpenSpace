@@ -34,7 +34,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    const openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "

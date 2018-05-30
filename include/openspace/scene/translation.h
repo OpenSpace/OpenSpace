@@ -66,7 +66,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    double _cachedTime;
+    double _cachedTime = -std::numeric_limits<double>::max();
     glm::dvec3 _cachedPosition = glm::dvec3(0.0);
     std::function<void()> _onParameterChangeCallback;
 };

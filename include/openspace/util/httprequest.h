@@ -45,10 +45,10 @@
 namespace openspace {
 
 namespace curlfunctions {
-    size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userdata);
+    size_t writeCallback(char* ptr, size_t size, size_t nmemb, void* userData);
 
-    int progressCallback(void* clientp, int64_t dltotal, int64_t dlnow, int64_t ultotal,
-        int64_t ulnow);
+    int progressCallback(void* userData, int64_t nTotalDownloadBytes,
+        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
 
     size_t headerCallback(char* ptr, size_t size, size_t nmemb, void* userData);
 }
@@ -122,24 +122,15 @@ private:
     Progress _progress;
     RequestOptions _options;
 
-    friend size_t curlfunctions::writeCallback(
-        char *ptr,
-        size_t size,
-        size_t nmemb,
-        void *userdata);
+    friend size_t curlfunctions::writeCallback(char* ptr, size_t size, size_t nmemb,
+        void* userData);
 
-    friend int curlfunctions::progressCallback(
-        void *clientp,
-        int64_t dltotal,
-        int64_t dlnow,
-        int64_t ultotal,
-        int64_t ulnow);
+    friend int curlfunctions::progressCallback(void* userData,
+        int64_t nTotalDownloadBytes,
+        int64_t nDownloadedBytes, int64_t nTotalUploadBytes, int64_t nUploadBytes);
 
-    friend size_t curlfunctions::headerCallback(
-       char *ptr,
-       size_t size,
-       size_t nmemb,
-       void *userdata);
+    friend size_t curlfunctions::headerCallback(char* ptr, size_t size, size_t nmemb,
+       void* userData);
 };
 
 class HttpDownload {

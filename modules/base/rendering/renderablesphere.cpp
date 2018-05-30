@@ -48,7 +48,7 @@ namespace {
         Inside = 2
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
@@ -56,40 +56,40 @@ namespace {
         "projection."
     };
 
-    static const openspace::properties::Property::PropertyInfo OrientationInfo = {
+    const openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both."
     };
 
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that the sphere is separated in."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the radius of the sphere in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
+    const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
         "FadeOutThreshould",
         "Fade-Out Threshould",
         "This value determines percentage of the sphere is visible before starting "
         "fading-out it."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
+    const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
         "FadeInThreshould",
         "Fade-In Threshould",
         "Distance from center of MilkyWay from where the astronomical object starts to "
         "fade in."
     };
 
-    static const openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
+    const openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
         "DisableFadeInOu",
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."
@@ -366,7 +366,7 @@ void RenderableSphere::update(const UpdateData&) {
 }
 
 void RenderableSphere::loadTexture() {
-    if (_texturePath.value() != "") {
+    if (!_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(_texturePath);
 
@@ -376,13 +376,7 @@ void RenderableSphere::loadTexture() {
                 fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             texture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than
-            // linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-
             _texture = std::move(texture);
         }
     }

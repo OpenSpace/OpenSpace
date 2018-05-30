@@ -126,7 +126,7 @@ std::vector<glm::vec4> BasicGrid::createPositions(int xSegments, int ySegments) 
         ySegments
     );
     for (const glm::vec2& coords : templateTextureCoords) {
-        positions.push_back(glm::vec4(coords, 0.f, 1.f));
+        positions.emplace_back(coords, 0.f, 1.f);
     }
     //for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
     //    positions.push_back(glm::vec4(
@@ -145,10 +145,10 @@ std::vector<glm::vec2> BasicGrid::createTextureCoordinates(int xSegments, int yS
 
     for (int y = 0; y < ySegments + 1; y++) {
         for (int x = 0; x < xSegments + 1; x++) {
-            textureCoordinates.push_back(glm::vec2(
+            textureCoordinates.emplace_back(
                 static_cast<float>(x) / static_cast<float>(xSegments),
                 static_cast<float>(y) / static_cast<float>(ySegments)
-            ));
+            );
         }
     }
     return textureCoordinates;
@@ -161,7 +161,7 @@ std::vector<glm::vec3> BasicGrid::createNormals(int xSegments, int ySegments) {
 
     for (int y = 0; y < ySegments + 1; y++) {
         for (int x = 0; x < xSegments + 1; x++) {
-            normals.push_back(glm::vec3(0, 0, 1));
+            normals.emplace_back(0.f, 0.f, 1.f);
         }
     }
 

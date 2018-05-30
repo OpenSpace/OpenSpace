@@ -42,7 +42,7 @@ public:
     Time& time();
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
-    void addKeyframe(double timestamp, Time kf);
+    void addKeyframe(double timestamp, Time keyframeTime);
     void removeKeyframesBefore(double timestamp);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();

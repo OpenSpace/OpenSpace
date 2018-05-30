@@ -53,10 +53,11 @@ public:
     virtual int ySegments() const override;
 
 private:
-    std::vector<GLuint> createElements(int xRes, int yRes) override;
-    std::vector<glm::vec4> createPositions(int xRes, int yRes) override;
-    std::vector<glm::vec2> createTextureCoordinates(int xRes, int yRes) override;
-    std::vector<glm::vec3> createNormals(int xRes, int yRes) override;
+    std::vector<GLuint> createElements(int xSegments, int ySegments) override;
+    std::vector<glm::vec4> createPositions(int xSegments, int ySegments) override;
+    std::vector<glm::vec2> createTextureCoordinates(int xSegments,
+        int ySegments) override;
+    std::vector<glm::vec3> createNormals(int xSegments, int ySegments) override;
 
     void validate(int xSegments, int ySegments);
 

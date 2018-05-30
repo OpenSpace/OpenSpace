@@ -46,7 +46,7 @@ namespace {
     constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
     constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
 
-    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "This is the path to the XML configuration file that describes the temporal tile "
@@ -120,67 +120,6 @@ namespace {
         }
     }
 } // namespace
-
-/**
-* Interface for stringifying OpenSpace Time instances.
-*
-* Once OpenSpace has a proper Time format class, this should be handled by that instead
-* of here.
-*/
-struct TimeFormat {
-    virtual ~TimeFormat() = default;
-    /**
-    * Stringifies a OpenSpace time instance
-    * \param t The time to be stringifyed
-    * \returns A string description of the provided time
-    */
-    virtual std::string stringify(const Time& t) const = 0;
-};
-
-/**
-* Stringifies OpenSpace to the format "YYYY-MM-DD".
-* Example: 2016-09-08
-*/
-struct YYYY_MM_DD : public TimeFormat {
-    virtual ~YYYY_MM_DD() override = default;
-    virtual std::string stringify(const Time& t) const override;
-};
-
-/**
-* Stringifies OpenSpace to the format "YYYYMMDD_hhmmss"
-* Example: 20160908_230505
-*/
-struct YYYYMMDD_hhmmss : public TimeFormat {
-    virtual ~YYYYMMDD_hhmmss() override = default;
-    virtual std::string stringify(const Time& t) const override;
-};
-
-/**
-* Stringifies OpenSpace to the format "YYYYMMDD_hhmm"
-* Example: 20160908_2305
-*/
-struct YYYYMMDD_hhmm : public TimeFormat {
-    virtual ~YYYYMMDD_hhmm() override = default;
-    virtual std::string stringify(const Time& t) const override;
-};
-
-/**
-* Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
-* Example: 2016-09-08T23:05:05Z
-*/
-struct YYYY_MM_DDThhColonmmColonssZ : public TimeFormat {
-    virtual ~YYYY_MM_DDThhColonmmColonssZ() override = default;
-    virtual std::string stringify(const Time& t) const override;
-};
-
-/**
-* Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
-* Example: 2016-09-08T23:05:05Z
-*/
-struct YYYY_MM_DDThh_mm_ssZ : public TimeFormat {
-    virtual ~YYYY_MM_DDThh_mm_ssZ() override = default;
-    virtual std::string stringify(const Time& t) const override;
-};
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     : _initDict(dictionary)
@@ -299,10 +238,10 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
     return gdalDescription;
 }
 
-std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key,
+std::string TemporalTileProvider::getXMLValue(CPLXMLNode* node, const std::string& key,
                                               const std::string& defaultVal)
 {
-    CPLXMLNode* n = CPLSearchXMLNode(root, key.c_str());
+    CPLXMLNode* n = CPLSearchXMLNode(node, key.c_str());
     if (!n) {
         throw ghoul::RuntimeError(
             fmt::format("Unable to parse file {}. {} missing", _filePath.value(), key)
@@ -425,7 +364,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey tim
         "${layer}"
     };
 
-    std::string gdalDatasetXml = getGdalDatasetXML(timekey);
+    std::string gdalDatasetXml = getGdalDatasetXML(std::move(timekey));
     FileSys.expandPathTokens(gdalDatasetXml, AllowedTokens);
 
     _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
@@ -434,12 +373,12 @@ std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey tim
     return tileProvider;
 }
 
-std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
+std::string TemporalTileProvider::getGdalDatasetXML(const Time& t) {
     TimeKey timeKey = timeStringify(_timeFormat, t);
     return getGdalDatasetXML(timeKey);
 }
 
-std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
+std::string TemporalTileProvider::getGdalDatasetXML(const TimeKey& timeKey) {
     std::string xmlTemplate(_gdalXmlTemplate);
     const size_t pos = xmlTemplate.find(UrlTimePlaceholder);
     //size_t numChars = std::string(UrlTimePlaceholder).length();

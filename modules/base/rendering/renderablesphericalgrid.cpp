@@ -37,33 +37,33 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    static const openspace::properties::Property::PropertyInfo GridColorInfo = {
+    const openspace::properties::Property::PropertyInfo GridColorInfo = {
         "GridColor",
         "Grid Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
-    static const openspace::properties::Property::PropertyInfo GridMatrixInfo = {
+    const openspace::properties::Property::PropertyInfo GridMatrixInfo = {
         "GridMatrix",
         "Grid Matrix",
         "This value specifies the local transformation matrix that defines the "
         "orientation of this grid relative to the parent's rotation."
     };
 
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
         "surrounding sphere."
     };
 
-    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    const openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
 
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    const openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "This value specifies the radius of the grid."
@@ -275,8 +275,9 @@ void RenderableSphericalGrid::update(const UpdateData&) {
                 const float z = r * cos(phi) * sin(theta);  //
 
                 glm::vec3 normal = glm::vec3(x, y, z);
-                if (!(x == 0.f && y == 0.f && z == 0.f))
+                if (!(x == 0.f && y == 0.f && z == 0.f)) {
                     normal = glm::normalize(normal);
+                }
 
                 glm::vec4 tmp(x, y, z, 1);
                 glm::mat4 rot = glm::rotate(

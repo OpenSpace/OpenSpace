@@ -44,59 +44,59 @@ namespace {
     constexpr const size_t MaxLatencyDiffs = 64;
     constexpr const char* _loggerCat = "ParallelPeer";
 
-    static const openspace::properties::Property::PropertyInfo PasswordInfo = {
+    const openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
         "server."
     };
 
-    static const openspace::properties::Property::PropertyInfo HostPasswordInfo = {
+    const openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host Password",
         "The password that is required to take control of the joint session and thus "
         "send all commands to connected clients."
     };
 
-    static const openspace::properties::Property::PropertyInfo PortInfo = {
+    const openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
         "OpenSpace."
     };
 
-    static const openspace::properties::Property::PropertyInfo AddressInfo = {
+    const openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The address of the Wormhole server either as a DNS name or an IP address."
     };
 
-    static const openspace::properties::Property::PropertyInfo NameInfo = {
+    const openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
         "Connection Name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
         "connected instances."
     };
 
-    static const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+    const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+    const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
         "TimeKeyframeInterval",
         "Time keyframe interval",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+    const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
         "Camera Keyframe interval",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
+    const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
         "TimeTolerance",
         "Time tolerance",
         "" // @TODO Missing documentation
@@ -263,13 +263,10 @@ double ParallelPeer::timeTolerance() const {
     return _timeTolerance;
 }
 
-void ParallelPeer::dataMessageReceived(const std::vector<char>& messageContent) {
+void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
     // The type of data message received
-    const uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));
-    std::vector<char> buffer(
-        messageContent.begin() + sizeof(uint32_t),
-        messageContent.end()
-    );
+    const uint32_t type = *(reinterpret_cast<const uint32_t*>(message.data()));
+    std::vector<char> buffer(message.begin() + sizeof(uint32_t), message.end());
 
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
@@ -344,7 +341,7 @@ void ParallelPeer::connectionStatusMessageReceived(const std::vector<char>& mess
         return;
     }
 
-    std::string hostName = "";
+    std::string hostName;
     if (hostNameSize > 0) {
         hostName = std::string(&message[pointer], hostNameSize);
     }
@@ -426,12 +423,12 @@ void ParallelPeer::resignHostship() {
     ));
 }
 
-void ParallelPeer::setPassword(std::string pwd) {
-    _password = std::move(pwd);
+void ParallelPeer::setPassword(std::string password) {
+    _password = std::move(password);
 }
 
-void ParallelPeer::setHostPassword(std::string pwd) {
-    _hostPassword = std::move(pwd);
+void ParallelPeer::setHostPassword(std::string hostPassword) {
+    _hostPassword = std::move(hostPassword);
 }
 
 void ParallelPeer::sendScript(std::string script) {

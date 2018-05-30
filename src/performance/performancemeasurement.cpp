@@ -33,7 +33,7 @@ namespace openspace::performance {
 PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
                                  std::shared_ptr<performance::PerformanceManager> manager)
     : _identifier(std::move(identifier))
-    , _manager(manager)
+    , _manager(std::move(manager))
 {
     if (_manager.lock()) {
         glFinish();

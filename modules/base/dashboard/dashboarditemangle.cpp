@@ -42,27 +42,27 @@ namespace {
 
     constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceTypeInfo = {
+    const openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle. The default value is 'Camera'."
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
+    const openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
@@ -71,7 +71,7 @@ namespace {
         "Source, Reference, Destination)."
     };
 
-    static const openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
+    const openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
         "ReferenceType",
         "Reference Type",
         "The type of position that is used as the destination of the reference line used "
@@ -79,14 +79,14 @@ namespace {
         "the triangle (Source, Reference, Destination)."
     };
 
-    static const openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
+    const openspace::properties::Property::PropertyInfo ReferenceNodeNameInfo = {
         "ReferenceNodeName",
         "Reference Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the reference direction to compute the angle."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
+    const openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the angle. "
@@ -94,7 +94,7 @@ namespace {
         "Source, Reference, Destination). The default value for this is 'Focus'."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
+    const openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
@@ -174,7 +174,7 @@ documentation::Documentation DashboardItemAngle::Documentation() {
     };
 }
 
-DashboardItemAngle::DashboardItemAngle(ghoul::Dictionary dictionary)
+DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _source{
         properties::OptionProperty(

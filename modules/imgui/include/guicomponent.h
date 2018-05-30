@@ -82,8 +82,8 @@ protected:
     /// internal state of the window
     properties::BoolProperty _isCollapsed;
 
-    bool _showHelpTooltip;
-    double _tooltipDelay;
+    bool _showHelpTooltip = true;
+    double _tooltipDelay = true;
 };
 
 } // namespace openspace::gui

@@ -133,7 +133,7 @@ private:
     std::shared_ptr<Camera> _savedCamera;
 
     std::string _frame;
-    double _time;
+    double _time = 0.0;
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;

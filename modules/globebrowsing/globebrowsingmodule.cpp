@@ -376,7 +376,7 @@ glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
     return glm::vec3(positionModelSpace);
 }
 
-void GlobeBrowsingModule::goToChunk(Camera& camera, globebrowsing::TileIndex ti,
+void GlobeBrowsingModule::goToChunk(Camera& camera, const globebrowsing::TileIndex& ti,
                                     glm::vec2 uv, bool doResetCameraDirection)
 {
     using namespace globebrowsing;
@@ -517,7 +517,7 @@ GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
 }
 
 std::string GlobeBrowsingModule::layerGroupNamesList() {
-    std::string listLayerGroups("");
+    std::string listLayerGroups;
     for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
         listLayerGroups += globebrowsing::layergroupid::LAYER_GROUP_IDENTIFIERS[i] +
                            std::string(", ");

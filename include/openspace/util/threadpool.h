@@ -40,7 +40,7 @@ class ThreadPool;
 
 class Worker {
 public:
-    Worker(ThreadPool& pool);
+    Worker(ThreadPool& p);
     void operator()();
 
 private:

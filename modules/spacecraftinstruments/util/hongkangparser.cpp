@@ -54,7 +54,9 @@ namespace {
         return 0.0;
     }
 
-    double ephemerisTimeFromMissionElapsedTime(std::string line, double metReference) {
+    double ephemerisTimeFromMissionElapsedTime(const std::string& line,
+                                               double metReference)
+    {
         std::string::size_type sz;
         return ephemerisTimeFromMissionElapsedTime(std::stod(line, &sz), metReference);
     }
@@ -75,26 +77,26 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
     //get the different instrument types
     const std::vector<std::string>& decoders = translationDictionary.keys();
     //for each decoder (assuming might have more if hong makes changes)
-    for (size_t i = 0; i < decoders.size(); ++i) {
+    for (const std::string& decoderType : decoders) {
         //create dictionary containing all {playbookKeys , spice IDs}
-        if (decoders[i] == "Instrument") {
+        if (decoderType == "Instrument") {
             ghoul::Dictionary typeDictionary;
-            translationDictionary.getValue(decoders[i], typeDictionary);
+            translationDictionary.getValue(decoderType, typeDictionary);
             // for each playbook call -> create a Decoder object
             const std::vector<std::string>& keys = typeDictionary.keys();
-            for (size_t j = 0; j < keys.size(); ++j) {
-                std::string currentKey = decoders[i] + "." + keys[j];
+            for (const std::string& key : keys) {
+                std::string currentKey = decoderType + "." + key;
 
                 ghoul::Dictionary decoderDictionary;
                 translationDictionary.getValue(currentKey, decoderDictionary);
 
                 std::unique_ptr<Decoder> decoder = Decoder::createFromDictionary(
                     decoderDictionary,
-                    decoders[i]
+                    decoderType
                 );
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
-                _fileTranslation[keys[j]] = std::move(decoder);
+                _fileTranslation[key] = std::move(decoder);
             }
         }
         //Hong's playbook needs _only_ instrument translation though.
@@ -140,7 +142,7 @@ bool HongKangParser::create() {
             "HongKangParser"
         );
     }
-    size_t position = _fileName.find_last_of(".") + 1;
+    size_t position = _fileName.find_last_of('.') + 1;
     if (position == 0 || position == std::string::npos) {
         sendPlaybookInformation(PlaybookIdentifierName);
         return true;
@@ -174,7 +176,7 @@ bool HongKangParser::create() {
     while (!file.eof()) {
         std::getline(file, line);
 
-        std::string event = line.substr(0, line.find_first_of(" "));
+        std::string event = line.substr(0, line.find_first_of(' '));
 
         const auto it = _fileTranslation.find(event);
         const bool foundEvent = (it != _fileTranslation.end());
@@ -212,7 +214,7 @@ bool HongKangParser::create() {
                 // map (used for: 'next observation focus')
                 if (previousTarget != image.target) {
                     previousTarget = image.target;
-                    _targetTimes.push_back({ time, image.target });
+                    _targetTimes.emplace_back(time, image.target);
                 }
 
                 // store actual image in map. All targets get _only_ their
@@ -242,7 +244,7 @@ bool HongKangParser::create() {
 
                         TimeRange scanRange = { scanStart, scanStop };
                         ghoul_assert(scanRange.isDefined(), "Invalid time range!");
-                        _instrumentTimes.push_back({ it->first, scanRange });
+                        _instrumentTimes.emplace_back(it->first, scanRange);
 
                         // store individual image
                         Image image = {
@@ -271,7 +273,7 @@ bool HongKangParser::create() {
                 captureStop = time;
                 TimeRange cameraRange = { captureStart, captureStop };
                 ghoul_assert(cameraRange.isDefined(), "Invalid time range!");
-                _instrumentTimes.push_back({ previousCamera, cameraRange });
+                _instrumentTimes.emplace_back(previousCamera, cameraRange);
                 captureStart = -1;
             }
         }

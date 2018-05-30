@@ -79,9 +79,10 @@ getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
 {
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*>> tilesAndSettings;
     for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
-        tilesAndSettings.push_back({
-            layer->tileProvider()->chunkTile(tileIndex), &layer->renderSettings()
-        });
+        tilesAndSettings.emplace_back(
+            layer->tileProvider()->chunkTile(tileIndex),
+            &layer->renderSettings()
+        );
     }
     std::sort(
         tilesAndSettings.begin(),
@@ -101,9 +102,10 @@ getTilesAndSettingsUnsorted(const LayerGroup& layerGroup, const TileIndex& tileI
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
     for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
-            tilesAndSettings.push_back({
-                layer->tileProvider()->chunkTile(tileIndex), &layer->renderSettings()
-            });
+            tilesAndSettings.emplace_back(
+                layer->tileProvider()->chunkTile(tileIndex),
+                &layer->renderSettings()
+            );
         }
     }
     std::reverse(tilesAndSettings.begin(), tilesAndSettings.end());

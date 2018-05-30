@@ -153,7 +153,7 @@ private:
     void initializeDefaultTile();
 
     static unsigned int _numTileProviders;
-    unsigned int _uniqueIdentifier;
+    unsigned int _uniqueIdentifier = 0;
     bool _isInitialized = false;
 
     std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;

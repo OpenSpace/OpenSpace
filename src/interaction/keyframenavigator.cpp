@@ -121,7 +121,7 @@ Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
 
 void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
 {
-    timeline().addKeyframe(timestamp, pose);
+    timeline().addKeyframe(timestamp, std::move(pose));
 }
 
 void KeyframeNavigator::removeKeyframesAfter(double timestamp) {

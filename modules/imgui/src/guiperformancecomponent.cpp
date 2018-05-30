@@ -44,27 +44,27 @@ namespace {
         Total = 5
     };
 
-    static const openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
+    const openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
         "SortingSelection",
         "Sorting",
         "This value determines the sorting order of the performance measurements."
     };
 
-    static const openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
+    const openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
         "ShowSceneGraph",
         "Show Scene Graph Measurements",
         "If this value is enabled, the window showing the measurements for the scene "
         "graph values is visible."
     };
 
-    static const openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
+    const openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
         "ShowFunctions",
         "Show Function Measurements",
         "If this value is enabled, the window showing the measurements for the "
         "individual functions is visible."
     };
 
-    static const openspace::properties::Property::PropertyInfo OutputLogsInfo = {
+    const openspace::properties::Property::PropertyInfo OutputLogsInfo = {
         "OutputLogs",
         "Output Logs",
         "" // @TODO Missing documentation
@@ -88,7 +88,7 @@ GuiPerformanceComponent::GuiPerformanceComponent()
     addProperty(_outputLogs);
 }
 
-GuiPerformanceComponent::~GuiPerformanceComponent() {}
+GuiPerformanceComponent::~GuiPerformanceComponent() {} // NOLINT
 
 void GuiPerformanceComponent::render() {
     if (!OsEng.renderEngine().doesPerformanceMeasurements()) {

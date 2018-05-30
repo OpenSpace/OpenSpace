@@ -34,39 +34,39 @@
 namespace {
     constexpr const char* _loggerCat = "MemoryAwareTileCache";
 
-    static const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
+    const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
         "utilizing."
     };
 
-    static const openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
+    const openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
         "utilizing."
     };
 
-    static const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
+    const openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
         "ApplyTileCacheSize",
         "Apply tile cache size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
+    const openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
         "ClearTileCache",
         "Clear tile cache",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UsePboInfo = {
+    const openspace::properties::Property::PropertyInfo UsePboInfo = {
         "UsePbo",
         "Use PBO",
         "If this value is enabled, pixel buffer objects are used to upload the texture "
@@ -158,7 +158,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     LDEBUG("Resetting tile cache size");
-    ghoul_assert(_textureContainerMap.size() > 0, "Texture containers must exist.");
+    ghoul_assert(!_textureContainerMap.empty(), "Texture containers must exist.");
 
     const size_t sumTextureTypeSize = std::accumulate(
         _textureContainerMap.cbegin(),
@@ -242,27 +242,24 @@ ghoul::opengl::Texture* MemoryAwareTileCache::texture(
     return texture;
 }
 
-void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
-                                            std::shared_ptr<RawTile> rawTile)
-{
-    ghoul_precondition(rawTile, "RawTile can not be null");
+void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile& rawTile) {
     using ghoul::opengl::Texture;
 
-    if (rawTile->error != RawTile::ReadError::None) {
+    if (rawTile.error != RawTile::ReadError::None) {
         return;
     }
     else {
-        const TileTextureInitData& initData = *rawTile->textureInitData;
+        const TileTextureInitData& initData = *rawTile.textureInitData;
         Texture* tex = texture(initData);
 
         // Re-upload texture, either using PBO or by using RAM data
-        if (rawTile->pbo != 0) {
-            tex->reUploadTextureFromPBO(rawTile->pbo);
+        if (rawTile.pbo != 0) {
+            tex->reUploadTextureFromPBO(rawTile.pbo);
             if (initData.shouldAllocateDataOnCPU()) {
                 if (!tex->dataOwnership()) {
                     _numTextureBytesAllocatedOnCPU += initData.totalNumBytes();
                 }
-                tex->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
+                tex->setPixelData(rawTile.imageData, Texture::TakeOwnership::Yes);
             }
         }
         else {
@@ -271,27 +268,25 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
                 tex->dataOwnership(),
                 "Texture must have ownership of old data to avoid leaks"
             );
-            tex->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
+            tex->setPixelData(rawTile.imageData, Texture::TakeOwnership::Yes);
             [[ maybe_unused ]] size_t expectedDataSize = tex->expectedPixelDataSize();
-            const size_t numBytes = rawTile->textureInitData->totalNumBytes();
+            const size_t numBytes = rawTile.textureInitData->totalNumBytes();
             ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
             _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
             tex->reUploadTexture();
         }
         tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        Tile tile(tex, rawTile->tileMetaData, Tile::Status::OK);
+        Tile tile(tex, rawTile.tileMetaData, Tile::Status::OK);
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
-        _textureContainerMap[initDataKey].second->put(key, tile);
+        _textureContainerMap[initDataKey].second->put(std::move(key), tile);
     }
-    return;
 }
 
 void MemoryAwareTileCache::put(const ProviderTileKey& key,
                                const TileTextureInitData::HashKey& initDataKey,
                                Tile tile)
 {
-    _textureContainerMap[initDataKey].second->put(key, tile);
-    return;
+    _textureContainerMap[initDataKey].second->put(key, std::move(tile));
 }
 
 void MemoryAwareTileCache::update() {

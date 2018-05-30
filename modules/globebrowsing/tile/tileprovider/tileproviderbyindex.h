@@ -39,7 +39,7 @@ public:
     virtual ~TileProviderByIndex() = default;
 
     virtual Tile tile(const TileIndex& tileIndex) override;
-    virtual Tile::Status tileStatus(const TileIndex& index) override;
+    virtual Tile::Status tileStatus(const TileIndex& tileIndex) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;

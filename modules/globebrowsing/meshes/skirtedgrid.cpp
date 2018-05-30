@@ -127,7 +127,7 @@ std::vector<glm::vec4> SkirtedGrid::createPositions(int xSegments, int ySegments
     std::vector<glm::vec4> positions;
     positions.reserve(numVertices(xSegments, ySegments));
     for (const glm::vec2& c : templateTextureCoords) {
-        positions.push_back(glm::vec4(c, 0.f, 1.f));
+        positions.emplace_back(c, 0.f, 1.f);
     }
     return positions;
 }
@@ -140,7 +140,7 @@ std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int 
     textureCoordinates.reserve(numVertices(xSegments + 2, ySegments + 2));
     for (int y = -1; y < ySegments + 2; y++) {
         for (int x = -1; x < xSegments + 2; x++) {
-            textureCoordinates.push_back(glm::vec2(
+            textureCoordinates.emplace_back(
                 glm::clamp(
                     static_cast<float>(x) / static_cast<float>(xSegments),
                     0 - 1.f / (2 * xSegments),
@@ -151,7 +151,7 @@ std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int 
                     0 - 1.f / (2 * ySegments),
                     1 + 1.f / (2 * ySegments)
                 )
-            ));
+            );
         }
     }
     return textureCoordinates;
@@ -164,7 +164,7 @@ std::vector<glm::vec3> SkirtedGrid::createNormals(int xSegments, int ySegments) 
     normals.reserve(numVertices(xSegments + 2, ySegments + 2));
     for (int y = -1; y < ySegments + 2; y++) {
         for (int x = -1; x < xSegments + 2; x++) {
-            normals.push_back(glm::vec3(0.f, 0.f, 1.f));
+            normals.emplace_back(0.f, 0.f, 1.f);
         }
     }
 

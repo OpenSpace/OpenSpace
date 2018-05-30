@@ -33,7 +33,8 @@ class HongKangParser : public SequenceParser {
 public:
     HongKangParser();
     HongKangParser(std::string name, std::string fileName, std::string spacecraft,
-        const ghoul::Dictionary& dictionary, std::vector<std::string> potentialTargets);
+        const ghoul::Dictionary& translationDictionary,
+        std::vector<std::string> potentialTargets);
 
     bool create() override;
     std::string findPlaybookSpecifiedTarget(std::string line);

@@ -49,8 +49,8 @@ public:
 
     void resetPerformanceMeasurements();
 
-    void storeIndividualPerformanceMeasurement(std::string identifier,
-        long long nanoseconds);
+    void storeIndividualPerformanceMeasurement(const std::string& identifier,
+        long long microseconds);
     void storeScenePerformanceMeasurements(
         const std::vector<SceneGraphNode*>& sceneNodes);
 

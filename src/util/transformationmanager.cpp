@@ -57,7 +57,7 @@ TransformationManager::TransformationManager(){
     };
 }
 
-TransformationManager::~TransformationManager(){
+TransformationManager::~TransformationManager() { // NOLINT
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = nullptr;
 #endif

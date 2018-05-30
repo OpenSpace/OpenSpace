@@ -83,20 +83,20 @@ namespace {
         );
     }
 
-    static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+    const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
         "explaining what impact they have on the visuals."
     };
 
-    static const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown."
     };
 
-    static const openspace::properties::Property::PropertyInfo HiddenInfo = {
+    const openspace::properties::Property::PropertyInfo HiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If this value is true, all GUI items will not be rendered, regardless of their "
@@ -130,7 +130,6 @@ GUI::GUI()
     )
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
-    , _currentVisibility(properties::Property::Visibility::Developer)
     , _allHidden(HiddenInfo, true)
 {
     for (GuiComponent* comp : _components) {
@@ -164,7 +163,7 @@ GUI::GUI()
     addProperty(_allHidden);
 }
 
-GUI::~GUI() {}
+GUI::~GUI() {} // NOLINT
 
 void GUI::initialize() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
@@ -363,7 +362,7 @@ void GUI::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
+        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv)) // NOLINT
     );
     glEnableVertexAttribArray(colorAttrib);
     glVertexAttribPointer(
@@ -372,7 +371,7 @@ void GUI::initializeGL() {
         GL_UNSIGNED_BYTE,
         GL_TRUE,
         sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col))
+        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col)) // NOLINT
     );
     glBindVertexArray(0);
 

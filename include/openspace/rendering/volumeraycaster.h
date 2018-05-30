@@ -44,7 +44,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~VolumeRaycaster();
+    virtual ~VolumeRaycaster() = default;
 
     /**
      * Render the volume's entry points (front face of the bounding geometry)

@@ -88,8 +88,9 @@ std::pair<double, std::string> ImageSequencer::currentTarget() {
     if (it != _targetTimes.end() && it != _targetTimes.begin()){
         return *std::prev(it);
     }
-    else
+    else {
         return { 0.0, "No Target" };
+    }
 }
 
 std::pair<double, std::vector<std::string>> ImageSequencer::incidentTargetList(

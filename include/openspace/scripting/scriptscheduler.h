@@ -43,7 +43,7 @@ class ScriptScheduler {
 public:
     struct ScheduledScript {
         ScheduledScript() = default;
-        ScheduledScript(const ghoul::Dictionary& dict);
+        ScheduledScript(const ghoul::Dictionary& dictionary);
 
         double time = -std::numeric_limits<double>::max();
         std::string forwardScript;

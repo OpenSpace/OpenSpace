@@ -55,21 +55,21 @@ namespace {
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
 
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
         "Color Base Texture",
         "The path to the base color texture that is used on the planet prior to any "
         "image projection."
     };
 
-    static const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
+    const openspace::properties::Property::PropertyInfo HeightTextureInfo = {
         "HeightTexture",
         "Heightmap Texture",
         "The path to the height map texture that is used for the planet. If no height "
         "map is specified the planet does not use a height field."
     };
 
-    static const openspace::properties::Property::PropertyInfo NightTextureInfo = {
+    const openspace::properties::Property::PropertyInfo NightTextureInfo = {
         "NightTexture",
         "Night Texture",
         "The path to the night texture that is used for the part of the planet that is "
@@ -77,7 +77,7 @@ namespace {
         "planet is rendered dark."
     };
 
-    static const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
+    const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
          "HeightExaggeration",
          "Height Exaggeration",
          "This value determines the level of height exaggeration that is applied to a "
@@ -85,7 +85,7 @@ namespace {
          "value of '1' uses the measured height field."
     };
 
-    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "

@@ -33,7 +33,7 @@
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
 
-    static const openspace::properties::Property::PropertyInfo UseTreeInfo = {
+    const openspace::properties::Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
         "Use Tree Layout",
         "If this value is checked, this component will display the properties using a "
@@ -41,7 +41,7 @@ namespace {
         "property windows that display SceneGraphNodes, or the application might crash."
     };
 
-    static const openspace::properties::Property::PropertyInfo OrderingInfo = {
+    const openspace::properties::Property::PropertyInfo OrderingInfo = {
         "Ordering",
         "Tree Ordering",
         "This list determines the order of the first tree layer if it is used. Elements "
@@ -49,7 +49,7 @@ namespace {
         "elements not listed."
     };
 
-    static const openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
+    const openspace::properties::Property::PropertyInfo IgnoreHiddenInfo = {
         "IgnoreHidden",
         "Ignore Hidden Hint",
         "If this value is 'true', all 'Hidden' hints passed into the SceneGraphNodes are "
@@ -102,7 +102,7 @@ namespace {
             node.children.begin(),
             node.children.end(),
             [p = *path.begin()](const std::unique_ptr<TreeNode>& c) {
-                return c.get()->path == p;
+                return c->path == p;
             }
         );
 
@@ -290,8 +290,8 @@ void GuiPropertyComponent::render() {
                 owners.begin(),
                 owners.end(),
                 [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
-                    std::string lhsGroup = static_cast<SceneGraphNode*>(lhs)->guiPath();
-                    std::string rhsGroup = static_cast<SceneGraphNode*>(rhs)->guiPath();
+                    std::string lhsGroup = dynamic_cast<SceneGraphNode*>(lhs)->guiPath();
+                    std::string rhsGroup = dynamic_cast<SceneGraphNode*>(rhs)->guiPath();
 
                     if (lhsGroup.empty()) {
                         return false;

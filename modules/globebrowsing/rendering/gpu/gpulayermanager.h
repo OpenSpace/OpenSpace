@@ -49,7 +49,7 @@ public:
      * called before setting using this method.
      */
     void setValue(ghoul::opengl::ProgramObject* programObject,
-        const LayerManager& layerManager, const TileIndex& tileIndex);
+        const LayerManager& manager, const TileIndex& tileIndex);
 
     /**
      * Binds this object with GLSL variables with identifiers starting
@@ -57,7 +57,7 @@ public:
      * After this method has been called, users may invoke setValue.
      */
     void bind(ghoul::opengl::ProgramObject* programObject,
-        const LayerManager& layerManager);
+        const LayerManager& manager);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.

@@ -60,8 +60,9 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const float z = r * cos(phi) * sin(theta);  //
 
             glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f))
+            if (!(x == 0.f && y == 0.f && z == 0.f)) {
                 normal = glm::normalize(normal);
+            }
 
             const float t1 = (fj / fsegments);
             const float t2 = 1.f - (fi / fsegments);
@@ -147,8 +148,9 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             _varray[nr].location[3] = 0.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f))
+            if (!(x == 0.f && y == 0.f && z == 0.f)) {
                 normal = glm::normalize(normal);
+            }
 
             _varray[nr].normal[0] = normal[0];
             _varray[nr].normal[1] = normal[1];
@@ -214,8 +216,9 @@ PowerScaledSphere::~PowerScaledSphere() {
 
 bool PowerScaledSphere::initialize() {
     // Initialize and upload to graphics card
-    if (_vaoID == 0)
+    if (_vaoID == 0) {
         glGenVertexArrays(1, &_vaoID);
+    }
 
     if (_vBufferID == 0) {
         glGenBuffers(1, &_vBufferID);
@@ -251,7 +254,7 @@ bool PowerScaledSphere::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)) // NOLINT
     );
 
     glEnableVertexAttribArray(2);
@@ -261,7 +264,7 @@ bool PowerScaledSphere::initialize() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)) // NOLINT
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);

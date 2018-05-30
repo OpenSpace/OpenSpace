@@ -60,7 +60,7 @@ private:
     // Private virtual function overloading
     virtual void initialize() override;
     virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io,
-        char* dst) const override;
+        char* dataDestination) const override;
 
     // Member variables
     std::string _datasetFilePath;

@@ -54,12 +54,12 @@ public:
 
     struct InvalidSceneError : ghoul::RuntimeError {
         /**
-        * \param message The reason that caused this exception to be thrown
-        * \param component The optional compoment that caused this exception to be thrown
-        * \pre message may not be empty
+         * \param message The reason that caused this exception to be thrown
+         * \param component The optional compoment that caused this exception to be thrown
+         * \pre message may not be empty
         */
-        explicit InvalidSceneError(const std::string& message,
-            const std::string& component = "");
+        explicit InvalidSceneError(const std::string& msg,
+            const std::string& comp = "");
     };
 
     // constructors & destructor
@@ -108,8 +108,8 @@ public:
     SceneGraphNode* root();
 
     /**
-    * Return the root SceneGraphNode.
-    */
+     * Return the root SceneGraphNode.
+     */
     const SceneGraphNode* root() const;
 
     /**

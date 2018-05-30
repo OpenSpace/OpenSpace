@@ -49,7 +49,7 @@ namespace openspace::globebrowsing::tileprovider {
 class DefaultTileProvider : public TileProvider {
 public:
     DefaultTileProvider(const ghoul::Dictionary& dictionary);
-    DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
+    DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> reader);
 
     virtual ~DefaultTileProvider();
 
@@ -79,14 +79,14 @@ private:
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
 
-    cache::MemoryAwareTileCache* _tileCache;
+    cache::MemoryAwareTileCache* _tileCache = nullptr;
 
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;
-    layergroupid::GroupID _layerGroupID;
+    layergroupid::GroupID _layerGroupID = layergroupid::GroupID::Unknown;
     int _preCacheLevel = 0;
-    bool _performPreProcessing;
-    bool _padTiles;
+    bool _performPreProcessing = false;
+    bool _padTiles = true;
 };
 
 } // namespace openspace::globebrowsing::tileprovider

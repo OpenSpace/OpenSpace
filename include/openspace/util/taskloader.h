@@ -38,7 +38,7 @@ class Task;
 class TaskLoader {
 public:
     std::vector<std::unique_ptr<Task>> tasksFromDictionary(
-        const ghoul::Dictionary& dictionary);
+        const ghoul::Dictionary& tasksDictionary);
 
     std::vector<std::unique_ptr<Task>> tasksFromFile(const std::string& path);
 };

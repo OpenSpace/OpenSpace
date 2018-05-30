@@ -73,7 +73,7 @@ private:
     void calculateHashKey();
     unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
 
-    HashKey _hashKey;
+    HashKey _hashKey = HashKey(0);
     glm::ivec3 _dimensions;
     glm::ivec2 _tilePixelStartOffset;
     glm::ivec2 _tilePixelSizeDifference;

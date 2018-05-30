@@ -67,7 +67,7 @@ PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
         "Identifier must contain any whitespaces"
     );
     ghoul_precondition(
-        _identifier.find_first_of(".") == std::string::npos,
+        _identifier.find_first_of('.') == std::string::npos,
         "Identifier must contain any whitespaces"
     );
 }
@@ -92,24 +92,24 @@ std::vector<Property*> PropertyOwner::propertiesRecursive() const {
     return props;
 }
 
-Property* PropertyOwner::property(const std::string& id) const {
+Property* PropertyOwner::property(const std::string& uri) const {
     auto it = std::find_if(
         _properties.begin(),
         _properties.end(),
-        [&id](Property* prop) { return prop->identifier() == id; }
+        [&uri](Property* prop) { return prop->identifier() == uri; }
     );
 
-    if (it == _properties.end() || (*it)->identifier() != id) {
+    if (it == _properties.end() || (*it)->identifier() != uri) {
         // if we do not own the searched property, it must consist of a concatenated
         // name and we can delegate it to a subowner
-        const size_t ownerSeparator = id.find(URISeparator);
+        const size_t ownerSeparator = uri.find(URISeparator);
         if (ownerSeparator == std::string::npos) {
             // if we do not own the property and there is no separator, it does not exist
             return nullptr;
         }
         else {
-            const std::string ownerName = id.substr(0, ownerSeparator);
-            const std::string propertyName = id.substr(ownerSeparator + 1);
+            const std::string ownerName = uri.substr(0, ownerSeparator);
+            const std::string propertyName = uri.substr(ownerSeparator + 1);
 
             PropertyOwner* owner = propertySubOwner(ownerName);
             if (!owner) {
@@ -126,8 +126,8 @@ Property* PropertyOwner::property(const std::string& id) const {
     }
 }
 
-bool PropertyOwner::hasProperty(const std::string& id) const {
-    return property(id) != nullptr;
+bool PropertyOwner::hasProperty(const std::string& uri) const {
+    return property(uri) != nullptr;
 }
 
 const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
@@ -311,7 +311,7 @@ void PropertyOwner::setIdentifier(std::string identifier) {
         "Identifier must contain any whitespaces"
     );
     ghoul_precondition(
-        _identifier.find_first_of(".") == std::string::npos,
+        _identifier.find_first_of('.') == std::string::npos,
         "Identifier must contain any whitespaces"
     );
 

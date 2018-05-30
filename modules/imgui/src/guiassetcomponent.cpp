@@ -76,7 +76,7 @@ void GuiAssetComponent::render() {
 
     AssetManager& assetManager = OsEng.assetManager();
 
-    std::string rootPath = "";
+    std::string rootPath;
 
     for (const std::shared_ptr<Asset>& a : assetManager.rootAsset()->childAssets()) {
         renderTree(*a, rootPath);

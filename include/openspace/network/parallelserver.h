@@ -40,7 +40,7 @@ public:
     void start(int port, const std::string& password,
         const std::string& changeHostPassword);
 
-    void setDefaultHostAddress(std::string hostAddress);
+    void setDefaultHostAddress(std::string defaultHostAddress);
 
     std::string defaultHostAddress() const;
 
@@ -79,20 +79,20 @@ private:
 
     void disconnect(std::shared_ptr<Peer> peer);
     void setName(std::shared_ptr<Peer> peer, std::string name);
-    void assignHost(std::shared_ptr<Peer> peer);
+    void assignHost(std::shared_ptr<Peer> newHost);
     void setToClient(std::shared_ptr<Peer> peer);
     void setNConnections(size_t nConnections);
     void sendConnectionStatus(std::shared_ptr<Peer> peer);
 
-    void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleAuthentication(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleData(std::shared_ptr<Peer> peer, std::vector<char> data);
-    void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> data);
+    void handleHostshipRequest(std::shared_ptr<Peer> peer, std::vector<char> message);
     void handleHostshipResignation(std::shared_ptr<Peer> peer, std::vector<char> data);
     void handleDisconnection(std::shared_ptr<Peer> peer);
 
     void handleNewPeers();
     void eventLoop();
-    std::shared_ptr<Peer> peer(size_t i);
+    std::shared_ptr<Peer> peer(size_t id);
     void handlePeer(size_t id);
     void handlePeerMessage(PeerMessage peerMessage);
 

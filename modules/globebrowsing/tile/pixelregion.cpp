@@ -34,11 +34,6 @@ PixelRegion::PixelRegion(const PixelCoordinate& pixelStart,
     , numPixels(numberOfPixels)
 {}
 
-PixelRegion::PixelRegion(const PixelRegion& o)
-    : start(o.start)
-    , numPixels(o.numPixels)
-{}
-
 void PixelRegion::setSide(Side side, int pos) {
     switch (side) {
     case Side::LEFT:
@@ -200,8 +195,8 @@ void PixelRegion::roundDownToQuadratic() {
     }
 }
 
-PixelRegion PixelRegion::globalCut(Side side, int p) {
-    if (!lineIntersect(side, p)) {
+PixelRegion PixelRegion::globalCut(Side side, int globalPos) {
+    if (!lineIntersect(side, globalPos)) {
         return PixelRegion({ 0, 0 }, { 0, 0 });
     }
 
@@ -209,31 +204,31 @@ PixelRegion PixelRegion::globalCut(Side side, int p) {
     int cutSize = 0;
     switch (side) {
     case Side::LEFT:
-        setLeft(p);
-        cutOff.setRight(p - cutSize);
+        setLeft(globalPos);
+        cutOff.setRight(globalPos - cutSize);
         break;
     case Side::TOP:
-        setTop(p);
-        cutOff.setBottom(p - cutSize);
+        setTop(globalPos);
+        cutOff.setBottom(globalPos - cutSize);
         break;
     case Side::RIGHT:
-        setRight(p);
-        cutOff.setLeft(p + cutSize);
+        setRight(globalPos);
+        cutOff.setLeft(globalPos + cutSize);
         break;
     case Side::BOTTOM:
-        setBottom(p);
-        cutOff.setTop(p + cutSize);
+        setBottom(globalPos);
+        cutOff.setTop(globalPos + cutSize);
         break;
     }
     return cutOff;
 }
 
-PixelRegion PixelRegion::localCut(Side side, int p) {
-    if (p < 1) {
+PixelRegion PixelRegion::localCut(Side side, int localPos) {
+    if (localPos < 1) {
         return PixelRegion({ 0, 0 }, { 0, 0 });
     }
     else {
-        return globalCut(side, edge(side) - edgeDirectionSign(side) * p);
+        return globalCut(side, edge(side) - edgeDirectionSign(side) * localPos);
     }
 }
 

@@ -39,7 +39,7 @@ namespace openspace::globebrowsing {
 struct TimeQuantizer {
     TimeQuantizer() = default;
     TimeQuantizer(const Time& start, const Time& end, double resolution);
-    TimeQuantizer(const Time& start, const Time& end, const std::string& resolutionStr);
+    TimeQuantizer(const Time& start, const Time& end, const std::string& resolution);
 
     /**
     * Takes a time resulition string and parses it into a double

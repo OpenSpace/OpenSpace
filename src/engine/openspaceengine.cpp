@@ -109,13 +109,13 @@ namespace {
         std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
 
-    static const openspace::properties::Property::PropertyInfo VersionInfo = {
+    const openspace::properties::Property::PropertyInfo VersionInfo = {
         "VersionInfo",
         "Version Information",
         "This value contains the full string identifying this OpenSpace Version"
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+    const openspace::properties::Property::PropertyInfo SourceControlInfo = {
         "SCMInfo",
         "Source Control Management Information",
         "This value contains information from the SCM, such as commit hash and branch"
@@ -145,7 +145,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _timeManager(new TimeManager)
     , _windowWrapper(std::move(windowWrapper))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
-        programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        std::move(programName),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
     , _navigationHandler(new interaction::NavigationHandler)
     , _keyBindingManager(new interaction::KeyBindingManager)
@@ -586,7 +587,7 @@ void OpenSpaceEngine::initialize() {
 
 void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
     _hasScheduledAssetLoading = true;
-    _scheduledAssetPathToLoad = assetPath;
+    _scheduledAssetPathToLoad = std::move(assetPath);
 }
 
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {

@@ -93,7 +93,7 @@ AssetLoader::AssetLoader(ghoul::lua::LuaState& luaState,
                          std::string assetRootDirectory)
     : _rootAsset(std::make_shared<Asset>(this, syncWatcher))
     , _synchronizationWatcher(syncWatcher)
-    , _assetRootDirectory(assetRootDirectory)
+    , _assetRootDirectory(std::move(assetRootDirectory))
     , _luaState(&luaState)
 {
     setCurrentAsset(_rootAsset);
@@ -314,7 +314,7 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
     // 2) Relative to the global asset root (*)
 
     PathType pathType = classifyPath(assetPath);
-    std::string prefix = "";
+    std::string prefix;
     if (pathType == PathType::RelativeToAsset) {
         prefix = baseDirectory + ghoul::filesystem::FileSystem::PathSeparator;
     } else if (pathType == PathType::RelativeToAssetRoot) {
@@ -369,7 +369,7 @@ std::string AssetLoader::generateAssetPath(const std::string& baseDirectory,
 
 std::shared_ptr<Asset> AssetLoader::getAsset(std::string name) {
     ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, name);
+    std::string path = generateAssetPath(directory, std::move(name));
 
     // Check if asset is already loaded.
     const auto it = _trackedAssets.find(path);
@@ -433,23 +433,23 @@ int AssetLoader::onDeinitializeDependencyLua(Asset* dependant, Asset* dependency
     return 0;
 }
 
-std::shared_ptr<Asset> AssetLoader::require(const std::string& name) {
-    std::shared_ptr<Asset> asset = getAsset(name);
+std::shared_ptr<Asset> AssetLoader::require(const std::string& identifier) {
+    std::shared_ptr<Asset> asset = getAsset(identifier);
     std::shared_ptr<Asset> dependant = _currentAsset;
     dependant->require(asset);
     return asset;
 }
 
-std::shared_ptr<Asset> AssetLoader::request(const std::string& name) {
-    std::shared_ptr<Asset> asset = getAsset(name);
+std::shared_ptr<Asset> AssetLoader::request(const std::string& identifier) {
+    std::shared_ptr<Asset> asset = getAsset(identifier);
     std::shared_ptr<Asset> parent = _currentAsset;
     parent->request(asset);
     assetRequested(parent, asset);
     return asset;
 }
 
-void AssetLoader::unrequest(const std::string& name) {
-    std::shared_ptr<Asset> asset = has(name);
+void AssetLoader::unrequest(const std::string& identifier) {
+    std::shared_ptr<Asset> asset = has(identifier);
     std::shared_ptr<Asset> parent = _currentAsset;
     parent->unrequest(asset.get());
     assetUnrequested(parent, asset);
@@ -474,9 +474,9 @@ void AssetLoader::remove(const std::string& identifier) {
     unrequest(identifier);
 }
 
-std::shared_ptr<Asset> AssetLoader::has(const std::string& name) const {
+std::shared_ptr<Asset> AssetLoader::has(const std::string& identifier) const {
     ghoul::filesystem::Directory directory = currentDirectory();
-    std::string path = generateAssetPath(directory, name);
+    std::string path = generateAssetPath(directory, identifier);
 
     const auto it = _trackedAssets.find(path);
     if (it == _trackedAssets.end()) {

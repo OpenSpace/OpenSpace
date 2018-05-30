@@ -66,7 +66,7 @@ public:
     static double convertTime(const std::string& time);
 
     Time(double secondsJ2000 = -1);
-    Time(const Time& other);
+    Time(const Time& other) = default;
 
     /**
      * Initializes the Time singleton.
@@ -193,7 +193,7 @@ public:
 private:
     double _time;
     double _dt = 1.0;
-    bool _timeJumped;
+    bool _timeJumped = false;
     bool _timePaused = false;
 };
 

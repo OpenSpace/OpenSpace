@@ -35,13 +35,13 @@ namespace {
     constexpr const char* KeyType = "Type";
     constexpr const char* KeyTag = "Tag";
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether this object will be visible or not."
     };
 
-    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    const openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Transparency",
         "This value determines the transparency of this object."

@@ -43,48 +43,48 @@ namespace {
 
     constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceTypeInfo = {
+    const openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source Type",
         "The type of position that is used as the source to calculate the distance. The "
         "default value is 'Camera'."
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
+    const openspace::properties::Property::PropertyInfo SourceNodeNameInfo = {
         "SourceNodeName",
         "Source Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the source for computing the distance."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
+    const openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination Type",
         "The type of position that is used as the destination to calculate the distance. "
         "The default value for this is 'Focus'."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
+    const openspace::properties::Property::PropertyInfo DestinationNodeNameInfo = {
         "DestinationNodeName",
         "Destination Node Name",
         "If a scene graph node is selected as type, this value specifies the name of the "
         "node that is to be used as the destination for computing the distance."
     };
 
-    static const openspace::properties::Property::PropertyInfo SimplificationInfo = {
+    const openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
         "If this value is enabled, the distace is displayed in nuanced units, such as "
@@ -92,7 +92,7 @@ namespace {
         "displayed in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+    const openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used as a destination "
@@ -182,7 +182,7 @@ documentation::Documentation DashboardItemDistance::Documentation() {
     };
 }
 
-DashboardItemDistance::DashboardItemDistance(ghoul::Dictionary dictionary)
+DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)

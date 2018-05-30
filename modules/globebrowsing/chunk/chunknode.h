@@ -37,7 +37,7 @@ class ChunkedLodGlobe;
 
 class ChunkNode {
 public:
-    ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
+    ChunkNode(Chunk chunk, ChunkNode* parent = nullptr);
 
     /**
      * Recursively split the ChunkNode.

@@ -60,18 +60,14 @@ namespace {
         return written;
     }
 
-    size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void* userp) {
+    size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
         size_t realsize = size * nmemb;
-        auto mem = static_cast<openspace::DownloadManager::MemoryFile *>(userp);
+        auto mem = static_cast<openspace::DownloadManager::MemoryFile*>(userp);
 
+        // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
         mem->buffer = reinterpret_cast<char*>(
             realloc(mem->buffer, mem->size + realsize + 1)
         );
-        if (!mem->buffer) {
-            // out of memory
-            printf("not enough memory (realloc returned NULL)\n");
-            return 0;
-        }
 
         std::memcpy(&(mem->buffer[mem->size]), contents, realsize);
         mem->size += realsize;
@@ -169,30 +165,31 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         );
     }
 
-    auto downloadFunction = [url, failOnError, timeout_secs, finishedCallback,
-                             progressCallback, future, fp]()
+    auto downloadFunction = [url, failOnError, timeout_secs,
+                             finishedCb = std::move(finishedCallback),
+                             progressCb = std::move(progressCallback), future, fp]()
     {
         CURL* curl = curl_easy_init();
         if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData); // NOLINT
             if (timeout_secs) {
-                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs);
+                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs); // NOLINT
             }
             if (failOnError) {
-                curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+                curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L); // NOLINT
             }
 
             ProgressInformation p = {
                 future,
                 std::chrono::system_clock::now(),
-                &progressCallback
+                &progressCb
             };
-            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
-            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p); // NOLINT
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L); // NOLINT
 
             CURLcode res = curl_easy_perform(curl);
             curl_easy_cleanup(curl);
@@ -205,8 +202,8 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 future->errorMessage = curl_easy_strerror(res);
             }
 
-            if (finishedCallback) {
-                finishedCallback(*future);
+            if (finishedCb) {
+                finishedCb(*future);
             }
         }
     };
@@ -235,7 +232,9 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 {
     LDEBUG(fmt::format("Start downloading file: '{}' into memory", url));
 
-    auto downloadFunction = [url, successCallback, errorCallback]() {
+    auto downloadFunction = [url, successCb = std::move(successCallback),
+                             errorCb = std::move(errorCallback)]()
+    {
         DownloadManager::MemoryFile file;
         file.buffer = reinterpret_cast<char*>(malloc(1));
         file.size = 0;
@@ -246,21 +245,22 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             throw ghoul::RuntimeError("Error initializing cURL");
         }
 
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
+        // NOLINTNEXTLINE 
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback); // NOLINT
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // NOLINT
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false); // NOLINT
 
         // Will fail when response status is 400 or above
-        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L); // NOLINT
 
         CURLcode res = curl_easy_perform(curl);
         if (res == CURLE_OK) {
             // ask for the content-type
             char* ct;
-            res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+            res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct); // NOLINT
             if (res == CURLE_OK) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
@@ -270,13 +270,13 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             } else {
                 LWARNING("Could not get extension from file downloaded from: " + url);
             }
-            successCallback(file);
+            successCb(file);
             curl_easy_cleanup(curl);
             return file;
         } else {
             std::string err = curl_easy_strerror(res);
-            if (errorCallback) {
-                errorCallback(err);
+            if (errorCb) {
+                errorCb(err);
             } else {
                 LWARNING(fmt::format("Error downloading '{}': {}", url, err));
             }
@@ -299,19 +299,19 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 void DownloadManager::getFileExtension(const std::string& url,
                                        RequestFinishedCallback finishedCallback)
 {
-    auto requestFunction = [url, finishedCallback]() {
+    auto requestFunction = [url, finishedCb = std::move(finishedCallback)]() {
         CURL* curl = curl_easy_init();
         if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
             //USING CURLOPT NOBODY
-            curl_easy_setopt(curl, CURLOPT_NOBODY,1);
+            curl_easy_setopt(curl, CURLOPT_NOBODY, 1); // NOLINT
             CURLcode res = curl_easy_perform(curl);
             if (CURLE_OK == res) {
                 char* ct;
                 // ask for the content-type
-                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-                if ((res == CURLE_OK) && ct && finishedCallback) {
-                    finishedCallback(std::string(ct));
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct); // NOLINT
+                if ((res == CURLE_OK) && ct && finishedCb) {
+                    finishedCb(std::string(ct));
                 }
             }
 

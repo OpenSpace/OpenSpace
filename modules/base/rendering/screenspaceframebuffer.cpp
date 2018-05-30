@@ -32,7 +32,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane."
@@ -82,7 +82,7 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 }
 
-ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
+ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {} // NOLINT
 
 bool ScreenSpaceFramebuffer::initializeGL() {
     ScreenSpaceRenderable::initializeGL();

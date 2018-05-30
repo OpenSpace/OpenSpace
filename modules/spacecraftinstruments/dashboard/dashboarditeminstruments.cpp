@@ -41,20 +41,20 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
+    const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
         "ActiveColor",
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
@@ -62,7 +62,7 @@ namespace {
         "color. The default value is (0.6, 1.0, 0.0)."
     };
 
-    static const openspace::properties::Property::PropertyInfo FlashColorInfo = {
+    const openspace::properties::Property::PropertyInfo FlashColorInfo = {
         "FlashColor",
         "Flash Color",
         "This value determines the color that is used shortly after an instrument "
@@ -129,7 +129,7 @@ documentation::Documentation DashboardItemInstruments::Documentation() {
     };
 }
 
-DashboardItemInstruments::DashboardItemInstruments(ghoul::Dictionary dictionary)
+DashboardItemInstruments::DashboardItemInstruments(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)

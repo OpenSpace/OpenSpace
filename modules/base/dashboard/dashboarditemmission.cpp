@@ -39,14 +39,14 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const float DefaultFontSize = 15.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
@@ -135,7 +135,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         double currentTime = OsEng.timeManager().time().j2000Seconds();
         const Mission& mission = MissionManager::ref().currentMission();
 
-        if (mission.phases().size() > 0) {
+        if (!mission.phases().empty()) {
             static const glm::vec4 nextMissionColor(0.7f, 0.3f, 0.3f, 1.f);
             static const glm::vec4 currentMissionColor(0.f, 0.5f, 0.5f, 1.f);
             static const glm::vec4 missionProgressColor = currentMissionColor;
@@ -152,7 +152,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
 
             auto phaseTrace = mission.phaseTrace(currentTime);
 
-            if (phaseTrace.size()) {
+            if (!phaseTrace.empty()) {
                 const MissionPhase& phase = phaseTrace.back().get();
                 const std::string title = "Current Mission Phase: " + phase.name();
                 penPosition.y -= _font->height();

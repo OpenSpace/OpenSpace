@@ -37,7 +37,7 @@
 #include <chrono>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo ScriptInfo = {
+    const openspace::properties::Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "

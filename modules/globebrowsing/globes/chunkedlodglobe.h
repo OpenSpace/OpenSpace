@@ -125,7 +125,7 @@ public:
 #endif // DEBUG_GLOBEBROWSING_STATSRECORD
 
 private:
-    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
+    void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const;
 
     const RenderableGlobe& _owner;
 

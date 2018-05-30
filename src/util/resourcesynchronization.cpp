@@ -81,14 +81,14 @@ std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDict
     return factory->create(synchronizationType, dictionary);
 }
 
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict) {
+ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(
         Documentation(),
-        dict,
+        dictionary,
         "ResourceSynchronization"
     );
 
-    _name = dict.value<std::string>(KeyName);
+    _name = dictionary.value<std::string>(KeyName);
 }
 
 ResourceSynchronization::State ResourceSynchronization::state() const {

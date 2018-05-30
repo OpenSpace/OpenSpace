@@ -65,27 +65,28 @@ namespace {
 
 namespace openspace {
 
-Asset::Asset(AssetLoader* loader, SynchronizationWatcher* syncWatcher)
+Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher)
     : _state(State::SyncResolved)
     , _loader(loader)
-    , _synchronizationWatcher(syncWatcher)
+    , _synchronizationWatcher(watcher)
     , _hasAssetPath(false)
     , _assetName("Root Asset")
 {}
 
-Asset::Asset(AssetLoader* loader, SynchronizationWatcher* syncWatcher,
+Asset::Asset(AssetLoader* loader, SynchronizationWatcher* watcher,
              std::string assetPath
 )
     : _state(State::Unloaded)
     , _loader(loader)
-    , _synchronizationWatcher(syncWatcher)
+    , _synchronizationWatcher(watcher)
     , _hasAssetPath(true)
     , _assetPath(std::move(assetPath))
 {}
 
 std::string Asset::resolveLocalResource(std::string resourceName) {
     std::string assetDir = assetDirectory();
-    return assetDir + ghoul::filesystem::FileSystem::PathSeparator + resourceName;
+    return assetDir + ghoul::filesystem::FileSystem::PathSeparator +
+           std::move(resourceName);
 }
 
 Asset::State Asset::state() const {

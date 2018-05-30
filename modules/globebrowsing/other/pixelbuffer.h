@@ -129,7 +129,7 @@ public:
     operator GLuint() const;
 
 private:
-    GLuint _id;
+    GLuint _id = 0;
     const size_t _numBytes;
     const Usage _usage;
     bool _isMapped = false;

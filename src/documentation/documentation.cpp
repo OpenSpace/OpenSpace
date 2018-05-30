@@ -166,19 +166,22 @@ Documentation::Documentation(std::string n, std::string i, DocumentationEntries 
 {}
 
 Documentation::Documentation(std::string n, DocumentationEntries ents)
-    : Documentation(n, "", ents)
+    : Documentation(std::move(n), "", std::move(ents))
 {}
 
 Documentation::Documentation(DocumentationEntries ents)
-    : Documentation("", "", ents)
+    : Documentation("", "", std::move(ents))
 {}
 
-TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dict) {
+TestResult testSpecification(const Documentation& documentation,
+                             const ghoul::Dictionary& dictionary)
+{
     TestResult result;
     result.success = true;
 
-    auto applyVerifier = [dict, &result](Verifier& verifier, const std::string& key) {
-        TestResult res = verifier(dict, key);
+    auto applyVerifier = [dictionary, &result](Verifier& verifier, const std::string& key)
+    {
+        TestResult res = verifier(dictionary, key);
         if (!res.success) {
             result.success = false;
             result.offenses.insert(
@@ -194,14 +197,14 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         );
     };
 
-    for (const auto& p : d.entries) {
+    for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (const std::string& key : dict.keys()) {
+            for (const std::string& key : dictionary.keys()) {
                 applyVerifier(*(p.verifier), key);
             }
         }
         else {
-            if (p.optional && !dict.hasKey(p.key)) {
+            if (p.optional && !dictionary.hasKey(p.key)) {
                 // If the key is optional and it doesn't exist, we don't need to check it
                 // if the key exists, it has to be correct, however
                 continue;
@@ -229,11 +232,11 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
     return result;
 }
 
-void testSpecificationAndThrow(const Documentation& doc, const ghoul::Dictionary& dict,
-                               std::string component)
+void testSpecificationAndThrow(const Documentation& documentation,
+                               const ghoul::Dictionary& dictionary, std::string component)
 {
     // Perform testing against the documentation/specification
-    TestResult testResult = testSpecification(doc, dict);
+    TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
         throw SpecificationError(std::move(testResult), std::move(component));
     }

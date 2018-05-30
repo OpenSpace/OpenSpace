@@ -88,7 +88,7 @@ protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 
 private:
-    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+    void goToChunk(Camera& camera, const globebrowsing::TileIndex& ti, glm::vec2 uv,
         bool doResetCameraDirection);
     void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
         bool doResetCameraDirection);

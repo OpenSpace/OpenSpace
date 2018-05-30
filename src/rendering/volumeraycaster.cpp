@@ -26,7 +26,6 @@
 
 namespace openspace {
 
-VolumeRaycaster::~VolumeRaycaster() {}
 void VolumeRaycaster::preRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
 void VolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
 

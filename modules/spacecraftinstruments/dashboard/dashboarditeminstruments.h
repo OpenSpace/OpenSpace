@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemInstruments : public DashboardItem {
 public:
-    DashboardItemInstruments(ghoul::Dictionary dictionary);
+    DashboardItemInstruments(const ghoul::Dictionary& dictionary);
     ~DashboardItemInstruments() = default;
 
     void render(glm::vec2& penPosition) override;

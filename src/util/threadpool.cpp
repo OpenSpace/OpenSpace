@@ -26,7 +26,7 @@
 
 namespace openspace {
 
-Worker::Worker(ThreadPool& pool_) : pool(pool_) {}
+Worker::Worker(ThreadPool& p) : pool(p) {}
 
 void Worker::operator()() {
     std::function<void()> task;
@@ -58,7 +58,7 @@ void Worker::operator()() {
 
 ThreadPool::ThreadPool(size_t numThreads) : stop(false) {
     for (size_t i = 0; i < numThreads; ++i) {
-        workers.push_back(std::thread(Worker(*this)));
+        workers.emplace_back(std::thread(Worker(*this)));
     }
 }
 
@@ -74,8 +74,8 @@ ThreadPool::~ThreadPool() {
     condition.notify_all();
 
     // join them
-    for (size_t i = 0; i < workers.size(); ++i) {
-        workers[i].join();
+    for (std::thread& w : workers) {
+        w.join();
     }
 }
 
@@ -85,7 +85,7 @@ void ThreadPool::enqueue(std::function<void()> f) {
         std::unique_lock<std::mutex> lock(queue_mutex);
 
         // add the task
-        tasks.push_back(f);
+        tasks.push_back(std::move(f));
     } // release lock
 
     // wake up one thread

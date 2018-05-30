@@ -332,8 +332,9 @@ void PerformanceManager::tick() {
     _currentTick = (_currentTick + 1) % PerformanceLayout::NumberValues;
 }
 
-void PerformanceManager::storeIndividualPerformanceMeasurement(std::string identifier,
-                                                               long long microseconds)
+void PerformanceManager::storeIndividualPerformanceMeasurement(
+                                                            const std::string& identifier,
+                                                                   long long microseconds)
 {
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();

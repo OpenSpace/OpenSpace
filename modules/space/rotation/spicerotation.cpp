@@ -33,14 +33,14 @@
 namespace {
     constexpr const char* KeyKernels = "Kernels";
 
-    static const openspace::properties::Property::PropertyInfo SourceInfo = {
+    const openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name."
     };
 
-    static const openspace::properties::Property::PropertyInfo DestinationInfo = {
+    const openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "

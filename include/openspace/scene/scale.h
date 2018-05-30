@@ -50,7 +50,7 @@ public:
 
     double scaleValue() const;
     virtual double scaleValue(const Time& time) const = 0;
-    virtual void update(const Time& data);
+    virtual void update(const Time& time);
 
     static documentation::Documentation Documentation();
 
@@ -59,7 +59,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    double _cachedTime;
+    double _cachedTime = -std::numeric_limits<double>::max();
     double _cachedScale = 1.0;
 };
 

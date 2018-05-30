@@ -46,21 +46,21 @@ namespace {
     constexpr const char* KeyBlendMode = "BlendMode";
     constexpr const char* KeyPadTiles = "PadTiles";
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed."
     };
 
-    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    const openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath."
     };
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
@@ -68,21 +68,21 @@ namespace {
         "composition."
     };
 
-    static const openspace::properties::Property::PropertyInfo ResetInfo = {
+    const openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles."
     };
 
-    static const openspace::properties::Property::PropertyInfo RemoveInfo = {
+    const openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorInfo = {
+    const openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
@@ -370,17 +370,16 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            ghoul::Dictionary tileProviderInitDict = initDict;
-            tileProviderInitDict.setValue(keyLayerGroupID, _layerGroupId);
-            if (tileProviderInitDict.hasKeyAndValue<std::string>(keyName)) {
+            initDict.setValue(keyLayerGroupID, _layerGroupId);
+            if (initDict.hasKeyAndValue<std::string>(keyName)) {
                 std::string name;
-                tileProviderInitDict.getValue(keyName, name);
+                initDict.getValue(keyName, name);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
                 tileprovider::TileProvider::createFromDictionary(
                     typeId,
-                    tileProviderInitDict
+                    std::move(initDict)
                 )
             );
             break;

@@ -124,18 +124,20 @@ private:
     };
 
     /**
-     * Create a GDAL dataset description based on the time t
+     * Create a GDAL dataset description based on the time t,
+     *
      * \param t Time to generate a GDAL dataset description for
-     * \returns a GDAL dataset description
+     * \return a GDAL dataset description
      */
-    std::string getGdalDatasetXML(Time t);
+    std::string getGdalDatasetXML(const Time& t);
 
     /**
      * Create a GDAL dataset description associated with the provided TimeKey
-     * \param key The TimeKey specifying time
-     * \returns a GDAL dataset description
+     *
+     * \param timeKey The TimeKey specifying time
+     * \return a GDAL dataset description
      */
-    std::string getGdalDatasetXML(TimeKey key);
+    std::string getGdalDatasetXML(const TimeKey& timeKey);
 
     /**
      * Instantiates a new TileProvder for the temporal dataset at the time
@@ -145,7 +147,7 @@ private:
      * with the provided timekey, the opens a new GDAL dataset with that URL.
      *
      * \param timekey time specifying dataset's temporality
-     * \returns newly instantiated TileProvider
+     * \return newly instantiated TileProvider
      */
     std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
 
@@ -164,10 +166,11 @@ private:
 
     /**
      * Helper method to read a XML value from a XML tree.
+     *
      * \param node XML tree to search in
      * \param key XML tag to find the value for
      * \param defaultVal value to return if key was not found
-     * \returns the value of the Key, or defaultVal if key was undefined.
+     * \return the value of the Key, or defaultVal if key was undefined.
      */
     std::string getXMLValue(CPLXMLNode* node, const std::string& key,
         const std::string& defaultVal);

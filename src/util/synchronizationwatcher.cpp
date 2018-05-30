@@ -37,7 +37,7 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
     WatchHandle watchHandle = generateWatchHandle();
 
     ResourceSynchronization::CallbackHandle cbh = synchronization->addStateChangeCallback(
-        [this, synchronization, watchHandle, callback]
+        [this, synchronization, watchHandle, cb = std::move(callback)]
         (ResourceSynchronization::State state)
         {
             std::lock_guard<std::mutex> g(_mutex);
@@ -45,12 +45,12 @@ SynchronizationWatcher::WatchHandle SynchronizationWatcher::watchSynchronization
                 synchronization,
                 state,
                 watchHandle,
-                callback
+                cb
             });
         }
     );
 
-    _watchedSyncs.insert({ watchHandle, { synchronization, cbh } });
+    _watchedSyncs.insert({ watchHandle, { std::move(synchronization), cbh } });
 
     return watchHandle;
 }

@@ -35,15 +35,15 @@ namespace {
 
 namespace openspace {
 
-ParallelConnection::Message::Message(MessageType t, const std::vector<char>& c)
+ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
     : type(t)
-    , content(c)
+    , content(std::move(c))
 {}
 
 ParallelConnection::DataMessage::DataMessage(datamessagestructures::Type t,
-                                             const std::vector<char>& c)
+                                             std::vector<char> c)
     : type(t)
-    , content(c)
+    , content(std::move(c))
 {}
 
 ParallelConnection::ConnectionLostError::ConnectionLostError()

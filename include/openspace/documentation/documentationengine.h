@@ -50,10 +50,11 @@ public:
         /**
          * Constructor of a DuplicateDocumentationException storing the offending
          * Documentation for later use.
-         * \param documentation The Documentation whose identifier was previously
-         * registered
+         *
+         * \param doc The Documentation whose identifier was previously
+         *        registered
          */
-        DuplicateDocumentationException(Documentation documentation);
+        DuplicateDocumentationException(Documentation doc);
 
         /// The offending Documentation whose identifier was previously registered
         Documentation documentation;
@@ -64,20 +65,24 @@ public:
     /**
      * Adds the \p documentation to the list of Documentation%s that are written to a
      * documentation file with the writeDocumentation method.
+     *
      * \param documentation The Documentation object that is to be stored for later use
-     * \throws DuplicateDocumentationException If the \p documentation has a non-empty
-     * identifier and it was not unique
+     *
+     * \throw DuplicateDocumentationException If the \p documentation has a non-empty
+     *        identifier and it was not unique
      */
     void addDocumentation(Documentation documentation);
 
     /**
-     * Returns a list of all registered Documentation%s
+     * Returns a list of all registered Documentation%s.
+     *
      * \return A list of all registered Documentation%s
      */
     std::vector<Documentation> documentations() const;
 
     /**
-     * Returns a static reference to the main singleton DocumentationEngine
+     * Returns a static reference to the main singleton DocumentationEngine.
+     *
      * \return A static reference to the main singleton DocumentationEngine
      */
     static DocumentationEngine& ref();

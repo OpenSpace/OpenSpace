@@ -30,12 +30,13 @@
 
 namespace openspace::globebrowsing {
 
-GPULayerManager::~GPULayerManager() {}
+GPULayerManager::~GPULayerManager() {} // NOLINT
 
 void GPULayerManager::setValue(ghoul::opengl::ProgramObject* programObject,
                                const LayerManager& manager, const TileIndex& tileIndex)
 {
     const std::vector<std::shared_ptr<LayerGroup>>& layerGroups = manager.layerGroups();
+
     for (size_t i = 0; i < layerGroups.size(); ++i) {
         _gpuLayerGroups[i]->setValue(programObject, *layerGroups[i], tileIndex);
     }

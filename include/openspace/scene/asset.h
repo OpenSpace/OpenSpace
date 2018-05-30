@@ -57,10 +57,9 @@ public:
     Asset(AssetLoader* loader, SynchronizationWatcher* watcher);
 
     /**
-    * Regular asset constructor
-    */
-    Asset(AssetLoader* loader, SynchronizationWatcher* watcher,
-        std::string assetPath);
+     * Regular asset constructor
+     */
+    Asset(AssetLoader* loader, SynchronizationWatcher* watcher, std::string assetPath);
 
     ~Asset() = default;
 
@@ -78,7 +77,7 @@ public:
         ownSynchronizations() const;
 
     void syncStateChanged(ResourceSynchronization* sync,
-        ResourceSynchronization::State s);
+        ResourceSynchronization::State state);
 
     /**
      * Load this asset and return true if successful,
@@ -116,10 +115,10 @@ public:
 
     // Dependency graph
     bool requires(const Asset* asset) const;
-    void require(std::shared_ptr<Asset> asset);
-    void unrequire(Asset* asset);
+    void require(std::shared_ptr<Asset> child);
+    void unrequire(Asset* child);
 
-    bool requests(Asset* child) const;
+    bool requests(Asset* asset) const;
     void request(std::shared_ptr<Asset> child);
     void unrequest(Asset* child);
 
@@ -142,8 +141,8 @@ public:
 private:
     void setState(State state);
 
-    void requiredAssetChangedState(std::shared_ptr<Asset> a, Asset::State state);
-    void requestedAssetChangedState(Asset* a, Asset::State state);
+    void requiredAssetChangedState(std::shared_ptr<Asset> asset, Asset::State childState);
+    void requestedAssetChangedState(Asset* child, Asset::State childState);
 
     bool isSyncResolveReady();
 

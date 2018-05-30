@@ -75,8 +75,8 @@ protected:
     GLuint _iBufferID = 0;
 
     GLenum _mode = GL_LINES;
-    unsigned int _isize;
-    unsigned int _vsize;
+    unsigned int _isize = 0;
+    unsigned int _vsize = 0;
     std::vector<Vertex> _varray;
     std::vector<int> _iarray;
 };

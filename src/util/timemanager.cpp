@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-using datamessagestructures::TimeKeyframe;
-
 void TimeManager::preSynchronization(double dt) {
     removeKeyframesBefore(_latestConsumedTimestamp);
     if (_shouldSetTime) {
@@ -157,8 +155,8 @@ void TimeManager::consumeKeyframes(double dt) {
     }
 }
 
-void TimeManager::addKeyframe(double timestamp, Time time) {
-    _timeline.addKeyframe(timestamp, std::move(time));
+void TimeManager::addKeyframe(double timestamp, Time keyframeTime) {
+    _timeline.addKeyframe(timestamp, std::move(keyframeTime));
 }
 
 void TimeManager::removeKeyframesAfter(double timestamp) {
@@ -192,14 +190,14 @@ std::vector<Syncable*> TimeManager::getSyncables() {
 
 TimeManager::CallbackHandle TimeManager::addTimeChangeCallback(TimeChangeCallback cb) {
     CallbackHandle handle = _nextCallbackHandle++;
-    _timeChangeCallbacks.push_back({ handle, std::move(cb) });
+    _timeChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
 TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCallback cb)
 {
     CallbackHandle handle = _nextCallbackHandle++;
-    _deltaTimeChangeCallbacks.push_back({ handle, std::move(cb) });
+    _deltaTimeChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 

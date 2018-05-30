@@ -48,14 +48,14 @@ struct TileIndex {
 
     int x, y, level;
 
-    TileIndex(int x = 0, int y = 0, int level = 0);
-    TileIndex(const TileIndex& other);
+    TileIndex(int x_ = 0, int y_ = 0, int level_ = 0);
+    TileIndex(const TileIndex& other) = default;
 
     /**
      * Creates the geodetic tile index for the Geodetic patch that covers the
      * point p at the specified level
      */
-    TileIndex(const Geodetic2& point, int level);
+    TileIndex(const Geodetic2& point, int level_);
 
     /**
      * Initializes a TileIndex from a Dictionary

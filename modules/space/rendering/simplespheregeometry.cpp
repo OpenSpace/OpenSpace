@@ -30,13 +30,13 @@
 #include <openspace/util/powerscaledsphere.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    const openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "This value specifies the radius of this sphere in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "This value specifies the number of segments that this sphere is split into."
@@ -71,8 +71,7 @@ documentation::Documentation SimpleSphereGeometry::Documentation() {
 }
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
-    : PlanetGeometry()
-    , _radius(RadiusInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(std::pow(10.f, 20.f)))
+    : _radius(RadiusInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(std::pow(10.f, 20.f)))
     , _segments(SegmentsInfo, 20, 1, 5000)
     , _sphere(nullptr)
 {
@@ -104,7 +103,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     addProperty(_segments);
 }
 
-SimpleSphereGeometry::~SimpleSphereGeometry() {}
+SimpleSphereGeometry::~SimpleSphereGeometry() {} // NOLINT
 
 void SimpleSphereGeometry::initialize() {
     createSphere();

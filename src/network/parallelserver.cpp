@@ -29,6 +29,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <functional>
 
+// @TODO(abock): In the entire class remove std::shared_ptr<Peer> by const Peer& where
+//               possible to simplify the interface
+
 namespace {
     constexpr const char* _loggerCat = "ParallelServer";
 } // namespace
@@ -256,7 +259,7 @@ void ParallelServer::handleHostshipRequest(std::shared_ptr<Peer> peer,
 }
 
 void ParallelServer::handleHostshipResignation(std::shared_ptr<Peer> peer,
-                                               std::vector<char> data)
+                                               std::vector<char>)
 {
     LINFO(fmt::format("Connection {} wants to resign its hostship.", peer->id));
 

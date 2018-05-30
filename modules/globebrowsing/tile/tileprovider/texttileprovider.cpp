@@ -48,7 +48,7 @@ TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t f
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
 }
 
-TextTileProvider::~TextTileProvider() {}
+TextTileProvider::~TextTileProvider() {} // NOLINT
 
 bool TextTileProvider::initialize() {
     bool res = TileProvider::initialize();

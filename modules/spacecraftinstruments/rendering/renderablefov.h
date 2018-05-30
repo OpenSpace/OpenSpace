@@ -81,8 +81,10 @@ private:
         return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
     }
 
-    void computeIntercepts(const UpdateData& data, const std::string& target, bool inFOV);
-    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time,
+    void computeIntercepts(const UpdateData& data, const std::string& target,
+        bool isInFov);
+
+    glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
         const std::string& target) const;
     glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time,
         const std::string& target) const;

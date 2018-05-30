@@ -97,9 +97,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     _renderer = std::make_unique<ChunkRenderer>(geometry, layerManager, ellipsoid);
 }
 
-// The destructor is defined here to make it feasiable to use a unique_ptr
-// with a forward declaration
-ChunkedLodGlobe::~ChunkedLodGlobe() {}
+ChunkedLodGlobe::~ChunkedLodGlobe() {} // NOLINT
 
 bool ChunkedLodGlobe::isReady() const {
     return true;
@@ -123,13 +121,15 @@ bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk,
     return false;
 }
 
-const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2& p) const {
+const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2& location) const {
     ghoul_assert(
-        Coverage.contains(p),
+        Coverage.contains(location),
         "Point must be in lat [-90, 90] and lon [-180, 180]"
     );
 
-    return p.lon < Coverage.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+    return location.lon < Coverage.center().lon ?
+        _leftRoot->find(location) :
+        _rightRoot->find(location);
 }
 
 int ChunkedLodGlobe::desiredLevel(const Chunk& chunk,

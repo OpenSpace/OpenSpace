@@ -79,7 +79,7 @@
 // items in memory as was shown to be much slower than the current system.   ---abock
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo PeriodInfo = {
+    const openspace::properties::Property::PropertyInfo PeriodInfo = {
         "Period",
         "Period (in days)",
         "The objects period, i.e. the length of its orbit around the parent object given "
@@ -88,7 +88,7 @@ namespace {
         "possible to show the effects of precession."
     };
 
-    static const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    const openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Number of samples along the orbit",
         "The number of samples along the orbit. This determines the resolution of the "

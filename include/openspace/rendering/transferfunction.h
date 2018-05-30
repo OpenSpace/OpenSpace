@@ -49,7 +49,7 @@ public:
     ghoul::opengl::Texture& texture();
     void bind();
     void update();
-    glm::vec4 sample(size_t t);
+    glm::vec4 sample(size_t offset);
     size_t width();
     void setCallback(TfChangedCallback callback);
     void setTextureFromTxt(std::shared_ptr<ghoul::opengl::Texture> ptr);

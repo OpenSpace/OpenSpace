@@ -74,18 +74,19 @@ public:
         };
 
         /**
-        * Default constructor initializing the AberrationCorrection to Type::None with a
-        * Direction::Reception
-        */
+         * Default constructor initializing the AberrationCorrection to Type::None with a
+         * Direction::Reception
+         */
         AberrationCorrection() = default;
 
         /**
-        * Constructor initializing the AberrationCorrection to the provided \p type and
-        * \p direction
-        * \param type The type of the aberration correction (AberrationCorrection::Type)
-        * \param direction The used direction (AberrationCorrection::Direction)
-        */
-        AberrationCorrection(Type type, Direction direction);
+         * Constructor initializing the AberrationCorrection to the provided \p type and
+         * \p direction
+         *
+         * \param t The type of the aberration correction (AberrationCorrection::Type)
+         * \param d The used direction (AberrationCorrection::Direction)
+         */
+        AberrationCorrection(Type t, Direction d);
 
         /**
          * Converts one of the valid aberration correction strings into its enumeration

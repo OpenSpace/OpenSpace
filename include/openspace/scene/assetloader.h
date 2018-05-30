@@ -62,7 +62,7 @@ class AssetListener;
 class AssetLoader {
 public:
     AssetLoader(ghoul::lua::LuaState& luaState, SynchronizationWatcher* syncWatcher,
-        std::string assetRoot);
+        std::string assetRootDirectory);
 
     ~AssetLoader();
 
@@ -130,19 +130,19 @@ public:
     /**
      * Call the dependency.onInitialize function specified in the asset file
      */
-    void callOnDependencyInitialize(Asset* dependency, Asset* asset);
+    void callOnDependencyInitialize(Asset* asset, Asset* dependant);
 
     /**
      * Call the dependency.onDeinitialize function specified in the asset file
      */
-    void callOnDependencyDeinitialize(Asset* dependency, Asset* asset);
+    void callOnDependencyDeinitialize(Asset* asset, Asset* dependant);
 
     /**
      * Generate the absolute path for an asset specified as `path`
      * relative to `baseDirectory`
      */
     std::string generateAssetPath(const std::string& baseDirectory,
-        const std::string& path) const;
+        const std::string& assetPath) const;
 
     /**
      * Add listener to asset state changes
@@ -171,13 +171,13 @@ public:
 
 private:
     std::shared_ptr<Asset> require(const std::string& identifier);
-    std::shared_ptr<Asset> request(const std::string& path);
-    void unrequest(const std::string& path);
+    std::shared_ptr<Asset> request(const std::string& identifier);
+    void unrequest(const std::string& identifier);
 
     void setUpAssetLuaTable(Asset* asset);
     void tearDownAssetLuaTable(Asset* asset);
 
-    std::shared_ptr<Asset> getAsset(std::string path);
+    std::shared_ptr<Asset> getAsset(std::string name);
     ghoul::filesystem::Directory currentDirectory() const;
 
     void setCurrentAsset(std::shared_ptr<Asset> asset);
@@ -188,8 +188,8 @@ private:
     int onDeinitializeLua(Asset* asset);
     int onInitializeDependencyLua(Asset* dependant, Asset* dependency);
     int onDeinitializeDependencyLua(Asset* dependant, Asset* dependency);
-    int requireLua(Asset* asset);
-    int requestLua(Asset* asset);
+    int requireLua(Asset* dependant);
+    int requestLua(Asset* parent);
     int existsLua(Asset* asset);
     int localResourceLua(Asset* asset);
     int syncedResourceLua(Asset* asset);

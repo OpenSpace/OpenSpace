@@ -33,7 +33,7 @@ Grid::Grid(int xSegments, int ySegments)
     , _ySegments(ySegments)
 {}
 
-Grid::~Grid() {}
+Grid::~Grid() {} // NOLINT
 
 TriangleSoup& Grid::geometry() {
     return *_geometry;

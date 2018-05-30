@@ -47,7 +47,7 @@ public:
         None
     };
 
-    DashboardItemFramerate(const ghoul::Dictionary& dict);
+    DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;
     glm::vec2 size() const override;

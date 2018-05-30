@@ -53,14 +53,14 @@ namespace {
 
     constexpr const char* DestinationFrame = "GALACTIC";
 
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
         "Color Base Texture",
         "This is the path to a local image file that is used as the base texture for the "
         "model on which the image projections are layered."
     };
 
-    static const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "

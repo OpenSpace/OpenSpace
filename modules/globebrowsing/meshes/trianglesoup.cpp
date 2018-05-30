@@ -38,7 +38,7 @@ TriangleSoup::TriangleSoup(std::vector<unsigned int> elements, Positions usePosi
     , _useTextureCoordinates(useTextures)
     , _useVertexNormals(useNormals)
 {
-    setElements(elements);
+    setElements(std::move(elements));
 }
 
 TriangleSoup::~TriangleSoup() {
@@ -133,7 +133,7 @@ bool TriangleSoup::updateDataOnGPU() {
             GL_FLOAT,
             GL_FALSE,
             sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture))
+            reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture)) // NOLINT
         );
     }
     // Normals at location 2
@@ -145,7 +145,7 @@ bool TriangleSoup::updateDataOnGPU() {
             GL_FLOAT,
             GL_FALSE,
             sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+            reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))  // NOLINT
         );
     }
 

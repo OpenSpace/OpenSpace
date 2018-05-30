@@ -60,7 +60,7 @@ protected:
 
 private:
     bool _needsUpdate = true;
-    double _cachedTime;
+    double _cachedTime = -std::numeric_limits<double>::max();
     glm::dmat3 _cachedMatrix;
 };
 

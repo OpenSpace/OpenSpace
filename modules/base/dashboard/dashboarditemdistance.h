@@ -43,7 +43,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemDistance : public DashboardItem {
 public:
-    DashboardItemDistance(ghoul::Dictionary dictionary);
+    DashboardItemDistance(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemDistance() = default;
 
     void render(glm::vec2& penPosition) override;

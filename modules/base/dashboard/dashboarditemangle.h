@@ -42,7 +42,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemAngle : public DashboardItem {
 public:
-    DashboardItemAngle(ghoul::Dictionary dictionary);
+    DashboardItemAngle(const ghoul::Dictionary& dictionary);
     virtual ~DashboardItemAngle() = default;
 
     void render(glm::vec2& penPosition) override;
@@ -64,7 +64,7 @@ private:
         SceneGraphNode* node;
     };
 
-    std::pair<glm::dvec3, std::string> positionAndLabel(Component& mainComp) const;
+    std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp) const;
 
     Component _source;
     Component _reference;

@@ -95,7 +95,7 @@ private:
         createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 
-    GLuint _fbo;
+    GLuint _fbo = 0;
 
     cache::MemoryAwareTileCache* _tileCache;
 };

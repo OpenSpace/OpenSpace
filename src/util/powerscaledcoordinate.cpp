@@ -121,37 +121,33 @@ glm::vec3 PowerScaledCoordinate::direction() const
 
 PowerScaledCoordinate& PowerScaledCoordinate::operator=(const PowerScaledCoordinate& rhs)
 {
-    if (this != &rhs)
+    if (this != &rhs) {
         _vec = rhs._vec;
+    }
     return *this;  // Return a reference to myself.
 }
 
-PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::vec4& rhs)
-{
+PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::vec4& rhs) {
     _vec = rhs;
     return *this;  // Return a reference to myself.
 }
 
-PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::vec3& rhs)
-{
+PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::vec3& rhs) {
     _vec = glm::vec4(rhs[0], rhs[1], rhs[2], 0.0);
     return *this;  // Return a reference to myself.
 }
 
-PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::dvec4& rhs)
-{
+PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::dvec4& rhs) {
     _vec = glm::vec4(rhs);
     return *this;  // Return a reference to myself.
 }
 
-PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::dvec3& rhs)
-{
+PowerScaledCoordinate& PowerScaledCoordinate::operator=(const glm::dvec3& rhs) {
     _vec = glm::vec4(rhs[0], rhs[1], rhs[2], 0.0);
     return *this;  // Return a reference to myself.
 }
 
-PowerScaledCoordinate& PowerScaledCoordinate::operator=(PowerScaledCoordinate&& rhs)
-{
+PowerScaledCoordinate& PowerScaledCoordinate::operator=(PowerScaledCoordinate&& rhs) {
     _vec = std::move(rhs._vec);
     return *this;
 }

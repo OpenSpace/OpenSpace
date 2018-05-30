@@ -42,7 +42,7 @@ bool MultiModelGeometry::loadModel(const std::string& filename) {
 
     _vertices.reserve(vertices.size());
     for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
-        Vertex vv;
+        Vertex vv {};
         memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
         vv.location[3] = 1.0;
         //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);

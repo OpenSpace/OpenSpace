@@ -27,7 +27,7 @@
 namespace openspace::globebrowsing::cache {
 
 TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
-    : _initData(initData)
+    : _initData(std::move(initData))
     , _numTextures(numTextures)
 {
     reset();

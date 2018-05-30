@@ -96,7 +96,7 @@ private:
     GLuint _vertexBufferID = 0;
     GLuint _elementBufferID = 0;
 
-    bool _gpuDataNeedUpdate;
+    bool _gpuDataNeedUpdate = false;
 };
 
 } // namespace openspace::globebrowsing

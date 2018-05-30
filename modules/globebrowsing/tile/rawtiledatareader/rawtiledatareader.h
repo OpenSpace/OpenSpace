@@ -97,7 +97,7 @@ protected:
      * \param worstError should be set to the error code returned when reading the data.
      */
     void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const;
+        IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const;
 
     /**
      * The default does not affect the IODescription but this function can be used for
@@ -141,14 +141,14 @@ protected:
      * A recursive function that is able to perform wrapping in case the read region of
      * the given IODescription is outside of the given write region.
      */
-    RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& io,
-        char* dst, int depth = 0) const;
+    RawTile::ReadError repeatedRasterRead(int rasterBand, const IODescription& fullIO,
+        char* dataDestination, int depth = 0) const;
 
-    std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> result,
+    std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> rawTile,
         const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
     RawTile::ReadError postProcessErrorCheck(
-        std::shared_ptr<const RawTile> ioResult) const;
+        std::shared_ptr<const RawTile> rawTile) const;
 
     struct Cached {
         int _maxLevel = -1;
@@ -156,7 +156,7 @@ protected:
     } _cached;
     const TileTextureInitData _initData;
     PerformPreprocessing _preprocess;
-    TileDepthTransform _depthTransform;
+    TileDepthTransform _depthTransform = { 0.f, 0.f };
 };
 
 } // namespace openspace::globebrowsing

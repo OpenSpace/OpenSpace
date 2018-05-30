@@ -46,7 +46,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    bool _downloadImage;
+    bool _downloadImage = false;
     bool _textureIsDirty;
     std::future<DownloadManager::MemoryFile> _imageFuture;
     properties::StringProperty _texturePath;
@@ -54,7 +54,8 @@ protected:
 private:
     void bindTexture() override;
 
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
+        const std::string& url);
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 };

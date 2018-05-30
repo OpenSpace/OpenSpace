@@ -43,7 +43,7 @@
 #include <imgui_internal.h>
 
 namespace {
-    static const ImVec2 Size = ImVec2(350, 500);
+    const ImVec2 Size = ImVec2(350, 500);
 
     void showTooltip(const std::string& message, double delay) {
         // Hackish way to enfore a window size for TextWrapped (SetNextWindowSize did not
@@ -118,7 +118,7 @@ void GuiSpaceTimeComponent::render() {
 
     SceneGraphNode* currentFocus = OsEng.navigationHandler().focusNode();
 
-    std::string nodeNames = "";
+    std::string nodeNames;
     for (SceneGraphNode* n : nodes) {
         nodeNames += n->identifier() + '\0';
     }

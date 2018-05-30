@@ -43,21 +43,21 @@
 // _endTime. This buffer is updated every frame.
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo StartTimeInfo = {
+    const openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start Time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx."
     };
 
-    static const openspace::properties::Property::PropertyInfo EndTimeInfo = {
+    const openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End Time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx."
     };
 
-    static const openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
+    const openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
         "SampleInterval",
         "Sample Interval",
         "The interval between samples of the trajectory. This value (together with "
@@ -66,7 +66,7 @@ namespace {
         "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments."
     };
 
-    static const openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
+    const openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
         "TimeStampSubsampleFactor",
         "Time Stamp Subsampling Factor",
         "The factor that is used to create subsamples along the trajectory. This value "
@@ -75,7 +75,7 @@ namespace {
         "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments."
     };
 
-    static const openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
+    const openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render Full Trail",
         "If this value is set to 'true', the entire trail will be rendered; if it is "

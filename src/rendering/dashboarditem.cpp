@@ -32,25 +32,25 @@
 namespace {
     constexpr const char* KeyType = "Type";
 
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
     };
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo IdentifierInfo = {
+    const openspace::properties::Property::PropertyInfo IdentifierInfo = {
         "Identifier",
         "Identifier",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo GuiNameInfo = {
+    const openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
         ""
@@ -95,7 +95,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 
     const std::string& dashboardType = dictionary.value<std::string>(KeyType);
 
-    return factory->create(dashboardType, dictionary);
+    return factory->create(dashboardType, std::move(dictionary));
 }
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)

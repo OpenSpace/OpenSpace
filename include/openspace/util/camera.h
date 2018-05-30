@@ -165,7 +165,7 @@ private:
     SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
     SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
     SyncData<glm::vec2> _scaling = glm::vec2(1.f, 0.f);
-    SceneGraphNode* _parent;
+    SceneGraphNode* _parent = nullptr;
 
 
     // _focusPosition to be removed

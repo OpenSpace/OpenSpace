@@ -102,14 +102,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
     : _showMessage(showMessage)
     , _showNodeNames(showNodeNames)
     , _showProgressbar(showProgressbar)
-    , _iProgress(0)
-    , _nItems(0)
-    , _loadingFont(nullptr)
-    , _messageFont(nullptr)
-    , _itemFont(nullptr)
-    , _logo{ 0, 0 }
-    , _progressbar{ 0, 0, 0, 0 }
-    , _hasCatastrophicErrorOccurred(false)
     , _randomEngine(_randomDevice())
 {
     _program = ghoul::opengl::ProgramObject::Build(

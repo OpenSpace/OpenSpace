@@ -92,7 +92,8 @@ public:
     bool charCallback(unsigned int character, KeyModifier modifier);
 
     void startFrame(float deltaTime, const glm::vec2& windowSize,
-        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
+        const glm::vec2& dpiScaling, const glm::vec2& mousePos,
+        uint32_t mouseButtonsPressed);
     void endFrame();
 
     void render() override;

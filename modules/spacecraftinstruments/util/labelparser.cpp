@@ -144,7 +144,7 @@ bool LabelParser::create() {
     using Sort = ghoul::filesystem::Directory::Sort;
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
     for (std::string path : sequencePaths) {
-        size_t position = path.find_last_of(".") + 1;
+        size_t position = path.find_last_of('.') + 1;
         if (position == 0 || position == std::string::npos) {
             continue;
         }
@@ -178,7 +178,7 @@ bool LabelParser::create() {
             line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
             line.erase(std::remove(line.begin(), line.end(), '\r'), line.end() );
 
-            std::string read = line.substr(0, line.find_first_of("="));
+            std::string read = line.substr(0, line.find_first_of('='));
 
             _detectorType = "CAMERA"; //default value
 
@@ -202,7 +202,7 @@ bool LabelParser::create() {
             }
 
             if (read == "START_TIME") {
-                std::string start = line.substr(line.find("=") + 1);
+                std::string start = line.substr(line.find('=') + 1);
                 start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
                 startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                 count++;
@@ -212,9 +212,9 @@ bool LabelParser::create() {
                 line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                 line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
-                read = line.substr(0, line.find_first_of("="));
+                read = line.substr(0, line.find_first_of('='));
                 if (read == "STOP_TIME"){
-                    std::string stop = line.substr(line.find("=") + 1);
+                    std::string stop = line.substr(line.find('=') + 1);
                     stop.erase(
                         std::remove_if(
                             stop.begin(),
@@ -292,7 +292,7 @@ bool LabelParser::create() {
     for (const Image& image : tmp) {
         if (previousTarget != image.target) {
             previousTarget = image.target;
-            _targetTimes.push_back({ image.timeRange.start , image.target });
+            _targetTimes.emplace_back(image.timeRange.start , image.target);
             std::sort(
                 _targetTimes.begin(),
                 _targetTimes.end(),
@@ -306,7 +306,7 @@ bool LabelParser::create() {
     }
 
     for (const std::pair<const std::string, ImageSubset>& target : _subsetMap) {
-        _instrumentTimes.push_back({ lblName, _subsetMap[target.first]._range });
+        _instrumentTimes.emplace_back(lblName, _subsetMap[target.first]._range);
     }
     sendPlaybookInformation(PlaybookIdentifierName);
     return true;

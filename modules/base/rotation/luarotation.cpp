@@ -35,7 +35,7 @@
 #include <chrono>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo ScriptInfo = {
+    const openspace::properties::Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -44,7 +44,8 @@ namespace {
         "epoch as the first argument, the current wall time as milliseconds past the "
         "J2000 epoch as the second argument and computes the rotation returned as 9 "
         "values."
-    };} // namespace
+    };
+} // namespace
 
 namespace openspace {
 

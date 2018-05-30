@@ -47,11 +47,11 @@ class RawTileDataReader;
 class AsyncTileDataProvider {
 public:
     /**
-     * \param textureDataProvider is the reader that will be used for the asynchronos
+     * \param rawTileDataReader is the reader that will be used for the asynchronous
      * tile loading.
      */
-    AsyncTileDataProvider(const std::string& name,
-        std::shared_ptr<RawTileDataReader> textureDataProvider);
+    AsyncTileDataProvider(std::string name,
+        std::shared_ptr<RawTileDataReader> rawTileDataReader);
 
     ~AsyncTileDataProvider();
 

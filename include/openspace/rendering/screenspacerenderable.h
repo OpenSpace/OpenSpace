@@ -121,7 +121,7 @@ protected:
     UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    bool _useEuclideanCoordinates;
+    bool _useEuclideanCoordinates = true;
     glm::vec2 _originalViewportSize;
 
     float _radius;

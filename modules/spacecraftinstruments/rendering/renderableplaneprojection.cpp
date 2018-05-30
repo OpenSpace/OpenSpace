@@ -151,8 +151,9 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     const double timePast = std::abs(img.timeRange.start - _previousTime);
 
-    if (_moving || _planeIsDirty)
+    if (_moving || _planeIsDirty) {
         updatePlane(img, time);
+    }
 
     else if (timePast > DBL_EPSILON) {
         _previousTime = img.timeRange.start;
@@ -294,7 +295,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         reinterpret_cast<void*>(sizeof(GLfloat) * 4)
     );
 
-    if (!_moving && img.path != "") {
+    if (!_moving && !img.path.empty()) {
         _texturePath = img.path;
         loadTexture();
     }

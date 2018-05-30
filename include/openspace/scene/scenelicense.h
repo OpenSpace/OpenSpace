@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; }
 
 struct SceneLicense {
     // module must not be empty
-    SceneLicense(const ghoul::Dictionary& dictionary, std::string module);
+    SceneLicense(const ghoul::Dictionary& dictionary, std::string m);
 
     std::string module;
 

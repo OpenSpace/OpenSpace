@@ -40,8 +40,8 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <array>
+#include <cstdint>
 #include <fstream>
-#include <stdint.h>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableStars";
@@ -80,42 +80,42 @@ namespace {
         float speed;
     };
 
-    static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
+    const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
         "Point Spread Function Texture",
         "The path to the texture that should be used as a point spread function for the "
         "stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "
         "to its color. The texture is used as a one dimensional lookup function."
     };
 
-    static const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
+    const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
         "stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all stars."
     };
 
-    static const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each star."
     };
 
-    static const openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
+    const openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
         "MinBillboardSize",
         "Min Billboard Size",
         "This value is used as a lower limit on the size of stars that are rendered. Any "
@@ -282,7 +282,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_minBillboardSize);
 }
 
-RenderableStars::~RenderableStars() {}
+RenderableStars::~RenderableStars() {} // NOLINT
 
 bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
@@ -349,7 +349,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::vec2(OsEng.renderEngine().renderingResolution())
     );
 
-    setPscUniforms(*_program.get(), data.camera, data.position);
+    setPscUniforms(*_program, data.camera, data.position);
     _program->setUniform(_uniformCache.scaling, scaling);
 
     ghoul::opengl::TextureUnit psfUnit;
@@ -423,7 +423,7 @@ void RenderableStars::update(const UpdateData&) {
                 GL_FLOAT,
                 GL_FALSE,
                 stride,
-                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
+                reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor)) // NOLINT
             );
 
             break;
@@ -443,7 +443,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor))
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, bvColor)) //NOLINT
                 );
 
                 GLint velocityAttrib = _program->attributeLocation("in_velocity");
@@ -454,7 +454,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_TRUE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
+                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx)) // NOLINT
                 );
 
                 break;
@@ -475,7 +475,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor))
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, bvColor)) // NOLINT
                 );
 
                 GLint speedAttrib = _program->attributeLocation("in_speed");
@@ -486,7 +486,7 @@ void RenderableStars::update(const UpdateData&) {
                     GL_FLOAT,
                     GL_TRUE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed))
+                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed)) // NOLINT
                 );
             }
         }
@@ -500,7 +500,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_pointSpreadFunctionTextureIsDirty) {
         LDEBUG("Reloading Point Spread Function texture");
         _pointSpreadFunctionTexture = nullptr;
-        if (_pointSpreadFunctionTexturePath.value() != "") {
+        if (!_pointSpreadFunctionTexturePath.value().empty()) {
             _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_pointSpreadFunctionTexturePath)
             );
@@ -531,7 +531,7 @@ void RenderableStars::update(const UpdateData&) {
     if (_colorTextureIsDirty) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
-        if (_colorTexturePath.value() != "") {
+        if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_colorTexturePath)
             );
@@ -623,7 +623,7 @@ bool RenderableStars::readSpeckFile() {
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
-    std::string line = "";
+    std::string line;
     while (true) {
         std::streampos position = file.tellg();
         std::getline(file, line);
@@ -668,14 +668,13 @@ bool RenderableStars::readSpeckFile() {
         for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
         }
-        bool nullArray = true;
-        for (size_t i = 0; i < values.size(); ++i) {
-            if (values[i] != 0.0) {
-                nullArray = false;
-                break;
-            }
-        }
-        if (!nullArray) {
+
+        bool hasValues = std::any_of(
+            values.begin(),
+            values.end(),
+            [](float f) { return f != 0.f; }
+        );
+        if (hasValues) {
             _fullData.insert(_fullData.end(), values.begin(), values.end());
         }
     } while (!file.eof());

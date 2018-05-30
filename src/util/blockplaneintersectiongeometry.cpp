@@ -153,8 +153,9 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 }
 
 bool BlockPlaneIntersectionGeometry::initialize() {
-    if (_vaoId == 0)
+    if (_vaoId == 0) {
         glGenVertexArrays(1, &_vaoId);
+    }
 
     if (_vBufferId == 0) {
         glGenBuffers(1, &_vBufferId);

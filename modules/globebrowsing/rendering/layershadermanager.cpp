@@ -156,7 +156,7 @@ ghoul::opengl::ProgramObject* LayerShaderManager::programObject() const {
 void LayerShaderManager::recompileShaderProgram(
                                            LayerShaderPreprocessingData preprocessingData)
 {
-    _preprocessingData = preprocessingData;
+    _preprocessingData = std::move(preprocessingData);
     ghoul::Dictionary shaderDictionary;
 
     // Different layer types can be height layers or color layers for example.

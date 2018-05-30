@@ -54,21 +54,21 @@ namespace {
 
     constexpr const double Epsilon = 1e-4;
 
-    static const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    const openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value determines width of the lines connecting the instrument to the "
         "corners of the field of view."
     };
 
-    static const openspace::properties::Property::PropertyInfo DrawSolidInfo = {
+    const openspace::properties::Property::PropertyInfo DrawSolidInfo = {
         "SolidDraw",
         "Solid Draw",
         "This value determines whether the field of view should be rendered as a solid "
         "or as lines only."
     };
 
-    static const openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
+    const openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
         "Standoff Distance Factor",
         "This value determines the standoff distance factor which influences the "
@@ -78,7 +78,7 @@ namespace {
         "making it more visible."
     };
 
-    static const openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
+    const openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
         "Colors.DefaultStart",
         "Start of default color",
         "This value determines the color of the field of view frustum close to the "
@@ -86,7 +86,7 @@ namespace {
         "color."
     };
 
-    static const openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
+    const openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
         "Colors.DefaultEnd",
         "End of default color",
         "This value determines the color of the field of view frustum close to the "
@@ -94,21 +94,21 @@ namespace {
         "color."
     };
 
-    static const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
+    const openspace::properties::Property::PropertyInfo ActiveColorInfo = {
         "Colors.Active",
         "Active Color",
         "This value determines the color that is used when the instrument's field of "
         "view is active."
     };
 
-    static const openspace::properties::Property::PropertyInfo TargetInFovInfo = {
+    const openspace::properties::Property::PropertyInfo TargetInFovInfo = {
         "Colors.TargetInFieldOfView",
         "Target in field-of-view Color",
         "This value determines the color that is used if the target is inside the field "
         "of view of the instrument but the instrument is not yet active."
     };
 
-    static const openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
+    const openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
         "Colors.IntersectionStart",
         "Start of the intersection",
         "This value determines the color that is used close to the instrument if one of "
@@ -116,7 +116,7 @@ namespace {
         "retrieved by interpolating between this color and the intersection end color."
     };
 
-    static const openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
+    const openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
         "Colors.IntersectionEnd",
         "End of the intersection",
         "This value determines the color that is used close to the target if one of the "
@@ -124,7 +124,7 @@ namespace {
         "retrieved by interpolating between this color and the intersection begin color."
     };
 
-    static const openspace::properties::Property::PropertyInfo SquareColorInfo = {
+    const openspace::properties::Property::PropertyInfo SquareColorInfo = {
         "Colors.Square",
         "Orthogonal Square",
         "This value determines the color that is used for the field of view square in "

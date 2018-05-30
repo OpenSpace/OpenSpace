@@ -35,11 +35,7 @@ SyncBuffer::SyncBuffer(size_t n)
     _dataStream.resize(_n);
 }
 
-SyncBuffer::~SyncBuffer() {
-    // The destructor is defined here, so that the otherwise default inlined destructor is
-    // not created (which would make it impossible to use a forward declaration with
-    // unique_ptr
-}
+SyncBuffer::~SyncBuffer() {} // NOLINT
 
 void SyncBuffer::encode(const std::string& s) {
     ghoul_assert(_encodeOffset + sizeof(char) * s.size() + sizeof(int32_t) < _n, "");

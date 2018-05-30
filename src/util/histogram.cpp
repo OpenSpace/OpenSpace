@@ -47,9 +47,7 @@ Histogram::Histogram(float minValue, float maxValue, int numBins, float* data)
 }
 
 Histogram::~Histogram() {
-    if (_data) {
-        delete[] _data;
-    }
+    delete[] _data;
 }
 
 int Histogram::numBins() const {

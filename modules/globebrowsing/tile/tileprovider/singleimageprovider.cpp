@@ -32,7 +32,7 @@
 namespace {
     constexpr const char* KeyFilePath = "FilePath";
 
-    static const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    const openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "The file path that is used for this image provider. The file must point to an "

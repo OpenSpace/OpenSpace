@@ -169,9 +169,9 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
 
 SpiceManager::SpiceManager() {
     // Set the SPICE library to not exit the program if an error occurs
-    erract_c("SET", 0, const_cast<char*>("REPORT"));
+    erract_c("SET", 0, const_cast<char*>("REPORT")); // NOLINT
     // But we do not want SPICE to print the errors, we will fetch them ourselves
-    errprt_c("SET", 0, const_cast<char*>("NONE"));
+    errprt_c("SET", 0, const_cast<char*>("NONE")); // NOLINT
 }
 
 SpiceManager::~SpiceManager() {
@@ -180,8 +180,8 @@ SpiceManager::~SpiceManager() {
     }
 
     // Set values back to default
-    erract_c("SET", 0, const_cast<char*>("DEFAULT"));
-    errprt_c("SET", 0, const_cast<char*>("DEFAULT"));
+    erract_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
+    errprt_c("SET", 0, const_cast<char*>("DEFAULT")); // NOLINT
 }
 
 SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
@@ -198,7 +198,7 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         )
     );
 
-    std::string path = absPath(filePath);
+    std::string path = absPath(std::move(filePath));
     const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
@@ -282,7 +282,7 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
 void SpiceManager::unloadKernel(std::string filePath) {
     ghoul_assert(!filePath.empty(), "Empty filename");
 
-    std::string path = absPath(filePath);
+    std::string path = absPath(std::move(filePath));
 
     const auto it = std::find_if(
         _loadedKernels.begin(),
@@ -726,39 +726,39 @@ SpiceManager::TargetStateResult SpiceManager::targetState(const std::string& tar
 }
 
 SpiceManager::TransformMatrix SpiceManager::stateTransformMatrix(
-                                                             const std::string& fromFrame,
-                                                               const std::string& toFrame,
+                                                           const std::string& sourceFrame,
+                                                      const std::string& destinationFrame,
                                                                double ephemerisTime) const
 {
-    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
-    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
+    ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
+    ghoul_assert(!destinationFrame.empty(), "toFrame must not be empty");
 
     TransformMatrix m;
     sxform_c(
-        fromFrame.c_str(),
-        toFrame.c_str(),
+        sourceFrame.c_str(),
+        destinationFrame.c_str(),
         ephemerisTime,
         reinterpret_cast<double(*)[6]>(m.data())
     );
     throwOnSpiceError(fmt::format(
         "Error retrieved state transform matrix from frame '{}' to frame '{}' at time "
         "'{}'",
-        fromFrame, toFrame, ephemerisTime
+        sourceFrame, destinationFrame, ephemerisTime
     ));
     return m;
 }
 
-glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
-                                                 const std::string& toFrame,
+glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
+                                                 const std::string& destinationFrame,
                                                  double ephemerisTime) const
 {
-    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
-    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
+    ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
+    ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
     glm::dmat3 result;
     pxform_c(
-        fromFrame.c_str(),
-        toFrame.c_str(),
+        sourceFrame.c_str(),
+        destinationFrame.c_str(),
         ephemerisTime,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
     );
@@ -767,25 +767,29 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     SpiceBoolean success = !(failed_c());
     reset_c();
     if (!success) {
-        result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
+        result = getEstimatedTransformMatrix(
+            sourceFrame,
+            destinationFrame,
+            ephemerisTime
+        );
     }
 
     return glm::transpose(result);
 }
 
-glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
-                                                 const std::string& toFrame,
+glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
+                                                 const std::string& destinationFrame,
                                                  double ephemerisTimeFrom,
                                                  double ephemerisTimeTo) const
 {
-    ghoul_assert(!fromFrame.empty(), "fromFrame must not be empty");
-    ghoul_assert(!toFrame.empty(), "toFrame must not be empty");
+    ghoul_assert(!sourceFrame.empty(), "sourceFrame must not be empty");
+    ghoul_assert(!destinationFrame.empty(), "destinationFrame must not be empty");
 
     glm::dmat3 result;
 
     pxfrm2_c(
-        fromFrame.c_str(),
-        toFrame.c_str(),
+        sourceFrame.c_str(),
+        destinationFrame.c_str(),
         ephemerisTimeFrom,
         ephemerisTimeTo,
         reinterpret_cast<double(*)[3]>(glm::value_ptr(result))
@@ -793,7 +797,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     throwOnSpiceError(fmt::format(
         "Error retrieving position transform matrix from '{}' at time '{}' to frame '{}' "
         "at time '{}'",
-        fromFrame, ephemerisTimeFrom, toFrame, ephemerisTimeTo
+        sourceFrame, ephemerisTimeFrom, destinationFrame, ephemerisTimeTo
     ));
     return glm::transpose(result);
 }
@@ -898,7 +902,7 @@ bool SpiceManager::addFrame(std::string body, std::string frame) {
         return false;
     }
     else {
-        _frameByBody.push_back(std::make_pair(body, frame));
+        _frameByBody.emplace_back(body, frame);
         return true;
     }
 }
@@ -942,7 +946,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     throwOnSpiceError("Error finding Ck Coverage");
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i);
+        const SpiceInt frame = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -992,7 +996,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     throwOnSpiceError("Error finding Spk ID for coverage");
 
     for (SpiceInt i = 0; i < card_c(&ids); ++i) {
-        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i);
+        const SpiceInt obj = SPICE_CELL_ELEM_I(&ids, i); // NOLINT
 
 #if defined __clang__
 #pragma clang diagnostic pop
