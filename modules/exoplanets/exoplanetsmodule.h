@@ -27,7 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/scripting/scriptengine.h>
 
 namespace openspace {
 
