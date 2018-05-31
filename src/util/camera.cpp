@@ -92,6 +92,24 @@ const glm::dvec3& Camera::positionVec3() const {
     return _position;
 }
 
+glm::dvec3 Camera::eyePositionVec3() const {
+    glm::dvec4 eyeInEyeSpace(0.0, 0.0, 0.0, 1.0);
+
+    glm::dmat4 invViewMatrix = glm::inverse(sgctInternal.viewMatrix());
+    glm::dmat4 invRotationMatrix = glm::mat4_cast(static_cast<glm::dquat>(_rotation));
+    glm::dmat4 invTranslationMatrix = glm::translate(
+        glm::dmat4(1.0),
+        static_cast<glm::dvec3>(_position)
+    );
+
+    glm::dmat4 invViewScale = glm::inverse(viewScaleMatrix());
+
+    glm::dvec4 eyeInWorldSpace = invTranslationMatrix * invRotationMatrix *
+        invViewScale * invViewMatrix * eyeInEyeSpace;
+
+    return glm::dvec3(eyeInWorldSpace.x, eyeInWorldSpace.y, eyeInWorldSpace.z);
+}
+
 const glm::dvec3& Camera::unsynchedPositionVec3() const {
     return _position;
 }
@@ -120,29 +138,9 @@ const glm::dvec3& Camera::lookUpVectorWorldSpace() const {
             static_cast<glm::dquat>(_rotation) * LookupVectorCameraSpace
         );
         _cachedLookupVector.isDirty = true;
-        _cachedViewRotationMatrix.isDirty = true;
-        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     return _cachedLookupVector.datum;
-}
-
-glm::dvec3 Camera::eyePositionVec3() const {
-    glm::dvec4 eyeInEyeSpace(0.0, 0.0, 0.0, 1.0);
-
-    glm::dmat4 invViewMatrix = glm::inverse(sgctInternal.viewMatrix());
-    glm::dmat4 invRotationMatrix =  glm::mat4_cast(static_cast<glm::dquat>(_rotation));
-    glm::dmat4 invTranslationMatrix = glm::translate(
-        glm::dmat4(1.0),
-        static_cast<glm::dvec3>(_position)
-    );
-
-    glm::dmat4 invViewScale = glm::inverse(viewScaleMatrix());
-
-    glm::dvec4 eyeInWorldSpace = invTranslationMatrix * invRotationMatrix *
-                                 invViewScale * invViewMatrix * eyeInEyeSpace;
-
-    return glm::dvec3(eyeInWorldSpace.x, eyeInWorldSpace.y, eyeInWorldSpace.z);
 }
 
 float Camera::maxFov() const {
@@ -157,19 +155,12 @@ float Camera::sinMaxFov() const {
     return _cachedSinMaxFov.datum;
 }
 
-float Camera::scaling() const {
-    return _scaling;
-}
-
-const glm::dmat4& Camera::viewScaleMatrix() const {
-    if (_cachedViewScaleMatrix.isDirty) {
-        _cachedViewScaleMatrix.datum = glm::scale(glm::mat4(1.f), glm::vec3(_scaling));
-    }
-    return _cachedViewScaleMatrix.datum;
-}
-
 SceneGraphNode* Camera::parent() const {
     return _parent;
+}
+
+float Camera::scaling() const {
+    return _scaling;
 }
 
 const glm::dmat4& Camera::viewRotationMatrix() const {
@@ -179,6 +170,13 @@ const glm::dmat4& Camera::viewRotationMatrix() const {
         );
     }
     return _cachedViewRotationMatrix.datum;
+}
+
+const glm::dmat4& Camera::viewScaleMatrix() const {
+    if (_cachedViewScaleMatrix.isDirty) {
+        _cachedViewScaleMatrix.datum = glm::scale(glm::mat4(1.f), glm::vec3(_scaling));
+    }
+    return _cachedViewScaleMatrix.datum;
 }
 
 const glm::dquat& Camera::rotationQuaternion() const {
@@ -192,6 +190,7 @@ const glm::dmat4& Camera::combinedViewMatrix() const {
         );
         _cachedCombinedViewMatrix.datum =
             glm::dmat4(sgctInternal.viewMatrix()) *
+            glm::dmat4(viewScaleMatrix()) *
             glm::dmat4(viewRotationMatrix()) *
             cameraTranslation;
         _cachedCombinedViewMatrix.isDirty = true;
