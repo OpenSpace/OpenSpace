@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { toggleActivated } from '../../../api/Actions/dataLoaderActions';
-
 import TabMenuItem from '../../common/TabMenu/TabMenuItem';
 import Label from '../../common/Label/Label';
 
@@ -32,15 +31,9 @@ const mapStateToProps = state => ({
   activated: state.dataLoader.activated
 });
 
-const mapDispatchToProps = dispatch => ({
-  toggleActivated: (activated) => {
-    dispatch(toggleActivated(activated));
-  }
-});
-
 ToggleDataLoader = connect(
   mapStateToProps,
-  mapDispatchToProps
+  null
 )(ToggleDataLoader);
 
 export default ToggleDataLoader;

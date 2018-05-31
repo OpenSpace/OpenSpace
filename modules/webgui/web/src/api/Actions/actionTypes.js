@@ -30,5 +30,5 @@ export const actionTypes = {
   setClickablePoint: 'TRANSFERFUNCTION_TOGGLE_CLICKABLE_POINT',
 
   // action types for data loader
-  toggleDataLoaderActivated: 'DATA_LOADER_TOGGLE_ACTIVATED',
+  setDataLoaderActivated: 'DATA_LOADER_TOGGLE_ACTIVATED',
 };
