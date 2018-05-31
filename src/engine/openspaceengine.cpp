@@ -849,6 +849,16 @@ void OpenSpaceEngine::loadFonts() {
             ));
         }
     }
+
+    try {
+        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
+        if (!initSuccess) {
+            LERROR("Error initializing default font renderer");
+        }
+    }
+    catch (const ghoul::RuntimeError& err) {
+        LERRORC(err.component, err.message);
+    }
 }
 
 void OpenSpaceEngine::configureLogging(bool consoleLog) {
@@ -1084,16 +1094,6 @@ void OpenSpaceEngine::initializeGL() {
                 call.function->name() + arguments + returnValue
             );
         });
-    }
-
-    try {
-        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess) {
-            LERROR("Error initializing default font renderer");
-        }
-    }
-    catch (const ghoul::RuntimeError& err) {
-        LERRORC(err.component, err.message);
     }
 
     LDEBUG("Initializing Rendering Engine");

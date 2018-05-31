@@ -208,7 +208,6 @@ void LayerShaderManager::recompileShaderProgram(
         shaderDictionary.setValue(keyLayerAdjustmentType, 0);
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
-            std::string key = groupName + std::to_string(j) + "LayerAdjustmentType";
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "LayerAdjustmentType",
                 static_cast<int>(textureTypes[i].layerAdjustmentType[j])

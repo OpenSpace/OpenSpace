@@ -31,16 +31,16 @@ namespace openspace::globebrowsing {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-const Angle<T> Angle<T>::ZERO = Angle<T>(glm::radians(T(0)));
+const Angle<T> Angle<T>::ZERO = Angle<T>(T(0));
 
 template <typename T>
-const Angle<T> Angle<T>::QUARTER = Angle<T>(glm::radians(glm::half_pi<T>()));
+const Angle<T> Angle<T>::QUARTER = Angle<T>(glm::half_pi<T>());
 
 template <typename T>
-const Angle<T> Angle<T>::HALF = Angle<T>(glm::radians(glm::pi<T>()));
+const Angle<T> Angle<T>::HALF = Angle<T>(glm::pi<T>());
 
 template <typename T>
-const Angle<T> Angle<T>::FULL = Angle<T>(glm::radians(glm::two_pi<T>()));
+const Angle<T> Angle<T>::FULL = Angle<T>(glm::two_pi<T>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                 Constructors                                         //

@@ -104,7 +104,7 @@ void PointGlobe::initialize() {
 
     // Position at location 0
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 
     glBindVertexArray(0);
 }

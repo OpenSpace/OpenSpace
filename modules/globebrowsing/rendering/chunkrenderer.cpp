@@ -323,13 +323,13 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
 
         constexpr const float TileDelta = 1.f / 64.f;
         const glm::vec3 deltaTheta0 = modelViewTransformMat3 *
-                                      glm::vec3(corner10 - corner00) * TileDelta;
+                                      (glm::vec3(corner10 - corner00) * TileDelta);
         const glm::vec3 deltaTheta1 = modelViewTransformMat3 * 
-                                      glm::vec3(corner11 - corner01) * TileDelta;
+                                      (glm::vec3(corner11 - corner01) * TileDelta);
         const glm::vec3 deltaPhi0 = modelViewTransformMat3 * 
-                                    glm::vec3(corner01 - corner00) * TileDelta;
+                                    (glm::vec3(corner01 - corner00) * TileDelta);
         const glm::vec3 deltaPhi1 = modelViewTransformMat3 *
-                                    glm::vec3(corner11 - corner10) * TileDelta;
+                                    (glm::vec3(corner11 - corner10) * TileDelta);
 
         // Upload uniforms
         programObject.setUniform("deltaTheta0", glm::length(deltaTheta0));
@@ -365,8 +365,8 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
         const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
-        const         glm::dvec3 cameraPosition = glm::dvec3(
-            inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1)
+        const glm::dvec3 cameraPosition = glm::dvec3(
+            inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
         const float distanceScaleFactor = static_cast<float>(
             chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius()

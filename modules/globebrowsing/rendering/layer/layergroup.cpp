@@ -169,7 +169,7 @@ int LayerGroup::pileSize() const{
 }
 
 bool LayerGroup::layerBlendingEnabled() const {
-    return _levelBlendingEnabled.value();
+    return _levelBlendingEnabled;
 }
 
 void LayerGroup::onChange(std::function<void(void)> callback) {

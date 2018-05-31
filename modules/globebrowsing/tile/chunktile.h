@@ -33,12 +33,6 @@
 namespace openspace::globebrowsing {
 
 struct ChunkTile {
-    //ChunkTile() = default;
-    //ChunkTile(Tile t, TileUvTransform uv, TileDepthTransform depth);
-
-    //ChunkTile(ChunkTile&& rhs) = default;
-
-
     Tile tile = Tile::TileUnavailable;
     TileUvTransform uvTransform;
     TileDepthTransform depthTransform;
