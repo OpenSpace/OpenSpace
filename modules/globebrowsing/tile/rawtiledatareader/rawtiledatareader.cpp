@@ -501,8 +501,8 @@ TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
         tiledatatype::getMaximumValue(_initData.glType());
 
     return {
-        depthOffset(),
-        static_cast<float>(depthScale() * maximumValue)
+        static_cast<float>(depthScale() * maximumValue),
+        depthOffset()
     };
 }
 
