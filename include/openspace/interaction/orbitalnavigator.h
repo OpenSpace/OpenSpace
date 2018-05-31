@@ -89,14 +89,24 @@ private:
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
 
+    properties::BoolProperty _useAdaptiveStereoscopicDepth;
+    properties::FloatProperty _stereoscopicDepthOfFocusSurface;
+    properties::FloatProperty _staticViewScaleExponent;
+
+    properties::FloatProperty _rotateToFocusInterpolationTime;
+    properties::FloatProperty _stereoInterpolationTime;
+
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
+    double _currentCameraToSurfaceDistance;
+    bool _directlySetStereoDistance = false;
 
     Interpolator<double> _rotateToFocusNodeInterpolator;
+    Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
     /**
@@ -130,6 +140,11 @@ private:
      */
     glm::dquat interpolateLocalRotation(double deltaTime,
         const glm::dquat& localCameraRotation);
+
+
+    double interpolateCameraToSurfaceDistance(double deltaTime,
+                                              double currentDistance,
+                                              double targetDistance);
 
     /**
      * Translates the horizontal direction. If far from the focus object, this will
@@ -191,6 +206,14 @@ private:
         double interpolationTime, const glm::dquat& rotationDiff,
         const glm::dvec3& objectPosition, const glm::dvec3& cameraPosition,
         const SurfacePositionHandle& positionHandle);
+
+    /**
+     * Get the vector from the camera to the surface of the focus object in world space.
+     */
+    glm::dvec3 cameraToSurfaceVector(
+        const glm::dvec3& cameraPos,
+        const glm::dvec3& centerPos,
+        const SurfacePositionHandle& posHandle);
 
     /**
      * Calculates a SurfacePositionHandle given a camera position in world space.

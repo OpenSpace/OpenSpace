@@ -29,7 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr const uint32_t ProtocolVersion = 3;
+    constexpr const uint32_t ProtocolVersion = 4;
     constexpr const char* _loggerCat = "ParallelConnection";
 } // namespace
 

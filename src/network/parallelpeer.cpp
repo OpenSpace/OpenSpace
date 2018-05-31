@@ -543,6 +543,7 @@ void ParallelPeer::sendCameraKeyframe() {
     }
 
     kf._focusNode = focusNode->identifier();
+    kf._scale = OsEng.navigationHandler().camera()->scaling();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.windowWrapper().applicationTime();

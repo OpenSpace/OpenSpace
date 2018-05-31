@@ -212,7 +212,7 @@ void LoadingScreen::render() {
 
     const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     const glm::ivec2 res =
-        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+        glm::vec2(OsEng.windowWrapper().currentDrawBufferResolution()) / dpiScaling;
 
     float screenAspectRatio = static_cast<float>(res.x) / static_cast<float>(res.y);
 
@@ -382,7 +382,6 @@ void LoadingScreen::render() {
     //
     using FR = ghoul::fontrendering::FontRenderer;
     const FR& renderer = FR::defaultRenderer();
-
 
     const std::string headline =
         _hasCatastrophicErrorOccurred ?

@@ -296,10 +296,9 @@ glm::dvec3 KeplerTranslation::position(const Time& time) const {
     const double e = eccentricAnomaly(meanAnomaly);
 
     // Use the eccentric anomaly to compute the actual location
-    const double a = _semiMajorAxis / (1.0 - _eccentricity) * 1000.0;
     const glm::dvec3 p = {
-        a * (cos(e) - _eccentricity),
-        a * sqrt(1.0 - _eccentricity * _eccentricity) * sin(e),
+        _semiMajorAxis * 1000.0 * (cos(e) - _eccentricity),
+        _semiMajorAxis * 1000.0 * sin(e) * sqrt(1.0 - _eccentricity * _eccentricity),
         0.0
     };
     return _orbitPlaneRotation * p;

@@ -110,7 +110,7 @@ void main() {
     fs_normal = patchNormalModelSpace;
     positionCameraSpace = p;
 
-#if USE_ECLIPSE_SHADOWS
+    #if USE_ECLIPSE_SHADOWS
     positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
-#endif
+    #endif
 }

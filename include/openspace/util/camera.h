@@ -74,7 +74,7 @@ public:
     void setPositionVec3(glm::dvec3 pos);
     void setFocusPositionVec3(glm::dvec3 pos);
     void setRotation(glm::dquat rotation);
-    void setScaling(glm::vec2 scaling);
+    void setScaling(float scaling);
     void setMaxFov(float fov);
     void setParent(SceneGraphNode* parent);
 
@@ -84,17 +84,19 @@ public:
     // Accessors
     // Remove Vec3 from the name when psc is gone
     const glm::dvec3& positionVec3() const;
+    glm::dvec3 eyePositionVec3() const;
     const glm::dvec3& unsynchedPositionVec3() const;
     const glm::dvec3& focusPositionVec3() const;
     const glm::dvec3& viewDirectionWorldSpace() const;
     const glm::dvec3& lookUpVectorCameraSpace() const;
     const glm::dvec3& lookUpVectorWorldSpace() const;
-    const glm::vec2& scaling() const;
     const glm::dmat4& viewRotationMatrix() const;
+    const glm::dmat4& viewScaleMatrix() const;
     const glm::dquat& rotationQuaternion() const;
     float maxFov() const;
     float sinMaxFov() const;
     SceneGraphNode* parent() const;
+    float scaling() const;
 
     // @TODO this should simply be called viewMatrix!
     // Or it needs to be changed so that it actually is combined. Right now it is
@@ -147,6 +149,7 @@ public:
     psc unsynchedPosition() const;
     // [[deprecated("Replaced by Camera::focusPositionVec3()")]]
     psc focusPosition() const;
+    const glm::mat4& sceneMatrix() const;
     // @TODO use Camera::SgctInternal interface instead
     // [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
     const glm::mat4& viewMatrix() const;
@@ -164,9 +167,8 @@ private:
 
     SyncData<glm::dvec3> _position = glm::dvec3(1.0, 1.0, 1.0);
     SyncData<glm::dquat> _rotation  = glm::dquat(glm::dvec3(1.0, 1.0, 1.0));
-    SyncData<glm::vec2> _scaling = glm::vec2(1.f, 0.f);
+    SyncData<float> _scaling = 1.f;
     SceneGraphNode* _parent = nullptr;
-
 
     // _focusPosition to be removed
     glm::dvec3 _focusPosition;
@@ -176,6 +178,7 @@ private:
     mutable Cached<glm::dvec3> _cachedViewDirection;
     mutable Cached<glm::dvec3> _cachedLookupVector;
     mutable Cached<glm::dmat4> _cachedViewRotationMatrix;
+    mutable Cached<glm::dmat4> _cachedViewScaleMatrix;
     mutable Cached<glm::dmat4> _cachedCombinedViewMatrix;
     mutable Cached<float> _cachedSinMaxFov;
 

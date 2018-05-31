@@ -34,6 +34,8 @@
 namespace {
     constexpr const char* _loggerCat = "TimeTopic";
     constexpr const char* PropertyKey = "property";
+    constexpr const char* EventKey = "event";
+    constexpr const char* UnsubscribeEvent = "stop_subscription";
     constexpr const char* CurrentTimeKey = "currentTime";
     constexpr const char* DeltaTimeKey = "deltaTime";
     constexpr const std::chrono::milliseconds TimeUpdateInterval(100);
@@ -59,11 +61,17 @@ TimeTopic::~TimeTopic() {
 }
 
 bool TimeTopic::isDone() const {
-    return false;
+    return _isDone;
 }
 
 void TimeTopic::handleJson(const nlohmann::json& json) {
-    const std::string& requestedKey = json.at(PropertyKey).get<std::string>();
+    std::string event = json.at(EventKey).get<std::string>();
+    if (event == UnsubscribeEvent) {
+        _isDone = true;
+        return;
+    }
+
+    std::string requestedKey = json.at(PropertyKey).get<std::string>();
     LDEBUG("Subscribing to " + requestedKey);
 
     if (requestedKey == CurrentTimeKey) {
@@ -90,6 +98,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     }
     else {
         LWARNING("Cannot get " + requestedKey);
+        _isDone = true;
     }
 }
 

@@ -83,9 +83,8 @@ private:
         GLuint textureHeight);
     void loadPolygonGeometryForRendering();
     void renderPolygonGeometry(GLuint vao);
-    void renderBillboards(const RenderData& data, const glm::dmat4& modelViewMatrix,
-        const glm::dmat4& worldToModelTransform, const glm::dvec3& orthoRight,
-        const glm::dvec3& orthoUp, float fadeInVariable);
+    void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
+        const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
@@ -122,11 +121,14 @@ private:
     properties::FloatProperty _textMaxSize;
     properties::BoolProperty _drawElements;
     properties::BoolProperty _drawLabels;
+    properties::BoolProperty _pixelSizeControl;
     properties::OptionProperty _colorOption;
     properties::Vec2Property _fadeInDistance;
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _billboardMaxSize;
     properties::FloatProperty _billboardMinSize;
+    properties::FloatProperty _correctionSizeEndDistance;
+    properties::FloatProperty _correctionSizeFactor;
 
     // DEBUG:
     properties::OptionProperty _renderOption;
@@ -138,10 +140,12 @@ private:
     ghoul::opengl::ProgramObject* _program = nullptr;
     ghoul::opengl::ProgramObject* _renderToPolygonProgram = nullptr;
 
-    UniformCache(modelViewProjection, cameraPos, cameraLookup,
-        renderOption, centerSceenInWorldPos, minBillboardSize, maxBillboardSize,
-        color, sides, alphaValue, scaleFactor, up, right, fadeInValue, screenSize,
-        spriteTexture, polygonTexture, hasPolygon, hasColormap) _uniformCache;
+    UniformCache(cameraViewProjectionMatrix, modelMatrix, cameraPos, cameraLookup,
+        renderOption, minBillboardSize, maxBillboardSize, correctionSizeEndDistance,
+        correctionSizeFactor, color, sides, alphaValue, scaleFactor, up, right,
+        fadeInValue, screenSize, spriteTexture, polygonTexture, hasPolygon,
+        hasColormap, enabledRectSizeControl
+    ) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     std::string _speckFile;
@@ -170,7 +174,6 @@ private:
     GLuint _polygonVao = 0;
     GLuint _polygonVbo = 0;
 };
-
 
 } // namespace openspace
 

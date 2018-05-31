@@ -37,12 +37,12 @@ namespace {
     constexpr const char* KeyUrl = "URL";
     constexpr const char* _loggerCat = "ScreenSpaceBrowser";
 
-    static const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    const openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
         "Set the dimensions of the web browser windows."
     };
-    static const openspace::properties::Property::PropertyInfo UrlInfo = {
+    const openspace::properties::Property::PropertyInfo UrlInfo = {
         "URL",
         "url",
         "The URL to load"
@@ -77,7 +77,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary &dictionary)
         _url = dictionary.value<std::string>(KeyUrl);
     }
 
-    glm::vec2 windowDimensions = OsEng.windowWrapper().currentWindowSize();
+    glm::vec2 windowDimensions = OsEng.windowWrapper().currentSubwindowSize();
     _dimensions = windowDimensions;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(

@@ -165,11 +165,16 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Draw2D,
         [&]() {
+            // TODO emiax: Make sure this is only called for one of the eyes, in the case
+            // of side-by-side / top-bottom stereo.
+
             WindowWrapper& wrapper = OsEng.windowWrapper();
             const bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
             if (wrapper.isMaster() && showGui) {
-                glm::vec2 mousePosition = wrapper.mousePosition();
                 const glm::ivec2 windowSize = wrapper.currentWindowSize();
+                const glm::ivec2 resolution = wrapper.currentWindowResolution();
+
+                glm::vec2 mousePosition = wrapper.mousePosition();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
 
                 const double dt = std::max(wrapper.averageDeltaTime(), 0.0);
@@ -182,7 +187,7 @@ ImGUIModule::ImGUIModule() : OpenSpaceModule(Name) {
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
-                    wrapper.dpiScaling(),
+                    resolution / windowSize,
                     mousePosition,
                     mouseButtons
                 );

@@ -46,6 +46,7 @@ private:
 
     int _timeCallbackHandle = UnsetOnChangeHandle;
     int _deltaTimeCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
     std::chrono::system_clock::time_point _lastUpdateTime;
 };
 
