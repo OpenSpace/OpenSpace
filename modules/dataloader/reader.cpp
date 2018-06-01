@@ -37,8 +37,8 @@ namespace {
         "This list contains names of volume data files converted from the CDF format"
     };
 
-    static const openspace::properties::Property::PropertyInfo ReadVolumeTriggerInfo = {
-        "Volume Trigger",
+    static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
+        "ReadVolumesTrigger",
         "Trigger load volume data files",
         "If this property is triggered it will call the function to load volume data"
     };
@@ -49,40 +49,37 @@ namespace openspace::dataloader {
 Reader::Reader()
     : PropertyOwner({ "Reader" })
     , _volumes(VolumesInfo) 
-    , _readVolumeTrigger(ReadVolumeTriggerInfo) 
+    , _readVolumesTrigger(ReadVolumesTriggerInfo) 
 {
     _topDir = ghoul::filesystem::Directory(
       "${DATA}/.internal",
       ghoul::filesystem::Directory::RawPath::No
     );
 
-    _readVolumeTrigger.onChange([this](){
-      loadVolumeDataItems();
+    _readVolumesTrigger.onChange([this](){
+        readVolumeDataItems();
     });
 
     addProperty(_volumes);
-    addProperty(_readVolumeTrigger);
+    addProperty(_readVolumesTrigger);
 }
 
 void Reader::readVolumeDataItems() {
-
-    // Go into data/.internal(
     ghoul::filesystem::Directory volumeDir(
         _topDir.path() +
         ghoul::filesystem::FileSystem::PathSeparator +
         "CDF" 
     );
 
-    // Read files
     std::vector<std::string> files = volumeDir.readFiles(
-      ghoul::filesystem::Directory::Recursive::No,
+      ghoul::filesystem::Directory::Recursive::Yes,
       ghoul::filesystem::Directory::Sort::Yes
     );
 
     // Print vector
-    for (auto el : files) {
-      LINFO("A file: " + el);
-    }
+    // for (auto el : files) {
+    //   LINFO("A file: " + el);
+    // }
 
     // For each folder
       // Take first part of file name

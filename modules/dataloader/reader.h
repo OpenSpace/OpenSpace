@@ -41,7 +41,7 @@ class Reader : public properties::PropertyOwner {
 
   private:
     properties::StringListProperty _volumes;
-    properties::TriggerProperty _readVolumeTrigger;
+    properties::TriggerProperty _readVolumesTrigger;
     
     ghoul::filesystem::Directory _topDir;
 };
