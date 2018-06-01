@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Proptypes from 'prop-types'; 
+
+import DataManager from '../../api/DataManager';
 import styles from './DataLoader.scss';
 import Window from '../common/Window/Window';
 import { setActivated, setFilePaths } from '../../api/Actions/dataLoaderActions';
@@ -12,15 +14,64 @@ class DataLoader extends Component {
   constructor(props) {
     super(props);
 
+    this.dataTypesToLoad = ['Volumes', 'Fieldlines'];
+
+    this.state = {
+      activeDataType: '',
+      dataToLoadUri: '',
+    };
   }
 
   // handleChange(event) {
   //   let filePathString = event.target.value;
   // };
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const { activeDataType, dataToLoadUri } = this.state;
+    console.log(this.state)
+    console.log(nextState)
+    if ((activeDataType !== nextState.activeDataType) && (nextState.activeDataType !== '')) {
+      this.triggerDataToLoad(nextState.activeDataType);
+      this.setState({
+        dataToLoadUri: this.getUriForDataToLoad(nextState.activeDataType)
+      });
+    }
+
+    if (dataToLoadUri !== nextState.dataToLoadUri) {
+      this.subscribeToActiveUri();
+    }
+
+    return true;
+  }
+
+  getUriForDataToLoad(dataType) {
+    let uri = 'Modules.DataLoader.Reader.';
+
+    for (const type of this.dataTypesToLoad) {
+      uri += type;
+    }
+
+    console.log(`returning uri ${uri}`)
+
+    return uri;
+  }
+
+  triggerDataToLoad(dataType) {
+    DataManager.trigger(`Modules.DataLoader.Reader.Read${dataType}Trigger`)
+  }
+
+  handleDataTypeList(data) {
+    console.log(data);
+  }
+
+  subscribeToActiveUri() {
+    console.log(`subscribing to ${this.state.dataToLoadUri}`);
+    DataManager.subscribe(this.state.dataToLoadUri, this.handleDataTypeList);
+  }
+
   render() {
     const {setActivated, activated } = this.props
-    let buttonArray = ["Volume", "Fieldlines"];
+    console.log(this.state.dataToLoadUri)
 
     let dataTypeButtons = () => {
       return(
@@ -29,11 +80,11 @@ class DataLoader extends Component {
             Select data type you wish to load
           </SmallLabel>
           <div>
-            {buttonArray.map((element) => 
+            {this.dataTypesToLoad.map((dataType) => 
               <Button 
-                key={element} 
-                onClick={() => setFilePaths(element)}>
-                <Label>{element}</Label>
+                key={dataType} 
+                onClick={() => this.setState({activeDataType: dataType})}>
+                <Label>{dataType}</Label>
               </Button>
             )}
           </div>

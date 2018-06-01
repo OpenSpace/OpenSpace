@@ -35,15 +35,27 @@ namespace {
 
 namespace {
     static const openspace::properties::Property::PropertyInfo VolumesInfo = {
-        "VolumeItems",
-        "List of volumes stored internally and ready to load",
+        "Volumes",
+        "List of volume items stored internally and ready to load",
         "This list contains names of volume data files converted from the CDF format"
+    };
+
+    static const openspace::properties::Property::PropertyInfo FieldlinesInfo = {
+        "Fieldlines",
+        "List of fieldline items stored internally and ready to load",
+        "This list contains names of fieldline data files converted from the CDF format"
     };
 
     static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
         "ReadVolumesTrigger",
         "Trigger load volume data files",
         "If this property is triggered it will call the function to load volume data"
+    };
+
+    static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
+        "ReadFieldlinesTrigger",
+        "Trigger load fieldline data files",
+        "If this property is triggered it will call the function to load fieldline data"
     };
 }
 
