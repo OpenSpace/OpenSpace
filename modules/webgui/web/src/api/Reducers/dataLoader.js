@@ -10,6 +10,14 @@ export const dataLoader = (state = {}, action) => {
         activated
       }
 
+    case actionTypes.setSelectedFilesPathName:
+      const { filePaths } = action.payload;
+      
+      return {
+        ...state,
+        filePaths
+      }
+
     default:
       return state;
   }

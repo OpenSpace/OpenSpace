@@ -6,3 +6,10 @@ export const setActivated = (isActivated) => ({
     activated: isActivated
   }
 });
+
+export const setFilePaths = (filePaths) => ({
+  type: actionTypes.setSelectedFilesPathName,
+  payload: {
+    filePaths: filePaths
+  }
+});
