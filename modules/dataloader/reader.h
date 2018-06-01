@@ -40,7 +40,7 @@ class Reader : public properties::PropertyOwner {
     void readVolumeDataItems();
 
   private:
-    properties::StringListProperty _volumes;
+    properties::StringListProperty _volumeItems;
     properties::TriggerProperty _readVolumesTrigger;
     
     ghoul::filesystem::Directory _topDir;

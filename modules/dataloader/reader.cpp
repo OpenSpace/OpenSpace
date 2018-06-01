@@ -26,13 +26,16 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
+#include <string>
+#include <regex>
+
 namespace {
     constexpr const char* _loggerCat = "Reader";
 } // namespace
 
 namespace {
     static const openspace::properties::Property::PropertyInfo VolumesInfo = {
-        "Volumes",
+        "VolumeItems",
         "List of volumes stored internally and ready to load",
         "This list contains names of volume data files converted from the CDF format"
     };
@@ -48,7 +51,7 @@ namespace openspace::dataloader {
 
 Reader::Reader()
     : PropertyOwner({ "Reader" })
-    , _volumes(VolumesInfo) 
+    , _volumeItems(VolumesInfo) 
     , _readVolumesTrigger(ReadVolumesTriggerInfo) 
 {
     _topDir = ghoul::filesystem::Directory(
@@ -60,7 +63,7 @@ Reader::Reader()
         readVolumeDataItems();
     });
 
-    addProperty(_volumes);
+    addProperty(_volumeItems);
     addProperty(_readVolumesTrigger);
 }
 
@@ -68,23 +71,39 @@ void Reader::readVolumeDataItems() {
     ghoul::filesystem::Directory volumeDir(
         _topDir.path() +
         ghoul::filesystem::FileSystem::PathSeparator +
-        "CDF" 
+        "volumes_from_cdf" 
     );
 
-    std::vector<std::string> files = volumeDir.readFiles(
-      ghoul::filesystem::Directory::Recursive::Yes,
+    std::vector<std::string> itemDirectories = volumeDir.readDirectories(
+      ghoul::filesystem::Directory::Recursive::No,
       ghoul::filesystem::Directory::Sort::Yes
     );
 
-    // Print vector
-    // for (auto el : files) {
-    //   LINFO("A file: " + el);
+    std::vector<std::string> volumeItems(_volumeItems);
+    for (int i = 0; i < itemDirectories.size(); i++) {
+        volumeItems.push_back(itemDirectories[i]);
+    }
+
+    // for (auto el : volumeItems) {
+    //     LINFO("A dir: " + el);
     // }
 
-    // For each folder
-      // Take first part of file name
-      // Add to list
-      // Store a reference somehow if necessary 
+    // Take out leaves of uri:s
+    // std::regex dirLeaf_regex("([^/]+)/?$");
+    // std::smatch dirLeaf_match;
+    // std::vector<std::string> itemDirLeaves;
+
+    // // Add each directory uri leaf to list
+    // for (const std::string dir : itemDirectories) {
+    //     if (std::regex_search(dir, dirLeaf_match, dirLeaf_regex)) {
+    //         itemDirLeaves.push_back(dirLeaf_match[0].str());
+    //     } else {
+    //         LWARNING("Looked for match in " + dir + " but found none.");
+    //     }
+
+    // }
+
+    // Store a reference somehow if necessary 
 }
 
 }
