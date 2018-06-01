@@ -225,10 +225,10 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                     additionalLevelsToFetch);
                 // Fetch LOD stars from 208 parents one and two layer(s) up.
                 if (x != 0 || y != 0 || z != 0) {
-                    findAndFetchNeighborNode(secondParentId, x, y, z, 
-                        additionalLevelsToFetch + 1);
-                    findAndFetchNeighborNode(thirdParentId, x, y, z, 
-                        additionalLevelsToFetch + 1);
+                    //findAndFetchNeighborNode(secondParentId, x, y, z, 
+                    //    additionalLevelsToFetch + 1);
+                    //findAndFetchNeighborNode(thirdParentId, x, y, z, 
+                    //    additionalLevelsToFetch + 1);
                 }
             }
         }
@@ -406,9 +406,9 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
         // Avoid freezing when switching render mode for large datasets by only fetching 
         // one branch at a time when rebuilding buffer.
         if (_rebuildBuffer) {
-            renderData = std::move(tmpData);
+            //renderData = std::move(tmpData);
             _traversedBranchesInRenderCall++;
-            break;
+            //break;
         }
 
         // Observe that if there exists identical keys in renderData then those values in
@@ -1095,7 +1095,7 @@ std::map<int, std::vector<float>> OctreeManager::removeNodeFromCache(
     auto keysToRemove = std::map<int, std::vector<float>>();
 
     // If we're in rebuilding mode then there is no need to remove any nodes.
-    if (_rebuildBuffer) return keysToRemove;
+    //if (_rebuildBuffer) return keysToRemove;
 
     // Check if this node was rendered == had a specified index.
     if (node->bufferIndex != DEFAULT_INDEX) {

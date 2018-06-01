@@ -34,7 +34,7 @@ asset.request('scene/digitaluniverse/planetarynebulae')
 asset.request('scene/digitaluniverse/pulsars')
 asset.request('scene/digitaluniverse/quasars')
 asset.request('scene/digitaluniverse/sdss')
-asset.request('scene/digitaluniverse/starlabels')
+-- asset.request('scene/digitaluniverse/starlabels')
 -- asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/superclusters')
 asset.request('scene/digitaluniverse/supernovaremnants')
@@ -75,7 +75,7 @@ asset.onInitialize(function ()
     openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
-    openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MouseSensitivity', 40.0);
+    -- openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MouseSensitivity', 40.0);
     
     openspace.setDefaultGuiSorting()
 

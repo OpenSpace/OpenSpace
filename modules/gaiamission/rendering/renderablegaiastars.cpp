@@ -1763,7 +1763,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _maxStreamingBudgetInBytes / (_chunkSize * sizeof(GLfloat));
         
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
-        bool datasetFitInMemory = (_totalDatasetSizeInBytes < _cpuRamBudgetInBytes);
+        bool datasetFitInMemory = (static_cast<float>(_totalDatasetSizeInBytes) 
+            < (static_cast<float>(_cpuRamBudgetInBytes) * 0.9));
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
             " - Max streaming budget (in bytes): " + 
