@@ -523,21 +523,22 @@ std::vector<float> FitsFileReader::readSpeckFile(std::string filePath, int& nRen
 
     nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
 
-    // Order in Speck file:
-    // 0 BVcolor
-    // 1 lum
-    // 2 Vabsmag
-    // 3 Vappmag
-    // 4 distly
-    // 5 distpcPctErr
-    // 6 U
-    // 7 V
-    // 8 W
-    // 9 speed
-    // 10 sptypeindex
-    // 11 lumclassindex
-    // 12 catsource
-    // 13 texture
+    // Order in DR1 file:       DR2 - GaiaGroupMembers:
+    // 0 BVcolor                0 color
+    // 1 lum                    1 lum
+    // 2 Vabsmag                2 absmag
+    // 3 Vappmag                3 Gmag
+    // 4 distly                 4 distpc
+    // 5 distpcPctErr           5 plx
+    // 6 U                      6 ra
+    // 7 V                      7 dec
+    // 8 W                      8 RadVel
+    // 9 speed                  9 Teff
+    // 10 sptypeindex           10 vx
+    // 11 lumclassindex         11 vy
+    // 12 catsource             12 vz
+    // 13 texture               13 speed
+    //                          14 texture
 
     do {
         std::vector<float> readValues(nValuesPerStar);
@@ -579,11 +580,11 @@ std::vector<float> FitsFileReader::readSpeckFile(std::string filePath, int& nRen
             renderValues[0] = readValues[0] / 1000.0; // PosX
             renderValues[1] = readValues[1] / 1000.0; // PosY
             renderValues[2] = readValues[2] / 1000.0; // PosZ
-            renderValues[3] = readValues[5]; // AbsMag
-            renderValues[4] = readValues[3]; // B-V color
-            renderValues[5] = readValues[9]; // Vel X
-            renderValues[6] = readValues[10]; // Vel Y
-            renderValues[7] = readValues[11]; // Vel Z
+            renderValues[3] = readValues[6]; // AbsMag
+            renderValues[4] = readValues[3]; // color
+            renderValues[5] = readValues[13]; // Vel X
+            renderValues[6] = readValues[14]; // Vel Y
+            renderValues[7] = readValues[15]; // Vel Z
 
             fullData.insert(fullData.end(), renderValues.begin(), renderValues.end());
         }

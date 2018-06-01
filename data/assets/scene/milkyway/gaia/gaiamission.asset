@@ -35,10 +35,21 @@ local GaiaMission = {
         -- File = localStars .. "/DR2_full_Octree[50kSPN,250dist]_200pc,50/",
         -- File = localStars .. "/DR2_full_Octree[50kSPN,2000dist]_90,90/",
         -- File = localStars .. "/DR2_subset_Octree[10kSPN,200dist]_5p/",
+        -- File = localStars .. "/DR2_full_Octree[50kSPN,500dist]_50,50/",
         FileReaderOption = "StreamOctree", -- BinaryOctree, StreamOctree
 
+        -- File = localStars .. "/AMNH_event_Octree_files/andromeda_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/apogee_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/coMoving_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/DR2_giants_G14_Octree.bin",
         -- File = localStars .. "/AMNH_event_Octree_files/DR2_giants_Octree.bin",
-        -- File = localStars .. "/synthetic_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/DR2_UMS_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/GaiaGroupMembers.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/galah_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/hypatiaOverlap_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/k2_1arcsec_Octree.bin",
+        -- File = localStars .. "/AMNH_event_Octree_files/kepler_1arcsec_Octree.bin",
+        -- File = localStars .. "/synthetic_Octree_sphere.bin",
         -- FileReaderOption = "BinaryOctree", -- BinaryOctree, StreamOctree
         RenderOption = "Static",
         ShaderOption = "Point_SSBO",
@@ -53,6 +64,8 @@ local GaiaMission = {
         LodPixelThreshold = 0,
         MaxGpuMemoryPercent = 0.49,
         MaxCpuMemoryPercent = 0.5,
+        FilterSize = 5,
+        Sigma = 0.5,
         FilterPosX = {0.0, 0.0},
         FilterPosY = {0.0, 0.0},
         FilterPosZ = {0.0, 0.0},
@@ -77,6 +90,7 @@ local AMNH_andromeda = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Andromeda",
@@ -94,6 +108,7 @@ local AMNH_apogee = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Apogee",
@@ -111,6 +126,7 @@ local AMNH_coMoving = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Co-moving",
@@ -128,6 +144,7 @@ local AMNH_giantsG14 = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Giants G14",
@@ -145,6 +162,7 @@ local AMNH_giants = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Giants",
@@ -162,9 +180,28 @@ local AMNH_UMS = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH UMS",
+        Path = "/GaiaMission"
+    }
+}
+
+local AMNH_groupMembers = {
+    Identifier = "AMNH_groupMembers",
+    Renderable = {
+        Type = "RenderableGaiaStars",
+        File = localStars .. "/AMNH_event_Octree_files/GaiaGroupMembers.bin",
+        FileReaderOption = "BinaryOctree", -- BinaryOctree, StreamOctree
+        RenderOption = "Color",
+        ShaderOption = "Point_SSBO",
+        Texture = textures .. "/halo.png",
+        ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
+    },
+    GUI = {
+        Name = "AMNH Group Members",
         Path = "/GaiaMission"
     }
 }
@@ -179,6 +216,7 @@ local AMNH_galah = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Galah",
@@ -196,6 +234,7 @@ local AMNH_hypatia = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Hypatia",
@@ -213,6 +252,7 @@ local AMNH_k2 = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH K2",
@@ -230,6 +270,7 @@ local AMNH_kepler = {
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
+        LodPixelThreshold = 0,
     },
     GUI = {
         Name = "AMNH Kepler",
@@ -281,6 +322,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaMission })
 --     , AMNH_giants
 --     , AMNH_UMS
 --     , AMNH_coMoving
+--     , AMNH_groupMembers
 --     , AMNH_galah
 --     , AMNH_hypatia
 --     , AMNH_k2

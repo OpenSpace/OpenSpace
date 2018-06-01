@@ -2,8 +2,8 @@ return {
     {
         Type = "ConstructOctreeTask",
         InFileOrFolderPath = "E:/gaia_sync_data/Gaia_DR2_full_24columns/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/DR2_full_Octree[50kSPN,250dist]_200pc,50/",
-        MaxDist = 250,
+        OutFileOrFolderPath = "L:/DR2_full_Octree_test_50,50/",
+        MaxDist = 500,
         MaxStarsPerNode = 50000,
         SingleFileInput = false,
         -- Specify filter thresholds
@@ -11,7 +11,7 @@ return {
         --FilterPosY = {0.0, 0.0},
         --FilterPosZ = {0.0, 0.0},
         FilterGMag = {20.0, 20.0},
-        --FilterBpRp = {0.0, 0.0},
+        FilterBpRp = {0.0, 0.0},
         --FilterVelX = {0.0, 0.0},
         --FilterVelY = {0.0, 0.0},
         --FilterVelZ = {0.0, 0.0},
@@ -23,8 +23,8 @@ return {
         --FilterRaError = {0.0, 0.0},
         --FilterDec = {0.0, 0.0},
         --FilterDecError = {0.0, 0.0},
-        FilterParallax = {5.0, 0.0}, -- = 200 closest pc
-        FilterParallaxError = {0.0, 0.5},
+        FilterParallax = {0.00001, 0.0},
+        FilterParallaxError = {0.00001, 0.5},
         --FilterPmra = {0.0, 0.0},
         --FilterPmraError = {0.0, 0.0},
         --FilterPmdec = {0.0, 0.0},
@@ -32,12 +32,13 @@ return {
         --FilterRv = {0.0, 0.0},
         --FilterRvError = {0.0, 0.0},
     },
+
     --{
     --    Type = "ConstructOctreeTask",
     --    InFileOrFolderPath = "NoFile",
-    --    OutFileOrFolderPath = "E:/gaia_sync_data/synthetic_Octree.bin",
-    --    MaxDist = 10,
-    --    MaxStarsPerNode = 20000,
+    --    OutFileOrFolderPath = "E:/gaia_sync_data/synthetic_Octree_sphere.bin",
+    --    MaxDist = 20,
+    --    MaxStarsPerNode = 2000,
     --    SingleFileInput = true,
     --},
 
@@ -123,4 +124,12 @@ return {
     --    SingleFileInput = true,
     --},
 
+    --{
+    --    Type = "ConstructOctreeTask",
+    --    InFileOrFolderPath = "E:/gaia_sync_data/AMNH_event_Bin_files/GaiaGroupMembers.bin",
+    --    OutFileOrFolderPath = "E:/gaia_sync_data/AMNH_event_Octree_files/GaiaGroupMembers.bin",
+    --    MaxDist = 1,
+    --    MaxStarsPerNode = 1000,
+    --    SingleFileInput = true,
+    --},
 }

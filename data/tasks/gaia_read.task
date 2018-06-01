@@ -88,8 +88,7 @@ return {
 
     --{
     --    Type = "ReadSpeckTask",
-    --    InFileOrFolderPath = "E:/gaia_sync_data/DR1_AMNH.speck",
-    --    OutFileOrFolderPath = "E:/gaia_sync_data/DR1_AMNH_8col.bin",
-    --    SingleFileProcess = true,
+    --    InFilePath = "L:/AMNH-event/GaiaGroupMembers.speck",
+    --    OutFilePath = "L:/AMNH-event/GaiaGroupMembers.bin",
     --}
 }
