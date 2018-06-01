@@ -132,6 +132,7 @@ private:
     properties::FloatProperty _closeUpBoostDist;
     properties::IntProperty _tmPointFilterSize;
     properties::FloatProperty _tmPointSigma;
+    properties::FloatProperty _tmPointPixelWeightThreshold;
     properties::FloatProperty _lodPixelThreshold;
 
     properties::Vec2Property _posXThreshold;
@@ -165,7 +166,7 @@ private:
         bpRpThreshold, distThreshold) _uniformFilterCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
-    UniformCache(renderedTexture, screenSize, filterSize, sigma, 
+    UniformCache(renderedTexture, screenSize, filterSize, sigma, pixelWeightThreshold,
         projection) _uniformCacheTM;
     std::unique_ptr<ghoul::opengl::Texture> _fboTexture;
 

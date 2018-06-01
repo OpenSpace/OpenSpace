@@ -31,6 +31,7 @@ uniform dmat4 projection;
 uniform vec2 screenSize;
 uniform int filterSize;
 uniform float sigma;
+uniform float pixelWeightThreshold;
 
 const float M_PI = 3.141592653589793238462;
 const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
@@ -47,6 +48,10 @@ Fragment getFragment() {
     float right = float(near * (projection[2][0] + 1.0) / projection[0][0]);
     float top = float(near * (projection[2][1] + 1.0) / projection[1][1]);
     float bottom = float(near * (projection[2][1] - 1.0) / projection[1][1]);
+
+    float planeAspect = (right - left) / (top - bottom);
+    float screenAspect = screenSize.y / screenSize.x;
+    float fullAspect = planeAspect * screenAspect;
     
     // Find screenPos in skewed frustum. uv is [0, 1]
     vec2 screenPos = uv * vec2(right - left, top - bottom) + vec2(left, bottom); 
@@ -57,7 +62,7 @@ Fragment getFragment() {
 
     // Scale filter size depending on screen pos.
     vec2 filterScaleFactor = vec2(
-        pow(screenPos.x / near, 2.0),  
+        pow(screenPos.x / near, 2.0) * fullAspect,  
         pow(screenPos.y / near, 2.0)  
     );
 
@@ -116,11 +121,15 @@ Fragment getFragment() {
             vec2 sPoint = uv + (pixelSize * ivec2(x, y));
 
             // Calculate the contribution of this pixel (elliptic gaussian distribution).
-            float pixelWeight = exp(-( a * pow(x, 2.0) + 2 * b * x * y + c * pow(y, 2.0) ));
+            float pixelWeight = exp(-( 
+                a * pow(x * fullAspect, 2.0)
+                + 2 * b * x * y * fullAspect 
+                + c * pow(y, 2.0) 
+            ));
             
             // Only sample inside FBO texture and if the pixel will contribute to final color.
             if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0))) 
-                && pixelWeight > 0.001) {
+                && pixelWeight > pixelWeightThreshold) {
                 vec4 sIntensity = texture( renderedTexture, sPoint );
 
                 // Use normal distribution function for halo/bloom effect. 
@@ -132,8 +141,7 @@ Fragment getFragment() {
                     }
                 else {
                     // Divide contribution by area of ellipse.
-                    intensity += sIntensity.rgb * pixelWeight 
-                        / (M_PI * sigmaScaleFactor.x * sigmaScaleFactor.y);
+                    intensity += sIntensity.rgb * pixelWeight;
                 }
             }
         }

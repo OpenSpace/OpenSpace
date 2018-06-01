@@ -150,6 +150,15 @@ namespace {
         "rendering. [Works only with points]"
     };
 
+    static const openspace::properties::Property::PropertyInfo TmPointPxThresholdInfo = {
+        "PixelWeightThreshold",
+        "Pixel Weight Threshold",
+        "Set the threshold for how big the elliptic weight of a pixel has to be to "
+        "contribute to the final elliptic shape. A smaller value gives a more visually "
+        "pleasing result while a bigger value will speed up the rendering on skewed "
+        "frustums (aka Domes)."
+    };
+
     static const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color Texture",
@@ -378,6 +387,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 TmPointSigmaInfo.description
             },
             {
+                TmPointPxThresholdInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                TmPointPxThresholdInfo.description
+            },
+            {
                 FirstRowInfo.identifier,
                 new IntVerifier,
                 Optional::Yes,
@@ -478,6 +493,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _closeUpBoostDist(CloseUpBoostDistInfo, 300.f, 1.f, 1000.f)
     , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
     , _tmPointSigma(TmPointSigmaInfo, 0.70, 0.1, 3.0)
+    , _tmPointPixelWeightThreshold(TmPointPxThresholdInfo, 0.001, 0.000001, 0.01)
     , _lodPixelThreshold(LodPixelThresholdInfo, 250.0, 0.0, 5000.0)
     , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45, 0.0, 1.0)
     , _maxCpuMemoryPercent(MaxCpuMemoryPercentInfo, 0.5, 0.0, 1.0)
@@ -685,6 +701,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             dictionary.value<double>(TmPointSigmaInfo.identifier)
             );
     }
+    if (dictionary.hasKey(TmPointPxThresholdInfo.identifier)) {
+        _tmPointPixelWeightThreshold = static_cast<float>(
+            dictionary.value<double>(TmPointPxThresholdInfo.identifier)
+            );
+    }
 
     if (dictionary.hasKey(LodPixelThresholdInfo.identifier)) {
         _lodPixelThreshold = static_cast<float>(
@@ -851,9 +872,12 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
         _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
         _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+        _uniformCacheTM.pixelWeightThreshold = 
+            _programTM->uniformLocation("pixelWeightThreshold");
 
         addProperty(_tmPointFilterSize);
         addProperty(_tmPointSigma);
+        addProperty(_tmPointPixelWeightThreshold);
         break;
     }
     case gaiamission::ShaderOption::Point_VBO: {
@@ -871,9 +895,12 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
         _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
         _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+        _uniformCacheTM.pixelWeightThreshold =
+            _programTM->uniformLocation("pixelWeightThreshold");
 
         addProperty(_tmPointFilterSize);
         addProperty(_tmPointSigma);
+        addProperty(_tmPointPixelWeightThreshold);
         break;
     }
     case gaiamission::ShaderOption::Billboard_SSBO: {
@@ -1143,7 +1170,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _nRenderedStars.set(_nStarsToRender);
         }
 
-        size_t indexBufferSize = nChunksToRender * sizeof(GLint);
+        size_t indexBufferSize = _accumulatedIndices.size() * sizeof(GLint);
 
         // Update SSBO Index (stars per chunk).
         glBufferData(
@@ -1428,6 +1455,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
             _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
             _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
+            _programTM->setUniform(_uniformCacheTM.pixelWeightThreshold, 
+                _tmPointPixelWeightThreshold);
         }
 
         glBindVertexArray(_vaoQuad);
@@ -1520,6 +1549,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 removeProperty(_pointSpreadFunctionTexturePath);
             if (!hasProperty(&_tmPointFilterSize)) addProperty(_tmPointFilterSize);
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
+            if (!hasProperty(&_tmPointPixelWeightThreshold)) 
+                addProperty(_tmPointPixelWeightThreshold);
             break;
         }
         case gaiamission::ShaderOption::Point_VBO: {
@@ -1545,6 +1576,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 removeProperty(_pointSpreadFunctionTexturePath);
             if (!hasProperty(&_tmPointFilterSize)) addProperty(_tmPointFilterSize);
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
+            if (!hasProperty(&_tmPointPixelWeightThreshold))
+                addProperty(_tmPointPixelWeightThreshold);
             break;
         }
         case gaiamission::ShaderOption::Billboard_SSBO:
@@ -1599,6 +1632,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 addProperty(_pointSpreadFunctionTexturePath);
             if (hasProperty(&_tmPointFilterSize)) removeProperty(_tmPointFilterSize);
             if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
+            if (hasProperty(&_tmPointPixelWeightThreshold))
+                removeProperty(_tmPointPixelWeightThreshold);
             break;
         }
         case gaiamission::ShaderOption::Billboard_VBO: {
@@ -1631,6 +1666,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 addProperty(_pointSpreadFunctionTexturePath);
             if (hasProperty(&_tmPointFilterSize)) removeProperty(_tmPointFilterSize);
             if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
+            if (hasProperty(&_tmPointPixelWeightThreshold))
+                removeProperty(_tmPointPixelWeightThreshold);
             break;
         }
         }
@@ -1675,6 +1712,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
             _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
             _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+            _uniformCacheTM.pixelWeightThreshold = 
+                _programTM->uniformLocation("pixelWeightThreshold");
             break;
         }
         case gaiamission::ShaderOption::Billboard_SSBO:
