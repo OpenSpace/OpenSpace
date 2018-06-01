@@ -30,12 +30,12 @@ local GaiaMission = {
     Renderable = {
         Type = "RenderableGaiaStars",
         -- File = torrentStars .. "/DR2_rv_Octree[10kSPN,20dist]/",
-        -- File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]_5p",
-        -- File = localStars .. "/DR2_full_Octree[20kSPN,200dist]_90,0",
-        File = localStars .. "/DR2_full_Octree[150kSPN,250dist]_50,125/",
+        -- File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]_5p/",
+        File = localStars .. "/DR2_full_Octree[20kSPN,200dist]_90,0/",
+        -- File = localStars .. "/DR2_full_Octree[150kSPN,250dist]_50,125/",
         -- File = localStars .. "/DR2_full_Octree[50kSPN,250dist]_200pc,50/",
         -- File = localStars .. "/DR2_full_Octree[50kSPN,500dist]_50,50/",
-        -- File = localStars .. "/DR2_full_Octree[150kSPN,250dist]_5p",
+        -- File = localStars .. "/DR2_full_Octree[150kSPN,250dist]_5p/",
         FileReaderOption = "StreamOctree", -- BinaryOctree, StreamOctree
 
         -- File = localStars .. "/AMNH_event_Octree_files/andromeda_Octree.bin",
