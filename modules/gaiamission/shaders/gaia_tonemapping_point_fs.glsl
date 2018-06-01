@@ -49,9 +49,12 @@ Fragment getFragment() {
     float top = float(near * (projection[2][1] + 1.0) / projection[1][1]);
     float bottom = float(near * (projection[2][1] - 1.0) / projection[1][1]);
 
-    float planeAspect = (right - left) / (top - bottom);
-    float screenAspect = screenSize.y / screenSize.x;
-    float fullAspect = planeAspect * screenAspect;
+	float xFactor = float(projection[0][0]);
+	float yFactor = float(projection[1][1]);
+	
+    float planeAspect = yFactor / xFactor; // Equals: (right - left) / (top - bottom)
+    float screenAspect = screenSize.x / screenSize.y;
+    float fullAspect = planeAspect / screenAspect;
     
     // Find screenPos in skewed frustum. uv is [0, 1]
     vec2 screenPos = uv * vec2(right - left, top - bottom) + vec2(left, bottom); 
@@ -60,6 +63,9 @@ Fragment getFragment() {
     float beta = atan(length(screenPos) / near);
     vec2 sigmaScaleFactor = vec2( 1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0)); 
 
+	float defaultScreen = 1200.0;
+	float scaling = screenSize.y / defaultScreen * yFactor;
+	
     // Scale filter size depending on screen pos.
     vec2 filterScaleFactor = vec2(
         pow(screenPos.x / near, 2.0) * fullAspect,  
@@ -90,7 +96,7 @@ Fragment getFragment() {
     bool useCircleDist = false;
 
     // Apply scaling on bloom filter.
-    vec2 newFilterSize = vec2(filterSize) * (1.0 + length(filterScaleFactor));
+    vec2 newFilterSize = vec2(filterSize) * (1.0 + length(filterScaleFactor)) * scaling;
 
     // Calculate params for a rotated Elliptic Gaussian distribution.
     float sigmaMajor;
@@ -101,8 +107,8 @@ Fragment getFragment() {
     if (!useCircleDist) {
         float alpha = atan(screenPos.y, screenPos.x);
         // Apply scaling on sigma.
-        sigmaMajor = sigma * sigmaScaleFactor.y;
-        sigmaMinor = sigma * sigmaScaleFactor.x;
+        sigmaMajor = sigma * sigmaScaleFactor.y * scaling;
+        sigmaMinor = sigma * sigmaScaleFactor.x * scaling;
 
         a = pow(cos(alpha), 2.0) / (2 * pow(sigmaMajor, 2.0)) 
             + pow(sin(alpha), 2.0) / (2 * pow(sigmaMinor, 2.0)) ;
@@ -141,7 +147,7 @@ Fragment getFragment() {
                     }
                 else {
                     // Divide contribution by area of ellipse.
-                    intensity += sIntensity.rgb * pixelWeight;
+                    intensity += sIntensity.rgb * pixelWeight * fullAspect;
                 }
             }
         }
