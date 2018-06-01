@@ -12,7 +12,6 @@ class DataLoader extends Component {
   constructor(props) {
     super(props);
 
-    this.state={activeDataType: ''};
   }
 
   // handleChange(event) {
@@ -33,8 +32,8 @@ class DataLoader extends Component {
             {buttonArray.map((element) => 
               <Button 
                 key={element} 
-                onClick={() => this.setState({activeDataType: element})}>
-                <SmallLabel>{element}</SmallLabel>
+                onClick={() => setFilePaths(element)}>
+                <Label>{element}</Label>
               </Button>
             )}
           </div>
