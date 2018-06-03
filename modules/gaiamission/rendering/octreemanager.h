@@ -359,6 +359,7 @@ private:
     std::stack<int> _freeSpotsInBuffer;
     std::set<int> _removedKeysInPrevCall;
     std::queue<unsigned long long> _leastRecentlyFetchedNodes;
+    std::mutex _leastRecentlyFetchedNodesMutex;
 
     size_t _totalDepth;
     size_t _numLeafNodes;

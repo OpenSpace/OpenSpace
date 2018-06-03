@@ -58,6 +58,7 @@ local Keybindings = {
 }
 
 local GaiaModelAsset = asset.require('scene/milkyway/gaia/gaiamodel')
+asset.require('scene/milkyway/gaia/trail')
 
 assetHelper.registerDashboardItems(asset, {
     {
