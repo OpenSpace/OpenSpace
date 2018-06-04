@@ -86,15 +86,10 @@ void Reader::readVolumeDataItems() {
         "volumes_from_cdf" 
     );
 
-    std::vector<std::string> itemDirectories = volumeDir.readDirectories(
+    _volumeItems = volumeDir.readDirectories(
       ghoul::filesystem::Directory::Recursive::No,
       ghoul::filesystem::Directory::Sort::Yes
     );
-
-    std::vector<std::string> volumeItems(_volumeItems);
-    for (int i = 0; i < itemDirectories.size(); i++) {
-        volumeItems.push_back(itemDirectories[i]);
-    }
 
     // for (auto el : volumeItems) {
     //     LINFO("A dir: " + el);
