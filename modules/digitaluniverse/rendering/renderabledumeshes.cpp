@@ -283,10 +283,9 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         addProperty(_drawElements);
     }
 
-    // DEBUG:
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
-    _renderOption.addOption(2, "Screen center Position Normal");
+    _renderOption.set(1);
     addProperty(_renderOption);
 
     if (dictionary.hasKey(keyUnit)) {
@@ -596,6 +595,15 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     glm::vec3 orthoRight = glm::normalize(
         glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
     );
+
+    if (orthoRight == glm::vec3(0.0)) {
+        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        right = glm::cross(viewDirection, otherVector);
+        orthoRight = glm::normalize(
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            );
+    }
+
     glm::vec3 orthoUp = glm::normalize(
         glm::vec3(worldToModelTransform * glm::vec4(up, 0.0))
     );

@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/cachemanager.h>
@@ -570,7 +571,7 @@ namespace openspace {
         addProperty(_scaleFactor);
 
         if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
-            _polygonSides = static_cast<float>(
+            _polygonSides = static_cast<int>(
                 dictionary.value<double>(PolygonSidesInfo.identifier)
                 );
             _hasPolygon = true;
@@ -597,21 +598,19 @@ namespace openspace {
 
 
             if (dictionary.hasKey(TextSizeInfo.identifier)) {
-                _textSize = dictionary.value<double>(TextSizeInfo.identifier);
+                _textSize = dictionary.value<float>(TextSizeInfo.identifier);
             }
             addProperty(_textSize);
 
             if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-                _textMinSize = static_cast<int>(
-                    dictionary.value<float>(LabelMinSizeInfo.identifier)
-                    );
+                _textMinSize =
+                    dictionary.value<float>(LabelMinSizeInfo.identifier);
             }
             addProperty(_textMinSize);
 
             if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-                _textMaxSize = static_cast<int>(
-                    dictionary.value<float>(LabelMaxSizeInfo.identifier)
-                    );
+                _textMaxSize = 
+                    dictionary.value<float>(LabelMaxSizeInfo.identifier);
             }
             addProperty(_textMaxSize);
         }
@@ -895,19 +894,19 @@ namespace openspace {
             scale = 1e3;
             break;
         case Parsec:
-            scale = PARSEC;
+            scale = static_cast<float>(PARSEC);
             break;
         case Kiloparsec:
-            scale = 1e3 * PARSEC;
+            scale = static_cast<float>(1e3 * PARSEC);
             break;
         case Megaparsec:
-            scale = 1e6 * PARSEC;
+            scale = static_cast<float>(1e6 * PARSEC);
             break;
         case Gigaparsec:
-            scale = 1e9 * PARSEC;
+            scale = static_cast<float>(1e9 * PARSEC);
             break;
         case GigalightYears:
-            scale = 306391534.73091 * PARSEC;
+            scale = static_cast<float>(306391534.73091 * PARSEC);
             break;
         }
 
@@ -921,9 +920,9 @@ namespace openspace {
                 *_font,
                 scaledPos,
                 textColor,
-                pow(10.0, _textSize.value()),
-                _textMinSize,
-                _textMaxSize,
+                powf(10.f, _textSize.value()),
+                static_cast<int>(_textMinSize),
+                static_cast<int>(_textMaxSize),
                 modelViewProjectionMatrix,
                 orthoRight,
                 orthoUp,
@@ -947,32 +946,32 @@ namespace openspace {
             scale = 1e3;
             break;
         case Parsec:
-            scale = PARSEC;
+            scale = static_cast<float>(PARSEC);
             break;
         case Kiloparsec:
-            scale = 1e3 * PARSEC;
+            scale = static_cast<float>(1e3 * PARSEC);
             break;
         case Megaparsec:
-            scale = 1e6 * PARSEC;
+            scale = static_cast<float>(1e6 * PARSEC);
             break;
         case Gigaparsec:
-            scale = 1e9 * PARSEC;
+            scale = static_cast<float>(1e9 * PARSEC);
             break;
         case GigalightYears:
-            scale = 306391534.73091 * PARSEC;
+            scale = static_cast<float>(306391534.73091 * PARSEC);
             break;
         }
 
         float fadeInVariable = 1.0f;
         if (!_disableFadeInDistance) {
-            float distCamera = glm::length(data.camera.positionVec3());
+            float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
             glm::vec2 fadeRange = _fadeInDistance;
             float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
             float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
             float funcValue = a * distCamera + b;
-            fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+            fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
 
-            if (funcValue < 0.01) {
+            if (funcValue < 0.01f) {
                 return;
             }
         }
@@ -989,14 +988,22 @@ namespace openspace {
         glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) *
             modelViewMatrix;
 
-        glm::dvec3 cameraViewDirectionWorld = glm::normalize(data.camera.viewDirectionWorldSpace());
-        glm::dvec3 cameraUpDirectionWorld = glm::normalize(data.camera.lookUpVectorWorldSpace());
-        glm::dvec3 orthoRight = glm::dvec3(glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld));
+        glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+        glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+        glm::dvec3 orthoRight = glm::normalize(
+            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+        );
         if (orthoRight == glm::dvec3(0.0)) {
-            glm::dvec3 otherVector(cameraUpDirectionWorld.y, cameraUpDirectionWorld.x, cameraUpDirectionWorld.z);
-            orthoRight = glm::dvec3(glm::cross(otherVector, cameraViewDirectionWorld));
+            glm::dvec3 otherVector(
+                cameraUpDirectionWorld.y, 
+                cameraUpDirectionWorld.x, 
+                cameraUpDirectionWorld.z
+            );
+            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
         }
-        glm::dvec3 orthoUp = cameraUpDirectionWorld;
+        glm::dvec3 orthoUp = glm::normalize(
+            glm::cross(cameraViewDirectionWorld, orthoRight)
+        );
 
         if (_hasSpeckFile) {
             renderBillboards(
