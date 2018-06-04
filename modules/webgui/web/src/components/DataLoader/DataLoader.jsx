@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Proptypes from 'prop-types'; 
 
+import DataItemList from './presentational/DataItemList';
+
 import DataManager from '../../api/DataManager';
 import styles from './DataLoader.scss';
 import Window from '../common/Window/Window';
@@ -15,6 +17,8 @@ class DataLoader extends Component {
     super(props);
 
     this.dataTypesToLoad = ['Volumes', 'Fieldlines'];
+
+    this.handleDataTypeList = this.handleDataTypeList.bind(this);
 
     this.state = {
       activeDataType: '',
@@ -62,7 +66,9 @@ class DataLoader extends Component {
   }
 
   handleDataTypeList(data) {
-    console.log(data);
+    // Separate into array
+
+    this.setState({dataItemsString: data.value});
   }
 
   subscribeToActiveUri(uri = '') {
@@ -122,6 +128,7 @@ class DataLoader extends Component {
               closeCallback={() => setActivated(false)}
             >
               { dataTypeButtons() }
+              <DataItemList items={this.state.dataItemsString} />
               { uploadDataButton() }
             </Window>
           </div>
