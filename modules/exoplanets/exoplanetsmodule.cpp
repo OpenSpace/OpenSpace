@@ -38,6 +38,22 @@ using namespace exoplanets;
 
 ExoplanetsModule::ExoplanetsModule() : OpenSpaceModule(Name) {}
 
+void ExoplanetsModule::setClosestExoplanet(Exoplanet closestExo) {
+	_exo = closestExo;
+}
+
+Exoplanet ExoplanetsModule::getClosestExoplanet() {
+	return _exo;
+}
+
+void ExoplanetsModule::setStarName(std::string starName) {
+	_starName = starName;
+}
+
+std::string ExoplanetsModule::getStarName() {
+	return _starName;
+}
+
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 
     scripting::LuaLibrary res;
@@ -64,7 +80,7 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 }
 
 void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
-    
+
     auto fTask = FactoryManager::ref().factory<Task>();
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fTask, "No task factory existed");

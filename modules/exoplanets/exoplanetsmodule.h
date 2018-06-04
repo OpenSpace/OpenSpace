@@ -33,6 +33,50 @@
 #include <modules/exoplanets/discoverymethods/discoverymethods.h>
 
 namespace openspace {
+	struct Exoplanet {
+		float A;
+		double AUPPER;
+		double ALOWER;
+		double UA;
+		float BIGOM;
+		float BIGOMUPPER;
+		float BIGOMLOWER;
+		float UBIGOM;
+		bool BINARY;
+		float BMV;
+		float ECC;
+		float ECCUPPER;
+		float ECCLOWER;
+		float UECC;
+		float I;
+		float IUPPER;
+		float ILOWER;
+		float UI;
+		int NCOMP;
+		float OM;
+		float OMUPPER;
+		float OMLOWER;
+		float UOM;
+		double PER;
+		float PERUPPER;
+		float PERLOWER;
+		float UPER;
+		double R;
+		double RUPPER;
+		double RLOWER;
+		double UR;
+		float RSTAR;
+		float RSTARUPPER;
+		float RSTARLOWER;
+		float URSTAR;
+		double TT;
+		float TTUPPER;
+		float TTLOWER;
+		float UTT;
+		float POSITIONX;
+		float POSITIONY;
+		float POSITIONZ;
+	};
 
 class ExoplanetsModule : public OpenSpaceModule {
 public:
@@ -45,10 +89,17 @@ public:
 
     std::vector<documentation::Documentation> documentations() const override;
 
+	void setClosestExoplanet(Exoplanet);
+	Exoplanet getClosestExoplanet();
+	void setStarName(std::string);
+	std::string getStarName();
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
     std::unique_ptr<openspace::exoplanets::DiscoveryMethods> _discoveryMethods;
 
+	Exoplanet _exo;
+	std::string _starName;
 };
 
 } // namespace openspace

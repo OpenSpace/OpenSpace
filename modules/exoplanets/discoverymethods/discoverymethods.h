@@ -39,6 +39,15 @@ private:
 	properties::BoolProperty _showTransit;
 	properties::BoolProperty _showDoppler;
 
+    void addTransitMethodVisualization();
+    void removeTransitMethodVisualization();
+    void addDopplerMethodVisualization();
+    void removeDopplerMethodVisualization();
+
+    void scaleStar(std::string, float);
+    void moveStar(std::string, float);
+    void moveCamera();
+
 };
 
 } // namespace
