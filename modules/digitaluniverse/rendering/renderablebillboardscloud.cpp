@@ -29,7 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configuration.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 
 #include <ghoul/filesystem/cachemanager.h>
@@ -465,7 +465,13 @@ namespace openspace {
         // DEBUG:
         _renderOption.addOption(0, "Camera View Direction");
         _renderOption.addOption(1, "Camera Position Normal");
-        _renderOption.set(1);
+        if (OsEng.windowWrapper().isFisheyeRendering()) {
+            _renderOption.set(1);
+        }
+        else {
+            _renderOption.set(0);
+        }
+        
         addProperty(_renderOption);
 
         if (dictionary.hasKey(keyUnit)) {

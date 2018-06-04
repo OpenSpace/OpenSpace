@@ -283,6 +283,13 @@ public:
     virtual bool isSimpleRendering() const;
 
     /**
+    * Returns <code>true</code> if the rendering is being done using a Fisheye lens; 
+    * <code>false</code> otherwise. On default, this method returns
+    * <code>false</code>
+    */
+    virtual bool isFisheyeRendering() const;
+
+    /**
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
     virtual void takeScreenshot(bool applyWarping = false) const;
