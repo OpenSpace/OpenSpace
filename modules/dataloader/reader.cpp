@@ -52,7 +52,7 @@ namespace {
         "If this property is triggered it will call the function to load volume data"
     };
 
-    static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
+    static const openspace::properties::Property::PropertyInfo ReadFieldlinesTriggerInfo = {
         "ReadFieldlinesTrigger",
         "Trigger load fieldline data files",
         "If this property is triggered it will call the function to load fieldline data"

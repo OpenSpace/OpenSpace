@@ -28,17 +28,18 @@ class DataLoader extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     const { activeDataType, dataToLoadUri } = this.state;
-    console.log(this.state)
-    console.log(nextState)
     if ((activeDataType !== nextState.activeDataType) && (nextState.activeDataType !== '')) {
       this.triggerDataToLoad(nextState.activeDataType);
-      this.setState({
-        dataToLoadUri: this.getUriForDataToLoad(nextState.activeDataType)
-      });
+      const uri = this.getUriForDataToLoad(nextState.activeDataType);
+      this.setState({ dataToLoadUri: uri }, this.subscribeToActiveUri(uri));
     }
 
     if (dataToLoadUri !== nextState.dataToLoadUri) {
-      this.subscribeToActiveUri();
+      this.subscribeToActiveUri(nextState.dataToLoadUri);
+    }
+
+    if ((dataToLoadUri !== nextState.dataToLoadUri) && (activeDataType === nextState.activeDataType)) {
+        return false;
     }
 
     return true;
@@ -48,10 +49,10 @@ class DataLoader extends Component {
     let uri = 'Modules.DataLoader.Reader.';
 
     for (const type of this.dataTypesToLoad) {
-      uri += type;
+      if (dataType == type) {
+        uri += type;
+      }
     }
-
-    console.log(`returning uri ${uri}`)
 
     return uri;
   }
@@ -64,14 +65,12 @@ class DataLoader extends Component {
     console.log(data);
   }
 
-  subscribeToActiveUri() {
-    console.log(`subscribing to ${this.state.dataToLoadUri}`);
-    DataManager.subscribe(this.state.dataToLoadUri, this.handleDataTypeList);
+  subscribeToActiveUri(uri = '') {
+    DataManager.subscribe(uri || this.state.dataToLoadUri, this.handleDataTypeList);
   }
 
   render() {
     const {setActivated, activated } = this.props
-    console.log(this.state.dataToLoadUri)
 
     let dataTypeButtons = () => {
       return(
@@ -83,7 +82,8 @@ class DataLoader extends Component {
             {this.dataTypesToLoad.map((dataType) => 
               <Button 
                 key={dataType} 
-                onClick={() => this.setState({activeDataType: dataType})}>
+                onClick={() => this.setState({activeDataType: dataType})}
+                disabled={dataType == 'Fieldlines'}>
                 <Label>{dataType}</Label>
               </Button>
             )}
