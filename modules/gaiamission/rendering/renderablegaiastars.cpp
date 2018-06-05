@@ -157,6 +157,15 @@ namespace {
         "rendering. [Works only with points]"
     };
 
+    static const openspace::properties::Property::PropertyInfo AdditionalNodesInfo = {
+        "AdditionalNodes",
+        "Additional Nodes",
+        "Determines how many additional nodes around the camera that will be fetched from disk. "
+        "The first value determines how many additional layers of parents that will be fetched. "
+        "The second value determines how many layers of descendant that will be fetched from the "
+        "found parents."
+    };
+
     static const openspace::properties::Property::PropertyInfo TmPointPxThresholdInfo = {
         "PixelWeightThreshold",
         "Pixel Weight Threshold",
@@ -394,6 +403,12 @@ documentation::Documentation RenderableGaiaStars::Documentation() {
                 TmPointSigmaInfo.description
             },
             {
+                AdditionalNodesInfo.identifier,
+                new Vector2Verifier<double>,
+                Optional::Yes,
+                AdditionalNodesInfo.description
+            },
+            {
                 TmPointPxThresholdInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -500,6 +515,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     , _closeUpBoostDist(CloseUpBoostDistInfo, 300.f, 1.f, 1000.f)
     , _tmPointFilterSize(TmPointFilterSizeInfo, 7, 1, 19)
     , _tmPointSigma(TmPointSigmaInfo, 0.70, 0.1, 3.0)
+    , _additionalNodes(AdditionalNodesInfo, glm::ivec2(1), glm::ivec2(0), glm::ivec2(4))
     , _tmPointPixelWeightThreshold(TmPointPxThresholdInfo, 0.001, 0.000001, 0.01)
     , _lodPixelThreshold(LodPixelThresholdInfo, 250.0, 0.0, 5000.0)
     , _maxGpuMemoryPercent(MaxGpuMemoryPercentInfo, 0.45, 0.0, 1.0)
@@ -720,6 +736,11 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         _tmPointPixelWeightThreshold = static_cast<float>(
             dictionary.value<double>(TmPointPxThresholdInfo.identifier)
             );
+    }
+
+    if (dictionary.hasKey(AdditionalNodesInfo.identifier)) {
+        _additionalNodes = static_cast<glm::ivec2>(
+            dictionary.value<glm::vec2>(AdditionalNodesInfo.identifier));
     }
 
     if (dictionary.hasKey(LodPixelThresholdInfo.identifier)) {
@@ -1141,7 +1162,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     if (_fileReaderOption == gaiamission::FileReaderOption::StreamOctree) {
         glm::dvec3 cameraPos = data.camera.positionVec3();
         size_t chunkSizeInBytes = _chunkSize * sizeof(GLfloat);
-        _octreeManager->fetchSurroundingNodes(cameraPos, chunkSizeInBytes);
+        _octreeManager->fetchSurroundingNodes(cameraPos, chunkSizeInBytes, _additionalNodes);
 
         // Update CPU Budget property.
         _cpuRamBudgetProperty.set(static_cast<float>(_octreeManager->cpuRamBudget()));
@@ -1803,6 +1824,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
         bool datasetFitInMemory = (static_cast<float>(_totalDatasetSizeInBytes) 
             < (static_cast<float>(_cpuRamBudgetInBytes) * 0.9));
+        if (datasetFitInMemory && !hasProperty(&_additionalNodes)) {
+            addProperty(_additionalNodes);
+        }
+        else if (hasProperty(&_additionalNodes)){
+            removeProperty(_additionalNodes);
+        }
 
         LINFO("Chunk size: " + std::to_string(_chunkSize) +
             " - Max streaming budget (in bytes): " + 

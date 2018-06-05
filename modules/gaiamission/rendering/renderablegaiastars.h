@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/ivec2property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -132,6 +133,7 @@ private:
     properties::FloatProperty _closeUpBoostDist;
     properties::IntProperty _tmPointFilterSize;
     properties::FloatProperty _tmPointSigma;
+    properties::IVec2Property _additionalNodes;
     properties::FloatProperty _tmPointPixelWeightThreshold;
     properties::FloatProperty _lodPixelThreshold;
 

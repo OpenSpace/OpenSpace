@@ -166,7 +166,7 @@ void OctreeManager::printStarsPerNode() const {
 }
 
 void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos, 
-    size_t chunkSizeInBytes) {
+    size_t chunkSizeInBytes, const glm::ivec2& additionalNodes) {
 
     // If entire dataset fits in RAM then load the entire dataset asynchronously now.
     // Nodes will be rendered when they've been made available.
@@ -204,17 +204,23 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
     }
     unsigned long long leafId = node->octreePositionIndex;
     unsigned long long firstParentId = leafId / 10;
-    // Each parent level may be root, make sure to propagate it in that case!
-    unsigned long long secondParentId = (firstParentId == 8) ? 8 : leafId / 100;
-    unsigned long long thirdParentId = (secondParentId == 8) ? 8 : leafId / 1000;
 
     // Return early if camera resides in the same first parent as before!
     // Otherwise camera has moved and may need to load more nodes!
     if (_parentNodeOfCamera == firstParentId) return;
     _parentNodeOfCamera = firstParentId;
 
-    int additionalLevelsToFetch = 0;
-    if (_parentNodeOfCamera < 800000) additionalLevelsToFetch++;
+    // Each parent level may be root, make sure to propagate it in that case!
+    unsigned long long secondParentId = (firstParentId == 8) ? 8 : leafId / 100;
+    unsigned long long thirdParentId = (secondParentId == 8) ? 8 : leafId / 1000;
+    unsigned long long fourthParentId = (thirdParentId == 8) ? 8 : leafId / 10000;
+    unsigned long long fifthParentId = (fourthParentId == 8) ? 8 : leafId / 100000;
+
+    // Get the number of levels to fetch from user input.
+    int additionalLevelsToFetch = additionalNodes.y;
+
+    // Get more descendants when closer to root.
+    if (_parentNodeOfCamera < 80000) additionalLevelsToFetch++;
 
     // Get the 3^3 closest parents and load all their (eventual) children.
     for (int x = -1; x <= 1; x += 1) {
@@ -225,10 +231,18 @@ void OctreeManager::fetchSurroundingNodes(const glm::dvec3& cameraPos,
                     additionalLevelsToFetch);
                 // Fetch LOD stars from 208 parents one and two layer(s) up.
                 if (x != 0 || y != 0 || z != 0) {
-                    //findAndFetchNeighborNode(secondParentId, x, y, z, 
-                    //    additionalLevelsToFetch + 1);
-                    //findAndFetchNeighborNode(thirdParentId, x, y, z, 
-                    //    additionalLevelsToFetch + 1);
+                    if (additionalNodes.x > 0) 
+                        findAndFetchNeighborNode(secondParentId, x, y, z, 
+                            additionalLevelsToFetch);
+                    if (additionalNodes.x > 1)
+                        findAndFetchNeighborNode(thirdParentId, x, y, z, 
+                            additionalLevelsToFetch);
+                    if (additionalNodes.x > 2)
+                        findAndFetchNeighborNode(fourthParentId, x, y, z,
+                            additionalLevelsToFetch);
+                    if (additionalNodes.x > 3)
+                        findAndFetchNeighborNode(fifthParentId, x, y, z,
+                            additionalLevelsToFetch);
                 }
             }
         }

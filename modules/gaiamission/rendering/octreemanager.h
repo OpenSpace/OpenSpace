@@ -107,7 +107,8 @@ public:
      * Calls <code>findAndFetchNeighborNode()</code> and 
      * <code>removeNodesFromRam()</code> internally.
      */
-    void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes);
+    void fetchSurroundingNodes(const glm::dvec3& cameraPos, size_t chunkSizeInBytes, 
+        const glm::ivec2& additionalNodes);
 
     /**
      * Builds render data structure by traversing the Octree and checking for intersection

@@ -582,9 +582,9 @@ std::vector<float> FitsFileReader::readSpeckFile(std::string filePath, int& nRen
             renderValues[2] = readValues[2] / 1000.0; // PosZ
             renderValues[3] = readValues[6]; // AbsMag
             renderValues[4] = readValues[3]; // color
-            renderValues[5] = readValues[13]; // Vel X
-            renderValues[6] = readValues[14]; // Vel Y
-            renderValues[7] = readValues[15]; // Vel Z
+            renderValues[5] = readValues[13] * readValues[16]; // Vel X
+            renderValues[6] = readValues[14] * readValues[16]; // Vel Y
+            renderValues[7] = readValues[15] * readValues[16]; // Vel Z
 
             fullData.insert(fullData.end(), renderValues.begin(), renderValues.end());
         }
