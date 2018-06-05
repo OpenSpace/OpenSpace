@@ -102,6 +102,8 @@ void Reader::readVolumeDataItems() {
       ghoul::filesystem::Directory::Sort::Yes
     );
 
+    // DataLoader _internalDirDirty = false
+
     // for (auto el : volumeItems) {
     //     LINFO("A dir: " + el);
     // }

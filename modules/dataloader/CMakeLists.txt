@@ -27,12 +27,14 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dataloadermodule.h
     ${CMAKE_CURRENT_SOURCE_DIR}/reader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/loader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dataloadermodule.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/reader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/loader.cpp
 )
 
 option(OPENSPACE_MODULE_DATALOADER "Use Data Loader Module" ON)
