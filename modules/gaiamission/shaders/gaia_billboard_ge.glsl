@@ -48,6 +48,8 @@ out float ge_cameraDistFromSun;
 uniform dmat4 view;
 uniform dmat4 projection;
 
+uniform dvec3 cameraPos;
+uniform dvec3 cameraLookUp;
 uniform float viewScaling;
 uniform float cutOffThreshold;
 uniform float closeUpBoostDist;
@@ -101,10 +103,17 @@ void main() {
     if( length(position) < EPS || distThreshold <= 0){
         return;
     }
-
-    vec4 wCameraRight = vec4(inverse(view) * vec4(1.0, 0.0, 0.0, 0.0));
-    vec4 wCameraUp = vec4(inverse(view) * vec4(0.0, 1.0, 0.0, 0.0));
+    
     vec4 centerWorldPos = vs_gPosition[0];
+    
+    dvec3 cameraNormal   = normalize(cameraPos - dvec3(centerWorldPos.xyz));
+    dvec3 newRight = normalize(cross(cameraLookUp, cameraNormal));
+    dvec3 newUp    = cross(cameraNormal, newRight);
+    vec4 wCameraRight = vec4(newRight, 0.0);
+    vec4 wCameraUp = vec4(newUp, 0.0);
+
+    float multiplier = float(length(cameraPos));
+    starSize *= float(multiplier/1E1);
 
     for (int i = 0; i < 4; i++) {
         // Always turn the billboard towards the camera (needed for warped screen).

@@ -157,10 +157,11 @@ private:
     properties::FloatProperty _maxCpuMemoryPercent;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
-        magnitudeBoost, cutOffThreshold, sharpness, billboardSize, closeUpBoostDist, 
-        screenSize, psfTexture, time, colorTexture, nChunksToRender, valuesPerStar, 
-        maxStarsPerNode) _uniformCache;
+    UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection, 
+        renderOption, luminosityMultiplier, magnitudeBoost, cutOffThreshold, 
+        sharpness, billboardSize, closeUpBoostDist, screenSize, psfTexture, 
+        time, colorTexture, nChunksToRender, valuesPerStar, maxStarsPerNode) 
+        _uniformCache;
 
     UniformCache(posXThreshold, posYThreshold, posZThreshold, gMagThreshold, 
         bpRpThreshold, distThreshold) _uniformFilterCache;

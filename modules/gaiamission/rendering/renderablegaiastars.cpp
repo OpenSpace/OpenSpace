@@ -910,6 +910,8 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
         );
+        _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
+        _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
         _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
@@ -939,6 +941,8 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_nofbo_fs.glsl"),
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
         );
+        _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
+        _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
         _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
@@ -963,6 +967,8 @@ void RenderableGaiaStars::initializeGL() {
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_fs.glsl"),
             absPath("${MODULE_GAIAMISSION}/shaders/gaia_billboard_ge.glsl")
         );
+        _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
+        _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
         _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
@@ -1029,7 +1035,7 @@ void RenderableGaiaStars::initializeGL() {
         CpuCap.installedMainMemory()) * 1024 * 1024;
     _cpuRamBudgetInBytes = static_cast<long long>(
         static_cast<float>(installedRam) * _maxCpuMemoryPercent);
-    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes));
+    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes)); 
 
     LINFO("GPU Memory Budget {bytes}: " + std::to_string(_gpuMemoryBudgetInBytes) +
         " - CPU RAM Budget {bytes}: " + std::to_string(_cpuRamBudgetInBytes));
@@ -1379,6 +1385,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     }
     case gaiamission::ShaderOption::Billboard_SSBO: 
     case gaiamission::ShaderOption::Billboard_SSBO_noFBO: {
+        _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+        _program->setUniform(_uniformCache.cameraLookUp, data.camera.lookUpVectorWorldSpace());
         _program->setUniform(_uniformCache.maxStarsPerNode, maxStarsPerNode);
         _program->setUniform(_uniformCache.valuesPerStar, valuesPerStar);
         _program->setUniform(_uniformCache.nChunksToRender, nChunksToRender);
@@ -1398,6 +1406,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         break;
     }
     case gaiamission::ShaderOption::Billboard_VBO: {
+        _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+        _program->setUniform(_uniformCache.cameraLookUp, data.camera.lookUpVectorWorldSpace());
         _program->setUniform(_uniformCache.closeUpBoostDist,
             _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
         );
@@ -1606,6 +1616,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _program = std::move(program);
             }
 
+            _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
+            _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
             _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
             _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
@@ -1651,6 +1663,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 _program = std::move(program);
             }
 
+            _uniformCache.cameraPos = _program->uniformLocation("cameraPos");
+            _uniformCache.cameraLookUp = _program->uniformLocation("cameraLookUp");
             _uniformCache.magnitudeBoost = _program->uniformLocation("magnitudeBoost");
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
             _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
