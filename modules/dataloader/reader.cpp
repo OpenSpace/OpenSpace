@@ -25,6 +25,8 @@
 #include <modules/dataloader/reader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <string>
 #include <regex>
@@ -65,6 +67,7 @@ Reader::Reader()
     : PropertyOwner({ "Reader" })
     , _volumeItems(VolumesInfo) 
     , _readVolumesTrigger(ReadVolumesTriggerInfo) 
+    , _loadDataTrigger(LoadDataTriggerInfo)
 {
     _topDir = ghoul::filesystem::Directory(
       "${DATA}/.internal",
@@ -77,6 +80,7 @@ Reader::Reader()
 
     addProperty(_volumeItems);
     addProperty(_readVolumesTrigger);
+    addProperty(_loadDataTrigger);
 }
 
 void Reader::readVolumeDataItems() {
@@ -111,6 +115,11 @@ void Reader::readVolumeDataItems() {
     // }
 
     // Store a reference somehow if necessary 
+}
+
+void Reader::loadData() {
+  LINFO("Reader::loadData() function has fired");
+  system("nautilus /home/");
 }
 
 }
