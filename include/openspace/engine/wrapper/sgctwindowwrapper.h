@@ -78,6 +78,7 @@ public:
     void sendMessageToExternalControl(const std::vector<char>& message) const override;
 
     bool isSimpleRendering() const override;
+    bool isFisheyeRendering() const override;
 
     void takeScreenshot(bool applyWarping = false) const override;
 
