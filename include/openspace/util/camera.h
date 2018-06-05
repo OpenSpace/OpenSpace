@@ -56,9 +56,9 @@ class SyncBuffer;
 class Camera {
 public:
     /**
-    * Used to explicitly show which variables within the Camera class that are used
-    * for caching.
-    */
+     * Used to explicitly show which variables within the Camera class that are used
+     * for caching.
+     */
     template<typename T>
     struct Cached {
         Cached() { isDirty = true; }

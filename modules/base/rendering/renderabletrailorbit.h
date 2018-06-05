@@ -101,7 +101,7 @@ private:
     /// The time stamp of the newest fixed point in the array
     double _lastPointTime = 0.0;
     /// The time stamp of when the last valid trail was generated.
-    double _previousTime = 0;
+    double _previousTime = 0.0;
 };
 
 } // namespace openspace
