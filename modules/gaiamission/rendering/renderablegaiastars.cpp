@@ -49,6 +49,12 @@
 #include <fstream>
 #include <stdint.h>
 
+#ifdef __APPLE__
+#define APPLE_OS TRUE
+#else
+#define APPLE_OS FALSE
+#endif // __APPLE__
+
 namespace {
     constexpr const char* _loggerCat = "RenderableGaiaStars";
 
@@ -87,6 +93,7 @@ namespace {
         "If 'Billboard_*' is chosen then the geometry shaders will generate screen-faced "
         "billboards for all stars. For '*_SSBO' the data will be stored in Shader Storage "
         "Buffer Objects while '*_VBO' uses Vertex Buffer Objects for the streaming."
+        "OBS! SSBO won't work on APPLE!"
     };
     
     static const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
@@ -603,30 +610,38 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _renderOption.onChange([&] { _buffersAreDirty = true; });
     addProperty(_renderOption);
 
-    _shaderOption.addOptions({
-        { gaiamission::ShaderOption::Point_SSBO, "Point_SSBO" },
-        { gaiamission::ShaderOption::Point_VBO, "Point_VBO" },
-        { gaiamission::ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
-        { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" },
-        { gaiamission::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
+    if (APPLE_OS) {
+        _shaderOption.addOptions({
+            { gaiamission::ShaderOption::Point_VBO, "Point_VBO" },
+            { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" },
         });
+    }
+    else {
+        _shaderOption.addOptions({
+            { gaiamission::ShaderOption::Point_SSBO, "Point_SSBO" },
+            { gaiamission::ShaderOption::Point_VBO, "Point_VBO" },
+            { gaiamission::ShaderOption::Billboard_SSBO, "Billboard_SSBO" },
+            { gaiamission::ShaderOption::Billboard_VBO, "Billboard_VBO" },
+            { gaiamission::ShaderOption::Billboard_SSBO_noFBO, "Billboard_SSBO_noFBO" }
+         });
+    }
     if (dictionary.hasKey(ShaderOptionInfo.identifier)) {
         const std::string shaderOption = 
             dictionary.value<std::string>(ShaderOptionInfo.identifier);
-        if (shaderOption == "Point_SSBO") {
+        if (shaderOption == "Point_SSBO" && !APPLE_OS) {
             _shaderOption = gaiamission::ShaderOption::Point_SSBO;
         }
         else if (shaderOption == "Point_VBO") {
             _shaderOption = gaiamission::ShaderOption::Point_VBO;
         }
-        else if (shaderOption == "Billboard_SSBO") {
+        else if (shaderOption == "Billboard_SSBO" && !APPLE_OS) {
             _shaderOption = gaiamission::ShaderOption::Billboard_SSBO;
         }
-        else if (shaderOption == "Billboard_VBO") {
-            _shaderOption = gaiamission::ShaderOption::Billboard_VBO;
+        else if (shaderOption == "Billboard_SSBO_noFBO" && !APPLE_OS) {
+            _shaderOption = gaiamission::ShaderOption::Billboard_SSBO_noFBO;
         }
         else {
-            _shaderOption = gaiamission::ShaderOption::Billboard_SSBO_noFBO;
+            _shaderOption = gaiamission::ShaderOption::Billboard_VBO;
         }
     }
     _shaderOption.onChange([&] { _buffersAreDirty = true; _shadersAreDirty = true; });
@@ -734,8 +749,9 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         float dedicatedVidMem = static_cast<float>(
             static_cast<long long>(nDedicatedVidMemoryInKB) * 1024);
 
-        _gpuMemoryBudgetInBytes = static_cast<long long>(dedicatedVidMem
-            * _maxGpuMemoryPercent);
+        // TODO: Need to fix what happens if we can't query! For now use 2 GB by default.
+        _gpuMemoryBudgetInBytes = dedicatedVidMem > 0 ? 
+            static_cast<long long>(dedicatedVidMem * _maxGpuMemoryPercent) : 2147483648;
         _buffersAreDirty = true; 
         _maxStreamingBudgetInBytes = 0;
     });
@@ -826,7 +842,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _nRenderedStars.setReadOnly(true);
     addProperty(_nRenderedStars);
 
-    // Add CPU RAM Budget Property and SSBO Star Stream Property to menu.
+    // Add CPU RAM Budget Property and GPU Stream Budget Property to menu.
     _cpuRamBudgetProperty.setReadOnly(true);
     addProperty(_cpuRamBudgetProperty);
     _gpuStreamBudgetProperty.setReadOnly(true);
@@ -1027,15 +1043,17 @@ void RenderableGaiaStars::initializeGL() {
     // Set ceiling for video memory to use in streaming.
     float dedicatedVidMem = static_cast<float>(
         static_cast<long long>(nDedicatedVidMemoryInKB) * 1024);
-    _gpuMemoryBudgetInBytes = static_cast<long long>(dedicatedVidMem
-        * _maxGpuMemoryPercent);
+    // TODO: Need to fix what happens if we can't query! For now use 2 GB by default.
+    _gpuMemoryBudgetInBytes = dedicatedVidMem > 0 ? 
+        static_cast<long long>(dedicatedVidMem * _maxGpuMemoryPercent) : 2147483648;
 
     // Set ceiling for how much of the installed CPU RAM to use for streaming. 
     long long installedRam = static_cast<long long>(
         CpuCap.installedMainMemory()) * 1024 * 1024;
-    _cpuRamBudgetInBytes = static_cast<long long>(
-        static_cast<float>(installedRam) * _maxCpuMemoryPercent);
-    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes)); 
+    // TODO: What to do if we can't query? As for now we use 4 GB by default.
+    _cpuRamBudgetInBytes = installedRam > 0 ? static_cast<long long>(
+        static_cast<float>(installedRam) * _maxCpuMemoryPercent) : 4294967296;
+    _cpuRamBudgetProperty.setMaxValue(static_cast<float>(_cpuRamBudgetInBytes));
 
     LINFO("GPU Memory Budget {bytes}: " + std::to_string(_gpuMemoryBudgetInBytes) +
         " - CPU RAM Budget {bytes}: " + std::to_string(_cpuRamBudgetInBytes));
@@ -1152,6 +1170,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         || shaderOption == gaiamission::ShaderOption::Point_SSBO
         || shaderOption == gaiamission::ShaderOption::Billboard_SSBO_noFBO) {
 
+#ifndef __APPLE__
         //------------------------ RENDER WITH SSBO ---------------------------
         // Update SSBO Index array with accumulated stars in all chunks.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
@@ -1213,6 +1232,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         }
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+#endif // !__APPLE__
     }
     else {
         //---------------------- RENDER WITH VBO -----------------------------
@@ -1528,6 +1548,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         switch (shaderOption) {
         case gaiamission::ShaderOption::Point_SSBO: {
+#ifndef __APPLE__
             std::unique_ptr<ghoul::opengl::ProgramObject> program =
                 ghoul::opengl::ProgramObject::Build(
                     "GaiaStar",
@@ -1561,6 +1582,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (!hasProperty(&_tmPointSigma)) addProperty(_tmPointSigma);
             if (!hasProperty(&_tmPointPixelWeightThreshold)) 
                 addProperty(_tmPointPixelWeightThreshold);
+#endif // !__APPLE__
             break;
         }
         case gaiamission::ShaderOption::Point_VBO: {
@@ -1592,6 +1614,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         case gaiamission::ShaderOption::Billboard_SSBO:
         case gaiamission::ShaderOption::Billboard_SSBO_noFBO: {
+#ifndef __APPLE__
             std::unique_ptr<ghoul::opengl::ProgramObject> program;
             if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO) {
                 program = ghoul::opengl::ProgramObject::Build(
@@ -1646,6 +1669,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             if (hasProperty(&_tmPointSigma)) removeProperty(_tmPointSigma);
             if (hasProperty(&_tmPointPixelWeightThreshold))
                 removeProperty(_tmPointPixelWeightThreshold);
+#endif // !__APPLE__
             break;
         }
         case gaiamission::ShaderOption::Billboard_VBO: {
@@ -1790,6 +1814,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         if (shaderOption == gaiamission::ShaderOption::Billboard_SSBO
             || shaderOption == gaiamission::ShaderOption::Point_SSBO
             || shaderOption == gaiamission::ShaderOption::Billboard_SSBO_noFBO) {
+#ifndef __APPLE__
             _useVBO = false;
 
             // Trigger a rebuild of buffer data from octree. 
@@ -1864,6 +1889,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 );
             }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif // !__APPLE__
         }
         else { // ------------------ RENDER WITH VBO -----------------------
             _useVBO = true;
@@ -1989,6 +2015,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
 
+#ifndef __APPLE__
             // Deallocate SSBO buffers if they existed.
             if (_ssboIdx != 0) {
                 glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
@@ -2009,6 +2036,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 );
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+#endif //!__APPLE__
         }
         
         // Generate VAO and VBO for Quad.
