@@ -45,6 +45,8 @@ class Loader : public properties::PropertyOwner {
     // Load a data item with an abs path to the item under its data type subfolder in data/.internal
     void loadDataItem(std::string absPathToItem);
 
+    void createVolumeDataItem(std::string absPath);
+
   private:
 };
 

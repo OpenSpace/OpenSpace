@@ -30,6 +30,10 @@
 
 namespace openspace {
 
+/**
+ * Own reader, writer, loader
+ * Have functions like getDataItemList that gets list from reader
+ */
 class DataLoaderModule : public OpenSpaceModule {
 public:
     constexpr static const char* Name = "DataLoader";

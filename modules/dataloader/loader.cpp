@@ -22,3 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/dataloader/loader.h>
+
+namespace openspace::dataloader {
+
+Loader::Loader() : PropertyOwner({ "Loader" }) {};
+
+void Loader::addInternalDataItemProperties() {
+  // Get list of internal data items
+
+  // Iterate data items
+    // Initialize trigger property with data item name (are they unique?)
+    // Set onChange method to call loadDataItem with the path as argument
+    // addProperty()
+}
+
+// addDataItemProperty();
+// removeDataItemProperties();
+// loadDataItem(std::string absPathToItem);
+// createVolumeDataItem(std::string absPath);
+
+}
