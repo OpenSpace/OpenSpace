@@ -64,9 +64,9 @@ void main() {
         (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
         (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
-        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
-        (abs(distThreshold.x) > EPS && length(in_position) < distThreshold.x) || 
-        (abs(distThreshold.y) > EPS && length(in_position) > distThreshold.y) ||
+        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ||
+        (abs(distThreshold.x - distThreshold.y) < EPS 
+            && abs(length(in_position) - distThreshold.y) < EPS) ||
         ( renderOption != RENDEROPTION_STATIC && (
         (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
         (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) || 
@@ -87,6 +87,16 @@ void main() {
     if ( renderOption == RENDEROPTION_MOTION ) {
         // Velocity is already in [m/s].
         objectPosition.xyz += time * in_velocity;
+    }
+
+    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
+
+    if ( (abs(distThreshold.x - distThreshold.y) > EPS && 
+        ((abs(distThreshold.x) > EPS && length(distPosition) < distThreshold.x) || 
+        (abs(distThreshold.y) > EPS && length(distPosition) > distThreshold.y)))) {
+        vs_gPosition = vec4(0.0);    
+        gl_Position = vec4(0.0);
+        return;
     }
 
     // Apply camera transforms.

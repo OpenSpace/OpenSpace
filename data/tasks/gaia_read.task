@@ -1,94 +1,56 @@
+local dataFolder = "C:/Users/Adam/Documents/GitHub/OpenSpace/gaia_sync_data/AMNH"
 return {
+    --{
+    --    Type = "ReadFitsTask",
+    --    InFileOrFolderPath = "L:/Gaia_DR2/gaia_source/fits/",
+    --    OutFileOrFolderPath = "E:/gaia_sync_data/Gaia_DR2_full_24columns/",
+    --    SingleFileProcess = false,
+    --    ThreadsToUse = 8,
+    --},
+
     {
-        Type = "ReadFitsTask",
-        InFileOrFolderPath = "L:/Gaia_DR2/gaia_source/fits/",
-        OutFileOrFolderPath = "E:/gaia_sync_data/Gaia_DR2_full_24columns/",
-        SingleFileProcess = false,
-        ThreadsToUse = 8,
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaCepheids/GaiaCepheids.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaCepheids.bin",
     },
-
-
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_AMNH/APOGEE_GaiaDR2okAMNH.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/APOGEE_GaiaDR2okAMNH.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_AMNH/GALAH_GaiaDR2okAMNH.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/GALAH_GaiaDR2okAMNH.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-
-
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/andromeda.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/andromeda.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/k2_dr2_1arcsec.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/k2_dr2_1arcsec.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/kepler_dr2_1arcsec.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/kepler_dr2_1arcsec.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-
-
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/Co-moving-Stars.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/Co-moving-Stars.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-
-
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2/DR2_UMS.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/DR2_UMS.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/DR2_giants.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/DR2_giants.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/DR2_giants_G14.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/DR2_giants_G14.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-    --{
-    --    Type = "ReadFitsTask",
-    --    InFileOrFolderPath = "L:/AMNH-event/Format_DR2_light/gaiadr2_hypatia_overlap.fits",
-    --    OutFileOrFolderPath = "L:/AMNH-event/Bin_files/gaiadr2_hypatia_overlap.bin",
-    --    SingleFileProcess = true,
-    --    ThreadsToUse = 1,
-    --},
-
-
-    --{
-    --    Type = "ReadSpeckTask",
-    --    InFilePath = "L:/AMNH-event/GaiaGroupMembers.speck",
-    --    OutFilePath = "L:/AMNH-event/GaiaGroupMembers.bin",
-    --}
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaCoMovingStarsAll/GaiaCoMovingStarsAll.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaCoMovingStarsAll.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaCoMovingStarsAll/GaiaCoMovingStarsVel.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaCoMovingStarsVel.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaK2/GaiaK2.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaK2.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaKepler/GaiaKepler.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaKepler.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaKeplerPlanets/GaiaKeplerPlanets.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaKeplerPlanets.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaLongPerVar/GaiaLongPerVar.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaLongPerVar.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaRRLyr/GaiaRRLyr.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaRRLyr.bin",
+    },
+    {
+        Type = "ReadSpeckTask",
+        InFilePath = dataFolder .. "/GaiaUMS/GaiaUMS.speck",
+        OutFilePath = dataFolder .. "/Binary/GaiaUMS.bin",
+    },
 }
