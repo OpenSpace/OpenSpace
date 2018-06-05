@@ -29,9 +29,10 @@
 namespace openspace::properties {
 
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
-    [](lua_State* state, bool& success) -> TYPE {                                        \
+    [](lua_State* state, bool leaveOnStack, bool& success) -> TYPE {                     \
         TYPE TF;                                                                         \
         success = true;                                                                  \
+        /*TODO: Actually keep envelopes on lua stack*/                                   \
         TF.setEnvelopesFromLua(state);                                                   \
         return TF;                                                                       \
     }

@@ -42,7 +42,7 @@ public:
         T maximumValue, T steppingValue, float exponent);
 
     bool getLuaValue(lua_State* state) const override;
-    bool setLuaValue(lua_State* state) override;
+    bool setLuaValue(lua_State* state, bool leaveOnStack = false) override;
     int typeLua() const override;
 
     bool getStringValue(std::string& value) const override;
@@ -68,7 +68,7 @@ public:
 
 
     void setInterpolationTarget(ghoul::any value) override;
-    void setLuaInterpolationTarget(lua_State* state) override;
+    void setLuaInterpolationTarget(lua_State* state, bool leaveOnStack = false) override;
     void setStringInterpolationTarget(std::string value) override;
 
     void interpolateValue(float t,

@@ -54,10 +54,12 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue(lua_State* state,        \
+                                                                bool leaveOnStack,       \
                                                                 bool& success);          \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue(lua_State* state,       \
+                                                                 bool leaveOnStack,      \
                                                                  bool& success);         \
     template <>                                                                          \
     template <>                                                                          \
@@ -142,18 +144,20 @@ namespace openspace::properties {
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* lua,    \
+                                                                      bool leaveOnStack, \
                                                                       bool& successful)  \
     {                                                                                    \
-        return FROM_LUA_LAMBDA_EXPRESSION(lua, successful);                              \
+        return FROM_LUA_LAMBDA_EXPRESSION(lua, leaveOnStack, successful);                \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::fromLuaValue<TYPE>(lua_State* lua,   \
+                                                                       bool leaveOnStack,\
                                                                        bool& successful) \
     {                                                                                    \
         return PropertyDelegate<TemplateProperty<TYPE>>::fromLuaValue<TYPE>(             \
-          lua, successful);                                                              \
+          lua, leaveOnStack, successful);                                                \
     }                                                                                    \
                                                                                          \
     template <>                                                                          \
@@ -303,10 +307,10 @@ std::string NumericalProperty<T>::className() const {
 }
 
 template <typename T>
-bool NumericalProperty<T>::setLuaValue(lua_State* state) {
+bool NumericalProperty<T>::setLuaValue(lua_State* state, bool leaveOnStack) {
     bool success = false;
     T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
-        state, success
+        state, leaveOnStack, success
     );
     if (success)
         TemplateProperty<T>::setValue(std::move(value));
@@ -439,10 +443,12 @@ void NumericalProperty<T>::setInterpolationTarget(ghoul::any value) {
 }
 
 template <typename T>
-void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
+void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state, bool leaveOnStack)
+{
     bool success = false;
     T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
         state,
+        leaveOnStack,
         success
     );
     if (success) {
