@@ -22,65 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/marsrovermodule.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
-#include <modules/marsrover/rendering/screenspacedashboard.h>
-#include <modules/marsrover/rendering/renderablemarsrover.h>
 #include <modules/marsrover/heighthandler/extractheightmap.h>
-#include <modules/marsrover/rendering/renderableheightmap.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>	//use ghoul to write to file?
+#include <openspace/engine/openspaceengine.h>
 
-#include <modules/marsrover/rotation/fixedrotation.h>
-#include <modules/marsrover/rotation/luarotation.h>
-#include <modules/marsrover/rotation/staticrotation.h>
+#include <ghoul/fmt.h>
 
-#include <modules/marsrover/rotation/advancedspicerotation.h>
+namespace {
 
-#include <modules/marsrover/scale/luascale.h>
-#include <modules/marsrover/scale/staticscale.h>
+	const char* _loggerCat = "ExtractHeightMap";
 
+} // namespace
+namespace ghoul::filesystem { class File; } //maybe not needed?
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
-
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
-
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
-    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-    
-    //if we need the heightmap code to be a renderable
-    fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
+//************************Call these functions inside marsrovermodule****************************************//
 
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
-}
+//maybe have function as void and just write to file? yeeees?
+    int extractSubsiteInformation(const ghoul::Dictionary dictionary) {
+    	
+        //RenderEngine& renderEngine = OsEng.renderEngine();
+        //_programObject = renderEngine.buildRenderProgram("RenderableMarsrover",
+        //    absPath("${MODULE_MARSROVER}/shaders/heightmap_vs.glsl"),
+        //    absPath("${MODULE_MARSROVER}/shaders/heightmap_fs.glsl")
+        //);
 
-void MarsroverModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-}
+        //std::vector<std::shared_ptr<Subsite>> pos;
+        //LERROR(fmt::format("position KRIIIIISTIN    '{}'", pos));
+        int pos = 1;
+        return pos;
 
-std::vector<documentation::Documentation> MarsroverModule::documentations() const {
-    return {
-        RenderableMarsrover::Documentation()
-        //AdvancedSpiceRotation::Documentation()
-    };
-}
+    }
+
+    std::vector<std::shared_ptr<Subsite>> samplePositionValues(std::vector<std::shared_ptr<Subsite>> vector) {
+
+    	//look at z values and choose the largest one and eliminate the rest of them
+    	std::vector<std::shared_ptr<Subsite>> hej;
+
+    	return hej;
+    }
 
 
-std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
-    return {
-        ScreenSpaceDashboard::luaLibrary()
-    };
-}
+    std::vector<std::shared_ptr<Subsite>> writeToFile(const ghoul::Dictionary dictionary) {
+
+    	std::vector<std::shared_ptr<Subsite>> hej;
+
+    	return hej;
+    }
+
+
 
 } // namespace openspace

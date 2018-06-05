@@ -22,65 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/marsrovermodule.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
 
-#include <ghoul/misc/assert.h>
+// need to include roverterrain.cpp
+//need to access the vertex positions of the fullsite_vs.glsl file. 
 
-#include <modules/marsrover/rendering/screenspacedashboard.h>
-#include <modules/marsrover/rendering/renderablemarsrover.h>
-#include <modules/marsrover/heighthandler/extractheightmap.h>
-#include <modules/marsrover/rendering/renderableheightmap.h>
+//send position of every vertex in fullsubsite_vs.glsl
 
-#include <modules/marsrover/rotation/fixedrotation.h>
-#include <modules/marsrover/rotation/luarotation.h>
-#include <modules/marsrover/rotation/staticrotation.h>
+//FUNCTIONALITY
+// look at the x,y,z values of each vertex point
+// check if there is several z values for the same point (maybe this is better done in fullsite_vs.glsl?)
+	//decide which z value is the heighest.
+// save the correct and sampled x,y,z values
+//write to a txt file (or maybe png??)
 
-#include <modules/marsrover/rotation/advancedspicerotation.h>
+#include <ghoul/misc/dictionary.h>
+#include <modules/roverterrainrenderer/filehandler/subsite.h>
+#include <modules/roverterrainrenderer/renderable/subsitemodels.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <modules/roverterrainrenderer/renderable/sitemanager.h>
 
-#include <modules/marsrover/scale/luascale.h>
-#include <modules/marsrover/scale/staticscale.h>
+#include <modules/roverterrainrenderer/renderable/roverterrain.h>
+
+//#include <modules/roverterrainrenderer/shaders/fullsubsite_vs.glsl>
+#include <modules/roverterrainrenderer/filehandler/roverpathfilereader.h>
+
+
+#ifndef __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___EXTRAXTHEIGHTMAP___H__
+#define __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___EXTRAXTHEIGHTMAP___H__
+
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
+namespace documentation { struct Documentation; }
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
+class ExtractHeightMap {
+public:
+	struct TextureInformation{
+		std::vector<std::string> fileNames; //might not need
+		std::vector<PointCloudInfo> cameraInfoVector;	//might not be able to reach this file, and might not need it
+	};
 
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
-    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-    
-    //if we need the heightmap code to be a renderable
-    fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
+	//ExtractHeightMap(const ghoul::Dictionary& dictionary);
+	static int extractSubsiteInformation(const ghoul::Dictionary dictionary);	//maybe these should be static??
+	
 
+private:
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
-}
+	std::vector<std::shared_ptr<Subsite>> samplePositionValues(const ghoul::Dictionary dictionary);
+	std::vector<std::shared_ptr<Subsite>> writeToFile(const ghoul::Dictionary dictionary);
 
-void MarsroverModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-}
+	std::string _modelPath;
+	std::vector<std::shared_ptr<Subsite>> _subsites;
+	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-std::vector<documentation::Documentation> MarsroverModule::documentations() const {
-    return {
-        RenderableMarsrover::Documentation()
-        //AdvancedSpiceRotation::Documentation()
-    };
-}
-
-
-std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
-    return {
-        ScreenSpaceDashboard::luaLibrary()
-    };
-}
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_ROVER_TERRAIN_RENDERER___EXTRAXTHEIGHTMAP___H__
