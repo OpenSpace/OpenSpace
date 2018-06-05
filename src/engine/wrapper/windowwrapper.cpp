@@ -186,6 +186,10 @@ bool WindowWrapper::isSimpleRendering() const {
     return true;
 }
 
+bool WindowWrapper::isFisheyeRendering() const {
+    return false;
+}
+
 void WindowWrapper::takeScreenshot(bool) const {}
 
 void WindowWrapper::swapBuffer() const {}

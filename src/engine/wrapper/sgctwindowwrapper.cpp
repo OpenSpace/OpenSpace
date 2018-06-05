@@ -269,6 +269,12 @@ bool SGCTWindowWrapper::isSimpleRendering() const {
             sgct::Engine::NonLinearBuffer);
 }
 
+bool SGCTWindowWrapper::isFisheyeRendering() const {
+    return dynamic_cast<sgct_core::FisheyeProjection *>(
+        sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0)->getNonLinearProjectionPtr()
+        );
+}
+
 void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
     sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
     sgct::Engine::instance()->takeScreenshot();

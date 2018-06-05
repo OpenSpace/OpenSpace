@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -435,6 +436,12 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     _renderOption.addOption(0, "Camera View Direction");
     _renderOption.addOption(1, "Camera Position Normal");
     _renderOption.set(1);
+    if (OsEng.windowWrapper().isFisheyeRendering()) {
+        _renderOption.set(1);
+    }
+    else {
+        _renderOption.set(0);
+    }
     addProperty(_renderOption);
 
     if (dictionary.hasKey(keyUnit)) {
@@ -537,7 +544,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     addProperty(_scaleFactor);
 
     if (dictionary.hasKey(PolygonSidesInfo.identifier)) {
-        _polygonSides = static_cast<float>(
+        _polygonSides = static_cast<int>(
             dictionary.value<double>(PolygonSidesInfo.identifier)
         );
         _hasPolygon = true;
@@ -564,21 +571,17 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
 
 
         if (dictionary.hasKey(TextSizeInfo.identifier)) {
-            _textSize = dictionary.value<double>(TextSizeInfo.identifier);
+            _textSize = dictionary.value<float>(TextSizeInfo.identifier);
         }
         addProperty(_textSize);
 
         if (dictionary.hasKey(LabelMinSizeInfo.identifier)) {
-            _textMinSize = static_cast<int>(
-                dictionary.value<float>(LabelMinSizeInfo.identifier)
-                );
+            _textMinSize = dictionary.value<float>(LabelMinSizeInfo.identifier);
         }
         addProperty(_textMinSize);
 
         if (dictionary.hasKey(LabelMaxSizeInfo.identifier)) {
-            _textMaxSize = static_cast<int>(
-                dictionary.value<float>(LabelMaxSizeInfo.identifier)
-                );
+            _textMaxSize = dictionary.value<float>(LabelMaxSizeInfo.identifier);
         }
         addProperty(_textMaxSize);
     }
@@ -867,19 +870,19 @@ void RenderableBillboardsCloud::renderLabels(const RenderData& data,
             scale = 1e3;
             break;
         case Parsec:
-            scale = PARSEC;
+            scale = static_cast<float>(PARSEC);
             break;
         case Kiloparsec:
-            scale = 1e3 * PARSEC;
+            scale = static_cast<float>(1e3 * PARSEC);
             break;
         case Megaparsec:
-            scale = 1e6 * PARSEC;
+            scale = static_cast<float>(1e6 * PARSEC);
             break;
         case Gigaparsec:
-            scale = 1e9 * PARSEC;
+            scale = static_cast<float>(1e9 * PARSEC);
             break;
         case GigalightYears:
-            scale = 306391534.73091 * PARSEC;
+            scale = static_cast<float>(306391534.73091 * PARSEC);
             break;
     }
 
@@ -918,19 +921,19 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
             scale = 1e3;
             break;
         case Parsec:
-            scale = PARSEC;
+            scale = static_cast<float>(PARSEC);
             break;
         case Kiloparsec:
-            scale = 1e3 * PARSEC;
+            scale = static_cast<float>(1e3 * PARSEC);
             break;
         case Megaparsec:
-            scale = 1e6 * PARSEC;
+            scale = static_cast<float>(1e6 * PARSEC);
             break;
         case Gigaparsec:
-            scale = 1e9 * PARSEC;
+            scale = static_cast<float>(1e9 * PARSEC);
             break;
         case GigalightYears:
-            scale = 306391534.73091 * PARSEC;
+            scale = static_cast<float>(306391534.73091 * PARSEC);
             break;
     }
 
@@ -938,10 +941,10 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     if (!_disableFadeInDistance) {
         float distCamera = glm::length(data.camera.positionVec3());
         const glm::vec2 fadeRange = _fadeInDistance;
-        const float a = 1.0f / ((fadeRange.y - fadeRange.x) * scale);
+        const float a = 1.f / ((fadeRange.y - fadeRange.x) * scale);
         const float b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const float funcValue = a * distCamera + b;
-        fadeInVariable *= funcValue > 1.0 ? 1.0 : funcValue;
+        fadeInVariable *= funcValue > 1.f ? 1.f : funcValue;
 
         if (funcValue < 0.01f) {
             return;
@@ -958,14 +961,22 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
 
     glm::dmat4 modelViewProjectionMatrix = glm::dmat4(projectionMatrix) * modelViewMatrix;
 
-    glm::dvec3 cameraViewDirectionWorld = glm::normalize(data.camera.viewDirectionWorldSpace());
-    glm::dvec3 cameraUpDirectionWorld = glm::normalize(data.camera.lookUpVectorWorldSpace());
-    glm::dvec3 orthoRight = glm::dvec3(glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld));
+    glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+    glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+    glm::dvec3 orthoRight = glm::normalize(
+        glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+    );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(cameraUpDirectionWorld.y, cameraUpDirectionWorld.x, cameraUpDirectionWorld.z);
-        orthoRight = glm::dvec3(glm::cross(otherVector, cameraViewDirectionWorld));
+        glm::dvec3 otherVector(
+            cameraUpDirectionWorld.y, 
+            cameraUpDirectionWorld.x, 
+            cameraUpDirectionWorld.z
+        );
+        orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
     }
-    glm::dvec3 orthoUp = cameraUpDirectionWorld;
+    glm::dvec3 orthoUp = glm::normalize(
+        glm::cross(cameraViewDirectionWorld, orthoRight)
+    );
 
     if (_hasSpeckFile) {
         renderBillboards(
