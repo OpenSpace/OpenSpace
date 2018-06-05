@@ -726,7 +726,7 @@ void OctreeManager::fetchNodeDataFromFile(std::shared_ptr<OctreeNode> node) {
         // Keep track of nodes that are loaded and update CPU RAM budget.
         node->isLoaded = true;
         if (!_datasetFitInMemory) {
-            std::lock_guard g(_leastRecentlyFetchedNodesMutex);
+            std::lock_guard<std::mutex> g(_leastRecentlyFetchedNodesMutex);
             _leastRecentlyFetchedNodes.push(node->octreePositionIndex);
         }
         _cpuRamBudget -= nBytes;

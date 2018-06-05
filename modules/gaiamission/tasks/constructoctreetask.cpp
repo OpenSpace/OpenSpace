@@ -34,6 +34,7 @@
 #include <ghoul/fmt.h>
 
 #include <fstream>
+#include <thread>
 
 namespace {
     const char* KeyInFileOrFolderPath = "InFileOrFolderPath";

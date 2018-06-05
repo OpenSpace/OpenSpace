@@ -153,7 +153,10 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(std::string& path,
 
             // Create TableData object of table contents.
             TableData<T> loadedTable = {
-                std::move(contents), table.rows(), table.getRowsize(), table.name()
+                std::move(contents),
+                static_cast<int>(table.rows()),
+                table.getRowsize(),
+                table.name()
             };
 
             _mutex.unlock();
