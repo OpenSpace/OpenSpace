@@ -30,6 +30,8 @@
 #include <ghoul/misc/misc.h>
 #include <algorithm>
 
+//#define DebuggingTreeNode
+
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
 
@@ -81,12 +83,28 @@ namespace {
     }
 
     struct TreeNode {
-        TreeNode(std::string p) : path(std::move(p)) {}
+        TreeNode(std::string p)
+            : path(std::move(p))
+#ifdef DebuggingTreeNode
+            , index(nextIndex++)
+#endif // DebuggingTreeNode
+        {}
 
         std::string path;
         std::vector<std::unique_ptr<TreeNode>> children;
         std::vector<openspace::SceneGraphNode*> nodes;
+#ifdef DebuggingTreeNode
+        int index = 0;
+        static int nextIndex;
+#endif // DebuggingTreeNode
+
     };
+
+#ifdef DebuggingTreeNode
+
+    int TreeNode::nextIndex = 0;
+
+#endif // DebuggingTreeNode
 
     void addPathToTree(TreeNode& node, const std::vector<std::string>& path,
                        openspace::SceneGraphNode* owner)
