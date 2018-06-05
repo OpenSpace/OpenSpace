@@ -781,172 +781,23 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
         result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
 
     return glm::transpose(result);
-    
-    //FIX: returnerar endas result i fromFrame: BASE
+}
 
-    /*
-    const std::string ra_base = "MSL_RA_BASE";
-    const std::string ra_az = "MSL_RA_SHOULDER_AZ";
-    const std::string ra_el = "MSL_RA_SHOULDER_EL";
-    const std::string ra_elbow = "MSL_RA_ELBOW";
-    const std::string ra_wrist = "MSL_RA_WRIST";
-    const std::string ra_turret = "MSL_RA_TURRET";
-
-    const std::string rsm_az = "MSL_RSM_ZERO_AZ";
-    const std::string rsm_el = "MSL_RSM_ZERO_EL";
-
-    const std::string hga_az = "MSL_HGA_AZ";
-    const std::string hga_el = "MSL_HGA_EL";
-
-
-    
-    if( fromFrame == ra_base || fromFrame == ra_az  || fromFrame == ra_el || fromFrame == ra_elbow || fromFrame == ra_wrist || fromFrame == ra_turret ||
-        fromFrame == rsm_el  || fromFrame == rsm_az ||
-        fromFrame == hga_az  || fromFrame == hga_el )
-    {   
-        //ERROR(fmt::format("tihi: " ));
-   
-        //PXFORM( 'MSL_RA_BASE', 'MSL_RA_SHOULDER_AZ', ET, M )
-        //M2EUL( M, 3, 2, 1, ROTZ, ROTY, ROTX )
-        //ANGLE = ROTZ
-        // M = result
-        // ET = ephemerisTime
-        /*
-        void pxform_c ( ConstSpiceChar   * from,
-                        ConstSpiceChar   * to,
-                        SpiceDouble        et,
-                        SpiceDouble        rotate[3][3] )
-
-
-        m2eul_c ( ConstSpiceDouble    r[3][3],
-                  SpiceInt            axis3,
-                  SpiceInt            axis2,
-                  SpiceInt            axis1,
-                  SpiceDouble       * angle3,
-                  SpiceDouble       * angle2,
-                  SpiceDouble       * angle1  )*/
-    /*
+double SpiceManager::getEulerAngle(glm::dmat3 transformMatrix, int a)
+{
         SpiceDouble rot_x;
         SpiceDouble rot_y;
         SpiceDouble rot_z;
-        
-        //Compute Gimbal Angles
-        m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(result)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
-
-        //FIX, delete, use rot_z rename
-        SpiceDouble angle = rot_z;
-            
-        //Rotation for AZ
-        if (fromFrame == ra_base) 
-        {
-            result = glm::dmat3( glm::cos(angle),  glm::sin(angle), 0.0, 
-                                -glm::sin(angle),  glm::cos(angle), 0.0, 
-                                    0.0,             0.0,           1.0 );
-            return result;
-        }
-
-        //Rotation for RA-EL
-        else if (fromFrame == ra_az ) 
-        {
-            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
-                                      0.0,        1.0 ,     0.0, 
-                                 glm::sin(angle), 0.0,  glm::cos(angle) );
-
-        }
-
-        //Rotation for RA-ELBOW 
-        else if (fromFrame == ra_el) 
-        {
-            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
-                                      0.0,        1.0 ,     0.0, 
-                                 glm::sin(angle), 0.0,  glm::cos(angle) );
-        }
-
-        //Rotation  RA-WRIST
-        else if (fromFrame == ra_elbow) 
-        {
-            double rad_90 = 3.14/2.0;
-            glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
-                                                       0.0,        1.0 ,     0.0, 
-                                                  glm::sin(angle), 0.0,  glm::cos(angle) );
-
-            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_90), 0.0, glm::sin(rad_90), 
-                                                            0.0,        1.0,      0.0, 
-                                                     -glm::sin(rad_90), 0.0,  glm::cos(rad_90) );
-            
-            result = MSL_rotation * matrixCorrection;
-        }
-
-        //Rotation RA-turret
-        else if (fromFrame == ra_turret) 
-        {
-            double rad_60 = (50.535*3.14)/180.0;
-            glm::dmat3 MSL_rotation = glm::dmat3( 1.0,        0.0,           0.0,
-                                                  0.0, glm::cos(angle), -glm::sin(angle), 
-                                                  0.0, glm::sin(angle),  glm::cos(angle) );
-
-            //FIX: find correct angle
-            glm::dmat3 matrixCorrection = glm::dmat3( 1.0,       0.0,               0.0,
-                                                      0.0, glm::cos(rad_60), -glm::sin(rad_60), 
-                                                      0.0, glm::sin(rad_60),  glm::cos(rad_60) );
-
-            result = MSL_rotation * matrixCorrection;
-        }
-
-        //Rotation MastCam
-        else if (fromFrame == rsm_az) 
-        {
-            double rad_180 = 3.1590;
-            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_180), -glm::sin(rad_180), 0.0, 
-                                                      glm::sin(rad_180),  glm::cos(rad_180), 0.0, 
-                                                             0.0,             0.0,           1.0 ); 
-
-
-            //glm::dmat3 MSL_rotation = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
-            //                                      glm::sin(angle),  glm::cos(angle), 0.0, 
-            //                                         0.0,             0.0,           1.0 ); 
-
-            result = result * matrixCorrection;
-        }
-
-        else if (fromFrame == rsm_el)
-        {   
-            double rad_90 = 3.14/2.0;
-            glm::dmat3 matrixCorrection = glm::dmat3( glm::cos(rad_90), 0.0, glm::sin(rad_90), 
-                                                              0.0,      1.0,      0.0, 
-                                                     -glm::sin(rad_90), 0.0,  glm::cos(rad_90) );
-
-            result = result * matrixCorrection;
-        }
-
-        //HGA
-        else if (fromFrame == hga_az) 
-        {
-            result = glm::dmat3( glm::cos(angle), -glm::sin(angle), 0.0, 
-                                 glm::sin(angle),  glm::cos(angle), 0.0, 
-                                    0.0,             0.0,           1.0 );
-        }
-
-        else if (fromFrame == hga_el ) 
-        {
-            result = glm::dmat3( glm::cos(angle), 0.0, -glm::sin(angle), 
-                                      0.0,        1.0,     0.0, 
-                                 glm::sin(angle), 0.0,  glm::cos(angle) );
-        }
-    }*/
-
-}
-
-double SpiceManager::getEulerAngle(glm::dmat3 transformMatrix)
-{
-        double rot_x;
-        double rot_y;
-        double rot_z;
+        double angle;
 
         //Compute Gimbal Angles
         m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(transformMatrix)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
 
-        return rot_z;
+        if (a == 1) angle = rot_x;
+        else if (a == 2) angle = rot_y;
+        else angle = rot_z;
+
+        return angle;
 }
 
 glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,

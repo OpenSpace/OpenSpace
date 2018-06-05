@@ -53,14 +53,21 @@ namespace {
 
     static const openspace::properties::Property::PropertyInfo rotAxisSpice = {
         "RotationAxisSpice",
-        "RotationAxis",
+        "RotationAxis1",
+        "This value specifies about which axis to rotate about for correction."
+        "Valid strings are: X90, X180, X90neg, X180neg, Y90, Y180, Y90neg, Y180neg, Z90, Z180, Z90neg, Z180neg"
+    };
+
+    static const openspace::properties::Property::PropertyInfo rotAngleSpice = {
+        "RotationAngleSpice",
+        "RotationAxis1",
         "This value specifies about which axis to rotate about for correction."
         "Valid strings are: X90, X180, X90neg, X180neg, Y90, Y180, Y90neg, Y180neg, Z90, Z180, Z90neg, Z180neg"
     };
 
     static const openspace::properties::Property::PropertyInfo rotAxisCorrection = {
         "RotationAxisStatic",
-        "RotationAxis",
+        "RotationAxis2",
         "This value specifies about which axis to rotate about for correction."
         "Valid strings are: X90, X180, X90neg, X180neg, Y90, Y180, Y90neg, Y180neg, Z90, Z180, Z90neg, Z180neg"
     };    
@@ -74,17 +81,18 @@ namespace {
 
     static const openspace::properties::Property::PropertyInfo rotDir1 = {
         "RotationDirectionSpice",
-        "direction",
+        "direction1",
         "This value specifies the angle of correction around staticAxisRotation2."
         "Valid strings are expressed in radians"
     };
 
     static const openspace::properties::Property::PropertyInfo rotDir2 = {
         "RotationDirectionStatic",
-        "direction",
+        "direction2",
         "This value specifies the angle of correction around staticAxisRotation2."
         "Valid strings are expressed in radians"
     };
+
 } // namespace
 
 namespace openspace {
@@ -95,25 +103,23 @@ namespace openspace {
 AdvancedSpiceRotation::AdvancedSpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo) // @TODO Missing documentation
     , _destinationFrame(DestinationInfo)
-    , _rotationAxisSPICE(rotAxisSpice, 0)
-    , _rotationAxisCorrection(rotAxisCorrection, 0)
+    , _rotationAxisSPICE(rotAxisSpice)
+    , _rotationAngleSPICE(rotAngleSpice)
+    , _rotationAxisCorrection(rotAxisCorrection)
     , _rotationAngle(rotAngle, 0.f)
     , _rotationDir1(rotDir1, true)
     , _rotationDir2(rotDir2, true)
     
-
-
 {
     _sourceFrame = dictionary.value<std::string>(SourceInfo.identifier);
     _destinationFrame = dictionary.value<std::string>(DestinationInfo.identifier);
 
     _rotationAxisSPICE = static_cast<int>(dictionary.value<double>(rotAxisSpice.identifier));
+    _rotationAngleSPICE = static_cast<int>(dictionary.value<double>(rotAngleSpice.identifier));
     _rotationAxisCorrection = static_cast<int>(dictionary.value<double>(rotAxisCorrection.identifier));
     _rotationAngle = static_cast<float>(dictionary.value<double>(rotAngle.identifier));
     _rotationDir1 = dictionary.value<bool>(rotDir1.identifier);
     _rotationDir2 = dictionary.value<bool>(rotDir2.identifier);
-
-
 
 
     if (dictionary.hasKeyAndValue<std::string>(KeyKernels)) {
@@ -135,6 +141,7 @@ AdvancedSpiceRotation::AdvancedSpiceRotation(const ghoul::Dictionary& dictionary
     addProperty(_sourceFrame);
     addProperty(_destinationFrame);
     addProperty(_rotationAxisSPICE);
+    addProperty(_rotationAngleSPICE);
     addProperty(_rotationAxisCorrection);
     addProperty(_rotationAngle);
     addProperty(_rotationDir1);
@@ -150,6 +157,7 @@ AdvancedSpiceRotation::AdvancedSpiceRotation(const ghoul::Dictionary& dictionary
     _destinationFrame.onChange(update);
     
     _rotationAxisSPICE.onChange(update);
+    _rotationAngleSPICE.onChange(update);
     _rotationAxisCorrection.onChange(update);
     _rotationAngle.onChange(update);
     _rotationDir1.onChange(update);
@@ -160,10 +168,7 @@ AdvancedSpiceRotation::AdvancedSpiceRotation(const ghoul::Dictionary& dictionary
 
 glm::dmat3 AdvancedSpiceRotation::matrix(const Time& time) const {
     try {
-        //multiplicate _sourceframe and _destinationframe with the right rotation matrix before sending it to spicemanager!!!!!!!!
         glm::dmat3 result;
-        glm::dmat3 result1;
-        glm::dmat3 result2;
 
         result = SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
@@ -171,20 +176,16 @@ glm::dmat3 AdvancedSpiceRotation::matrix(const Time& time) const {
             time.j2000Seconds()
         );
 
-        if (_rotationAxisSPICE.Property::getStringValue() != 0) 
+        if (_rotationAxisSPICE != 0) 
         {
-            double angle = SpiceManager::ref().getEulerAngle(result);
-            result1 = getRotationMatrix(_rotationAxisSPICE, _rotationDir1, angle);
+            double angle = SpiceManager::ref().getEulerAngle(result, _rotationAngleSPICE);
+            result = getRotationMatrix(_rotationAxisSPICE, _rotationDir1, angle);
         }
 
-        //FIX: inside or outside if statement above?
-        if (_rotationAxisCorrection != 0) {
-            result2 = getRotationMatrix(_rotationAxisCorrection, _rotationDir2, _rotationAngle);
-            result = result1 * result2;
-        }
-
-        //return glm::transpose(result);
-        return result; 
+        if (_rotationAxisCorrection == 1 || _rotationAxisCorrection == 2 || _rotationAxisCorrection == 3) 
+            result = result * getRotationMatrix(_rotationAxisCorrection, _rotationDir2, _rotationAngle);
+        
+        return glm::transpose(result); 
     }
     catch (const SpiceManager::SpiceException&) {
         return glm::dmat3(1.0);
@@ -196,56 +197,45 @@ glm::dmat3 AdvancedSpiceRotation::getRotationMatrix(int axis, bool posDirection,
     
     glm::dmat3 rotMatrix = glm::dmat3(1.0);
 
+    double sin = glm::sin(radians);
+    double cos = glm::cos(radians);
+
     switch(axis)
     {
         case 1:
-            LWARNING("CASE 1");
-            if (posDirection) {
-                LWARNING("POS");
-                rotMatrix = glm::dmat3( 1.0,         0.0,                0.0,
-                                        0.0, glm::cos(radians), -glm::sin(radians), 
-                                        0.0, glm::sin(radians),  glm::cos(radians) );
-            }
-            else {
-                 LWARNING("NEG");
-                rotMatrix = glm::dmat3( 1.0,         0.0,                0.0,
-                                        0.0,  glm::cos(radians),  glm::sin(radians), 
-                                        0.0, -glm::sin(radians),  glm::cos(radians) );
-            }
+            if (posDirection) 
+                rotMatrix = glm::dmat3( 1.0, 0.0,  0.0,
+                                        0.0, cos, -sin, 
+                                        0.0, sin,  cos );
+            else 
+                rotMatrix = glm::dmat3( 1.0,  0.0, 0.0,
+                                        0.0,  cos, sin, 
+                                        0.0, -sin, cos );
             break;
 
         case 2:
-            LWARNING("CASE 2");
-            if (posDirection) {
-                LWARNING("POS");
-                rotMatrix = glm::dmat3( glm::cos(radians), 0.0, glm::sin(radians), 
-                                               0.0,        1.0,        0.0, 
-                                       -glm::sin(radians), 0.0, glm::cos(radians) );
-            }
-            else {
-                LWARNING("NEG");
-                rotMatrix = glm::dmat3( glm::cos(radians), 0.0, -glm::sin(radians), 
-                                               0.0,        1.0,        0.0, 
-                                        glm::sin(radians), 0.0,  glm::cos(radians) );
-            }
+            if (posDirection) 
+                rotMatrix = glm::dmat3( cos, 0.0, sin, 
+                                        0.0, 1.0, 0.0, 
+                                       -sin, 0.0, cos );
+            else 
+                rotMatrix = glm::dmat3( cos, 0.0, -sin, 
+                                        0.0, 1.0,  0.0, 
+                                        sin, 0.0,  cos ); 
             break;
 
         case 3:    
-            LWARNING("CASE 3");  
-            if (posDirection) {
-                 LWARNING("POS");
-                rotMatrix = glm::dmat3( glm::cos(radians), -glm::sin(radians), 0.0, 
-                                        glm::sin(radians),  glm::cos(radians), 0.0, 
-                                             0.0,                0.0,          1.0 );  
-            }
-            else {
-                 LWARNING("NEG");
-                rotMatrix = glm::dmat3(  glm::cos(radians), glm::sin(radians), 0.0, 
-                                        -glm::sin(radians), glm::cos(radians), 0.0, 
-                                             0.0,                0.0,          1.0 ); 
-            }
+            if (posDirection) 
+                rotMatrix = glm::dmat3( cos, -sin, 0.0, 
+                                        sin,  cos, 0.0, 
+                                        0.0,  0.0, 1.0 );  
+            else 
+                rotMatrix = glm::dmat3(  cos, sin, 0.0, 
+                                        -sin, cos, 0.0, 
+                                         0.0, 0.0, 1.0 ); 
             break;
     }
+
     return rotMatrix;
 }
 

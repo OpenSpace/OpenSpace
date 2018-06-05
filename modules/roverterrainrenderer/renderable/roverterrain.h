@@ -101,6 +101,8 @@ namespace openspace {
 
         GeneralProperties _generalProperties;
 
+        std::vector<Geodetic2> _coordinatesModels;
+
         properties::Vec3Property _debugModelRotation;
 
         bool _isFirst;

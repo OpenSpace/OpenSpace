@@ -25,6 +25,8 @@
 #include <modules/roverterrainrenderer/renderable/roverterrain.h>
 #include <modules/roverterrainrenderer/model/modelprovider.h>
 
+#include <modules/marsrover/heighthandler/extractheightmap.h> //KRISTIN
+
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
@@ -129,6 +131,14 @@ namespace openspace {
         subsiteWithModelDictionary.setValue("AbsPathToModels", _modelPath);
         _subsitesWithModels = RoverPathFileReader::extractSubsitesWithModels(subsiteWithModelDictionary);
 
+        //KRIIIIISTIN
+        //want to send this to extractHeightMap!!!!!!!!!!!
+        //LERROR(fmt::format("positionWorldSpace    '{}'", positionWorldSpace));
+        //std::vector<std::shared_ptr<Subsite>> hej;
+        //hej = ExtractHeightMap::extractSubsiteInformation(_subsitesWithModels);
+        //KRIIIIISTIN
+
+
         // Extract all subsites
         ghoul::Dictionary subsiteDictionary;
         subsiteDictionary.setValue("RoverLocationPath", _roverLocationPath);
@@ -164,6 +174,7 @@ namespace openspace {
         for (auto subsite : _subsitesWithModels) {
             coordinatesWithModel.push_back(subsite->geodetic);
         }
+
 
         RenderEngine& renderEngine = OsEng.renderEngine();
         _programObject = renderEngine.buildRenderProgram("RoverTerrain",
@@ -207,7 +218,7 @@ namespace openspace {
 
     void RoverTerrain::render(const RenderData& data, RendererTasks& rendererTask) {
         std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
-
+        
         if (subSitesVector.size() < 1) {
             return;
         }
@@ -264,6 +275,14 @@ namespace openspace {
             vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, lodCheck);
         else if (ss.size() > 0)
             vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, lodCheck);
+
+        //KRIIIIISTIN
+        //want to send this to extractHeightMap!!!!!!!!!!!
+        //LERROR(fmt::format("positionWorldSpace    '{}'", positionWorldSpace));
+        // /std::vector<std::shared_ptr<Subsite>> hej;
+        // /hej = ExtractHeightMap::extractSubsiteInformation(vectorOfsubsiteModels);
+        //KRIIIIISTIN
+
 
         vectorOfsubsiteModels = calculateSurfacePosition(vectorOfsubsiteModels);
         
@@ -341,6 +360,17 @@ namespace openspace {
             const GLint locationHorizontal = _programObject->uniformLocation("camerasHorizontals");
             const GLint locationVector = _programObject->uniformLocation("camerasVectors");
 
+            //KRISTIN
+            //std::vector<glm::fvec3> positionInfo;
+            //for (auto loc : subsiteModels->positionInfo){
+            //    positionInfo.push_back(subsiteModels->cartesianPosition);
+            //}
+            
+            //const GLint position = _programObject->uniformLocation("vertexPosition");
+            //glUniform3fv(position, cameraInfoVector.size(), reinterpret_cast<GLfloat *>(cameraInfoVector.data()));
+
+
+            //KRISTIN
 
             glUniform3fv(locationCenter, cameraInfoCenter.size(), reinterpret_cast<GLfloat *>(cameraInfoCenter.data()));
             glUniform3fv(locationAxis, cameraInfoAxis.size(), reinterpret_cast<GLfloat *>(cameraInfoAxis.data()));

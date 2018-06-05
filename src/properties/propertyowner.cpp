@@ -229,11 +229,11 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
 
     // If we found the propertyowner's name, we need to bail out
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
-        LERROR(fmt::format(
-            "PropertyOwner '{}' already present in PropertyOwner '{}'",
-            owner->identifier(),
-            identifier()
-        ));
+        //LERROR(fmt::format(
+        //    "PropertyOwner '{}' already present in PropertyOwner '{}'",
+        //    owner->identifier(),
+        //    identifier()
+        //));
         return;
     } else {
         // We still need to check if the PropertyOwners name is used in a Property

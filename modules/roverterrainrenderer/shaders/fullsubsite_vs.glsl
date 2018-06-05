@@ -29,6 +29,10 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
+//KRISTIN
+//uniform vec3 vertexPosition[0];
+//KRISTIN
+
 uniform vec3 camerasCenters[20];
 uniform vec3 camerasAxes[20];
 uniform vec3 camerasHorizontals[20];
@@ -56,6 +60,7 @@ uniform float _magnification;
 out vec3 vs_normalViewSpace;
 out vec4 vs_positionScreenSpace;
 out vec4 vs_positionCameraSpace;
+out vec4 vs_vertPosition;
 
 out vec2 vs_stDone[22];
 flat out int textureIndex;
@@ -149,6 +154,7 @@ void main () {
   position.xyz *= pow(10, _magnification);
   vs_positionCameraSpace = modelViewTransform * position;
   vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+  vs_vertPosition = position;
 
   vs_positionScreenSpace = z_normalization(positionClipSpace);
   gl_Position = vs_positionScreenSpace;

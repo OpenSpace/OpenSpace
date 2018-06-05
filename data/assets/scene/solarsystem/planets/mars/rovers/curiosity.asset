@@ -606,10 +606,19 @@ local Submodules = {
         Type = "RoverTerrain",
         RoverLocationPath = dataPath .. "/path/rover_locations.shp",
         --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
-        ModelPath = "F:/RoverTerrain-Models&Textures/modelsEasy/",    
-        TexturePath = "F:/RoverTerrain-Models&Textures/texturesEasy/",
+        ModelPath = "F:/RoverTerrain-Models&Textures/models/",    
+        TexturePath = "F:/RoverTerrain-Models&Textures/textures/",
     },
     GuiPath = "/Solar System/Curiosity"
+}
+
+local HeightMap = {
+    Identifier = "HeightMap",
+    Parent = "Submodules",
+    Renderable = {
+        Type = "RenderableHeightMap",
+        FrustumSize = {1, 2}
+    }
 }
 
 
@@ -1112,6 +1121,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     SAM_Cover_2,
     CHEMIN_Bottom,
     Submodules,
+    HeightMap,
 
     Wheel_Base,
     Wheel_Leg_1A_L,

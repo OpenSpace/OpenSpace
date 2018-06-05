@@ -47,6 +47,8 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager/sitepropertyowner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager/drivepropertyowner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/filehandler/pointcloudinfo.h
+
+
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -69,6 +71,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/renderable/lodmodelswitch.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager/sitepropertyowner.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager/drivepropertyowner.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

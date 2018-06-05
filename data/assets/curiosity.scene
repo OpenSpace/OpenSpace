@@ -31,7 +31,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Mars", "Curiosity"
+        "Earth", "Mars", "Curiosity", "HeightMap"
     })
 
     openspace.addVirtualProperty(
@@ -45,8 +45,8 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = MSLAsset.CuriosityModel.Identifier,
-        --Focus = marsAsset.Mars.Identifier,
+        --Focus = MSLAsset.CuriosityModel.Identifier,
+        Focus = marsAsset.Mars.Identifier,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })
@@ -59,6 +59,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Mars", "Curiosity"
+        "Earth", "Mars", "Curiosity", "HeightMap"
     })
 end)

@@ -717,7 +717,7 @@ public:
 
 
     //returns the gimbal angle for spacecrafts
-    double getEulerAngle(glm::dmat3 transformMatrix);
+    double getEulerAngle(glm::dmat3 transformMatrix, int a);
 
     /// The structure returned by the #fieldOfView methods
     struct FieldOfViewResult {

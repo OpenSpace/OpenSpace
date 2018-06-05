@@ -28,20 +28,10 @@ set(HEADER_FILES
 
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacedashboard.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.h>
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
-
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
 
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -49,20 +39,11 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacedashboard.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.cpp>
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/fixedrotation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/luarotation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
