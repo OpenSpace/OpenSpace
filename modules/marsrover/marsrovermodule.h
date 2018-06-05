@@ -26,6 +26,9 @@
 #define __OPENSPACE_MODULE_MARSROVER___MARSROVERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <modules/globebrowsing/globebrowsingmodule.h>
+
+
 
 #include <ghoul/opengl/programobjectmanager.h>
 
@@ -39,14 +42,11 @@ public:
     MarsroverModule();
     virtual ~MarsroverModule() = default;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    static ghoul::opengl::ProgramObjectManager ProgramObjectManager; //nej
 
 protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
+    void internalInitialize(const ghoul::Dictionary&) override; //used always typ
 };
 
 } // namespace openspace

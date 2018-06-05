@@ -24,24 +24,19 @@
 
 #include <modules/marsrover/marsrovermodule.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
 
+//#include <modules/marsrover/surfaceprojection/marsprojection.h>
+
+
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 
-#include <modules/marsrover/rendering/screenspacedashboard.h>
-#include <modules/marsrover/rendering/renderablemarsrover.h>
-
-#include <modules/marsrover/rotation/fixedrotation.h>
-#include <modules/marsrover/rotation/luarotation.h>
-#include <modules/marsrover/rotation/staticrotation.h>
+//#include <modules/marsrover/rendering/renderablemarsrover.h>
 
 #include <modules/marsrover/rotation/advancedspicerotation.h>
+//#include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
 
-#include <modules/marsrover/scale/luascale.h>
-#include <modules/marsrover/scale/staticscale.h>
 
 namespace openspace {
 
@@ -50,31 +45,19 @@ ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
 MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
 
 void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
-    fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
+    
+    //to later
+    //auto fRenderable = FactoryManager::ref().factory<Renderable>();    
+    //ghoul_assert(fRenderable, "Renderable factory was not created");    
+    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
     
     auto fRotation = FactoryManager::ref().factory<Rotation>();
-    ghoul_assert(fRotation, "Rotation factory was not created");
+    
+    //(fRotation, "Rotation factory was not created");
     fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
+    
+   
 }
 
-void MarsroverModule::internalDeinitializeGL() {
-    ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-}
-
-std::vector<documentation::Documentation> MarsroverModule::documentations() const {
-    return {
-        RenderableMarsrover::Documentation()
-        //AdvancedSpiceRotation::Documentation()
-    };
-}
-
-
-std::vector<scripting::LuaLibrary> MarsroverModule::luaLibraries() const {
-    return {
-        ScreenSpaceDashboard::luaLibrary()
-    };
-}
 
 } // namespace openspace

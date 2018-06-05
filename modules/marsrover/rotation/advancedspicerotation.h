@@ -50,11 +50,12 @@ private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
 
-    properties::IntProperty  _rotationAxisSPICE;
-    properties::IntProperty  _rotationAxisCorrection;
-    properties::FloatProperty _rotationAngle;
-    properties::BoolProperty  _rotationDir1;
-    properties::BoolProperty  _rotationDir2;
+    properties::IntProperty    _rotationAxisSPICE;  // specifies rotation axis to rotate around for transformation matrix
+    properties::IntProperty    _rotationAngleSPICE; //specifies which angle to use from spice
+    properties::IntProperty    _rotationAxisCorrection;
+    properties::FloatProperty  _rotationAngle;
+    properties::BoolProperty   _rotationDir1; 
+    properties::BoolProperty   _rotationDir2;
 };
 
 } // namespace openspace
