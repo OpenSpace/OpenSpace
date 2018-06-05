@@ -1,18 +1,14 @@
 import React, { Component } from 'react';
-import Proptypes from 'prop-types'; 
+import PropTypes from 'prop-types'; 
 import styles from './DataItemList.scss';
-// import Label from '../common/Label/Label';
 
-const getDirectoryLeaf = (directory) => {
-  const leaf = directory.match('([^/]+)/?$');
-  console.log(leaf);
-  // std::regex dirLeaf_regex("([^/]+)/?$");
-}
+import { getDirectoryLeaf } from '../utils/helpers';
 
 const DataItemList = (props) => (
   <div className={styles.list}>
-    {props.items && props.items.map(p => (
-      <div class={styles.item}
+    {props.items.length > 0 && props.items.map(p => (
+      <div className={styles.item}
+           key={p}
            onClick={() => console.log(`clicked ${p}`)}>
         {getDirectoryLeaf(p)}
       </div>
@@ -20,6 +16,13 @@ const DataItemList = (props) => (
   </div>
 )
 
-// define props
+DataItemList.propTypes = {
+  items: PropTypes.arrayOf(PropTypes.string)
+};
+
+DataItemList.defaultProps = {
+  items: [],
+};
+
 
 export default DataItemList;

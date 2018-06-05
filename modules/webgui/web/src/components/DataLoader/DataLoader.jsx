@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Proptypes from 'prop-types'; 
 
 import DataItemList from './presentational/DataItemList';
+import { stringListToArray } from './utils/helpers';
 
 import DataManager from '../../api/DataManager';
 import styles from './DataLoader.scss';
@@ -23,6 +24,7 @@ class DataLoader extends Component {
     this.state = {
       activeDataType: '',
       dataToLoadUri: '',
+      dataItems: []
     };
   }
 
@@ -40,10 +42,6 @@ class DataLoader extends Component {
 
     if (dataToLoadUri !== nextState.dataToLoadUri) {
       this.subscribeToActiveUri(nextState.dataToLoadUri);
-    }
-
-    if ((dataToLoadUri !== nextState.dataToLoadUri) && (activeDataType === nextState.activeDataType)) {
-        return false;
     }
 
     return true;
@@ -66,9 +64,7 @@ class DataLoader extends Component {
   }
 
   handleDataTypeList(data) {
-    // Separate into array
-
-    this.setState({dataItemsString: data.value});
+    this.setState({dataItems: stringListToArray(data.Value)});
   }
 
   subscribeToActiveUri(uri = '') {
@@ -117,9 +113,9 @@ class DataLoader extends Component {
     };
 
     return(
-      <div id="page-content-wrapper">
+      <div className="page-content-wrapper">
         { this.props.activated && (
-          <div className={styles.center-content}>
+          <div className={styles.centerContent}>
             <Window
               title="Data Loader"
               // Temporary position and size fix
@@ -128,7 +124,7 @@ class DataLoader extends Component {
               closeCallback={() => setActivated(false)}
             >
               { dataTypeButtons() }
-              <DataItemList items={this.state.dataItemsString} />
+              <DataItemList items={this.state.dataItems} />
               { uploadDataButton() }
             </Window>
           </div>
