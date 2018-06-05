@@ -52,13 +52,6 @@ local landingSite = {
 local MSL_Location = {
     Identifier = "MSL_Location",
     Parent =  landingSite.Identifier,
-    Transform = {   
-        Translation = {
-            Type = "SpacecraftProjection",
-            DestinationPlanet = "mars",
-            Position = {0.0, 0.0, 0.0}
-        }
-    },
     --Transform = {
     --    Scale = {
     --         Type = "StaticScale",
