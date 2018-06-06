@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#pragma optimize ("", off)
+
 #include <modules/base/rotation/fixedrotation.h>
 
 #include <openspace/documentation/documentation.h>
@@ -63,7 +65,7 @@ namespace {
     };
 
     static const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
-        "InvertObject",
+        "Inverted",
         "Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
@@ -126,6 +128,12 @@ documentation::Documentation FixedRotation::Documentation() {
                 OrthogonalVectorInfo.description
             },
             {
+                KeyXAxis + InvertObjectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                InvertObjectInfo.description
+            },
+            {
                 KeyYAxis,
                 new OrVerifier(
                     new StringVerifier,
@@ -144,6 +152,12 @@ documentation::Documentation FixedRotation::Documentation() {
                 OrthogonalVectorInfo.description
             },
             {
+                KeyYAxis + InvertObjectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                InvertObjectInfo.description
+            },
+            {
                 KeyZAxis,
                 new OrVerifier(
                     new StringVerifier,
@@ -160,6 +174,12 @@ documentation::Documentation FixedRotation::Documentation() {
                 new BoolVerifier,
                 Optional::Yes,
                 OrthogonalVectorInfo.description
+            },
+            {
+                KeyZAxis + InvertObjectInfo.identifier,
+                new BoolVerifier,
+                Optional::Yes,
+                InvertObjectInfo.description
             },
             {
                 AttachedInfo.identifier,
@@ -471,6 +491,12 @@ bool FixedRotation::initialize() {
         _xAxis.type = Axis::Type::OrthogonalVector;
     }
 
+    if (_constructorDictionary.hasKey(KeyXAxis + InvertObjectInfo.identifier)) {
+        _xAxis.invertObject = _constructorDictionary.value<bool>(
+            KeyXAxis + InvertObjectInfo.identifier
+        );
+    }
+
     bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
     if (hasYAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyYAxis)) {
@@ -492,6 +518,13 @@ bool FixedRotation::initialize() {
     if (_yAxis.isOrthogonal) {
         _yAxis.type = Axis::Type::OrthogonalVector;
     }
+
+    if (_constructorDictionary.hasKey(KeyYAxis + InvertObjectInfo.identifier)) {
+        _yAxis.invertObject = _constructorDictionary.value<bool>(
+            KeyYAxis + InvertObjectInfo.identifier
+        );
+    }
+
 
     bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
     if (hasZAxis) {
@@ -515,6 +548,11 @@ bool FixedRotation::initialize() {
         _zAxis.type = Axis::Type::OrthogonalVector;
     }
 
+    if (_constructorDictionary.hasKey(KeyZAxis + InvertObjectInfo.identifier)) {
+        _zAxis.invertObject = _constructorDictionary.value<bool>(
+            KeyZAxis + InvertObjectInfo.identifier
+        );
+    }
 
 
     if (!hasXAxis && hasYAxis && hasZAxis) {
@@ -569,17 +607,21 @@ glm::dmat3 FixedRotation::matrix(const Time&) const {
 }
 
 glm::vec3 FixedRotation::xAxis() const {
+    // @TODO: Change this (and the others) back to _xAxis.type once that class is fixed
     switch (_xAxis.type) {
         case Axis::Type::Unspecified:
             LWARNINGC("FixedRotation", "Unspecified axis type for X axis");
             return glm::vec3(1.f, 0.f, 0.f);
         case Axis::Type::Object:
             if (_xAxis.node && _attachedNode) {
-                glm::vec3 dir = glm::vec3(glm::normalize(
-                    _xAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
-                ));
-                return _xAxis.invertObject ? -dir : dir;
+                glm::dvec3 dir = _xAxis.node->worldPosition() -
+                    _attachedNode->worldPosition();
+
+                if (dir == glm::dvec3(0.0)) {
+                    dir = glm::dvec3(1.0, 0.0, 0.0);
+                }
+                glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                return _xAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
                 if (_xAxis.node) {
@@ -630,11 +672,14 @@ glm::vec3 FixedRotation::yAxis() const {
             return glm::vec3(0.f, 1.f, 0.f);
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
-                glm::vec3 dir = glm::vec3(glm::normalize(
-                    _yAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
-                ));
-                return _yAxis.invertObject ? -dir : dir;
+                glm::dvec3 dir = _yAxis.node->worldPosition() -
+                    _attachedNode->worldPosition();
+
+                if (dir == glm::dvec3(0.0)) {
+                    dir = glm::dvec3(0.0, 1.0, 0.0);
+                }
+                glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                return _yAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
                 if (_yAxis.node) {
@@ -685,11 +730,14 @@ glm::vec3 FixedRotation::zAxis() const {
             return glm::vec3(0.f, 0.f, 1.f);
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
-                glm::vec3 dir = glm::vec3(glm::normalize(
-                    _zAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
-                ));
-                return _zAxis.invertObject ? -dir : dir;
+                glm::dvec3 dir = _zAxis.node->worldPosition() -
+                    _attachedNode->worldPosition();
+
+                if (dir == glm::dvec3(0.0)) {
+                    dir = glm::dvec3(0.0, 0.0, 1.0);
+                }
+                glm::vec3 dirNorm = glm::vec3(glm::normalize(dir));
+                return _zAxis.invertObject ? -dirNorm : dirNorm;
             }
             else {
                 if (_zAxis.node) {

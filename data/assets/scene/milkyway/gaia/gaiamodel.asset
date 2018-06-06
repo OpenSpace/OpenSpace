@@ -21,13 +21,14 @@ local GaiaModel = {
     Identifier = "GaiaModel",
     Parent = transforms.GaiaPosition.Identifier,
     Transform = {
-        -- Rotation = {
-        --     Type = "FixedRotation",
-        --     Attached = "GaiaModel",
-        --     XAxis = { 1.0, 0.0, 0.0 },
-        --     XAxisIsOrthogonal = true,
-        --     YAxis = "Sun"
-        -- },
+        Rotation = {
+            Type = "FixedRotation",
+            Attached = "GaiaModel",
+            XAxis = { 1.0, 0.0, 0.0 },
+            XAxisOrthogonal = true,
+            YAxis = "Sun",
+            YAxisInverted = true
+        },
         Scale = {
             Type = "StaticScale",
             Scale = 10.0

@@ -57,7 +57,7 @@ private:
 
     struct Axis {
         enum Type {
-            Unspecified = 0,
+            Unspecified = -1,
             Object,
             Vector,
             OrthogonalVector,
