@@ -1,5 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 
 local trail = asset.syncedResource({
@@ -34,4 +35,29 @@ local GaiaTrail = {
     }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaTrail } )
+local GaiaTrailEclip = {
+    Identifier = "GaiaTrail_Eclip",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+            Type = "HorizonsTranslation",
+            HorizonsTextFile = trail .. "/gaia_orbit_horizons_sun.dat"
+        },
+        Color = { 1.0, 0.0, 0.0 },
+        ShowFullTrail = false,
+        StartTime = "2013 DEC 19 09:55:10",
+        EndTime = "2019 JUN 20 05:55:10",
+        PointSize = 5,
+        SampleInterval = 6000,
+        TimeStampSubsampleFactor = 1,
+        EnableFade = false,
+        Rendering = "Lines"
+    },
+    GUI = {
+        Name = "Ecliptic Trail",
+        Path = "/GaiaMission/Gaia Model"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { GaiaTrail, GaiaTrailEclip } )

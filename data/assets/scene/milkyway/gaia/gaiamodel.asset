@@ -20,6 +20,20 @@ local model = asset.syncedResource({
 local GaiaModel = {
     Identifier = "GaiaModel",
     Parent = transforms.GaiaPosition.Identifier,
+    Transform = {
+        -- Rotation = {
+        --     Type = "FixedRotation",
+        --     Attached = "GaiaModel",
+        --     XAxis = { 1.0, 0.0, 0.0 },
+        --     XAxisIsOrthogonal = true,
+        --     YAxis = "Sun"
+        -- },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 10.0
+        }
+    },
+    -- X Orthogonal 
     Renderable = {
         Type = "RenderableModel",
         Body = "GAIA",
