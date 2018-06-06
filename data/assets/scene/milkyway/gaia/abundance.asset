@@ -1,0 +1,43 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local hypatia = {
+    Identifier = "Stars_Hypatia",
+    Renderable = {
+        Type = "RenderableStars",
+        File = "C:/Users/ab7512/Desktop/GaiaHypatia/GaiaHypatia.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = "C:/Users/ab7512/Desktop/GaiaHypatia/RainbowGradient.cmap",
+    },
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
+}
+
+
+local apogee = {
+    Identifier = "Stars_Apogee",
+    Renderable = {
+        Type = "RenderableStars",
+        File = "C:/Users/ab7512/Desktop/GaiaAbundApogee/GaiaAbundApogee.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = "C:/Users/ab7512/Desktop/GaiaAbundApogee/RainbowGradient.cmap",
+    },
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
+}
+
+local galah = {
+    Identifier = "Stars_Galah",
+    Renderable = {
+        Type = "RenderableStars",
+        File = "C:/Users/ab7512/Desktop/GaiaAbundGalah/GaiaAbundGalah.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = "C:/Users/ab7512/Desktop/GaiaAbundGalah/RainbowGradient.cmap",
+    },
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { hypatia, apogee, galah })

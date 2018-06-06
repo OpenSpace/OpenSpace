@@ -49,7 +49,7 @@ namespace {
 
     constexpr int8_t CurrentCacheVersion = 1;
 
-    struct ColorVBOLayout {
+    struct SingleValueLayout {
         std::array<float, 4> position; // (x,y,z,e)
 
         float bvColor; // B-V color value
@@ -120,6 +120,30 @@ namespace {
         "This value is used as a lower limit on the size of stars that are rendered. Any "
         "stars that have a smaller apparent size will be discarded entirely."
     };
+
+    const openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
+        "OtherData",
+        "Other Data Column",
+        "The index of the speck file data column that is used as the color input"
+    };
+
+    const openspace::properties::Property::PropertyInfo OtherDataValueRange = {
+        "OtherDataValueRange",
+        "Range of the Other Data Values",
+        ""
+    };
+
+    const openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
+        "OtherDataColorMap",
+        "Other Data Color Map",
+        "The color map that is used if the 'Other Data' rendering method is selected"
+    };
+
+    const openspace::properties::Property::PropertyInfo UsePsfTexture = {
+        "UsePSFTexture",
+        "Use Point Spread Function texture",
+        ""
+    };
 }  // namespace
 
 namespace openspace {
@@ -157,10 +181,10 @@ namespace openspace {
             {
                 ColorOptionInfo.identifier,
                 new StringInListVerifier({
-            "Color", "Velocity", "Speed"
-                    }),
-            Optional::Yes,
-            ColorOptionInfo.description
+                    "Color", "Velocity", "Speed"
+                }),
+                Optional::Yes,
+                ColorOptionInfo.description
             },
             {
                 TransparencyInfo.identifier,
@@ -194,9 +218,13 @@ namespace openspace {
         , _colorTextureIsDirty(true)
         , _colorOption(ColorOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
         , _dataIsDirty(true)
+        , _otherDataOption(OtherDataOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+        , _otherDataColorMapPath(OtherDataColorMapInfo)
+        , _otherDataRange(OtherDataValueRange, glm::vec2(0.f, 1.f), glm::vec2(-10.f, -10.f), glm::vec2(10.f, 10.f))
         , _alphaValue(TransparencyInfo, 1.f, 0.f, 1.f)
-        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 10.f)
+        , _scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
         , _minBillboardSize(MinBillboardSizeInfo, 1.f, 1.f, 100.f)
+        , _usePsfTexture(UsePsfTexture, true)
         , _program(nullptr)
         , _speckFile("")
         , _nValuesPerStar(0)
@@ -226,7 +254,8 @@ namespace openspace {
         _colorOption.addOptions({
             { ColorOption::Color, "Color" },
             { ColorOption::Velocity, "Velocity" },
-            { ColorOption::Speed, "Speed" }
+            { ColorOption::Speed, "Speed" },
+            { ColorOption::OtherData, "Other Data"}
             });
         if (dictionary.hasKey(ColorOptionInfo.identifier)) {
             const std::string colorOption = dictionary.value<std::string>(
@@ -238,8 +267,11 @@ namespace openspace {
             else if (colorOption == "Velocity") {
                 _colorOption = ColorOption::Velocity;
             }
-            else {
+            else if (colorOption == "Speed") {
                 _colorOption = ColorOption::Speed;
+            }
+            else {
+                _colorOption = ColorOption::OtherData;
             }
         }
         _colorOption.onChange([&] { _dataIsDirty = true; });
@@ -279,6 +311,17 @@ namespace openspace {
                 );
         }
         addProperty(_minBillboardSize);
+
+        addProperty(_usePsfTexture);
+
+        addProperty(_otherDataOption);
+        _otherDataOption.onChange([&]() { _dataIsDirty = true; });
+
+        addProperty(_otherDataRange);
+
+        addProperty(_otherDataColorMapPath);
+        _otherDataColorMapPath.onChange([&] { _otherDataColorMapIsDirty = true; });
+
     }
 
     RenderableStars::~RenderableStars() {}
@@ -352,14 +395,26 @@ namespace openspace {
         _program->setUniform(_uniformCache.scaling, scaling);
 
         ghoul::opengl::TextureUnit psfUnit;
-        psfUnit.activate();
-        _pointSpreadFunctionTexture->bind();
-        _program->setUniform(_uniformCache.psfTexture, psfUnit);
+        if (_usePsfTexture) {
+            psfUnit.activate();
+            _pointSpreadFunctionTexture->bind();
+            _program->setUniform(_uniformCache.psfTexture, psfUnit);
+        }
+        _program->setUniform("usePsfTexture", _usePsfTexture);
 
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
         _colorTexture->bind();
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
+
+        ghoul::opengl::TextureUnit otherDataUnit;
+        if (_colorOption == ColorOption::OtherData) {
+            otherDataUnit.activate();
+            _otherDataColorMapTexture->bind();
+            _program->setUniform("otherDataTexture", otherDataUnit);
+
+            _program->setUniform("otherDataRange", _otherDataRange);
+        }
 
         glBindVertexArray(_vao);
         const GLsizei nStars = static_cast<GLsizei>(_fullData.size() / _nValuesPerStar);
@@ -414,7 +469,7 @@ namespace openspace {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    nullptr // = offsetof(ColorVBOLayout, position)
+                    nullptr // = offsetof(SingleValueLayout, position)
                 );
                 glVertexAttribPointer(
                     brightnessDataAttrib,
@@ -422,7 +477,7 @@ namespace openspace {
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
-                    reinterpret_cast<void*>(offsetof(ColorVBOLayout, bvColor))
+                    reinterpret_cast<void*>(offsetof(SingleValueLayout, bvColor))
                 );
 
                 break;
@@ -488,6 +543,25 @@ namespace openspace {
                     reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed))
                 );
             }
+            case ColorOption::OtherData:
+                glVertexAttribPointer(
+                    positionAttrib,
+                    4,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    nullptr // = offsetof(SingleValueLayout, position)
+                );
+                glVertexAttribPointer(
+                    brightnessDataAttrib,
+                    3,
+                    GL_FLOAT,
+                    GL_FALSE,
+                    stride,
+                    reinterpret_cast<void*>(offsetof(SingleValueLayout, bvColor))
+                );
+
+                break;
             }
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -552,6 +626,24 @@ namespace openspace {
             _colorTextureIsDirty = false;
         }
 
+        if (_otherDataColorMapIsDirty) {
+            LDEBUG("Reloading Color Texture");
+            _otherDataColorMapTexture = nullptr;
+            if (_otherDataColorMapPath.value() != "") {
+                _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+                    absPath(_otherDataColorMapPath)
+                );
+                if (_otherDataColorMapTexture) {
+                    LDEBUG(fmt::format(
+                        "Loaded texture from '{}'",
+                        absPath(_otherDataColorMapPath)
+                    ));
+                    _otherDataColorMapTexture->uploadTexture();
+                }
+            }
+            _otherDataColorMapIsDirty = false;
+        }
+
         if (_program->isDirty()) {
             _program->rebuildFromFile();
 
@@ -570,41 +662,41 @@ namespace openspace {
 
     bool RenderableStars::loadData() {
         std::string _file = _speckFile;
-        std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-            _file,
-            ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+        //std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        //    _file,
+        //    ghoul::filesystem::CacheManager::Persistent::Yes
+        //);
 
-        bool hasCachedFile = FileSys.fileExists(cachedFile);
-        if (hasCachedFile) {
-            LINFO(fmt::format(
-                "Cached file '{}' used for Speck file '{}'",
-                cachedFile,
-                _file
-            ));
+        //bool hasCachedFile = FileSys.fileExists(cachedFile);
+        //if (hasCachedFile) {
+        //    LINFO(fmt::format(
+        //        "Cached file '{}' used for Speck file '{}'",
+        //        cachedFile,
+        //        _file
+        //    ));
 
-            bool success = loadCachedFile(cachedFile);
-            if (success) {
-                return true;
-            }
-            else {
-                FileSys.cacheManager()->removeCacheFile(_file);
-                // Intentional fall-through to the 'else' computation to generate the cache
-                // file for the next run
-            }
-        }
-        else {
-            LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
-        }
-        LINFO(fmt::format("Loading Speck file '{}'", _file));
+        //    bool success = loadCachedFile(cachedFile);
+        //    if (success) {
+        //        return true;
+        //    }
+        //    else {
+        //        FileSys.cacheManager()->removeCacheFile(_file);
+        //        // Intentional fall-through to the 'else' computation to generate the cache
+        //        // file for the next run
+        //    }
+        //}
+        //else {
+        //    LINFO(fmt::format("Cache for Speck file '{}' not found", _file));
+        //}
+        //LINFO(fmt::format("Loading Speck file '{}'", _file));
 
         bool success = readSpeckFile();
         if (!success) {
             return false;
         }
 
-        LINFO("Saving cache");
-        success = saveCachedFile(cachedFile);
+        //LINFO("Saving cache");
+        //success = saveCachedFile(cachedFile);
 
         return success;
     }
@@ -617,6 +709,7 @@ namespace openspace {
             return false;
         }
 
+        _otherDataOption.clearOptions();
         _nValuesPerStar = 0;
 
         // The beginning of the speck file has a header that either contains comments
@@ -651,7 +744,14 @@ namespace openspace {
 
                 std::string dummy;
                 str >> dummy;
+
                 str >> _nValuesPerStar;
+
+                std::string name;
+                str >> name;
+
+                _otherDataOption.addOption(_nValuesPerStar, name);
+
                 _nValuesPerStar += 1; // We want the number, but the index is 0 based
             }
         }
@@ -678,6 +778,8 @@ namespace openspace {
                 _fullData.insert(_fullData.end(), values.begin(), values.end());
             }
         } while (!file.eof());
+
+
 
         return true;
     }
@@ -741,6 +843,7 @@ namespace openspace {
 
     void RenderableStars::createDataSlice(ColorOption option) {
         _slicedData.clear();
+        _otherDataRange = glm::vec2(std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 
         // This is only temporary until the scalegraph is in place ---abock
         float minDistance = std::numeric_limits<float>::max();
@@ -781,8 +884,8 @@ namespace openspace {
             case ColorOption::Color:
             {
                 union {
-                    ColorVBOLayout value;
-                    std::array<float, sizeof(ColorVBOLayout)> data;
+                    SingleValueLayout value;
+                    std::array<float, sizeof(SingleValueLayout)> data;
                 } layout;
 
                 layout.value.position = { {
@@ -849,6 +952,41 @@ namespace openspace {
                 _slicedData.insert(_slicedData.end(),
                     layout.data.begin(),
                     layout.data.end());
+                break;
+            }
+            case ColorOption::OtherData:
+            {
+                union {
+                    SingleValueLayout value;
+                    std::array<float, sizeof(SingleValueLayout)> data;
+                } layout;
+
+                layout.value.position = { {
+                        position[0], position[1], position[2], position[3]
+                    } };
+
+                int index = _otherDataOption.value();
+
+                layout.value.bvColor = _fullData[i + index + 3];
+
+                if (layout.value.bvColor == -9999) {
+                    layout.value.bvColor = 0;
+                }
+
+                glm::vec2 range = _otherDataRange.value();
+                range.x = std::min(range.x, layout.value.bvColor);
+                range.y = std::max(range.y, layout.value.bvColor);
+                _otherDataRange = range;
+                _otherDataRange.setMinValue(glm::vec2(range.x));
+                _otherDataRange.setMaxValue(glm::vec2(range.y));
+
+                layout.value.luminance = _fullData[i + 4];
+                layout.value.absoluteMagnitude = _fullData[i + 5];
+
+                _slicedData.insert(_slicedData.end(),
+                    layout.data.begin(),
+                    layout.data.end());
+
                 break;
             }
             }
