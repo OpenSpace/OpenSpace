@@ -89,27 +89,22 @@ Fragment getFragment() {
             break;
     }
 
-    vec4 textureColor = vec4(1.0);
+    float alpha;
     if (usePsfTexture) {
-        textureColor = texture(psfTexture, texCoord);
+        alpha = texture(psfTexture, texCoord).a;
     }
-    vec4 fullColor = vec4(color.rgb, textureColor.a);
-    fullColor.a *= alphaValue;
+    else {
+        alpha = pow(1.0 - length(texCoord - vec2(0.5)) * 1.2, 5.0);
+    }
+
+    vec4 fullColor = vec4(color.rgb, alpha * alphaValue);
 
     vec4 position = vs_position;
     // This has to be fixed when the scale graph is in place ---emiax
     position.w = 15;
 
     Fragment frag;
-    // frag.color = vec4(1.0);
-    frag.color = textureColor;
-
-    // frag.color = vec4(texCoord, 0.0, 1.0);
-
-    if (!usePsfTexture) {
-        frag.color.a = pow(1.0 - length(texCoord - vec2(0.5)) * 1.2, 5.0);
-    }
-
+    frag.color = fullColor;
 
     frag.depth = pscDepth(position);
 
