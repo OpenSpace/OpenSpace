@@ -187,6 +187,12 @@ namespace openspace {
                 ColorOptionInfo.description
             },
             {
+                OtherDataColorMapInfo.identifier,
+                new StringVerifier,
+                Optional::Yes,
+                OtherDataColorMapInfo.description
+            },
+            {
                 TransparencyInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -247,6 +253,13 @@ namespace openspace {
         _colorTexturePath = absPath(dictionary.value<std::string>(
             ColorTextureInfo.identifier
             ));
+
+        if (dictionary.hasKey(OtherDataColorMapInfo.identifier)) {
+            _otherDataColorMapPath = absPath(dictionary.value<std::string>(
+                OtherDataColorMapInfo.identifier
+            ));
+        }
+
         _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
         _speckFile = absPath(dictionary.value<std::string>(KeyFile));
@@ -402,13 +415,15 @@ namespace openspace {
         }
         _program->setUniform("usePsfTexture", _usePsfTexture);
 
-        ghoul::opengl::TextureUnit colorUnit;
-        colorUnit.activate();
-        _colorTexture->bind();
-        _program->setUniform(_uniformCache.colorTexture, colorUnit);
+        if (_colorTexture) {
+            ghoul::opengl::TextureUnit colorUnit;
+            colorUnit.activate();
+            _colorTexture->bind();
+            _program->setUniform(_uniformCache.colorTexture, colorUnit);
+        }
 
         ghoul::opengl::TextureUnit otherDataUnit;
-        if (_colorOption == ColorOption::OtherData) {
+        if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
             otherDataUnit.activate();
             _otherDataColorMapTexture->bind();
             _program->setUniform("otherDataTexture", otherDataUnit);
