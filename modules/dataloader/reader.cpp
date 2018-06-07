@@ -27,10 +27,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <string>
 #include <regex>
-
+#include <string>
 #include <iostream>
 
 #ifdef _WIN32
@@ -47,6 +45,18 @@ namespace {
         "Volumes",
         "List of volume items stored internally and ready to load",
         "This list contains names of volume data files converted from the CDF format"
+    };
+
+    static const openspace::properties::Property::PropertyInfo SelectedFilesInfo = {
+        "SelectedFiles",
+        "List of selected files and ready to load",
+        "This list contains names of selected files in char format"
+    };
+
+    static const openspace::properties::Property::PropertyInfo LoadDataTriggerInfo = {
+        "LoadDataTrigger",
+        "Trigger load data files",
+        "If this property is triggered it will call the function to load data"
     };
 
     static const openspace::properties::Property::PropertyInfo FieldlinesInfo = {
@@ -74,6 +84,7 @@ Reader::Reader()
     : PropertyOwner({ "Reader" })
     , _volumeItems(VolumesInfo) 
     , _readVolumesTrigger(ReadVolumesTriggerInfo) 
+    , _filePaths(SelectedFilesInfo)
     , _loadDataTrigger(LoadDataTriggerInfo)
 {
     _topDir = ghoul::filesystem::Directory(
@@ -87,6 +98,7 @@ Reader::Reader()
 
     addProperty(_volumeItems);
     addProperty(_readVolumesTrigger);
+    addProperty(_filePaths);
     addProperty(_loadDataTrigger);
 }
 
@@ -128,34 +140,38 @@ void Reader::readVolumeDataItems() {
 
 void Reader::loadData() {
 
-  // char filePath = "";
+  char filepath[ MAX_PATH ];
+
   // Linux
   #ifdef _linux
   system("thunar /home/mberg");
 
   // Windows 
   #elif _WIN32
-  char filename[ MAX_PATH ];
 
   OPENFILENAME ofn;
-    ZeroMemory( &filename, sizeof( filename ) );
+    ZeroMemory( &filepath, sizeof( filepath ) );
     ZeroMemory( &ofn,      sizeof( ofn ) );
     ofn.lStructSize  = sizeof( ofn );
     ofn.hwndOwner    = NULL;  // If you have a window to center over, put its HANDLE here
     ofn.lpstrFilter  = "Text Files\0*.txt\0Any File\0*.*\0";
-    ofn.lpstrFile    = filename;
+    ofn.lpstrFile    = filepath;
     ofn.nMaxFile     = MAX_PATH;
-    ofn.lpstrTitle   = "Select a File, yo!";
+    ofn.lpstrTitle   = "Upload Data";
     ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
   
   if (GetOpenFileNameA( &ofn ))
   {
-    std::cout << "You chose the file \"" << filename << "\"\n";
+	// ghoul::filesystem::Directory fileDir(filepath);    
+    // _filePaths = fileDir.readDirectories(
+    //   ghoul::filesystem::Directory::Recursive::No,
+    //   ghoul::filesystem::Directory::Sort::Yes
+    // );
+    _filePaths = filepath;
   }
   else
   {
-    // All this stuff below is to tell you exactly how you messed up above. 
-    // Once you've got that fixed, you can often (not always!) reduce it to a 'user cancelled' assumption.
+    // All the below is to print incorrect user input. 
     switch (CommDlgExtendedError())
     {
       case CDERR_DIALOGFAILURE   : std::cout << "CDERR_DIALOGFAILURE\n";   break;
@@ -179,10 +195,10 @@ void Reader::loadData() {
   // MAC
   #elif __APPLE__
   // Still to do
-
   #endif
 
-  // return filePath;
+  // _filePaths = filepath;
+;
 }
 
 
