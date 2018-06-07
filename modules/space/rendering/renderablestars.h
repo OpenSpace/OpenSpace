@@ -30,6 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -63,7 +64,8 @@ namespace openspace {
         enum ColorOption {
             Color = 0,
             Velocity = 1,
-            Speed = 2
+            Speed = 2,
+            OtherData = 3
         };
 
         void createDataSlice(ColorOption option);
@@ -86,9 +88,16 @@ namespace openspace {
         properties::OptionProperty _colorOption;
         bool _dataIsDirty;
 
+        properties::OptionProperty _otherDataOption;
+        properties::StringProperty _otherDataColorMapPath;
+        properties::Vec2Property _otherDataRange;
+        std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+        bool _otherDataColorMapIsDirty = true;
+
         properties::FloatProperty _alphaValue;
         properties::FloatProperty _scaleFactor;
         properties::FloatProperty _minBillboardSize;
+        properties::BoolProperty _usePsfTexture;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _program;
         UniformCache(view, projection, colorOption, alphaValue, scaleFactor,

@@ -72,6 +72,10 @@ void main() {
     ge_speed = vs_speed[0];
 
     float absoluteMagnitude = vs_brightness[0].z;
+    if (absoluteMagnitude < -4) {
+        absoluteMagnitude = -4;
+    }
+    // float absoluteMagnitude = 0;
     float modifiedSpriteSize =
         exp((-30.623 - absoluteMagnitude) * 0.462) * scaleFactor * 2000;
 

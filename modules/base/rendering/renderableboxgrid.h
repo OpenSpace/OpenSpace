@@ -22,52 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/gaiamission/gaiamissionmodule.h>
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEBOXGRID___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEBOXGRID___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
 
-#include <ghoul/misc/assert.h>
-#include <modules/gaiamission/rendering/renderablegaiastars.h>
-#include <modules/gaiamission/tasks/readfitstask.h>
-#include <modules/gaiamission/tasks/readspecktask.h>
-#include <modules/gaiamission/tasks/constructoctreetask.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/scripting/lualibrary.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/matrix/dmat4property.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl {
+    class ProgramObject;
+} // namespace ghoul::opengl
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-GaiaMissionModule::GaiaMissionModule() : OpenSpaceModule(Name) {}
+class RenderableBoxGrid : public Renderable {
+public:
+    RenderableBoxGrid(const ghoul::Dictionary& dictionary);
+    ~RenderableBoxGrid();
 
-void GaiaMissionModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableGaiaStars>("RenderableGaiaStars");
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-    auto fTask = FactoryManager::ref().factory<Task>();
-    ghoul_assert(fRenderable, "No task factory existed");
-    fTask->registerClass<ReadFitsTask>("ReadFitsTask");
-    fTask->registerClass<ReadSpeckTask>("ReadSpeckTask");
-    fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
-}
+    bool isReady() const override;
 
-std::vector<documentation::Documentation> GaiaMissionModule::documentations() const {
-    return {
-        RenderableGaiaStars::Documentation(),
-        ReadFitsTask::Documentation(),
-        ReadSpeckTask::Documentation(),
-        ConstructOctreeTask::Documentation(),
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+
+protected:
+    struct Vertex {
+        float location[3];
     };
-}
 
-scripting::LuaLibrary GaiaMissionModule::luaLibrary() const {
-    scripting::LuaLibrary res;
-    res.name = "gaia";
-    res.scripts = {
-        absPath("${MODULE_GAIAMISSION}/scripts/filtering.lua")
-    };
-    return res;
-}
+    ghoul::opengl::ProgramObject* _gridProgram;
 
-} // namespace openspace
+    properties::DMat4Property _gridMatrix;
+    properties::Vec4Property _gridColor;
+    properties::IntProperty _segments;
+    properties::FloatProperty _lineWidth;
+    properties::Vec3Property _size;
+
+    bool _gridIsDirty;
+
+    GLuint _vaoID;
+    GLuint _vBufferID;
+
+    GLenum _mode;
+    std::vector<Vertex> _varray;
+};
+
+}// namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEBOXGRID___H__

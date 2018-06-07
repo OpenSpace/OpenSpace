@@ -2,7 +2,6 @@ local assetHelper = asset.require('util/asset_helper')
 local earthTransforms = asset.require('scene/solarsystem/planets/earth/transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-
 local trail = asset.syncedResource({
     Name = "Gaia Trail",
     Type = "HttpSynchronization",

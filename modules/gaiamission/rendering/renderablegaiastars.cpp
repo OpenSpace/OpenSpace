@@ -1405,9 +1405,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformFilterCache.distThreshold, _distThreshold);
 
     ghoul::opengl::TextureUnit colorUnit;
-    colorUnit.activate();
-    _colorTexture->bind();
-    _program->setUniform(_uniformCache.colorTexture, colorUnit);
+    if (_colorTexture) {
+        colorUnit.activate();
+        _colorTexture->bind();
+        _program->setUniform(_uniformCache.colorTexture, colorUnit);
+    }
 
     // Specify how many stars we will render. (Will be overwritten if rendering billboards.)
     GLsizei nShaderCalls = _nStarsToRender;
@@ -1496,9 +1498,11 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ghoul::opengl::TextureUnit fboTexUnit;
-        fboTexUnit.activate();
-        _fboTexture->bind();
-        _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
+        if (_fboTexture) {
+            fboTexUnit.activate();
+            _fboTexture->bind();
+            _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
+        }
         _programTM->setUniform(_uniformCacheTM.projection, projection);
 
         if (shaderOption == gaiamission::ShaderOption::Point_SSBO
@@ -1824,7 +1828,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
         bool datasetFitInMemory = (static_cast<float>(_totalDatasetSizeInBytes) 
             < (static_cast<float>(_cpuRamBudgetInBytes) * 0.9));
-        if (datasetFitInMemory && !hasProperty(&_additionalNodes)) {
+        if (!datasetFitInMemory && !hasProperty(&_additionalNodes)) {
             addProperty(_additionalNodes);
         }
         else if (hasProperty(&_additionalNodes)){
