@@ -422,7 +422,6 @@ void GUI::endFrame() {
     }
 
     _performance.setEnabled(OsEng.renderEngine().doesPerformanceMeasurements());
-    _mission.setEnabled(MissionManager::ref().hasCurrentMission());
 
     if (_performance.isEnabled()) {
         _performance.render();

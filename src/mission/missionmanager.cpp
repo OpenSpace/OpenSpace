@@ -65,7 +65,7 @@ std::string MissionManager::loadMission(const std::string& filename) {
     std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";
 
     Mission mission = missionFromFile(filename);
-    const std::string& missionName = mission.name();
+    std::string missionName = mission.name();
     _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
         setCurrentMission(missionName);

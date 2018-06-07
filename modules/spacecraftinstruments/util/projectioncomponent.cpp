@@ -419,6 +419,7 @@ bool ProjectionComponent::initializeGL() {
     if (texture) {
         texture->setFilter(Texture::FilterMode::LinearMipMap);
         texture->setWrapping(Texture::WrappingMode::ClampToEdge);
+        texture->uploadTexture();
     }
     _placeholderTexture = std::move(texture);
 
