@@ -74,6 +74,118 @@ local Keybindings = {
         Command = "openspace.setPropertyValueSingle('Scene.GaiaMission.renderable.File', [[F:/Gaia/DR2_rv_Octree[10kSPN,20dist]_5p/]]);",
         Documentation = "Switch to the 7.2M Radial Velocity datset.",
         Local = false
+    },
+    },
+    {
+        Key = "KP_1",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.25, 0.2 });
+        openspace.setPropertyValue('Scene.Stars_Galah.renderable.OtherDataValueRange', { -0.8, 0.6 });
+        openspace.setPropertyValue('Scene.Stars_Apogee.renderable.OtherDataValueRange', { -0.8, 0.6 });
+        ]],
+        Documentation = "Set values for FeH for Apogee/Galah/Hypatia",
+        Local = false
+    },
+    {
+        Key = "KP_2",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Galah.renderable.OtherDataValueRange', { -0.2, 0.6 });
+        openspace.setPropertyValue('Scene.Stars_Apogee.renderable.OtherDataValueRange', { -0.2, 0.6 });
+        ]],
+        Documentation = "Set values for MgFe and alphaFe for Apogee/Galah",
+        Local = false
+    },
+    {
+        Key = "KP_3",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Galah.renderable.OtherDataValueRange', { -0.15, 0.6 });
+        openspace.setPropertyValue('Scene.Stars_Apogee.renderable.OtherDataValueRange', { -0.15, 0.6 });
+        ]],
+        Documentation = "Set values for AlFe for Apogee/Galah",
+        Local = false
+    },
+    {
+        Key = "KP_4",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Galah.renderable.OtherDataValueRange', { -0.1, 1.5 });
+        openspace.setPropertyValue('Scene.Stars_Apogee.renderable.OtherDataValueRange', { -0.1, 1.5 });
+        ]],
+        Documentation = "Set values for MgAl for Apogee/Galah",
+        Local = false
+    },
+    {
+        Key = "KP_5",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Galah.renderable.OtherDataValueRange', { -0.15, 0.2 });
+        openspace.setPropertyValue('Scene.Stars_Apogee.renderable.OtherDataValueRange', { -0.15, 0.2 });
+        ]],
+        Documentation = "Set values for aexahyd for Apogee/Galah",
+        Local = false
+    },
+    {
+        Key = "KP_6",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Galah.renderable.OtherDataValueRange', { -0.6, 0.6 });
+        openspace.setPropertyValue('Scene.Stars_Apogee.renderable.OtherDataValueRange', { -0.6, 0.5 });
+        ]],
+        Documentation = "Set values for NaO for Apogee/Galah",
+        Local = false
+    },
+    {
+        Key = "KP_7",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.25, 0.15 });
+        ]],
+        Documentation = "Set values for CH for Hypatia",
+        Local = false
+    },
+    {
+        Key = "KP_8",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.25, 0.13 });
+        ]],
+        Documentation = "Set values for OH for Hypatia",
+        Local = false
+    },
+    {
+        Key = "KP_9",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.15, 0.15 });
+        ]],
+        Documentation = "Set values for NaH for Hypatia",
+        Local = false
+    },
+    {
+        Key = "KP_0",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.1, 0.2 });
+        ]],
+        Documentation = "Set values for AlH for Hypatia",
+        Local = false
+    },
+    {
+        Key = "Shift+KP_1",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.2, 0.7 });
+        ]],
+        Documentation = "Set values for BeFe for Galah",
+        Local = false
+    },
+    {
+        Key = "Shift+KP_2",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.4, 0.6 });
+        ]],
+        Documentation = "Set values for EuFe for Galah",
+        Local = false
+    },
+    {
+        Key = "Shift+KP_3",
+        Command = [[
+        openspace.setPropertyValue('Scene.Stars_Hypatia.renderable.OtherDataValueRange', { -0.8, 0.9 });
+        ]],
+        Documentation = "Set values for BaEu for Galah",
+        Local = false
     }
 }
 
