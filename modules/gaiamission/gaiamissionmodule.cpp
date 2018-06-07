@@ -33,6 +33,8 @@
 #include <modules/gaiamission/tasks/readfitstask.h>
 #include <modules/gaiamission/tasks/readspecktask.h>
 #include <modules/gaiamission/tasks/constructoctreetask.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <openspace/scripting/lualibrary.h>
 
 namespace openspace {
 
@@ -57,6 +59,15 @@ std::vector<documentation::Documentation> GaiaMissionModule::documentations() co
         ReadSpeckTask::Documentation(),
         ConstructOctreeTask::Documentation(),
     };
+}
+
+scripting::LuaLibrary GaiaMissionModule::luaLibrary() const {
+    scripting::LuaLibrary res;
+    res.name = "gaia";
+    res.scripts = {
+        absPath("${MODULE_GAIAMISSION}/scripts/filtering.lua")
+    };
+    return res;
 }
 
 } // namespace openspace
