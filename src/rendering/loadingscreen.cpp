@@ -219,6 +219,8 @@ void LoadingScreen::render() {
     float textureAspectRatio = static_cast<float>(_logoTexture->dimensions().x) /
         static_cast<float>(_logoTexture->dimensions().y);
 
+    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(res);
+
     const glm::vec2 size = {
         LogoSize.x,
         LogoSize.y * textureAspectRatio * screenAspectRatio
