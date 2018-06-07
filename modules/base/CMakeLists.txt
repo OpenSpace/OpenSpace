@@ -35,6 +35,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.h
@@ -69,6 +70,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableboxgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneimagelocal.cpp

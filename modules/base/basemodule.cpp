@@ -40,6 +40,7 @@
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
 
+#include <modules/base/rendering/renderableboxgrid.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -107,6 +108,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
+    fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePlaneImageLocal>("RenderablePlaneImageLocal");
     fRenderable->registerClass<RenderablePlaneImageOnline>("RenderablePlaneImageOnline");
@@ -153,6 +155,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         DashboardItemSimulationIncrement::Documentation(),
         DashboardItemSpacing::Documentation(),
 
+        RenderableBoxGrid::Documentation(),
         RenderableModel::Documentation(),
         RenderablePlane::Documentation(),
         RenderableSphere::Documentation(),
