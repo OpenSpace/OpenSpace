@@ -9,7 +9,7 @@ import { stringListToArray } from './utils/helpers';
 import DataManager from '../../api/DataManager';
 import styles from './DataLoader.scss';
 import Window from '../common/Window/Window';
-import { setActivated, setFilePaths } from '../../api/Actions/dataLoaderActions';
+import { setActivated } from '../../api/Actions/dataLoaderActions';
 import Button from '../common/Input/Button/Button';
 import Label from '../common/Label/Label';
 import UploadDataButton from './UploadDataButton';
@@ -117,10 +117,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  setFilePaths: (filePaths) => {
-    dispatch(setFilePaths(filePaths))
-  },
-
   setActivated: (isActivated) => {
     dispatch(setActivated(isActivated));
   },
