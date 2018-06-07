@@ -1824,7 +1824,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
         bool datasetFitInMemory = (static_cast<float>(_totalDatasetSizeInBytes) 
             < (static_cast<float>(_cpuRamBudgetInBytes) * 0.9));
-        if (datasetFitInMemory && !hasProperty(&_additionalNodes)) {
+        if (!datasetFitInMemory && !hasProperty(&_additionalNodes)) {
             addProperty(_additionalNodes);
         }
         else if (hasProperty(&_additionalNodes)){
