@@ -153,7 +153,8 @@ Fragment getFragment() {
         }
     }
     // Tonemap intensity to color!
-    intensity = 1.0 - 1.0 * exp(-25.0 * intensity);
+    //intensity = 1.0 - 1.0 * exp(-25.0 * intensity);
+    intensity = pow(intensity, vec3(0.8));
 
     if (length(intensity) < 0.01) {
         discard;

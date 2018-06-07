@@ -44,6 +44,7 @@ out vec4 ge_gPosition;
 out vec2 texCoord;
 out float ge_starDistFromSun;
 out float ge_cameraDistFromSun;
+out float ge_observedDist;
 
 uniform dmat4 view;
 uniform dmat4 projection;
@@ -75,8 +76,8 @@ void main() {
     vec4 viewPosition = vec4(view * vs_gPosition[0]);
 
     // Make closer stars look a bit bigger.
-    float observedDistance = safeLength(viewPosition / viewScaling);
-    float closeUpBoost = closeUpBoostDist / observedDistance;
+    ge_observedDist = safeLength(viewPosition / viewScaling);
+    float closeUpBoost = closeUpBoostDist / ge_observedDist;
     float initStarSize = billboardSize;
 
     // Use magnitude for size boost as well.
@@ -89,13 +90,13 @@ void main() {
         float normalizedMagnitude = (absoluteMagnitude - 20) / -1; // (-15 - 20);
         
         // TODO: A linear scale is prabably not the best!
-        initStarSize += normalizedMagnitude * (magnitudeBoost / 100);
+        initStarSize += normalizedMagnitude * (magnitudeBoost / 50);
     }
 
     vec4 position = gl_in[0].gl_Position;
-    vec2 starSize = vec2(initStarSize + closeUpBoost) / screenSize * position.w;
+    vec2 starSize = vec2(initStarSize + closeUpBoost) * position.w / 10000.0;
 
-    float distThreshold = cutOffThreshold - log(observedDistance) / log(4.0);
+    float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
 
     // Discard geometry if star has no position (but wasn't a nullArray).
     // Or if observed distance is above threshold set by cutOffThreshold.

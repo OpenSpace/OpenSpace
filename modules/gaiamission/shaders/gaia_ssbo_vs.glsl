@@ -116,9 +116,9 @@ void main() {
         (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) || 
         (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) || 
         (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) || 
-        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ||
+        (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) || 
         (abs(distThreshold.x - distThreshold.y) < EPS 
-            && abs(length(in_position) - distThreshold.y) < EPS) ) {
+        && abs(length(in_position) - distThreshold.y) < EPS) ) {
         // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
@@ -156,11 +156,12 @@ void main() {
     // Add velocity [m/s] if we've read any.
     objectPosition.xyz += time * in_velocity;
 
-    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
-
+    // Thres moving stars by their new position.
+    float distPosition = length(objectPosition.xyz / (1000.0 * Parsec) );
     if ( (abs(distThreshold.x - distThreshold.y) > EPS && 
-        ((abs(distThreshold.x) > EPS && length(distPosition) < distThreshold.x) || 
-        (abs(distThreshold.y) > EPS && length(distPosition) > distThreshold.y)))) {
+        ((abs(distThreshold.x) > EPS && distPosition < distThreshold.x) || 
+        (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))) ) {
+        // Discard star in geometry shader.
         vs_gPosition = vec4(0.0);    
         gl_Position = vec4(0.0);
         return;

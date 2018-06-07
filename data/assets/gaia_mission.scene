@@ -6,7 +6,7 @@ asset.require('spice/base')
 
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 -- assetHelper.requestAll(asset, 'scene/solarsystem/planets')
-asset.require('scene/solarsystem/planets/earth/earth')
+local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 asset.require('scene/solarsystem/planets/earth/moon/moon')
 
 -- Add everything from DU except the old stars
@@ -34,14 +34,16 @@ asset.request('scene/digitaluniverse/planetarynebulae')
 asset.request('scene/digitaluniverse/pulsars')
 asset.request('scene/digitaluniverse/quasars')
 asset.request('scene/digitaluniverse/sdss')
--- asset.request('scene/digitaluniverse/starlabels')
--- asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/starlabels')
+asset.request('scene/digitaluniverse/stars')
 asset.request('scene/digitaluniverse/superclusters')
 asset.request('scene/digitaluniverse/supernovaremnants')
 asset.request('scene/digitaluniverse/tully')
 asset.request('scene/digitaluniverse/voids')
 
 asset.request('scene/milkyway/gaia/gaiamission')
+asset.request('scene/milkyway/gaia/abundance')
+asset.request('scene/milkyway/gaia/exoplanets_hypatia')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -52,7 +54,25 @@ local Keybindings = {
     {
         Key = "g",
         Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'GaiaModel')",
-        Documentation = "Sets the focus of the camera on 'Gaia'.",
+        Documentation = "Sets the focus of the camera to the 'GaiaModel'.",
+        Local = false
+    },
+    {
+        Key = "e",
+        Command = "openspace.setPropertyValue('NavigationHandler.Origin', 'Earth')",
+        Documentation = "Sets the focus of the camera to 'Earth'.",
+        Local = false
+    },
+    {
+        Key = "b",
+        Command = "openspace.setPropertyValueSingle('Scene.GaiaMission.renderable.File', [[F:/Gaia/DR2_full_Octree[75kSPN,800dist]_5p/]]);",
+        Documentation = "Switch to the 900M dataset.",
+        Local = false
+    },
+    {
+        Key = "r",
+        Command = "openspace.setPropertyValueSingle('Scene.GaiaMission.renderable.File', [[F:/Gaia/DR2_rv_Octree[10kSPN,20dist]_5p/]]);",
+        Documentation = "Switch to the 7.2M Radial Velocity datset.",
         Local = false
     }
 }
@@ -94,11 +114,49 @@ asset.onInitialize(function ()
         nil
     )
 
+    --openspace.navigation.setCameraState({
+    --    Focus = GaiaModelAsset.GaiaModel.Identifier,
+    --    Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
+    --    Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
+    --})
     openspace.navigation.setCameraState({
-        Focus = GaiaModelAsset.GaiaModel.Identifier,
-        Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
-        Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
+        Focus = earthAsset.Earth.Identifier,
+        Position = { 100000000.0, 100000000.0, 100000000.0 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
     })
+
+
+    -- For the AMNH Gaia Sprint event
+    openspace.setPropertyValueSingle('RenderEngine.ShowLog', false);
+    openspace.setPropertyValueSingle('Scene.OpenStarClusters.renderable.Transparency', 0.3);
+    openspace.setPropertyValueSingle('Scene.OpenStarClusters.renderable.ScaleFactor', 400.0);
+    openspace.setPropertyValueSingle('Scene.OpenStarClusters.renderable.TextSize', 15.5);
+    openspace.setPropertyValueSingle('Scene.GlobularClusters.renderable.ScaleFactor', 400.0);
+    openspace.setPropertyValueSingle('Scene.GlobularClusters.renderable.Transparency', 0.45);
+    openspace.setPropertyValueSingle('Scene.GlobularClusters.renderable.TextSize', 16.5);
+    openspace.setPropertyValueSingle('Scene.GlobularClusters.renderable.BillboardMaxSize', 530.0);
+    openspace.setPropertyValueSingle('Scene.OBAssociations.renderable.ScaleFactor', 400.0);
+
+    openspace.setPropertyValueSingle('Scene.Stars.renderable.UsePSFTexture', false);
+
+    openspace.setPropertyValueSingle('Scene.Stars_Apogee.renderable.UsePSFTexture', false);
+    openspace.setPropertyValueSingle('Scene.Stars_Apogee.renderable.OtherDataColorMap', [[F:/Gaia/GaiaAbundApogee/RainbowGradient.cmap]]);
+    openspace.setPropertyValueSingle('Scene.Stars_Apogee.renderable.ColorOption', 3);
+    openspace.setPropertyValueSingle('Scene.Stars_Apogee.renderable.ScaleFactor', 8.0);
+    openspace.setPropertyValueSingle('Scene.Stars_Apogee.renderable.OtherDataValueRange', {-0.5,0.5});
+
+    openspace.setPropertyValueSingle('Scene.Stars_Galah.renderable.UsePSFTexture', false);
+    openspace.setPropertyValueSingle('Scene.Stars_Galah.renderable.OtherDataColorMap', [[F:/Gaia/GaiaAbundGalah/RainbowGradient.cmap]]);
+    openspace.setPropertyValueSingle('Scene.Stars_Galah.renderable.ColorOption', 3);
+    openspace.setPropertyValueSingle('Scene.Stars_Galah.renderable.ScaleFactor', 12.0);
+    openspace.setPropertyValueSingle('Scene.Stars_Galah.renderable.OtherDataValueRange', {-0.5,0.5});
+
+
+    openspace.setPropertyValueSingle('Scene.Stars_Hypatia.renderable.UsePSFTexture', false);
+    openspace.setPropertyValueSingle('Scene.Stars_Hypatia.renderable.OtherDataColorMap', [[F:/Gaia/GaiaHypatia/RainbowGradient.cmap]]);
+    openspace.setPropertyValueSingle('Scene.Stars_Hypatia.renderable.ColorOption', 3);
+    openspace.setPropertyValueSingle('Scene.Stars_Hypatia.renderable.ScaleFactor', 6.0);
+    openspace.setPropertyValueSingle('Scene.Stars_Hypatia.renderable.OtherDataValueRange', {-0.5,0.5});
 end)
 
 -- Remove interesting nodes and added virtual properties

@@ -1,0 +1,53 @@
+local assetHelper = asset.require('util/asset_helper')
+local textures = asset.syncedResource({
+    Name = "Stars Textures",
+    Type = "HttpSynchronization",
+    Identifier = "stars_textures",
+    Version = 1
+})
+
+local localData = "F:/Gaia"
+
+local hypatia = {
+    Identifier = "Stars_Hypatia",
+    Renderable = {
+        Type = "RenderableStars",
+        Enabled = false,
+        File = localData .. "/GaiaHypatia/GaiaHypatia.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = localData .. "/GaiaHypatia/RainbowGradient.cmap",
+    },
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
+}
+
+local apogee = {
+    Identifier = "Stars_Apogee",
+    Renderable = {
+        Type = "RenderableStars",
+        Enabled = false,
+        File = localData .. "/GaiaAbundApogee/GaiaAbundApogee.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = localData .. "/GaiaAbundApogee/RainbowGradient.cmap",
+    },
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
+}
+
+local galah = {
+    Identifier = "Stars_Galah",
+    Renderable = {
+        Type = "RenderableStars",
+        Enabled = false,
+        File = localData .. "/GaiaAbundGalah/GaiaAbundGalah.speck",
+        Texture = textures .. "/halo.png",
+        ColorMap = localData .. "/GaiaAbundGalah/RainbowGradient.cmap",
+    },
+    GUI = {
+        Path = "/Milky Way/Stars"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { hypatia, apogee, galah })

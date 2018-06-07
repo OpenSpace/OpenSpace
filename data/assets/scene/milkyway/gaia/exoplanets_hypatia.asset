@@ -1,0 +1,40 @@
+local assetHelper = asset.require('util/asset_helper')
+
+local textures = asset.syncedResource({
+    Name = "Exoplanets Textures",
+    Type = "HttpSynchronization",
+    Identifier = "digitaluniverse_exoplanets_textures",
+    Version = 1
+})
+
+local localStars = "F:/Gaia"
+
+local speck = localStars .. "/GaiaHypatiaPlanets/GaiaHypatiaPlanets.speck"
+local label = localStars .. "/GaiaHypatiaPlanets/GaiaHypatiaPlanets.label"
+
+local object = {
+    Identifier = "Exoplanets_Hypatia",
+    Renderable = {
+        Type = "RenderableBillboardsCloud",
+        Enabled = false,
+        Color = { 1.0, 1.0, 1.0 },
+        Transparency = 0.65,
+        ScaleFactor = 10.0,
+        Texture = textures .. "/target-blue.pbm",
+        File = speck,
+        LabelFile = label,
+        ScaleFactor = 380.0,
+        TextColor = { 0.3, 0.3, 0.8, 1.0 },
+        TextSize = 14.8,
+        TextMaxSize = 200.0,
+        TextMinSize = 10.0,
+        CorrectionSizeEndDistance = 15.23,
+        CorrectionSizeFactor = 13.3,
+        Unit = "pc"
+    },
+    GUI = {
+        Path = "/Milky Way/Exoplanets"
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { object })
