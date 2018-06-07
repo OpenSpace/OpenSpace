@@ -26,12 +26,17 @@
 #define __OPENSPACE_MODULE_DATALOADER___LOADER___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace::dataloader {
 
 class Loader : public properties::PropertyOwner {
   public:
     Loader();
+
+    // Select file data path
+    void uploadData();
 
     // Add trigger properties for data items in internal directory
     void addInternalDataItemProperties();
@@ -48,6 +53,8 @@ class Loader : public properties::PropertyOwner {
     void createVolumeDataItem(std::string absPath);
 
   private:
+    properties::StringProperty _filePaths;
+    properties::TriggerProperty _uploadDataTrigger;
 };
 
 }

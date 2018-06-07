@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h> // do we need this
 #include <openspace/properties/stringlistproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <ghoul/filesystem/directory.h>
 
@@ -39,13 +38,10 @@ class Reader : public properties::PropertyOwner {
     Reader();
 
     void readVolumeDataItems();
-    void loadData();
 
   private:
     properties::StringListProperty _volumeItems;
-    properties::StringProperty _filePaths;
     properties::TriggerProperty _readVolumesTrigger;
-    properties::TriggerProperty _loadDataTrigger;
     
     ghoul::filesystem::Directory _topDir;
 };

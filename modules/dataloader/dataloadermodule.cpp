@@ -24,6 +24,7 @@
 
 #include <modules/dataloader/dataloadermodule.h>
 #include <modules/dataloader/reader.h>
+#include <modules/dataloader/loader.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
@@ -40,7 +41,9 @@ void DataLoaderModule::internalInitialize(const ghoul::Dictionary&) {
     // rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
 
     _reader = std::make_unique<openspace::dataloader::Reader>();
+    _loader = std::make_unique<openspace::dataloader::Loader>(); 
     addPropertySubOwner(*_reader);
+    addPropertySubOwner(*_loader);
 }
 
 } // namespace openspace

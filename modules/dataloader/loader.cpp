@@ -23,10 +23,108 @@
  ****************************************************************************************/
 
 #include <modules/dataloader/loader.h>
+#include <ghoul/logging/logmanager.h>
+#include <iostream>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+namespace {
+  constexpr const char* _loggerCat = "Loader";
+} // namespace
+
+namespace {
+  static const openspace::properties::Property::PropertyInfo SelectedFilesInfo = {
+      "SelectedFiles",
+      "List of selected files and ready to load",
+      "This list contains names of selected files in char format"
+  };
+
+  static const openspace::properties::Property::PropertyInfo UploadDataTriggerInfo = {
+      "UploadDataTrigger",
+      "Trigger load data files",
+      "If this property is triggered it will call the function to load data"
+  };
+}
 
 namespace openspace::dataloader {
 
-Loader::Loader() : PropertyOwner({ "Loader" }) {};
+Loader::Loader() 
+    : PropertyOwner({ "Loader" })
+    , _filePaths(SelectedFilesInfo)
+    , _uploadDataTrigger(UploadDataTriggerInfo)
+{
+    _uploadDataTrigger.onChange([this](){
+        uploadData();
+    });
+
+    addProperty(_filePaths);
+    addProperty(_uploadDataTrigger);
+}
+
+void Loader::uploadData() {
+
+  char filepath[ MAX_PATH ];
+
+  // Linux
+  #ifdef _linux
+  system("thunar /home/mberg");
+
+  // Windows 
+  #elif _WIN32
+
+  OPENFILENAME ofn;
+    ZeroMemory( &filepath, sizeof( filepath ) );
+    ZeroMemory( &ofn,      sizeof( ofn ) );
+    ofn.lStructSize  = sizeof( ofn );
+    ofn.hwndOwner    = NULL;  // If you have a window to center over, put its HANDLE here
+    ofn.lpstrFilter  = "Text Files\0*.txt\0Any File\0*.*\0";
+    ofn.lpstrFile    = filepath;
+    ofn.nMaxFile     = MAX_PATH;
+    ofn.lpstrTitle   = "Upload Data";
+    ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+  
+  if (GetOpenFileNameA( &ofn ))
+  {
+	// ghoul::filesystem::Directory fileDir(filepath);    
+    // _filePaths = fileDir.readDirectories(
+    //   ghoul::filesystem::Directory::Recursive::No,
+    //   ghoul::filesystem::Directory::Sort::Yes
+    // );
+    _filePaths = filepath;
+  }
+  else
+  {
+    // All the below is to print incorrect user input. 
+    switch (CommDlgExtendedError())
+    {
+      case CDERR_DIALOGFAILURE   : std::cout << "CDERR_DIALOGFAILURE\n";   break;
+      case CDERR_FINDRESFAILURE  : std::cout << "CDERR_FINDRESFAILURE\n";  break;
+      case CDERR_INITIALIZATION  : std::cout << "CDERR_INITIALIZATION\n";  break;
+      case CDERR_LOADRESFAILURE  : std::cout << "CDERR_LOADRESFAILURE\n";  break;
+      case CDERR_LOADSTRFAILURE  : std::cout << "CDERR_LOADSTRFAILURE\n";  break;
+      case CDERR_LOCKRESFAILURE  : std::cout << "CDERR_LOCKRESFAILURE\n";  break;
+      case CDERR_MEMALLOCFAILURE : std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
+      case CDERR_MEMLOCKFAILURE  : std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
+      case CDERR_NOHINSTANCE     : std::cout << "CDERR_NOHINSTANCE\n";     break;
+      case CDERR_NOHOOK          : std::cout << "CDERR_NOHOOK\n";          break;
+      case CDERR_NOTEMPLATE      : std::cout << "CDERR_NOTEMPLATE\n";      break;
+      case CDERR_STRUCTSIZE      : std::cout << "CDERR_STRUCTSIZE\n";      break;
+      case FNERR_BUFFERTOOSMALL  : std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
+      case FNERR_INVALIDFILENAME : std::cout << "FNERR_INVALIDFILENAME\n"; break;
+      case FNERR_SUBCLASSFAILURE : std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
+      default                    : std::cout << "You cancelled.\n";
+    }
+  }
+  // MAC
+  #elif __APPLE__
+  // Still to do
+  #endif
+
+  // _filePaths = filepath;
+;
+}
 
 void Loader::addInternalDataItemProperties() {
   // Get list of internal data items

@@ -27,6 +27,7 @@
 
 #include <openspace/util/openspacemodule.h>
 #include <modules/dataloader/reader.h>
+#include <modules/dataloader/loader.h>
 
 namespace openspace {
 
@@ -44,6 +45,7 @@ public:
 
 private:
     std::unique_ptr<openspace::dataloader::Reader> _reader;
+    std::unique_ptr<openspace::dataloader::Loader> _loader;
 };
 
 } // namespace openspace
