@@ -27,7 +27,7 @@ class DataLoader extends Component {
       activeDataType: '',
       dataToLoadUri: '',
       dataItems: [],
-      filePath: ''
+      filePaths: ''
     };
   }
 
@@ -38,7 +38,7 @@ class DataLoader extends Component {
   }
 
   handleUploadedFiles(data) {
-    this.setState({filePath:data.Value});
+    this.props.setFilePaths(data.Value);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -144,7 +144,8 @@ class DataLoader extends Component {
 }
 
 const mapStateToProps = state => ({
-  activated: state.dataLoader.activated
+  activated: state.dataLoader.activated,
+  filePaths: state.dataLoader.filePaths,
 });
 
 const mapDispatchToProps = dispatch => ({
