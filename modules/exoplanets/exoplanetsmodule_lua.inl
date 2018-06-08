@@ -65,13 +65,13 @@ std::string getStarColor(float bv) {
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om) {
     // Exoplanet defined inclination changed to be used as Kepler defined inclination
-    float iModified = 90.0 - i;
+
 	const glm::vec3 ascendingNodeAxisRot = { 0.f, 0.f, 1.f };
 	const glm::vec3 inclinationAxisRot = { 1.f, 0.f, 0.f };
 	const glm::vec3 argPeriapsisAxisRot = { 0.f, 0.f, 1.f };
 
 	const double asc = glm::radians(bigom);
-	const double inc = glm::radians(iModified);
+	const double inc = glm::radians(i);
 	const double per = glm::radians(om);
 
 	glm::dmat4 orbitPlaneRotation =
@@ -180,29 +180,29 @@ std::string getCsvStarname(std::string explName) {
 // Rotate the original coordinate system (where x is pointing to First Point of Aries)
 // so that x is pointing from star to the sun.
 // Modified from http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-17-quaternions/#how-do-i-find-the-rotation-between-2-vectors- 
-glm::dmat3 getExoplanetSystemRotation(glm::dvec3 pos) {
+glm::dmat3 getExoplanetSystemRotation(glm::dvec3 start, glm::dvec3 end) {
 
     glm::quat rotInQuat;
-    glm::dvec3 oldXVec = glm::dvec3(1.0, 0.0, 0.0); //parent nod x-vec
-    glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - pos);
+    //glm::dvec3 oldXVec = glm::dvec3(1.0, 0.0, 0.0); //parent nod x-vec
+    //glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - end);
 
-    float cosTheta = dot(oldXVec, starToSunVec);
+    float cosTheta = dot(start, end);
     glm::dvec3 rotationAxis;
 
     if (cosTheta < -1 + 0.001f) {
         // special case when vectors in opposite directions:
         // there is no "ideal" rotation axis
         // So guess one; any will do as long as it's perpendicular to startvector(oldXVec)
-        rotationAxis = cross(glm::dvec3(0.0f, 0.0f, 1.0f), oldXVec);
+        rotationAxis = cross(glm::dvec3(0.0f, 0.0f, 1.0f), start);
         if (length2(rotationAxis) < 0.01) // bad luck, they were parallel, try again!
-            rotationAxis = cross(glm::dvec3(1.0f, 0.0f, 0.0f), oldXVec);
+            rotationAxis = cross(glm::dvec3(1.0f, 0.0f, 0.0f), start);
 
         rotationAxis = normalize(rotationAxis);
         rotInQuat = glm::quat(glm::radians(180.0f), rotationAxis);
         return glm::dmat3(toMat4(rotInQuat));
     }
 
-    rotationAxis = cross(oldXVec, starToSunVec);
+    rotationAxis = cross(start, end);
 
     float s = sqrt((1 + cosTheta) * 2);
     float invs = 1 / s;
@@ -280,7 +280,17 @@ int addExoplanetSystem(lua_State* L) {
 
         glm::dvec3 position = glm::dvec3(p.POSITIONX * parsec , p.POSITIONY * parsec, p.POSITIONZ * parsec);
         
-        glm::dmat3 exoplanetSystemRot = getExoplanetSystemRotation(position);
+        glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - position);
+        glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
+        // Earths north vector (0,0,1) projected onto the skyplane, the plane perpendicular to the viewing vector (starTosunVec)
+        glm::dvec3 northProjected = normalize(glm::length(north)*glm::sin(dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
+
+        glm::dmat3 firstRotation = getExoplanetSystemRotation(glm::dvec3(0.0,0.0,1.0), starToSunVec);
+        glm::dvec3 newX =  firstRotation * glm::dvec3(1.0, 0.0, 0.0) ;
+        glm::dmat3 secondRotation = getExoplanetSystemRotation(newX, northProjected);
+
+        glm::dmat3 exoplanetSystemRot = firstRotation; //secondRotation * 
+
 		const std::string starParent = "{"
 			"Identifier = '" + starname + "',"
 			"Parent = 'SolarSystemBarycenter',"
@@ -314,7 +324,7 @@ int addExoplanetSystem(lua_State* L) {
             }
             if (isnan(p.BIGOM))
             {
-                p.BIGOM = 270;
+                p.BIGOM = 0;
             }
             if (isnan(p.OM))
             {
@@ -362,7 +372,7 @@ int addExoplanetSystem(lua_State* L) {
                         "Type = 'KeplerTranslation',"
                         "Eccentricity = " + std::to_string(p.ECC) + "," //ECC
                         "SemiMajorAxis = 0," // 149 597 871km = 1 AU. A
-                        "Inclination = 90 - " + std::to_string(p.I) + "," //I
+                        "Inclination = " + std::to_string(p.I) + "," //I
                         "AscendingNode  = " + std::to_string(p.BIGOM) + "," //BIGOM
                         "ArgumentOfPeriapsis  = " + std::to_string(p.OM) + "," //OM
                         "MeanAnomaly = 0.0,"
@@ -415,7 +425,7 @@ int addExoplanetSystem(lua_State* L) {
 			}
 			if (isnan(plsy[i].BIGOM))
 			{
-				plsy[i].BIGOM = 270;
+				plsy[i].BIGOM = 0;
 			}
 			if (isnan(plsy[i].OM))
 			{
@@ -455,7 +465,7 @@ int addExoplanetSystem(lua_State* L) {
 							"Type = 'KeplerTranslation',"
 							"Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
 							"SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
-							"Inclination = 90 - " + std::to_string(plsy[i].I) + "," //I
+							"Inclination = " + std::to_string(plsy[i].I) + "," //I
 							"AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
 							"ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
 							"MeanAnomaly = 0.0,"
@@ -486,7 +496,7 @@ int addExoplanetSystem(lua_State* L) {
 				        "Type = 'KeplerTranslation',"
 				        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC 
 				        "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
-				        "Inclination = 90 - " + std::to_string(plsy[i].I) + "," //I
+				        "Inclination = " + std::to_string(plsy[i].I) + "," //I
 				        "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
 				        "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
 				        "MeanAnomaly = 0.0,"
