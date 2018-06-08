@@ -38,6 +38,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/glm.h>
+#include <glm/gtx/string_cast.hpp>
 
 namespace {
     constexpr const char* ProgramName = "Plane";
@@ -200,9 +202,25 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("opacity", _opacity);
 
-    // Model transform and view transform needs to be in double precision
+    glm::dvec3 objectPositionWorld = glm::dvec3(
+        glm::translate(
+            glm::dmat4(1.0), 
+            data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
+    );
+
+    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
+    glm::dvec3 newRight = glm::normalize(
+        glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
+    );
+    glm::dvec3 newUp = glm::cross(normal, newRight);
+
+    glm::dmat4 cameraOrientedRotation;
+    cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
+    cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
+    cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
+
     const glm::dmat4 rotationTransform = _billboard ?
-        glm::inverse(glm::dmat4(data.camera.viewRotationMatrix())) :
+        cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
     const glm::dmat4 modelTransform =
