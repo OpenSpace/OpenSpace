@@ -26,13 +26,16 @@
 #define __OPENSPACE_MODULE_DATALOADER___DATALOADERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/dataloader/reader.h>
-#include <modules/dataloader/loader.h>
+
+namespace openspace::dataloader {
+    class Reader;
+    class Loader;
+}
 
 namespace openspace {
 
 /**
- * Own reader, writer, loader
+ * Reference reader, writer, loader
  * Have functions like getDataItemList that gets list from reader
  */
 class DataLoaderModule : public OpenSpaceModule {
@@ -40,12 +43,26 @@ public:
     constexpr static const char* Name = "DataLoader";
 
     DataLoaderModule();
+    ~DataLoaderModule();
 
     void internalInitialize(const ghoul::Dictionary&) override;
 
+    void validateDataDirectory();
+    void setDataDirectoryRead(bool isRead);
+
+    std::vector<std::string> volumeDataItems();
+    void setVolumeDataItems(std::vector<std::string> items);
+
+    dataloader::Reader* reader();
+    dataloader::Loader* loader();
+
 private:
-    std::unique_ptr<openspace::dataloader::Reader> _reader;
-    std::unique_ptr<openspace::dataloader::Loader> _loader;
+    bool _dataDirectoryIsRead = true;
+
+    std::unique_ptr<dataloader::Reader> _reader;
+    std::unique_ptr<dataloader::Loader> _loader;
+
+    std::vector<std::string> _volumeDataItems;
 };
 
 } // namespace openspace

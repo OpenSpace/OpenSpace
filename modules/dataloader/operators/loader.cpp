@@ -22,9 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/dataloader/loader.h>
-#include <ghoul/logging/logmanager.h>
 #include <iostream>
+#include <modules/dataloader/operators/loader.h>
+#include <modules/dataloader/dataloadermodule.h>
+#include <ghoul/logging/logmanager.h>
+#include <openspace/properties/triggerproperty.h>
+#include <modules/dataloader/helpers.cpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -32,7 +35,7 @@
 
 namespace {
   constexpr const char* _loggerCat = "Loader";
-} // namespace
+} 
 
 namespace {
   static const openspace::properties::Property::PropertyInfo SelectedFilesInfo = {
@@ -65,14 +68,14 @@ Loader::Loader()
 
 void Loader::uploadData() {
 
-  char filepath[ MAX_PATH ];
-
   // Linux
   #ifdef _linux
   system("thunar /home/mberg");
 
   // Windows 
   #elif _WIN32
+
+  char filepath[ MAX_PATH ];
 
   OPENFILENAME ofn;
     ZeroMemory( &filepath, sizeof( filepath ) );
@@ -127,17 +130,35 @@ void Loader::uploadData() {
 }
 
 void Loader::addInternalDataItemProperties() {
-  // Get list of internal data items
+    getModule()->validateDataDirectory();
+    std::vector<std::string> volumeItems = getModule()->volumeDataItems();
 
-  // Iterate data items
-    // Initialize trigger property with data item name (are they unique?)
-    // Set onChange method to call loadDataItem with the path as argument
-    // addProperty()
+    for (auto item : volumeItems) {
+        static const openspace::properties::Property::PropertyInfo info = {
+            "ItemTrigger_" + openspace::dataloader::helpers::getDirLeaf(item),
+            "",
+            ""
+        };
+
+        // Initialize trigger property with data item name (are they unique?)
+        properties::TriggerProperty volumeItemTrigger(info);
+
+        // Set onChange method to call loadDataItem with the path as argument
+        volumeItemTrigger.onChange([this](){
+            // loadDataItem(item);
+        });
+
+        addProperty(volumeItemTrigger);
+    }
 }
 
 // addDataItemProperty();
 // removeDataItemProperties();
-// loadDataItem(std::string absPathToItem);
+
+// loadDataItem(std::string absPathToItem) {
+//     LINFO("Load item " + absPathToItem);
+// }
+
 // createVolumeDataItem(std::string absPath);
 
 }

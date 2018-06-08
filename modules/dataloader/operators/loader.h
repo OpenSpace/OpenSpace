@@ -25,13 +25,16 @@
 #ifndef __OPENSPACE_MODULE_DATALOADER___LOADER___H__
 #define __OPENSPACE_MODULE_DATALOADER___LOADER___H__
 
+#include <modules/dataloader/operators/operator.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 namespace openspace::dataloader {
 
-class Loader : public properties::PropertyOwner {
+using properties::PropertyOwner;
+
+class Loader : public PropertyOwner, public Operator {
   public:
     Loader();
 

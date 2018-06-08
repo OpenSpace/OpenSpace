@@ -22,18 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/dataloader/reader.h>
+#include <modules/dataloader/operators/reader.h>
+#include <modules/dataloader/dataloadermodule.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <regex>
-#include <string>
+
+#include <iostream>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 
 namespace {
     constexpr const char* _loggerCat = "Reader";
-} // namespace
+} 
 
 namespace {
     static const openspace::properties::Property::PropertyInfo VolumesInfo = {
@@ -93,7 +102,8 @@ void Reader::readVolumeDataItems() {
       ghoul::filesystem::Directory::Sort::Yes
     );
 
-    // DataLoader _internalDirDirty = false
+    getModule()->setVolumeDataItems(_volumeItems);
+    getModule()->setDataDirectoryRead(true);
 
     // for (auto el : volumeItems) {
     //     LINFO("A dir: " + el);
@@ -109,7 +119,6 @@ void Reader::readVolumeDataItems() {
     //     if (std::regex_search(dir, dirLeaf_match, dirLeaf_regex)) {
     //         itemDirLeaves.push_back(dirLeaf_match[0].str());
     //     } else {
-    //         LWARNING("Looked for match in " + dir + " but found none.");
     //     }
 
     // }
