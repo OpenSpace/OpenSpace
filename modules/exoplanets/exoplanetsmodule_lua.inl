@@ -289,7 +289,7 @@ int addExoplanetSystem(lua_State* L) {
         glm::dvec3 newX =  firstRotation * glm::dvec3(1.0, 0.0, 0.0) ;
         glm::dmat3 secondRotation = getExoplanetSystemRotation(newX, northProjected);
 
-        glm::dmat3 exoplanetSystemRot = firstRotation; //secondRotation * 
+        glm::dmat3 exoplanetSystemRot = secondRotation * firstRotation;
 
 		const std::string starParent = "{"
 			"Identifier = '" + starname + "',"
