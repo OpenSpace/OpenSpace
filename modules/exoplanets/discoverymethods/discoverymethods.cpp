@@ -52,16 +52,31 @@ namespace {
 namespace openspace::exoplanets{
 
     void DiscoveryMethods::addTransitMethodVisualization() {
-        
-        LINFO("addTransit");
+       
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-        scaleStar(starName, 1.5);
-        moveCamera();
+        float planetSemiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A; // AU
+        float eccentricity = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).ECC; 
+        float starRadius = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).RSTAR; // Solar Radii
+
+        // periapsis radius
+        float periapsisRadius = planetSemiMajorAxis * (1.0 - eccentricity);
+        // to km
+        periapsisRadius *= 149597871;
+        starRadius *= 695700;
+
+        // increase star radius to two thirds of periapsis radius
+        float scaleFactor = (0.666 * periapsisRadius) / starRadius;
+        std::string planetName = starName + " b";
+        scaleStar(starName +"Globe", scaleFactor);
+        scaleStar(planetName, scaleFactor);
+        moveCameraTransitView();
     }
     void DiscoveryMethods::removeTransitMethodVisualization() {
 
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-        scaleStar(starName, 1.0);
+        std::string planetName = starName + " b";
+        scaleStar(starName + "Globe", 1);
+        scaleStar(planetName, 1);
     }
 
     void DiscoveryMethods::addDopplerMethodVisualization() {
@@ -69,15 +84,28 @@ namespace openspace::exoplanets{
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
         float planetSemiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
         float starSemiMajorAxis = 0.1 * planetSemiMajorAxis * 149597871; // 10% of exoplanets semiMajorAxis (get value from em)
+        float eccentricity = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).ECC;
+        float starRadius = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).RSTAR; // Solar Radii
+
+        float periapsisRadius = planetSemiMajorAxis * (1.0 - eccentricity);
+        // to km
+        periapsisRadius *= 149597871;
+        starRadius *= 695700;
+        float scaleFactor = (0.1 * periapsisRadius) / starRadius;
+
+        moveCameraDopplerView();
+        scaleStar(starName + "Globe", scaleFactor);
         moveStar(starName, starSemiMajorAxis);
     }
 
     void DiscoveryMethods::removeDopplerMethodVisualization() {
-        
+        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
+        scaleStar(starName + "Globe", 1.0);
+        moveStar(starName, 0.0);
     }
 
-    void DiscoveryMethods::scaleStar(std::string starName, float scalefactor) {
-        std::string script = "openspace.setPropertyValue( 'Scene."+starName+"Globe.Scale.Scale', " + std::to_string(scalefactor) + ", 1, 'single', 'linear');"; //get name of current star from em
+    void DiscoveryMethods::scaleStar(std::string nodeName, float scalefactor) {
+        std::string script = "openspace.setPropertyValueSingle( 'Scene."+ nodeName +".Scale.Scale', " + std::to_string(scalefactor) + ", 1);"; //get name of current star from em
         OsEng.scriptEngine().queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
@@ -86,28 +114,44 @@ namespace openspace::exoplanets{
 
     void DiscoveryMethods::moveStar(std::string starName, float semiMajorAxis) {
         std::string script = "openspace.setPropertyValueSingle( 'Scene."+starName+"Globe.Translation.SemiMajorAxis', " + std::to_string(semiMajorAxis) + ", 1); "; //get name of current star from em
-        script += "openspace.setPropertyValueSingle( 'Scene." + starName + "Globe.Translation.MeanAnomaly', 180, 1);"; //get name of current star from em
         OsEng.scriptEngine().queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 
-    void DiscoveryMethods::moveCamera() {
-        //glm::dvec3 originalPosition = _camera->positionVec3();
+    void DiscoveryMethods::moveCameraTransitView() {
+
         Camera* cam = OsEng.navigationHandler().camera();
-        glm::dvec3 originalPosition = cam->positionVec3();
 
         SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
-        std::string id = focusNode->identifier();
         glm::dvec3 starPosition = focusNode->worldPosition();
-
         // get the vector between star and the sun
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPosition);
 
         // a position along that vector (twice the semimajor axis away from the sun)
         float semiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
         glm::dvec3 newCameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700) * starToSunVec);
+
+        //move camera to that pos
+        cam->setPositionVec3(newCameraPosition);
+        OsEng.navigationHandler().resetCameraDirection();
+
+    }
+    
+    void DiscoveryMethods::moveCameraDopplerView() {
+
+        Camera* cam = OsEng.navigationHandler().camera();
+
+        SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
+        glm::dvec3 starPosition = focusNode->worldPosition();
+        glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPosition);
+        glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
+        glm::dvec3 northProjected = glm::normalize(glm::length(north)*glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
+        glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, northProjected));
+        // a position along that vector (twice the semimajor axis away from the sun)
+        float semiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
+        glm::dvec3 newCameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700) * faceOnVector);
 
         //move camera to that pos
         cam->setPositionVec3(newCameraPosition);

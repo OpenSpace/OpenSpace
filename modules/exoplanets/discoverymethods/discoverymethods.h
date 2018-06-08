@@ -46,7 +46,8 @@ private:
 
     void scaleStar(std::string, float);
     void moveStar(std::string, float);
-    void moveCamera();
+    void moveCameraTransitView();
+    void moveCameraDopplerView();
 
 };
 

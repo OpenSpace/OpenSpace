@@ -375,7 +375,7 @@ int addExoplanetSystem(lua_State* L) {
                         "Inclination = " + std::to_string(p.I) + "," //I
                         "AscendingNode  = " + std::to_string(p.BIGOM) + "," //BIGOM
                         "ArgumentOfPeriapsis  = " + std::to_string(p.OM) + "," //OM
-                        "MeanAnomaly = 0.0,"
+                        "MeanAnomaly = 180.0,"
                         "Epoch = '" + sepoch_star + "'," //TT. JD to YYYY MM DD hh:mm:ss
                         "Period = " + std::to_string(p.PER) + "* 86400" //PER. 86 400sec = 1 day.
                     "}"
@@ -461,6 +461,10 @@ int addExoplanetSystem(lua_State* L) {
 						"}"
 					"},"
 					"Transform = {"
+                        "Scale = {"
+                            "Type = 'StaticScale',"
+                            "Scale = 1.0,"
+                        "},"
 						"Translation = {"
 							"Type = 'KeplerTranslation',"
 							"Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
