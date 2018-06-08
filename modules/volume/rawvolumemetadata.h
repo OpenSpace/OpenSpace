@@ -22,26 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
-#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
+#define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
 
-#include <ghoul/misc/exception.h>
+#include <openspace/documentation/documentation.h>
+#include <modules/volume/volumegridtype.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace::volume {
 
-enum class VolumeGridType : int {
-    Cartesian = 0,
-    Spherical = 1
-};
+struct RawVolumeMetadata {
+    static RawVolumeMetadata CreateFromDictionary(const ghoul::Dictionary& dictionary);
+    static documentation::Documentation Documentation();
 
-struct InvalidGridTypeError : public ghoul::RuntimeError {
-    explicit InvalidGridTypeError(std::string gridType);
-    std::string gridType;
-};
+    ghoul::Dictionary dictionary();
 
-VolumeGridType parseGridType(const std::string& gridType);
-std::string gridTypeToString(VolumeGridType);
+    glm::uvec3 dimensions;
+    VolumeGridType gridType;
+
+    bool hasTime;
+    double time;
+
+    bool hasValueRange;
+    float minValue;
+    float maxValue;
+    bool hasValueUnit;
+    std::string valueUnit;
+
+    bool hasDomainBounds;
+    glm::vec3 lowerDomainBound;
+    glm::vec3 upperDomainBound;
+    bool hasDomainUnit;
+    std::string domainUnit;
+};
 
 } // namespace openspace::volume
 
-#endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
+#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__

@@ -22,26 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
-#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
 
-#include <ghoul/misc/exception.h>
+#include <openspace/util/task.h>
 
-namespace openspace::volume {
+#include <ghoul/glm.h>
 
-enum class VolumeGridType : int {
-    Cartesian = 0,
-    Spherical = 1
+#include <string>
+
+namespace openspace {
+namespace volume {
+
+class GenerateRawVolumeTask : public Task {
+public:
+    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+
+private:
+    std::string _rawVolumeOutputPath;
+    std::string  _dictionaryOutputPath;
+    std::string _time;
+
+    glm::uvec3 _dimensions;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+
+    std::string _valueFunctionLua;
 };
 
-struct InvalidGridTypeError : public ghoul::RuntimeError {
-    explicit InvalidGridTypeError(std::string gridType);
-    std::string gridType;
-};
+} // namespace volume
+} // namespace openspace
 
-VolumeGridType parseGridType(const std::string& gridType);
-std::string gridTypeToString(VolumeGridType);
-
-} // namespace openspace::volume
-
-#endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
