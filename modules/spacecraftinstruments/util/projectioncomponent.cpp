@@ -417,9 +417,9 @@ bool ProjectionComponent::initializeGL() {
         absPath(placeholderFile)
     );
     if (texture) {
-        texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToEdge);
         texture->uploadTexture();
+        texture->setFilter(Texture::FilterMode::LinearMipMap);
+        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     _placeholderTexture = std::move(texture);
 
@@ -1005,10 +1005,6 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
     );
     if (_projectionTexture) {
         _projectionTexture->uploadTexture();
-        _projectionTexture->setWrapping(
-            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
-        );
-        _projectionTexture->setFilter(Texture::FilterMode::LinearMipMap);
     }
 
     if (_dilation.isEnabled) {
