@@ -42,6 +42,7 @@ struct InvalidGridTypeError : public ghoul::RuntimeError {
 };
 
 VolumeGridType parseGridType(const std::string& gridType);
+std::string gridTypeToString(VolumeGridType);
 
 } // namespace openspace::volume
 

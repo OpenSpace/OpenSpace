@@ -49,11 +49,13 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     vec3 transformedPos = samplePos;
     if (gridType_#{id} == 1) {
         transformedPos = volume_cartesianToSpherical(samplePos);
+        if (abs(transformedPos.r) > 1.0) {
+           return;
+        }
     }
 
     float clipAlpha = 1.0;
     vec3 centerToPos = transformedPos - vec3(0.5);
-
 
     for (int i = 0; i < nClips_#{id} && i < 8; i++) {
         vec3 clipNormal = clipNormals_#{id}[i];
@@ -72,6 +74,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
         }
 
         vec4 color = texture(transferFunction_#{id}, val);
+
         vec3 backColor = color.rgb;
         vec3 backAlpha = color.aaa;
 

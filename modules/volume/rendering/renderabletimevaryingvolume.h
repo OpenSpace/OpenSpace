@@ -30,17 +30,28 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
+// #include <modules/volume/rawvolume.h>
+ #include <modules/volume/rawvolumemetadata.h>
+// #include <modules/volume/rendering/basicvolumeraycaster.h>
+// #include <modules/volume/rendering/volumeclipplanes.h>
+
+// #include <openspace/properties/vectorproperty.h>
+// #include <openspace/properties/optionproperty.h>
+// #include <openspace/properties/stringproperty.h>
+// #include <openspace/util/boxgeometry.h>
+// #include <openspace/util/histogram.h>
+// #include <openspace/rendering/transferfunction.h>
 
 namespace openspace {
     class Histogram;
     struct RenderData;
+    class TransferFunction;
 } // namespace openspace
 
 namespace openspace::volume {
 
 class BasicVolumeRaycaster;
 template <typename T> class RawVolume;
-class TransferFunctionHandler;
 class VolumeClipPlanes;
 
 class RenderableTimeVaryingVolume : public Renderable {
@@ -55,21 +66,14 @@ public:
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
-    static documentation::Documentation TimestepDocumentation();
 
 private:
     struct Timestep {
         std::string baseName;
-        double time;
-        float minValue;
-        float maxValue;
-        glm::uvec3 dimensions;
-        glm::vec3 lowerDomainBound;
-        glm::vec3 upperDomainBound;
-        std::string unit;
-        bool isInRam;
-        bool isOnGpu;
-        std::unique_ptr<RawVolume<float>> rawVolume;
+        bool inRam;
+        bool onGpu;
+        RawVolumeMetadata metadata;
+        std::shared_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
         std::shared_ptr<Histogram> histogram;
     };
@@ -100,7 +104,7 @@ private:
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<TransferFunctionHandler> _transferFunctionHandler;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
 } // namespace openspace::volume

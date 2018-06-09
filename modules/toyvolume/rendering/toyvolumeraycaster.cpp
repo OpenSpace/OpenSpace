@@ -24,20 +24,26 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <sstream>
-#include <ghoul/opengl/programobject.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 #include <vector>
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <sstream>
+
 namespace {
-    constexpr const char* GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
-    constexpr const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
-    constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
+    constexpr const char* GlslRaycastPath =
+        "${MODULE_TOYVOLUME}/toyvolume/shaders/raycast.glsl";
+    constexpr const char* GlslBoundsVsPath =
+        "${MODULE_TOYVOLUME}/toyvolume/shaders/boundsvs.glsl";
+    constexpr const char* GlslBoundsFsPath =
+        "${MODULE_TOYVOLUME}/toyvolume/shaders/boundsfs.glsl";
 } // namespace
 
 namespace openspace {
@@ -121,15 +127,15 @@ bool ToyVolumeRaycaster::isCameraInside(const RenderData& data, glm::vec3& local
 }
 
 std::string ToyVolumeRaycaster::boundsVertexShaderPath() const {
-    return GlslBoundsVsPath;
+    return absPath(GlslBoundsVsPath);
 }
 
 std::string ToyVolumeRaycaster::boundsFragmentShaderPath() const {
-    return GlslBoundsFsPath;
+    return absPath(GlslBoundsFsPath);
 }
 
 std::string ToyVolumeRaycaster::raycasterPath() const {
-    return GlslRaycastPath;
+    return absPath(GlslRaycastPath);
 }
 
 std::string ToyVolumeRaycaster::helperPath() const {

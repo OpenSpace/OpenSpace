@@ -26,6 +26,10 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/transferfunction.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -94,7 +98,7 @@ private:
     std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<volume::TransferFunctionHandler> _transferFunctionHandler;
+    std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };
 
 } // namespace openspace::kameleonvolume

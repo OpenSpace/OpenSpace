@@ -22,31 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumegridtype.h>
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__
 
-namespace openspace::volume {
+#include <openspace/util/task.h>
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gt)
-    : RuntimeError("Invalid grid type: '" + gt + "'")
-    , gridType(std::move(gt))
-{}
+#include <ghoul/glm.h>
 
-VolumeGridType parseGridType(const std::string& gridType) {
-    if (gridType == "Cartesian") {
-        return VolumeGridType::Cartesian;
-    }
-    if (gridType == "Spherical") {
-        return VolumeGridType::Spherical;
-    }
-    throw InvalidGridTypeError(gridType);
-}
+#include <string>
 
-std::string gridTypeToString(VolumeGridType gridType) {
-    switch (gridType) {
-        case VolumeGridType::Cartesian: return "Cartesian";
-        case VolumeGridType::Spherical: return "Spherical";
-    }
-    return "Unknown";
-}
+namespace openspace {
+namespace volume {
 
-} // namespace openspace::volume
+class GenerateRawVolumeTask : public Task {
+public:
+    GenerateRawVolumeTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
+
+private:
+    std::string _rawVolumeOutputPath;
+    std::string  _dictionaryOutputPath;
+    std::string _time;
+
+    glm::uvec3 _dimensions;
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+
+    std::string _valueFunctionLua;
+};
+
+} // namespace volume
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___GENERATERAWVOLUMETASK___H__

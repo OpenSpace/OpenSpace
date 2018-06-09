@@ -87,12 +87,22 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
 
     std::ifstream file(_path, std::ios::binary);
     char* buffer = reinterpret_cast<char*>(volume->data());
+
+    if (file.fail()) {
+        throw ghoul::FileNotFoundError("Volume file not found");
+    }
+
     size_t length = static_cast<size_t>(dims.x) *
                     static_cast<size_t>(dims.y) *
                     static_cast<size_t>(dims.z) *
                     sizeof(VoxelType);
 
     file.read(buffer, length);
+
+    if (file.fail()) {
+        throw ghoul::RuntimeError("Error reading volume file");
+    }
+
     return volume;
 }
 

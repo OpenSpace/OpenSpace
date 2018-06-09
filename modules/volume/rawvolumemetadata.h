@@ -22,31 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
+#define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__
+
+#include <openspace/documentation/documentation.h>
 #include <modules/volume/volumegridtype.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace::volume {
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gt)
-    : RuntimeError("Invalid grid type: '" + gt + "'")
-    , gridType(std::move(gt))
-{}
+struct RawVolumeMetadata {
+    static RawVolumeMetadata CreateFromDictionary(const ghoul::Dictionary& dictionary);
+    static documentation::Documentation Documentation();
 
-VolumeGridType parseGridType(const std::string& gridType) {
-    if (gridType == "Cartesian") {
-        return VolumeGridType::Cartesian;
-    }
-    if (gridType == "Spherical") {
-        return VolumeGridType::Spherical;
-    }
-    throw InvalidGridTypeError(gridType);
-}
+    ghoul::Dictionary dictionary();
 
-std::string gridTypeToString(VolumeGridType gridType) {
-    switch (gridType) {
-        case VolumeGridType::Cartesian: return "Cartesian";
-        case VolumeGridType::Spherical: return "Spherical";
-    }
-    return "Unknown";
-}
+    glm::uvec3 dimensions;
+    VolumeGridType gridType;
+
+    bool hasTime;
+    double time;
+
+    bool hasValueRange;
+    float minValue;
+    float maxValue;
+    bool hasValueUnit;
+    std::string valueUnit;
+
+    bool hasDomainBounds;
+    glm::vec3 lowerDomainBound;
+    glm::vec3 upperDomainBound;
+    bool hasDomainUnit;
+    std::string domainUnit;
+};
 
 } // namespace openspace::volume
+
+#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__

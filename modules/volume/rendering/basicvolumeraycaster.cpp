@@ -48,11 +48,11 @@ namespace openspace::volume {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-                         std::shared_ptr<TransferFunctionHandler> transferFunctionHandler,
+                            std::shared_ptr<openspace::TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
-    : _clipPlanes(clipPlanes)
-    , _volumeTexture(volumeTexture)
-    , _transferFunctionHandler(transferFunctionHandler)
+    : _volumeTexture(volumeTexture)
+    , _transferFunction(transferFunction)
+    , _clipPlanes(clipPlanes)
     , _boundingBox(glm::vec3(1.0))
 {}
 
@@ -108,7 +108,7 @@ void BasicVolumeRaycaster::renderExitPoints(const RenderData& data,
 void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
                                       ghoul::opengl::ProgramObject& program)
 {
-    if (!_volumeTexture || !_transferFunctionHandler) {
+    if (!_volumeTexture || !_transferFunction) {
         return;
     }
 
@@ -117,9 +117,10 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
 
     std::string id = std::to_string(data.id);
 
+    _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunctionHandler->texture().bind();
+    _transferFunction->texture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -177,10 +178,10 @@ std::string BasicVolumeRaycaster::helperPath() const {
 }
 
 
-void BasicVolumeRaycaster::setTransferFunctionHandler(
-                         std::shared_ptr<TransferFunctionHandler> transferFunctionHandler)
+void BasicVolumeRaycaster::setTransferFunction(
+                            std::shared_ptr<openspace::TransferFunction> transferFunction)
 {
-    _transferFunctionHandler = std::move(transferFunctionHandler);
+    _transferFunction = std::move(transferFunction);
 }
 
 void BasicVolumeRaycaster::setVolumeTexture(
