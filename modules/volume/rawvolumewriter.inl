@@ -24,6 +24,7 @@
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/volumeutils.h>
+#include <ghoul/misc/exception.h>
 #include <fstream>
 
 namespace openspace::volume {

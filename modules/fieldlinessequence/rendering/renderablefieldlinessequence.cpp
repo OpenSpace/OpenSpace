@@ -38,6 +38,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <fstream>
+#include <thread>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableFieldlinesSequence";

@@ -29,6 +29,7 @@
 
 #include <atomic>
 #include <thread>
+#include <vector>
 
 namespace openspace {
 

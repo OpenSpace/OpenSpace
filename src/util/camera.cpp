@@ -24,6 +24,8 @@
 
 #include <openspace/util/camera.h>
 
+#include <sstream>
+
 namespace openspace {
 
 const glm::dvec3 Camera::ViewDirectionCameraSpace = glm::dvec3(0, 0, -1);

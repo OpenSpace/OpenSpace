@@ -24,6 +24,8 @@
 
 #include <openspace/util/powerscaledscalar.h>
 
+#include <sstream>
+
 namespace {
     constexpr const double k = 10.0;
 } // namespace

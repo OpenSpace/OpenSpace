@@ -36,6 +36,7 @@
 #include <openspace/util/synchronizationwatcher.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <thread>
 
 namespace {
     constexpr const char* KeyAsset = "Asset";

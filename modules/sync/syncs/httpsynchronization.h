@@ -28,6 +28,7 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <thread>
+#include <vector>
 
 namespace openspace {
 
