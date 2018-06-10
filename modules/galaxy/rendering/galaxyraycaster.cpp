@@ -139,7 +139,8 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
 
     const glm::mat4 scaledModelTransform = modelTransform / divisor;
 
-    const glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
+    const glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) *
+                               camWorldPos;
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
     return (localPosition.x > 0 && localPosition.y > 0 &&

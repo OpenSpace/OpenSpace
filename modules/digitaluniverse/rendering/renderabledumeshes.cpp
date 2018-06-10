@@ -1009,7 +1009,7 @@ void RenderableDUMeshes::createMeshes() {
                     scale = static_cast<float>(306391534.73091 * PARSEC);
                     break;
             }
-            
+
             for (GLfloat& v : p.second.vertices) {
                 v *= scale;
             }

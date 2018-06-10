@@ -69,7 +69,7 @@ namespace detail {
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
         ++totalComponents;
-#endif 
+#endif
 
         return totalComponents;
     }

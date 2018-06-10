@@ -247,7 +247,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // NOLINT
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // NOLINT
-        // NOLINTNEXTLINE 
+        // NOLINTNEXTLINE
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback); // NOLINT
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L); // NOLINT

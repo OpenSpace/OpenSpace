@@ -183,7 +183,9 @@ OrbitalNavigator::OrbitalNavigator()
         return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
     };
     _rotateToFocusNodeInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
-    _cameraToSurfaceDistanceInterpolator.setTransferFunction(smoothStepDerivedTranferFunction);
+    _cameraToSurfaceDistanceInterpolator.setTransferFunction(
+        smoothStepDerivedTranferFunction
+    );
 
     // Define callback functions for changed properties
     _friction.roll.onChange([&]() {
@@ -487,7 +489,7 @@ glm::dquat OrbitalNavigator::rotateLocally(double deltaTime,
 }
 
 glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
-                                                      const glm::dquat& localCameraRotation)
+                                                    const glm::dquat& localCameraRotation)
 {
     if (_rotateToFocusNodeInterpolator.isInterpolating()) {
         const double t = _rotateToFocusNodeInterpolator.value();
@@ -509,11 +511,11 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     else {
         return localCameraRotation;
     }
-    
+
     double t = _rotateToFocusNodeInterpolator.value();
     _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _rotateToFocusNodeInterpolator.step();
-    
+
     glm::dquat result = glm::slerp(
         localCameraRotation,
         glm::dquat(glm::dvec3(0.0)),
@@ -523,7 +525,7 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     if (angle(result) < 0.01) {
         _rotateToFocusNodeInterpolator.end();
     }
-    
+
     return result;
 }
 
@@ -733,7 +735,9 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
     const double distanceToCamera = glm::length(cameraPosition - objectPosition);
 
     // Interpolate with a negative delta time if distance is too large to follow
-    const double interpolationSign = glm::sign(maximumDistanceForRotation - distanceToCamera);
+    const double interpolationSign = glm::sign(
+        maximumDistanceForRotation - distanceToCamera
+    );
 
     _followRotationInterpolator.setInterpolationTime(static_cast<float>(
         interpolationTime

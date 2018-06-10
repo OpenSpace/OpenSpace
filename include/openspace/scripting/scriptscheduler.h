@@ -72,8 +72,8 @@ public:
 
     /**
      * Progresses the script schedulers time and returns all scripts that has been
-     * scheduled to run between \param newTime and the time provided in the last invocation
-     * of this method.
+     * scheduled to run between \param newTime and the time provided in the last
+     * invocation of this method.
      *
      * \param newTime A j2000 time value specifying the new time stamp that
      * the script scheduler should progress to.

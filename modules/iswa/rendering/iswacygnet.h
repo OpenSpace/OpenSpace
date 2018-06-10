@@ -131,7 +131,7 @@ protected:
     Metadata _data;
 
     // to rotate objects with flipped texture coordinates
-    glm::mat4 _rotation = glm::mat4(1.f); 
+    glm::mat4 _rotation = glm::mat4(1.f);
 
 private:
     glm::dmat3 _stateMatrix;

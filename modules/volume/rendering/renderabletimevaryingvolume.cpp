@@ -404,7 +404,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     try {
         ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-        metadata = RawVolumeMetadata::CreateFromDictionary(dictionary);
+        metadata = RawVolumeMetadata::createFromDictionary(dictionary);
     } catch (...) {
         return;
     }

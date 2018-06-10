@@ -369,7 +369,10 @@ void GuiPropertyComponent::render() {
                        dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
         auto renderProp = [&](properties::PropertyOwner* pOwner) {
-            const int count = nVisibleProperties(pOwner->propertiesRecursive(), _visibility);
+            const int count = nVisibleProperties(
+                pOwner->propertiesRecursive(),
+                _visibility
+            );
 
             if (count == 0) {
                 return;

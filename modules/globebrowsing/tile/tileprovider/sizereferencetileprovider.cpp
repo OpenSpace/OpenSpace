@@ -77,7 +77,7 @@ void SizeReferenceTileProvider::renderText(
         0.f,
         aboveEquator ? _fontSize / 2.f : _initData.dimensions().y - 3.f * _fontSize / 2.f
     };
-        
+
     fontRenderer.render(
         *_font,
         textPosition,

@@ -58,9 +58,9 @@ struct UpdateStructures;
 class FramebufferRenderer : public Renderer, public RaycasterListener,
                             public DeferredcasterListener
 {
-public: 
+public:
     typedef std::map<
-        VolumeRaycaster*, 
+        VolumeRaycaster*,
         std::unique_ptr<ghoul::opengl::ProgramObject>
     > RaycasterProgObjMap;
     typedef std::map<

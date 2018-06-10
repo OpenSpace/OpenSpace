@@ -227,7 +227,8 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+                                          modelTransform;
 
     _gridProgram->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _gridProgram->setUniform("projectionTransform", data.camera.projectionMatrix());

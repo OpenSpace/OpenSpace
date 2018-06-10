@@ -151,7 +151,7 @@ float Renderable::boundingSphere() const {
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
-                                                 const glm::dvec3& targetModelSpace) const 
+                                                 const glm::dvec3& targetModelSpace) const
 {
     const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
     return {

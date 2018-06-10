@@ -142,7 +142,7 @@ void ParallelPeer::connect() {
     setStatus(ParallelConnection::Status::Connecting);
 
     std::unique_ptr<ghoul::io::TcpSocket> socket = std::make_unique<ghoul::io::TcpSocket>(
-        _address, 
+        _address,
         atoi(_port.value().c_str())
     );
 

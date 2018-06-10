@@ -51,4 +51,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___SYNCDATA___H__
+#endif // __OPENSPACE_CORE___SYNCABLE___H__

@@ -144,7 +144,12 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     glBindVertexArray(_vaoId);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertices.size() * sizeof(GLfloat),
+        _vertices.data(),
+        GL_STATIC_DRAW
+    );
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);

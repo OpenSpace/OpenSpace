@@ -479,7 +479,9 @@ void GlobeBrowsingModule::resetCameraDirection(Camera& camera,
     const glm::dvec3 slightlyNorth = globe->ellipsoid().cartesianSurfacePosition(
         Geodetic2(geo2.lat + 0.001, geo2.lon)
     );
-    const glm::dvec3 lookUpModelSpace = glm::normalize(slightlyNorth - positionModelSpace);
+    const glm::dvec3 lookUpModelSpace = glm::normalize(
+        slightlyNorth - positionModelSpace
+    );
     const glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
 
     // Lookat vector

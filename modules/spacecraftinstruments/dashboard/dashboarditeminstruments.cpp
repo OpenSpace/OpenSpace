@@ -358,7 +358,6 @@ glm::vec2 DashboardItemInstruments::size() const {
         return size;
     }
 
-    
     using FR = ghoul::fontrendering::FontRenderer;
     FR& renderer = FR::defaultRenderer();
 

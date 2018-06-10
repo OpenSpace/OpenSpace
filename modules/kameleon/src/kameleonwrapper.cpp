@@ -201,7 +201,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     constexpr const int NBins = 200;
     std::vector<int> histogram(NBins, 0);
     // Explicitly mentioning the capture list provides either an error on MSVC (if NBins)
-    // is not specified or a warning on Clang if it is specified. Sigh... 
+    // is not specified or a warning on Clang if it is specified. Sigh...
     auto mapToHistogram = [=](double val) {
         double zeroToOne = (val - varMin) / (varMax - varMin);
         zeroToOne *= static_cast<double>(NBins);
@@ -235,7 +235,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
                     // phi range needs to be mapped to the slightly different model
                     // range to avoid gaps in the data Subtract a small term to
                     // avoid rounding errors when comparing to phiMax.
-                    const double phiPh = _min.z + phiNorm / 
+                    const double phiPh = _min.z + phiNorm /
                                     glm::two_pi<double>() * (_max.z - _min.z - 0.000001);
 
                     double value = 0.0;
@@ -665,7 +665,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::lorentzTrajectories(
                 // set positive trajectory to pink
                 trajectory.push_back({
                     RE_TO_METER * std::move(position),
-                    glm::vec4(1.f, 0.f, 1.f, 1.f) 
+                    glm::vec4(1.f, 0.f, 1.f, 1.f)
                 });
             }
             else {
@@ -790,7 +790,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
     glm::vec3 pos = seedPoint;
     int numSteps = 0;
     TraceLine line;
-    
+
     // While we are inside the models boundaries and not inside earth
     while ((pos.x < _max.x && pos.x > _min.x && pos.y < _max.y && pos.y > _min.y &&
             pos.z < _max.z && pos.z > _min.z) &&
@@ -810,7 +810,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
             _interpolator->interpolate(zID, pos.x, pos.y, pos.z)
         ));
         k1 = (direction == TraceDirection::FORWARD) ? k1 : -1.f * k1;
-        
+
         glm::vec3 step = glm::vec3(stepX, stepY, stepZ) * stepSize;
 
         glm::vec3 k1Pos = pos + step / 2.f * k1;

@@ -279,7 +279,7 @@ public:
     virtual bool isSimpleRendering() const;
 
     /**
-    * Returns <code>true</code> if the rendering is being done using a Fisheye lens; 
+    * Returns <code>true</code> if the rendering is being done using a Fisheye lens;
     * <code>false</code> otherwise. On default, this method returns
     * <code>false</code>
     */

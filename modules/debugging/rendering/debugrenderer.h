@@ -36,7 +36,7 @@
 #include <memory>
 #include <vector>
 
-namespace ghoul::opengl { class ProgramObject; } 
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 

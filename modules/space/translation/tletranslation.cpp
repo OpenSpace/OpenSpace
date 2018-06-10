@@ -126,7 +126,11 @@ namespace {
         const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
 
         // Get the position of the Epoch
-        const auto y2000 = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), Epoch);
+        const auto y2000 = std::lower_bound(
+            LeapSeconds.begin(),
+            LeapSeconds.end(),
+            Epoch
+        );
 
         // The distance between the two iterators gives us the number of leap years
         const int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));

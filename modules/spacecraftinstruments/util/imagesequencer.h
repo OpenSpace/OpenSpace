@@ -111,7 +111,8 @@ public:
     double nextCaptureTime();
 
     /**
-     * Retrieves the time interval length between the current time and an upcoming capture.
+     * Retrieves the time interval length between the current time and an upcoming
+     * capture.
      */
     double intervalLength();
 

@@ -105,7 +105,7 @@ public:
      * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
      * The default visibility settings is Visibility::All, whereas the default read-only
      * state is \c false.
-     * 
+     *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property.
      *
@@ -191,7 +191,7 @@ public:
      * \c LUA_TLIGHTUSERDATA, \c LUA_TNUMBER, \c LUA_TSTRING, \c LUA_TTABLE,
      * \c LUA_TFUNCTION, \c LUA_TUSERDATA, or \c LUA_TTHREAD. The default implementation
      * will return \c LUA_TNONE.
-     * 
+     *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
      *         and Property::setLuaValue methods.
      */
@@ -202,7 +202,7 @@ public:
      * <code>std::string</code>. The specific details of this serialization is up to the
      * property developer. The implementation has to be synchronized with the
      * Property::setStringValue method. The default implementation is a no-op.
-     * 
+     *
      * \param value The value to which the Property will be encoded
      * \return \p true if the encoding succeeded, \p false otherwise
      */
@@ -211,7 +211,7 @@ public:
     /**
      * This method encodes the encapsulated value of this Property as a
      * <code>std::string</code>.
-     * 
+     *
      * \return the string value
      *
      * \throw ghoul::RuntimeError If value could not be fetched

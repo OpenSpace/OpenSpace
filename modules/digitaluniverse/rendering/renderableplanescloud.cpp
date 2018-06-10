@@ -914,7 +914,9 @@ bool RenderablePlanesCloud::loadTextures() {
                     fmt::format("Loaded texture from '{}'", pair.second)
                 );
                 p.first->second->uploadTexture();
-                p.first->second->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+                p.first->second->setFilter(
+                    ghoul::opengl::Texture::FilterMode::LinearMipMap
+                );
             }
         }
     }

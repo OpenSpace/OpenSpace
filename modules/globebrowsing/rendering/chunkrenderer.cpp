@@ -94,7 +94,7 @@ void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
 
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
                                                  LayerShaderManager& layeredShaderManager,
-                                                         GPULayerManager& gpuLayerManager, 
+                                                         GPULayerManager& gpuLayerManager,
                                                                        const Chunk& chunk)
 {
     const TileIndex& tileIndex = chunk.tileIndex();
@@ -183,7 +183,7 @@ void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk,
             const glm::dvec3 planetCasterVec = casterPos - data.position.dvec3();
             const glm::dvec3 sourceCasterVec = casterPos - sourcePos;
             const double sc_length = glm::length(sourceCasterVec);
-            const glm::dvec3 planetCaster_proj = 
+            const glm::dvec3 planetCaster_proj =
                 (glm::dot(planetCasterVec, sourceCasterVec) / (sc_length*sc_length)) *
                 sourceCasterVec;
             const double d_test = glm::length(planetCasterVec - planetCaster_proj);
@@ -232,7 +232,7 @@ void ChunkRenderer::calculateEclipseShadows(const Chunk& chunk,
             constexpr const char* NameRc = "shadowDataArray[{}].rc";
             constexpr const char* NameSource = "shadowDataArray[{}].sourceCasterVec";
             constexpr const char* NamePos= "shadowDataArray[{}].casterPositionVec";
-                
+
             programObject->setUniform(
                 fmt::format(NameIsShadowing, counter), sd.isShadowing
             );
@@ -324,9 +324,9 @@ void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObjec
         constexpr const float TileDelta = 1.f / 64.f;
         const glm::vec3 deltaTheta0 = modelViewTransformMat3 *
                                       (glm::vec3(corner10 - corner00) * TileDelta);
-        const glm::vec3 deltaTheta1 = modelViewTransformMat3 * 
+        const glm::vec3 deltaTheta1 = modelViewTransformMat3 *
                                       (glm::vec3(corner11 - corner01) * TileDelta);
-        const glm::vec3 deltaPhi0 = modelViewTransformMat3 * 
+        const glm::vec3 deltaPhi0 = modelViewTransformMat3 *
                                     (glm::vec3(corner01 - corner00) * TileDelta);
         const glm::vec3 deltaPhi1 = modelViewTransformMat3 *
                                     (glm::vec3(corner11 - corner10) * TileDelta);
@@ -418,7 +418,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     if (chunk.owner().generalProperties().useAccurateNormals && hasHeightLayer) {
         // Apply an extra scaling to the height if the object is scaled
         programObject->setUniform(
-            "heightScale", static_cast<float>(data.modelTransform.scale * data.camera.scaling()));
+            "heightScale",
+            static_cast<float>(data.modelTransform.scale * data.camera.scaling())
+        );
     }
 
     setCommonUniforms(*programObject, chunk, data);

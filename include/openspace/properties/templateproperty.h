@@ -59,7 +59,7 @@ public:
     /**
      * The constructor initializing the TemplateProperty with the provided PropertyInfo
      * \p info and and the default value \p value.
-     * 
+     *
      * \param info The PropertyInfo structure that contains all the required static
      *        information for initializing this Property.
      * \param value The default value of the Property
@@ -123,7 +123,7 @@ public:
      * is performed by calling the PropertyDelegate::fromLuaValue with the template
      * parameter <code>T</code> as argument. If the decoding is successful, the new value
      * is set, otherwise it remains unchanged.
-     * 
+     *
      * \param state The Lua state from which the value will be decoded
      * \return \c true if the decoding succeeded; \c false otherwise
      */

@@ -42,7 +42,7 @@ int AvailableTileData::desiredLevel(const Chunk& chunk, const RenderData&) const
 
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const std::shared_ptr<Layer>& layer :
-             layerManager->layerGroup(i).activeLayers()) 
+             layerManager->layerGroup(i).activeLayers())
         {
             Tile::Status status = layer->tileStatus(chunk.tileIndex());
             if (status == Tile::Status::OK) {

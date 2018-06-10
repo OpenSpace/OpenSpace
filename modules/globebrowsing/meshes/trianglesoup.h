@@ -81,7 +81,6 @@ protected:
         GLfloat position[3];
         GLfloat texture[2];
         GLfloat normal[3];
-        //GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
     };
 
     // Vertex data

@@ -374,11 +374,11 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     LINFO(fmt::format("Saved fieldline state to: {}{}", absPath, ext));
 }
 
-void FieldlinesState::setModel(fls::Model m) { 
+void FieldlinesState::setModel(fls::Model m) {
     _model = m;
 }
 
-void FieldlinesState::setTriggerTime(double t) { 
+void FieldlinesState::setTriggerTime(double t) {
     _triggerTime = t;
 }
 

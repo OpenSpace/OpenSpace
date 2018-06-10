@@ -242,7 +242,7 @@ void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
 }
 
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
-    sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();   
+    sgct::SGCTWindow* window = sgct::Engine::instance()->getCurrentWindowPtr();
     if (!window || !window->getCurrentViewport()) {
         return glm::ivec4(0, 0, 0, 0);
     }
@@ -270,9 +270,10 @@ bool SGCTWindowWrapper::isSimpleRendering() const {
 }
 
 bool SGCTWindowWrapper::isFisheyeRendering() const {
-    return dynamic_cast<sgct_core::FisheyeProjection *>(
-        sgct::Engine::instance()->getCurrentWindowPtr()->getViewport(0)->getNonLinearProjectionPtr()
-        );
+    sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+    return dynamic_cast<sgct_core::FisheyeProjection*>(
+        w->getViewport(0)->getNonLinearProjectionPtr()
+    );
 }
 
 void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {

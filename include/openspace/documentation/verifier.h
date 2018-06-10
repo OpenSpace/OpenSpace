@@ -585,8 +585,9 @@ struct GreaterEqualVerifier : public OperatorVerifier<T,
 };
 
 /**
- * This Verifier checks whether the incoming value is equal to the stored value. Due to the
- * operator type restrictions, \c T cannot be a subclass of (or the same as) TableVerifier.
+ * This Verifier checks whether the incoming value is equal to the stored value. Due to
+ * the operator type restrictions, \c T cannot be a subclass of (or the same as)
+ * TableVerifier.
  */
 template <typename T>
 struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type>> {
@@ -661,8 +662,8 @@ struct InListVerifier : public T {
 
 /**
  * This Verifier checks whether the incoming value is of the correct type, using the
- * Verifier passed as a template parameter \c T and then checks whether it is not part of a
- * list that is passed to the constructor. To the missing equality operator, \c T cannot
+ * Verifier passed as a template parameter \c T and then checks whether it is not part of
+ * a list that is passed to the constructor. To the missing equality operator, \c T cannot
  * be a subclass of (or the same as) TableVerifier.
  */
 template <typename T>

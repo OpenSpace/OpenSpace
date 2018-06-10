@@ -217,7 +217,7 @@ namespace {
         "Control variable for distance size.",
         ""
     };
-    
+
     const openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable pixel size control.",
@@ -365,7 +365,7 @@ documentation::Documentation RenderableBillboardsCloud::Documentation() {
                 Optional::Yes,
                 CorrectionSizeEndDistanceInfo.description
             },
-            { 
+            {
                 CorrectionSizeFactorInfo.identifier,
                 new DoubleVerifier,
                 Optional::Yes,
@@ -479,7 +479,9 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
         _spriteTexturePath = absPath(dictionary.value<std::string>(
             SpriteTextureInfo.identifier
         ));
-        _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(_spriteTexturePath);
+        _spriteTextureFile = std::make_unique<ghoul::filesystem::File>(
+            _spriteTexturePath
+        );
 
         _spriteTexturePath.onChange([&] { _spriteTextureIsDirty = true; });
         _spriteTextureFile->setCallback(
@@ -687,25 +689,31 @@ void RenderableBillboardsCloud::initializeGL() {
         "modelMatrix"
     );
 
-    _uniformCache.cameraPos                 = _program->uniformLocation("cameraPosition");
-    _uniformCache.cameraLookup              = _program->uniformLocation("cameraLookUp");
-    _uniformCache.renderOption              = _program->uniformLocation("renderOption");
-    _uniformCache.minBillboardSize          = _program->uniformLocation("minBillboardSize");
-    _uniformCache.maxBillboardSize          = _program->uniformLocation("maxBillboardSize");
-    _uniformCache.correctionSizeEndDistance = _program->uniformLocation("correctionSizeEndDistance");
-    _uniformCache.correctionSizeFactor      = _program->uniformLocation("correctionSizeFactor");
-    _uniformCache.color                     = _program->uniformLocation("color");
-    _uniformCache.alphaValue                = _program->uniformLocation("alphaValue");
-    _uniformCache.scaleFactor               = _program->uniformLocation("scaleFactor");
-    _uniformCache.up                        = _program->uniformLocation("up");
-    _uniformCache.right                     = _program->uniformLocation("right");
-    _uniformCache.fadeInValue               = _program->uniformLocation("fadeInValue");
-    _uniformCache.screenSize                = _program->uniformLocation("screenSize");
-    _uniformCache.spriteTexture             = _program->uniformLocation("spriteTexture");
-    _uniformCache.polygonTexture            = _program->uniformLocation("polygonTexture");
-    _uniformCache.hasPolygon                = _program->uniformLocation("hasPolygon");
-    _uniformCache.hasColormap               = _program->uniformLocation("hasColorMap");
-    _uniformCache.enabledRectSizeControl    = _program->uniformLocation("enabledRectSizeControl");
+    _uniformCache.cameraPos = _program->uniformLocation("cameraPosition");
+    _uniformCache.cameraLookup = _program->uniformLocation("cameraLookUp");
+    _uniformCache.renderOption = _program->uniformLocation("renderOption");
+    _uniformCache.minBillboardSize = _program->uniformLocation("minBillboardSize");
+    _uniformCache.maxBillboardSize = _program->uniformLocation("maxBillboardSize");
+    _uniformCache.correctionSizeEndDistance = _program->uniformLocation(
+        "correctionSizeEndDistance"
+    );
+    _uniformCache.correctionSizeFactor = _program->uniformLocation(
+        "correctionSizeFactor"
+    );
+    _uniformCache.color = _program->uniformLocation("color");
+    _uniformCache.alphaValue = _program->uniformLocation("alphaValue");
+    _uniformCache.scaleFactor = _program->uniformLocation("scaleFactor");
+    _uniformCache.up = _program->uniformLocation("up");
+    _uniformCache.right = _program->uniformLocation("right");
+    _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
+    _uniformCache.screenSize = _program->uniformLocation("screenSize");
+    _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
+    _uniformCache.polygonTexture = _program->uniformLocation("polygonTexture");
+    _uniformCache.hasPolygon = _program->uniformLocation("hasPolygon");
+    _uniformCache.hasColormap = _program->uniformLocation("hasColorMap");
+    _uniformCache.enabledRectSizeControl = _program->uniformLocation(
+        "enabledRectSizeControl"
+    );
 
     if (_hasPolygon) {
         createPolygonTexture();
@@ -795,7 +803,10 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     );
 
     _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
-    _program->setUniform(_uniformCache.cameraLookup, data.camera.lookUpVectorWorldSpace());
+    _program->setUniform(
+        _uniformCache.cameraLookup,
+        data.camera.lookUpVectorWorldSpace()
+    );
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
     _program->setUniform(_uniformCache.cameraViewProjectionMatrix,
@@ -809,7 +820,10 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.right, orthoRight);
     _program->setUniform(_uniformCache.fadeInValue, fadeInVariable);
 
-    _program->setUniform(_uniformCache.correctionSizeEndDistance, _correctionSizeEndDistance);
+    _program->setUniform(
+        _uniformCache.correctionSizeEndDistance,
+        _correctionSizeEndDistance
+    );
     _program->setUniform(_uniformCache.correctionSizeFactor, _correctionSizeFactor);
 
     _program->setUniform(_uniformCache.enabledRectSizeControl, _pixelSizeControl);
@@ -968,8 +982,8 @@ void RenderableBillboardsCloud::render(const RenderData& data, RendererTasks&) {
     );
     if (orthoRight == glm::dvec3(0.0)) {
         glm::dvec3 otherVector(
-            cameraUpDirectionWorld.y, 
-            cameraUpDirectionWorld.x, 
+            cameraUpDirectionWorld.y,
+            cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
         );
         orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));

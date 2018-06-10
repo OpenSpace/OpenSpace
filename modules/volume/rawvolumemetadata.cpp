@@ -45,7 +45,9 @@ namespace {
 
 namespace openspace::volume {
 
-RawVolumeMetadata RawVolumeMetadata::CreateFromDictionary(const ghoul::Dictionary& dictionary) {
+RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,

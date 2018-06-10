@@ -53,7 +53,7 @@ Angle<T>::Angle(const Angle<T>& other)
 
 template <typename T>
 Angle<T>::Angle(T radians)
-    : _radians(radians) 
+    : _radians(radians)
 {}
 
 //////////////////////////////////////////////////////////////////////////////////////////

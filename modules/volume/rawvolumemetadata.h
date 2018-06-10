@@ -33,7 +33,7 @@
 namespace openspace::volume {
 
 struct RawVolumeMetadata {
-    static RawVolumeMetadata CreateFromDictionary(const ghoul::Dictionary& dictionary);
+    static RawVolumeMetadata createFromDictionary(const ghoul::Dictionary& dictionary);
     static documentation::Documentation Documentation();
 
     ghoul::Dictionary dictionary();

@@ -548,7 +548,7 @@ void ABufferRenderer::render(Scene* scene, Camera* camera, float blackoutFactor,
     if (!scene || !camera) {
         return;
     }
-    
+
     ghoul::opengl::TextureUnit mainColorTextureUnit;
     mainColorTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);

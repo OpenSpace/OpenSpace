@@ -219,11 +219,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 //            glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
 //            program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
 //            program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
-//            
+//
 //            // Eye Space in OS to Eye Space in SGCT
 //            glm::dmat4 dSgctEye2OSEye = glm::inverse(
 //                glm::dmat4(renderData.camera.viewMatrix()));
-//            
+//
 //            // Eye Space in SGCT to Projection (Clip) Space in SGCT
 //            glm::dmat4 dInverseProjection = glm::inverse(
 //                glm::dmat4(renderData.camera.projectionMatrix()));
@@ -231,11 +231,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 //            glm::dmat4 dInverseCameraRotationToSgctEyeTransform = glm::mat4_cast(
 //                static_cast<glm::dquat>(renderData.camera.rotationQuaternion())
 //            ) * dSgctEye2OSEye;
-//            
-//            
-//            glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix = 
+//
+//            glm::dmat4 dInverseSGCTEyeToTmpRotTransformMatrix =
 //                dInverseCameraRotationToSgctEyeTransform * dInverseProjection;
-//            
+//
 //            double* mSource = glm::value_ptr(dInverseSGCTEyeToTmpRotTransformMatrix);
 //            mSource[12] += renderData.camera.positionVec3().x;
 //            mSource[13] += renderData.camera.positionVec3().y;
@@ -290,7 +289,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache.cullAtmosphere, 0);
             program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
             program.setUniform(_uniformCache.Rt, _atmosphereRadius);
-            program.setUniform(_uniformCache.groundRadianceEmittion, _planetGroundRadianceEmittion);
+            program.setUniform(
+                _uniformCache.groundRadianceEmittion,
+                _planetGroundRadianceEmittion
+            );
             program.setUniform(_uniformCache.HR, _rayleighHeightScale);
             program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
             program.setUniform(_uniformCache.HM, _mieHeightScale);
@@ -307,14 +309,19 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
 
             // Object Space
             glm::dmat4 inverseModelMatrix = glm::inverse(_modelTransform);
-            program.setUniform(_uniformCache2.dInverseModelTransformMatrix, inverseModelMatrix);
+            program.setUniform(
+                _uniformCache2.dInverseModelTransformMatrix,
+                inverseModelMatrix
+            );
             program.setUniform(_uniformCache2.dModelTransformMatrix, _modelTransform);
 
             // Eye Space in SGCT to Eye Space in OS (SGCT View to OS Camera Rig)
             glm::dmat4 dSgctEye2OSEye = glm::inverse(
                 glm::dmat4(renderData.camera.viewMatrix()));
 
-            glm::dmat4 dSGCTViewToWorldMatrix = glm::inverse(renderData.camera.combinedViewMatrix());
+            glm::dmat4 dSGCTViewToWorldMatrix = glm::inverse(
+                renderData.camera.combinedViewMatrix()
+            );
 
             // Eye Space in SGCT to OS World Space
             program.setUniform(_uniformCache2.dSGCTViewToWorldMatrix,
@@ -334,13 +341,17 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
                 dInverseProjection;
 
             // SGCT Projection to World Space
-            glm::dmat4 dSgctProjectionToWorldTransformMatrix(dProjectionToTmpRotTransformMatrix);
-            double *mSource = reinterpret_cast<double *>(glm::value_ptr(dSgctProjectionToWorldTransformMatrix));
+            glm::dmat4 dSgctProjectionToWorldTransformMatrix(
+                dProjectionToTmpRotTransformMatrix
+            );
+            double* mSource = reinterpret_cast<double *>(
+                glm::value_ptr(dSgctProjectionToWorldTransformMatrix)
+            );
 
             mSource[12] += renderData.camera.eyePositionVec3().x;
             mSource[13] += renderData.camera.eyePositionVec3().y;
             mSource[14] += renderData.camera.eyePositionVec3().z;
-                
+
             mSource[15] = 1.0;
 
 
@@ -350,8 +361,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             program.setUniform(_uniformCache2.dSgctProjectionToModelTransformMatrix,
                 inverseWholeMatrixPipeline);
 
-            glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
-            //glm::dvec4 camPosObjCoords = inverseModelMatrix * glm::dvec4(renderData.camera.positionVec3(), 1.0);
+            glm::dvec4 camPosObjCoords = inverseModelMatrix *
+                                     glm::dvec4(renderData.camera.eyePositionVec3(), 1.0);
             program.setUniform(_uniformCache2.dCamPosObj, camPosObjCoords);
 
             double lt;
@@ -378,7 +389,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             }
 
             // Sun Position in Object Space
-            program.setUniform(_uniformCache2.sunDirectionObj, glm::normalize(glm::dvec3(sunPosObj)));
+            program.setUniform(
+                _uniformCache2.sunDirectionObj,
+                glm::normalize(glm::dvec3(sunPosObj))
+            );
 
             // Shadow calculations..
             if (!_shadowConfArray.empty()) {
@@ -478,7 +492,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
     }
     _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-    program.setUniform(_uniformCache2.transmittanceTexture, _transmittanceTableTextureUnit);
+    program.setUniform(
+        _uniformCache2.transmittanceTexture,
+        _transmittanceTableTextureUnit
+    );
 
     _irradianceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
@@ -515,11 +532,15 @@ std::string AtmosphereDeferredcaster::helperPath() const {
     return ""; // no helper file
 }
 
-void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramObject& program) {
+void AtmosphereDeferredcaster::initializeCachedVariables(
+                                                    ghoul::opengl::ProgramObject& program)
+{
     _uniformCache.cullAtmosphere = program.uniformLocation("cullAtmosphere");
     _uniformCache.Rg = program.uniformLocation("Rg");
     _uniformCache.Rt = program.uniformLocation("Rt");
-    _uniformCache.groundRadianceEmittion = program.uniformLocation("groundRadianceEmittion");
+    _uniformCache.groundRadianceEmittion = program.uniformLocation(
+        "groundRadianceEmittion"
+    );
     _uniformCache.HR = program.uniformLocation("HR");
     _uniformCache.betaRayleigh = program.uniformLocation("betaRayleigh");
     _uniformCache.HM = program.uniformLocation("HM");
@@ -533,10 +554,18 @@ void AtmosphereDeferredcaster::initializeCachedVariables(ghoul::opengl::ProgramO
     _uniformCache.SAMPLES_MU = program.uniformLocation("SAMPLES_MU");
     _uniformCache.SAMPLES_MU_S = program.uniformLocation("SAMPLES_MU_S");
     _uniformCache.SAMPLES_NU = program.uniformLocation("SAMPLES_NU");
-    _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation("dInverseModelTransformMatrix");
-    _uniformCache2.dModelTransformMatrix = program.uniformLocation("dModelTransformMatrix");
-    _uniformCache2.dSgctProjectionToModelTransformMatrix = program.uniformLocation("dSgctProjectionToModelTransformMatrix");
-    _uniformCache2.dSGCTViewToWorldMatrix = program.uniformLocation("dSGCTViewToWorldMatrix");
+    _uniformCache2.dInverseModelTransformMatrix = program.uniformLocation(
+        "dInverseModelTransformMatrix"
+    );
+    _uniformCache2.dModelTransformMatrix = program.uniformLocation(
+        "dModelTransformMatrix"
+    );
+    _uniformCache2.dSgctProjectionToModelTransformMatrix = program.uniformLocation(
+        "dSgctProjectionToModelTransformMatrix"
+    );
+    _uniformCache2.dSGCTViewToWorldMatrix = program.uniformLocation(
+        "dSGCTViewToWorldMatrix"
+    );
     _uniformCache2.dCamPosObj = program.uniformLocation("dCamPosObj");
     _uniformCache2.sunDirectionObj = program.uniformLocation("sunDirectionObj");
     _uniformCache2.hardShadows = program.uniformLocation("hardShadows");
@@ -1135,9 +1164,8 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
-                fmt::format("deltaJ_texture-scattering_order-{}.ppm", 
-                    scatteringOrder),
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
+                fmt::format("deltaJ_texture-scattering_order-{}.ppm", scatteringOrder),
                 _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaJProgramObject->deactivate();
@@ -1185,9 +1213,8 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
-                fmt::format("deltaE_texture-scattering_order-{}.ppm", 
-                    scatteringOrder),
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
+                fmt::format("deltaE_texture-scattering_order-{}.ppm", scatteringOrder),
                 _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceSupTermsProgramObject->deactivate();
@@ -1221,7 +1248,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         }
         if (_saveCalculationTextures) {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
-                fmt::format("deltaS_texture-scattering_order-{}.ppm", 
+                fmt::format("deltaS_texture-scattering_order-{}.ppm",
                     scatteringOrder),
                 _mu_s_samples * _nu_samples,
                 _mu_samples
@@ -1252,7 +1279,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         loadAtmosphereDataIntoShaderProgram(_irradianceFinalProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
                 fmt::format("irradianceTable_order-{}.ppm",
                     scatteringOrder),
                 _delta_e_table_width, _delta_e_table_height);
@@ -1281,7 +1308,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
         if (_saveCalculationTextures) {
-            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, 
+            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0,
                 fmt::format("inscatteringTable_order-{}.ppm",
                     scatteringOrder),
                 _mu_s_samples * _nu_samples, _mu_samples);

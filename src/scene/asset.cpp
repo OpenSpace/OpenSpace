@@ -254,7 +254,9 @@ std::vector<std::shared_ptr<const Asset>> Asset::subTreeAssets() const {
 std::vector<std::shared_ptr<const Asset>> Asset::requiredSubTreeAssets() const {
     std::unordered_set<std::shared_ptr<const Asset>> assets({ shared_from_this() });
     for (const std::shared_ptr<Asset>& dep : _requiredAssets) {
-        const std::vector<std::shared_ptr<const Asset>>& subTree = dep->requiredSubTreeAssets();
+        const std::vector<std::shared_ptr<const Asset>>& subTree =
+            dep->requiredSubTreeAssets();
+
         std::copy(subTree.begin(), subTree.end(), std::inserter(assets, assets.end()));
     }
     std::vector<std::shared_ptr<const Asset>> assetVector(assets.begin(), assets.end());

@@ -121,7 +121,7 @@ void HttpSynchronization::start() {
         return;
     }
 
-    const std::string& query = 
+    const std::string& query =
         std::string("?") + QueryKeyIdentifier + "=" + _identifier + "&" +
         QueryKeyFileVersion + "=" + std::to_string(_version) + "&" +
         QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);

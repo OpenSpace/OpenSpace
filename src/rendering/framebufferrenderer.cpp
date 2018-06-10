@@ -307,7 +307,7 @@ void FramebufferRenderer::update() {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } 
+            }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
@@ -318,7 +318,7 @@ void FramebufferRenderer::update() {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } 
+            }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
@@ -344,7 +344,7 @@ void FramebufferRenderer::update() {
         if (program.second && program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } 
+            }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
             }
@@ -944,7 +944,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     Time time = OsEng.timeManager().time();
 
-    RenderData data = { *camera, psc(), std::move(time), doPerformanceMeasurements, 0, {} };
+    RenderData data = {
+        *camera,
+        psc(),
+        std::move(time),
+        doPerformanceMeasurements,
+        0,
+        {}
+    };
     RendererTasks tasks;
 
     data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
@@ -1089,7 +1096,9 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
     }
 }
 
-void FramebufferRenderer::performDeferredTasks(const std::vector<DeferredcasterTask>& tasks) {
+void FramebufferRenderer::performDeferredTasks(
+                                             const std::vector<DeferredcasterTask>& tasks)
+{
     bool firstPaint = true;
 
     for (const DeferredcasterTask& deferredcasterTask : tasks) {
