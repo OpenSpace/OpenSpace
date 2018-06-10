@@ -23,12 +23,14 @@
  ****************************************************************************************/
 
 #include <modules/galaxy/galaxymodule.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
+
 #include <modules/galaxy/rendering/renderablegalaxy.h>
 #include <modules/galaxy/tasks/milkywayconversiontask.h>
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

@@ -29,9 +29,6 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-
-#include <ghoul/misc/sharedmemory.h>
-
 #include <memory>
 
 namespace ghoul { class SharedMemory; }
@@ -41,6 +38,7 @@ namespace openspace::gui {
 class GuiPerformanceComponent : public GuiComponent {
 public:
     GuiPerformanceComponent();
+    ~GuiPerformanceComponent();
 
     void render() override;
 

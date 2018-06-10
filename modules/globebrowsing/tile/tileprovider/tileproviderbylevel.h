@@ -27,8 +27,6 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-#include <openspace/properties/stringproperty.h>
-
 namespace openspace::globebrowsing::tileprovider {
 
 class TileProviderByLevel : public TileProvider {
@@ -40,15 +38,16 @@ public:
     bool initialize() override;
     bool deinitialize() override;
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual Tile tile(const TileIndex& tileIndex) override;
+    virtual Tile::Status tileStatus(const TileIndex& index) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;
     virtual int maxLevel() override;
+
 private:
-    inline int providerIndex(int level) const;
-    inline TileProvider* levelProvider(int level) const;
+    int providerIndex(int level) const;
+    TileProvider* levelProvider(int level) const;
 
     std::vector<int> _providerIndices;
     std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;

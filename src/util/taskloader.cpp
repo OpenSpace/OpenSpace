@@ -24,13 +24,13 @@
 
 #include <openspace/util/taskloader.h>
 
+#include <openspace/util/task.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
+#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/dictionary.h>
 #include <algorithm>
 
 namespace {
@@ -43,16 +43,17 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
                                                  const ghoul::Dictionary& tasksDictionary)
 {
     std::vector<std::unique_ptr<Task>> tasks;
-    std::vector<std::string> keys = tasksDictionary.keys();
+
+    const std::vector<std::string>& keys = tasksDictionary.keys();
     for (const std::string& key : keys) {
         std::string taskName;
         ghoul::Dictionary subTask;
         if (tasksDictionary.getValue(key, taskName)) {
-            std::string path = taskName + ".task";
+            const std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         } else if (tasksDictionary.getValue(key, subTask)) {
-            std::string taskType = subTask.value<std::string>("Type");
+            const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {
                 LERROR(fmt::format(
@@ -76,16 +77,11 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
 
     ghoul::Dictionary tasksDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(
-            absTasksFile,
-            tasksDictionary
-        );
+        ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary);
     } catch (const ghoul::RuntimeError& e) {
         LERROR(fmt::format(
             "Could not load tasks file '{}. Lua error: {}: {}",
-            absTasksFile,
-            e.message,
-            e.component
+            absTasksFile, e.message, e.component
         ));
         return std::vector<std::unique_ptr<Task>>();
     }

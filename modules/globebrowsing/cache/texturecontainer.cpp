@@ -23,13 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/cache/texturecontainer.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace::globebrowsing::cache {
 
 TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
-    : _initData(initData)
-    , _freeTexture(0)
+    : _initData(std::move(initData))
     , _numTextures(numTextures)
 {
     reset();
@@ -39,19 +37,20 @@ void TextureContainer::reset() {
     _textures.clear();
     _freeTexture = 0;
     for (size_t i = 0; i < _numTextures; ++i) {
-        auto tex = std::make_unique<ghoul::opengl::Texture>(
+        using namespace ghoul::opengl;
+        std::unique_ptr<Texture> tex = std::make_unique<Texture>(
             _initData.dimensions(),
             _initData.ghoulTextureFormat(),
             _initData.glTextureFormat(),
             _initData.glType(),
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-            ghoul::opengl::Texture::AllocateData(_initData.shouldAllocateDataOnCPU())
+            Texture::FilterMode::Linear,
+            Texture::WrappingMode::ClampToEdge,
+            Texture::AllocateData(_initData.shouldAllocateDataOnCPU())
         );
 
-        tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
+        tex->setDataOwnership(Texture::TakeOwnership::Yes);
         tex->uploadTexture();
-        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        tex->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
         _textures.push_back(std::move(tex));
     }

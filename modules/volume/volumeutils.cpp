@@ -22,29 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "volumeutils.h"
+#include <modules/volume/volumeutils.h>
 
 namespace openspace::volume {
 
 size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-//    size_t d = dims.z;
-//
-//    size_t x = coords.x;
-//    size_t y = coords.y;
-//    size_t z = coords.z;
-
+    const size_t w = dims.x;
+    const size_t h = dims.y;
     return coords.z * (h * w) + coords.y * w + coords.x;
 }
 
 glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
+    const size_t w = dims.x;
+    const size_t h = dims.y;
 
-    size_t x = index % w;
-    size_t y = (index / w) % h;
-    size_t z = index / w / h;
+    const size_t x = index % w;
+    const size_t y = (index / w) % h;
+    const size_t z = index / w / h;
 
     return glm::uvec3(x, y, z);
 }

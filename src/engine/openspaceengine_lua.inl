@@ -24,8 +24,7 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
-namespace openspace {
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 /**
  * \ingroup LuaScripts
@@ -34,10 +33,7 @@ namespace luascriptfunctions {
  * reached
  */
 int toggleShutdown(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::toggleShutdown");
 
     OsEng.toggleShutdownMode();
 
@@ -51,10 +47,7 @@ int toggleShutdown(lua_State* L) {
 * Writes out documentation files
 */
 int writeDocumentation(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::writeDocumentation");
 
     OsEng.writeStaticDocumentation();
     OsEng.writeSceneDocumentation();
@@ -69,28 +62,25 @@ int writeDocumentation(lua_State* L) {
  * Adds a virtual property that will set a group of properties
  */
 int addVirtualProperty(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 7) {
-        return luaL_error(L, "Expected %i arguments, got %i", 7, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, { 5, 7 }, "lua::addVirtualProperty");
 
-    const std::string type = lua_tostring(L, -7);
-    const std::string name = lua_tostring(L, -6);
-    const std::string identifier = lua_tostring(L, -5);
-    const std::string description = lua_tostring(L, -4);
+    const std::string& type = ghoul::lua::value<std::string>(L, 1);
+    const std::string& name = ghoul::lua::value<std::string>(L, 2);
+    const std::string& identifier = ghoul::lua::value<std::string>(L, 3);
+    const std::string& description = ghoul::lua::value<std::string>(L, 4);
 
     std::unique_ptr<properties::Property> prop;
     if (type == "BoolProperty") {
-        bool v = lua_toboolean(L, -3);
+        const bool v = ghoul::lua::value<bool>(L, 5);
         prop = std::make_unique<properties::BoolProperty>(
             properties::Property::PropertyInfo{ identifier, name, description },
             v
         );
     }
     else if (type == "IntProperty") {
-        int v = static_cast<int>(lua_tonumber(L, -3));
-        int min = static_cast<int>(lua_tonumber(L, -2));
-        int max = static_cast<int>(lua_tonumber(L, -1));
+        const int v = ghoul::lua::value<int>(L, 5);
+        const int min = ghoul::lua::value<int>(L, 6);
+        const int max = ghoul::lua::value<int>(L, 7);
 
         prop = std::make_unique<properties::IntProperty>(
             properties::Property::PropertyInfo{ identifier, name, description },
@@ -100,9 +90,9 @@ int addVirtualProperty(lua_State* L) {
         );
     }
     else if (type == "FloatProperty") {
-        float v = static_cast<float>(lua_tonumber(L, -3));
-        float min = static_cast<float>(lua_tonumber(L, -2));
-        float max = static_cast<float>(lua_tonumber(L, -1));
+        const float v = ghoul::lua::value<float>(L, 5);
+        const float min = ghoul::lua::value<float>(L, 6);
+        const float max = ghoul::lua::value<float>(L, 7);
 
         prop = std::make_unique<properties::FloatProperty>(
             properties::Property::PropertyInfo{ identifier, name, description },
@@ -123,6 +113,7 @@ int addVirtualProperty(lua_State* L) {
 
     lua_settop(L, 0);
     OsEng.virtualPropertyManager().addProperty(std::move(prop));
+
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -133,13 +124,9 @@ int addVirtualProperty(lua_State* L) {
 * Removes a previously added virtual property
 */
 int removeVirtualProperty(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::removeVirtualProperty");
 
-    const std::string name = lua_tostring(L, -1);
-    lua_settop(L, 0);
+    const std::string& name = ghoul::lua::value<std::string>(L, 1);
     properties::Property* p = OsEng.virtualPropertyManager().property(name);
     if (p) {
         OsEng.virtualPropertyManager().removeProperty(p);
@@ -147,9 +134,11 @@ int removeVirtualProperty(lua_State* L) {
     else {
         LWARNINGC(
             "removeVirtualProperty",
-            fmt::format("Virtual Property with name {} did not exist", name)
+            fmt::format("Virtual Property with name '{}'' did not exist", name)
         );
     }
+
+    lua_settop(L, 0);
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
@@ -160,12 +149,10 @@ int removeVirtualProperty(lua_State* L) {
 * Remove all registered virtual properties
 */
 int removeAllVirtualProperties(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 0, "lua::removeAllVirtualProperties");
 
-    std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
+    const std::vector<properties::Property*>& ps =
+        OsEng.virtualPropertyManager().properties();
     for (properties::Property* p : ps) {
         OsEng.virtualPropertyManager().removeProperty(p);
         delete p;
@@ -181,13 +168,10 @@ int removeAllVirtualProperties(lua_State* L) {
  * Adds a Tag to a SceneGraphNode
  */
 int addTag(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 2) {
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
 
-    const std::string uri = lua_tostring(L, -2);
-    const std::string tag = lua_tostring(L, -1);
+    const std::string& uri = ghoul::lua::value<std::string>(L, 1);
+    std::string tag = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
@@ -207,13 +191,10 @@ int addTag(lua_State* L) {
  * Removes a tag from a SceneGraphNode
  */
 int removeTag(lua_State* L) {
-    const int nArguments = lua_gettop(L);
-    if (nArguments != 2) {
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-    }
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
 
-    const std::string uri = lua_tostring(L, -2);
-    const std::string tag = lua_tostring(L, -1);
+    const std::string& uri = ghoul::lua::value<std::string>(L, 1);
+    const std::string& tag = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
@@ -233,28 +214,32 @@ int removeTag(lua_State* L) {
 * Downloads a file from Lua interpreter
 */
 int downloadFile(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2)
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-    std::string uri = luaL_checkstring(L, -2);
-    std::string savePath = luaL_checkstring(L, -1);
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::addTag");
+
+    const std::string& uri = ghoul::lua::value<std::string>(L, 1);
+    const std::string& savePath = ghoul::lua::value<std::string>(L, 2);
     lua_settop(L, 0);
 
-    const std::string _loggerCat = "OpenSpaceEngine";
-    LINFO(fmt::format("Downloading file from {}", uri));
-    DownloadManager dm = openspace::DownloadManager(false);
-    std::shared_ptr<openspace::DownloadManager::FileFuture> future =
-        dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);
+    LINFOC("OpenSpaceEngine", fmt::format("Downloading file from {}", uri));
+    DownloadManager dm = DownloadManager(DownloadManager::UseMultipleThreads::No);
+    std::shared_ptr<DownloadManager::FileFuture> future = dm.downloadFile(
+        uri,
+        savePath,
+        DownloadManager::OverrideFile::Yes,
+        DownloadManager::FailOnError::Yes,
+        5
+    );
     if (!future || (future && !future->isFinished)) {
-        std::string errorMsg = "Download failed";
-        if (future)
-            errorMsg += ": " + future->errorMessage;
-        return luaL_error(L, errorMsg.c_str());
+        return luaL_error(
+            L,
+            future ?
+                "Download failed" :
+                ("Download failed: " + future->errorMessage).c_str()
+        );
     }
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
-} // namespace luascriptfunctions
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

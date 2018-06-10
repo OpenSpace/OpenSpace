@@ -138,6 +138,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/volumeraycaster.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/asset.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
@@ -208,6 +209,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
@@ -237,7 +239,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
     ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/binaryproperty.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/optionproperty.h
@@ -245,14 +246,12 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertydelegate.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/propertyowner.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalarproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/selectionproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/stringlistproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vectorproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h
@@ -322,6 +321,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/asset.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/assetmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
@@ -348,6 +348,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/httprequest.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/job.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
@@ -358,8 +359,11 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/resourcesynchronization.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/synchronizationwatcher.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h

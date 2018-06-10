@@ -49,11 +49,11 @@ TEST_F(ChunkNodeTest, Split) {
 	ASSERT_TRUE(cn.isRoot()) << "Chunk node is root";
 	ASSERT_FALSE(cn.isLeaf()) << "Chunk node is not leaf";
 
-	ASSERT_EQ(cn.bounds.center.x, cn.getChild(Quad::NORTH_WEST).bounds.center.x * 2);
-	ASSERT_EQ(cn.bounds.center.x, cn.getChild(Quad::NORTH_EAST).bounds.center.x * 2/3);
+	ASSERT_EQ(cn.bounds.center.x, cn.child(Quad::NORTH_WEST).bounds.center.x * 2);
+	ASSERT_EQ(cn.bounds.center.x, cn.child(Quad::NORTH_EAST).bounds.center.x * 2/3);
 
-	ASSERT_EQ(cn.bounds.halfSize.x, cn.getChild(Quad::NORTH_WEST).bounds.halfSize.x * 2);
-	ASSERT_EQ(cn.bounds.halfSize.y, cn.getChild(Quad::NORTH_WEST).bounds.halfSize.y * 2);
+	ASSERT_EQ(cn.bounds.halfSize.x, cn.child(Quad::NORTH_WEST).bounds.halfSize.x * 2);
+	ASSERT_EQ(cn.bounds.halfSize.y, cn.child(Quad::NORTH_WEST).bounds.halfSize.y * 2);
 
 	chunkLodNode.deinitialize();
 }

@@ -26,6 +26,24 @@
 
 #include <ghoul/misc/assert.h>
 
+namespace {
+    size_t numElements(int xSegments, int ySegments) {
+        return 3 * 2 * xSegments * ySegments;
+    }
+
+    size_t numVertices(int xSegments, int ySegments) {
+        return (xSegments + 1) * (ySegments + 1);
+    }
+
+    void validate([[maybe_unused]] int xSegments, [[maybe_unused]] int ySegments) {
+        ghoul_assert(
+            xSegments > 0 && ySegments > 0,
+            "Resolution must be at least 1x1. (" + std::to_string(xSegments) + ", " +
+            std::to_string(ySegments) + ")"
+        );
+    }
+} // namespace
+
 namespace openspace::globebrowsing {
 
 SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
@@ -62,23 +80,6 @@ int SkirtedGrid::ySegments() const {
     return _ySegments;
 }
 
-void SkirtedGrid::validate([[maybe_unused]] int xSegments, [[maybe_unused]] int ySegments)
-{
-    ghoul_assert(
-        xSegments > 0 && ySegments > 0,
-        "Resolution must be at least 1x1. (" + std::to_string(xSegments) + ", " +
-            std::to_string(ySegments) + ")"
-    );
-}
-
-inline size_t SkirtedGrid::numElements(int xSegments, int ySegments) {
-    return 3 * 2 * xSegments * ySegments;
-}
-
-inline size_t SkirtedGrid::numVertices(int xSegments, int ySegments) {
-    return (xSegments + 1) * (ySegments + 1);
-}
-
 std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
 
@@ -94,10 +95,10 @@ std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
             // x    x     x     x ..
             // :    :     :     :
 
-            GLuint v00 = (y + 0) * (xSegments + 2 + 1) + x + 0;
-            GLuint v10 = (y + 0) * (xSegments + 2 + 1) + x + 1;
-            GLuint v01 = (y + 1) * (xSegments + 2 + 1) + x + 0;
-            GLuint v11 = (y + 1) * (xSegments + 2 + 1) + x + 1;
+            const GLuint v00 = (y + 0) * (xSegments + 2 + 1) + x + 0;
+            const GLuint v10 = (y + 0) * (xSegments + 2 + 1) + x + 1;
+            const GLuint v01 = (y + 1) * (xSegments + 2 + 1) + x + 0;
+            const GLuint v11 = (y + 1) * (xSegments + 2 + 1) + x + 1;
 
             // add upper triangle
             elements.push_back(v00);
@@ -116,46 +117,41 @@ std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
 
 std::vector<glm::vec4> SkirtedGrid::createPositions(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
-    std::vector<glm::vec4> positions;
-    positions.reserve(numVertices(xSegments, ySegments));
 
     // Copy from 2d texture coordinates and use as template to create positions
-    std::vector<glm::vec2> templateTextureCoords = createTextureCoordinates(
-        xSegments, ySegments
+    const std::vector<glm::vec2>& templateTextureCoords = createTextureCoordinates(
+        xSegments,
+        ySegments
     );
-    for (const auto& c : templateTextureCoords) {
-        positions.push_back(glm::vec4(c, 0.f, 1.f));
+
+    std::vector<glm::vec4> positions;
+    positions.reserve(numVertices(xSegments, ySegments));
+    for (const glm::vec2& c : templateTextureCoords) {
+        positions.emplace_back(c, 0.f, 1.f);
     }
-    //for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
-    //    positions.push_back(glm::vec4(
-    //        templateTextureCoords[i],
-    //        0.0f,
-    //        1.0f
-    //        ));
-    //}
     return positions;
 }
 
 std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int ySegments)
 {
     validate(xSegments, ySegments);
+
     std::vector<glm::vec2> textureCoordinates;
     textureCoordinates.reserve(numVertices(xSegments + 2, ySegments + 2));
-
     for (int y = -1; y < ySegments + 2; y++) {
         for (int x = -1; x < xSegments + 2; x++) {
-            textureCoordinates.push_back(glm::vec2(
+            textureCoordinates.emplace_back(
                 glm::clamp(
                     static_cast<float>(x) / static_cast<float>(xSegments),
-                    0 - 1.0f / (2 * xSegments),
-                    1 + 1.0f / (2 * xSegments)
+                    0 - 1.f / (2 * xSegments),
+                    1 + 1.f / (2 * xSegments)
                 ),
                 glm::clamp(
                     static_cast<float>(y) / static_cast<float>(ySegments),
-                    0 - 1.0f / (2 * ySegments),
-                    1 + 1.0f / (2 * ySegments)
+                    0 - 1.f / (2 * ySegments),
+                    1 + 1.f / (2 * ySegments)
                 )
-            ));
+            );
         }
     }
     return textureCoordinates;
@@ -163,12 +159,12 @@ std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int 
 
 std::vector<glm::vec3> SkirtedGrid::createNormals(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
+
     std::vector<glm::vec3> normals;
     normals.reserve(numVertices(xSegments + 2, ySegments + 2));
-
     for (int y = -1; y < ySegments + 2; y++) {
         for (int x = -1; x < xSegments + 2; x++) {
-            normals.push_back(glm::vec3(0, 0, 1));
+            normals.emplace_back(0.f, 0.f, 1.f);
         }
     }
 

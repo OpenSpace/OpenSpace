@@ -24,19 +24,12 @@
 
 #include <modules/sync/syncs/torrentsynchronization.h>
 
-#include <modules/sync/syncmodule.h>
-
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/moduleengine.h>
-
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
-
 
 namespace {
     constexpr const char* KeyIdentifier = "Identifier";
@@ -50,20 +43,20 @@ documentation::Documentation TorrentSynchronization::Documentation() {
     return {
         "TorrentSynchronization",
         "torrent_synchronization",
-    {
         {
-            KeyIdentifier,
-            new StringVerifier,
-            Optional::No,
-            "A unique identifier for this torrent"
-        },
-        {
-            KeyMagnet,
-            new StringVerifier,
-            Optional::No,
-            "A magnet link identifying the torrent"
+            {
+                KeyIdentifier,
+                new StringVerifier,
+                Optional::No,
+                "A unique identifier for this torrent"
+            },
+            {
+                KeyMagnet,
+                new StringVerifier,
+                Optional::No,
+                "A magnet link identifying the torrent"
+            }
         }
-    }
     };
 }
 
@@ -89,19 +82,19 @@ TorrentSynchronization::~TorrentSynchronization() {
 }
 
 std::string TorrentSynchronization::uniformResourceName() const {
-    size_t begin = _magnetLink.find("=urn") + 1;
-    size_t end = _magnetLink.find('&', begin);
+    const size_t begin = _magnetLink.find("=urn") + 1;
+    const size_t end = _magnetLink.find('&', begin);
     std::string xs = _magnetLink.substr(
         begin,
-        end == std::string::npos ? end : (end - begin)
+        (end == std::string::npos) ? end : (end - begin)
     );
 
-    std::transform(xs.begin(), xs.end(), xs.begin(), [](char x) {
-        if (x == ':') {
-            return '.';
-        }
-        return x;
-    });
+    std::transform(
+        xs.begin(),
+        xs.end(),
+        xs.begin(),
+        [](char x) { return (x == ':') ? '.' : x; }
+    );
     return xs;
 }
 
@@ -160,13 +153,13 @@ void TorrentSynchronization::clear() {
 }
 
 bool TorrentSynchronization::hasSyncFile() {
-    std::string path = directory() + ".ossync";
+    const std::string& path = directory() + ".ossync";
     return FileSys.fileExists(path);
 }
 
 void TorrentSynchronization::createSyncFile() {
-    std::string directoryName = directory();
-    std::string filepath = directoryName + ".ossync";
+    const std::string& directoryName = directory();
+    const std::string& filepath = directoryName + ".ossync";
 
     FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
 

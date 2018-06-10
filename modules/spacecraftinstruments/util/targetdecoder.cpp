@@ -37,11 +37,11 @@ TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) : _type("TARGE
     }
 }
 
-std::string TargetDecoder::getDecoderType() {
+const std::string& TargetDecoder::decoderType() const {
     return _type;
 }
 
-std::vector<std::string> TargetDecoder::getTranslation() {
+const std::vector<std::string>& TargetDecoder::translations() const {
     return _names;
 }
 

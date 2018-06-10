@@ -25,7 +25,6 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
-
 #include <algorithm>
 
 namespace openspace::documentation {
@@ -134,7 +133,8 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
-                                   const std::string & key) const {
+                                   const std::string & key) const
+{
     if (dict.hasKeyAndValue<int>(key)) {
         // We we have a key and the value is int, we are done
         return { true, {}, {} };
@@ -176,14 +176,15 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
-TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
-    : documentations(std::move(d))
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries)
+    : documentations(std::move(documentationEntries))
 {}
 
-TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
-                                     const std::string& key) const {
-    if (dict.hasKeyAndValue<Type>(key)) {
-        ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
+TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                     const std::string& key) const
+{
+    if (dictionary.hasKeyAndValue<Type>(key)) {
+        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({documentations}, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
@@ -199,7 +200,7 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
         return res;
     }
     else {
-        if (dict.hasKey(key)) {
+        if (dictionary.hasKey(key)) {
             return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
 
         }
@@ -287,8 +288,7 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
 }
 
 std::string ReferencingVerifier::documentation() const {
-    using namespace std::string_literals;
-    return "Referencing Documentation: '"s + identifier + "'";
+    return "Referencing Documentation: '" + identifier + "'";
 }
 
 AndVerifier::AndVerifier(Verifier* l, Verifier* r)
@@ -299,11 +299,11 @@ AndVerifier::AndVerifier(Verifier* l, Verifier* r)
     ghoul_assert(rhs, "rhs must not be nullptr");
 }
 
-TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
+TestResult AndVerifier::operator()(const ghoul::Dictionary& dictionary,
                                    const std::string& key) const
 {
-    TestResult resLhs = lhs->operator()(dict, key);
-    TestResult resRhs = rhs->operator()(dict, key);
+    TestResult resLhs = lhs->operator()(dictionary, key);
+    TestResult resRhs = rhs->operator()(dictionary, key);
 
     if (resLhs.success && resRhs.success) {
         return { true, {}, {} };
@@ -334,10 +334,11 @@ OrVerifier::OrVerifier(Verifier* l, Verifier* r)
     ghoul_assert(rhs, "rhs must not be nullptr");
 }
 
-TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
-                                   const std::string& key) const {
-    TestResult resA = lhs->operator()(dict, key);
-    TestResult resB = rhs->operator()(dict, key);
+TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                   const std::string& key) const
+{
+    TestResult resA = lhs->operator()(dictionary, key);
+    TestResult resB = rhs->operator()(dictionary, key);
 
     if (resA.success || resB.success) {
         return { true, {}, {} };

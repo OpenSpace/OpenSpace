@@ -36,7 +36,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl

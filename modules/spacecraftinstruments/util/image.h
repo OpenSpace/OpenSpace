@@ -22,29 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MATRIXPROPERTY___H__
-#define __OPENSPACE_CORE___MATRIXPROPERTY___H__
+#ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__
+#define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <openspace/util/timerange.h>
 
-#include <openspace/properties/matrix/mat2property.h>
-#include <openspace/properties/matrix/mat2x3property.h>
-#include <openspace/properties/matrix/mat2x4property.h>
-#include <openspace/properties/matrix/mat3x2property.h>
-#include <openspace/properties/matrix/mat3property.h>
-#include <openspace/properties/matrix/mat3x4property.h>
-#include <openspace/properties/matrix/mat4x2property.h>
-#include <openspace/properties/matrix/mat4x3property.h>
-#include <openspace/properties/matrix/mat4property.h>
+#include <string>
+#include <vector>
 
-#include <openspace/properties/matrix/dmat2property.h>
-#include <openspace/properties/matrix/dmat2x3property.h>
-#include <openspace/properties/matrix/dmat2x4property.h>
-#include <openspace/properties/matrix/dmat3x2property.h>
-#include <openspace/properties/matrix/dmat3property.h>
-#include <openspace/properties/matrix/dmat3x4property.h>
-#include <openspace/properties/matrix/dmat4x2property.h>
-#include <openspace/properties/matrix/dmat4x3property.h>
-#include <openspace/properties/matrix/dmat4property.h>
+namespace openspace {
 
-#endif // __OPENSPACE_CORE___MATRIXPROPERTY___H__
+struct Image {
+    TimeRange timeRange;
+    std::string path;
+    std::vector<std::string> activeInstruments;
+    std::string target;
+    bool isPlaceholder = false;
+    bool projected = false;
+};
+
+struct ImageSubset {
+    TimeRange _range;
+    std::vector<Image> _subset;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__

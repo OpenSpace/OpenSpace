@@ -23,8 +23,22 @@
  ****************************************************************************************/
 
 #include <openspace/util/transformationmanager.h>
+
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
+
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+#ifdef WIN32
+#pragma warning (push)
+#pragma warning (disable : 4619) // #pragma warning: there is no warning number '4675'
+#endif // WIN32
+
+#include <ccmc/Kameleon.h>
+
+#ifdef WIN32
+#pragma warning (pop)
+#endif // WIN32
+#endif
 
 namespace openspace {
 
@@ -43,7 +57,7 @@ TransformationManager::TransformationManager(){
     };
 }
 
-TransformationManager::~TransformationManager(){
+TransformationManager::~TransformationManager() { // NOLINT
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = nullptr;
 #endif

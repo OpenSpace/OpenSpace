@@ -33,16 +33,14 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#include <openspace/util/spicemanager.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace documentation { struct Documentation; }
-
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 struct RenderData;
 struct UpdateData;
@@ -62,11 +60,13 @@ public:
 
 private:
     struct CylinderVBOLayout {
-        float x, y, z, e;
+        float x;
+        float y;
+        float z;
+        float e;
     };
 
     void createCylinder(double time);
-
 
     properties::IntProperty _numberOfPoints;
     properties::FloatProperty _shadowLength;
@@ -78,16 +78,15 @@ private:
     properties::StringProperty _bodyFrame;
     properties::OptionProperty _aberration;
 
-    ghoul::opengl::ProgramObject* _shader;
+    ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor) _uniformCache;
 
     glm::dmat3 _stateMatrix;
 
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     std::vector<CylinderVBOLayout> _vertices;
-    // SpiceManager::AberrationCorrection
 };
 
 } // namespace openspace

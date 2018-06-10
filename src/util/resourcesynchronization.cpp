@@ -23,17 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/util/resourcesynchronization.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
-#include <modules/sync/syncmodule.h>
 
-#include <openspace/util/factorymanager.h>
-#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <memory>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
     constexpr const char* KeyType = "Type";
@@ -72,28 +66,29 @@ documentation::Documentation ResourceSynchronization::Documentation() {
 }
 
 std::unique_ptr<ResourceSynchronization> ResourceSynchronization::createFromDictionary(
-    const ghoul::Dictionary & dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
-        Documentation(), dictionary, "ResourceSynchronization");
-
-    std::string synchronizationType = dictionary.value<std::string>(KeyType);
-
-    auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
-    ghoul_assert(factory, "ResourceSynchronization factory did not exist");
-    std::unique_ptr<ResourceSynchronization> result =
-        factory->create(synchronizationType, dictionary);
-    return result;
-}
-
-ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dict) {
-    documentation::testSpecificationAndThrow(
         Documentation(),
-        dict,
+        dictionary,
         "ResourceSynchronization"
     );
 
-    _name = dict.value<std::string>(KeyName);
+    const std::string& synchronizationType = dictionary.value<std::string>(KeyType);
+
+    auto factory = FactoryManager::ref().factory<ResourceSynchronization>();
+    ghoul_assert(factory, "ResourceSynchronization factory did not exist");
+    return factory->create(synchronizationType, dictionary);
+}
+
+ResourceSynchronization::ResourceSynchronization(const ghoul::Dictionary& dictionary) {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "ResourceSynchronization"
+    );
+
+    _name = dictionary.value<std::string>(KeyName);
 }
 
 ResourceSynchronization::State ResourceSynchronization::state() const {
@@ -117,7 +112,7 @@ ResourceSynchronization::addStateChangeCallback(StateChangeCallback cb)
 {
     std::lock_guard<std::mutex> guard(_callbackMutex);
     CallbackHandle callbackId = _nextCallbackId++;
-    _stateChangeCallbacks[callbackId] = cb;
+    _stateChangeCallbacks[callbackId] = std::move(cb);
     return callbackId;
 }
 
@@ -168,7 +163,7 @@ float ResourceSynchronization::progress() {
     return static_cast<float>(nSynchronizedBytes()) / static_cast<float>(nTotalBytes());
 }
 
-std::string ResourceSynchronization::name() const {
+const std::string& ResourceSynchronization::name() const {
     return _name;
 }
 

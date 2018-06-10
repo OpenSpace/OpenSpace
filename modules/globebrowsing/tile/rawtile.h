@@ -26,12 +26,9 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
 
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/textureformat.h>
-
 #include <ghoul/glm.h>
-
+#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
-#include <sstream>
 
 namespace openspace::globebrowsing {
 
@@ -40,21 +37,19 @@ class TileTextureInitData;
 
 struct RawTile {
     enum class ReadError {
-        None = 0,
-        Debug = 1,
-        Warning = 2,
-        Failure = 3,
-        Fatal = 4
+        None = 0, // = CE_None
+        Debug,    // = CE_Debug
+        Warning,  // = CE_Warning
+        Failure,  // = CE_Failure
+        Fatal     // = CE_Fatal
     };
 
-    RawTile();
-
-    char* imageData;
-    std::shared_ptr<TileMetaData> tileMetaData;
-    std::shared_ptr<TileTextureInitData> textureInitData;
-    TileIndex tileIndex;
-    ReadError error;
-    GLuint pbo;
+    char* imageData = nullptr;
+    std::shared_ptr<TileMetaData> tileMetaData = nullptr;
+    std::shared_ptr<TileTextureInitData> textureInitData = nullptr;
+    TileIndex tileIndex = { 0, 0, 0 };
+    ReadError error = ReadError::None;
+    GLuint pbo = 0;
 
     static RawTile createDefault(const TileTextureInitData& initData);
 };

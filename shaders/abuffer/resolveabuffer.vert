@@ -24,10 +24,8 @@
 
 #version __CONTEXT__
 
-in vec4 position;
-out vec2 texCoord;
+in vec2 position;
 
 void main() {
-    gl_Position = position;
-    texCoord = 0.5 + position.xy * 0.5;
+    gl_Position = vec4(position, 0.0, 1.0);
 }

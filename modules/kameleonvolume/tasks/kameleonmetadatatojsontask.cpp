@@ -25,21 +25,18 @@
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
-
+#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <fstream>
 
 namespace {
-    const char* KeyInput = "Input";
-    const char* KeyOutput = "Output";
+    constexpr const char* KeyInput = "Input";
+    constexpr const char* KeyOutput = "Output";
 } // namespace
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
                                                       const ghoul::Dictionary& dictionary)
@@ -55,8 +52,10 @@ KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
 }
 
 std::string KameleonMetadataToJsonTask::description() {
-    return "Extract metadata from cdf-file " + _inputPath +
-        " and write as json to " + _outputPath;
+    return fmt::format(
+        "Extract metadata from cdf file {} and write as json to {}",
+        _inputPath, _outputPath
+    );
 }
 
 void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
@@ -67,7 +66,7 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressC
     ghoul::DictionaryJsonFormatter formatter;
     std::string json = formatter.format(dictionary);
     std::ofstream output(_outputPath);
-    output << json;
+    output << std::move(json);
     progressCallback(1.0f);
 }
 
@@ -93,11 +92,10 @@ documentation::Documentation KameleonMetadataToJsonTask::documentation() {
                 KeyOutput,
                 new StringAnnotationVerifier("A valid filepath"),
                 Optional::No,
-                "The json file to export data into"
+                "The JSON file to export data into"
             }
         }
     };
 }
 
-} // namespace kameleonvolume
-} // namespace openspace
+} // namespace openspace::kameleonvolume

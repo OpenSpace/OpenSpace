@@ -70,4 +70,10 @@ size_t ConcurrentQueue<T>::size() const {
     return s;
 }
 
+template <typename T>
+bool ConcurrentQueue<T>::empty() const {
+    return size() == 0;
+}
+
+
 } // namespace openspace

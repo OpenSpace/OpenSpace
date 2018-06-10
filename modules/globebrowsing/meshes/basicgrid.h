@@ -27,8 +27,7 @@
 
 #include <modules/globebrowsing/meshes/grid.h>
 
-#include <ghoul/glm.h>
-
+#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <vector>
 
 namespace openspace::globebrowsing {
@@ -39,11 +38,11 @@ public:
      * \param xSegments is the number of grid cells in the x direction.
      * \param ySegments is the number of grid cells in the y direction.
      * \param usePositions determines whether or not to upload any vertex position data
-     * to the GPU.
+     *        to the GPU.
      * \param useTextureCoordinates determines whether or not to upload any vertex texture
-     * coordinate data to the GPU.
+     *        coordinate data to the GPU.
      * \param useNormals determines whether or not to upload any vertex normal data
-     * to the GPU.
+     *        to the GPU.
     */
     BasicGrid(unsigned int xSegments, unsigned int ySegments,
         TriangleSoup::Positions usePositions,
@@ -54,11 +53,11 @@ public:
     virtual int ySegments() const override;
 
 private:
-    std::vector<GLuint> createElements(int xRes, int yRes) override;
-    std::vector<glm::vec4> createPositions(int xRes, int yRes) override;
-    std::vector<glm::vec2> createTextureCoordinates(int xRes, int yRes)
-        override;
-    std::vector<glm::vec3> createNormals(int xRes, int yRes) override;
+    std::vector<GLuint> createElements(int xSegments, int ySegments) override;
+    std::vector<glm::vec4> createPositions(int xSegments, int ySegments) override;
+    std::vector<glm::vec2> createTextureCoordinates(int xSegments,
+        int ySegments) override;
+    std::vector<glm::vec3> createNormals(int xSegments, int ySegments) override;
 
     void validate(int xSegments, int ySegments);
 

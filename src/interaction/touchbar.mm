@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
 
 // Apple uses 'defer' as named arguments in some functions, so unfortunately, we have to
@@ -105,7 +106,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([identifier isEqualToString:showFullGuiId]) {
@@ -124,7 +125,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([identifier isEqualToString:showSimpleGuiId]) {
@@ -143,7 +144,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         if ([focusIdentifiers containsObject:identifier]) {
@@ -162,7 +163,7 @@ NSArray* focusIdentifiers;
                 @""
             );
 
-            return touchBarItem;
+            return [touchBarItem autorelease];
         }
 
         return nil;

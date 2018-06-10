@@ -27,7 +27,9 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
+#include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace openspace {
 
@@ -38,15 +40,11 @@ public:
 
     void registerOptions(
         const std::vector<properties::SelectionProperty::Option>& options);
-    std::vector<int> dataOptionsValue();
+    std::vector<int> dataOptionsValue() const;
 
 protected:
     void registerProperties();
     void createDataProcessor();
-
-    // void readFieldlinePaths(std::string indexFile);
-    // void updateFieldlineSeeds();
-    // void clearFieldlines();
 
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
@@ -55,7 +53,6 @@ protected:
     properties::Vec2Property _backgroundValues;
     properties::StringProperty _transferFunctionsFile;
     properties::SelectionProperty _dataOptions;
-
 };
 
 } //namespace openspace

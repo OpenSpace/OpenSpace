@@ -32,12 +32,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -46,7 +43,7 @@ namespace openspace {
 class RenderableSphericalGrid : public Renderable {
 public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);
-    ~RenderableSphericalGrid();
+    ~RenderableSphericalGrid() = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -71,15 +68,15 @@ protected:
     properties::FloatProperty _lineWidth;
     properties::FloatProperty _radius;
 
-    bool _gridIsDirty;
+    bool _gridIsDirty = true;
 
-    GLuint _vaoID;
-    GLuint _vBufferID;
-    GLuint _iBufferID;
+    GLuint _vaoID = 0;
+    GLuint _vBufferID = 0;
+    GLuint _iBufferID = 0;
 
-    GLenum _mode;
-    unsigned int _isize;
-    unsigned int _vsize;
+    GLenum _mode = GL_LINES;
+    unsigned int _isize = 0;
+    unsigned int _vsize = 0;
     std::vector<Vertex> _varray;
     std::vector<int> _iarray;
 };

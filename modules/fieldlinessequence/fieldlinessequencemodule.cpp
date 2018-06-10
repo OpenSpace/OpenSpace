@@ -25,11 +25,10 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 #include <fstream>
 
 namespace {
@@ -50,9 +49,7 @@ namespace openspace {
 
 std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
-FieldlinesSequenceModule::FieldlinesSequenceModule()
-    : OpenSpaceModule(Name)
-{
+FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
     DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
     std::ofstream file(DefaultTransferFunctionFile);

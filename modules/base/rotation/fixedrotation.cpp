@@ -26,18 +26,18 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
-
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/fmt.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 
 namespace {
-    const char* KeyXAxis = "XAxis";
-    const char* KeyYAxis = "YAxis";
-    const char* KeyZAxis = "ZAxis";
+    constexpr const char* KeyXAxis = "XAxis";
+    constexpr const char* KeyYAxis = "YAxis";
+    constexpr const char* KeyZAxis = "ZAxis";
 
-    static const openspace::properties::Property::PropertyInfo EnableInfo = {
+    const openspace::properties::Property::PropertyInfo EnableInfo = {
         "Enable",
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
@@ -45,7 +45,7 @@ namespace {
         "undefined behavior."
     };
 
-    static const openspace::properties::Property::PropertyInfo TypeInfo = {
+    const openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Specification Type",
         "This value specifies how this axis is being specified, that is whether it is "
@@ -54,7 +54,7 @@ namespace {
         "vectors."
     };
 
-    static const openspace::properties::Property::PropertyInfo ObjectInfo = {
+    const openspace::properties::Property::PropertyInfo ObjectInfo = {
         "Object",
         "Focus Object",
         "This is the object that the axis will focus on. This object must name an "
@@ -62,7 +62,7 @@ namespace {
         "stay fixed to the current position of that object."
     };
 
-    static const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
+    const openspace::properties::Property::PropertyInfo InvertObjectInfo = {
         "InvertObject",
         "Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -70,14 +70,14 @@ namespace {
         "referenced object."
     };
 
-    static const openspace::properties::Property::PropertyInfo VectorInfo = {
+    const openspace::properties::Property::PropertyInfo VectorInfo = {
         "Vector",
         "Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
         "rotation."
     };
 
-    static const openspace::properties::Property::PropertyInfo OrthogonalVectorInfo = {
+    const openspace::properties::Property::PropertyInfo OrthogonalVectorInfo = {
         "Orthogonal",
         "Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -85,7 +85,7 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    static const openspace::properties::Property::PropertyInfo AttachedInfo = {
+    const openspace::properties::Property::PropertyInfo AttachedInfo = {
         "Attached",
         "Attached Node",
         "This is the name of the node that this rotation is attached to, this value is "
@@ -309,7 +309,6 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         nullptr
     }
     , _attachedObject(AttachedInfo, "")
-    , _attachedNode(nullptr)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -323,8 +322,6 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     setPropertyGroupName("xAxis", "X Axis");
     setPropertyGroupName("yAxis", "Y Axis");
     setPropertyGroupName("zAxis", "Z Axis");
-
-
 
     _enabled.setGroupIdentifier("global");
     addProperty(_enabled);
@@ -364,9 +361,7 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _xAxis.type.setGroupIdentifier("xAxis");
-    _xAxis.type.onChange([&]() {
-        setPropertyVisibility(_xAxis);
-    });
+    _xAxis.type.onChange([&]() { setPropertyVisibility(_xAxis); });
     addProperty(_xAxis.type);
 
     _xAxis.object.setGroupIdentifier("xAxis");
@@ -389,23 +384,18 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _yAxis.type.setGroupIdentifier("yAxis");
-    _yAxis.type.onChange([&]() {
-        setPropertyVisibility(_yAxis);
-    });
+    _yAxis.type.onChange([&]() { setPropertyVisibility(_yAxis); });
     addProperty(_yAxis.type);
 
     _yAxis.object.setGroupIdentifier("yAxis");
     addProperty(_yAxis.object);
-    _yAxis.object.onChange([this](){
-        _yAxis.node = sceneGraphNode(_yAxis.object);
-    });
+    _yAxis.object.onChange([this]() { _yAxis.node = sceneGraphNode(_yAxis.object); });
 
     _yAxis.invertObject.setGroupIdentifier("yAxis");
     addProperty(_yAxis.invertObject);
 
     _yAxis.vector.setGroupIdentifier("yAxis");
     addProperty(_yAxis.vector);
-
 
     _zAxis.type.addOptions({
         { Axis::Type::Object, "Object" },
@@ -414,16 +404,12 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _zAxis.type.setGroupIdentifier("zAxis");
-    _zAxis.type.onChange([&]() {
-        setPropertyVisibility(_zAxis);
-    });
+    _zAxis.type.onChange([&]() { setPropertyVisibility(_zAxis); });
     addProperty(_zAxis.type);
 
     _zAxis.object.setGroupIdentifier("zAxis");
     addProperty(_zAxis.object);
-    _zAxis.object.onChange([this](){
-        _zAxis.node = sceneGraphNode(_zAxis.object);
-    });
+    _zAxis.object.onChange([this]() { _zAxis.node = sceneGraphNode(_zAxis.object); });
 
     _zAxis.invertObject.setGroupIdentifier("zAxis");
     addProperty(_zAxis.invertObject);
@@ -441,7 +427,7 @@ bool FixedRotation::initialize() {
     // nodes referenced in the dictionary might not exist yet at construction time. At
     // initialization time, however, we know that they already have been created
 
-    bool res = Rotation::initialize();
+    const bool res = Rotation::initialize();
 
     if (_constructorDictionary.hasKey(AttachedInfo.identifier)) {
         _attachedObject = _constructorDictionary.value<std::string>(
@@ -449,7 +435,7 @@ bool FixedRotation::initialize() {
         );
     }
 
-    bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
+    const bool hasXAxis = _constructorDictionary.hasKey(KeyXAxis);
     if (hasXAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyXAxis)) {
             _xAxis.type = Axis::Type::Object;
@@ -471,7 +457,7 @@ bool FixedRotation::initialize() {
         _xAxis.type = Axis::Type::OrthogonalVector;
     }
 
-    bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
+    const bool hasYAxis = _constructorDictionary.hasKey(KeyYAxis);
     if (hasYAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyYAxis)) {
             _yAxis.type = Axis::Type::Object;
@@ -493,7 +479,7 @@ bool FixedRotation::initialize() {
         _yAxis.type = Axis::Type::OrthogonalVector;
     }
 
-    bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
+    const bool hasZAxis = _constructorDictionary.hasKey(KeyZAxis);
     if (hasZAxis) {
         if (_constructorDictionary.hasKeyAndValue<std::string>(KeyZAxis)) {
             _zAxis.type = Axis::Type::Object;
@@ -539,11 +525,11 @@ glm::dmat3 FixedRotation::matrix(const Time&) const {
         return glm::dmat3();
     }
 
-    glm::vec3 x = xAxis();
-    glm::vec3 y = yAxis();
-    glm::vec3 z = zAxis();
+    const glm::vec3 x = xAxis();
+    const glm::vec3 y = yAxis();
+    const glm::vec3 z = zAxis();
 
-    static const float Epsilon = 1e-3f;
+    constexpr const float Epsilon = 1e-3f;
 
     if (glm::dot(x, y) > 1.f - Epsilon ||
         glm::dot(y, z) > 1.f - Epsilon ||
@@ -551,11 +537,7 @@ glm::dmat3 FixedRotation::matrix(const Time&) const {
     {
         LWARNINGC(
             "FixedRotation",
-            fmt::format("Dangerously collinear vectors detected: x ({}) y ({}) z ({})",
-                x,
-                y,
-                z
-            )
+            fmt::format("Near-ollinear vectors detected: x ({}) y ({}) z ({})", x, y, z)
         );
         return glm::dmat3();
     }
@@ -631,8 +613,7 @@ glm::vec3 FixedRotation::yAxis() const {
         case Axis::Type::Object:
             if (_yAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    _yAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
+                    _yAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _yAxis.invertObject ? -dir : dir;
             }
@@ -686,8 +667,7 @@ glm::vec3 FixedRotation::zAxis() const {
         case Axis::Type::Object:
             if (_zAxis.node && _attachedNode) {
                 glm::vec3 dir = glm::vec3(glm::normalize(
-                    _zAxis.node->worldPosition() -
-                    _attachedNode->worldPosition()
+                    _zAxis.node->worldPosition() - _attachedNode->worldPosition()
                 ));
                 return _zAxis.invertObject ? -dir : dir;
             }

@@ -30,7 +30,8 @@ local object = {
         TextColor = { 0.7, 0.0, 0.0, 1.0 },
         ScaleFactor = 418.33,
         TextSize = 16.68,
-        TextMinSize = 4.5,
+        TextMinSize = 7.5,
+        TextMaxSize = 30.0,
         Unit = "pc"
     },
     GUI = {

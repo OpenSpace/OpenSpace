@@ -26,16 +26,13 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__
 
 #include <modules/globebrowsing/cache/lrucache.h>
-
 #include <condition_variable>
 #include <functional>
 #include <mutex>
-#include <queue>
 #include <thread>
 #include <vector>
-#include <atomic>
 
-// Implementatin based on http://progsch.net/wordpress/?p=81
+// Implementation based on http://progsch.net/wordpress/?p=81
 
 namespace openspace::globebrowsing {
 
@@ -46,6 +43,7 @@ class LRUThreadPoolWorker {
 public:
     LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
     void operator()();
+
 private:
     LRUThreadPool<KeyType>& _pool;
 };
@@ -74,7 +72,6 @@ public:
     void clearEnqueuedTasks();
 
 private:
-
     struct DefaultHasher {
         unsigned long long operator()(const KeyType& key) const {
             return static_cast<unsigned long long>(key);
@@ -88,7 +85,7 @@ private:
     std::mutex _queueMutex;
     std::condition_variable _condition;
 
-    bool _stop;
+    bool _stop = false;
 };
 
 } // namespace openspace::globebrowsing

@@ -27,13 +27,11 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dimensions);
 glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dimensions);
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMEUTILS___H__

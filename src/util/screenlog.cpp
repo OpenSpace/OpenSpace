@@ -35,13 +35,11 @@ ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
     , _logLevel(logLevel)
 {}
 
-ScreenLog::~ScreenLog() {}
-
 void ScreenLog::removeExpiredEntries() {
     std::lock_guard<std::mutex> guard(_mutex);
-    auto t = std::chrono::steady_clock::now();
+    const auto t = std::chrono::steady_clock::now();
 
-    auto rit = std::remove_if(
+    const auto rit = std::remove_if(
         _entries.begin(),
         _entries.end(),
         [&t, ttl = _timeToLive](const LogEntry& e) { return (t - e.timeStamp) > ttl; }

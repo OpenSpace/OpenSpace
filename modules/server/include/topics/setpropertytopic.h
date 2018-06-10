@@ -22,68 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
+#ifndef __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
 
-namespace openspace::globebrowsing {
+#include <modules/server/include/topics/topic.h>
 
-DistanceSwitch::~DistanceSwitch() {}
+namespace openspace {
 
-bool DistanceSwitch::initialize() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->initialize();
-    }
-    return true;
-}
+class SetPropertyTopic : public Topic {
+public:
+    SetPropertyTopic() = default;
+    virtual ~SetPropertyTopic() = default;
 
-bool DistanceSwitch::initializeGL() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->initializeGL();
-    }
-    return true;
-}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+};
 
-bool DistanceSwitch::deinitialize() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->deinitialize();
-    }
-    return true;
-}
+} // namespace
 
-bool DistanceSwitch::deinitializeGL() {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->deinitializeGL();
-    }
-    return true;
-}
-
-void DistanceSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    const double distanceToCamera =
-        distance(data.camera.positionVec3(), data.modelTransform.translation);
-
-    // This distance will be enough to render the globe as one pixel if the field of
-    // view is 'fov' radians and the screen resolution is 'res' pixels.
-    const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
-    int res = 2880;
-
-    // linear search through nodes to find which Renderable to render
-    for (std::shared_ptr<Renderable> renderable : _renderables) {
-        const double distance = res * renderable->boundingSphere() / tan(fov / 2);
-        if (distanceToCamera < distance) {
-            renderable->render(data, tasks);
-        }
-    }
-}
-
-void DistanceSwitch::update(const UpdateData& data) {
-    for (std::shared_ptr<Renderable> renderable : _renderables) {
-        renderable->update(data);
-    }
-}
-
-void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable) {
-    _renderables.push_back(renderable);
-}
-
-} // namespace openspace::globebrowsing
+#endif // __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__

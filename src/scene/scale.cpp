@@ -28,12 +28,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    constexpr const char* KeyType = "Type";
 } // namespace
 
 namespace openspace {
@@ -58,11 +58,6 @@ documentation::Documentation Scale::Documentation() {
     };
 }
 
-void Scale::requireUpdate() {
-    _needsUpdate = true;
-}
-
-
 std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
 
@@ -74,11 +69,11 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
     return result;
 }
 
-Scale::Scale()
-    : properties::PropertyOwner({ "Scale" })
-    , _needsUpdate(true)
-    , _cachedScale(1.0)
-{}
+Scale::Scale() : properties::PropertyOwner({ "Scale" }) {}
+
+void Scale::requireUpdate() {
+    _needsUpdate = true;
+}
 
 bool Scale::initialize() {
     return true;

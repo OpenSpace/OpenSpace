@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEMETADATA___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEMETADATA___H__
 
-#include <sstream>
+#include <iosfwd>
 #include <vector>
 
 namespace openspace::globebrowsing {
@@ -35,8 +35,8 @@ struct TileMetaData {
     std::vector<float> minValues;
     std::vector<bool> hasMissingData;
 
-    void serialize(std::ostream& s);
-    static TileMetaData deserialize(std::istream& s);
+    void serialize(std::ostream& os);
+    static TileMetaData deserialize(std::istream& is);
 };
 
 } // namespace openspace::globebrowsing

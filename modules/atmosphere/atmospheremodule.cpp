@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

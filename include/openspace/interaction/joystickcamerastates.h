@@ -63,14 +63,11 @@ public:
         float deadzone = 0.f;
     };
 
-
     JoystickCameraStates(double sensitivity, double velocityScaleFactor);
 
     void updateStateFromInput(const InputState& inputState, double deltaTime) override;
 
-    void setAxisMapping(
-        int axis,
-        AxisType mapping,
+    void setAxisMapping(int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         AxisNormalize shouldNormalize = AxisNormalize::No
     );
@@ -82,7 +79,7 @@ public:
 
 
     void bindButtonCommand(int button, std::string command, JoystickAction action,
-        ButtonCommandRemote local);
+        ButtonCommandRemote remote, std::string documentation);
     void clearButtonCommand(int button);
     std::vector<std::string> buttonCommand(int button) const;
 

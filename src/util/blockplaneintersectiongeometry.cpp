@@ -25,9 +25,6 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <ghoul/logging/logmanager.h>
-
-#include <ghoul/glm.h>
-#include <vector>
 #include <algorithm>
 
 namespace {
@@ -39,10 +36,7 @@ namespace openspace {
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSize,
                                                                glm::vec3 planeNormal,
                                                                float planeDistance)
-    // : _initialized(false)
-    : _vaoId(0)
-    , _vBufferId(0)
-    , _size(blockSize)
+    : _size(blockSize)
 {}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
@@ -51,7 +45,7 @@ BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
 }
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
-    _size = size;
+    _size = std::move(size);
     updateVertices();
 }
 
@@ -65,23 +59,23 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     _vertices.clear();
 
     const int cornersInLines[24] = {
-        0,1,
-        1,5,
-        5,4,
-        4,0,
+        0, 1,
+        1, 5,
+        5, 4,
+        4, 0,
 
-        2,3,
-        3,7,
-        7,6,
-        6,2,
+        2, 3,
+        3, 7,
+        7, 6,
+        6, 2,
 
-        0,2,
-        1,3,
-        5,7,
-        4,6
+        0, 2,
+        1, 3,
+        5, 7,
+        4, 6
     };
 
-    glm::vec3 halfSize = _size * 0.5f;
+    const glm::vec3 halfSize = _size * 0.5f;
     glm::vec3 intersections[12];
     int nIntersections = 0;
 
@@ -89,8 +83,16 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         int iCorner0 = cornersInLines[i * 2];
         int iCorner1 = cornersInLines[i * 2 + 1];
 
-        glm::vec3 corner0 = glm::vec3(iCorner0 % 2, (iCorner0 / 2) % 2, iCorner0 / 4) - halfSize;
-        glm::vec3 corner1 = glm::vec3(iCorner1 % 2, (iCorner1 / 2) % 2, iCorner1 / 4) - halfSize;
+        glm::vec3 corner0 = glm::vec3(
+            iCorner0 % 2,
+            (iCorner0 / 2) % 2,
+            iCorner0 / 4
+        ) - halfSize;
+        glm::vec3 corner1 = glm::vec3(
+            iCorner1 % 2,
+            (iCorner1 / 2) % 2,
+            iCorner1 / 4
+        ) - halfSize;
 
         glm::vec3 line = corner1 - corner0;
 
@@ -100,11 +102,14 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         }
     }
 
-    if (nIntersections <3) return; // Gotta love intersections
+    // Gotta love intersections
+    if (nIntersections <3) {
+        return;
+    }
 
     // Construct vectors vectors (vectors1 .. vectorsN) between the N points
 
-    std::vector< std::pair<int, float> > angles(nIntersections-1);
+    std::vector<std::pair<int, float>> angles(nIntersections - 1);
 
     glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
     angles[0] = std::pair<int, float>(1, 0.0f);
@@ -113,7 +118,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
         float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
         float cosA = glm::dot(vector1, vectorI);
-        angles[i - 1] = std::pair<int, float>(i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)));
+        angles[i - 1] = { i, static_cast<float>(glm::sign(sinA) * (1.0 - cosA)) };
     }
 
     // Sort the vectors by angle in the plane
@@ -139,7 +144,12 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     glBindVertexArray(_vaoId);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(GLfloat), _vertices.data(), GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertices.size() * sizeof(GLfloat),
+        _vertices.data(),
+        GL_STATIC_DRAW
+    );
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
@@ -148,8 +158,9 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 }
 
 bool BlockPlaneIntersectionGeometry::initialize() {
-    if (_vaoId == 0)
+    if (_vaoId == 0) {
         glGenVertexArrays(1, &_vaoId);
+    }
 
     if (_vBufferId == 0) {
         glGenBuffers(1, &_vBufferId);

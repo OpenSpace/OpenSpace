@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
 
+#include <openspace/util/gpudata.h>
+
 namespace openspace::globebrowsing {
 
 void GPUChunkTilePile::setValue(ghoul::opengl::ProgramObject* programObject,
@@ -49,7 +51,7 @@ void GPUChunkTilePile::bind(ghoul::opengl::ProgramObject* programObject,
 }
 
 void GPUChunkTilePile::deactivate() {
-    for (auto& t : _gpuChunkTiles) {
+    for (GPUChunkTile& t : _gpuChunkTiles) {
         t.deactivate();
     }
 }

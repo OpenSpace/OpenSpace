@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
@@ -33,20 +34,21 @@
 
 namespace openspace::globebrowsing::chunklevelevaluator {
 
-int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+int ProjectedArea::desiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
     // with the inverse model matrix
-    glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
+    const glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
 
     const RenderableGlobe& globe = chunk.owner();
     const Ellipsoid& ellipsoid = globe.ellipsoid();
-    glm::dvec4 cameraPositionModelSpace = glm::dvec4(data.camera.positionVec3(), 1);
-    glm::dvec3 cameraPosition =
-        glm::dvec3(inverseModelTransform * cameraPositionModelSpace);
-    glm::dvec3 cameraToEllipsoidCenter = -cameraPosition;
+    const glm::dvec4 cameraPositionModelSpace = glm::dvec4(data.camera.positionVec3(), 1);
+    const glm::dvec3 cameraPosition = glm::dvec3(
+        inverseModelTransform * cameraPositionModelSpace
+    );
+    const glm::dvec3 cameraToEllipsoidCenter = -cameraPosition;
 
-    Geodetic2 cameraGeodeticPos = ellipsoid.cartesianToGeodetic2(cameraPosition);
+    const Geodetic2 cameraGeodeticPos = ellipsoid.cartesianToGeodetic2(cameraPosition);
 
     // Approach:
     // The projected area of the chunk will be calculated based on a small area that
@@ -72,7 +74,7 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //    |                 |
     //    +-----------------+  <-- south east corner
 
-    Chunk::BoundingHeights heights = chunk.boundingHeights();
+    const Chunk::BoundingHeights heights = chunk.boundingHeights();
     const Geodetic3 c = { center, heights.min };
     const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
     const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
@@ -92,15 +94,16 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     //    +-----------------+  <-- south east corner
 
 
-    // Go from geodetic to cartesian space
-    glm::dvec3 A = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c);
-    glm::dvec3 B = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c1);
-    glm::dvec3 C = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c2);
-
-    // Project onto unit sphere
-    A = glm::normalize(A);
-    B = glm::normalize(B);
-    C = glm::normalize(C);
+    // Go from geodetic to cartesian space and project onto unit sphere
+    const glm::dvec3 A = glm::normalize(
+        cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c)
+    );
+    const glm::dvec3 B = glm::normalize(
+        cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c1)
+    );
+    const glm::dvec3 C = glm::normalize(
+        cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c2)
+    );
 
     // Camera                      *cartesian space*
     // |                    +--------+---+
@@ -115,11 +118,11 @@ int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) c
     // correspond to 1/8 of the full area
     const glm::dvec3 AB = B - A;
     const glm::dvec3 AC = C - A;
-    double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
-    double projectedChunkAreaApprox = 8 * areaABC;
+    const double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
+    const     double projectedChunkAreaApprox = 8 * areaABC;
 
-    double scaledArea =
-        globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
+    const double scaledArea = globe.generalProperties().lodScaleFactor *
+                              projectedChunkAreaApprox;
     return chunk.tileIndex().level + static_cast<int>(round(scaledArea - 1));
 }
 

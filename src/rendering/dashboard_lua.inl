@@ -25,6 +25,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/screenspacedashboard.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace openspace::luascriptfunctions {
 
@@ -35,7 +36,7 @@ namespace openspace::luascriptfunctions {
 int addDashboardItem(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::addDashboardItem");
 
-    int type = lua_type(L, -1);
+    const int type = lua_type(L, -1);
     if (type == LUA_TTABLE) {
         ghoul::Dictionary d;
         try {
@@ -54,7 +55,7 @@ int addDashboardItem(lua_State* L) {
         return 0;
     }
     else {
-        return luaL_error(L, "Expected argument of type 'string' or 'table'");
+        return luaL_error(L, "Expected argument of type 'table'");
     }
 }
 

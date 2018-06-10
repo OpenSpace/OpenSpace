@@ -22,20 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/screenspacerenderhandler.h"
+#include <ghoul/misc/assert.h>
+#include <cstring>
 
 namespace openspace {
 
-void ScreenSpaceRenderHandler::draw(void) {
+template <typename T>
+void SyncBuffer::encode(const T& v) {
+    const size_t size = sizeof(T);
+    ghoul_assert(_encodeOffset + size < _n, "");
 
+    memcpy(_dataStream.data() + _encodeOffset, &v, size);
+    _encodeOffset += size;
 }
 
-void ScreenSpaceRenderHandler::render() {
-
+template <typename T>
+T SyncBuffer::decode() {
+    const size_t size = sizeof(T);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    T value;
+    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
+    return value;
 }
 
-void ScreenSpaceRenderHandler::setTexture(const GLuint &t) {
-    _texture = t;
+template <typename T>
+void SyncBuffer::decode(T& value) {
+    const size_t size = sizeof(T);
+    ghoul_assert(_decodeOffset + size < _n, "");
+    memcpy(&value, _dataStream.data() + _decodeOffset, size);
+    _decodeOffset += size;
 }
 
-}
+} // namespace openspace

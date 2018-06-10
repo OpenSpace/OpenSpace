@@ -22,31 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#include <modules/server/include/topics/bouncetopic.h>
 
-#include <openspace/util/timemanager.h>
-#include <openspace/query/query.h>
-#include "topic.h"
-#include "connection.h"
+#include <modules/server/include/connection.h>
 
 namespace openspace {
-class property;
-class SubscriptionTopic : public Topic {
-public:
-    SubscriptionTopic();
-    ~SubscriptionTopic();
-    void handleJson(nlohmann::json json);
-    bool isDone();
 
-private:
-    bool _requestedResourceIsSubscribable;
-    bool _isSubscribedTo;
-    int _onChangeHandle;
-    int _onDeleteHandle;
-    properties::Property* _prop;
+void BounceTopic::handleJson(const nlohmann::json& json) {
+    _connection->sendJson(json);
 };
 
-} // namespace openspace
+bool BounceTopic::isDone() const {
+    return false;
+}
 
-#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+} // namespace openspace

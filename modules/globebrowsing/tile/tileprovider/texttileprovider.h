@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/cache/lrucache.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
@@ -57,8 +59,8 @@ public:
     bool deinitialize() override;
 
     // The TileProvider interface below is implemented in this class
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual Tile tile(const TileIndex& tileIndex) override;
+    virtual Tile::Status tileStatus(const TileIndex& index) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;
@@ -93,7 +95,7 @@ private:
         createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 
-    GLuint _fbo;
+    GLuint _fbo = 0;
 
     cache::MemoryAwareTileCache* _tileCache;
 };

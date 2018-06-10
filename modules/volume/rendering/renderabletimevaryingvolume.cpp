@@ -24,121 +24,209 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 
-#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
+#include <modules/volume/rendering/volumeclipplanes.h>
+#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/rawvolume.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/raycastermanager.h>
+#include <modules/volume/rawvolumereader.h>
+#include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/util/histogram.h>
 #include <openspace/util/time.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
-#include <glm/gtc/matrix_transform.hpp>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr const char* _loggerCat = "RenderableTimeVaryingVolume";
 } // namespace
 
 namespace {
-    const char* KeyStepSize = "StepSize";
-    const char* KeyGridType = "GridType";
-    const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySourceDirectory = "SourceDirectory";
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyStepSize = "StepSize";
+    constexpr const char* KeyTransferFunction = "TransferFunction";
+    constexpr const char* KeySourceDirectory = "SourceDirectory";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyClipPlanes = "ClipPlanes";
+    constexpr const char* KeySecondsBefore = "SecondsBefore";
+    constexpr const char* KeySecondsAfter = "SecondsAfter";
+    constexpr const char* KeyGridType = "GridType";
+    constexpr const char* KeyMinValue = "MinValue";
+    constexpr const char* KeyMaxValue = "MaxValue";
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyUnit = "VisUnit";
+    constexpr const float SecondsInOneDay = 60 * 60 * 24;
 
-    const char* KeyClipPlanes = "ClipPlanes";
-    const char* KeySecondsBefore = "SecondsBefore";
-    const char* KeySecondsAfter = "SecondsAfter";
-
-    const float SecondsInOneDay = 60 * 60 * 24;
-
-    static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    const openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "gridType",
         "Grid Type",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
+    const openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
         "secondsBefore",
         "Seconds before",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
+    const openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "secondsAfter",
         "Seconds after",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
+    const openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "sourceDirectory",
         "Source Directory",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "transferFunctionPath",
         "Transfer Function Path",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
+    const openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
         "triggerTimeJump",
         "Jump",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
+    const openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "jumpToTimestep",
         "Jump to timestep",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
+    const openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
         "currentTimestep",
         "Current timestep",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    const openspace::properties::Property::PropertyInfo OpacityInfo = {
         "opacity",
         "Opacity",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo rNormalizationInfo = {
+    const openspace::properties::Property::PropertyInfo rNormalizationInfo = {
         "rNormalization",
         "Radius normalization",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
+    const openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
         "rUpperBound",
         "Radius upper bound",
         "" // @TODO Missing documentation
     };
 } // namespace
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
+
+    documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableTimevaryingVolume",
+        "volume_renderable_timevaryingvolume",
+        {
+            {
+                KeySourceDirectory,
+                new StringVerifier,
+                Optional::No,
+                "Specifies the path to load timesteps from"
+            },
+            {
+                KeyTransferFunction,
+                new StringVerifier,
+                Optional::No,
+                "Specifies the transfer function file path"
+            },
+            {
+                KeySecondsBefore,
+                new DoubleVerifier,
+                Optional::Yes,
+                "Specifies the number of seconds to show the the first timestep before "
+                "its actual time. The default value is 0."
+            },
+            {
+                KeySecondsAfter,
+                new DoubleVerifier,
+                Optional::No,
+                "Specifies the number of seconds to show the the last timestep after its "
+                "actual time"
+            }
+        }
+    };
+}
+
+
+//documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation() {
+//    using namespace documentation;
+//    return {
+//        "TimevaryingVolumeTimestep",
+//        "volume_timevaryingvolumetimestep",
+//        {
+//            {
+//                KeyLowerDomainBound,
+//                new Vector3Verifier<float>,
+//                Optional::No,
+//                "Specifies the lower domain bounds in the model coordinate system",
+//            },
+//            {
+//                KeyUpperDomainBound,
+//                new Vector3Verifier<float>,
+//                Optional::No,
+//                "Specifies the upper domain bounds in the model coordinate system",
+//            },
+//            {
+//                KeyDimensions,
+//                new Vector3Verifier<float>,
+//                Optional::No,
+//                "Specifies the number of grid cells in each dimension",
+//            },
+//            {
+//                KeyTime,
+//                new StringVerifier,
+//                Optional::No,
+//                "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
+//            },
+//            {
+//                KeyMinValue,
+//                new DoubleVerifier,
+//                Optional::No,
+//                "Specifies the minimum value stored in the volume"
+//            },
+//            {
+//                KeyMaxValue,
+//                new DoubleVerifier,
+//                Optional::No,
+//                "Specifies the maximum value stored in the volume"
+//            }
+//        }
+//    };
+//}
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _clipPlanes(nullptr)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
     , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
@@ -150,7 +238,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _currentTimestep(CurrentTimeStepInfo, 0, 0, 256)
-    , _raycaster(nullptr)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -167,15 +254,15 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _gridType.addOptions({
         { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
-        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" },
+        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" }
     });
-    _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+    _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 
-    if (dictionary.hasValue<float>(KeyStepSize)) {
+    if (dictionary.hasKeyAndValue<float>(KeyStepSize)) {
         _stepSize = dictionary.value<float>(KeyStepSize);
     }
 
-    if (dictionary.hasValue<float>(KeySecondsBefore)) {
+    if (dictionary.hasKeyAndValue<float>(KeySecondsBefore)) {
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
     }
     _secondsAfter = dictionary.value<float>(KeySecondsAfter);
@@ -186,18 +273,17 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasValue<std::string>(KeyGridType)) {
+    if (dictionary.hasKeyAndValue<std::string>(KeyGridType)) {
         VolumeGridType gridType = volume::parseGridType(
-            dictionary.value<std::string>(KeyGridType)
+           dictionary.value<std::string>(KeyGridType)
         );
-        _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
+        _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
 void RenderableTimeVaryingVolume::initializeGL() {
-
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
 
@@ -210,7 +296,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     using Sort = ghoul::filesystem::Directory::Sort;
 
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (auto path : sequencePaths) {
+    for (const std::string& path : sequencePaths) {
         ghoul::filesystem::File currentFile(path);
         std::string extension = currentFile.fileExtension();
         if (extension == "dictionary") {
@@ -218,9 +304,8 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
     }
 
-
     // TODO: defer loading of data to later (separate thread or at least not when loading)
-    for (auto& p : _volumeTimesteps) {
+    for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
         std::string path = FileSys.pathByAppendingComponent(
             _sourceDirectory, t.baseName
@@ -230,12 +315,12 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
         float min = t.metadata.minValue;
         float diff = t.metadata.maxValue - t.metadata.minValue;
-        float *data = t.rawVolume->data();
+        float* data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
-            data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
+            data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
         }
 
-        t.histogram = std::make_shared<Histogram>(0.0, 1.0, 100);
+        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
         for (int i = 0; i < t.rawVolume->nCells(); ++i) {
             t.histogram->add(data[i]);
         }
@@ -261,30 +346,30 @@ void RenderableTimeVaryingVolume::initializeGL() {
     //_transferFunction->initialize();
     _clipPlanes->initialize();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunction, _clipPlanes);
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        nullptr,
+        _transferFunction,
+        _clipPlanes
+    );
 
     _raycaster->initialize();
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
-    auto onChange = [&](bool enabled) {
+    onEnabledChange([&](bool enabled) {
         if (enabled) {
             OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
-        } else {
+        }
+        else {
             OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
         }
-    };
-    onEnabledChange(onChange);
-
-    _triggerTimeJump.onChange([this] () {
-        jumpToTimestep(_jumpToTimestep);
     });
 
-    _jumpToTimestep.onChange([this] () {
-        jumpToTimestep(_jumpToTimestep);
-    });
+    _triggerTimeJump.onChange([this] () { jumpToTimestep(_jumpToTimestep); });
 
-    const int lastTimestep = (_volumeTimesteps.size() > 0) ?
-                             static_cast<int>(_volumeTimesteps.size() - 1) :
-                             0;
+    _jumpToTimestep.onChange([this] () { jumpToTimestep(_jumpToTimestep); });
+
+    const int lastTimestep = !_volumeTimesteps.empty() ?
+        static_cast<int>(_volumeTimesteps.size() - 1) :
+        0;
     _currentTimestep.setMaxValue(lastTimestep);
     _jumpToTimestep.setMaxValue(lastTimestep);
 
@@ -301,22 +386,15 @@ void RenderableTimeVaryingVolume::initializeGL() {
     addProperty(_rUpperBound);
     addProperty(_gridType);
 
-    _raycaster->setGridType(
-        (_gridType.value() == 1) ?
-        VolumeGridType::Spherical :
-        VolumeGridType::Cartesian
-    );
+    _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     _gridType.onChange([this] {
-        _raycaster->setGridType(
-            (_gridType.value() == 1) ?
-            VolumeGridType::Spherical :
-            VolumeGridType::Cartesian
-        );
+        _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     });
 
     _transferFunctionPath.onChange([this] {
-        _transferFunction =
-            std::make_shared<TransferFunction>(_transferFunctionPath);
+        _transferFunction = std::make_shared<openspace::TransferFunction>(
+            _transferFunctionPath
+        );
         _raycaster->setTransferFunction(_transferFunction);
     });
 }
@@ -326,7 +404,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     try {
         ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
-        metadata = RawVolumeMetadata::CreateFromDictionary(dictionary);
+        metadata = RawVolumeMetadata::createFromDictionary(dictionary);
     } catch (...) {
         return;
     }
@@ -334,7 +412,6 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     Timestep t;
     t.metadata = metadata;
     t.baseName = ghoul::filesystem::File(path).baseName();
-
     t.inRam = false;
     t.onGpu = false;
 
@@ -342,7 +419,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    if (_volumeTimesteps.size() == 0) {
+    if (_volumeTimesteps.empty()) {
         return nullptr;
     }
     double currentTime = OsEng.timeManager().time().j2000Seconds();
@@ -377,7 +454,7 @@ int RenderableTimeVaryingVolume::timestepIndex(
         return -1;
     }
     int index = 0;
-    for (auto& it : _volumeTimesteps) {
+    for (const std::pair<const double, Timestep>& it : _volumeTimesteps) {
         if (&(it.second) == t) {
             return index;
         }
@@ -386,6 +463,7 @@ int RenderableTimeVaryingVolume::timestepIndex(
     return -1;
 }
 
+// @TODO Can this be turned into a const ref?
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFromIndex(
                                                                                int target)
 {
@@ -393,7 +471,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
         target = 0;
     }
     int index = 0;
-    for (auto& it : _volumeTimesteps) {
+    for (std::pair<const double, Timestep>& it : _volumeTimesteps) {
         if (index == target) {
             return &(it.second);
         }
@@ -404,10 +482,9 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
 
 void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     Timestep* t = timestepFromIndex(target);
-    if (!t) {
-        return;
+    if (t) {
+        OsEng.timeManager().setTimeNextFrame(t->metadata.time);
     }
-    OsEng.timeManager().setTimeNextFrame(t->metadata.time);
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData&) {
@@ -472,42 +549,4 @@ void RenderableTimeVaryingVolume::deinitializeGL() {
     }
 }
 
-documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
-    using namespace documentation;
-    return {
-        "RenderableTimevaryingVolume",
-        "volume_renderable_timevaryingvolume",
-        {
-            {
-                KeySourceDirectory,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the path to load timesteps from"
-            },
-            {
-                KeyTransferFunction,
-                new StringVerifier,
-                Optional::No,
-                "Specifies the transfer function file path"
-            },
-            {
-                KeySecondsBefore,
-                new DoubleVerifier,
-                Optional::Yes,
-                "Specifies the number of seconds to show the the first timestep before "
-                "its actual time. The default value is 0."
-            },
-            {
-                KeySecondsAfter,
-                new DoubleVerifier,
-                Optional::No,
-                "Specifies the number of seconds to show the the last timestep after its "
-                "actual time"
-            }
-        }
-    };
-}
-
-
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

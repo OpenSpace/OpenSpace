@@ -24,19 +24,9 @@
 
 #include <modules/globebrowsing/tile/rawtile.h>
 
-#include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace::globebrowsing {
-
-RawTile::RawTile()
-    : imageData(nullptr)
-    , tileMetaData(nullptr)
-    , textureInitData(nullptr)
-    , tileIndex(0, 0, 0)
-    , error(ReadError::None)
-    , pbo(0)
-{}
 
 RawTile RawTile::createDefault(const TileTextureInitData& initData) {
     RawTile defaultRes;

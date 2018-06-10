@@ -25,7 +25,7 @@
 #include <modules/sync/torrentclient.h>
 
 #include <openspace/openspace.h>
-
+#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 
 #ifdef SYNC_USE_LIBTORRENT
@@ -46,8 +46,6 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#include <ghoul/fmt.h>
-
 #endif // SYNC_USE_LIBTORRENT
 
 namespace {
@@ -64,10 +62,9 @@ TorrentError::TorrentError(std::string msg)
 void TorrentClient::initialize() {
 #ifdef SYNC_USE_LIBTORRENT
     libtorrent::settings_pack settings;
-    settings.set_str(libtorrent::settings_pack::user_agent, "OpenSpace/" +
-        std::to_string(openspace::OPENSPACE_VERSION_MAJOR) + "." +
-        std::to_string(openspace::OPENSPACE_VERSION_MINOR) + "." +
-        std::to_string(openspace::OPENSPACE_VERSION_PATCH)
+    settings.set_str(
+        libtorrent::settings_pack::user_agent,
+        "OpenSpace/" + std::string(OPENSPACE_VERSION_NUMBER)
     );
 
     settings.set_str(
@@ -91,17 +88,9 @@ router.bitcomet.com"
 
     _session.apply_settings(settings);
 
-    //_session.add_dht_router({ "router.utorrent.com", 6881 });
-    //_session.add_dht_router({ "dht.transmissionbt.com", 6881 });
-    //_session.add_dht_router({ "router.bittorrent.com", 6881 });
-    //_session.add_dht_router({ "router.bitcomet.com", 6881 });
-
     libtorrent::error_code ec;
-    //_session.listen_on(std::make_pair(20280, 20290), ec);
-    //_session.start_upnp();
 
     _isInitialized = true;
-
     _isActive = true;
 
     _torrentThread = std::thread([this]() {
@@ -126,16 +115,14 @@ void TorrentClient::deinitialize() {
         _torrentThread.join();
     }
 
-    std::vector<lt::torrent_handle> handles = _session.get_torrents();
+    const std::vector<lt::torrent_handle>& handles = _session.get_torrents();
     for (const lt::torrent_handle& h : handles) {
         _session.remove_torrent(h);
     }
     _torrents.clear();
 
     _session.abort();
-
     _isInitialized = false;
-
 #endif // SYNC_USE_LIBTORRENT
 }
 
@@ -189,13 +176,13 @@ TorrentClient::TorrentId TorrentClient::addTorrentFile(const std::string& torren
     if (ec) {
         LERROR(fmt::format("{}: {}", torrentFile, ec.message()));
     }
-    libtorrent::torrent_handle h = _session.add_torrent(p, ec);
+    const libtorrent::torrent_handle h = _session.add_torrent(p, ec);
     if (ec) {
         LERROR(fmt::format("{}: {}", torrentFile, ec.message()));
     }
 
     TorrentId id = h.id();
-    _torrents.emplace(id, Torrent{id, h, std::move(cb)});
+    _torrents.emplace(id, Torrent{ id, h, std::move(cb) });
     return id;
 #else // SYNC_USE_LIBTORRENT
     throw TorrentError("SyncModule is compiled without libtorrent support");
@@ -221,13 +208,13 @@ TorrentClient::TorrentId TorrentClient::addMagnetLink(const std::string& magnetL
     }
     p.save_path = destination;
     p.storage_mode = libtorrent::storage_mode_allocate;
-    libtorrent::torrent_handle h = _session.add_torrent(p, ec);
+    const libtorrent::torrent_handle h = _session.add_torrent(p, ec);
     if (ec) {
         LERROR(fmt::format("{}: {}", magnetLink, ec.message()));
     }
 
     TorrentId id = h.id();
-    _torrents.emplace(id, Torrent{id, h, std::move(cb)});
+    _torrents.emplace(id, Torrent{ id, h, std::move(cb) });
     return id;
 #else // SYNC_USE_LIBTORRENT
     throw TorrentError("SyncModule is compiled without libtorrent support");
@@ -238,12 +225,12 @@ void TorrentClient::removeTorrent(TorrentId id) {
 #ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
 
-    auto it = _torrents.find(id);
+    const auto it = _torrents.find(id);
     if (it == _torrents.end()) {
         return;
     }
 
-    libtorrent::torrent_handle h = it->second.handle;
+    const libtorrent::torrent_handle h = it->second.handle;
     _session.remove_torrent(h);
 
     _torrents.erase(it);
@@ -258,13 +245,13 @@ void TorrentClient::notify(TorrentId id) {
     {
         std::lock_guard<std::mutex> guard(_mutex);
 
-        auto it = _torrents.find(id);
+        const auto it = _torrents.find(id);
         if (it == _torrents.end()) {
             return;
         }
 
-        libtorrent::torrent_handle h = it->second.handle;
-        libtorrent::torrent_status status = h.status();
+        const libtorrent::torrent_handle h = it->second.handle;
+        const libtorrent::torrent_status status = h.status();
 
         progress.finished = status.is_finished;
         progress.nTotalBytesKnown = status.total_wanted > 0;

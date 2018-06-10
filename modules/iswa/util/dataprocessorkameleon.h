@@ -26,25 +26,28 @@
 #define __OPENSPACE_MODULE_ISWA___DATAPROCESSORKAMELEON___H__
 
 #include <modules/iswa/util/dataprocessor.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 
 namespace openspace {
+
+class KameleonWrapper;
 
 class DataProcessorKameleon : public DataProcessor {
 public:
     DataProcessorKameleon();
-    ~DataProcessorKameleon();
+    virtual ~DataProcessorKameleon();
 
-    virtual std::vector<std::string> readMetadata(std::string path,
+    virtual std::vector<std::string> readMetadata(const std::string& path,
         glm::size3_t& dimensions) override;
-    virtual void addDataValues(std::string data,
+
+    virtual void addDataValues(const std::string& data,
         properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string path,
+
+    virtual std::vector<float*> processData(const std::string& path,
         properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
-    virtual std::vector<float*> processData(std::string path,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions,
-        float slice);
-    void dimensions(glm::size3_t dimensions);
+
+    void setSlice(float slice);
+
+    void setDimensions(glm::size3_t dimensions);
 
 private:
     void initializeKameleonWrapper(std::string kwPath);
@@ -52,8 +55,7 @@ private:
     std::shared_ptr<KameleonWrapper> _kw;
     std::string _kwPath;
     std::vector<std::string> _loadedVariables;
-    float _slice;
-    // std::vector<float*> _data;
+    float _slice = 0.5;
 };
 
 } // namespace openspace

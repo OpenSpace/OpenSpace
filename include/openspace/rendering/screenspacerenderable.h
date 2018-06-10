@@ -31,13 +31,11 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
+
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -59,7 +57,7 @@ public:
     static constexpr const char* KeyIdentifier = "Identifier";
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable() = default;
+    virtual ~ScreenSpaceRenderable();
 
     virtual void render();
 
@@ -88,14 +86,14 @@ protected:
      * \param radius The radius position value of the plane
      * \return The x and y position value of the plane
      */
-    glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
+    //glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
 
     /**
      * Converts Euclidean coordinates to Spherical.
      * \param euclidean The coordinates x and y
      * \return The spherical coordinates theta and phi.
      */
-    glm::vec2 toSpherical(const glm::vec2& euclidean);
+    //glm::vec2 toSpherical(const glm::vec2& euclidean);
 
 
     void createShaders();
@@ -117,13 +115,13 @@ protected:
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
     glm::ivec2 _objectSize;
     UniformCache(occlusionDepth, alpha, modelTransform, viewProj, texture) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    bool _useEuclideanCoordinates;
+    bool _useEuclideanCoordinates = true;
     glm::vec2 _originalViewportSize;
 
     float _radius;

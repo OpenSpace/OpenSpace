@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
-
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -74,10 +73,12 @@ protected:
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
 
-    GLuint _vaoID;
-    GLuint _vbo;
-    GLuint _ibo;
-    GLenum _mode;
+    GLuint _vaoID = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0 ;
+    GLenum _mode = GL_TRIANGLES;
+
+    double _boundingRadius = 0.0;
 
     std::vector<Vertex> _vertices;
     std::vector<int> _indices;
