@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <iostream>
+#include <string>
 #include <modules/dataloader/operators/loader.h>
 #include <modules/dataloader/dataloadermodule.h>
 #include <ghoul/logging/logmanager.h>
@@ -129,19 +130,25 @@ void Loader::uploadData() {
 ;
 }
 
-void Loader::addInternalDataItemProperties() {
+void Loader::createInternalDataItemProperties() {
     getModule()->validateDataDirectory();
     std::vector<std::string> volumeItems = getModule()->volumeDataItems();
 
+    LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
+
+    int step = 0;
     for (auto item : volumeItems) {
+        const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(item);
         static const openspace::properties::Property::PropertyInfo info = {
-            "ItemTrigger_" + openspace::dataloader::helpers::getDirLeaf(item),
-            "",
+            "ItemTrigger_" + dirLeaf + std::to_string(step),
+            dirLeaf + std::to_string(step),
             ""
         };
 
+        step++;
+
         // Initialize trigger property with data item name (are they unique?)
-        properties::TriggerProperty volumeItemTrigger(info);
+        auto volumeItemTrigger = properties::TriggerProperty(info);
 
         // Set onChange method to call loadDataItem with the path as argument
         volumeItemTrigger.onChange([this](){
@@ -149,6 +156,7 @@ void Loader::addInternalDataItemProperties() {
         });
 
         addProperty(volumeItemTrigger);
+        LDEBUG("Added property " + dirLeaf);
     }
 }
 

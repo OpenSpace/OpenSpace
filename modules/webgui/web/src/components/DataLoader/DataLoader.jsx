@@ -46,7 +46,7 @@ class DataLoader extends Component {
   }
 
   getUriForDataToLoad(dataType) {
-    let uri = 'Modules.DataLoader.Reader.';
+    let uri = 'Modules.DataLoader.';
 
     for (const type of this.dataTypesToLoad) {
       if (dataType == type) {
@@ -58,7 +58,7 @@ class DataLoader extends Component {
   }
 
   triggerDataToLoad(dataType) {
-    DataManager.trigger(`Modules.DataLoader.Reader.Read${dataType}Trigger`)
+    DataManager.trigger(`Modules.DataLoader.ShowInternal${dataType}Trigger`)
   }
 
   handleDataTypeList(data) {

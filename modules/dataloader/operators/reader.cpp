@@ -44,50 +44,36 @@ namespace {
     constexpr const char* _loggerCat = "Reader";
 } 
 
-namespace {
-    static const openspace::properties::Property::PropertyInfo VolumesInfo = {
-        "Volumes",
-        "List of volume items stored internally and ready to load",
-        "This list contains names of volume data files converted from the CDF format"
-    };
+// namespace {
+//     static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
+//         "ReadVolumesTrigger",
+//         "Trigger load volume data files",
+//         "If this property is triggered it will call the function to load volume data"
+//     };
 
-    static const openspace::properties::Property::PropertyInfo FieldlinesInfo = {
-        "Fieldlines",
-        "List of fieldline items stored internally and ready to load",
-        "This list contains names of fieldline data files converted from the CDF format"
-    };
-
-    static const openspace::properties::Property::PropertyInfo ReadVolumesTriggerInfo = {
-        "ReadVolumesTrigger",
-        "Trigger load volume data files",
-        "If this property is triggered it will call the function to load volume data"
-    };
-
-    static const openspace::properties::Property::PropertyInfo ReadFieldlinesTriggerInfo = {
-        "ReadFieldlinesTrigger",
-        "Trigger load fieldline data files",
-        "If this property is triggered it will call the function to load fieldline data"
-    };
-}
+//     static const openspace::properties::Property::PropertyInfo ReadFieldlinesTriggerInfo = {
+//         "ReadFieldlinesTrigger",
+//         "Trigger load fieldline data files",
+//         "If this property is triggered it will call the function to load fieldline data"
+//     };
+// }
 
 namespace openspace::dataloader {
 
 Reader::Reader()
     : PropertyOwner({ "Reader" })
-    , _volumeItems(VolumesInfo) 
-    , _readVolumesTrigger(ReadVolumesTriggerInfo) 
+    // , _readVolumesTrigger(ReadVolumesTriggerInfo)
 {
     _topDir = ghoul::filesystem::Directory(
       "${DATA}/.internal",
       ghoul::filesystem::Directory::RawPath::No
     );
 
-    _readVolumesTrigger.onChange([this](){
-        readVolumeDataItems();
-    });
+    // _readVolumesTrigger.onChange([this](){
+    //     readVolumeDataItems();
+    // });
 
-    addProperty(_volumeItems);
-    addProperty(_readVolumesTrigger);
+    // addProperty(_readVolumesTrigger);
 }
 
 void Reader::readVolumeDataItems() {
@@ -97,12 +83,12 @@ void Reader::readVolumeDataItems() {
         "volumes_from_cdf" 
     );
 
-    _volumeItems = volumeDir.readDirectories(
+    std::vector volumeItems = volumeDir.readDirectories(
       ghoul::filesystem::Directory::Recursive::No,
       ghoul::filesystem::Directory::Sort::Yes
     );
 
-    getModule()->setVolumeDataItems(_volumeItems);
+    getModule()->setVolumeDataItems(volumeItems);
     getModule()->setDataDirectoryRead(true);
 
     // for (auto el : volumeItems) {

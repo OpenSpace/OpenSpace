@@ -26,6 +26,9 @@
 #define __OPENSPACE_MODULE_DATALOADER___DATALOADERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/property.h> // do we need this
+#include <openspace/properties/stringlistproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace::dataloader {
     class Reader;
@@ -33,6 +36,10 @@ namespace openspace::dataloader {
 }
 
 namespace openspace {
+
+enum DataTypes {
+    volume
+};
 
 /**
  * Reference reader, writer, loader
@@ -57,12 +64,13 @@ public:
     dataloader::Loader* loader();
 
 private:
-    bool _dataDirectoryIsRead = true;
+    bool _dataDirectoryIsRead = false;
 
     std::unique_ptr<dataloader::Reader> _reader;
     std::unique_ptr<dataloader::Loader> _loader;
 
-    std::vector<std::string> _volumeDataItems;
+    properties::StringListProperty _volumeDataItems;
+    properties::TriggerProperty _showInternalVolumesTrigger;
 };
 
 } // namespace openspace

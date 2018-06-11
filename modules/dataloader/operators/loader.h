@@ -41,8 +41,10 @@ class Loader : public PropertyOwner, public Operator {
     // Select file data path
     void uploadData();
 
-    // Add trigger properties for data items in internal directory
-    void addInternalDataItemProperties();
+    /**
+     * Creates and adds trigger properties for data items in the internal directory
+     */
+    void createInternalDataItemProperties();
 
     // Add one data item trigger property
     void addDataItemProperty();
