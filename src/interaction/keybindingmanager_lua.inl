@@ -43,7 +43,7 @@ int bindKey(lua_State* L) {
 
     if (command.empty()) {
         lua_settop(L, 0);
-        return luaL_error(L, "Command string is empty");
+        return ghoul::lua::luaError(L, "Command string is empty");
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
@@ -52,7 +52,7 @@ int bindKey(lua_State* L) {
         std::string error = fmt::format("Could not find key '{}'", key);
         LERRORC("lua.bindKey", error);
         lua_settop(L, 0);
-        return luaL_error(L, error.c_str());
+        return ghoul::lua::luaError(L, error);
     }
 
     std::string doc = (nArguments == 3) ? ghoul::lua::value<std::string>(L, 3) : "";
@@ -83,7 +83,7 @@ int bindKeyLocal(lua_State* L) {
     const std::string& command = ghoul::lua::value<std::string>(L, 2);
 
     if (command.empty()) {
-        return luaL_error(L, "Command string is empty");
+        return ghoul::lua::luaError(L, "Command string is empty");
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
@@ -91,7 +91,7 @@ int bindKeyLocal(lua_State* L) {
     if (iKey.key == openspace::Key::Unknown) {
         std::string error = fmt::format("Could not find key '{}'", key);
         LERRORC("lua.bindKey", error);
-        return luaL_error(L, error.c_str());
+        return ghoul::lua::luaError(L, error);
     }
 
     std::string doc = nArguments == 3 ? ghoul::lua::value<std::string>(L, 3) : "";

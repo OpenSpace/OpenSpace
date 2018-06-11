@@ -36,7 +36,7 @@ int restoreCameraStateFromFile(lua_State* L) {
     );
 
     if (cameraStateFilePath.empty()) {
-        return luaL_error(L, "filepath string is empty");
+        return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
     OsEng.navigationHandler().restoreCameraStateFromFile(cameraStateFilePath);
@@ -54,7 +54,10 @@ int setCameraState(lua_State* L) {
         OsEng.navigationHandler().setCameraStateFromDictionary(dictionary);
     } catch (const ghoul::RuntimeError& e) {
         lua_settop(L, 0);
-        return luaL_error(L, "Could not set camera state: %s", e.what());
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Could not set camera state: {}", e.what())
+        );
     }
 
     // @CLEANUP:  When luaDictionaryFromState doesn't leak space anymore, remove the next
@@ -74,7 +77,7 @@ int saveCameraStateToFile(lua_State* L) {
     );
 
     if (cameraStateFilePath.empty()) {
-        return luaL_error(L, "filepath string is empty");
+        return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
     OsEng.navigationHandler().saveCameraStateToFile(cameraStateFilePath);

@@ -33,7 +33,7 @@ int loadMission(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     if (missionFileName.empty()) {
-        return luaL_error(L, "Filepath is empty");
+        return ghoul::lua::luaError(L, "Filepath is empty");
     }
 
     std::string name = MissionManager::ref().loadMission(absPath(missionFileName));
@@ -52,11 +52,11 @@ int unloadMission(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     if (missionName.empty()) {
-        return luaL_error(L, "Mission name is empty");
+        return ghoul::lua::luaError(L, "Mission name is empty");
     }
 
     if (!MissionManager::ref().hasMission(missionName)) {
-        return luaL_error(L, "Mission was not previously loaded");
+        return ghoul::lua::luaError(L, "Mission was not previously loaded");
     }
 
     MissionManager::ref().unloadMission(missionName);
@@ -74,7 +74,7 @@ int hasMission(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     if (missionName.empty()) {
-        return luaL_error(L, "Missing name is empty");
+        return ghoul::lua::luaError(L, "Missing name is empty");
     }
 
     const bool hasMission = MissionManager::ref().hasMission(missionName);
@@ -94,7 +94,7 @@ int setCurrentMission(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     if (missionName.empty()) {
-        return luaL_error(L, "Mission name is empty");
+        return ghoul::lua::luaError(L, "Mission name is empty");
     }
 
     MissionManager::ref().setCurrentMission(missionName);

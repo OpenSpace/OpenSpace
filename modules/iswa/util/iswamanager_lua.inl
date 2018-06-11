@@ -57,7 +57,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+        return ghoul::lua::luaError(L, fmt::format(
+            "Expected {} argumemts, got {}", 1, nArguments
+        ));
     }
 
     ghoul::Dictionary d;

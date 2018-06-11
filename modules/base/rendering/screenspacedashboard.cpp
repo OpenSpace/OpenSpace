@@ -58,7 +58,7 @@ int addDashboardItemToScreenSpace(lua_State* L) {
     const std::string& name = ghoul::lua::value<std::string>(L, 1);
     const int type = lua_type(L, 2);
     if (type != LUA_TTABLE) {
-        return luaL_error(L, "Expected argument of type 'table'"); // NOLINT
+        return ghoul::lua::luaError(L, "Expected argument of type 'table'");
     }
 
     ghoul::Dictionary d;
@@ -73,13 +73,15 @@ int addDashboardItemToScreenSpace(lua_State* L) {
     ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
-        return luaL_error(L, "Provided name is not a ScreenSpace item"); // NOLINT
+        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
     }
 
     ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
-        // NOLINTNEXTLINE
-        return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+        return ghoul::lua::luaError(
+            L,
+            "Provided name is a ScreenSpace item but not a dashboard"
+        );
     }
 
     dash->dashboard().addDashboardItem(DashboardItem::createFromDictionary(d));
@@ -99,13 +101,15 @@ int removeDashboardItemsFromScreenSpace(lua_State* L) {
     ScreenSpaceRenderable* ssr = OsEng.renderEngine().screenSpaceRenderable(name);
 
     if (!ssr) {
-        return luaL_error(L, "Provided name is not a ScreenSpace item"); // NOLINT
+        return ghoul::lua::luaError(L, "Provided name is not a ScreenSpace item");
     }
 
     ScreenSpaceDashboard* dash = dynamic_cast<ScreenSpaceDashboard*>(ssr);
     if (!dash) {
-        // NOLINTNEXTLINE
-        return luaL_error(L, "Provided name is a ScreenSpace item but not a dashboard");
+        return ghoul::lua::luaError(
+            L,
+            "Provided name is a ScreenSpace item but not a dashboard"
+        );
     }
 
     dash->dashboard().clearDashboardItems();

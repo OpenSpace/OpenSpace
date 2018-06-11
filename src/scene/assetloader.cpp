@@ -626,7 +626,10 @@ int AssetLoader::requireLua(Asset* dependant) {
     std::shared_ptr<Asset> dependency = require(assetName);
 
     if (!dependency) {
-        return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
+        return ghoul::lua::luaError(
+            *_luaState,
+            fmt::format("Asset '{}' not found", assetName)
+        );
     }
 
     addLuaDependencyTable(dependant, dependency.get());

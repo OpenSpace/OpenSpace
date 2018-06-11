@@ -33,7 +33,7 @@ int loadFile(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     if (missionFileName.empty()) {
-        return luaL_error(L, "filepath string is empty");
+        return ghoul::lua::luaError(L, "filepath string is empty");
     }
 
     OsEng.scriptScheduler().loadScripts(

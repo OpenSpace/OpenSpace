@@ -108,7 +108,7 @@ int addVirtualProperty(lua_State* L) {
     }
     else {
         lua_settop(L, 0);
-        return luaL_error(L, "Unknown property type '%s'", type.c_str());
+        return ghoul::lua::luaError(L, fmt::format("Unknown property type '{}'", type));
     }
 
     lua_settop(L, 0);
@@ -176,7 +176,10 @@ int addTag(lua_State* L) {
 
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
     if (!node) {
-        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Unknown scene graph node type '{}'", uri)
+        );
     }
 
     node->addTag(std::move(tag));
@@ -199,7 +202,10 @@ int removeTag(lua_State* L) {
 
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(uri);
     if (!node) {
-        return luaL_error(L, "Unknown scene graph node type '%s'", uri.c_str());
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Unknown scene graph node type '{}'", uri)
+        );
     }
 
     node->removeTag(tag);
@@ -230,11 +236,9 @@ int downloadFile(lua_State* L) {
         5
     );
     if (!future || (future && !future->isFinished)) {
-        return luaL_error(
+        return ghoul::lua::luaError(
             L,
-            future ?
-                "Download failed" :
-                ("Download failed: " + future->errorMessage).c_str()
+            future ? "Download failed" : "Download failed: " + future->errorMessage
         );
     }
 

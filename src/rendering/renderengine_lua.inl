@@ -34,7 +34,7 @@ int setRenderer(lua_State* L) {
 
     const int type = lua_type(L, -1);
     if (type != LUA_TSTRING) {
-        return luaL_error(L, "Expected argument of type 'string'");
+        return ghoul::lua::luaError(L, "Expected argument of type 'string'");
     }
 
     const std::string& renderer = ghoul::lua::value<std::string>(

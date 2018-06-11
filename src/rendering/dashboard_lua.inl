@@ -55,7 +55,7 @@ int addDashboardItem(lua_State* L) {
         return 0;
     }
     else {
-        return luaL_error(L, "Expected argument of type 'table'");
+        return ghoul::lua::luaError(L, "Expected argument of type 'table'");
     }
 }
 

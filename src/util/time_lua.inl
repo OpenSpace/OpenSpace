@@ -39,7 +39,7 @@ int time_setDeltaTime(lua_State* L) {
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
-        return luaL_error(L, "bad argument (%s)", msg);
+        return ghoul::lua::luaError(L, fmt::format("bad argument ({})", msg));
     }
 
     const bool isNumber = (lua_isnumber(L, -1) != 0);
@@ -57,7 +57,7 @@ int time_setDeltaTime(lua_State* L) {
             lua_typename(L, LUA_TNUMBER),
             luaL_typename(L, -1)
         );
-        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
     }
 
 }
@@ -117,7 +117,7 @@ int time_setTime(lua_State* L) {
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
-        return luaL_error(L, "bad argument (%s)", 1, msg);
+        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
     }
 
     const bool isNumber = (lua_isnumber(L, -1) != 0);
@@ -126,7 +126,7 @@ int time_setTime(lua_State* L) {
         const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
                                 lua_typename(L, LUA_TNUMBER),
                                 lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
-        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+        return ghoul::lua::luaError(L, fmt::format("bad argument #1 ({})", msg));
     }
     if (isNumber) {
         double value = lua_tonumber(L, -1);

@@ -50,7 +50,10 @@ int loadKernel(lua_State* L) {
         ghoul::lua::PopValue::Yes
     );
     if (!FileSys.fileExists(argument)) {
-        return luaL_error(L, "Kernel file '%s' did not exist", argument.c_str());
+        return ghoul::lua::luaError(
+            L,
+            fmt::format("Kernel file '{}' did not exist", argument)
+        );
     }
     unsigned int result = SpiceManager::ref().loadKernel(argument);
 

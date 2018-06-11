@@ -54,19 +54,19 @@ int addLayer(lua_State* L) {
     // Get the node and make sure it exists
     SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
     if (!n) {
-        return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
+        return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
     }
 
     // Get the renderable globe
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
+        return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
 
     // Get the layer group
     layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
-        return luaL_error(L, ("Unknown layer group: " + layerGroupName).c_str());
+        return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
 
     // Get the dictionary defining the layer
@@ -104,19 +104,19 @@ int deleteLayer(lua_State* L) {
     // Get the node and make sure it exists
     SceneGraphNode* n = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
     if (!n) {
-        return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
+        return ghoul::lua::luaError(L, "Unknown globe name: " + globeName);
     }
 
     // Get the renderable globe
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
+        return ghoul::lua::luaError(L, "Renderable is not a globe: " + globeName);
     }
 
     // Get the layer group
     layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
-        return luaL_error(L, ("Unknown layer group: " + layerGroupName).c_str());
+        return ghoul::lua::luaError(L, "Unknown layer group: " + layerGroupName);
     }
 
     globe->layerManager()->deleteLayer(groupID, layerName);
@@ -174,11 +174,11 @@ int getGeoPosition(lua_State* L) {
 
     SceneGraphNode* n = sceneGraphNode(name);
     if (!n) {
-        return luaL_error(L, ("Unknown globe name: " + name).c_str());
+        return ghoul::lua::luaError(L, "Unknown globe name: " + name);
     }
     const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!globe) {
-        return luaL_error(L, "Name must be a RenderableGlobe");
+        return ghoul::lua::luaError(L, "Name must be a RenderableGlobe");
     }
 
     GlobeBrowsingModule& mod = *(OsEng.moduleEngine().module<GlobeBrowsingModule>());
@@ -201,7 +201,7 @@ int getGeoPositionForCamera(lua_State* L) {
     GlobeBrowsingModule* module = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     const RenderableGlobe* globe = module->castFocusNodeRenderableToGlobe();
     if (!globe) {
-        return luaL_error(L, "Focus node must be a RenderableGlobe");
+        return ghoul::lua::luaError(L, "Focus node must be a RenderableGlobe");
     }
 
     const glm::dvec3 cameraPosition = OsEng.navigationHandler().camera()->positionVec3();
