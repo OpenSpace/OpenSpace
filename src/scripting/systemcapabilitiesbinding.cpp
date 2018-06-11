@@ -36,8 +36,44 @@ using namespace ghoul::systemcapabilities;
 
 namespace luascripting::general {
 
-int operatingSystem(lua_State* L) {
-    ghoul::lua::push(L, CpuCap.operatingSystemString());
+int os(lua_State* L) {
+    using OS = ghoul::systemcapabilities::GeneralCapabilitiesComponent::OperatingSystem;
+    OS os = CpuCap.operatingSystem();
+
+    switch (os) {
+        case OS::Windows10:
+        case WindowsServer2016,
+        case WindowsVista:
+        case WindowsServer2008:
+        case Windows7:
+        case WindowsServer2008R2:
+        case Windows8:
+        case WindowsServer2012:
+        case Windows81:
+        case WindowsServer2012R2:
+        case WindowsServer2003R2:
+        case WindowsStorageServer2003:
+        case WindowsXPProfx64:
+        case WindowsServer2003:
+        case WindowsXPHome:
+        case WindowsXPProf:
+        case Windows2000Prof:
+        case Windows2000DatacenterServer:
+        case Windows2000AdvancedServer:
+        case Windows2000Server:
+            ghoul::lua::push(L, "windows");
+            break;
+        case Linux:
+            ghoul::lua::push(L, "linux");
+            break;
+        case MacOS:
+            ghoul::lua::push(L, "macos");
+            break;
+        default:
+            ghoul::lua::push("other");
+            break;
+    }
+
     return 1;
 }
 
@@ -199,13 +235,14 @@ LuaLibrary generalSystemCapabilities() {
         "systemCapabilities",
         {
             {
-                "operatingSystem",
+                "os",
                 &luascripting::general::operatingSystem,
                 {},
                 "",
-                "Returns a parsed string of the operating system type, for example "
-                "Windows, Linux, MacOS, or others, together with the specific version, "
-                "where available."
+                "This function returns a string identifying the currently running "
+                "operating system. For Windows, the string is 'windows', for MacOS, it "
+                "is 'osx', and for Linux it is 'linux'. For any other operating system, "
+                "this function returns 'other'."
             },
             {
                 "fullOperatingSystem",

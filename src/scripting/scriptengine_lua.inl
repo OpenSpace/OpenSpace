@@ -252,10 +252,10 @@ int fileExists(lua_State* L) {
 }
 
 /**
-* \ingroup LuaScripts
-* directoryExists(string):
-* Checks whether the provided file exists
-*/
+ * \ingroup LuaScripts
+ * directoryExists(string):
+ * Checks whether the provided file exists
+ */
 int directoryExists(lua_State* L) {
     ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::directoryExists");
 
