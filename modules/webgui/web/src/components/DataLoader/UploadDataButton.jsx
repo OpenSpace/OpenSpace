@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import Proptypes from 'prop-types'; 
 
 import DataManager from '../../api/DataManager';
-import styles from './UploadData.scss';
+import styles from './UploadDataButton';
 import { setFilePaths } from '../../api/Actions/dataLoaderActions';
 import Button from '../common/Input/Button/Button';
 import Label from '../common/Label/Label';

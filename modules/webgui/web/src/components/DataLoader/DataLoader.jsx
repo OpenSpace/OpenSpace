@@ -7,7 +7,7 @@ import DataItemList from './presentational/DataItemList';
 import { stringListToArray } from './utils/helpers';
 
 import DataManager from '../../api/DataManager';
-import styles from './DataLoader.scss';
+import styles from './DataLoader';
 import Window from '../common/Window/Window';
 import { setActivated } from '../../api/Actions/dataLoaderActions';
 import Button from '../common/Input/Button/Button';
