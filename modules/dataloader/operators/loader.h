@@ -30,6 +30,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
+#include <openspace/util/taskloader.h>
+
 namespace openspace::dataloader {
 
 using properties::PropertyOwner;
@@ -57,9 +59,19 @@ class Loader : public PropertyOwner, public Operator {
 
     void createVolumeDataItem(std::string absPath);
 
+    ghoul::Dictionary createTaskDictionary(std::string filePath);
+
+    // Perfom tasks that create dictionaries and converts
+    // .CDF formatted volume files into .rawvolume
+    void performTasks(std::string& path);
+
   private:
     properties::StringProperty _filePaths;
     properties::TriggerProperty _uploadDataTrigger;
+  
+    TaskLoader taskLoader;
+    std::vector<std::unique_ptr<Task>> tasks;
+
 };
 
 }
