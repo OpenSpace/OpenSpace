@@ -19,14 +19,13 @@ local masDensityColorTable = transferFunctions .. "/enlil_density.txt"
 
 local sunRadius = 695508000
 
-
 -- Fieldlies from binaries
 local MAS = {
     Identifier = "FL_MAS",
     Parent = transforms.HNMReferenceFrame.Identifier,
     Renderable = {
         Type = "RenderableFieldlinesSequence",
-        SourceFolder = MASPaths.Sun,
+        SourceFolder = "E:/MAS_Bastille/fieldlines/osfls",
         InputFileType = "osfls",
         -- StartStateOffset = 309,
         -- MaxNumStates = 1,
@@ -39,24 +38,11 @@ local MAS = {
             { 0, 1000000 },
             { 100, 2000 }
         },
-        -- ExtraMinMaxLimits = {
-        --     { -1, 10000000 },
-        --     { 0, 5000 }
-        -- },
-        -- RadialDomainLimits = { 0, 30 },
-        -- CartesianDomainLimits = {
-        --     { -20.5, 20.5 },
-        --     { -20.5, 20.5 },
-        --     { -20.5, 20.5}
-        -- },
         LoadAtRuntime = true,
         ScaleToMeters = 1.0,
         SecondsBefore = 50*365*24*60*60, -- 50 years before
         SecondsAfter = 50*365*24*60*60, -- 50 years after
         SimulationModel = "mas",
-        -- MaskingRanges = {
-        --     {-1000, 1000},
-        -- } 
     },
     GUI = {
         Name = "Fieldlines MAS"
@@ -81,7 +67,8 @@ local MAS = {
 --     Renderable = {
 --         Type = "RenderableFieldlinesSequence",
 --         -- TracingMethod = "PreTracedBinary",
---         SourceFolder = "C:/Users/CCMC/data/fieldlines_json/mas_multiple_timesteps/JSON/",
+--         -- SourceFolder = "C:/Users/CCMC/data/fieldlines_json/mas_multiple_timesteps/JSON/",
+--         SourceFolder = "E:/MAS_Bastille/fieldlines/JSON_renamed/",
 --         InputFileType = "json",
 --         -- StartStateOffset = 309,
 --         -- MaxNumStates = 1,
@@ -105,7 +92,8 @@ local MAS = {
 --             { -2.5, 2.5}
 --         },
 --         LoadAtRuntime = true,
---         OutputFolder = "C:/Users/CCMC/data/fieldlines_binaries/mas_multiple_timesteps/",
+--         -- OutputFolder = "C:/Users/CCMC/data/fieldlines_binaries/mas_multiple_timesteps/",
+--         OutputFolder = "C:/Users/gberg2/OpenSpace/data/mas_fieldlines/",
 --         SimulationModel = "mas",
 --         ScaleToMeters = 1.0,
 --         SecondsBefore = 50*365*24*60*60, -- 50 years before
@@ -114,7 +102,8 @@ local MAS = {
 --     GUI = {
 --         Name = "Fieldlines MAS"
 --     },
--- } 
+-- }
+
 
 local objects = { MAS }
 

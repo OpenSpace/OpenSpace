@@ -16,19 +16,19 @@ asset.request('customization/globebrowsing')
 asset.require('scene/solarsystem/sun/sun')
 
 -- We need to specify paths to the prepared fieldline files before requesting the BATSRUS, ENLIL, and PFSS fieldline assets:
-local FieldLineBasePath = "C:/Users/CCMC/data/fieldlines_binaries/"
-ENLILPaths = {
-    EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
-    EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
-    Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
-    Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
-    Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
-    StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
-}
-asset.require('./fieldlines/enlil')
+-- local FieldLineBasePath = "C:/Users/CCMC/data/fieldlines_binaries/"
+-- ENLILPaths = {
+--     EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
+--     EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
+--     Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
+--     Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
+--     Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
+--     StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
+-- }
+-- asset.require('./fieldlines/enlil')
 
 MASPaths = {
-    Sun = FieldLineBasePath .. "mas_multiple_timesteps/"
+    Sun = "E:/MAS_Bastille/fieldlines/osfls"
 }
 asset.require('./fieldlines/mas')
 

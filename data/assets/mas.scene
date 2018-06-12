@@ -7,9 +7,13 @@ asset.require('spice/base')
 
 assetHelper.requestAll(asset, 'scene/solarsystem/sun')
 assetHelper.requestAll(asset, 'scene/digitaluniverse')
+-- asset.require('scene/solarsystem/planets')
+-- asset.require('scene/digitaluniverse/stars')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+-- asset.request('customization/globebrowsing')
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
 local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas_mhd')
@@ -23,6 +27,18 @@ local toggleMas = function ()
 end
 
 local Keybindings = {
+    {
+        Key = "F5",
+        Command = "openspace.time.setTime('2000 JUL 14 08:33:37.100');",
+        Documentation = "Jumps to first of the MAS-fieldline timesteps",
+        Local = true
+    },
+    {
+        Key = "F6",
+        Command = "openspace.time.setTime('2012 JUL 01 00:07:00.000');",
+        Documentation = "Jumps to first of the Enlil-fieldline timesteps",
+        Local = true
+    },
     {
         Key = "F7",
         Command = "openspace.time.setTime('2017 AUG 20 00:00:00');",
@@ -55,9 +71,30 @@ local Keybindings = {
     },
 }
 
+-- FIELDLINES --
+
+-- We need to specify paths to the prepared fieldline files before requesting the BATSRUS, ENLIL, and PFSS fieldline assets:
+-- local FieldLineBasePath = "C:/Users/CCMC/data/fieldlines_binaries/"
+-- ENLILPaths = {
+--     EqPlane011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_1/",
+--     EqPlane011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_eq_plane_2/",
+--     Lat4011AU1 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_1/",
+--     Lat4011AU2 = FieldLineBasePath .. "enlil/july2012/downsampled40/011AU_lat4_2/",
+--     Earth = FieldLineBasePath .. "enlil/july2012/downsampled40/earth/",
+--     StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
+-- }
+-- asset.require('./fieldlines/enlil')
+
+asset.require('./fieldlines/mas')
+
+local sunAsset = asset.require('scene/solarsystem/sun/sun')
+local sunRadius = 695508000
+
 asset.onInitialize(function ()
     -- openspace.time.setTime("2017 JUN 01 00:00:00")
-    openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setTime("2000 JUL 14 08:33:37.100")
+
+    -- openspace.time.setTime(openspace.time.currentWallTime())
     sceneHelper.bindKeys(Keybindings)
 
     openspace.setPropertyValueSingle('Scene.SunGlare.renderable.Enabled', false);
@@ -65,7 +102,7 @@ asset.onInitialize(function ()
     openspace.setDefaultGuiSorting()
 
     openspace.markInterestingNodes({
-        "Mas_MHD"
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
     })
 
     openspace.addVirtualProperty(
@@ -81,7 +118,7 @@ asset.onInitialize(function ()
     openspace.navigation.setCameraState({
         Focus = masMhdAsset.Mas_MHD.Identifier,
         Position = { 100000000000.0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 },
+        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 }
     })
 
 end)
@@ -90,7 +127,7 @@ asset.onDeinitialize(function ()
     sceneHelper.unbindKeys(Keybindings)
 
     openspace.removeInterestingNodes({
-        "Mas_MHD"
+        "Earth", "Sun", "Moon", "FL_ENLIL_earth", "FL_MAS", "Mas_MHD"
     })
 
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
