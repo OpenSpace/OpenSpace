@@ -13,7 +13,7 @@ local Mas_MHD = {
             Type = "RenderableTimeVaryingVolume",
             StepSize = 0.002,
             TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
-            SourceDirectory = "${DATA}/mas/bastille/generated",
+            SourceDirectory = "E:/MAS_Bastille/rawvolumes/density_23_05_2018",
             LowerValueBound = 0,
             UpperValueBound = 1,
             GridType = "Spherical",
@@ -29,7 +29,7 @@ local Mas_MHD = {
             },
             Scale = {
                 Type = "StaticScale",
-                Scale = 4.0 * sunRadius
+                Scale = sunRadius
             }
         },
         GUI = {
