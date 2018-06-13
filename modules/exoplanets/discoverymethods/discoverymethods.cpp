@@ -54,9 +54,10 @@ namespace openspace::exoplanets{
     void DiscoveryMethods::addTransitMethodVisualization() {
        
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-        float planetSemiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A; // AU
-        float eccentricity = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).ECC; 
-        float starRadius = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).RSTAR; // Solar Radii
+        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+        float planetSemiMajorAxis = planets[0].A; // AU
+        float eccentricity = planets[0].ECC; 
+        float starRadius = planets[0].RSTAR; // Solar Radii
 
         // periapsis radius
         float periapsisRadius = planetSemiMajorAxis * (1.0 - eccentricity);
@@ -82,10 +83,12 @@ namespace openspace::exoplanets{
     void DiscoveryMethods::addDopplerMethodVisualization() {
 
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-        float planetSemiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
+        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+        //float planetSemiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
+        float planetSemiMajorAxis = planets[0].A;
         float starSemiMajorAxis = 0.1 * planetSemiMajorAxis * 149597871; // 10% of exoplanets semiMajorAxis (get value from em)
-        float eccentricity = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).ECC;
-        float starRadius = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).RSTAR; // Solar Radii
+        float eccentricity = planets[0].ECC;
+        float starRadius = planets[0].RSTAR; // Solar Radii
 
         float periapsisRadius = planetSemiMajorAxis * (1.0 - eccentricity);
         // to km
@@ -96,12 +99,14 @@ namespace openspace::exoplanets{
         moveCameraDopplerView();
         scaleStar(starName + "Globe", scaleFactor);
         moveStar(starName, starSemiMajorAxis);
+        toggleVisabilityOuterPlanets("false");
     }
 
     void DiscoveryMethods::removeDopplerMethodVisualization() {
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
         scaleStar(starName + "Globe", 1.0);
         moveStar(starName, 0.0);
+        toggleVisabilityOuterPlanets("true");
     }
 
     void DiscoveryMethods::scaleStar(std::string nodeName, float scalefactor) {
@@ -138,6 +143,30 @@ namespace openspace::exoplanets{
         OsEng.navigationHandler().resetCameraDirection();
 
     }
+
+    void DiscoveryMethods::toggleVisabilityOuterPlanets(std::string visability) {
+        //std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+
+        if (planetNames.size()>1)
+        {
+            //keeping first planet in the list, wich dosn't neccesarily mean the closest one...
+            for (size_t i = 1; i < planetNames.size(); i++) {
+                std::string script = "";
+                //remove planetglobe
+                script += "openspace.setPropertyValueSingle( 'Scene." + planetNames[i] + ".renderable.Enabled', "+visability+"); ";
+                //remove trail
+                script += "openspace.setPropertyValueSingle( 'Scene." + planetNames[i] + "Trail.renderable.Enabled', " + visability + "); ";
+                //remove disc
+                script += "openspace.setPropertyValueSingle( 'Scene."+planetNames[i]+"Disc.renderable.Enabled', " + visability + "); ";
+                
+                OsEng.scriptEngine().queueScript(
+                    script,
+                    openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                );
+            }   
+        }  
+    }
     
     void DiscoveryMethods::moveCameraDopplerView() {
 
@@ -149,8 +178,10 @@ namespace openspace::exoplanets{
         glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
         glm::dvec3 northProjected = glm::normalize(glm::length(north)*glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
         glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, northProjected));
-        // a position along that vector (twice the semimajor axis away from the sun)
-        float semiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
+        // a position along that vector (3x the semimajor axis away from the star)
+        //float semiMajorAxis = (OsEng.moduleEngine().module<ExoplanetsModule>()->getClosestExoplanet()).A;
+        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+        float semiMajorAxis = planets[0].A;
         glm::dvec3 newCameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700) * faceOnVector);
 
         //move camera to that pos
@@ -199,6 +230,7 @@ namespace openspace::exoplanets{
             }
              
         });
+
 	}
 
 } // namespce

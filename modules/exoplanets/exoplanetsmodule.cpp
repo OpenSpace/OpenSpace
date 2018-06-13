@@ -53,6 +53,18 @@ void ExoplanetsModule::setStarName(std::string starName) {
 std::string ExoplanetsModule::getStarName() {
 	return _starName;
 }
+void ExoplanetsModule::setPlsy(std::vector<Exoplanet> plsy) {
+    _plsy = plsy;
+}
+std::vector<Exoplanet> ExoplanetsModule::getPlsy() {
+    return _plsy;
+}
+void ExoplanetsModule::setPlna(std::vector<std::string> plna) {
+    _plna = plna;
+}
+std::vector<std::string> ExoplanetsModule::getPlna() {
+    return _plna;
+}
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 

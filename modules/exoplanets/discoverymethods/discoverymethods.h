@@ -48,6 +48,7 @@ private:
     void moveStar(std::string, float);
     void moveCameraTransitView();
     void moveCameraDopplerView();
+    void toggleVisabilityOuterPlanets(std::string);
 
 };
 

@@ -93,6 +93,10 @@ public:
 	Exoplanet getClosestExoplanet();
 	void setStarName(std::string);
 	std::string getStarName();
+    void setPlsy(std::vector<Exoplanet>);
+    std::vector<Exoplanet> getPlsy();
+    void setPlna(std::vector<std::string>);
+    std::vector<std::string> getPlna();
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -100,6 +104,8 @@ protected:
 
 	Exoplanet _exo;
 	std::string _starName;
+    std::vector<Exoplanet> _plsy;
+    std::vector<std::string> _plna;
 };
 
 } // namespace openspace
