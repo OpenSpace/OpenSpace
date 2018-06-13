@@ -85,14 +85,14 @@ class DataLoader extends Component {
       return(
         <section className={styles.dataButtons}>
           <div>
-            {this.dataTypesToLoad.map((dataType) => 
+            {this.dataTypesToLoad.map(dataType => (
               <Button 
                 key={dataType} 
                 onClick={() => this.setState({activeDataType: dataType})}
-                disabled={dataType == 'Fieldlines'}>
+                disabled={dataType !== 'Volumes'}>
                 <Label>{dataType}</Label>
               </Button>
-            )}
+            ))}
           </div>
         </section>
       );

@@ -138,16 +138,13 @@ void Loader::createInternalDataItemProperties() {
 
     LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
 
-    int step = 0;
     for (auto item : volumeItems) {
         const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(item);
-        static const openspace::properties::Property::PropertyInfo info = {
-            "ItemTrigger_" + dirLeaf + std::to_string(step),
-            dirLeaf + std::to_string(step),
+        const openspace::properties::Property::PropertyInfo info = {
+            "ItemTrigger_" + dirLeaf,
+            dirLeaf,
             ""
         };
-
-        step++;
 
         // Initialize trigger property with data item name (are they unique?)
         auto volumeItemTrigger = properties::TriggerProperty(info);
