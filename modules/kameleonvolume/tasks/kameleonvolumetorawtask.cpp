@@ -80,7 +80,7 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     if (!dictionary.getValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound)) {
         _autoDomainBounds = true;
     }
-    if (dictionary.hasValue<std::string>(KeyFactorRSquared)) {
+    if (dictionary.hasValue<std::string>(KeyFactorRSquared) && dictionary.getValue<std::string>(KeyFactorRSquared) != "false") {
         _factorRSquared = true;
     }
 }
