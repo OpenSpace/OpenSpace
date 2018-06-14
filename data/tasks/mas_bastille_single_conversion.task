@@ -1,0 +1,13 @@
+
+return {{
+    Type = "KameleonVolumeToRawTask",
+	Input = "/media/jgrangien/SimDataDrive/BastilleDay/mhd_run/3D_CDF/mas_merged_step_112.cdf",
+    -- Variable = "rho",
+    VariableVector = "ur uphi utheta",
+    InnerRadialLimit = 1.75,
+    Dimensions = {100, 100, 128},
+    LowerDomainBound = {1, -90, 0},
+    UpperDomainBound = {15, 90, 360},
+	RawVolumeOutput = "${DATA}/mas/bastille/u/mas_merged_step_112.rawvolume",
+	DictionaryOutput = "${DATA}/mas/bastille/u/mas_merged_step_112.dictionary"
+}}

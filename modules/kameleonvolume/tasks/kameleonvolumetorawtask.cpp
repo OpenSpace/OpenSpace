@@ -35,7 +35,6 @@
 #include <fstream>
 #include <sstream>
 
-
 namespace {
     constexpr const char* KeyInput = "Input";
     constexpr const char* KeyRawVolumeOutput = "RawVolumeOutput";

@@ -159,6 +159,12 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
             continue;
         }
 
+        // Radius is within custom limit of exclusion, skip value
+        if (volumeCoords.x < innerRadialLimit) {
+            // std::cout << "Skipping radius " << volumeCoords.x << std::endl;
+            continue;
+        }
+
         float value = !variable.empty() ? sample(volumeCoords) : sampleVectorVariablesLength(volumeCoords);
 
         // Multiply value by the squared first coordinate
@@ -341,3 +347,4 @@ void KameleonVolumeReader::setReaderCallback(callback_t& cb) {
 };
 
 } // namespace openspace::kameleonvolume
+

@@ -30,9 +30,8 @@
 #include <string>
 #include <vector>
 #include <modules/volume/rawvolume.h>
-#include <ghoul/misc/dictionary.h>
+// #include <ghoul/misc/dictionary.h>
 #include <functional>
-
 
 #ifdef WIN32
 #pragma warning (push)
@@ -90,6 +89,8 @@ public:
     std::vector<std::string> variableAttributeNames() const;
     std::vector<std::string> globalAttributeNames() const;
     std::array<std::string, 3> gridVariableNames() const;
+
+    void setReaderCallback(callback_t& cb);
 
     void setReaderCallback(callback_t& cb);
 
