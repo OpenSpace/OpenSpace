@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <math.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 
 #include <modules/kameleon/include/kameleonwrapper.h>
@@ -97,14 +98,17 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                   const glm::vec3& upperDomainBound) const
 {
     float min, max;
+    std::vector<std::string> emptyVec;
     return readFloatVolume(
         dimensions,
         variable,
         lowerDomainBound,
         upperDomainBound,
+        emptyVec,
         min,
         max,
-        false
+        false,
+        -1.0
     );
 }
 
@@ -113,9 +117,11 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                             const std::string & variable,
                                                             const glm::vec3 & lowerBound,
                                                             const glm::vec3 & upperBound,
+                                                            const std::vector<std::string> & variableVector,
                                                             float& minValue,
                                                             float& maxValue,
-                                                            bool factorRSquared) const
+                                                            bool factorRSquared,
+                                                            float innerRadialLimit) const
 {
     minValue = std::numeric_limits<float>::max();
     maxValue = -std::numeric_limits<float>::max();
@@ -130,19 +136,34 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         return _interpolator->interpolate(var, coords[0], coords[1], coords[2]);
     };
 
+    auto sample = [&variable, &interpolate](glm::vec3 volumeCoords) {
+        return interpolate(variable, volumeCoords);
+    };
+
+    auto sampleVectorVariablesLength = [&variableVector, &interpolate](glm::vec3 volumeCoords) {
+        float x = interpolate(variableVector[0], volumeCoords);
+        float y = interpolate(variableVector[1], volumeCoords);
+        float z = interpolate(variableVector[2], volumeCoords);
+        return sqrt(x*x + y*y + z*z);
+    };
+
     float* data = volume->data();
     for (size_t index = 0; index < volume->nCells(); ++index) {
         const glm::vec3 coords = volume->indexToCoords(index);
         const glm::vec3 coordsZeroToOne = coords / dims;
         const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        float value = interpolate(variable, volumeCoords);
+        // Radius is within custom limit of exclusion, skip value
+        if (volumeCoords.x < innerRadialLimit) {
+            // std::cout << "Skipping radius " << volumeCoords.x << std::endl;
+            continue;
+        }
+
+        float value = !variable.empty() ? sample(volumeCoords) : sampleVectorVariablesLength(volumeCoords);
 
         // Multiply value by the squared first coordinate
-        // (radial distance in case of spherical)
+        // (radial distance for spherical coords)
         if (factorRSquared) {
-            
-            // value *= coords.x * coords.x;
             value *= volumeCoords.x * volumeCoords.x;
         }
 
@@ -154,6 +175,10 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         }
 
         data[index] = value;
+
+        if (_readerCallback != nullptr) {
+            (*_readerCallback)((float) index / volume->nCells());
+        }
     }
 
     return volume;
@@ -310,5 +335,9 @@ double KameleonVolumeReader::maxValue(const std::string & variable) const {
     ccmc::Model& m = *_kameleon.model;
     return m.getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
+
+void KameleonVolumeReader::setReaderCallback(callback_t& cb) {
+    _readerCallback = &cb;
+};
 
 } // namespace openspace::kameleonvolume
