@@ -34,10 +34,12 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/assert.h>
 
 #include <ghoul/glm.h>
 
 #include <fstream>
+#include <sstream>
 
 namespace {
     constexpr const char* KeyInput = "Input";
@@ -45,10 +47,12 @@ namespace {
     constexpr const char* KeyDictionaryOutput = "DictionaryOutput";
     constexpr const char* KeyDimensions = "Dimensions";
     constexpr const char* KeyVariable = "Variable";
+    constexpr const char* KeyVariableVector = "VariableVector";
     constexpr const char* KeyFactorRSquared = "FactorRSquared";
     constexpr const char* KeyTime = "Time";
     constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
     constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyInnerRadialLimit = "InnerRadialLimit";
 
     constexpr const char* KeyMinValue = "MinValue";
     constexpr const char* KeyMaxValue = "MaxValue";
@@ -68,11 +72,39 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
         "KameleonVolumeToRawTask"
     );
 
+    auto extractVarsFromVectorString = [](std::string vars) {
+        std::istringstream buffer(vars);
+        std::vector<std::string> vec((std::istream_iterator<std::string>(buffer)),
+                                    std::istream_iterator<std::string>());
+        return vec;
+    };
+
     _inputPath = absPath(dictionary.value<std::string>(KeyInput));
     _rawVolumeOutputPath = absPath(dictionary.value<std::string>(KeyRawVolumeOutput));
     _dictionaryOutputPath = absPath(dictionary.value<std::string>(KeyDictionaryOutput));
-    _variable = dictionary.value<std::string>(KeyVariable);
     _dimensions = glm::uvec3(dictionary.value<glm::vec3>(KeyDimensions));
+
+    if (dictionary.hasValue<std::string>(KeyVariable)) {
+        _variable = dictionary.value<std::string>(KeyVariable);
+    }
+    if (dictionary.hasValue<std::string>(KeyVariableVector)) {
+        _variableVector = extractVarsFromVectorString(dictionary.value<std::string>(KeyVariableVector));
+    }
+
+    ghoul_assert(
+        _variable.empty() || _variableVector.size() == 0, 
+        "Cannot have both a single variable and a vector of variables"
+    );
+    ghoul_assert(
+        !_variable.empty() || _variableVector.size() > 0, 
+        "Must specify either a single variable or a vector of variables"
+    );
+    if (_variableVector.size() > 0) {
+        ghoul_assert(
+            _variableVector.size() == 3,
+            "In case of vector of variables, only a vector of three variables implemented"
+        );
+    }
 
     if (!dictionary.getValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound)) {
         _autoDomainBounds = true;
@@ -80,8 +112,13 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
     if (!dictionary.getValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound)) {
         _autoDomainBounds = true;
     }
-    if (dictionary.hasValue<std::string>(KeyFactorRSquared) && dictionary.getValue<std::string>(KeyFactorRSquared) != "false") {
+    if (dictionary.hasValue<std::string>(KeyFactorRSquared) && dictionary.value<std::string>(KeyFactorRSquared) != "false") {
+        std::cout << "With factor r squared\n";
         _factorRSquared = true;
+    }
+    if (!dictionary.getValue<float>(KeyInnerRadialLimit, _innerRadialLimit)) {
+        std::cout << "Without inner radial limit\n";
+        _innerRadialLimit = -1.0;
     }
 }
 
@@ -95,7 +132,6 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     KameleonVolumeReader reader(_inputPath);
 
     std::vector<std::string> variables = reader.gridVariableNames();
-
     if (variables.size() == 3 && _autoDomainBounds) {
         _lowerDomainBound = glm::vec3(
             reader.minValue(variables[0]),
@@ -108,23 +144,30 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
             reader.maxValue(variables[2]));
     }
 
+    // std::function<void()> readerCallback([](float progress){
+    //     progressCallback(progress);
+    // });
+
+    reader.setReaderCallback([&](float progress) {
+        progressCallback(progress);
+    });
+
     float volumeMinValue, volumeMaxValue;
     std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
         _lowerDomainBound,
         _upperDomainBound,
+        _variableVector,
         volumeMinValue,
         volumeMaxValue,
-        _factorRSquared
+        _factorRSquared,
+        _innerRadialLimit
     );
-
-    progressCallback(0.5f);
 
     volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(*rawVolume);
 
-    progressCallback(0.9f);
 
     ghoul::Dictionary inputMetadata = reader.readMetaData();
     ghoul::Dictionary outputMetadata;
@@ -199,8 +242,20 @@ documentation::Documentation KameleonVolumeToRawTask::documentation() {
             {
                 KeyVariable,
                 new StringAnnotationVerifier("A valid kameleon variable"),
-                Optional::No,
+                Optional::Yes,
                 "The variable name to read from the kameleon dataset",
+            },
+            {
+                KeyVariableVector,
+                new StringAnnotationVerifier("A vector of kameleon variables"),
+                Optional::Yes,
+                "A vector of variable names to read from the dataset and calculate the abs value of",
+            },
+            {
+                KeyFactorRSquared,
+                new StringAnnotationVerifier("Whether to multiply with r squared or not"),
+                Optional::Yes,
+                "Sayd whether or not to multiply the variable value with the first coordinate of the volume coords squared",
             },
             {
                 KeyDimensions,

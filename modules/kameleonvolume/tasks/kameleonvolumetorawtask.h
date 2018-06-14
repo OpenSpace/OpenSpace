@@ -30,6 +30,7 @@
 #include <ghoul/glm.h>
 
 #include <string>
+#include <vector>
 
 namespace openspace {
 namespace kameleonvolume {
@@ -47,12 +48,13 @@ private:
     std::string  _dictionaryOutputPath;
 
     std::string _variable;
+    std::vector<std::string> _variableVector;
     std::string _units;
     glm::uvec3 _dimensions;
     bool _autoDomainBounds;
     glm::vec3 _lowerDomainBound;
     glm::vec3 _upperDomainBound;
-
+    float _innerRadialLimit;
     bool _factorRSquared = false;
 };
 

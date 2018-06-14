@@ -26,9 +26,11 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
 #include <string>
+#include <vector>
 #include <memory>
 #include <modules/volume/rawvolume.h>
 #include <ghoul/misc/dictionary.h>
+#include <functional>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -51,6 +53,8 @@ namespace kameleonvolume {
 
 class KameleonVolumeReader {
 public:
+    typedef const std::function<void (float)> callback_t;
+
     KameleonVolumeReader(const std::string& path);
 
     std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
@@ -64,9 +68,11 @@ public:
         const std::string& variable,
         const glm::vec3& lowerBound,
         const glm::vec3& upperBound,
+        const std::vector<std::string>& variableVector,
         float& minValue,
         float& maxValue,
-        bool factorRSquared) const;
+        bool factorRSquared,
+        float innerRadialLimit) const;
 
     ghoul::Dictionary readMetaData() const;
 
@@ -84,6 +90,8 @@ public:
     std::vector<std::string> variableAttributeNames() const;
     std::vector<std::string> globalAttributeNames() const;
 
+    void setReaderCallback(callback_t& cb);
+
 private:
     static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
         const std::string& key, ccmc::Attribute& attr);
@@ -92,6 +100,9 @@ private:
     ccmc::Kameleon _kameleon;
     ccmc::Model* _model;
     std::unique_ptr<ccmc::Interpolator> _interpolator;
+
+    callback_t* _readerCallback;
+    float _progress = 0.0f;
 
 };
 
