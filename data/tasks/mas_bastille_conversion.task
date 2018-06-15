@@ -1,19 +1,18 @@
-local length = 276
+local length = 117
 local tasks = {}
 
 for i=1,length do
-	-- local step = string.format("%03d", i)
 	tasks[#tasks+1] = {
 	    Type = "KameleonVolumeToRawTask",
     	Input = "/media/jgrangien/SimDataDrive/BastilleDay/mhd_run/3D_CDF/mas_merged_step_" .. i .. ".cdf",
 	    Dimensions = {100, 100, 128},
-    	Variable = "rho",
-    	FactorRSquared = "true", 
+    	VariableVector = "ur uphi utheta",
+		InnerRadialLimit = 1.75,
 	    LowerDomainBound = {1, -90, 0},
 	    UpperDomainBound = {15, 90, 360},
-	    RawVolumeOutput = "${DATA}/mas/bastille/generated/test/mas_merged_step_" .. i .. ".rawvolume",
-	    DictionaryOutput = "${DATA}/mas/bastille/generated/test/mas_merged_step_" .. i .. ".dictionary"
+	    RawVolumeOutput = "${DATA}/mas/bastille/u/mas_merged_step_" .. i .. ".rawvolume",
+	    DictionaryOutput = "${DATA}/mas/bastille/u/mas_merged_step_" .. i .. ".dictionary"
 	}
 end
 
--- return tasks
+return tasks
