@@ -64,6 +64,7 @@ namespace {
     constexpr const char* KeyTime = "Time";
     constexpr const char* KeyUnit = "VisUnit";
     constexpr const float SecondsInOneDay = 60 * 60 * 24;
+    constexpr const float VolumeMaxOpacity = 500;
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
@@ -227,7 +228,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     : Renderable(dictionary)
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
-    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _opacity(OpacityInfo, 10.f, 0.f, VolumeMaxOpacity)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -263,6 +264,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     if (dictionary.hasKeyAndValue<float>(KeyStepSize)) {
         _stepSize = dictionary.value<float>(KeyStepSize);
+    }
+
+    if (dictionary.hasValue<float>(KeyOpacity)) {
+        _opacity = dictionary.value<float>(KeyOpacity) * VolumeMaxOpacity;
     }
 
     if (dictionary.hasKeyAndValue<float>(KeySecondsBefore)) {
