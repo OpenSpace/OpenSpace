@@ -31,9 +31,7 @@
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <ghoul/opengl/uniformcache.h>
-
 #include <memory>
 
 namespace ghoul::opengl {
@@ -73,7 +71,7 @@ private:
     properties::BoolProperty _performShading;
     properties::Mat3Property _modelTransform;
 
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _programObject = nullptr;
     UniformCache(opacity, directionToSunViewSpace, modelViewTransform,
         projectionTransform, performShading, texture) _uniformCache;
 

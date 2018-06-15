@@ -743,8 +743,7 @@ void LuaConsole::render() {
         // Compute the current width of the string and console prefix.
         const float currentWidth = FontRenderer::defaultRenderer().boundingBox(
             *_font,
-            "> %s",
-            currentCommand.c_str()
+            "> " + currentCommand
         ).boundingBox.x + inputLocation.x;
 
         // Compute the overflow in pixels
@@ -764,7 +763,7 @@ void LuaConsole::render() {
             0,
             static_cast<int>(inputPositionFromEnd) -
                 (NVisibleCharsAfterCursor + 1) -
-                static_cast<int>(nChoppedCharsEnd)
+                stasdatic_cast<int>(nChoppedCharsEnd)
         );
 
         // Do not hide the cursor in the beginning.
@@ -801,8 +800,7 @@ void LuaConsole::render() {
         *_font,
         inputLocation,
         _entryTextColor,
-        "> %s",
-        currentCommand.c_str()
+        "> " + currentCommand
     );
 
     // Just offset the ^ marker slightly for a nicer look
@@ -813,7 +811,7 @@ void LuaConsole::render() {
         *_font,
         inputLocation,
         _entryTextColor,
-        (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^").c_str()
+        std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^"
     );
 
     glm::vec2 historyInputLocation = glm::vec2(
@@ -838,8 +836,7 @@ void LuaConsole::render() {
             *_historyFont,
             historyInputLocation,
             _historyTextColor,
-            "%s",
-            cmd.c_str()
+            cmd
         );
     }
 

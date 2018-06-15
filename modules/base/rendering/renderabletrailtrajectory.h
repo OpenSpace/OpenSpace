@@ -27,12 +27,11 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/stringproperty.h>
-
-#include <ghoul/opengl/programobject.h>
+#include <array>
 
 namespace openspace {
 
@@ -74,17 +73,17 @@ private:
     properties::BoolProperty _renderFullTrail;
 
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
-    bool _needsFullSweep;
+    bool _needsFullSweep = true;
 
     /// Dirty flag to determine whether the stride information needs to be changed
-    bool _subsamplingIsDirty;
+    bool _subsamplingIsDirty = true;
 
-    std::array<TrailVBOLayout, 2> _auxiliaryVboData;
+    std::array<TrailVBOLayout, 2> _auxiliaryVboData = {};
 
     /// The conversion of the _startTime into the internal time format
-    double _start;
+    double _start = 0.0;
     /// The conversion of the _endTime into the internal time format
-    double _end;
+    double _end = 0.0;
 };
 
 } // namespace openspace

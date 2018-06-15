@@ -22,50 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
-
-#include <memory>
-#include <vector>
+#include <openspace/rendering/volumeraycaster.h>
 
 namespace openspace {
-    class Renderable;
-    struct RenderData;
-    struct RendererTasks;
-    struct UpdateData;
+
+void VolumeRaycaster::preRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
+void VolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
+
+bool VolumeRaycaster::isCameraInside(const RenderData&, glm::vec3&) {
+    return false;
+}
+
 } // namespace openspace
-
-namespace openspace::globebrowsing {
-
-/**
- * Selects a specific Renderable to be used for rendering, based on distance to the
- * camera
- */
-class DistanceSwitch {
-public:
-    ~DistanceSwitch();
-
-    bool initialize();
-    bool initializeGL();
-    bool deinitialize();
-    bool deinitializeGL();
-
-    /**
-     * Picks the first Renderable with the associated maxDistance greater than the
-     * current distance to the camera
-     */
-    void render(const RenderData& data, RendererTasks& rendererTask);
-    void update(const UpdateData& data);
-
-    /**
-     * Adds a new renderable
-     */
-    void addSwitchValue(std::shared_ptr<Renderable> renderable);
-
-private:
-    std::vector<std::shared_ptr<Renderable>> _renderables;
-};
-
-} // namespace openspace::globebrowsing
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__

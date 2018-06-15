@@ -23,7 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/server/servermodule.h>
-#include <modules/server/include/topic.h>
+#include <modules/server/include/topics/topic.h>
+#include <ext/json/json.hpp>
 
 namespace openspace {
 
@@ -32,7 +33,7 @@ void Topic::initialize(Connection* connection, size_t topicId) {
     _topicId = topicId;
 };
 
-nlohmann::json Topic::wrappedPayload(const nlohmann::json &payload) const {
+nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
     // TODO: add message time
     nlohmann::json j = {
         { "topic", _topicId },
@@ -51,8 +52,4 @@ nlohmann::json Topic::wrappedError(std::string message, int code) {
     return j;
 };
 
-void BounceTopic::handleJson(nlohmann::json json) {
-    _connection->sendJson(json);
-};
-
-}
+} // namespace openspace

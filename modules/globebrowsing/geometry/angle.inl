@@ -26,37 +26,35 @@
 
 namespace openspace::globebrowsing {
 
-template <typename T>
-const T Angle<T>::PI = T(3.14159265358979323846264338327950);
-
-template <typename T>
-const T Angle<T>::EPSILON = 1e-10; // Should depend on the typedef /eb
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                             STATIC CONSTANTS                                         //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-const Angle<T> Angle<T>::ZERO = Angle::fromRadians(0);
+const Angle<T> Angle<T>::ZERO = Angle<T>(T(0));
 
 template <typename T>
-const Angle<T> Angle<T>::QUARTER = Angle::fromRadians(PI/2);
+const Angle<T> Angle<T>::QUARTER = Angle<T>(glm::half_pi<T>());
 
 template <typename T>
-const Angle<T> Angle<T>::HALF = Angle::fromRadians(PI);
+const Angle<T> Angle<T>::HALF = Angle<T>(glm::pi<T>());
 
 template <typename T>
-const Angle<T> Angle<T>::FULL = Angle::fromRadians(2*PI);
+const Angle<T> Angle<T>::FULL = Angle<T>(glm::two_pi<T>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                 Constructors                                         //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template <typename T> Angle<T>::Angle(const Angle<T>& other)
-    : _radians(other._radians) { }
+template <typename T>
+Angle<T>::Angle(const Angle<T>& other)
+    : _radians(other._radians)
+{}
 
-template <typename T> Angle<T>::Angle(T radians)
-    : _radians(radians) { }
+template <typename T>
+Angle<T>::Angle(T radians)
+    : _radians(radians)
+{}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                 Factory Methods                                      //
@@ -69,12 +67,7 @@ Angle<T> Angle<T>::fromRadians(T rads) {
 
 template <typename T>
 Angle<T> Angle<T>::fromDegrees(T degrees) {
-    return Angle<T>(degrees * PI / 180);
-}
-
-template <typename T>
-Angle<T> Angle<T>::fromRevolutions(T revs) {
-    return Angle<T>(revs * 2 * PI);
+    return Angle<T>(glm::radians(degrees));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,12 +81,7 @@ T Angle<T>::asRadians() const {
 
 template <typename T>
 T Angle<T>::asDegrees() const {
-    return _radians * T(180.0) / PI;
-}
-
-template <typename T>
-T Angle<T>::asRevolutions() const {
-    return _radians / (2 * PI);
+    return glm::degrees(_radians);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -182,11 +170,11 @@ bool Angle<T>::operator!=(const Angle<T>& rhs) const{
 template <typename T>
 Angle<T>& Angle<T>::normalize() {
     // this will cause _radians to be in value range ]-2pi, 2pi[
-    _radians = fmod(_radians, 2*PI);
+    _radians = fmod(_radians, glm::two_pi<T>());
 
     // ensure _radians are positive, ie in value range [0, 2pi[
-    if (_radians < 0.0){
-        _radians += 2 * PI;
+    if (_radians < T(0)) {
+        _radians += glm::two_pi<T>();
     }
 
     return *this;
@@ -194,49 +182,24 @@ Angle<T>& Angle<T>::normalize() {
 
 template <typename T>
 Angle<T>& Angle<T>::normalizeAround(const Angle<T>& center) {
-    _radians -= center._radians + PI;
+    _radians -= center._radians + glm::pi<T>();
     normalize();
-    _radians += center._radians - PI;
+    _radians += center._radians - glm::pi<T>();
     return *this;
 }
 
 template <typename T>
 Angle<T>& Angle<T>::clamp(const Angle<T>& min, const Angle<T>& max) {
-    _radians = _radians < min._radians ? min._radians
-        : _radians > max._radians ? max._radians
-        : _radians;
+    const T& minRad = min._radians;
+    const T& maxRad = max._radians;
+
+    _radians = glm::clamp(_radians, minRad, maxRad);
     return *this;
 }
 
-
 template <typename T>
-Angle<T>& Angle<T>::abs(){
-    _radians = glm::abs(_radians);
-    return *this;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//                         Chainable Relative Factory Methods                           //
-//////////////////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-Angle<T> Angle<T>::getNormalized() const {
-    return Angle<T>(*this).normalize();
-}
-
-template <typename T>
-Angle<T> Angle<T>::getNormalizedAround(const Angle<T>& center) const {
-    return Angle<T>(*this).normalizeAround(center);
-}
-
-template <typename T>
-Angle<T> Angle<T>::getClamped(const Angle<T>& min, const Angle<T>& max) const {
-    return Angle<T>(*this).clamp(min, max);
-}
-
-template <typename T>
-Angle<T> Angle<T>::getAbs() const {
-    return Angle<T>(*this).abs();
+Angle<T> Angle<T>::abs() const {
+    return Angle<T>::fromRadians(glm::abs(_radians));
 }
 
 } // namespace openspace::globebrowsing

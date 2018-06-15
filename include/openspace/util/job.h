@@ -22,31 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
+#ifndef __OPENSPACE_CORE___JOB___H__
+#define __OPENSPACE_CORE___JOB___H__
 
-#include <openspace/util/timemanager.h>
-#include "topic.h"
+#include <memory>
 
 namespace openspace {
 
-class TimeTopic : public Topic {
-public:
-    TimeTopic();
-    ~TimeTopic();
-    void handleJson(nlohmann::json json);
-    bool isDone();
+// Templated abstract base class representing a job to be done.
+// Client code derive from this class and implement the virtual execute() method
+template <typename P>
+struct Job {
+    Job() = default;
+    virtual ~Job() = default;
 
-private:
-    nlohmann::json currentTime();
-    nlohmann::json deltaTime();
-
-    bool _isDone;
-    int _timeCallbackHandle;
-    int _deltaTimeCallbackHandle;
-    std::chrono::system_clock::time_point _lastUpdateTime;
+    virtual void execute() = 0;
+    virtual std::shared_ptr<P> product() = 0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
+#endif // __OPENSPACE_CORE___JOB___H__

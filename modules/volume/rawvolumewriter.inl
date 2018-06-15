@@ -22,15 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <fstream>
+#include <modules/volume/rawvolume.h>
 #include <modules/volume/volumeutils.h>
+#include <ghoul/misc/exception.h>
+#include <fstream>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 template <typename VoxelType>
 RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
-    : _path(path)
+    : _path(std::move(path))
     , _bufferSize(bufferSize)
 {}
 
@@ -45,8 +46,8 @@ glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
 }
 
 template <typename VoxelType>
-void RawVolumeWriter<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
-    _dimensions = dimensions;
+void RawVolumeWriter<VoxelType>::setDimensions(glm::uvec3 dimensions) {
+    _dimensions = std::move(dimensions);
 }
 
 template <typename VoxelType>
@@ -57,13 +58,12 @@ glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
 template <typename VoxelType>
 void RawVolumeWriter<VoxelType>::write(
                                     const std::function<VoxelType(const glm::uvec3&)>& fn,
-                                    const std::function<void(float t)>& onProgress)
+                                           const std::function<void(float t)>& onProgress)
 {
-    glm::uvec3 dims = dimensions();
+    const glm::uvec3 dims = dimensions();
 
-    size_t size = static_cast<size_t>(dims.x) *
-        static_cast<size_t>(dims.y) *
-        static_cast<size_t>(dims.z);
+    const size_t size = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y) *
+                  static_cast<size_t>(dims.z);
 
     std::vector<VoxelType> buffer(_bufferSize);
     std::ofstream file(_path, std::ios::binary);
@@ -106,5 +106,4 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.close();
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

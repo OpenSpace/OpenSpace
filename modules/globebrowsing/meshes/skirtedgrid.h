@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 
-#include <modules/globebrowsing/meshes/basicgrid.h>
+#include <modules/globebrowsing/meshes/grid.h>
 
+#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <ghoul/glm.h>
 #include <vector>
 
@@ -60,15 +61,11 @@ public:
     virtual int ySegments() const override;
 
 private:
-    std::vector<GLuint> createElements(int xRes, int yRes) override;
-    std::vector<glm::vec4> createPositions(int xRes, int yRes) override;
-    std::vector<glm::vec2> createTextureCoordinates(int xRes, int yRes) override;
-    std::vector<glm::vec3> createNormals(int xRes, int yRes) override;
-
-    void validate(int xSegments, int ySegments);
-
-    size_t numElements(int xSegments, int ySegments);
-    size_t numVertices(int xSegments, int ySegments);
+    std::vector<GLuint> createElements(int xSegments, int ySegments) override;
+    std::vector<glm::vec4> createPositions(int xSegments, int ySegments) override;
+    std::vector<glm::vec2> createTextureCoordinates(int xSegments,
+        int ySegments) override;
+    std::vector<glm::vec3> createNormals(int xSegments, int ySegments) override;
 };
 
 } // namespace openspace::globebrowsing

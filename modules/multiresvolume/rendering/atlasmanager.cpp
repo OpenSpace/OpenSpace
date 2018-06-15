@@ -24,14 +24,12 @@
 
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 
+#include <modules/multiresvolume/rendering/tsp.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
-
 #include <iostream>
 #include <fstream>
-#include <cassert>
-#include <cstring>
 
 namespace {
     constexpr const char* _loggerCat = "AtlasManager";
@@ -40,8 +38,6 @@ namespace {
 namespace openspace {
 
 AtlasManager::AtlasManager(TSP* tsp) : _tsp(tsp) {}
-
-AtlasManager::~AtlasManager() {}
 
 bool AtlasManager::initialize() {
     TSP::Header header = _tsp->header();
@@ -69,28 +65,34 @@ bool AtlasManager::initialize() {
         glm::size3_t(_atlasDim, _atlasDim, _atlasDim), 
         ghoul::opengl::Texture::Format::RGBA, 
         GL_RGBA, 
-        GL_FLOAT);
+        GL_FLOAT
+    );
     _textureAtlas->uploadTexture();
 
     glGenBuffers(2, _pboHandle);
 
     glGenBuffers(1, &_atlasMapBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, _atlasMapBuffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLint)*_nBricksInMap, NULL, GL_DYNAMIC_READ);
+    glBufferData(
+        GL_SHADER_STORAGE_BUFFER,
+        sizeof(GLint) * _nBricksInMap,
+        nullptr,
+        GL_DYNAMIC_READ
+    );
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     return true;
 }
 
-std::vector<unsigned int> AtlasManager::atlasMap() {
+const std::vector<unsigned int>& AtlasManager::atlasMap() const {
     return _atlasMap;
 }
 
-unsigned int AtlasManager::atlasMapBuffer() {
+unsigned int AtlasManager::atlasMapBuffer() const {
     return _atlasMapBuffer;
 }
 
-void AtlasManager::updateAtlas(BUFFER_INDEX bufferIndex, std::vector<int>& brickIndices) {
+void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickIndices) {
     size_t nBrickIndices = brickIndices.size();
 
     _requiredBricks.clear();
@@ -222,7 +224,7 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
     }
 }
 
-void AtlasManager::pboToAtlas(BUFFER_INDEX bufferIndex) {
+void AtlasManager::pboToAtlas(BufferIndex bufferIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
     glBindTexture(GL_TEXTURE_3D, *_textureAtlas);

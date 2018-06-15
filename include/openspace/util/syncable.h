@@ -22,22 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
-
-#include <ext/json/json.hpp>
-#include <modules/server/include/topic.h>
+#ifndef __OPENSPACE_CORE___SYNCABLE___H__
+#define __OPENSPACE_CORE___SYNCABLE___H__
 
 namespace openspace {
 
-class LuaScriptTopic : public Topic {
+class SyncBuffer;
+
+/**
+ * Interface for synchronizable data
+ *
+ * Used by <code>SyncEngine</code>
+ */
+class Syncable {
 public:
-    LuaScriptTopic() : Topic() {};
-    ~LuaScriptTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return true; };
+    virtual ~Syncable() = default;
+
+protected:
+    // Allowing SyncEngine synchronization methods and at the same time hiding them
+    // from the used of implementations of the interface
+    friend class SyncEngine;
+
+    virtual void preSync(bool /*isMaster*/) {};
+    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
+    virtual void postSync(bool /*isMaster*/) {};
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
+#endif // __OPENSPACE_CORE___SYNCABLE___H__

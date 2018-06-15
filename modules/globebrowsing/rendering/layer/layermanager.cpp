@@ -24,9 +24,11 @@
 
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 
+#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "LayerManager";
@@ -39,24 +41,27 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
 {
     // First create empty layer groups in case not all are specified
     _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
-    for (unsigned long i = 0; i < _layerGroups.size(); ++i) {
+    for (size_t i = 0; i < _layerGroups.size(); ++i) {
         ghoul::Dictionary emptyDict;
         _layerGroups[i] = std::make_shared<LayerGroup>(
             static_cast<layergroupid::GroupID>(i), emptyDict
         );
     }
 
-    std::vector<std::string> layerGroupNamesInDict = layerGroupsDict.keys();
+    const std::vector<std::string>& layerGroupNamesInDict = layerGroupsDict.keys();
 
     // Create all the layer groups
     for (const std::string& groupName : layerGroupNamesInDict) {
         layergroupid::GroupID groupId = layergroupid::getGroupIDFromName(groupName);
 
         if (groupId != layergroupid::GroupID::Unknown) {
-            ghoul::Dictionary layerGroupDict =
-                layerGroupsDict.value<ghoul::Dictionary>(groupName);
-            _layerGroups[static_cast<int>(groupId)] =
-                std::make_shared<LayerGroup>(groupId, layerGroupDict);
+            ghoul::Dictionary layerGroupDict = layerGroupsDict.value<ghoul::Dictionary>(
+                groupName
+                );
+            _layerGroups[static_cast<int>(groupId)] = std::make_shared<LayerGroup>(
+                groupId,
+                layerGroupDict
+            );
         }
         else {
             LWARNING("Unknown layer group: " + groupName);
@@ -81,14 +86,18 @@ void LayerManager::deinitialize() {
 }
 
 std::shared_ptr<Layer> LayerManager::addLayer(layergroupid::GroupID groupId,
-                                              ghoul::Dictionary layerDict)
+                                              const ghoul::Dictionary& layerDict)
 {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
+
     return _layerGroups[groupId]->addLayer(layerDict);
 }
 
-void LayerManager::deleteLayer(layergroupid::GroupID groupId, std::string layerName) {
+void LayerManager::deleteLayer(layergroupid::GroupID groupId,
+                               const std::string& layerName)
+{
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
+
     _layerGroups[groupId]->deleteLayer(layerName);
 }
 
@@ -101,12 +110,14 @@ const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
 }
 
 bool LayerManager::hasAnyBlendingLayersEnabled() const {
-    for (const auto& layerGroup : _layerGroups) {
-        if (layerGroup->layerBlendingEnabled() && layerGroup->activeLayers().size() > 0) {
-            return true;
+    return std::any_of(
+        _layerGroups.begin(),
+        _layerGroups.end(),
+        [](const std::shared_ptr<LayerGroup>& layerGroup) {
+            return layerGroup->layerBlendingEnabled() &&
+                   !layerGroup->activeLayers().empty();
         }
-    }
-    return false;
+    );
 }
 
 const std::vector<std::shared_ptr<LayerGroup>>& LayerManager::layerGroups() const {
@@ -121,7 +132,7 @@ void LayerManager::update() {
 
 void LayerManager::reset(bool includeDisabled) {
     for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        for (std::shared_ptr<Layer> layer : layerGroup->layers()) {
+        for (const std::shared_ptr<Layer>& layer : layerGroup->layers()) {
             if (layer->enabled() || includeDisabled) {
                 layer->tileProvider()->reset();
             }
@@ -130,42 +141,72 @@ void LayerManager::reset(bool includeDisabled) {
 }
 
 TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID id,
-    bool padTiles,
-    size_t preferredTileSize)
+                                                         PadTiles padTiles,
+                                                         size_t preferredTileSize)
 {
     switch (id) {
         case layergroupid::GroupID::HeightLayers: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 64;
-            return TileTextureInitData(tileSize, tileSize, GL_FLOAT,
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 64;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_FLOAT,
                 ghoul::opengl::Texture::Format::Red,
-                padTiles,
-                TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
+                TileTextureInitData::PadTiles(padTiles),
+                TileTextureInitData::ShouldAllocateDataOnCPU::Yes
+            );
         }
         case layergroupid::GroupID::ColorLayers: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA, padTiles);
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(padTiles)
+            );
         }
         case layergroupid::GroupID::Overlays: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA, padTiles);
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(padTiles)
+            );
         }
         case layergroupid::GroupID::NightLayers: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA, padTiles);
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(padTiles)
+            );
         }
         case layergroupid::GroupID::WaterMasks: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA, padTiles);
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(padTiles)
+            );
         }
         default: {
             ghoul_assert(false, "Unknown layer group ID");
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA, padTiles);
+
+            const size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(
+                tileSize,
+                tileSize,
+                GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA,
+                TileTextureInitData::PadTiles(padTiles)
+            );
         }
     }
 }
@@ -174,7 +215,7 @@ bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID 
     // Only preprocess height layers by default
     switch (id) {
         case layergroupid::GroupID::HeightLayers: return true;
-        default: return false;
+        default:                                  return false;
     }
 }
 

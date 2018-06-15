@@ -25,40 +25,35 @@
 #ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
 #define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
 
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 
+class PowerScaledScalar;
+class PowerScaledSphere;
+
 class PowerScaledSphere {
 public:
-    // initializers
-    PowerScaledSphere(const PowerScaledScalar& radius,
-        int segments = 8);
-
+    PowerScaledSphere(const PowerScaledScalar& radius, int segments = 8);
     PowerScaledSphere(glm::vec3 radius, int segments);
-
-    ~PowerScaledSphere();
     PowerScaledSphere(const PowerScaledSphere& cpy);
+    ~PowerScaledSphere();
 
     bool initialize();
 
     void render();
 
-
 //private:
-    typedef struct {
+    struct Vertex {
         GLfloat location[4];
         GLfloat tex[2];
         GLfloat normal[3];
-        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+    };
 
-    GLuint _vaoID;
-    GLuint _vBufferID;
-    GLuint _iBufferID;
+    GLuint _vaoID = 0;
+    GLuint _vBufferID = 0;
+    GLuint _iBufferID = 0;
 
     unsigned int _isize;
     unsigned int _vsize;

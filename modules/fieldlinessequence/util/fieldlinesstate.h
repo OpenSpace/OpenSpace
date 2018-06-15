@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
 #include <modules/fieldlinessequence/util/commons.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <string>
@@ -59,23 +58,23 @@ public:
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
 
-    void setModel(fls::Model m) { _model = m; }
-    void setTriggerTime(double t) { _triggerTime = t; }
+    void setModel(fls::Model m);
+    void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
 
     void addLine(std::vector<glm::vec3>& line);
-    void appendToExtra(size_t idx, float val) { _extraQuantities[idx].push_back(val); }
+    void appendToExtra(size_t idx, float val);
 
 private:
-    bool                            _isMorphable = false;
-    double                          _triggerTime = -1.0;
-    fls::Model                      _model;
+    bool _isMorphable = false;
+    double _triggerTime = -1.0;
+    fls::Model _model;
 
     std::vector<std::vector<float>> _extraQuantities;
-    std::vector<std::string>        _extraQuantityNames;
-    std::vector<GLsizei>            _lineCount;
-    std::vector<GLint>              _lineStart;
-    std::vector<glm::vec3>          _vertexPositions;
+    std::vector<std::string> _extraQuantityNames;
+    std::vector<GLsizei> _lineCount;
+    std::vector<GLint> _lineStart;
+    std::vector<glm::vec3> _vertexPositions;
 };
 
 } // namespace openspace

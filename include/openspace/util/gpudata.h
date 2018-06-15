@@ -28,9 +28,11 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-
 #include <string>
 #include <memory>
+
+// @TODO:  This class should disappear as it doesn't server much of a purpose and only
+//         complicates local reasoning
 
 namespace openspace {
 
@@ -43,9 +45,9 @@ template<typename T>
 class GPUData {
 public:
     /**
-    * Updates the uniform location of the uniform variable named <name>
-    * in the provided shader program.
-    */
+     * Updates the uniform location of the uniform variable named <name>
+     * in the provided shader program.
+     */
     void bind(ghoul::opengl::ProgramObject* program, const std::string& name) {
         _uniformLocation = program->uniformLocation(name);
     }
@@ -70,9 +72,9 @@ protected:
 class GPUTexture {
 public:
     /**
-    * Updates the uniform location of the uniform variable named <name>
-    * in the provided shader program.
-    */
+     * Updates the uniform location of the uniform variable named <name>
+     * in the provided shader program.
+     */
     void bind(ghoul::opengl::ProgramObject* program, const std::string& name) {
         _uniformLocation = program->uniformLocation(name);
     }

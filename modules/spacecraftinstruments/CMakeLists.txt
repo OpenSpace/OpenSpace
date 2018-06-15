@@ -35,6 +35,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumenttimesparser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/image.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h

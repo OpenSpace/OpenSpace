@@ -25,12 +25,7 @@
 #ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
 #define __OPENSPACE_CORE___SYNCBUFFER___H__
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/misc/assert.h>
-
-#include <cstring>
 #include <memory>
-#include <stdint.h>
 #include <vector>
 
 namespace sgct {
@@ -42,73 +37,24 @@ namespace openspace {
 
 class SyncBuffer {
 public:
-
     SyncBuffer(size_t n);
 
     ~SyncBuffer();
 
-    void encode(const std::string& s) {
-        [[ maybe_unused ]] size_t size = sizeof(char) * s.size() + sizeof(int32_t);
-        ghoul_assert(_encodeOffset + size < _n, "");
-
-        int32_t length = static_cast<int32_t>(s.length());
-        memcpy(
-            _dataStream.data() + _encodeOffset,
-            reinterpret_cast<const char*>(&length),
-            sizeof(int32_t)
-        );
-        _encodeOffset += sizeof(int32_t);
-        memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
-        _encodeOffset += length;
-    }
+    void encode(const std::string& s);
 
     template <typename T>
-    void encode(const T& v) {
-        const size_t size = sizeof(T);
-        ghoul_assert(_encodeOffset + size < _n, "");
+    void encode(const T& v);
 
-        memcpy(_dataStream.data() + _encodeOffset, &v, size);
-        _encodeOffset += size;
-    }
-
-    std::string decode() {
-        int32_t length;
-        memcpy(
-            reinterpret_cast<char*>(&length),
-            _dataStream.data() + _decodeOffset,
-            sizeof(int32_t)
-        );
-        char* tmp = new char[length + 1];
-        _decodeOffset += sizeof(int32_t);
-        memcpy(tmp, _dataStream.data() + _decodeOffset, length);
-        _decodeOffset += length;
-        tmp[length] = '\0';
-        std::string ret(tmp);
-        delete[] tmp;
-        return ret;
-    }
+    std::string decode();
 
     template <typename T>
-    T decode() {
-        const size_t size = sizeof(T);
-        ghoul_assert(_decodeOffset + size < _n, "");
-        T value;
-        memcpy(&value, _dataStream.data() + _decodeOffset, size);
-        _decodeOffset += size;
-        return value;
-    }
+    T decode();
 
-    void decode(std::string& s) {
-        s = decode();
-    }
+    void decode(std::string& s);
 
     template <typename T>
-    void decode(T& value) {
-        const size_t size = sizeof(T);
-        ghoul_assert(_decodeOffset + size < _n, "");
-        memcpy(&value, _dataStream.data() + _decodeOffset, size);
-        _decodeOffset += size;
-    }
+    void decode(T& value);
 
     void write();
 
@@ -116,12 +62,14 @@ public:
 
 private:
     size_t _n;
-    size_t _encodeOffset;
-    size_t _decodeOffset;
+    size_t _encodeOffset = 0;
+    size_t _decodeOffset = 0;
     std::vector<char> _dataStream;
     std::unique_ptr<sgct::SharedVector<char>> _synchronizationBuffer;
 };
 
 } // namespace openspace
+
+#include "syncbuffer.inl"
 
 #endif // __OPENSPACE_CORE___SYNCBUFFER___H__

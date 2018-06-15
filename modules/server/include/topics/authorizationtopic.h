@@ -22,29 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___VECTORPROPERTY___H__
-#define __OPENSPACE_CORE___VECTORPROPERTY___H__
+#ifndef __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <modules/server/include/topics/topic.h>
 
-#include <openspace/properties/vector/bvec2property.h>
-#include <openspace/properties/vector/bvec3property.h>
-#include <openspace/properties/vector/bvec4property.h>
+namespace openspace {
 
-#include <openspace/properties/vector/dvec2property.h>
-#include <openspace/properties/vector/dvec3property.h>
-#include <openspace/properties/vector/dvec4property.h>
+class AuthorizationTopic : public Topic {
+public:
+    AuthorizationTopic() = default;
 
-#include <openspace/properties/vector/ivec2property.h>
-#include <openspace/properties/vector/ivec3property.h>
-#include <openspace/properties/vector/ivec4property.h>
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-#include <openspace/properties/vector/uvec2property.h>
-#include <openspace/properties/vector/uvec3property.h>
-#include <openspace/properties/vector/uvec4property.h>
+private:
+    bool authorize(const std::string& key);
 
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/vector/vec4property.h>
+    bool _isAuthenticated = false;
+};
 
-#endif // __OPENSPACE_CORE___VECTORPROPERTY___H__
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__

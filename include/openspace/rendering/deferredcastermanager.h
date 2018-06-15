@@ -34,8 +34,6 @@ class DeferredcasterListener;
 
 class DeferredcasterManager {
 public:
-    DeferredcasterManager();
-    ~DeferredcasterManager();
     void attachDeferredcaster(Deferredcaster& deferredcaster);
     void detachDeferredcaster(Deferredcaster& deferredcaster);
     bool isAttached(Deferredcaster& deferredcaster);

@@ -26,14 +26,14 @@
 
 in vec4 position;
 
-out vec2 texCoord;
-out vec3 vPosition;
-out vec4 worldPosition;
+// out vec2 texCoord;
+// out vec3 vPosition;
+// out vec4 worldPosition;
 
 void main() {
     gl_Position = position;
-    texCoord = 0.5 + position.xy * 0.5;
+    // texCoord = 0.5 + position.xy * 0.5;
 
-    vPosition = position.xyz;
-    worldPosition = position;
+    // vPosition = position.xyz;
+    // worldPosition = position;
 }

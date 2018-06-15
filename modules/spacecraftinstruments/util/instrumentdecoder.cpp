@@ -30,49 +30,57 @@
 
 namespace {
     constexpr const char* _loggerCat  = "InstrumentDecoder";
-    constexpr const char* keyDetector = "DetectorType";
-    constexpr const char* keySpice    = "Spice";
-    constexpr const char* keyStopCommand = "StopCommand";
+    constexpr const char* KeyDetector = "DetectorType";
+    constexpr const char* KeySpice    = "Spice";
+    constexpr const char* KeyStopCommand = "StopCommand";
 } // namespace
 
 namespace openspace {
 
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
-    bool success = dictionary.getValue(keyDetector, _type);
-    ghoul_assert(success, "Instrument has not provided detector type");
-    std::for_each(
-        _type.begin(),
-        _type.end(),
-        [](char& in){ in = static_cast<char>(toupper(in)); }
-    );
-
-    if (!dictionary.hasKeyAndValue<std::string>(keyStopCommand) && _type == "SCANNER"){
-        LWARNING("Scanner must provide stop command, please check mod file.");
-    } else {
-        dictionary.getValue(keyStopCommand, _stopCommand);
+    if (dictionary.hasKeyAndValue<std::string>(KeyDetector)) {
+        _type = dictionary.value<std::string>(KeyDetector);
+        std::for_each(
+            _type.begin(),
+            _type.end(),
+            [](char& in) { in = static_cast<char>(toupper(in)); }
+        );
+    }
+    else {
+        ghoul_assert(false, "Instrument has not provided detector type");
+        throw ghoul::RuntimeError("Instrument has not provided detector type");
     }
 
-    ghoul::Dictionary spiceDictionary;
-    success = dictionary.getValue(keySpice, spiceDictionary);
-    ghoul_assert(success, "Instrument did not provide spice ids");
+    if (dictionary.hasKeyAndValue<std::string>(KeyStopCommand) && _type == "SCANNER"){
+        dictionary.getValue(KeyStopCommand, _stopCommand);
+    } else {
+        LWARNING("Scanner must provide stop command, please check mod file.");
+    }
 
-    _spiceIDs.resize(spiceDictionary.size());
-    for (size_t i = 0; i < _spiceIDs.size(); ++i) {
-        std::string id;
-        spiceDictionary.getValue(std::to_string(i + 1), id);
-        _spiceIDs[i] = id;
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeySpice)) {
+        ghoul::Dictionary spiceDictionary = dictionary.value<ghoul::Dictionary>(KeySpice);
+
+        _spiceIDs.resize(spiceDictionary.size());
+        for (size_t i = 0; i < _spiceIDs.size(); ++i) {
+            std::string id = spiceDictionary.value<std::string>(std::to_string(i + 1));
+            _spiceIDs[i] = std::move(id);
+        }
+    }
+    else {
+        ghoul_assert(false, "Instrument did not provide spice ids");
+        throw ghoul::RuntimeError("Instrument has not provided detector type");
     }
 }
 
-std::string InstrumentDecoder::getStopCommand() {
+const std::string& InstrumentDecoder::stopCommand() {
     return _stopCommand;
 }
 
-std::string InstrumentDecoder::getDecoderType() {
+const std::string& InstrumentDecoder::decoderType() const {
     return _type;
 }
 
-std::vector<std::string> InstrumentDecoder::getTranslation() {
+const std::vector<std::string>& InstrumentDecoder::translations() const {
     return _spiceIDs;
 }
 

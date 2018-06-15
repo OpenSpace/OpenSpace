@@ -29,26 +29,24 @@
 namespace openspace::globebrowsing {
 
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex)
-    : _rawTileDataReader(rawTileDataReader)
+                         const TileIndex& tileIndex)
+    : _rawTileDataReader(std::move(rawTileDataReader))
     , _chunkIndex(tileIndex)
-    , _pboMappedDataDestination(nullptr)
-    , _hasOwnershipOfData(false)
-{ }
+{}
 
 
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex, char* pboDataPtr)
-    : _rawTileDataReader(rawTileDataReader)
+                         const TileIndex& tileIndex, char* pboDataPtr)
+    : _rawTileDataReader(std::move(rawTileDataReader))
     , _chunkIndex(tileIndex)
     , _pboMappedDataDestination(pboDataPtr)
-    , _hasOwnershipOfData(false)
-{ }
+{}
 
 TileLoadJob::~TileLoadJob() {
     if (_hasOwnershipOfData) {
         ghoul_assert(_rawTile->imageData, "Image data must exist");
-        delete [] _rawTile->imageData;
+
+        delete[] _rawTile->imageData;
     }
 }
 
@@ -62,7 +60,10 @@ void TileLoadJob::execute() {
         _hasOwnershipOfData = true;
     }
     _rawTile = _rawTileDataReader->readTileData(
-        _chunkIndex, dataPtr, _pboMappedDataDestination);
+        _chunkIndex,
+        dataPtr,
+        _pboMappedDataDestination
+    );
 }
 
 std::shared_ptr<RawTile> TileLoadJob::product() {

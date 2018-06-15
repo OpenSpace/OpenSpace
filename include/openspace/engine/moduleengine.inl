@@ -22,46 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__
-
-#include <ctime>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-
-#include "topic.h"
-#include "connection.h"
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-class AuthorizationTopic : public Topic {
-public:
-    AuthorizationTopic();
-    void handleJson(nlohmann::json json);
-    bool isDone();
-
-    /* https://httpstatuses.com/ */
-    enum class StatusCode : int {
-        OK            = 200,
-        Accepted      = 202,
-
-        BadRequest    = 400,
-        Unauthorized  = 401,
-        NotAcceptable = 406,
-
-        NotImplemented = 501
-    };
-
-private:
-    bool _isAuthenticated;
-
-    const std::string getKey() const;
-    bool authorize(const std::string key);
-    nlohmann::json message(const std::string &message,
-        StatusCode statusCode = StatusCode::NotImplemented);
-};
+template <class ModuleSubClass>
+ModuleSubClass* ModuleEngine::module() const {
+    const auto it = std::find_if(_modules.begin(), _modules.end(),
+        [](const std::unique_ptr<OpenSpaceModule>& m) {
+        return m->identifier() == ModuleSubClass::Name;
+    });
+    if (it != _modules.end()) {
+        return dynamic_cast<ModuleSubClass*>(it->get());
+    }
+    else {
+        return nullptr;
+    }
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___AUTHORIZATION_TOPIC___H__

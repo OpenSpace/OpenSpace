@@ -30,7 +30,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -49,6 +49,7 @@ namespace openspace {
 class TouchMarker : public properties::PropertyOwner {
 public:
     TouchMarker();
+    virtual ~TouchMarker();
 
     void initialize();
     void deinitialize();

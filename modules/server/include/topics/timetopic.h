@@ -22,22 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
 
-#include <ext/json/json.hpp>
-#include <modules/server/include/topic.h>
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
 namespace openspace {
 
-class TriggerPropertyTopic : public Topic {
+class TimeTopic : public Topic {
 public:
-    TriggerPropertyTopic() : Topic() {};
-    ~TriggerPropertyTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return true; };
+    TimeTopic();
+    virtual ~TimeTopic();
+
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+
+private:
+    const int UnsetOnChangeHandle = -1;
+
+    nlohmann::json currentTime();
+    nlohmann::json deltaTime();
+
+    int _timeCallbackHandle = UnsetOnChangeHandle;
+    int _deltaTimeCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
 };
 
-} // namespace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__

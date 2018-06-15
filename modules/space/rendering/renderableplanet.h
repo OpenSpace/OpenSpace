@@ -29,28 +29,19 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/opengl/textureunit.h>
 
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
 struct TransformData;
-
-namespace planetgeometry {
-class PlanetGeometry;
-}
 
 namespace documentation { struct Documentation; }
 namespace planetgeometry { class PlanetGeometry; }
@@ -94,7 +85,7 @@ private:
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
 
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _programObject = nullptr;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
@@ -105,12 +96,12 @@ private:
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     properties::BoolProperty _performShading;
 
-    float _alpha;
-    float _planetRadius;
-    bool _hasNightTexture;
-    bool _hasHeightTexture;
-    bool _shadowEnabled;
-    double _time;
+    float _alpha = 1.f;
+    float _planetRadius = 0.f;
+    bool _hasNightTexture = false;
+    bool _hasHeightTexture = false;
+    bool _shadowEnabled = false;
+    double _time = 0.f;
 
     glm::dmat3 _stateMatrix;
 

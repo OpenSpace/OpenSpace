@@ -25,22 +25,21 @@
 #ifndef __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
 #define __OPENSPACE_MODULE_SERVER___GETPROPERTY_TOPIC___H__
 
-#include <openspace/query/query.h>
-#include "topic.h"
-#include "connection.h"
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
 class GetPropertyTopic : public Topic {
 public:
-    GetPropertyTopic();
-    ~GetPropertyTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone();
+    GetPropertyTopic() = default;
+    virtual ~GetPropertyTopic() = default;
+
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    nlohmann::json getAllProperties();
-    nlohmann::json getPropertyFromKey(const std::string& key);
+    nlohmann::json allProperties();
+    nlohmann::json propertyFromKey(const std::string& key);
 };
 
 } // namespace openspace

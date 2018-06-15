@@ -24,14 +24,12 @@
 
 #include <openspace/util/distanceconversion.h>
 
-#include <openspace/util/distanceconstants.h>
-
 #include <ghoul/glm.h>
 
 namespace openspace {
 
 std::pair<double, std::string> simplifyDistance(double meters, bool forceSingularForm) {
-    double metersVal = glm::abs(meters);
+    const double metersVal = glm::abs(meters);
 
     if (metersVal == 0.0) {
         return { 0.0, forceSingularForm ? "meter" : "meters"};
@@ -41,48 +39,48 @@ std::pair<double, std::string> simplifyDistance(double meters, bool forceSingula
     }
 
     if (metersVal < 1e-9) {
-        double val = meters / 1e-9;
+        const double val = meters / 1e-9;
         return { val, (val == 1.0 || forceSingularForm) ? "nanometer" : "nanometers" };
     }
     else if (metersVal < 1e-6) {
-        double val = meters / 1e-6;
+        const double val = meters / 1e-6;
         return { val, (val == 1.0 || forceSingularForm) ? "micrometer" : "micrometers" };
     }
     else if (metersVal < 1e-3) {
-        double val = meters / 1e-3;
+        const double val = meters / 1e-3;
         return { val, (val == 1.0 || forceSingularForm) ? "millimeter" : "millimeters" };
     }
 
     if (metersVal > (1e9 * distanceconstants::Parsec)) {
-        double val = meters / (1e9 * distanceconstants::Parsec);
+        const double val = meters / (1e9 * distanceconstants::Parsec);
         return { val, (val == 1.0 || forceSingularForm) ? "Gigaparsec" : "Gigaparsecs" };
     }
     else if (metersVal > (1e6 * distanceconstants::Parsec)) {
-        double val = meters / (1e6 * distanceconstants::Parsec);
+        const double val = meters / (1e6 * distanceconstants::Parsec);
         return { val, (val == 1.0 || forceSingularForm) ? "Megaparsec" : "Megaparsecs" };
     }
     else if (metersVal > (1e3 * distanceconstants::Parsec)) {
-        double val = meters / (1e3 * distanceconstants::Parsec);
+        const double val = meters / (1e3 * distanceconstants::Parsec);
         return { val, (val == 1.0 || forceSingularForm) ? "Kiloparsec" : "Kiloparsecs" };
     }
     else if (metersVal > distanceconstants::Parsec) {
-        double val = meters / distanceconstants::Parsec;
+        const double val = meters / distanceconstants::Parsec;
         return { val, (val == 1.0 || forceSingularForm) ? "Parsec" : "Parsecs" };
     }
     else if (metersVal > distanceconstants::LightYear) {
-        double val = meters / distanceconstants::LightYear;
+        const double val = meters / distanceconstants::LightYear;
         return { val, (val == 1.0 || forceSingularForm) ? "Lightyear" : "Lightyears" };
     }
     else if (metersVal > distanceconstants::LightMonth) {
-        double val = meters / distanceconstants::LightMonth;
+        const double val = meters / distanceconstants::LightMonth;
         return { val, (val == 1.0 || forceSingularForm) ? "Lightmonth" : "Lightmonths" };
     }
     else if (metersVal > distanceconstants::LightDay) {
-        double val = meters / distanceconstants::LightDay;
+        const double val = meters / distanceconstants::LightDay;
         return { val, (val == 1.0 || forceSingularForm) ? "Lightday" : "Lightdays" };
     }
     else if (metersVal > distanceconstants::LightHour) {
-        double val = meters / distanceconstants::LightHour;
+        const double val = meters / distanceconstants::LightHour;
         return { val, (val == 1.0 || forceSingularForm) ? "Lighthour" : "Lighthours" };
     }
     else if (metersVal > distanceconstants::AstronomicalUnit) {

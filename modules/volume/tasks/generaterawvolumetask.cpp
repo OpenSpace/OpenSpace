@@ -81,7 +81,7 @@ std::string GenerateRawVolumeTask::description() {
         std::to_string(_dimensions.y) + ", " +
         std::to_string(_dimensions.z) + "). " +
         "For each cell, set the value by evaluating the lua function: " +
-        "`" + _valueFunctionLua + "`, with three arguments (x, y, z) ranging from " + 
+        "`" + _valueFunctionLua + "`, with three arguments (x, y, z) ranging from " +
         "(" + std::to_string(_lowerDomainBound.x) + ", "
         + std::to_string(_lowerDomainBound.y) + ", " +
         std::to_string(_lowerDomainBound.z) + ") to (" +
@@ -132,7 +132,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         lua_pushnumber(state, coord.z);
 
         ghoul::lua::verifyStackSize(state, 4);
-        
+
         if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
             return;
         }

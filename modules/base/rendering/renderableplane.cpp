@@ -49,7 +49,7 @@ namespace {
         BlendModeAdditive
     };
 
-    static const openspace::properties::Property::PropertyInfo BillboardInfo = {
+    const openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
@@ -57,13 +57,13 @@ namespace {
         "transformations."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the size of the plane in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    const openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
         "This determines the blending mode that is applied to this plane."
@@ -105,10 +105,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _size(SizeInfo, 10.f, 0.f, 1e25f)
     , _blendMode(BlendModeInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , _shader(nullptr)
-    , _quad(0)
-    , _vertexPositionBuffer(0)
-    , _planeIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -244,19 +240,17 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("texture1", unit);
 
-    bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
+    bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                    RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::ABuffer;
+    bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", _blendMode == BlendModeAdditive);
     }
 
-    bool additiveBlending = _blendMode == BlendModeAdditive && usingFramebufferRenderer;
+    bool additiveBlending = (_blendMode == BlendModeAdditive) && usingFramebufferRenderer;
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -277,7 +271,6 @@ void RenderablePlane::bindTexture() {}
 
 void RenderablePlane::unbindTexture() {}
 
-
 void RenderablePlane::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
@@ -285,7 +278,6 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_planeIsDirty) {
         createPlane();
-
     }
 }
 
@@ -305,14 +297,7 @@ void RenderablePlane::createPlane() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        nullptr
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(

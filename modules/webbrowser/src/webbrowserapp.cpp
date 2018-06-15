@@ -23,9 +23,9 @@
  ****************************************************************************************/
 
 #include "include/webbrowserapp.h"
-namespace openspace {
+//#include <modules/webbrowser/include/webbrowserapp.h>
 
-WebBrowserApp::WebBrowserApp() = default;
+namespace openspace {
 
 CefRefPtr<CefRenderProcessHandler> WebBrowserApp::GetRenderProcessHandler() {
     return this;
@@ -33,11 +33,12 @@ CefRefPtr<CefRenderProcessHandler> WebBrowserApp::GetRenderProcessHandler() {
 
 void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                      CefRefPtr<CefFrame> frame,
-                                     CefRefPtr<CefV8Context> context) {
+                                     CefRefPtr<CefV8Context> context)
+{
     CEF_REQUIRE_UI_THREAD();
     CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
     CefRefPtr<CefV8Value> global = context->GetGlobal();
     global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
 }
 
-}
+} // namespace openspace

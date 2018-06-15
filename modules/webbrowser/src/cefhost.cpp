@@ -22,23 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/cefhost.h"
+#include <modules/webbrowser/include/cefhost.h>
+
+#include <modules/webbrowser/include/webbrowserapp.h>
+#include <openspace/engine/openspaceengine.h>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
 
 namespace {
-const char* _loggerCat = "CefHost";
-}
+    constexpr const char* _loggerCat = "CefHost";
+} // namespace
 
 namespace openspace {
 
 CefHost::CefHost(std::string helperLocation) {
     LDEBUG("Initializing CEF...");
-    CefMainArgs args;
-    CefSettings settings;
 
-    CefString(&settings.browser_subprocess_path).FromASCII(
-        // This is bad as it casts away the const
-        (char*) helperLocation.c_str()
-    );
+    CefSettings settings;
+    CefString(&settings.browser_subprocess_path).FromString(helperLocation);
     attachDebugSettings(settings);
 
 #ifdef WIN32
@@ -47,6 +48,7 @@ CefHost::CefHost(std::string helperLocation) {
 #endif
     CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
 
+    CefMainArgs args;
     CefInitialize(args, settings, app.get(), NULL);
     initializeCallbacks();
     LDEBUG("Initializing CEF... done!");
@@ -67,12 +69,9 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 
 void CefHost::initializeCallbacks() {
     OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                CefDoMessageLoopWork();
-            }
+        OpenSpaceEngine::CallbackOption::Render,
+        [this](){ CefDoMessageLoopWork(); }
     );
 }
 
-}
-
+} // namespace openspace

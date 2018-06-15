@@ -24,19 +24,11 @@
 
 #include <openspace/interaction/keybindingmanager.h>
 
-#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/string_cast.hpp>
 #include <ghoul/glm.h>
-
-#include <fstream>
+#include <sstream>
 
 #include "keybindingmanager_lua.inl"
 
@@ -52,25 +44,20 @@ KeyBindingManager::KeyBindingManager()
         },
         "${WEB}/keybindings/script.js"
     )
-{ }
+{}
 
 void KeyBindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
-        std::pair<std::multimap<KeyWithModifier, KeyInformation>::iterator,
-            std::multimap<KeyWithModifier, KeyInformation>::iterator> ret =
-            _keyLua.equal_range({ key, modifier });
-        for (std::multimap<KeyWithModifier, KeyInformation>::iterator it = ret.first;
-            it != ret.second;
-            ++it)
-        {
-            scripting::ScriptEngine::RemoteScripting remote =
-                it->second.synchronization ?
-                scripting::ScriptEngine::RemoteScripting::Yes :
-                scripting::ScriptEngine::RemoteScripting::No;
+        auto ret = _keyLua.equal_range({ key, modifier });
+        for (auto it = ret.first; it != ret.second; ++it) {
+            using RS = scripting::ScriptEngine::RemoteScripting;
 
-            OsEng.scriptEngine().queueScript(it->second.command, remote);
+            OsEng.scriptEngine().queueScript(
+                it->second.command,
+                it->second.synchronization ? RS::Yes : RS::No
+            );
         }
     }
 }
@@ -80,7 +67,7 @@ void KeyBindingManager::resetKeyBindings() {
 }
 
 void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
-                                      std::string luaCommand, std::string documentation)
+                                     std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
         { key, modifier },
@@ -93,7 +80,7 @@ void KeyBindingManager::bindKeyLocal(Key key, KeyModifier modifier,
 }
 
 void KeyBindingManager::bindKey(Key key, KeyModifier modifier,
-                                 std::string luaCommand, std::string documentation)
+                                std::string luaCommand, std::string documentation)
 {
     _keyLua.insert({
         { key, modifier },
@@ -121,18 +108,6 @@ void KeyBindingManager::removeKeyBinding(const std::string& key) {
             ++it;
         }
     }
-
-    // _keyLua.erase(
-    //     std::remove_if(
-    //         _keyLua.begin(),
-    //         _keyLua.end(),
-    //         [key](const std::pair<KeyWithModifier, KeyInformation>& val) {
-    //             KeyWithModifier k = stringToKey(key);
-    //             return val.first == k;
-    //         }
-    //     ),
-    //     _keyLua.end()
-    // );
 }
 
 std::vector<std::pair<KeyWithModifier, KeyBindingManager::KeyInformation>>
@@ -143,7 +118,7 @@ KeyBindingManager::keyBinding(const std::string& key) const
     KeyWithModifier k = stringToKey(key);
     auto itRange = _keyLua.equal_range(k);
     for (auto it = itRange.first; it != itRange.second; ++it) {
-        result.push_back({ it->first, it->second });
+        result.emplace_back(it->first, it->second);
     }
     return result;
 }

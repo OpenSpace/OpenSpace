@@ -32,7 +32,7 @@ const glm::ivec2 TileTextureInitData::TilePixelStartOffset = glm::ivec2(-2);
 const glm::ivec2 TileTextureInitData::TilePixelSizeDifference = glm::ivec2(4);
 
 TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glType,
-                                         Format textureFormat, bool padTiles,
+                                         Format textureFormat, PadTiles padTiles,
                                          ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
     : _glType(glType)
     , _ghoulTextureFormat(textureFormat)
@@ -59,10 +59,8 @@ TileTextureInitData::TileTextureInitData(const TileTextureInitData& original)
         original.dimensions().y,
         original.glType(),
         original.ghoulTextureFormat(),
-        original._padTiles,
-        original.shouldAllocateDataOnCPU() ?
-            ShouldAllocateDataOnCPU::Yes :
-            ShouldAllocateDataOnCPU::No
+        PadTiles(original._padTiles),
+        ShouldAllocateDataOnCPU(original.shouldAllocateDataOnCPU())
     )
 {}
 
@@ -140,22 +138,14 @@ unsigned int TileTextureInitData::getUniqueIdFromTextureFormat(
 {
     using Format = Format;
     switch (textureFormat) {
-        case Format::Red:
-            return 0;
-        case Format::RG:
-            return 1;
-        case Format::RGB:
-            return 2;
-        case Format::BGR:
-            return 3;
-        case Format::RGBA:
-            return 4;
-        case Format::BGRA:
-            return 5;
-        case Format::DepthComponent:
-            return 6;
-        default:
-            throw ghoul::MissingCaseException();
+        case Format::Red:            return 0;
+        case Format::RG:             return 1;
+        case Format::RGB:            return 2;
+        case Format::BGR:            return 3;
+        case Format::RGBA:           return 4;
+        case Format::BGRA:           return 5;
+        case Format::DepthComponent: return 6;
+        default:                     throw ghoul::MissingCaseException();
     }
 }
 

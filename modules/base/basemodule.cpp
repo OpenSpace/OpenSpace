@@ -24,13 +24,6 @@
 
 #include <modules/base/basemodule.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
 #include <modules/base/dashboard/dashboarditemangle.h>
 #include <modules/base/dashboard/dashboarditemdate.h>
 #include <modules/base/dashboard/dashboarditemdistance.h>
@@ -39,7 +32,6 @@
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
-
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
@@ -53,16 +45,20 @@
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
-
-#include <modules/base/translation/luatranslation.h>
-#include <modules/base/translation/statictranslation.h>
-
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/luarotation.h>
 #include <modules/base/rotation/staticrotation.h>
-
 #include <modules/base/scale/luascale.h>
 #include <modules/base/scale/staticscale.h>
+#include <modules/base/translation/luatranslation.h>
+#include <modules/base/translation/statictranslation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
@@ -145,6 +141,7 @@ void BaseModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        DashboardItemAngle::Documentation(),
         DashboardItemDate::Documentation(),
         DashboardItemDistance::Documentation(),
         DashboardItemFramerate::Documentation(),

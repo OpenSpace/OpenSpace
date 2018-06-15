@@ -22,25 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
+#ifndef __OPENSPACE_CORE___ASSETLISTENER___H__
+#define __OPENSPACE_CORE___ASSETLISTENER___H__
 
-#include <ext/json/json.hpp>
-#include <modules/server/include/topic.h>
+#include <openspace/scene/asset.h>
 
 namespace openspace {
 
-class SetPropertyTopic : public Topic {
+class AssetListener {
 public:
-    SetPropertyTopic() : Topic() {};
-    ~SetPropertyTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return true; };
+    virtual ~AssetListener() = default;
+    virtual void assetStateChanged(std::shared_ptr<Asset> asset, Asset::State state) = 0;
+    virtual void assetRequested(std::shared_ptr<Asset> parent,
+        std::shared_ptr<Asset> child) = 0;
 
-private:
-    void setTime(const std::string& value);
+    virtual void assetUnrequested(std::shared_ptr<Asset> parent,
+        std::shared_ptr<Asset> child) = 0;
 };
 
-} // namespace
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SETPROPERTYTOPIC___H__
+#endif // __OPENSPACE_CORE___ASSETLISTENER___H__

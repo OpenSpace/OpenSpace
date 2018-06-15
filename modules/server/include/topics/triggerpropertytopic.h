@@ -22,40 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TOPIC___H__
+#ifndef __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
 
-#include <ext/json/json.hpp>
+#include <modules/server/include/topics/topic.h>
 
 namespace openspace {
 
-class Connection;
-
-class Topic {
+class TriggerPropertyTopic : public Topic {
 public:
-    Topic() {};
-    virtual ~Topic() = default;
+    TriggerPropertyTopic() = default;
+    virtual ~TriggerPropertyTopic() = default;
 
-    void initialize(Connection* connection, size_t topicId);
-    nlohmann::json wrappedPayload(const nlohmann::json &payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request.",
-        int code = 500);
-    virtual void handleJson(nlohmann::json json) = 0;
-    virtual bool isDone() = 0;
-
-protected:
-    size_t _topicId;
-    Connection* _connection;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 };
 
-class BounceTopic : public Topic {
-public:
-    BounceTopic() : Topic() {};
-    ~BounceTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return false; }
-};
+} // namespace
 
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___TOPIC___H__
+#endif // __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__

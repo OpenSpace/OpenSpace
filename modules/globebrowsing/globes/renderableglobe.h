@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
+//#include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -47,11 +47,8 @@ class PointGlobe;
 class LayerManager;
 
 /**
- * A <code>RenderableGlobe</code> is a globe modeled as an ellipsoid using a chunked LOD
- * algorithm for rendering.
-
- * The renderable uses a <code>DistanceSwitch</code> to determine if the renderable
- * should be rendered.
+ * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
+ * rendering.
  */
 class RenderableGlobe : public Renderable {
 public:
@@ -109,10 +106,10 @@ public:
 
     // Getters that perform calculations
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-    float getHeight(glm::dvec3 position);
+    float getHeight(glm::dvec3 position) const;
 
     // Getters
-    std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
+    ChunkedLodGlobe* chunkedLodGlobe() const;
     LayerManager* layerManager() const;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
@@ -126,21 +123,17 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);
 
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                             const glm::dvec3& targetModelSpace) override;
+                                       const glm::dvec3& targetModelSpace) const override;
 
 private:
-    // Globes. These are renderables inserted in a distance switch so that the heavier
-    // <code>ChunkedLodGlobe</code> does not have to be rendered at far distances.
-    std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
-    //std::shared_ptr<PointGlobe> _pointGlobe;
+    std::unique_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
 
     Ellipsoid _ellipsoid;
     std::shared_ptr<LayerManager> _layerManager;
-    DistanceSwitch _distanceSwitch;
     std::shared_ptr<Camera> _savedCamera;
 
     std::string _frame;
-    double _time;
+    double _time = 0.0;
 
     glm::dmat4 _cachedModelTransform;
     glm::dmat4 _cachedInverseModelTransform;

@@ -28,8 +28,11 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/textureunit.h>
+
+namespace ghoul::opengl {
+    class FramebufferObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -45,6 +48,8 @@ namespace documentation { struct Documentation; }
  */
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
+    using RenderFunction = std::function<void()>;
+
     ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
     ~ScreenSpaceFramebuffer();
 
@@ -53,9 +58,8 @@ public:
     void render() override;
     bool isReady() const override;
 
-    void setSize(glm::vec4);
-    void addRenderFunction(std::shared_ptr<std::function<void()>> renderFunction);
-    void addRenderFunction(std::function<void()> renderFunction);
+    void setSize(glm::vec4 size);
+    void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
     static documentation::Documentation Documentation();
@@ -70,7 +74,6 @@ private:
     static int id();
 
     std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::vector<std::shared_ptr<std::function<void()>>> _renderFunctionsShared;
     std::vector<std::function<void()>> _renderFunctions;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;

@@ -22,21 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_RENDER_HANDLER___H__
-#define __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_RENDER_HANDLER___H__
+#ifndef __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__
 
-#include "include/webrenderhandler.h"
+#include <modules/server/include/topics/topic.h>
+
+namespace openspace::properties { class Property; }
 
 namespace openspace {
 
-class ScreenSpaceRenderHandler : public WebRenderHandler {
+class SubscriptionTopic : public Topic {
 public:
-    void draw();
-    void render();
+    SubscriptionTopic() = default;
+    ~SubscriptionTopic();
 
-    void setTexture(const GLuint&);
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+
+private:
+    const int UnsetCallbackHandle = -1;
+
+    bool _requestedResourceIsSubscribable = false;
+    bool _isSubscribedTo = false;
+    int _onChangeHandle = UnsetCallbackHandle;
+    int _onDeleteHandle = UnsetCallbackHandle;
+    properties::Property* _prop = nullptr;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_RENDER_HANDLER___H__
+#endif // __OPENSPACE_MODULE_SERVER___SUBSCRIPTION_TOPIC___H__

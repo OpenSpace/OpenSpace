@@ -22,26 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCALARPROPERTY___H__
-#define __OPENSPACE_CORE___SCALARPROPERTY___H__
+#ifndef __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__
 
-#include <openspace/properties/numericalproperty.h>
+#include <modules/server/include/topics/topic.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/charproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/longdoubleproperty.h>
-#include <openspace/properties/scalar/longlongproperty.h>
-#include <openspace/properties/scalar/longproperty.h>
-#include <openspace/properties/scalar/shortproperty.h>
-#include <openspace/properties/scalar/signedcharproperty.h>
-#include <openspace/properties/scalar/ucharproperty.h>
-#include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/properties/scalar/ulonglongproperty.h>
-#include <openspace/properties/scalar/ulongproperty.h>
-#include <openspace/properties/scalar/ushortproperty.h>
-#include <openspace/properties/scalar/wcharproperty.h>
+namespace openspace {
 
-#endif // __OPENSPACE_CORE___SCALARPROPERTY___H__
+class LuaScriptTopic : public Topic {
+public:
+    LuaScriptTopic() = default;
+    virtual ~LuaScriptTopic() = default;
+
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___LUASCRIPTTOPIC___H__

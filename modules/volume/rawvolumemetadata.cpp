@@ -24,7 +24,6 @@
 
 #include <modules/volume/rawvolumemetadata.h>
 
-#include <openspace/properties/vectorproperty.h>
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/util/time.h>
@@ -46,7 +45,9 @@ namespace {
 
 namespace openspace::volume {
 
-RawVolumeMetadata RawVolumeMetadata::CreateFromDictionary(const ghoul::Dictionary& dictionary) {
+RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,

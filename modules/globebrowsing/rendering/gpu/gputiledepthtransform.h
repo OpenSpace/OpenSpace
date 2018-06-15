@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPUTILEDEPTHTRANSFORM___H__
 
 #include <openspace/util/gpudata.h>
-
 #include <string>
 
 namespace ghoul::opengl { class ProgramObject; }

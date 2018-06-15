@@ -26,11 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
 
 #include <modules/globebrowsing/tile/pixelregion.h>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-
 #include <string>
 
 namespace openspace::globebrowsing {

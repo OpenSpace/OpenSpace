@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/rendering/gpu/gputileuvtransform.h>
 
 #include <openspace/util/gpudata.h>
-
 #include <string>
 
 namespace ghoul::opengl { class ProgramObject; }

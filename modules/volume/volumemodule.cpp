@@ -23,14 +23,14 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumemodule.h>
+
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

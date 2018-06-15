@@ -50,9 +50,9 @@ public:
     void reset(size_t numTextures);
 
     /**
-     * \returns a pointer to a texture if there is one texture never used before.
-     * If there are no textures left, nullptr is returned. TextureContainer still owns
-     * the texture so no delete should be called on the raw pointer.
+     * \return A pointer to a texture if there is one texture never used before. If there
+     *         are no textures left, nullptr is returned. TextureContainer still owns the
+     *         texture so no delete should be called on the raw pointer.
      */
     ghoul::opengl::Texture* getTextureIfFree();
 
@@ -67,7 +67,7 @@ private:
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
 
     const TileTextureInitData _initData;
-    size_t _freeTexture;
+    size_t _freeTexture = 0;
     size_t _numTextures;
 };
 

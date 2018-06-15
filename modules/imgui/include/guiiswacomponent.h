@@ -36,12 +36,13 @@ namespace openspace::gui {
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
     GuiIswaComponent();
+
     void render() override;
 
 private:
-    bool _gmData;
-    bool _gmImage;
-    bool _ionData;
+    bool _gmData = false;
+    bool _gmImage = false;
+    bool _ionData = false;
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;
 };
