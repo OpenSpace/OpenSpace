@@ -49,6 +49,7 @@ namespace {
 namespace {
     const char* KeyStepSize = "StepSize";
     const char* KeyGridType = "GridType";
+    const char* KeyOpacity = "Opacity";
     const char* KeyTransferFunction = "TransferFunction";
     const char* KeySourceDirectory = "SourceDirectory";
     const char* KeyLowerDomainBound = "LowerDomainBound";
@@ -60,6 +61,7 @@ namespace {
     const char* KeySecondsAfter = "SecondsAfter";
 
     const float SecondsInOneDay = 60 * 60 * 24;
+    const float VolumeMaxOpacity = 500;
 
     static const openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
@@ -156,7 +158,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _clipPlanes(nullptr)
     , _stepSize(StepSizeInfo, 0.02f, 0.001f, 1.f)
-    , _opacity(OpacityInfo, 10.f, 0.f, 500.f)
+    , _opacity(OpacityInfo, 10.f, 0.f, VolumeMaxOpacity)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
     , _secondsBefore(SecondsBeforeInfo, 0.f, 0.01f, SecondsInOneDay)
@@ -195,6 +197,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     if (dictionary.hasValue<float>(KeyStepSize)) {
         _stepSize = dictionary.value<float>(KeyStepSize);
+    }
+
+    if (dictionary.hasValue<float>(KeyOpacity)) {
+        _opacity = dictionary.value<float>(KeyOpacity) * VolumeMaxOpacity;
     }
 
     if (dictionary.hasValue<float>(KeySecondsBefore)) {
