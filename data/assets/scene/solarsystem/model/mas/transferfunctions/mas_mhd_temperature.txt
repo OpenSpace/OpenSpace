@@ -14,4 +14,3 @@ mappingkey 0.7          255 50  0     200
 mappingkey 0.8          255 40  0     200
 mappingkey 0.9          255 30  0     200
 mappingkey 1.0          255 20  0     200
-

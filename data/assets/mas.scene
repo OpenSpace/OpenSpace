@@ -85,7 +85,6 @@ local Keybindings = {
 --     StereoA = FieldLineBasePath .. "enlil/july2012/downsampled40/stereoa/"
 -- }
 -- asset.require('./fieldlines/enlil')
-
 asset.require('./fieldlines/mas')
 
 local sunAsset = asset.require('scene/solarsystem/sun/sun')
