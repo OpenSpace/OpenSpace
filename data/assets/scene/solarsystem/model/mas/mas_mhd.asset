@@ -6,15 +6,15 @@ asset.require("spice/base")
 
 local sunRadius = 695508000
 
-local Mas_MHD = {  
-        Identifier = "Mas_MHD",
+local Mas_MHD_rho = {  
+        Identifier = "Mas_MHD_rho",
         Parent = sunTransforms.SolarSystemBarycenter.Identifier,
         Renderable = {
             Type = "RenderableTimeVaryingVolume",
             StepSize = 0.004,
             Opacity = 0.3,
-            TransferFunction = asset.localResource("transferfunctions/mas_mhd_velocity.txt"),
-            SourceDirectory = "/home/jgrangien/Code/OpenSpace/data/mas/bastille/u/",
+            TransferFunction = asset.localResource("transferfunctions/mas_mhd_r_squared.txt"),
+            SourceDirectory = "E:/MAS_Bastille/MHD_rawvolumes/density_15_06_2018/",
             LowerValueBound = 0,
             UpperValueBound = 1,
             GridType = "Spherical",
@@ -38,4 +38,36 @@ local Mas_MHD = {
         }
 }
 
-assetHelper.registerSceneGraphNodesAndExport(asset, { Mas_MHD })
+local Mas_MHD_temperature = {  
+    Identifier = "Mas_MHD_temperature",
+    Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTimeVaryingVolume",
+        StepSize = 0.004,
+        Opacity = 0.3,
+        TransferFunction = asset.localResource("transferfunctions/mas_mhd_temperature.txt"),
+        SourceDirectory = "E:/MAS_Bastille/MHD_rawvolumes/T_14_06_2018/",
+        LowerValueBound = 0,
+        UpperValueBound = 1,
+        GridType = "Spherical",
+        SecondsBefore = 24*60*60, 
+        SecondsAfter = 24*60*60
+    },
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "SUN",
+            Observer = "SUN"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = sunRadius
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Mas",
+        Hidden = false
+    }
+}
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Mas_MHD_rho, Mas_MHD_temperature })
