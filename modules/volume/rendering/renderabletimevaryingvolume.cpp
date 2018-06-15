@@ -59,6 +59,7 @@ namespace {
     constexpr const char* KeySecondsBefore = "SecondsBefore";
     constexpr const char* KeySecondsAfter = "SecondsAfter";
     constexpr const char* KeyGridType = "GridType";
+    constexpr const char* KeyOpacity = "Opacity";
     constexpr const char* KeyMinValue = "MinValue";
     constexpr const char* KeyMaxValue = "MaxValue";
     constexpr const char* KeyTime = "Time";
