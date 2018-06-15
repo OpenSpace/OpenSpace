@@ -6,10 +6,17 @@
   border-radius: $popover-corner-radius;
   box-shadow: $box-shadow;
   color: $text-color-focus;
-  max-width: 300px;
 
   &.small {
     max-width: 150px;
+  }
+
+  &.medium {
+    max-width: 300px;
+  }
+
+  &.large {
+    max-width: 900px;
   }
 
   > :last-child {

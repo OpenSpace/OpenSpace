@@ -6,12 +6,30 @@ import Icon from '../Icon/Icon';
 import Button from '../Input/Button/Button';
 import { excludeKeys } from '../../../utils/helpers';
 
+const getWindowTypeClass = (type) => {
+  let className;
+  switch(type) {
+    case 'small':
+      className='small'
+      break;
+    
+    case 'medium':
+      className=''
+      break;
+    
+    case 'large':
+      className='large'
+      break;
+
+  }
+  return className;
+}
 const Window = (props) => {
-  const { children, title, closeCallback, className, size, position } = props;
+  const { children, title, closeCallback, className, size, position, type } = props;
   return (
     <Draggable defaultPosition={position} handle=".header">
       <section
-        className={`${styles.window} ${className}`}
+        className={`${styles.window} ${className} ${getWindowTypeClass(type)}`}
         style={{
           width: size.width,
           height: size.height,
@@ -48,6 +66,7 @@ Window.propTypes = {
     height: PropTypes.number,
     width: PropTypes.number,
   }),
+  type: PropTypes.oneOf(['small', 'medium', 'large']),
   title: PropTypes.string,
 };
 
@@ -57,6 +76,7 @@ Window.defaultProps = {
   className: '',
   position: { x: 10, y: 10 },
   size: { height: 'auto', width: '300px' },
+  type: "medium",
   title: 'Window',
 };
 

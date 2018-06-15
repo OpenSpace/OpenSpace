@@ -13,6 +13,7 @@ import { setActivated } from '../../api/Actions/dataLoaderActions';
 import Button from '../common/Input/Button/Button';
 import Label from '../common/Label/Label';
 import UploadDataButton from './UploadDataButton';
+import provideWindowWidth from './HOC/provideWindowSize';
 
 class DataLoader extends Component {
   constructor(props) {
@@ -26,12 +27,13 @@ class DataLoader extends Component {
       activeDataType: '',
       dataToLoadUri: '',
       dataItems: [],
-      filePaths: ''
+      width: 900,
+      height: 500
     };
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const { activeDataType, dataToLoadUri } = this.state;
+    const { activeDataType, dataToLoadUri, width } = this.state;
     if ((activeDataType !== nextState.activeDataType) && (nextState.activeDataType !== '')) {
       this.triggerDataToLoad(nextState.activeDataType);
       const uri = this.getUriForDataToLoad(nextState.activeDataType);
@@ -40,6 +42,13 @@ class DataLoader extends Component {
 
     if (dataToLoadUri !== nextState.dataToLoadUri) {
       this.subscribeToActiveUri(nextState.dataToLoadUri);
+    }
+
+    if (width !== nextProps.width && nextProps.width !== 0 ) {
+      this.setState({
+        width: nextProps.width / 2,
+        height: nextProps.height / 2
+      })
     }
 
     return true;
@@ -94,9 +103,9 @@ class DataLoader extends Component {
         { this.props.activated && (
           <div className={styles.centerContent}>
             <Window
+              type="large"
               title="Data Loader"
-              // Temporary position and size fix
-              size={{ width:600, height:400 }}
+              size={{ width:this.state.width, height:this.state.height }}
               position={{ x:470, y:-370 }}
               closeCallback={() => setActivated(false)}
             >
@@ -127,4 +136,4 @@ DataLoader = connect(
   mapDispatchToProps
 )(DataLoader);
 
-export default DataLoader;
+export default provideWindowWidth(DataLoader);
