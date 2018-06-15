@@ -5,9 +5,10 @@ return {{
     -- Variable = "rho",
     VariableVector = "ur uphi utheta",
     InnerRadialLimit = 1.75,
+    FactorRSquared = "false",
     Dimensions = {100, 100, 128},
     LowerDomainBound = {1, -90, 0},
     UpperDomainBound = {15, 90, 360},
-	RawVolumeOutput = "${DATA}/mas/bastille/u/mas_merged_step_112.rawvolume",
-	DictionaryOutput = "${DATA}/mas/bastille/u/mas_merged_step_112.dictionary"
+	RawVolumeOutput = "${DATA}/mas/bastille/test/mas_merged_step_112.rawvolume",
+	DictionaryOutput = "${DATA}/mas/bastille/test/mas_merged_step_112.dictionary"
 }}

@@ -113,11 +113,9 @@ KameleonVolumeToRawTask::KameleonVolumeToRawTask(const ghoul::Dictionary& dictio
         _autoDomainBounds = true;
     }
     if (dictionary.hasValue<std::string>(KeyFactorRSquared) && dictionary.value<std::string>(KeyFactorRSquared) != "false") {
-        std::cout << "With factor r squared\n";
         _factorRSquared = true;
     }
     if (!dictionary.getValue<float>(KeyInnerRadialLimit, _innerRadialLimit)) {
-        std::cout << "Without inner radial limit\n";
         _innerRadialLimit = -1.0;
     }
 }
