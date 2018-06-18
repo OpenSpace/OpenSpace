@@ -30,6 +30,7 @@
 #include <modules/base/dashboard/dashboarditemframerate.h>
 #include <modules/base/dashboard/dashboarditemmission.h>
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
+#include <modules/base/dashboard/dashboarditempropertyvalue.h>
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 #include <modules/base/dashboard/dashboarditemspacing.h>
 #include <modules/base/rendering/renderablemodel.h>
@@ -94,6 +95,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fDashboard->registerClass<DashboardItemMission>("DashboardItemMission");
     fDashboard->registerClass<DashboardItemParallelConnection>(
         "DashboardItemParallelConnection"
+    );
+    fDashboard->registerClass<DashboardItemPropertyValue>(
+        "DashboardItemPropertyValue"
     );
     fDashboard->registerClass<DashboardItemSimulationIncrement>(
         "DashboardItemSimulationIncrement"

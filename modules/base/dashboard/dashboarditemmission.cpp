@@ -106,7 +106,7 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDate"
+        "DashboardItemMission"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {

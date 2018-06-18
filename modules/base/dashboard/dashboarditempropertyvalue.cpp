@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/dashboard/dashboarditemsimulationincrement.h>
+#include <modules/base/dashboard/dashboarditempropertyvalue.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/query/query.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -50,44 +50,32 @@ namespace {
         "This value determines the size of the font that is used to render the date."
     };
 
-    const openspace::properties::Property::PropertyInfo SimplificationInfo = {
-        "Simplification",
-        "Time Simplification",
-        "If this value is enabled, the time is displayed in nuanced units, such as "
-        "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds."
+    const openspace::properties::Property::PropertyInfo PropertyUriInfo = {
+        "URI",
+        "Property URI",
+        "The URI of the property that is displayed in this dashboarditem"
     };
 
-    const openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
-        "RequestedUnit",
-        "Requested Unit",
-        "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into."
+    const openspace::properties::Property::PropertyInfo DisplayStringInfo = {
+        "DisplayString",
+        "Display String",
+        "The String that is being displayed. It must either be empty (in which case only "
+        "the value itself will be displayed), or it must contain extact one instance of "
+        "{}, which will be replaced with the value of the property during rendering."
     };
-
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::TimeUnits.size());
-        std::transform(
-            openspace::TimeUnits.begin(),
-            openspace::TimeUnits.end(),
-            res.begin(),
-            [](openspace::TimeUnit unit) -> std::string { return nameForTimeUnit(unit); }
-        );
-        return res;
-    }
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
+documentation::Documentation DashboardItemPropertyValue::Documentation() {
     using namespace documentation;
     return {
-        "DashboardItem Simulation Increment",
-        "base_dashboarditem_simulationincrement",
+        "DashboardItem PropertyValue",
+        "base_dashboarditem_propertyvalue",
         {
             {
                 "Type",
-                new StringEqualVerifier("DashboardItemSimulationIncrement"),
+                new StringEqualVerifier("DashboardItemPropertyValue"),
                 Optional::No
             },
             {
@@ -103,33 +91,32 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
                 FontSizeInfo.description
             },
             {
-                SimplificationInfo.identifier,
-                new BoolVerifier,
+                PropertyUriInfo.identifier,
+                new StringVerifier,
                 Optional::Yes,
-                SimplificationInfo.description
+                PropertyUriInfo.description
             },
             {
-                RequestedUnitInfo.identifier,
-                new StringInListVerifier(unitList()),
+                DisplayStringInfo.identifier,
+                new StringVerifier,
                 Optional::Yes,
-                RequestedUnitInfo.description
+                DisplayStringInfo.description
             }
         }
     };
 }
 
-DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
-                                                      const ghoul::Dictionary& dictionary)
+DashboardItemPropertyValue::DashboardItemPropertyValue(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
-    , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _propertyUri(PropertyUriInfo)
+    , _displayString(DisplayStringInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemSimulationIncrement"
+        "DashboardItemPropertyValue"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
@@ -141,82 +128,54 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
+        _fontSize = static_cast<float>(
+            dictionary.value<double>(FontSizeInfo.identifier)
+        );
     }
     _fontSize.onChange([this](){
         _font = OsEng.fontManager().font(_fontName, _fontSize);
     });
     addProperty(_fontSize);
 
-    if (dictionary.hasKey(SimplificationInfo.identifier)) {
-        _doSimplification = dictionary.value<bool>(SimplificationInfo.identifier);
+    if (dictionary.hasKey(PropertyUriInfo.identifier)) {
+        _propertyUri = dictionary.value<std::string>(PropertyUriInfo.identifier);
     }
-    _doSimplification.onChange([this]() {
-        if (_doSimplification) {
-            _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
-        }
-        else {
-            _requestedUnit.setVisibility(properties::Property::Visibility::User);
-        }
+    _propertyUri.onChange([this]() {
+        _propertyIsDirty = true;
     });
-    addProperty(_doSimplification);
+    addProperty(_propertyUri);
 
-    for (TimeUnit u : TimeUnits) {
-        _requestedUnit.addOption(static_cast<int>(u), nameForTimeUnit(u));
+    if (dictionary.hasKey(DisplayStringInfo.identifier)) {
+        _displayString = dictionary.value<std::string>(DisplayStringInfo.identifier);
     }
-    _requestedUnit = static_cast<int>(TimeUnit::Second);
-    if (dictionary.hasKey(RequestedUnitInfo.identifier)) {
-        std::string value = dictionary.value<std::string>(RequestedUnitInfo.identifier);
-        TimeUnit unit = timeUnitFromString(value.c_str());
-        _requestedUnit = static_cast<int>(unit);
-    }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
-    addProperty(_requestedUnit);
+    addProperty(_displayString);
 
     _font = OsEng.fontManager().font(_fontName, _fontSize);
 }
 
-void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    const double t = OsEng.timeManager().time().deltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        const double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
+void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
+    if (_propertyIsDirty) {
+        _property = openspace::property(_propertyUri);
+        _propertyIsDirty = false;
     }
 
-    penPosition.y -= _font->height();
-    RenderFont(
-        *_font,
-        penPosition,
-        fmt::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    );
+    if (_property) {
+        std::string value;
+        _property->getStringValue(value);
+
+        penPosition.y -= _font->height();
+        RenderFont(
+            *_font,
+            penPosition,
+            fmt::format(_displayString.value(), value)
+        );
+    }
 }
 
-glm::vec2 DashboardItemSimulationIncrement::size() const {
-    double t = OsEng.timeManager().time().deltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
-    }
-
+glm::vec2 DashboardItemPropertyValue::size() const {
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        fmt::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
+        _displayString.value()
     ).boundingBox;
 }
 

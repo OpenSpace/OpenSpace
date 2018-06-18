@@ -104,7 +104,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDate"
+        "DashboardItemFramerate"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {

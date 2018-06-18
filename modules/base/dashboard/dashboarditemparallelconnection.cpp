@@ -91,7 +91,7 @@ DashboardItemParallelConnection::DashboardItemParallelConnection(
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDate"
+        "DashboardItemParallelConnection"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
