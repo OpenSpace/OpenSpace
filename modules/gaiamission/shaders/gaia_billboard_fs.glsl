@@ -52,10 +52,10 @@ uniform float viewScaling;
 
 vec3 color2rgb(float color) {
     // BV is [-0.4, 2.0]
-    //float st = (color + 0.4) / (2.0 + 0.4);
+    float st = (color + 0.4) / (2.0 + 0.4);
 
     // Bp-Rp[-2.0, 6.5], Bp-G[-2.1, 5.0], G-Rp[-1.0, 3.0]
-    float st = (color + 1.0) / (5.0 + 1.0);
+    //float st = (color + 1.0) / (5.0 + 1.0);
 
     return texture(colorTexture, st).rgb;
 }
