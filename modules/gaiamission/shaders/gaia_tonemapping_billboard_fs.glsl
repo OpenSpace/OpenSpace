@@ -38,21 +38,12 @@ Fragment getFragment() {
     // BILLBOARDS
     // Sample color. Tonemapping done in first shader pass.  
     vec4 textureColor = texture( renderedTexture, uv );
-    vec3 intensity = pow(textureColor.xyz, vec3(0.5));
-
-    if (length(intensity) < 0.01) {
-        discard;
-    }
-    intensity = clamp(intensity, vec3(0.01), vec3(1.0)) * textureColor.a;
-
-    color = vec4(intensity, textureColor.a);
-    //color = vec4(vec3(textureColor.a), 1.0);
 
     // Use the following to check for any intensity at all.
     //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
 
     Fragment frag;
-    frag.color = color;
+    frag.color = textureColor;
     // Place stars at back to begin with. 
     frag.depth = DEFAULT_DEPTH;
     frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

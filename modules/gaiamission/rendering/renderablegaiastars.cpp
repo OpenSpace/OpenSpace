@@ -909,6 +909,7 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
         _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
         _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+        _uniformCacheTM.projection = _programTM->uniformLocation("projection");
         _uniformCacheTM.pixelWeightThreshold = 
             _programTM->uniformLocation("pixelWeightThreshold");
 
@@ -932,6 +933,7 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
         _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
         _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+        _uniformCacheTM.projection = _programTM->uniformLocation("projection");
         _uniformCacheTM.pixelWeightThreshold =
             _programTM->uniformLocation("pixelWeightThreshold");
 
@@ -953,7 +955,6 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
         _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
@@ -984,7 +985,6 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
         _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
@@ -1010,7 +1010,6 @@ void RenderableGaiaStars::initializeGL() {
         _uniformCache.sharpness = _program->uniformLocation("sharpness");
         _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
         _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-        _uniformCache.screenSize = _program->uniformLocation("screenSize");
         _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
         _programTM = renderEngine.buildRenderProgram("ToneMapping",
@@ -1046,7 +1045,6 @@ void RenderableGaiaStars::initializeGL() {
     _uniformFilterCache.distThreshold = _program->uniformLocation("distThreshold");
 
     _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
-    _uniformCacheTM.projection = _programTM->uniformLocation("projection");
 
 
     // Find out how much GPU memory this computer has (Nvidia cards).
@@ -1438,7 +1436,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
         );
         _program->setUniform(_uniformCache.billboardSize, _billboardSize);
-        _program->setUniform(_uniformCache.screenSize, screenSize);
         _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
         _program->setUniform(_uniformCache.sharpness, _sharpness);
 
@@ -1455,7 +1452,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _closeUpBoostDist * static_cast<float>(distanceconstants::Parsec)
         );
         _program->setUniform(_uniformCache.billboardSize, _billboardSize);
-        _program->setUniform(_uniformCache.screenSize, screenSize);
         _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
         _program->setUniform(_uniformCache.sharpness, _sharpness);
 
@@ -1495,7 +1491,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         _programTM->activate();
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ghoul::opengl::TextureUnit fboTexUnit;
         if (_fboTexture) {
@@ -1503,13 +1498,13 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _fboTexture->bind();
             _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
         }
-        _programTM->setUniform(_uniformCacheTM.projection, projection);
 
         if (shaderOption == gaiamission::ShaderOption::Point_SSBO
             || shaderOption == gaiamission::ShaderOption::Point_VBO) {
             _programTM->setUniform(_uniformCacheTM.screenSize, screenSize);
             _programTM->setUniform(_uniformCacheTM.filterSize, _tmPointFilterSize);
             _programTM->setUniform(_uniformCacheTM.sigma, _tmPointSigma);
+            _programTM->setUniform(_uniformCacheTM.projection, projection);
             _programTM->setUniform(_uniformCacheTM.pixelWeightThreshold, 
                 _tmPointPixelWeightThreshold);
         }
@@ -1670,7 +1665,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
             _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
             _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-            _uniformCache.screenSize = _program->uniformLocation("screenSize");
             _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
             _uniformCache.maxStarsPerNode = _program->uniformLocation("maxStarsPerNode");
@@ -1718,7 +1712,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCache.sharpness = _program->uniformLocation("sharpness");
             _uniformCache.billboardSize = _program->uniformLocation("billboardSize");
             _uniformCache.closeUpBoostDist = _program->uniformLocation("closeUpBoostDist");
-            _uniformCache.screenSize = _program->uniformLocation("screenSize");
             _uniformCache.psfTexture = _program->uniformLocation("psfTexture");
 
             if (!hasProperty(&_magnitudeBoost)) addProperty(_magnitudeBoost);
@@ -1775,6 +1768,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _uniformCacheTM.screenSize = _programTM->uniformLocation("screenSize");
             _uniformCacheTM.filterSize = _programTM->uniformLocation("filterSize");
             _uniformCacheTM.sigma = _programTM->uniformLocation("sigma");
+            _uniformCacheTM.projection = _programTM->uniformLocation("projection");
             _uniformCacheTM.pixelWeightThreshold = 
                 _programTM->uniformLocation("pixelWeightThreshold");
             break;
@@ -1797,7 +1791,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
         }
         // Common uniforms:
         _uniformCacheTM.renderedTexture = _programTM->uniformLocation("renderedTexture");
-        _uniformCacheTM.projection = _programTM->uniformLocation("projection");
 
         _shadersAreDirty = false;
     }

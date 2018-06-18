@@ -48,7 +48,6 @@ uniform sampler1D colorTexture;
 uniform float luminosityMultiplier;
 uniform float sharpness;
 uniform int renderOption;
-uniform float viewScaling;
 
 vec3 color2rgb(float color) {
     // BV is [-0.4, 2.0]
@@ -107,6 +106,10 @@ void main() {
 
     // Use truncating tonemapping here so we don't overexposure individual stars.
     //color = 1.0 - 1.0 * exp(-5.0 * color.rgb);
+    float maxVal = max(max(color.r, color.g), color.b);
+    if (maxVal > 1.0) {
+        color /= maxVal;
+    }
 
     outColor = vec4(color, textureColor.a);
 }

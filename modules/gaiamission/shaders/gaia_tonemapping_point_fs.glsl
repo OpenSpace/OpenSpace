@@ -74,6 +74,8 @@ Fragment getFragment() {
 
     // Use to ignore scaling.
     //filterScaleFactor = vec2(0.0);
+    //scaling = 1.0;
+    //sigmaScaleFactor = vec2(1.0);
 
     // Use the following to find the origo in a skewed frustum.
     //Fragment origoFrag;

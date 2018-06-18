@@ -55,7 +55,6 @@ uniform float viewScaling;
 uniform float cutOffThreshold;
 uniform float closeUpBoostDist;
 uniform float billboardSize;
-uniform vec2 screenSize;
 uniform int renderOption;
 uniform float magnitudeBoost;
 
