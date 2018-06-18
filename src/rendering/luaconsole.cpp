@@ -411,6 +411,30 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         );
         return true;
     }
+    
+    // Go to the previous '.' character
+    if (modifierControl && key == Key::Left) {
+        std::string current = _commands.at(_activeCommand);
+        std::reverse(current.begin(), current.end());
+        auto it = current.find('.', current.size() - (_inputPosition - 1));
+        if (it != std::string::npos) {
+            _inputPosition = current.size() - it;
+        }
+        else {
+            _inputPosition = 0;
+        }
+    }
+
+    // Go to the next '.' character
+    if (modifierControl && key == Key::Right) {
+        auto it = _commands.at(_activeCommand).find('.', _inputPosition);
+        if (it != std::string::npos) {
+            _inputPosition = it + 1;
+        }
+        else {
+            _inputPosition = _commands.at(_activeCommand).size();
+        }
+    }
 
     // Go to previous command
     if (key == Key::Up) {
