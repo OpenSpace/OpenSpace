@@ -234,6 +234,20 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "",
                 "Returns the current wall time as an ISO 8601 date string "
                 "(YYYY-MM-DDTHH-MN-SS) in the UTC timezone"
+            },
+            {
+                "advancedTime",
+                &luascriptfunctions::time_advancedTime,
+                {},
+                "string or number, string or number",
+                "Modifies the passed time (first argument) by the delta time (second "
+                "argument). The first argument can either be an ISO 8601 date string or "
+                "the number of seconds past the J2000 epoch. The second argument can "
+                "either be a string of the form [-]XX(s,m,h,d,M,y] with (s)econds, "
+                "(m)inutes, (h)ours, (d)ays, (M)onths, and (y)ears as units and an "
+                "optional - sign to move backwards in time. If the second argument is a "
+                "number, it is interpreted as a number of seconds. The return value is "
+                "of the same type as the first argument."
             }
         }
     };

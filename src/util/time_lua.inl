@@ -22,9 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
-
+#include <openspace/util/timeconversion.h>
 #include <ghoul/fmt.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/misc.h>
+#include <cctype>
 #include <ctime>
 
 namespace openspace::luascriptfunctions {
@@ -187,6 +189,95 @@ int time_currentWallTime(lua_State* L) {
     );
     lua_pushstring(L, time.c_str());
     ghoul_assert(lua_gettop(L) == 1, "Incorrect number of items left on stack");
+    return 1;
+}
+
+int time_advancedTime(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 2, "lua::time_advanceTime");
+
+    double j2000Seconds = -1.0;
+    Time t;
+    bool usesISO = false;
+    if (lua_type(L, 1) == LUA_TSTRING) {
+        j2000Seconds = Time::convertTime(ghoul::lua::value<std::string>(L, 1));
+        usesISO = true;
+    }
+    else if (lua_type(L, 1) == LUA_TNUMBER) {
+        j2000Seconds = ghoul::lua::value<double>(L, 1);
+        usesISO = false;
+    }
+
+    double dt = 0.0;
+    if (lua_type(L, 2) == LUA_TNUMBER) {
+        dt = ghoul::lua::value<double>(L, 2);
+    }
+    else {
+        std::string modifier = ghoul::lua::value<std::string>(L, 2);
+        if (modifier.empty()) {
+            return ghoul::lua::luaError(L, "Modifier string must not be empty");
+        }
+        ghoul::trimWhitespace(modifier);
+        bool isNegative = false;
+        if (modifier[0] == '-') {
+            isNegative = true;
+            modifier = modifier.substr(1);
+        }
+
+        auto it = std::find_if(
+            modifier.begin(),
+            modifier.end(),
+            [](unsigned char c) {
+                const bool digit = std::isdigit(c) == 1;
+                const bool isDot = c == '.';
+                return !digit && !isDot;
+            }
+        );
+
+        double value = std::stod(std::string(modifier.begin(), it));
+
+        std::string unitName = std::string(it, modifier.end());
+
+        TimeUnit unit = TimeUnit::Second;
+        if (unitName == "s") {
+            unit = TimeUnit::Second;
+        }
+        else if (unitName == "m") {
+            unit = TimeUnit::Minute;
+        }
+        else if (unitName == "h") {
+            unit = TimeUnit::Hour;
+        }
+        else if (unitName == "d") {
+            unit = TimeUnit::Day;
+        }
+        else if (unitName == "M") {
+            unit = TimeUnit::Month;
+        }
+        else if (unitName == "y") {
+            unit = TimeUnit::Year;
+        }
+        else {
+            return ghoul::lua::luaError(
+                L,
+                fmt::format("Unknown unit '{}'", unitName)
+            );
+        }
+
+        dt = convertTime(value, unit, TimeUnit::Second);
+        if (isNegative) {
+            dt *= -1.0;
+        }
+    }
+
+    lua_pop(L, 2);
+
+    if (usesISO) {
+        Time t(j2000Seconds + dt);
+        ghoul::lua::push(L, t.ISO8601());
+    }
+    else {
+        ghoul::lua::push(L, j2000Seconds + dt);
+    }
     return 1;
 }
 
