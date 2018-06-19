@@ -22,59 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DATALOADER___LOADER___H__
-#define __OPENSPACE_MODULE_DATALOADER___LOADER___H__
+#ifndef __OPENSPACE_MODULE_SERVER___LOADDATAITEMTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___LOADDATAITEMTOPIC___H__
 
-#include <modules/dataloader/operators/operator.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <ext/json/json.hpp>
+#include <modules/server/include/topic.h>
 
-#include <openspace/util/taskloader.h>
+namespace openspace {
 
-namespace openspace::dataloader {
-
-using properties::PropertyOwner;
-
-class Loader : public PropertyOwner, public Operator {
-  public:
-    Loader();
-
-    // Select file data path
-    void uploadData();
-
-    /**
-     * Creates and adds trigger properties for data items in the internal directory
-     */
-    void createInternalDataItemProperties();
-
-    // Add one data item trigger property
-    void addDataItemProperty();
-
-    // Remove the trigger properties 
-    void removeDataItemProperties();
-
-    // Load a data item with an abs path to the item under its data type subfolder in data/.internal
-    void loadDataItem(std::string absPathToItem);
-
-    // void createVolumeDataItem(std::string absPath);
-
-    ghoul::Dictionary createTaskDictionary(std::string filePath);
-
-    // Perfom tasks that create dictionaries and converts
-    // .CDF formatted volume files into .rawvolume
-    void performTasks(std::string& path);
-
-  private:
-    properties::StringProperty _filePaths;
-    properties::TriggerProperty _uploadDataTrigger;
-  
-    TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks;
-
+class LoadDataItemTopic : public Topic {
+public:
+    LoadDataItemTopic() : Topic() {};
+    ~LoadDataItemTopic() {};
+    void handleJson(nlohmann::json json);
+    bool isDone() { return true; };
 };
 
-}
+} // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DATALOADER___LOADER___H__
+#endif // __OPENSPACE_MODULE_SERVER___LOADDATAITEMTOPIC___H__
 

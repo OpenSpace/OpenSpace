@@ -22,59 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DATALOADER___LOADER___H__
-#define __OPENSPACE_MODULE_DATALOADER___LOADER___H__
+#include <modules/dataloader/dataloadermodule.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+// #include <openspace/scripting/scriptengine.h>
+#include <ghoul/logging/logmanager.h>
+#include <modules/server/include/loaddataitemtopic.h>
 
-#include <modules/dataloader/operators/operator.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-
-#include <openspace/util/taskloader.h>
-
-namespace openspace::dataloader {
-
-using properties::PropertyOwner;
-
-class Loader : public PropertyOwner, public Operator {
-  public:
-    Loader();
-
-    // Select file data path
-    void uploadData();
-
-    /**
-     * Creates and adds trigger properties for data items in the internal directory
-     */
-    void createInternalDataItemProperties();
-
-    // Add one data item trigger property
-    void addDataItemProperty();
-
-    // Remove the trigger properties 
-    void removeDataItemProperties();
-
-    // Load a data item with an abs path to the item under its data type subfolder in data/.internal
-    void loadDataItem(std::string absPathToItem);
-
-    // void createVolumeDataItem(std::string absPath);
-
-    ghoul::Dictionary createTaskDictionary(std::string filePath);
-
-    // Perfom tasks that create dictionaries and converts
-    // .CDF formatted volume files into .rawvolume
-    void performTasks(std::string& path);
-
-  private:
-    properties::StringProperty _filePaths;
-    properties::TriggerProperty _uploadDataTrigger;
-  
-    TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks;
-
-};
-
+namespace {
+const std::string ItemPathKey = "item";
+const std::string _loggerCat = "LoadDataItemTopic";
 }
 
-#endif // __OPENSPACE_MODULE_DATALOADER___LOADER___H__
+namespace openspace {
+
+void LoadDataItemTopic::handleJson(nlohmann::json json) {
+    try {
+        LINFO("call dataloadermodule function");
+        auto absItemPath = json.at(ItemPathKey).get<std::string>();
+        OsEng.moduleEngine().module<DataLoaderModule>()->loadDataItem(absItemPath);
+    }
+    catch (const std::out_of_range& e) {
+        LERROR("Could not run script -- key or value is missing in payload");
+        LERROR(e.what());
+    }
+}
+
+}
 

@@ -6,33 +6,47 @@ import DataManager from '../../../api/DataManager';
 
 import { getDirectoryLeaf } from '../utils/helpers';
 
-const handleClick = (dirLeaf) => {
-  DataManager.trigger(`Modules.DataLoader.Loader.ItemTrigger_${dirLeaf}`);
-}
+const LoadingItemsString = 'Loading items...';
+const NoItemsFoundString = 'No items found.';
 
-// TODO: class
-const DataItemList = (props) => (
-  <div className={styles.list}>
-    {props.items.length > 0 && props.items.map(p => {
-      const dirLeaf = getDirectoryLeaf(p);
-       
-      return (
-      <div className={styles.item}
-           key={p}
-           onClick={() => handleClick(dirLeaf)}>
-        {dirLeaf}
+class DataItemList extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(path) {
+    // DataManager.trigger(`Modules.DataLoader.Loader.ItemTrigger_${dirLeaf}`);
+    DataManager.loadDataItem(path);
+  }
+
+  render() {
+    const { items } = this.props;
+    const noItems = items[0] === LoadingItemsString || items[0] === NoItemsFoundString;
+
+    return (
+      <div className={styles.list}>
+        {items.map(itemPathString => (
+          <div className={noItems ? styles.nonItem : styles.item}
+              key={itemPathString}
+              onClick={noItems ? () => {} : () => this.handleClick(itemPathString)}>
+            {noItems ? itemPathString : getDirectoryLeaf(itemPathString)}
+          </div>
+          )
+        )}
       </div>
-      )}
-    )}
-  </div>
-)
+    )
+
+  }
+}
 
 DataItemList.propTypes = {
   items: PropTypes.arrayOf(PropTypes.string)
 };
 
 DataItemList.defaultProps = {
-  items: [],
+  items: [LoadingItemsString],
 };
 
 

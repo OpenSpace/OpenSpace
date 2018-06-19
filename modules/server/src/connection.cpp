@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/server/include/connection.h>
-
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
@@ -51,6 +50,7 @@ namespace {
     constexpr const char* AuthenticationTopicKey = "authorize";
     constexpr const char* GetPropertyTopicKey = "get";
     constexpr const char* LuaScriptTopicKey = "luascript";
+    constexpr const char* LoadDataItemTopicKey = "loaddataitem";
     constexpr const char* SetPropertyTopicKey = "set";
     constexpr const char* SubscriptionTopicKey = "subscribe";
     constexpr const char* TimeTopicKey = "time";
@@ -69,6 +69,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<AuthorizationTopic>(AuthenticationTopicKey);
     _topicFactory.registerClass<GetPropertyTopic>(GetPropertyTopicKey);
     _topicFactory.registerClass<LuaScriptTopic>(LuaScriptTopicKey);
+    _topicFactory.registerClass<LoadDataItemTopic>(LoadDataItemTopicKey);
     _topicFactory.registerClass<SetPropertyTopic>(SetPropertyTopicKey);
     _topicFactory.registerClass<SubscriptionTopic>(SubscriptionTopicKey);
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
@@ -115,7 +116,7 @@ void Connection::handleJson(const nlohmann::json& json) {
         LERROR("Payload must be an object");
         return;
     }
-
+    
     // The topic id may be an already discussed topic, or a new one.
     TopicId topicId = *topicJson;
     auto topicIt = _topics.find(topicId);

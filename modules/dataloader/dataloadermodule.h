@@ -60,6 +60,8 @@ public:
     std::vector<std::string> volumeDataItems();
     void setVolumeDataItems(std::vector<std::string> items);
 
+    void loadDataItem(std::string absPathToItem);
+
     dataloader::Reader* reader();
     dataloader::Loader* loader();
 

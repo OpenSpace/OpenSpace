@@ -101,6 +101,10 @@ std::vector<std::string> DataLoaderModule::volumeDataItems() {
     return _volumeDataItems;
 }
 
+void DataLoaderModule::loadDataItem(std::string absPathToItem) {
+    _loader->loadDataItem(absPathToItem);
+}
+
 void DataLoaderModule::setVolumeDataItems(std::vector<std::string> items) {
     _volumeDataItems = items;
 }
