@@ -285,14 +285,12 @@ int addExoplanetSystem(lua_State* L) {
 		std::string script = "";
 
         glm::dvec3 position = glm::dvec3(p.POSITIONX * parsec , p.POSITIONY * parsec, p.POSITIONZ * parsec);
-        
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - position);
         glm::dvec3 northEclipticPole = glm::dvec3(0.0, 0.0, 1.0); // , 1.0);
         //glm::dvec3 northCelectialPole = northEclipticPole * glm::rotate(glm::radians(336.6), glm::dvec3(1.f, 0.f, 0.f));
-        printf(std::to_string(northEclipticPole).c_str());
+
         // Earths north vector (0,0,1) projected onto the skyplane, the plane perpendicular to the viewing vector (starTosunVec)
         glm::dvec3 northProjected = normalize(glm::length(northEclipticPole)*glm::sin(dot(northEclipticPole, starToSunVec)) * glm::cross(starToSunVec, glm::cross(northEclipticPole, starToSunVec)));
-        printf(std::to_string(northProjected).c_str());
         glm::dmat3 firstRotation = getExoplanetSystemRotation(glm::dvec3(0.0,0.0,1.0), starToSunVec);
         glm::dvec3 newX = firstRotation * glm::dvec3(1.0, 0.0, 0.0);
         glm::dmat3 secondRotation = getExoplanetSystemRotation(newX, northProjected);
@@ -448,16 +446,27 @@ int addExoplanetSystem(lua_State* L) {
 			else
 				sepoch = "2009-05-19T07:11:34.080";
 
-            
-			if (!isnan(plsy[i].R))
-			{
+            float planetradius;
+            std::string enabled = "";
+			if (isnan(plsy[i].R))
+			{   
+                planetradius = plsy[i].RSTAR;
+                enabled = "false";
+
+            }
+            else {
+                planetradius = plsy[i].R;
+                enabled = "true";
+            }
+
 				const std::string planet = "{"
 					"Identifier = '" + plna[i] + "',"
 					"Parent = '" + starname + "',"
                     "Enabled = true,"
 					"Renderable = {"
 						"Type = 'RenderableGlobe',"
-						"Radii = " + std::to_string(plsy[i].R) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
+                        "Enabled = "+ enabled +","
+						"Radii = " + std::to_string(planetradius) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
 						"SegmentsPerPatch = 64,"
 						"PerformShading = false,"
 						"Layers = {"
@@ -496,7 +505,7 @@ int addExoplanetSystem(lua_State* L) {
 				);
 				script = "";
 
-			}
+			
 
             
 			const std::string planetTrail = "{"

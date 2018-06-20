@@ -26,7 +26,14 @@
 #include <modules/exoplanets/tasks/exoplanetscsvtobintask.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
+
+#include <thread> 
+#include <chrono>  
 
 #include "exoplanetsmodule_lua.inl"
 
@@ -102,6 +109,49 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
         _discoveryMethods = std::make_unique<openspace::exoplanets::DiscoveryMethods>();
         addPropertySubOwner(*_discoveryMethods);
+    });
+
+    // Render
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&] {
+
+        if (_discoveryMethods->isDoppler())
+        {
+            std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
+            std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+            SceneGraphNode* planetNode = OsEng.renderEngine().scene()->sceneGraphNode(planetNames[0]);
+            SceneGraphNode* starNode = OsEng.renderEngine().scene()->sceneGraphNode(starName);
+            glm::dvec3 planetPos = planetNode->worldPosition();
+            glm::dvec3 starPos = starNode->worldPosition();
+            glm::dvec3 starToPosVec = normalize(planetPos - starPos);
+            glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPos);
+            glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
+            glm::dvec3 northProjected = glm::normalize(glm::length(north)*glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
+            float northAngle = glm::acos(glm::dot(starToPosVec, northProjected)) * 57.2957795;
+            float viewAngle = glm::acos(glm::dot(starToPosVec, starToSunVec)) * 57.2957795;
+
+            float imagePos = 0;
+            if ( viewAngle <= 90.0 && northAngle <= 90.0)
+            {
+                imagePos = viewAngle / -90.0;
+            }
+            else if (viewAngle > 90.0 && northAngle <= 90.0)
+            {
+                imagePos = (180.0 - viewAngle) / -90.0;
+            }
+            else if (viewAngle > 90.0 && northAngle > 90.0)
+            {
+                imagePos = (180.0 - viewAngle) / 90.0;
+            }
+            else if (viewAngle <= 90.0 && northAngle > 90.0)
+            {
+                imagePos = viewAngle / 90.0;
+            }
+            
+            imagePos *= 0.01;
+            _discoveryMethods->setDopplerImagePos(imagePos);
+
+        }
+
     });
 }
 

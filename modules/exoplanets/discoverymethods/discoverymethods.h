@@ -34,6 +34,11 @@ namespace openspace::exoplanets {
 class DiscoveryMethods : public properties::PropertyOwner {
 public:
 	DiscoveryMethods();
+    bool isDoppler();
+    bool isTransit();
+    void setDopplerImagePos(float);
+    void setTransitImagePos(float, float);
+    float getTransitScaleFactor();
 
 private:
 	properties::BoolProperty _showTransit;
@@ -44,11 +49,16 @@ private:
     void addDopplerMethodVisualization();
     void removeDopplerMethodVisualization();
 
-    void scaleStar(std::string, float);
+    void addDirectionsMarkers(glm::dvec3, glm::dvec3, float);
+    void removeDirectionsMarkers();
+    void scaleNode(std::string, float);
     void moveStar(std::string, float);
-    void moveCameraTransitView();
-    void moveCameraDopplerView();
-    void toggleVisabilityOuterPlanets(std::string);
+    void moveCameraTransitView(glm::dvec3);
+    void moveCameraDopplerView(glm::dvec3);
+    void toggleVisabilityOuterPlanets(std::vector<std::string>, std::string);
+    void toggleVisabilityPlanet(std::string, std::string);
+
+    float _transitScaleFactor;
 
 };
 
