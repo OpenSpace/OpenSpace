@@ -35,6 +35,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dataloadermodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dataloadermodule_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/helpers.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/operators/operator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/operators/reader.cpp

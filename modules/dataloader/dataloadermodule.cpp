@@ -27,9 +27,12 @@
 #include <modules/dataloader/operators/loader.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+
+#include "dataloadermodule_lua.inl"
 
 namespace {
     constexpr const char* _loggerCat = "DataLoaderModule";
@@ -115,6 +118,21 @@ openspace::dataloader::Reader* DataLoaderModule::reader() {
 
 openspace::dataloader::Loader* DataLoaderModule::loader() {
     return _loader.get();
+}
+
+scripting::LuaLibrary DataLoaderModule::luaLibrary() const {
+    return{
+        "dataloader",
+        {
+            {
+                "loadItem",
+                &luascriptfunctions::loadItem,
+                {},
+                "string",
+                "Loads a data item into Open Space"
+            }
+        },
+    };
 }
 
 } // namespace openspace

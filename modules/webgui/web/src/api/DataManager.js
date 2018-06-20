@@ -6,7 +6,6 @@ const TOPIC_TYPES = {
   get: 'get',
   interaction: 'interaction',
   luascript: 'luascript',
-  loaddataitem: 'loaddataitem',
   set: 'set',
   subscribe: 'subscribe',
   time: 'time',
@@ -133,20 +132,6 @@ class DataManager {
       type: TOPIC_TYPES.luascript,
       payload: {
         script,
-      },
-    });
-    this.send(message);
-  }
-
-  /**
-   * Call data loader for an item
-   * @param item - the item to load
-   */
-  loadDataItem(item: string) {
-    const message = this.wrapMessage({
-      type: TOPIC_TYPES.loaddataitem,
-      payload: {
-        item,
       },
     });
     this.send(message);

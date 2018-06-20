@@ -5,6 +5,7 @@
 namespace openspace {
 
 class DataLoaderModule;
+class Scene;
 
 namespace dataloader {
 
@@ -13,10 +14,11 @@ class Operator {
         virtual ~Operator() {};
 
     protected:
-        DataLoaderModule* getModule();
+        DataLoaderModule* module();
+        Scene* scene();
 };
 
-}
-}
+} // namespace dataloader
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_DATALOADER___OPERATOR___H__

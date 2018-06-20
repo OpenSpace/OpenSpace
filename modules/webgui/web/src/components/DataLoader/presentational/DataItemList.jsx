@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styles from './DataItemList.scss';
 
 import DataManager from '../../../api/DataManager';
+import { ValuePlaceholder, LoadDataItemScript } from '../../../api/keys';
 
 import { getDirectoryLeaf } from '../utils/helpers';
 
@@ -17,8 +18,8 @@ class DataItemList extends React.Component {
   }
 
   handleClick(path) {
-    // DataManager.trigger(`Modules.DataLoader.Loader.ItemTrigger_${dirLeaf}`);
-    DataManager.loadDataItem(path);
+    const script = LoadDataItemScript.replace(ValuePlaceholder, `\'${path}\'`);
+    DataManager.runScript(script);
   }
 
   render() {

@@ -37,6 +37,8 @@ namespace openspace::dataloader {
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 enum DataTypes {
     volume
 };
@@ -61,6 +63,8 @@ public:
     void setVolumeDataItems(std::vector<std::string> items);
 
     void loadDataItem(std::string absPathToItem);
+
+    scripting::LuaLibrary luaLibrary() const override;
 
     dataloader::Reader* reader();
     dataloader::Loader* loader();

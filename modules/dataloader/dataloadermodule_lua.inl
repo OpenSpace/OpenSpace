@@ -22,23 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___LOADDATAITEMTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___LOADDATAITEMTOPIC___H__
+namespace openspace::luascriptfunctions {
 
-#include <ext/json/json.hpp>
-#include <modules/server/include/topic.h>
+/**
+* \ingroup LuaScripts
+* loadItem(string):
+* Load a data item
+*/
+int loadItem(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadItem");
 
-namespace openspace {
+    using ghoul::lua::errorLocation;
 
-class LoadDataItemTopic : public Topic {
-public:
-    LoadDataItemTopic() : Topic() {};
-    ~LoadDataItemTopic() {};
-    void handleJson(nlohmann::json json);
-    bool isDone() { return true; };
-};
+    std::string path = ghoul::lua::checkStringAndPop(L);
 
-} // namespace openspace
+    /** handle path to check item type or handle it in different function **/
 
-#endif // __OPENSPACE_MODULE_SERVER___LOADDATAITEMTOPIC___H__
+    OsEng.moduleEngine().module<DataLoaderModule>()->loadDataItem(path);
 
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
+} // namespace openspace::luascriptfunctions 

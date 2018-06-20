@@ -77,4 +77,3 @@ class Loader : public PropertyOwner, public Operator {
 }
 
 #endif // __OPENSPACE_MODULE_DATALOADER___LOADER___H__
-

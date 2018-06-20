@@ -31,3 +31,5 @@ export const DeltaTime = 'deltaTime';
 export const ValuePlaceholder = '___value___';
 // script for setting deltatime
 export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholder})`;
+
+export const LoadDataItemScript = `openspace.dataloader.loadItem(${ValuePlaceholder})`;

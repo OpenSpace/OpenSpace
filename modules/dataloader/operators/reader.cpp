@@ -29,16 +29,22 @@
 #include <openspace/engine/moduleengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <regex>
 #include <iostream>
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
+
+using Directory = ghoul::filesystem::Directory;
+using Recursive = ghoul::filesystem::Directory::Recursive;
+using Sort = ghoul::filesystem::Directory::Sort;
 
 namespace {
     constexpr const char* _loggerCat = "Reader";
@@ -77,19 +83,15 @@ Reader::Reader()
 }
 
 void Reader::readVolumeDataItems() {
-    ghoul::filesystem::Directory volumeDir(
-        _topDir.path() +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        "volumes_from_cdf" 
-    );
+    Directory volumeDir = getVolumeDir();
 
     std::vector volumeItems = volumeDir.readDirectories(
-      ghoul::filesystem::Directory::Recursive::No,
-      ghoul::filesystem::Directory::Sort::Yes
+      Recursive::No,
+      Sort::Yes
     );
 
-    getModule()->setVolumeDataItems(volumeItems);
-    getModule()->setDataDirectoryRead(true);
+    module()->setVolumeDataItems(volumeItems);
+    module()->setDataDirectoryRead(true);
 
     // for (auto el : volumeItems) {
     //     LINFO("A dir: " + el);
@@ -111,4 +113,13 @@ void Reader::readVolumeDataItems() {
 
     // Store a reference somehow if necessary 
 }
+
+Directory Reader::getVolumeDir() {
+    return Directory(
+        _topDir.path() +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        "volumes_from_cdf" 
+    );
+}
+
 }

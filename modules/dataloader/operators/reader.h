@@ -34,11 +34,13 @@
 namespace openspace::dataloader {
 
 using properties::PropertyOwner;
+using Directory = ghoul::filesystem::Directory;
 
 class Reader : public PropertyOwner, public Operator {
   public:
     Reader();
 
+    Directory getVolumeDir();
     void readVolumeDataItems();
 
   private:
