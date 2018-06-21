@@ -43,6 +43,9 @@
 
 namespace {
   constexpr const char* _loggerCat = "Loader";
+
+  constexpr const char* KeyTime = "Time";
+  const std::string KeyRenderableType = "RenderableTimeVaryingVolume";
 } 
 
 namespace {
@@ -169,9 +172,6 @@ void Loader::createInternalDataItemProperties() {
 // void Loader::createVolumeDataItem(std::string absPath) {}
 
 void Loader::loadDataItem(std::string absPathToItem) {
-    LINFO("Load item " + absPathToItem);
-
-    std::string renderableTypeKey = "RenderableTimeVaryingVolume";
     std::string scaleTypeKey = "StaticScale";
     std::string translationTypeKey = "SpiceTranslation";
     std::string sunKey = "SUN";
@@ -180,7 +180,7 @@ void Loader::loadDataItem(std::string absPathToItem) {
     std::string guiPathKey = "/Solar System/LoadedMas";
     bool guiHidden = false;
 
-    std::string stateFile = openspace::dataloader::helpers::findStateFile(absPathToItem);
+    std::string stateFile = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "state");
     ghoul::Dictionary renderableDictionary = ghoul::lua::loadDictionaryFromFile(stateFile);
 
     std::string tfFilePath = absPathToItem +
@@ -188,7 +188,7 @@ void Loader::loadDataItem(std::string absPathToItem) {
         "transferfunction.txt";
 
     // TODO: constexpr keys
-    renderableDictionary.setValue("Type", renderableTypeKey);
+    renderableDictionary.setValue("Type", KeyRenderableType);
     renderableDictionary.setValue("SourceDirectory", sourceDir);
     renderableDictionary.setValue("TransferFunction", tfFilePath);
 
@@ -230,32 +230,21 @@ void Loader::loadDataItem(std::string absPathToItem) {
     };
 
     const ghoul::Dictionary completeDictionary(completeList);
+    initializeNode(completeDictionary);
 
-    // std::vector<std::string> topKeys = completeDictionary.keys("");
-    // std::vector<std::string> renderableKeys = completeDictionary.keys("Renderable");
-    // std::vector<std::string> transformKeys = completeDictionary.keys("Transform");
-    // for (auto key : topKeys) {
-    //     LINFO("a top key: " + key);
-    // }
-    // for (auto key : renderableKeys) {
-    //     LINFO("a rend key: " + key);
-    // }
-    // for (auto key : transformKeys) {
-    //     LINFO("a transf key: " + key);
-    // }
-    LINFO("sourceDir = " + sourceDir);
+    goToFirstTimeStep(absPathToItem);
+}
 
-    // const std::string KeyType = "Type";
-    // const std::string KeyRendType = "Renderable.Type";
-    // const std::string type = renderableDictionary.value<std::string>(KeyType);
-    // const std::string rendType = completeDictionary.value<std::string>(KeyRendType);
-    // LINFO("Renderable.Type = " + type);
-    // LINFO("Renderable.Type = " + rendType);
-
-    SceneGraphNode* node = scene()->loadNode(completeDictionary);
+void Loader::initializeNode(ghoul::Dictionary dict) {
+    SceneGraphNode* node = scene()->loadNode(dict);
     scene()->initializeNode(node);
+}
 
-    // great success
+void Loader::goToFirstTimeStep(std::string absPathToItem) {
+    std::string firstDictionaryFilePath = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "dictionary");
+    ghoul::Dictionary dict = ghoul::lua::loadDictionaryFromFile(firstDictionaryFilePath);
+    std::string firstTimeStep = dict.value<std::string>(KeyTime);
+    time().setTime(firstTimeStep);
 }
 
 // void Loader::createVolumeDataItem(std::string absPath);

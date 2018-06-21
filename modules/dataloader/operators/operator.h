@@ -6,6 +6,7 @@ namespace openspace {
 
 class DataLoaderModule;
 class Scene;
+class Time;
 
 namespace dataloader {
 
@@ -16,6 +17,7 @@ class Operator {
     protected:
         DataLoaderModule* module();
         Scene* scene();
+        Time& time();
 };
 
 } // namespace dataloader

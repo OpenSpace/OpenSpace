@@ -32,6 +32,10 @@
 
 #include <openspace/util/taskloader.h>
 
+namespace ghoul {
+  class Dictionary;
+}
+
 namespace openspace::dataloader {
 
 using properties::PropertyOwner;
@@ -71,6 +75,9 @@ class Loader : public PropertyOwner, public Operator {
   
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks;
+
+  void initializeNode(ghoul::Dictionary dict);
+  void goToFirstTimeStep(std::string absPathToItem);
 
 };
 

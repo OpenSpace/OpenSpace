@@ -28,26 +28,28 @@ std::string getDirLeaf(std::string dir) {
     }
 }
 
-std::string findStateFile(std::string absPathToItem) {
+/**
+ * Get first file with the supplied extension in item folder
+ */
+std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::string extension) {
     Directory itemDirectory(absPathToItem);
 
-    std::vector<std::string> itemFiles = itemDirectory.readFiles(Recursive::No, Sort::No);
-    std::string stateFile = "";
+    std::vector<std::string> itemFiles = itemDirectory.readFiles(Recursive::No, Sort::Yes);
+    std::string filePath = "";
 
-    // Find (first) file with a .state extension
-    std::regex stateExtRegex("^.*\.(state)$");
-    std::smatch stateMatch;
+    // Find (first) file with the extension
+    std::regex extRegex("^.*\.(" + extension + ")$");
+    std::smatch match;
     for (auto file : itemFiles) {
-        LINFO("searching " + file + " in " + absPathToItem);
-        if (std::regex_search(file, stateMatch, stateExtRegex)) {
-            stateFile = file;
+        if (std::regex_search(file, match, extRegex)) {
+            filePath = file;
             break;
         }
     }
 
-    ghoul_assert(!stateFile.empty(), "Couldn't find a .state file in " + absPathToItem);
+    ghoul_assert(!filePath.empty(), "Couldn't find a file with ." + extension + " extension in " + absPathToItem);
 
-    return stateFile;
+    return filePath;
 }
 
 }
