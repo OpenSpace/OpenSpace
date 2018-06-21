@@ -27,10 +27,13 @@
 #include <string>
 #include <modules/dataloader/operators/loader.h>
 #include <modules/dataloader/dataloadermodule.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <modules/dataloader/helpers.cpp>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 
 
@@ -163,38 +166,94 @@ void Loader::createInternalDataItemProperties() {
 // addDataItemProperty();
 // removeDataItemProperties();
 
-// loadDataItem(std::string absPathToItem);
-
 // void Loader::createVolumeDataItem(std::string absPath) {}
 
 void Loader::loadDataItem(std::string absPathToItem) {
     LINFO("Load item " + absPathToItem);
 
+    std::string renderableTypeKey = "RenderableTimeVaryingVolume";
+    std::string scaleTypeKey = "StaticScale";
+    std::string translationTypeKey = "SpiceTranslation";
+    std::string sunKey = "SUN";
+    float sunRadiusScale = 695508000;
+    std::string sourceDir = absPathToItem;
+    std::string guiPathKey = "/Solar System/LoadedMas";
+    bool guiHidden = false;
+
     std::string stateFile = openspace::dataloader::helpers::findStateFile(absPathToItem);
-    
-    // extract as dictionary
-    ghoul::Dictionary stateDict = ghoul::lua::loadDictionaryFromFile(stateFile);
+    ghoul::Dictionary renderableDictionary = ghoul::lua::loadDictionaryFromFile(stateFile);
 
-    // Renderable
-    // Set Type = RenderableTimeVaryingVolume
-    // Set transferfunction directory
-    // Set source directory to absPathToItem
-    // ?? that's it
+    std::string tfFilePath = absPathToItem +
+        ghoul::filesystem::FileSystem::PathSeparator +
+        "transferfunction.txt";
 
-    // Make renderable
-        // timevaryingvolume instance?
-        // is the renderable displayed at this point?
+    // TODO: constexpr keys
+    renderableDictionary.setValue("Type", renderableTypeKey);
+    renderableDictionary.setValue("SourceDirectory", sourceDir);
+    renderableDictionary.setValue("TransferFunction", tfFilePath);
 
-    // create rest of, more complete, dictionary for scene graph node
+    // create complete dictionary for scene graph node
     const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(absPathToItem);
-    const std::string identifier = dirLeaf;
-    const std::string parent = "";
+    const std::string parent = "SolarSystemBarycenter";
+    
+    // Static stuff for now
+    std::initializer_list<std::pair<std::string, ghoul::any>> translation = {
+        std::make_pair( "Type", translationTypeKey ),
+        std::make_pair( "Target", sunKey ),
+        std::make_pair( "Observer", sunKey )
+    };
+    std::initializer_list<std::pair<std::string, ghoul::any>> scale = {
+        std::make_pair( "Type", scaleTypeKey ),
+        std::make_pair( "Scale", sunRadiusScale )
+    };
+    ghoul::Dictionary translationDictionary(translation);
+    ghoul::Dictionary scaleDictionary(scale);
 
-    // create node
-        // SceneGraphNode node = createFromDictionary(?)
+    std::initializer_list<std::pair<std::string, ghoul::any>> transform = {
+        std::make_pair( "Translation", translationDictionary ),
+        std::make_pair( "Scale", scaleDictionary )
+    };
+    ghoul::Dictionary transformDictionary(transform);
 
-    // get scene, add node to scene graph
-        // getScene()->
+    std::initializer_list<std::pair<std::string, ghoul::any>> gui = {
+        std::make_pair( "Path", guiPathKey ),
+        std::make_pair( "Hidden", guiHidden ),
+    };
+    ghoul::Dictionary guiDictionary(gui);
+
+    std::initializer_list<std::pair<std::string, ghoul::any>> completeList = {
+        std::make_pair( "Identifier", dirLeaf ),
+        std::make_pair( "Parent", parent ),
+        std::make_pair( "Renderable", renderableDictionary ),
+        std::make_pair( "Transform", transformDictionary ),
+        std::make_pair( "GUI", guiDictionary )
+    };
+
+    const ghoul::Dictionary completeDictionary(completeList);
+
+    // std::vector<std::string> topKeys = completeDictionary.keys("");
+    // std::vector<std::string> renderableKeys = completeDictionary.keys("Renderable");
+    // std::vector<std::string> transformKeys = completeDictionary.keys("Transform");
+    // for (auto key : topKeys) {
+    //     LINFO("a top key: " + key);
+    // }
+    // for (auto key : renderableKeys) {
+    //     LINFO("a rend key: " + key);
+    // }
+    // for (auto key : transformKeys) {
+    //     LINFO("a transf key: " + key);
+    // }
+    LINFO("sourceDir = " + sourceDir);
+
+    // const std::string KeyType = "Type";
+    // const std::string KeyRendType = "Renderable.Type";
+    // const std::string type = renderableDictionary.value<std::string>(KeyType);
+    // const std::string rendType = completeDictionary.value<std::string>(KeyRendType);
+    // LINFO("Renderable.Type = " + type);
+    // LINFO("Renderable.Type = " + rendType);
+
+    SceneGraphNode* node = scene()->loadNode(completeDictionary);
+    scene()->initializeNode(node);
 
     // great success
 }

@@ -29,21 +29,16 @@ std::string getDirLeaf(std::string dir) {
 }
 
 std::string findStateFile(std::string absPathToItem) {
-    Directory topDir("${DATA}/.internal", Directory::RawPath::No);
+    Directory itemDirectory(absPathToItem);
 
-    Directory volumeDir(
-        topDir.path() +
-        ghoul::filesystem::FileSystem::PathSeparator +
-        "volumes_from_cdf" 
-    );
-
-    std::vector<std::string> itemFiles = volumeDir.readFiles(Recursive::No, Sort::No);
+    std::vector<std::string> itemFiles = itemDirectory.readFiles(Recursive::No, Sort::No);
     std::string stateFile = "";
 
     // Find (first) file with a .state extension
     std::regex stateExtRegex("^.*\.(state)$");
     std::smatch stateMatch;
     for (auto file : itemFiles) {
+        LINFO("searching " + file + " in " + absPathToItem);
         if (std::regex_search(file, stateMatch, stateExtRegex)) {
             stateFile = file;
             break;
