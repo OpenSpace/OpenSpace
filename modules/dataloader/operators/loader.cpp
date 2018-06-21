@@ -42,10 +42,14 @@
 #endif
 
 namespace {
-  constexpr const char* _loggerCat = "Loader";
+constexpr const char* _loggerCat = "Loader";
+constexpr const char* KeyTime = "Time";
+const std::string KeyRenderableType = "RenderableTimeVaryingVolume";
+const std::string scaleTypeKey = "StaticScale";
+const std::string translationTypeKey = "SpiceTranslation";
+const std::string volumesGuiPathKey = "/Solar System/Volumes";
 
-  constexpr const char* KeyTime = "Time";
-  const std::string KeyRenderableType = "RenderableTimeVaryingVolume";
+const bool guiHidden = false;
 } 
 
 namespace {
@@ -172,14 +176,14 @@ void Loader::createInternalDataItemProperties() {
 // void Loader::createVolumeDataItem(std::string absPath) {}
 
 void Loader::loadDataItem(std::string absPathToItem) {
-    std::string scaleTypeKey = "StaticScale";
-    std::string translationTypeKey = "SpiceTranslation";
+    std::string sourceDir = absPathToItem;
+    const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(absPathToItem);
+
+    // TODO: Variables to let user initialize in GUI
     std::string sunKey = "SUN";
     float sunRadiusScale = 695508000;
-    std::string sourceDir = absPathToItem;
-    std::string guiPathKey = "/Solar System/LoadedMas";
-    bool guiHidden = false;
-
+    const std::string parent = "SolarSystemBarycenter"; // valid for all volume data?
+    
     std::string stateFile = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "state");
     ghoul::Dictionary renderableDictionary = ghoul::lua::loadDictionaryFromFile(stateFile);
 
@@ -187,16 +191,10 @@ void Loader::loadDataItem(std::string absPathToItem) {
         ghoul::filesystem::FileSystem::PathSeparator +
         "transferfunction.txt";
 
-    // TODO: constexpr keys
     renderableDictionary.setValue("Type", KeyRenderableType);
     renderableDictionary.setValue("SourceDirectory", sourceDir);
     renderableDictionary.setValue("TransferFunction", tfFilePath);
 
-    // create complete dictionary for scene graph node
-    const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(absPathToItem);
-    const std::string parent = "SolarSystemBarycenter";
-    
-    // Static stuff for now
     std::initializer_list<std::pair<std::string, ghoul::any>> translation = {
         std::make_pair( "Type", translationTypeKey ),
         std::make_pair( "Target", sunKey ),
@@ -216,7 +214,7 @@ void Loader::loadDataItem(std::string absPathToItem) {
     ghoul::Dictionary transformDictionary(transform);
 
     std::initializer_list<std::pair<std::string, ghoul::any>> gui = {
-        std::make_pair( "Path", guiPathKey ),
+        std::make_pair( "Path", volumesGuiPathKey ),
         std::make_pair( "Hidden", guiHidden ),
     };
     ghoul::Dictionary guiDictionary(gui);
