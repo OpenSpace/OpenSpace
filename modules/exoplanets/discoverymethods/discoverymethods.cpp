@@ -50,6 +50,12 @@ namespace {
 		"Show doppler method",
 		"Change the view so that the doppler method can be presented."
 	};
+    
+    static const openspace::properties::Property::PropertyInfo SolarSystemReferenceInfo = {
+		"SolarSystemReference",
+		"Show solar system reference",
+		"Show the size of the solar system as a reference for size."
+	};
 } // namespace
 
 namespace openspace::exoplanets{
@@ -228,7 +234,6 @@ namespace openspace::exoplanets{
         Camera* cam = OsEng.navigationHandler().camera();
         cam->setPositionVec3(pos);
         OsEng.navigationHandler().resetCameraDirection();
-
     }
 
     bool DiscoveryMethods::isDoppler() {
@@ -237,8 +242,21 @@ namespace openspace::exoplanets{
     bool DiscoveryMethods::isTransit() {
         return _showTransit;
     }
+    bool DiscoveryMethods::isReference() {
+        return _showSolarSystemReference;
+    }
+
+    //void DiscoveryMethods::setSunReferencePosition(glm::dvec3 pos) {
+    //    std::string script = "openspace.setPropertyValueSingle( 'Scene.SunReference.Translation.Position', " + std::to_string(pos) + ");";
+    //    OsEng.scriptEngine().queueScript(
+    //        script,
+    //        openspace::scripting::ScriptEngine::RemoteScripting::Yes
+    //    );
+    //}
+
+
     void DiscoveryMethods::setDopplerImagePos(float value) {
-        std::string script = "openspace.setPropertyValueSingle( 'ScreenSpace.DopplerShift2.EuclideanPosition', {"+std::to_string(value)+", -0.7}); "; //get name of current star from em
+        std::string script = "openspace.setPropertyValueSingle( 'ScreenSpace.DopplerShift2.EuclideanPosition', {"+std::to_string(value)+", -0.7}); ";
         OsEng.scriptEngine().queueScript(
             script,
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
@@ -388,10 +406,104 @@ namespace openspace::exoplanets{
     }
 
 
+    void DiscoveryMethods::addSolarSystemReferenceVisualization() {
+
+        std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
+        std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+        
+        // SUN
+        const std::string sunRef = "{"
+        	"Identifier = 'SunReference',"
+        	"Parent = '" + starName + "',"
+        	"Renderable = {"
+        	    "Type = 'RenderablePlaneImageLocal',"
+        	    "Size = 6.957E8," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+        	    "Billboard = true,"
+        	    "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+        	    "BlendMode = 'Additive'"
+        	"},"
+            "Transform = {"
+                "Translation = {"
+                    "Type = 'StaticTranslation',"
+                    "Position = {0, 0, 0}," //"+ std::to_string(planets[0].RSTAR) + "* 6.957E8
+                "},"
+            "},"
+        "}";
+        
+        std::string script = "openspace.addSceneGraphNode(" + sunRef + ");";
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
+        // EARTH
+        const std::string earthRef = "{"
+            "Identifier = 'EarthReference',"
+            "Parent = '" + planetNames[0] + "',"
+            "Renderable = {"
+                "Type = 'RenderablePlaneImageLocal',"
+                "Size = 6378137," // in meters
+                "Billboard = true,"
+                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+                "BlendMode = 'Additive'"
+            "},"
+            //"Transform = {"
+            //    "Translation = {"
+            //        "Type = 'StaticTranslation',"
+            //        "Position = {" + std::to_string(planets[0].R) + "* 7.1492E7, 0," + std::to_string(planets[0].R) + "* 7.1492E7}," //Jupiter radii to m " + std::to_string(planets[0].R) + "* 7.1492E7
+            //    "},"
+            //"},"
+        "}";
+        script = "";
+        script = "openspace.addSceneGraphNode(" + earthRef + ");";
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+
+        glm::dmat3 rotation = OsEng.moduleEngine().module<ExoplanetsModule>()->getRotation();
+        // ORBIT
+        const std::string orbitRef = "{"
+            "Identifier = 'OrbitReference',"
+            "Parent = '" + starName + "',"
+            "Renderable = {"
+                "Type = 'RenderablePlaneImageLocal',"
+                "Size = 1.496E11," // earths semi-major axis in m
+                "Billboard = false,"
+                "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
+                "BlendMode = 'Additive'"
+            "},"
+            "Transform = {"
+                "Rotation = {"
+                    "Type = 'StaticRotation',"
+                    "Rotation =  " + std::to_string(rotation) + ","
+                "}"
+            "},"
+        "}";
+        script = "";
+        script = "openspace.addSceneGraphNode(" + orbitRef + ");";
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    void DiscoveryMethods::removeSolarSystemReferenceVisualization() {
+        std::string script = "openspace.removeSceneGraphNode('SunReference');"
+            "openspace.removeSceneGraphNode('EarthReference');"
+            "openspace.removeSceneGraphNode('OrbitReference');";
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
 	DiscoveryMethods::DiscoveryMethods()
 		: PropertyOwner({ "DiscoveryMethods" })
 		, _showTransit(TransitMethodInfo, false)
 		, _showDoppler(DopplerMethodInfo, false)
+		, _showSolarSystemReference(SolarSystemReferenceInfo, false)
 	{
         _showTransit.onChange([&]() {
             if (_showTransit) //just changed to true
@@ -429,7 +541,16 @@ namespace openspace::exoplanets{
              
         });
         addProperty(_showDoppler);
-        printf("slut pa constructor");
+
+        _showSolarSystemReference.onChange([&]() {
+            if (_showSolarSystemReference) {
+                addSolarSystemReferenceVisualization();
+            }
+            else {
+                removeSolarSystemReferenceVisualization();
+            }
+        });
+        addProperty(_showSolarSystemReference);
 	}
 
 } // namespce

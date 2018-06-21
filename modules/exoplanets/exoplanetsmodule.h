@@ -97,6 +97,8 @@ public:
     std::vector<Exoplanet> getPlsy();
     void setPlna(std::vector<std::string>);
     std::vector<std::string> getPlna();
+    void setRotation(glm::dmat3);
+    glm::dmat3 getRotation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -106,6 +108,7 @@ protected:
 	std::string _starName;
     std::vector<Exoplanet> _plsy;
     std::vector<std::string> _plna;
+    glm::dmat3 _rotation;
 };
 
 } // namespace openspace

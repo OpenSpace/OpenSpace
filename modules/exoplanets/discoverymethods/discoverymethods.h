@@ -36,14 +36,18 @@ public:
 	DiscoveryMethods();
     bool isDoppler();
     bool isTransit();
+    bool isReference();
     void setDopplerImagePos(float);
-    void setTransitImagePos(float, float);
     float getTransitScaleFactor();
+    //void setSunReferencePosition(glm::dvec3);
 
 private:
 	properties::BoolProperty _showTransit;
 	properties::BoolProperty _showDoppler;
+	properties::BoolProperty _showSolarSystemReference;
 
+    void addSolarSystemReferenceVisualization();
+    void removeSolarSystemReferenceVisualization();
     void addTransitMethodVisualization();
     void removeTransitMethodVisualization();
     void addDopplerMethodVisualization();

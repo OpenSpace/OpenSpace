@@ -297,6 +297,7 @@ int addExoplanetSystem(lua_State* L) {
 
         glm::dmat3 exoplanetSystemRot = secondRotation * firstRotation;
 
+
 		const std::string starParent = "{"
 			"Identifier = '" + starname + "',"
 			"Parent = 'SolarSystemBarycenter',"
@@ -394,25 +395,25 @@ int addExoplanetSystem(lua_State* L) {
                 script,
                 openspace::scripting::ScriptEngine::RemoteScripting::Yes
             );
-            script = "";
+            //script = "";
 
-			const std::string starGlare = "{"
-				"Identifier = '" + starname + "Glare',"
-				"Parent = '" + starname + "',"
-				"Renderable = {"
-				"Type = 'RenderablePlaneImageLocal',"
-				"Size = " + std::to_string(p.RSTAR) + " * 5E9," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
-				"Billboard = true,"
-				"Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/halo.png',"
-				"BlendMode = 'Additive'"
-				"}"
-				"}";
-
-			script = "openspace.addSceneGraphNode(" + starGlare + ");";
+			//const std::string starGlare = "{"
+			//	"Identifier = '" + starname + "Glare',"
+			//	"Parent = '" + starname + "',"
+			//	"Renderable = {"
+			//	"Type = 'RenderablePlaneImageLocal',"
+			//	"Size = " + std::to_string(p.RSTAR) + " * 5E9," //RSTAR. in meters. 1 solar radii = 6.95700×10e8 m
+			//	"Billboard = true,"
+			//	"Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue.png',"
+			//	"BlendMode = 'Additive'"
+			//	"}"
+			//	"}";
+            //
+			//script = "openspace.addSceneGraphNode(" + starGlare + ");";
             //OsEng.scriptEngine().queueScript(
             //    script,
-           //     openspace::scripting::ScriptEngine::RemoteScripting::Yes
-           // );
+            //    openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            //);
 		}
 
 		
@@ -541,7 +542,7 @@ int addExoplanetSystem(lua_State* L) {
                 // Get the orbit plane that the trail orbit and planet have from the KeplerTranslation
                 glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(plsy[i].I, plsy[i].BIGOM, plsy[i].OM, exoplanetSystemRot);
                 glm::dmat3 rot = orbitPlaneRotationMatrix;
-
+                OsEng.moduleEngine().module<ExoplanetsModule>()->setRotation(rot);
 				const std::string disc = "{"
 					"Identifier = '" + plna[i] + "Disc',"
 					"Parent = '" + starname + "',"
