@@ -154,7 +154,10 @@ namespace {
         if ((node.children.size() == 1) && (node.nodes.empty())) {
             node.path = node.path + "/" + node.children[0]->path;
             node.nodes = std::move(node.children[0]->nodes);
-            node.children = std::move(node.children[0]->children);
+            std::vector<std::unique_ptr<TreeNode>> children = std::move(
+                node.children[0]->children
+            );
+            node.children = std::move(children);
         }
     }
 
