@@ -22,7 +22,7 @@ local LocalKernels = {
     kernels .. '/sclk/messenger_2548.tsc',
 
     kernels .. '/spk/de405.bsp',
-    kernels .. '/spk/msgr_040803_150430_150430_od431sc_2.bsp',
+    kernels .. '/spk/msgr_040803_140430_150328_od370sc_2.bsp',
     kernels .. '/spk/msgr_antenna_v000.bsp',
     kernels .. '/spk/msgr_de405_de423s.bsp',
 
