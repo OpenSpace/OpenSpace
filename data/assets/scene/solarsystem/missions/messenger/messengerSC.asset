@@ -38,7 +38,6 @@ local LocalKernels = {
     kernels .. '/ck/msgr_1103_v02.bc',
     kernels .. '/ck/msgr_1104_v02.bc',
     kernels .. '/ck/msgr_1105_v02.bc',
-    kernels .. '/ck/msgr_1106_v02.bc',
 
     kernels .. '/pck/pck00008.tpc',
     kernels .. '/pck/pck00008_msgr.tpc',
