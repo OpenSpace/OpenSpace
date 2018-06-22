@@ -65,7 +65,9 @@ class Loader : public PropertyOwner, public Operator {
 
     // void createVolumeDataItem(std::string absPath);
 
-    ghoul::Dictionary createTaskDictionary(std::string filePath);
+    void processCurrentlySelectedUploadData();
+
+    ghoul::Dictionary createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath);
 
     // Perfom tasks that create dictionaries and converts
     // .CDF formatted volume files into .rawvolume
@@ -82,6 +84,8 @@ class Loader : public PropertyOwner, public Operator {
     properties::BoolProperty _uploadedDataFactorRSquared;
     properties::DVec3Property _uploadedDataLowerDomainBounds;
     properties::DVec3Property _uploadedDataHigherDomainBounds;
+
+    // State properties
 
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks;
