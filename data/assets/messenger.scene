@@ -16,7 +16,7 @@ asset.require('util/default_dashboard')
 local MessengerAsset = asset.require('scene/solarsystem/missions/messenger/messengerSC')
 
 if not openspace.modules.isLoaded("Volume") then
-    openspace.printErro("Volume module is not loaded, skipping asset: mercurymagnetosphere")
+    openspace.printError("Volume module is not loaded, skipping asset: mercurymagnetosphere")
 else
     asset.require('scene/solarsystem/missions/messenger/mercurymagnetosphere')
 end
@@ -26,7 +26,7 @@ asset.request('customization/globebrowsing')
 assetHelper.registerDashboardItems(asset, {
     {
         Type = "DashboardItemDistance",
-        Identifier = "Messenger1Distance",
+        Identifier = "MessengerDistance",
         GuiName = "Messenger - Mercury Distance",
         SourceType = "Node",
         SourceNodeName = "Messenger",

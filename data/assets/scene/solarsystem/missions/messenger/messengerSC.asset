@@ -49,7 +49,7 @@ local LocalKernels = {
 }
 
 
-RotationMatrix = {
+local RotationMatrix = {
     0, 1, 0,
     0, 0, 1,
     1, 0, 0
@@ -113,7 +113,7 @@ local MessengerProbeFoil = {
     }
 }
 
-local MessengerProbeHeatSheild = {
+local MessengerProbeHeatShield = {
     Identifier = "MessengerProbe_heatShield",
     Parent = Messenger.Identifier,
     Renderable = {
@@ -199,7 +199,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Messenger,
     MessengerProbeBlack,
     MessengerProbeFoil,
-    MessengerProbeHeatSheild,
+    MessengerProbeHeatShield,
     MessengerProbeMetal,
     MessengerProbePanels,
     MessengerTrail
