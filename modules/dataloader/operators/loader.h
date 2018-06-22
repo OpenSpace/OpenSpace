@@ -29,6 +29,8 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <openspace/util/taskloader.h>
 
@@ -73,6 +75,14 @@ class Loader : public PropertyOwner, public Operator {
     properties::StringProperty _filePaths;
     properties::TriggerProperty _uploadDataTrigger;
   
+    // Volume specific. 
+    // Put in structs for different data types? Different file?
+    properties::DVec3Property _uploadedDataDimensions;
+    properties::StringProperty _uploadedDataVariable;
+    properties::BoolProperty _uploadedDataFactorRSquared;
+    properties::DVec3Property _uploadedDataLowerDomainBounds;
+    properties::DVec3Property _uploadedDataHigherDomainBounds;
+
     TaskLoader taskLoader;
     std::vector<std::unique_ptr<Task>> tasks;
 
