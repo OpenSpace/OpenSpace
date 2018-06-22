@@ -60,6 +60,8 @@ namespace {
 
 namespace openspace {
 
+constexpr const char* _loggerCat = "ghoul.opengl.FramebufferObject";
+
 documentation::Documentation SpiceRotation::Documentation() {
     using namespace openspace::documentation;
     return {
@@ -149,38 +151,17 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 }
 
 glm::dmat3 SpiceRotation::matrix(const Time& time) const {
+    //LERROR(fmt::format("SpiceRotation: '{}' ", time.j2000Seconds()));
     try {
         //multiplicate _sourceframe and _destinationframe with the right rotation matrix before sending it to spicemanager!!!!!!!!
         glm::dmat3 result;
-       /* glm::dmat3 rotationMatrixY;
 
-        std::string hej = "MSL_RA_SHOULDER_AZ";
-        */
-        /*if (hej.compare(std::string(_destinationFrame)) != 0) {
-
-            rotationMatrixY = { 
-                0.0, 0.0, 1.0,
-                0.0, 1.0, 0.0,
-                -1.0, 0.0, 0.0, 
-            };
-
-            result = SpiceManager::ref().positionTransformMatrix(
-                _sourceFrame,
-                _destinationFrame,
-                time.j2000Seconds()
-            );
-
-            return rotationMatrixY * result;
-        }
-        else {*/
-            result = SpiceManager::ref().positionTransformMatrix(
-                _sourceFrame,
-                _destinationFrame,
-                time.j2000Seconds()
-            );
-            return result;
-        //}
-        
+        result = SpiceManager::ref().positionTransformMatrix(
+            _sourceFrame,
+            _destinationFrame,
+            time.j2000Seconds()
+        );
+        return result;
 
     }
     catch (const SpiceManager::SpiceException&) {

@@ -22,61 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/marsrovermodule.h>
+#ifndef __OPENSPACE_MODULE_SPACE___SPACECRAFTPROJECTION___H__
+#define __OPENSPACE_MODULE_SPACE___SPACECRAFTPROJECTION___H__
 
+#include <openspace/scene/translation.h>
 
-//#include <modules/marsrover/surfaceprojection/marsprojection.h>
+//#include <modules/marsrover/surfaceprojection/mslterrain.h>
 
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/stringproperty.h>
+#include <vector>
+#include <ghoul/glm.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <modules/marsrover/rendering/renderableheightmap.h>
-
-//#include <modules/marsrover/rendering/renderablemarsrover.h>
-
-
-#include <modules/marsrover/rotation/advancedspicerotation.h>
-#include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
-
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+}
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
+namespace documentation { struct Documentation; }
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
+class SpacecraftProjection : public Translation {
+public:
+    SpacecraftProjection(const ghoul::Dictionary& dictionary);
 
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
+    static constexpr const char* RootNodeIdentifier = "Root";
+    static constexpr const char* KeyIdentifier = "Identifier";
+    static constexpr const char* KeyParentName = "Parent";
+    static constexpr const char* KeyDependencies = "Dependencies";
+    static constexpr const char* KeyTag = "Tag";
 
-    
-    //to later
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
+	void readHeightMapFile();
+	
+    glm::dvec3 getNewHeight(glm::dvec3 p); 
+    glm::dvec3 convertFromRectangularToLatitudinal(glm::dvec3 p);
 
-    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-    
-    //if we need the heightmap code to be a renderable
-    fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
+    glm::dvec3 position(const Time& time) const override;
 
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    //(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
-    
-    auto fTranslation = FactoryManager::ref().factory<Translation>();
-    fTranslation->registerClass<SpacecraftProjection>("SpacecraftProjection");
-   
+private:
+    properties::StringProperty _target;
+    properties::StringProperty _observer;
+    properties::StringProperty _frame;
+    properties::StringProperty _heightTexture;
 
-    //auto fProjectionProvider = std::make_unique<ghoul::TemplateFactory<ProjectionProvider>>();
-    //fProjectionProvider->registerClass<MslTerrain>("MslTerrain");
 
-    //Read heightmap once
-    //MslTerrain terrainMap;
-    //terrainMap.createHeightMap(); 
+    glm::dvec3 MSL_position;
 
-    //auto fTranslation = FactoryManager::ref().factory<Translation>();
-    //fTranslation->registerClass<MarsProjection>("MarsProjection");
-}
+    std::string _texturePath;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    glm::dvec3 directionVector;
+    glm::dvec3 newPoint;
 
+    int nrPoints;
+
+    unsigned int arrayWidth;
+    unsigned int arrayHeight;
+    std::vector<std::vector<double>> heightMap;
+    bool fileRead = false;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SPACE___SPACECRAFTPROJECTION___H__

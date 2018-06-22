@@ -528,7 +528,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         }
     }
     else if (targetHasCoverage && observerHasCoverage) {
-
+        
         glm::dvec3 position;
         spkpos_c(
             target.c_str(),
@@ -546,6 +546,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             referenceFrame,
             ephemerisTime
         ));
+
         return position;
     }
     else if (targetHasCoverage) {
@@ -785,19 +786,40 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
 
 double SpiceManager::getEulerAngle(glm::dmat3 transformMatrix, int a)
 {
-        SpiceDouble rot_x;
-        SpiceDouble rot_y;
-        SpiceDouble rot_z;
-        double angle;
+    SpiceDouble rot_x;
+    SpiceDouble rot_y;
+    SpiceDouble rot_z;
 
-        //Compute Gimbal Angles
-        m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(transformMatrix)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
+    //Compute Gimbal Angles
+    m2eul_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(transformMatrix)), 3, 2, 1, &rot_z, &rot_y, &rot_x);
 
-        if (a == 1) angle = rot_x;
-        else if (a == 2) angle = rot_y;
-        else angle = rot_z;
+    //FIX
+    if (a == 1)      return rot_x;
+    else if (a == 2) return rot_y;
+    else             return rot_z;
+}
 
-        return angle;
+//glm::dvec3 SpiceManager::ConvertToLatitudinalCoords(glm::dvec3 point) 
+glm::dvec3 SpiceManager::fromCartesianToLatitudinal(glm::dvec3 point) 
+{
+    double radius;
+    double longitude;
+    double latitude;
+
+    reclat_c(reinterpret_cast<double(*)[3]>(glm::value_ptr(point)), &radius, &longitude, &latitude);
+    
+    return glm::dvec3(radius, longitude, latitude);
+}
+
+//Fix: everything. 
+//whats re and f??
+glm::dvec3 SpiceManager::fromLatitudinalToCartesian(glm::dvec3 point) //(rad, long, lat)
+{
+    glm::dvec3 result;
+
+    latrec_c(point.x, point.y, point.z, glm::value_ptr(result));
+
+    return result;
 }
 
 glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
@@ -1170,18 +1192,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
 
     std::set<double> coveredTimes = _ckCoverageTimes.find(idFrame)->second;
 
-
-    // CAROLINE: Check if the two CK files provide identical data (same strucure)
-    // for example, different coordinate systems
-
-    //std::string val;
-    //getValue(toFrame, val, time);
-
     if (coveredTimes.lower_bound(time) == coveredTimes.begin()) {
-        
-
-
-
         // coverage later, fetch first transform
         pxform_c(
             fromFrame.c_str(),

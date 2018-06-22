@@ -12,7 +12,6 @@ local textures = asset.syncedResource({
     Version = 1
 })
 
--- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
 local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local mapServiceConfigs = asset.localResource("map_service_configs")
@@ -187,7 +186,8 @@ local height_layers = {
         Name = "MSL Gale",
         Enables = true,
         FilePath = "F:/MSLBaseMap/MSL_Gale_DEM_Mosaic_1m_v3_lonlat_Heightmap.vrt",
-        TilePixelSize = 90
+        TilePixelSize = 90,
+        Enabled = true
     }
 
 }

@@ -18,13 +18,12 @@ local models = asset.syncedResource({
 })
 
 
-
-
 -- Curiosity Model --
 
 local Curiosity = {
     Identifier = "Curiosity",
-    Parent = transforms.landingSite.Identifier,
+    Parent = transforms.MSL_Body.Identifier,
+    --Parent = transforms.MSL_LandingSite.Identifier,
     Tag = {"planet_solarsystem", "planet_terrestrial"},
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity"
@@ -34,23 +33,35 @@ local Curiosity = {
 local CuriosityModel = {
     Identifier = "CuriosityModel",
     Parent = Curiosity.Identifier
-    --GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
+    --GuiPath = "/Solar Syste/Planets/Mars/Curiosity",
+    --Transform = {
+    --    Scale = {
+    --        Type = "StaticScale",
+    --        Scale = 2.0;
+    --    }
+    --}
 }
 
 
 -- Curiosity Model Instruments --
 -- Test Model
 
---local renderTestMarsrover = {
---    Identifier = "renderTestMarsrover",
---    Parent = transforms.RoverLocation.Identifier,
---    Renderable = {
---        Type = "RenderableSphere",
---        Size = 300.0,
---        Segments = 100.0,
---        Texture = texturePath2
---    }
---}
+local renderTestMarsrover = {
+    Identifier = "renderTestMarsrover",
+    --Parent = "J2000",
+    Renderable = {
+        Type = "RenderableSphere",
+        Size = 300.0,
+        Segments = 100.0,
+        Texture = textures .. "/tex_01.png"
+    },
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 70.111, -35.4525, -0.106 }
+        }
+    }
+}
 
 -- yellow texture, tex_01
 local Body = {
@@ -69,6 +80,8 @@ local Body = {
         }
     }
 }
+
+
 
 -- pink texture, tex_02
 local Body_staticParts_1 = {
@@ -1091,6 +1104,8 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Body_staticParts_3,
     Body_staticParts_4,
     Body_staticParts_5,
+
+    renderTestMarsrover,
     
     RA_Shoulder_AZ,
     RA_Shoulder_AZ_detail_1,
@@ -1121,7 +1136,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     SAM_Cover_2,
     CHEMIN_Bottom,
     Submodules,
-    HeightMap,
+    --HeightMap,
 
     Wheel_Base,
     Wheel_Leg_1A_L,

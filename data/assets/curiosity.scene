@@ -22,7 +22,11 @@ asset.require('scene/solarsystem/planets/mars/rovers/curiosity')
 asset.onInitialize(function ()
     --openspace.time.setTime(openspace.time.currentWallTime())
 
-    openspace.time.setTime("2018-01-23T12:28:28")
+    --selfie
+    --openspace.time.setTime("2018-01-23T12:28:28")
+    --Landing
+    openspace.time.setTime("2012-08-06T01:33:28")
+    --openspace.time.setTime("2013-07-05T03:04:09")
 
     openspace.setDefaultGuiSorting()
 
@@ -31,7 +35,7 @@ asset.onInitialize(function ()
     )
 
     openspace.markInterestingNodes({
-        "Earth", "Mars", "Curiosity", "HeightMap"
+        "Earth", "Mars", "Curiosity", "HeightMap", "Body_staticParts_2"
     })
 
     openspace.addVirtualProperty(
@@ -45,8 +49,8 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        --Focus = MSLAsset.CuriosityModel.Identifier,
-        Focus = marsAsset.Mars.Identifier,
+        Focus = MSLAsset.CuriosityModel.Identifier,
+        --Focus = marsAsset.Mars.Identifier,
         Position = { 10.0, 10.0, 10.0 },
         Rotation = { 0.0, -0.0, 0.0, 0.0 },
     })
@@ -59,6 +63,6 @@ asset.onDeinitialize(function ()
     openspace.removeVirtualProperty("*Trail.renderable.Enabled")
 
     openspace.removeInterestingNodes({
-        "Earth", "Mars", "Curiosity", "HeightMap"
+        "Earth", "Mars", "Curiosity", "HeightMap", "Body_staticParts_2"
     })
 end)

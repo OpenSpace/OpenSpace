@@ -719,6 +719,10 @@ public:
     //returns the gimbal angle for spacecrafts
     double getEulerAngle(glm::dmat3 transformMatrix, int a);
 
+    //Converts rectangular coordinates to Latitudinal coordinates dvec3(radius, long, lat)
+    glm::dvec3 fromCartesianToLatitudinal(glm::dvec3 point);
+    glm::dvec3 fromLatitudinalToCartesian(glm::dvec3 point); 
+
     /// The structure returned by the #fieldOfView methods
     struct FieldOfViewResult {
         /// The rough shape of the returned field of view
