@@ -11,6 +11,7 @@ import About from './About/About';
 import Stack from '../components/common/Stack/Stack';
 import { startConnection } from '../api/Actions';
 import DataLoader from '../components/DataLoader/DataLoader'
+import PrepareUploadedData from '../components/DataLoader/PrepareUploadedData';
 
 class OnScreenGui extends Component {
   constructor(props) {
@@ -52,6 +53,7 @@ class OnScreenGui extends Component {
         </section>
         <section className={styles.Grid__Right}>
           <DataLoader />
+          <PrepareUploadedData />
           <BottomBar />
         </section>
       </div>

@@ -33,7 +33,7 @@ class DataLoader extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const { activeDataType, dataToLoadUri, width } = this.state;
+    const { activeDataType, dataToLoadUri } = this.state;
     if ((activeDataType !== nextState.activeDataType) && (nextState.activeDataType !== '')) {
       this.triggerDataToLoad(nextState.activeDataType);
       const uri = this.getUriForDataToLoad(nextState.activeDataType);
@@ -42,13 +42,6 @@ class DataLoader extends Component {
 
     if (dataToLoadUri !== nextState.dataToLoadUri) {
       this.subscribeToActiveUri(nextState.dataToLoadUri);
-    }
-
-    if (width !== nextProps.width && nextProps.width !== 0 ) {
-      this.setState({
-        width: nextProps.width / 2,
-        height: nextProps.height / 2
-      })
     }
 
     return true;
@@ -105,7 +98,7 @@ class DataLoader extends Component {
             <Window
               type="large"
               title="Data Loader"
-              size={{ width:this.state.width, height:this.state.height }}
+              size={{ width:this.props.width/2, height:this.props.height/2 }}
               position={{ x:470, y:-370 }}
               closeCallback={() => setActivated(false)}
             >
