@@ -17,10 +17,5 @@
         <BlockSizeY>360</BlockSizeY>
         <BandsCount>3</BandsCount>
         <MaxConnections>10</MaxConnections>
-        <Cache>
-                <Path>C:/OpenSpace/OpenSpaceMercuryRising/gdal_cache</Path>
-                <Depth>4</Depth>
-                <Extension>.png</Extension>
-        </Cache>
 </GDAL_WMS>
 
