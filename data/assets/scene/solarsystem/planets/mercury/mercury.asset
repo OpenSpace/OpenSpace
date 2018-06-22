@@ -213,6 +213,7 @@ local Mercury = {
         Layers = {
             ColorLayers = color_layers
         }
+    },
     Tag = { "planet_solarSystem", "planet_terrestrial" },
     GUI = {
         Path = "/Solar System/Planets/Mercury"
