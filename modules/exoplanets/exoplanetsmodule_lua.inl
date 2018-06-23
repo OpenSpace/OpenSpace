@@ -24,6 +24,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
@@ -63,12 +64,15 @@ std::string getStarColor(float bv) {
 	return colorString;
 }
 
-glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om, glm::dmat3 rot) {
+glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float om , glm::dmat3 rot) {
     // Exoplanet defined inclination changed to be used as Kepler defined inclination
 
     const glm::dvec3 ascendingNodeAxisRot = rot * glm::dvec3(0.f, 0.f, 1.f);
+    //const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.f, 0.f, 1.f);
     const glm::dvec3 inclinationAxisRot = rot * glm::dvec3(1.f, 0.f, 0.f );
+    //const glm::dvec3 inclinationAxisRot = glm::dvec3(1.f, 0.f, 0.f );
 	const glm::vec3 argPeriapsisAxisRot = rot * glm::dvec3( 0.f, 0.f, 1.f );
+	//const glm::vec3 argPeriapsisAxisRot = glm::dvec3( 0.f, 0.f, 1.f );
 
     /*const glm::vec3 ascendingNodeAxisRot = { 0.f, 0.f, 1.f };
     const glm::vec3 inclinationAxisRot = { 1.f, 0.f, 0.f };
@@ -285,26 +289,34 @@ int addExoplanetSystem(lua_State* L) {
 		std::string script = "";
 
         glm::dvec3 position = glm::dvec3(p.POSITIONX * parsec , p.POSITIONY * parsec, p.POSITIONZ * parsec);
+        
         glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - position);
-        glm::dvec3 northEclipticPole = glm::dvec3(0.0, 0.0, 1.0); // , 1.0);
-        //glm::dvec3 northCelectialPole = northEclipticPole * glm::rotate(glm::radians(336.6), glm::dvec3(1.f, 0.f, 0.f));
+        glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
+
+        glm::dmat3 galaxticToCelectialMatrix = SpiceManager::ref().positionTransformMatrix( // galaxtic north in celectial coordinates, or just celectial north?
+            "GALACTIC",
+            "J2000",
+            0.0
+        );
+        glm::dvec3 celestialNorth = normalize(galaxticToCelectialMatrix * galacticNorth);
+
 
         // Earths north vector (0,0,1) projected onto the skyplane, the plane perpendicular to the viewing vector (starTosunVec)
-        glm::dvec3 northProjected = normalize(glm::length(northEclipticPole)*glm::sin(dot(northEclipticPole, starToSunVec)) * glm::cross(starToSunVec, glm::cross(northEclipticPole, starToSunVec)));
-        glm::dmat3 firstRotation = getExoplanetSystemRotation(glm::dvec3(0.0,0.0,1.0), starToSunVec);
-        glm::dvec3 newX = firstRotation * glm::dvec3(1.0, 0.0, 0.0);
-        glm::dmat3 secondRotation = getExoplanetSystemRotation(newX, northProjected);
+        glm::dvec3 northProjected = normalize(celestialNorth - (((dot(celestialNorth, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec));
+        OsEng.moduleEngine().module<ExoplanetsModule>()->setNorthVector(northProjected);
 
-        glm::dmat3 exoplanetSystemRot = secondRotation * firstRotation;
-
+        glm::dvec3 beta = normalize(cross(northProjected, starToSunVec));
+        glm::dmat3 exoplanetSystemRot = glm::dmat3(starToSunVec.x, starToSunVec.y, starToSunVec.z,
+                                                     beta.x, beta.y, beta.z,
+                                                    northProjected.x, northProjected.y, northProjected.z);
 
 		const std::string starParent = "{"
 			"Identifier = '" + starname + "',"
-			"Parent = 'SolarSystemBarycenter',"
+			"Parent = 'SolarSystemBarycenter'," 
 			"Transform = {"
-            "Rotation = {"
-                "Type = 'StaticRotation',"
-                "Rotation = " + std::to_string(exoplanetSystemRot) + ","
+                "Rotation = {"
+                    "Type = 'StaticRotation',"
+                    "Rotation = " + std::to_string(exoplanetSystemRot) + ","
                 "},"
 				"Translation = {"
 					"Type = 'StaticTranslation',"
@@ -419,38 +431,38 @@ int addExoplanetSystem(lua_State* L) {
 		
 
 
-		for (size_t i = 0; i < plsy.size(); i++)
-		{
-			script = "";
+        for (size_t i = 0; i < plsy.size(); i++)
+        {
+            script = "";
 
-			if (isnan(plsy[i].ECC))
-			{
-				plsy[i].ECC = 0;
-			}
-			if (isnan(plsy[i].I))
-			{
-				plsy[i].I = 90;
-			}
-			if (isnan(plsy[i].BIGOM))
-			{
-				plsy[i].BIGOM = 0;
-			}
-			if (isnan(plsy[i].OM))
-			{
-				plsy[i].OM = 90;
-			}
-			std::string sepoch;
-			if (!isnan(plsy[i].TT)) {
-				epoch.setTime("JD " + std::to_string(plsy[i].TT));
-				sepoch = epoch.ISO8601();
-			}
-			else
-				sepoch = "2009-05-19T07:11:34.080";
+            if (isnan(plsy[i].ECC))
+            {
+                plsy[i].ECC = 0;
+            }
+            if (isnan(plsy[i].I))
+            {
+                plsy[i].I = 90;
+            }
+            if (isnan(plsy[i].BIGOM))
+            {
+                plsy[i].BIGOM = 0;
+            }
+            if (isnan(plsy[i].OM))
+            {
+                plsy[i].OM = 90;
+            }
+            std::string sepoch;
+            if (!isnan(plsy[i].TT)) {
+                epoch.setTime("JD " + std::to_string(plsy[i].TT));
+                sepoch = epoch.ISO8601();
+            }
+            else
+                sepoch = "2009-05-19T07:11:34.080";
 
             float planetradius;
             std::string enabled = "";
-			if (isnan(plsy[i].R))
-			{   
+            if (isnan(plsy[i].R))
+            {
                 planetradius = plsy[i].RSTAR;
                 enabled = "false";
 
@@ -460,76 +472,76 @@ int addExoplanetSystem(lua_State* L) {
                 enabled = "true";
             }
 
-				const std::string planet = "{"
-					"Identifier = '" + plna[i] + "',"
-					"Parent = '" + starname + "',"
-                    "Enabled = true,"
-					"Renderable = {"
-						"Type = 'RenderableGlobe',"
-                        "Enabled = "+ enabled +","
-						"Radii = " + std::to_string(planetradius) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
-						"SegmentsPerPatch = 64,"
-						"PerformShading = false,"
-						"Layers = {"
-							"ColorLayers = {"
-								"{"
-									"Identifier = 'ExoplanetTexture',"
-									"FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
-									"Enabled = true"
-								"}"
-							"}"
-						"}"
-					"},"
-					"Transform = {"
-                        "Scale = {"
-                            "Type = 'StaticScale',"
-                            "Scale = 1.0,"
-                        "},"
-						"Translation = {"
-							"Type = 'KeplerTranslation',"
-							"Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
-							"SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
-							"Inclination = " + std::to_string(plsy[i].I) + "," //I
-							"AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
-							"ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
-							"MeanAnomaly = 0.0,"
-							"Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-							"Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
-						"},"
-					"},"
-				"}";
-
-				script = "openspace.addSceneGraphNode(" + planet + ");";
-				OsEng.scriptEngine().queueScript(
-					script,
-					openspace::scripting::ScriptEngine::RemoteScripting::Yes
-				);
-				script = "";
-
-			
-
-            
-			const std::string planetTrail = "{"
-				"Identifier = '" + plna[i] + "Trail',"
-				"Parent = '" + starname + "',"
+            const std::string planet = "{"
+                "Identifier = '" + plna[i] + "',"
+                "Parent = '" + starname + "',"
                 "Enabled = true,"
-				"Renderable = {"
-				    "Type = 'RenderableTrailOrbit',"
-				    "Period = " + std::to_string(plsy[i].PER) + ","
-				    "Resolution = 1000,"
-				    "Translation = {"
-				        "Type = 'KeplerTranslation',"
-				        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC 
-				        "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
-				        "Inclination = " + std::to_string(plsy[i].I) + "," //I
-				        "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
-				        "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
-				        "MeanAnomaly = 0.0,"
-				        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-				        "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
-				    "},"
-				    "Color = { 1, 0, 0 }"
-				"},"
+                "Renderable = {"
+                    "Type = 'RenderableGlobe',"
+                    "Enabled = " + enabled + ","
+                    "Radii = " + std::to_string(planetradius) + " *7.1492E7," //R. in meters. 1 jupiter radii = 7.1492×10e7 m
+                    "SegmentsPerPatch = 64,"
+                    "PerformShading = false,"
+                    "Layers = {"
+                        "ColorLayers = {"
+                            "{"
+                                "Identifier = 'ExoplanetTexture',"
+                                "FilePath = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/test3.jpg',"
+                                "Enabled = true"
+                            "}"
+                        "}"
+                    "}"
+                "},"
+                "Transform = {"
+                    "Scale = {"
+                        "Type = 'StaticScale',"
+                        "Scale = 1.0,"
+                    "},"
+                    "Translation = {"
+                        "Type = 'KeplerTranslation',"
+                        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC
+                        "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
+                        "Inclination = " + std::to_string(plsy[i].I) + "," //I
+                        "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
+                        "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
+                        "MeanAnomaly = 0.0,"
+                        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
+                        "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "},"
+                "},"
+            "}";
+
+            script = "openspace.addSceneGraphNode(" + planet + ");";
+            OsEng.scriptEngine().queueScript(
+                script,
+                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            );
+            script = "";
+
+
+
+
+            const std::string planetTrail = "{"
+                "Identifier = '" + plna[i] + "Trail',"
+                "Parent = '" + starname + "',"
+                "Enabled = true,"
+                "Renderable = {"
+                    "Type = 'RenderableTrailOrbit',"
+                    "Period = " + std::to_string(plsy[i].PER) + ","
+                    "Resolution = 1000,"
+                    "Translation = {"
+                        "Type = 'KeplerTranslation',"
+                        "Eccentricity = " + std::to_string(plsy[i].ECC) + "," //ECC 
+                        "SemiMajorAxis = " + std::to_string(plsy[i].A) + " * 149597871," // 149 597 871km = 1 AU. A
+                        "Inclination = " + std::to_string(plsy[i].I) + "," //I
+                        "AscendingNode  = " + std::to_string(plsy[i].BIGOM) + "," //BIGOM
+                        "ArgumentOfPeriapsis  = " + std::to_string(plsy[i].OM) + "," //OM
+                        "MeanAnomaly = 0.0,"
+                        "Epoch = '" + sepoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
+                        "Period = " + std::to_string(plsy[i].PER) + "* 86400" //PER. 86 400sec = 1 day.
+                    "},"
+                    "Color = { 1, 0, 0 }"
+                "},"
 			"}";
 
 			OsEng.scriptEngine().queueScript(
@@ -541,6 +553,7 @@ int addExoplanetSystem(lua_State* L) {
 			{
                 // Get the orbit plane that the trail orbit and planet have from the KeplerTranslation
                 glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(plsy[i].I, plsy[i].BIGOM, plsy[i].OM, exoplanetSystemRot);
+                //glm::dmat4 orbitPlaneRotationMatrix = computeOrbitPlaneRotationMatrix(plsy[i].I, plsy[i].BIGOM, plsy[i].OM); // , exoplanetSystemRot);
                 glm::dmat3 rot = orbitPlaneRotationMatrix;
                 OsEng.moduleEngine().module<ExoplanetsModule>()->setRotation(rot);
 				const std::string disc = "{"

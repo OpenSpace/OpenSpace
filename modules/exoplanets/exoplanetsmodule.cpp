@@ -81,6 +81,12 @@ void ExoplanetsModule::setRotation(glm::dmat3 rot) {
 glm::dmat3 ExoplanetsModule::getRotation() {
     return _rotation;
 }
+void ExoplanetsModule::setNorthVector(glm::dvec3 vector) {
+    _north = vector;
+}
+glm::dvec3 ExoplanetsModule::getNorthVector() {
+    return _north;
+}
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
 
@@ -160,22 +166,6 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
             _discoveryMethods->setDopplerImagePos(imagePos);
 
         }
-        /*if (_discoveryMethods->isReference()) {
-            std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
-            float starRadius = planets[0].RSTAR * 6.957E8; //m 
-
-            std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
-            SceneGraphNode* starNode = OsEng.renderEngine().scene()->sceneGraphNode(starName);
-            glm::dvec3 starPos = starNode->worldPosition(); // in m
-            Camera* cam = OsEng.navigationHandler().camera();
-            glm::dvec3 cameraPos = cam->positionVec3(); // in m?
-            glm::dvec3 starToCamera = normalize(cameraPos - starPos);
-
-            
-            glm::dvec3 referencePos = (double(starRadius) * starToCamera);
-
-            _discoveryMethods->setSunReferencePosition(referencePos);
-        }*/
 
     });
 }

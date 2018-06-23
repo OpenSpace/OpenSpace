@@ -246,15 +246,6 @@ namespace openspace::exoplanets{
         return _showSolarSystemReference;
     }
 
-    //void DiscoveryMethods::setSunReferencePosition(glm::dvec3 pos) {
-    //    std::string script = "openspace.setPropertyValueSingle( 'Scene.SunReference.Translation.Position', " + std::to_string(pos) + ");";
-    //    OsEng.scriptEngine().queueScript(
-    //        script,
-    //        openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    //    );
-    //}
-
-
     void DiscoveryMethods::setDopplerImagePos(float value) {
         std::string script = "openspace.setPropertyValueSingle( 'ScreenSpace.DopplerShift2.EuclideanPosition', {"+std::to_string(value)+", -0.7}); ";
         OsEng.scriptEngine().queueScript(
@@ -276,12 +267,10 @@ namespace openspace::exoplanets{
         float eccentricity = planets[0].ECC;
         float starRadius = planets[0].RSTAR; // in Solar Radii
 
-        glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
-        //glm::dvec3 northProjected = glm::normalize(glm::length(north)*glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
-        glm::dvec3 northProjected = normalize(north - (((dot(north, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec));
+        glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
 
         // MOVE CAMERA
-        glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, northProjected));
+        glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, north));
         glm::dvec3 cameraPosition = starPosition + ((4.0 * semiMajorAxis * 149597870700.0) * faceOnVector);
         moveCameraDopplerView(cameraPosition);
         // END CAMERA
@@ -313,7 +302,7 @@ namespace openspace::exoplanets{
 
 
         // HELPER MARKERS
-        glm::dvec3 northDirectionPos = starPosition + (double(starRadius * scale) * northProjected);
+        glm::dvec3 northDirectionPos = starPosition + (double(starRadius * scale) * north);
         glm::dvec3 viewDirectionPos = starPosition + (double(starRadius * scale) * starToSunVec);
         addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
         // END MARKERS
@@ -384,20 +373,18 @@ namespace openspace::exoplanets{
         // END SCALE
 
         // HELPER MARKERS
-        glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
-        //glm::dvec3 northProjected = glm::normalize(glm::length(north)*glm::sin(glm::dot(north, starToSunVec)) * glm::cross(starToSunVec, glm::cross(north, starToSunVec)));
-        glm::dvec3 northProjected = normalize(north - (((dot(north, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec));
-        glm::dvec3 northDirectionPos = starPosition + (double(starRadius * scale) * northProjected);
+        glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
+        glm::dvec3 northDirectionPos = starPosition + (double(starRadius * scale) * north);
         glm::dvec3 viewDirectionPos = starPosition + (double(starRadius * scale) * starToSunVec);
         addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
         // END MARKERS
     }
     void DiscoveryMethods::removeTransitMethodVisualization() {
-
+        std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
         //SCALE STAR AND PLANET
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
         scaleNode(starName + "Globe", 1);
-        scaleNode(starName + " b", 1);
+        scaleNode(planetNames[0], 1);
 
 
 
@@ -448,12 +435,12 @@ namespace openspace::exoplanets{
                 "Texture = 'C:/Users/Karin/Documents/OpenSpace/modules/exoplanets/target-blue-ring.png',"
                 "BlendMode = 'Additive'"
             "},"
-            //"Transform = {"
-            //    "Translation = {"
-            //        "Type = 'StaticTranslation',"
-            //        "Position = {" + std::to_string(planets[0].R) + "* 7.1492E7, 0," + std::to_string(planets[0].R) + "* 7.1492E7}," //Jupiter radii to m " + std::to_string(planets[0].R) + "* 7.1492E7
-            //    "},"
-            //"},"
+            "Transform = {"
+                "Translation = {"
+                    "Type = 'StaticTranslation',"
+                    "Position = {0, 0, 0}," //Jupiter radii to m " + std::to_string(planets[0].R) + "* 7.1492E7
+                "},"
+            "},"
         "}";
         script = "";
         script = "openspace.addSceneGraphNode(" + earthRef + ");";
