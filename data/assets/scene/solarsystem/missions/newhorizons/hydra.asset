@@ -19,7 +19,7 @@ local Hydra = {
             Type = "SpiceTranslation",
             Target = "HYDRA",
             Observer = "PLUTO BARYCENTER",
-            Kernels = kernels .. "/new_horizons/spk/NavSE_plu047_od122.bsp"
+            Kernels = kernels .. "/NavSE_plu047_od122.bsp"
         }
     },
     Renderable = {

@@ -1,7 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels')
 
 
 

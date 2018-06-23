@@ -274,11 +274,14 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                     "HTTPSynchronization",
                     fmt::format("Error renaming file {} to {}", tempName, originalName)
                 );
-
                 failed = true;
             }
         }
         else {
+            LERRORC(
+                "HTTPSynchronization",
+                fmt::format("Error downloading file from URL {}", d->url())
+            );
             failed = true;
         }
     }

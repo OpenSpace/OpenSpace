@@ -108,6 +108,8 @@ public:
 
     void perform(RequestOptions opt);
 
+    const std::string& url() const;
+
 private:
     void setReadyState(ReadyState state);
 
@@ -171,6 +173,8 @@ public:
     virtual ~SyncHttpDownload() = default;
     void download(HttpRequest::RequestOptions opt);
 
+    const std::string& url() const;
+
 protected:
     HttpRequest _httpRequest;
 };
@@ -183,6 +187,8 @@ public:
     void start(HttpRequest::RequestOptions opt);
     void cancel();
     void wait();
+
+    const std::string& url() const;
 
 protected:
     void download(HttpRequest::RequestOptions opt);

@@ -33,8 +33,8 @@ local Vesta = {
             Target = "VESTA",
             Observer = "SUN",
             Kernels = {
-                --kernels .. "/pck/dawn_vesta_v06.tpc",
-                kernels .. "/DawnKernels/spk/sb_vesta_071107.bsp"
+                --kernels .. "/dawn_vesta_v06.tpc",
+                kernels .. "/sb_vesta_071107.bsp"
             }
         },
         Rotation = {
