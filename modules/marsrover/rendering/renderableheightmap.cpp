@@ -37,7 +37,7 @@
 #include <ghoul/fmt.h>
 
 #include <freeimage.h>
-#include <modules/marsrover/heighthandler/lodepng.h>
+
 
 
 #include <modules/globebrowsing/geometry/geodetic2.h>

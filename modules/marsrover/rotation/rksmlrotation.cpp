@@ -105,7 +105,7 @@ void RksmlRotation::openFile() const {
 
         fileName = fileName + "/rksml_playback_filt_eha.rksml";
         std::replace(fileName.begin(), fileName.end(), '\\', '/');
-        //LERROR(fmt::format("filename   '{}'", fileName));
+        LERROR(fmt::format("filename   '{}'", fileName));
 
 
         //call to parse the file:  ParseRksmlFile::parse();

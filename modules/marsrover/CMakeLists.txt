@@ -33,6 +33,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/rksmlrotation.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/spacecraftprojection.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.h
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.h
 
@@ -46,6 +48,8 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/rksmlrotation.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/spacecraftprojection.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.cpp

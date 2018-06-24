@@ -1,47 +1,33 @@
 local assetHelper = asset.require('util/asset_helper')
 local kernels = asset.require('./kernels')
 local marsTransforms = asset.require('scene/solarsystem/planets/mars/transforms')
+local marsTransforms2 = asset.require('scene/solarsystem/planets/mars/mars')
+
 --local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local correctRotation = {
-    Identifier = "correctRotation",
-    Parent = "MarsBarycenter",
+local wheeldata = asset.syncedResource({
+    Name = "Wheel Data",
+    Type = "HttpSynchronization",
+    Identifier = "marscuriosity_wheeldata",
+    Version = 1
+})
+
+local MSL_Rotation = {
+    Identifier = "MSL_Rotation",
+    Parent =  marsTransforms2.Mars.Identifier,
     Transform = {
         Rotation = {
-          Type = "SpiceRotation",
-          SourceFrame = "IAU_MARS",  
-          DestinationFrame = "J2000"
-        }
-    }
-}
-
-
---translate out to mars surface
-local centerMars = {
-    Identifier = "centerMars",
-    Parent = correctRotation.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MSL",                 
-            Observer = "MARS",
-            Frame = "J2000",                        
-            Kernels = kernels.CuriosityKernels          
-        }
-    }
-}
-
-
-local landingSite = {
-    Identifier = "landingSite",
-    Parent =  centerMars.Identifier,
-    Transform = {
-        Translation = {
-            Type = "SpiceTranslation",
-            Target = "MSL",
-            Observer = "MSL_LANDING_SITE",
-            Frame = "MSL_TOPO",                     
-            Kernels = kernels.CuriosityKernels          
+            Type = "StaticRotation",
+            -- correct, no scalefactor
+            --Rotation = { 0.9999998,  0.0006846, -0.0001692,
+            --            -0.0006846,  0.9999998,  0.0000001,
+            --             0.0001692,  0.0000001,  1.0000000
+            --}
+            -- scalefactor
+            Rotation = { 0.9999995,  0.0006493, -0.0008098,
+                        -0.0006493,  0.9999998,  0.0000003,
+                         0.0008098,  0.0000003,  0.9999996
+            }
         }
     },
     GUI = {
@@ -51,13 +37,36 @@ local landingSite = {
 
 local MSL_Location = {
     Identifier = "MSL_Location",
-    Parent =  landingSite.Identifier,
-    --Transform = {
-    --    Scale = {
-    --         Type = "StaticScale",
-    --         Scale = 10.0
-    --    }
-    --},
+    Parent =  MSL_Rotation.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "SpacecraftProjection",
+            Target = "MSL",                 
+            Observer = "MARS",
+            Frame = "IAU_MARS",
+            HeightTexture = "HeightmapTesting.jpg",                        
+            Kernels = kernels.CuriosityKernels    
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "MSL_ROVER",
+            DestinationFrame = "IAU_MARS"   
+        }
+    },
+    GUI = {
+        Path = "/Solar System/Planets/Mars/Curiosity/Model"
+    }
+}
+
+local MSL_Body = {
+    Identifier = "MSL_Body",
+    Parent =  MSL_Location.Identifier,
+    Transform = {   
+        Translation = {
+            Type = "StaticTranslation",
+            Position = { 0.17, 0.0, -0.844 }
+        }
+    },
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -69,7 +78,7 @@ local MSL_Location = {
 
 local RA_Base_Location = {
     Identifier = "RA_Base_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
     Transform = {   
         Translation = {
             Type = "StaticTranslation",
@@ -232,7 +241,7 @@ local RA_Mahli_Location = {
 ---- MASTCAM RSM ----
 local RSM_ZERO_AZ_Location = {
     Identifier = "RSM_ZERO_AZ_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
@@ -306,7 +315,7 @@ local RSM_EL_Location = {
 
 local HGA_AZ_Location = {
     Identifier = "HGA_AZ_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
     Transform = {   
         Rotation = {  
             Type = "AdvancedSpiceRotation",
@@ -360,7 +369,7 @@ local HGA_EL_Location = {
 
 local SAM_Cover_1_Location = {
     Identifier = "SAM_Cover_1_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -368,7 +377,7 @@ local SAM_Cover_1_Location = {
 
 local SAM_Cover_2_Location = {
     Identifier = "SAM_Cover_2_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -376,7 +385,7 @@ local SAM_Cover_2_Location = {
 
 local CHEMIN_Location = {
     Identifier = "CHEMIN_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -386,7 +395,14 @@ local CHEMIN_Location = {
 
 local Wheel_base_Location = {
     Identifier = "Wheel_base_Location",
-    Parent = MSL_Location.Identifier,
+    Parent = MSL_Body.Identifier,
+    Transform = {
+        Rotation = {
+            Type = "RksmlRotation",
+            DataPath = wheeldata .. "/rksml/", 
+            --send frames
+        }
+    },
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -624,10 +640,12 @@ local Wheel_B_R_Location = {
 }
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { 
-    correctRotation,
-    centerMars,
-    landingSite,
+    --correctRotation,
+    --centerMars,
+    --landingSite,
+    MSL_Rotation,
     MSL_Location,
+    MSL_Body,
     RA_Base_Location,
     RA_Shoulder_AZ_Location,
     RA_Shoulder_EL_Location,
