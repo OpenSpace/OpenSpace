@@ -12,7 +12,7 @@ local textures = asset.syncedResource({
 
 local models = asset.syncedResource({
     Name = "67P Models",
-    Type = "HtppSynchronization",
+    Type = "HttpSynchronization",
     Identifier = "67p_models",
     Version = 1
 })
