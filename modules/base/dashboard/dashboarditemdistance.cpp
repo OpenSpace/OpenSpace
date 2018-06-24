@@ -438,7 +438,7 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
         *_font,
         penPosition,
         fmt::format(
-            "Distance from {} to {}: {} {}",
+            "Distance from {} to {}: {:f} {}",
             sourceInfo.second, destinationInfo.second, dist.first, dist.second
         )
     );

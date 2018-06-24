@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
-local kernels368 = asset.require('../sat368').Kernels
+local kernel = asset.require('../kernels').sat368
 
 
 
@@ -25,7 +25,7 @@ local gallicGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 774.58,
-        Kernels = kernels368
+        Kernels = kernel
     },
     {
         Identifier = "Bebhionn",
@@ -41,7 +41,7 @@ local gallicGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 838.77,
-        Kernels = kernels368
+        Kernels = kernel
     },
     {
         Identifier = "Erriapus",
@@ -57,7 +57,7 @@ local gallicGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 844.89,
-        Kernels = kernels368
+        Kernels = kernel
     },
     {
         Identifier = "Tarvos",
@@ -73,7 +73,7 @@ local gallicGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 944.23,
-        Kernels = kernels368
+        Kernels = kernel
     },
 }
 

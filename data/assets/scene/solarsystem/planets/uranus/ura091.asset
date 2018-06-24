@@ -1,8 +1,0 @@
-local Kernels = asset.syncedResource({
-    Name = "Uranus Spice Kernels (ura091)",
-    Type = "TorrentSynchronization",
-    Identifier = "ura091",
-    Magnet = "magnet:?xt=urn:btih:4A5CA79334D5C8AC6AF622247E27A6723B74CCFB&dn=ura091-rocks-merge.bsp&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.publicbt.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce"
-})
-
-asset.export("Kernels", Kernels .. "/ura091-rocks-merge.bsp")

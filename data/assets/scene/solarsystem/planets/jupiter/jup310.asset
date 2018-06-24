@@ -1,8 +1,0 @@
-local Kernels = asset.syncedResource({
-    Name = "Jupiter Spice Kernels (jup310)",
-    Type = "TorrentSynchronization",
-    Identifier = "jup310",
-    Magnet = "magnet:?xt=urn:btih:E8B7D7E136DE1C6249158B254BFC8B9ECE2A0539&dn=jup310.bsp&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.publicbt.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce"
-})
-
-asset.export("Kernels", Kernels .. '/jup310.bsp')
