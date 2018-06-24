@@ -1,8 +1,9 @@
 /*****************************************************************************************
  *                                                                                       *
- * OpenSpace                                                                             *
+ * GHOUL                                                                                 *
+ * General Helpful Open Utility Library                                                  *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2012-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,53 +23,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/marsrovermodule.h>
+#ifndef __GHOUL___TEXTUREWRITERFREEIMAGE___H__
+#define __GHOUL___TEXTUREWRITERFREEIMAGE___H__
 
-
-//#include <modules/marsrover/surfaceprojection/marsprojection.h>
-
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
 #include <modules/marsrover/rendering/renderableheightmap.h>
-
-//#include <modules/marsrover/rendering/renderablemarsrover.h>
-
-
-#include <modules/marsrover/rotation/advancedspicerotation.h>
-#include <modules/marsrover/rotation/rksmlrotation.h>
-
-//#include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
+#include <memory>
+#include <string>
 
 
-namespace openspace {
+struct FIBITMAP;
 
-ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
+namespace ghoul::io {
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
+#ifdef GHOUL_USE_FREEIMAGE
 
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-
-    
-    //to later
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
-
-    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-    
-    //if we need the heightmap code to be a renderable
-    fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
-
-
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    
-    //(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
-    fRotation->registerClass<RksmlRotation>("RksmlRotation");
-    
+class TextureWriterFreeImage {
+public:
    
-}
+    static void writeTexture(unsigned char* texturePixels); 
+    static bool success(int ok);
 
+   
 
-} // namespace openspace
+private:
+    int bitsPerPixels = 24; // 8 bits is grayscale?
+    int WIDTH = 1920;
+    int HEIGHT = 1080;
+};
+
+#endif // GHOUL_USE_FREEIMAGE
+
+} // namespace ghoul::io
+
+#endif // __GHOUL___TEXTUREREADERFREEIMAGE___H__

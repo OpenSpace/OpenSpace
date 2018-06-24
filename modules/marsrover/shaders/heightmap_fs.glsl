@@ -27,19 +27,31 @@
 
 //in vec2 UV;
 in vec2 pass_textureCoords;
+//in vec4 positionCameraSpace;
+//out vec3 heightmapcolor;
+//out vec3 heightmapcolor;
 
-out vec3 heightmapcolor;
+in vec4 vs_position;
 
 uniform sampler2D heightmapTexture;
+
+float LinearizeDepth(in vec2 uv){
+    float zNear = 1000.0;  //replace with the zNear for orthographic projection
+    float zFar = -1000.0; // -||-
+    float depth = texture2D(heightmapTexture, uv).x;
+    return (2.0 * zNear) / (zFar + zNear - depth * (zFar - zNear));
+}
 
 
 Fragment getFragment(){
 
-    //vec4 heightmapcolor = vec4(0,0,0,0);
-    heightmapcolor = texture( heightmapTexture, pass_textureCoords).xyz; // UV + 0.005*vec2( sin(1024.0*UV.x),cos(768.0*UV.y)) ).xyz;
-
     Fragment frag;
-    frag.color = vec4(heightmapcolor, 1.0);
+
+    float c = LinearizeDepth(pass_textureCoords);
+
+    frag.color = vec4(c, c, c, 1.0);
+    //frag.color = texture2D(heightmapTexture, pass_textureCoords);
+    frag.depth = vs_position.w;
 
     return frag;
 

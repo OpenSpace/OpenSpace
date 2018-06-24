@@ -27,42 +27,19 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-//layout(location = 2) in vec3 in_normal;
-layout(location = 2) in vec2 textureCoords;
+layout(location = 1) in vec2 textureCoords;
 
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
 
-out vec2 vs_st;
 out vec4 vs_position;
-//out vec3 vs_normalViewSpace;
-//out float vs_screenSpaceDeph;
-
-//out vec2 UV;
 out vec2 pass_textureCoords;
-out vec4 vs_positionScreenSpace;
 
-//uniform mat4 cameraFrustumSize;
-//uniform mat4 directionToSurfaceViewSpace;
-uniform mat4 modelViewProjectionTransform;
-uniform mat4 projectionTransform;
-
-
-void main() {
-
-	vs_st = in_st;
-	vec4 positionCameraSpace = vec4(modelViewProjectionTransform * in_position);
-
-	//in_position should be the frustum size??? ie. ModelPath
-	//guessing this 0.0 should be the height
-	vs_position = z_normalization(
-		modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0) * vec4(textureCoords.xy, 0.0, 1.0) //* cameraFrustumSize
-	);
-
-	vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-
-	gl_Position = vs_position;
+void main(){
+	
 	pass_textureCoords = textureCoords;
-
-	//vs_normalViewSpace = normalize(mat3(ViewProjection) * in_normal);
+	
+	vs_position = projectionMatrix * viewMatrix * in_position;
+	gl_Position = vs_position;
 }
+

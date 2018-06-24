@@ -40,6 +40,7 @@
 #define __OPENSPACE_MODULE_SPACE___RENDERABLEHEIGHTMAP___H__
 
 
+
 #include <openspace/rendering/renderable.h>
 #include <ghoul/misc/dictionary.h>
 #include <modules/roverterrainrenderer/filehandler/subsite.h>
@@ -54,14 +55,24 @@
 #include <openspace/properties/vector/vec2property.h>
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <modules/marsrover/heighthandler/texturewriterfreeimage.h>
+//#include <ghoul/io/texture/texturewritersoil.h>
+#include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/io/texture/texturewriterbase.h>
 
 #include <ghoul/opengl/uniformcache.h>
 #include <openspace/util/updatestructures.h>	//must be here in order to use globebrowsing and scenegraphnode
+#include <openspace/interaction/navigationhandler.h>
+
+#include <freeimage.h>
+
 
 namespace openspace {
 
 	struct RenderData;
 	struct UpdateData;
+	class Camera;
 
 	namespace documentation { struct Documentation; }
 
@@ -83,28 +94,34 @@ public:
 	static documentation::Documentation Documentation();
 
 private:
+	bool renderTexture();
 	void renderOrthoCamera();
-	void drawTexture(); 
 
-
-	//glm::dvec3 _modelPathPosition; //If we want to improve our code with position for every submodel 
+	
     properties::Vec2Property _frustumSize;
 	ghoul::opengl::ProgramObject* _shader;
-    //std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
- 	UniformCache(cameraFrustumSize, directionToSurfaceViewSpace, 
- 				 heightmapTexture, modelViewTransform, projectionTransform) _uniformCache;
+ 	UniformCache(viewmatte, projectionMatrix, texture) _uniformCache;
 
- 	openspace::SceneGraphNode* _parent;
+ 	openspace::SceneGraphNode* _mars;
 
  	globebrowsing::RenderableGlobe* _globe;
 
- 	GLuint _vertexPositionBuffer;
- 	GLuint _heightmap;
+ 	GLuint _vertexArrayID;
+ 	//GLuint _vertexPositionBuffer;
+ 	//GLuint _heightmap;
+ 	//GLuint _depthTexture;
+
+ 	//GLuint _rbo;
+ 	GLuint _fbo;
  	GLuint _zbuffer;
 
- 	GLuint _vaHeightMap;
- 	GLuint _vbHeightMap;
+ 	//glm::dmat4 mvp;
+
+ 	Camera* _camera;	//camera object
+
+ 	const int windowWidth = 1920;
+ 	const int windowHeight = 1080;
 
 
 };

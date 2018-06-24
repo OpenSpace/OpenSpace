@@ -22,53 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/marsrovermodule.h>
 
+#ifndef __OPENSPACE_MODULE_SPACE___RKSMLROTATION___H__
+#define __OPENSPACE_MODULE_SPACE___RKSMLROTATION___H__
 
-//#include <modules/marsrover/surfaceprojection/marsprojection.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
-
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <modules/marsrover/rendering/renderableheightmap.h>
-
-//#include <modules/marsrover/rendering/renderablemarsrover.h>
-
-
-#include <modules/marsrover/rotation/advancedspicerotation.h>
-#include <modules/marsrover/rotation/rksmlrotation.h>
-
-//#include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
+#include <string>
 
 
 namespace openspace {
 
-ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
+namespace documentation { struct Documentation; }
 
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
+class RksmlRotation : public Rotation {
+public:
 
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-
+    RksmlRotation(const ghoul::Dictionary& dictionary);
     
-    //to later
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
-
-    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
+    glm::dmat3 matrix(const Time& time) const override;
     
-    //if we need the heightmap code to be a renderable
-    fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
+    void parseFile() const;
+
+private:
+    void openFile() const;
+
+    properties::StringProperty _dataPath;
 
 
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    
-    //(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
-    fRotation->registerClass<RksmlRotation>("RksmlRotation");
-    
-   
-}
-
+    //properties::IntProperty    _rotationAxisCorrection;
+    //properties::FloatProperty  _rotationAngle;
+    //properties::BoolProperty   _rotationDir2;
+};
 
 } // namespace openspace
+
+
+
+#endif // __OPENSPACE_MODULE_SPACE___RKSMLROTATION___H__

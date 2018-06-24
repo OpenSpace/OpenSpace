@@ -22,53 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/marsrover/marsrovermodule.h>
+#include <cstring>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 
-//#include <modules/marsrover/surfaceprojection/marsprojection.h>
+#include "libtorrent/xml_parse.hpp"
 
+namespace libtorrent {
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <modules/marsrover/rendering/renderableheightmap.h>
-
-//#include <modules/marsrover/rendering/renderablemarsrover.h>
-
-
-#include <modules/marsrover/rotation/advancedspicerotation.h>
-#include <modules/marsrover/rotation/rksmlrotation.h>
-
-//#include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
-
-
-namespace openspace {
-
-ghoul::opengl::ProgramObjectManager MarsroverModule::ProgramObjectManager;
-
-MarsroverModule::MarsroverModule() : OpenSpaceModule(MarsroverModule::Name) {}   
-
-void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {    
-
-    
-    //to later
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();    
-    ghoul_assert(fRenderable, "Renderable factory was not created");    
-
-    //fRenderable->registerClass<RenderableMarsrover>("RenderableMarsrover");
-    
-    //if we need the heightmap code to be a renderable
-    fRenderable->registerClass<RenderableHeightMap>("RenderableHeightMap");
-
-
-    auto fRotation = FactoryManager::ref().factory<Rotation>();
-    
-    //(fRotation, "Rotation factory was not created");
-    fRotation->registerClass<AdvancedSpiceRotation>("AdvancedSpiceRotation");
-    fRotation->registerClass<RksmlRotation>("RksmlRotation");
-    
-   
+	
+	
 }
-
-
-} // namespace openspace

@@ -28,10 +28,13 @@ set(HEADER_FILES
 
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.h>
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/rksmlrotation.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.h
 
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -39,11 +42,14 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemarsrover.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.cpp>
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableheightmap.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/advancedspicerotation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/rksmlrotation.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.cpp
+
 
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
