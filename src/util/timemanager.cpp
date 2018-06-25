@@ -228,10 +228,17 @@ TimeKeyframeData TimeManager::interpolate(
     const double a = pastDerivative * deltaAppTime - deltaSimTime;
     const double b = -futureDerivative * deltaAppTime + deltaSimTime;
 
-    const double interpolatedTime = (1 - t)*pastSimTime + t*futureSimTime + t*(1 - t)*(a*(1 - t) + b*t);
-    const double interpolatedDeltaTime = 3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime;
+    const double interpolatedTime =
+        (1 - t)*pastSimTime + t*futureSimTime + t*(1 - t)*(a*(1 - t) + b*t);
+    const double interpolatedDeltaTime =
+        3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime;
 
-    TimeKeyframeData data{ interpolatedTime, interpolatedDeltaTime, past.data.pause, past.data.jump };
+    TimeKeyframeData data {
+        interpolatedTime,
+        interpolatedDeltaTime,
+        past.data.pause,
+        past.data.jump
+    };
 
     return data;
 
