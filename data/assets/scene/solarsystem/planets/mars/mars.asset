@@ -184,6 +184,10 @@ local Mars = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_MARS",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

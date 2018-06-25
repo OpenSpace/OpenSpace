@@ -191,8 +191,14 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
         _modelTransform * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    double distance = glm::distance(tPlanetPosWorld, renderData.camera.eyePositionVec3());
-    if (distance > DISTANCE_CULLING) {
+    const double distance = glm::distance(tPlanetPosWorld, renderData.camera.eyePositionVec3());
+
+    // Radius is in KM
+    const double scaledRadius = glm::length(
+        glm::dmat3(_modelTransform) * glm::dvec3(1000.0 * _atmosphereRadius, 0.0, 0.0)
+    );
+
+    if (distance > scaledRadius * DISTANCE_CULLING_RADII) {
         program.setUniform("cullAtmosphere", 1);
     }
     else {

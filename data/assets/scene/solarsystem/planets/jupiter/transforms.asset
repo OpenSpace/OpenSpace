@@ -21,6 +21,4 @@ local JupiterBarycenter = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, { JupiterBarycenter })
