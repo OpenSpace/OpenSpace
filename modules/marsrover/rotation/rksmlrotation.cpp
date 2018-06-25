@@ -26,6 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -38,10 +41,17 @@
 
 
 namespace {
+    const char* DefaultReferenceFrame = "GALACTIC";
 
     static const openspace::properties::Property::PropertyInfo DataPathInfo = {
         "DataPath",
         "Path",
+        "This value specifies the source frame that is used as the basis for the "
+        "coordinate transformation. This has to be a valid SPICE name."
+    };
+    static const openspace::properties::Property::PropertyInfo FrameInfo = {
+        "Frame",
+        "Reference Frame",
         "This value specifies the source frame that is used as the basis for the "
         "coordinate transformation. This has to be a valid SPICE name."
     };
@@ -55,19 +65,42 @@ namespace openspace {
 
 RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     : _dataPath(DataPathInfo) // @TODO Missing documentation
-    
+    , _frame(FrameInfo, DefaultReferenceFrame)
 {
-    
+    openFile();
+    double now = OsEng.windowWrapper().applicationTime();
+
     _dataPath = dictionary.value<std::string>(DataPathInfo.identifier);
     //datapath will be: rksml/00028/rksml_playback_filt_eha.rksml
-    
-    openFile();
 
-
-
-
+    if (dictionary.hasKey(FrameInfo.identifier)) {
+        _frame = dictionary.value<std::string>(FrameInfo.identifier);
+    }
 
     addProperty(_dataPath);
+    addProperty(_frame);
+    
+    //create a pointer to a new node and assign it some data
+    Node caroline;
+    caroline.time = 3.0;
+    caroline.rotValue = 2.0;
+    Node *ptrToCaroline;
+    ptrToCaroline = &caroline;
+    LERROR(fmt::format("Caroline    '{}'", ptrToCaroline->time));//
+
+    addKeyframe(5000.555, caroline);
+    //create a new node for every wheelpart
+    // and then assign it the data from what we read in
+
+
+    _dataTimeline.firstKeyframeAfter(ptrToCaroline->time);
+
+    //creates a keyframe object of type node 
+    //const Keyframe<Node>* nextKeyframe = _dataTimeline.firstKeyframeAfter(now);
+    //const Keyframe<Node>* prevKeyframe = _dataTimeline.lastKeyframeBefore(now);
+    //if (_dataTimeline.nKeyframes() == 0) {
+    //    return;
+    //}
 
 
     auto update = [this]() {
@@ -75,10 +108,24 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     };
 
 
-    //Fix: needed?
     _dataPath.onChange(update);
+    _frame.onChange(update);
 
 }
+//Timeline<Node> RksmlRotation::getValue() {
+//    return _dataTimeline;
+//}
+
+Timeline<RksmlRotation::Node>& RksmlRotation::timeline() {
+    LERROR("inside of timeline");
+    return _dataTimeline;
+}
+void RksmlRotation::addKeyframe(double timestamp, RksmlRotation::Node data) {
+    LERROR("inside of addKeyframe");
+    timeline().addKeyframe(timestamp, data);
+}
+
+
 glm::dmat3 RksmlRotation::matrix(const Time& time) const {
     glm::dmat3 hej = glm::dmat3(1.0);
     return hej;
@@ -105,10 +152,10 @@ void RksmlRotation::openFile() const {
 
         fileName = fileName + "/rksml_playback_filt_eha.rksml";
         std::replace(fileName.begin(), fileName.end(), '\\', '/');
-        LERROR(fmt::format("filename   '{}'", fileName));
+        //LERROR(fmt::format("filename   '{}'", fileName));
 
 
-        //call to parse the file:  ParseRksmlFile::parse();
+        //save the data in the struct, in some way
 
     }
     

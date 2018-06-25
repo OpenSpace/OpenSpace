@@ -31,8 +31,12 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/util/timeline.h>
 
 #include <string>
+
+#include <openspace/network/parallelpeer.h>
+
 
 
 namespace openspace {
@@ -42,15 +46,47 @@ namespace documentation { struct Documentation; }
 class RksmlRotation : public Rotation {
 public:
 
+    struct Node {
+        double time;
+        double rotValue;    //radians 
+    };
+
     RksmlRotation(const ghoul::Dictionary& dictionary);
-    
+    Timeline<Node>& timeline();
+    void addKeyframe(double timestamp, RksmlRotation::Node data);
+    Timeline<Node> getValue();
+        
     glm::dmat3 matrix(const Time& time) const override;
     
     void parseFile() const;
 
 private:
     void openFile() const;
+    Timeline<Node> _dataTimeline;
+    
+    Node *_LFdrive;    //creates a Timeline object of the structure type Node 
+    Node *_LFsteer;
+    Node *_LMdrive;
+    Node *_LRdrive;
+    Node *_LRsteer;
+    Node *_RFdrive;
+    Node *_RFsteer;
+    Node *_RMdrive;
+    Node *_RRdrive;
+    Node *_RRsteer;
+    Node *_leftBogie;
+    Node *_leftDifferential;
+    Node *_rightBogie;
+    Node *_rightDifferential;
 
+/*
+    Timeline<Node> _quatC;
+    Timeline<Node> _quatX;
+    Timeline<Node> _quatY;
+    Timeline<Node> _quatZ;
+*/
+
+    properties::StringProperty _frame;
     properties::StringProperty _dataPath;
 
 

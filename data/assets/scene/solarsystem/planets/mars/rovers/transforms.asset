@@ -400,7 +400,7 @@ local Wheel_base_Location = {
         Rotation = {
             Type = "RksmlRotation",
             DataPath = wheeldata .. "/rksml/", 
-            --send frames
+            Frame = "IAU_MARS"
         }
     },
     GUI = {
