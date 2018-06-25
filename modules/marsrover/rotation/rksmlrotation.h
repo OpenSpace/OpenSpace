@@ -46,10 +46,10 @@ public:
     
     glm::dmat3 matrix(const Time& time) const override;
     
-    void parseFile() const;
 
 private:
     void openFile() const;
+    void parseFile(std::string path) const;
 
     properties::StringProperty _dataPath;
 
