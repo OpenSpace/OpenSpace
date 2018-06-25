@@ -65,12 +65,14 @@ private:
      * method with the correct values. If \p filename is a valid TLE file but contains
      * disallowed values (see KeplerTranslation::setKeplerElements), a
      * KeplerTranslation::RangeError is thrown.
+     *
      * \param filename The path to the file that contains the TLE file.
      * \param lineNum The line number in the file where the set of 3 TLE lines starts
+     *
      * \throw std::system_error if the TLE file is malformed (does not contain at least
-     * two lines that start with \c 1 and \c 2.
+     *        two lines that start with \c 1 and \c 2.
      * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
-     * the valid range supported by Kepler::setKeplerElements
+     *        the valid range supported by Kepler::setKeplerElements
      * \pre The \p filename must exist
      */
     void readTLEFile(const std::string& filename, int lineNum);

@@ -29,29 +29,28 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 
 namespace {
-    const char* KeyFontMono = "Mono";
-    const float DefaultFontSize = 10.f;
+    constexpr const char* KeyFontMono = "Mono";
+    constexpr const float DefaultFontSize = 10.f;
 
-    static const openspace::properties::Property::PropertyInfo FontNameInfo = {
+    const openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used."
     };
 
-    static const openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    const openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
         "This value determines the size of the font that is used to render the date."
     };
 
-    static const openspace::properties::Property::PropertyInfo SimplificationInfo = {
+    const openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
@@ -59,7 +58,7 @@ namespace {
         "displayed in seconds."
     };
 
-    static const openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+    const openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
@@ -72,9 +71,7 @@ namespace {
             openspace::TimeUnits.begin(),
             openspace::TimeUnits.end(),
             res.begin(),
-            [](openspace::TimeUnit unit) -> std::string {
-                return nameForTimeUnit(unit);
-            }
+            [](openspace::TimeUnit unit) -> std::string { return nameForTimeUnit(unit); }
         );
         return res;
     }
@@ -122,7 +119,7 @@ documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
 }
 
 DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)
@@ -132,7 +129,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "DashboardItemDate"
+        "DashboardItemSimulationIncrement"
     );
 
     if (dictionary.hasKey(FontNameInfo.identifier)) {
@@ -144,9 +141,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     addProperty(_fontName);
 
     if (dictionary.hasKey(FontSizeInfo.identifier)) {
-        _fontSize = static_cast<float>(
-            dictionary.value<double>(FontSizeInfo.identifier)
-        );
+        _fontSize = static_cast<float>(dictionary.value<double>(FontSizeInfo.identifier));
     }
     _fontSize.onChange([this](){
         _font = OsEng.fontManager().font(_fontName, _fontSize);
@@ -182,14 +177,14 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
 }
 
 void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
-    double t = OsEng.timeManager().targetDeltaTime();
+    const double t = OsEng.timeManager().targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
     }
     else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
+        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
+        const double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = { convertedT, nameForTimeUnit(unit, convertedT != 1.0) };
     }
 
@@ -199,10 +194,11 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     RenderFont(
         *_font,
         penPosition,
-        "Simulation increment: %.1f %s / second%s",
-        deltaTime.first,
-        deltaTime.second.c_str(),
-        pauseText
+        fmt::format(
+            "Simulation increment: {:.1f} {:s} / second{:s}",
+            deltaTime.first, deltaTime.second,
+            pauseText
+        )
     );
 }
 
@@ -220,9 +216,10 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
 
     return ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
         *_font,
-        "Simulation increment: %.1f %s / second",
-        deltaTime.first,
-        deltaTime.second.c_str()
+        fmt::format(
+            "Simulation increment: {:.1f} {:s} / second",
+            deltaTime.first, deltaTime.second
+        )
     ).boundingBox;
 }
 

@@ -61,12 +61,13 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/templatedstatscollector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/templatedstatscollector.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
@@ -149,9 +150,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/timequantizer.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp

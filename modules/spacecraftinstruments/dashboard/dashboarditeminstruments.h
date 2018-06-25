@@ -39,7 +39,7 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemInstruments : public DashboardItem {
 public:
-    DashboardItemInstruments(ghoul::Dictionary dictionary);
+    DashboardItemInstruments(const ghoul::Dictionary& dictionary);
     ~DashboardItemInstruments() = default;
 
     void render(glm::vec2& penPosition) override;
@@ -54,7 +54,6 @@ private:
 
     properties::Vec3Property _activeColor;
     properties::Vec3Property _activeFlash;
-
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 };

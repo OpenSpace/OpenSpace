@@ -25,18 +25,15 @@
 #include <openspace/performance/performancemeasurement.h>
 
 #include <openspace/performance/performancemanager.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
-
 #include <iostream>
 
 namespace openspace::performance {
 
 PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
-    std::shared_ptr<performance::PerformanceManager> manager
-)
+                                 std::shared_ptr<performance::PerformanceManager> manager)
     : _identifier(std::move(identifier))
-    , _manager(manager)
+    , _manager(std::move(manager))
 {
     if (_manager.lock()) {
         glFinish();
@@ -49,7 +46,8 @@ PerformanceMeasurement::~PerformanceMeasurement() {
     glFinish();
     auto endTime = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
-        endTime - _startTime).count();
+        endTime - _startTime
+    ).count();
 
     if (std::shared_ptr<performance::PerformanceManager> m = _manager.lock()) {
         m->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);

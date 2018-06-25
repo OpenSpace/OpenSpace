@@ -25,11 +25,13 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__
 
-#include <functional>
-#include <modules/volume/rawvolume.h>
+#include <ghoul/glm.h>
+#include <memory>
+#include <string>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
+
+template <typename T> class RawVolume;
 
 template <typename Type>
 class RawVolumeReader {
@@ -37,6 +39,7 @@ public:
     using VoxelType = Type;
 
     RawVolumeReader(const std::string& path, const glm::uvec3& dimensions);
+
     glm::uvec3 dimensions() const;
     std::string path() const;
     void setPath(const std::string& path);
@@ -52,8 +55,7 @@ private:
     std::string _path;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
 
 #include "rawvolumereader.inl"
 

@@ -25,69 +25,37 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__
 #define __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__
 
+//#include <modules/volume/lrucache.h>
 #include <ghoul/glm.h>
 #include <list>
 #include <iterator>
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 template <typename ValueType>
 class LinearLruCache {
 public:
-    LinearLruCache(size_t capacity, size_t nIndices)
-        : _tracker()
-        , _cache(nIndices, std::make_pair(nullptr, _tracker.end()))
-        , _capacity(capacity) {};
+    LinearLruCache(size_t capacity, size_t nIndices);
 
-    bool has(size_t key) {
-        return _cache[key].first != nullptr;
-    };
-    void set(size_t key, ValueType value) {
-        auto prev = _cache[key];
-        if (prev.first != nullptr) {
-            prev.first = value;
-            std::list<size_t>::iterator trackerIter = prev.second;
-            _tracker.splice(_tracker.end(),
-                _tracker,
-                trackerIter);
-        }
-        else {
-            insert(key, value);
-        }
-    };
-    ValueType& use(size_t key) {
-        auto pair = _cache[key];
-        std::list<size_t>::iterator trackerIter = pair.second;
-        _tracker.splice(_tracker.end(),
-            _tracker,
-            trackerIter);
-        return pair.first;
-    };
-    ValueType& get(size_t key) {
-        return _cache[key].first;
-    };
-    void evict() {
-        _cache[_tracker.front()] = make_pair(nullptr, _tracker.end());
-        _tracker.pop_front();
-    };
-    size_t capacity() {
-        return _capacity;
-    };
+    bool has(size_t key) const;
+    void set(size_t key, ValueType value);
+
+    ValueType& use(size_t key);
+    ValueType& get(size_t key);
+
+    void evict();
+    size_t capacity() const;
+
 private:
-    void insert(size_t key, const ValueType& value) {
-        if (_tracker.size() == _capacity) {
-            evict();
-        }
-        auto iter = _tracker.insert(_tracker.end(), key);
-        _cache[key] = std::make_pair(value, iter);
-    };
+    void insert(size_t key, const ValueType& value);
+
     std::list<size_t> _tracker;
     std::vector<std::pair<ValueType, typename std::list<size_t>::iterator>> _cache;
     size_t _capacity;
 };
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume
+
+#include "linearlrucache.inl"
 
 #endif // __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__

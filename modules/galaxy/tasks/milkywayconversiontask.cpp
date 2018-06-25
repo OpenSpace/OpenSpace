@@ -27,52 +27,31 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
+#include <modules/volume/textureslicevolumereader.h>
 
+#include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
 
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* KeyInFilenamePrefix = "InFilenamePrefix";
-    const char* KeyInFilenameSuffix = "InFilenameSuffix";
-    const char* KeyInFirstIndex = "InFirstIndex";
-    const char* KeyInNSlices = "InNSlices";
-    const char* KeyOutFilename = "OutFilename";
-    const char* KeyOutDimensions = "OutDimensions";
+    constexpr const char* KeyInFilenamePrefix = "InFilenamePrefix";
+    constexpr const char* KeyInFilenameSuffix = "InFilenameSuffix";
+    constexpr const char* KeyInFirstIndex = "InFirstIndex";
+    constexpr const char* KeyInNSlices = "InNSlices";
+    constexpr const char* KeyOutFilename = "OutFilename";
+    constexpr const char* KeyOutDimensions = "OutDimensions";
 } // namespace
 
 namespace openspace {
 
 MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
-    std::string inFilenamePrefix;
-    if (dictionary.getValue(KeyInFilenamePrefix, inFilenamePrefix)) {
-        _inFilenamePrefix = inFilenamePrefix;
-    }
-
-    std::string inFilenameSuffix;
-    if (dictionary.getValue(KeyInFilenameSuffix, inFilenameSuffix)) {
-        _inFilenameSuffix = inFilenameSuffix;
-    }
-
-    size_t inFirstIndex;
-    if (dictionary.getValue(KeyInFirstIndex, inFirstIndex)) {
-        _inFirstIndex = inFirstIndex;
-    }
-
-    size_t inNSlices;
-    if (dictionary.getValue(KeyInNSlices, inNSlices)) {
-        _inNSlices = inNSlices;
-    }
-
-    std::string outFilename;
-    if (dictionary.getValue(KeyOutFilename, outFilename)) {
-        _outFilename = outFilename;
-    }
-
-    glm::ivec3 outDimensions;
-    if (dictionary.getValue(KeyOutDimensions, outDimensions)) {
-        _outDimensions = outDimensions;
-    }
+    dictionary.getValue(KeyInFilenamePrefix, _inFilenamePrefix);
+    dictionary.getValue(KeyInFilenameSuffix, _inFilenameSuffix);
+    dictionary.getValue(KeyInFirstIndex, _inFirstIndex);
+    dictionary.getValue(KeyInNSlices, _inNSlices);
+    dictionary.getValue(KeyOutFilename, _outFilename);
+    dictionary.getValue(KeyOutDimensions, _outDimensions);
 }
 
 MilkywayConversionTask::~MilkywayConversionTask() {}
@@ -97,19 +76,18 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
     RawVolumeWriter<glm::tvec4<GLfloat>> rawWriter(_outFilename);
     rawWriter.setDimensions(_outDimensions);
 
-    glm::vec3 resolutionRatio =
-        static_cast<glm::vec3>(sliceReader.dimensions()) /
-        static_cast<glm::vec3>(rawWriter.dimensions());
+    const glm::vec3 resolutionRatio = static_cast<glm::vec3>(sliceReader.dimensions()) /
+                                      static_cast<glm::vec3>(rawWriter.dimensions());
 
     VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
-        sliceReader,
+        &sliceReader,
         resolutionRatio
     );
     std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
         [&](glm::ivec3 outCoord) {
-            glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5)) *
-                                 resolutionRatio) - glm::vec3(0.5);
-            glm::tvec4<GLfloat> value = sampler.sample(inCoord);
+            const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5)) *
+                                      resolutionRatio) - glm::vec3(0.5);
+            const glm::tvec4<GLfloat> value = sampler.sample(inCoord);
             return value;
         };
 

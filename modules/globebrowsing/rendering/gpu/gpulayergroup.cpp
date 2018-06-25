@@ -27,8 +27,11 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
 
 namespace openspace::globebrowsing {
+
+GPULayerGroup::~GPULayerGroup() {} // NOLINT
 
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
@@ -52,19 +55,18 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
                          const LayerGroup& layerGroup, const std::string& nameBase,
                          int category)
 {
-    auto activeLayers = layerGroup.activeLayers();
+    const std::vector<std::shared_ptr<Layer>>& activeLayers = layerGroup.activeLayers();
     _gpuActiveLayers.resize(activeLayers.size());
-    int pileSize = layerGroup.pileSize();
+    const int pileSize = layerGroup.pileSize();
     for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
         // should maybe a proper GPULayer factory
         _gpuActiveLayers[i] = (category == layergroupid::GroupID::HeightLayers) ?
             std::make_unique<GPUHeightLayer>() :
             std::make_unique<GPULayer>();
-        std::string nameExtension = "[" + std::to_string(i) + "].";
         _gpuActiveLayers[i]->bind(
             programObject,
             *activeLayers[i],
-            nameBase + nameExtension,
+            nameBase + "[" + std::to_string(i) + "].",
             pileSize
         );
     }

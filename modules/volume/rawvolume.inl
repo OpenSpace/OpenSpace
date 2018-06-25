@@ -23,10 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumeutils.h>
-#include "rawvolume.h"
 
-namespace openspace {
-namespace volume {
+namespace openspace::volume {
 
 template <typename VoxelType>
 RawVolume<VoxelType>::RawVolume(const glm::uvec3& dimensions)
@@ -53,7 +51,8 @@ size_t RawVolume<VoxelType>::nCells() const
     return static_cast<size_t>(
         static_cast<size_t>(_dimensions.x) *
         static_cast<size_t>(_dimensions.y) *
-        static_cast<size_t>(_dimensions.z));
+        static_cast<size_t>(_dimensions.z)
+    );
 }
 
 template <typename VoxelType>
@@ -78,10 +77,10 @@ void RawVolume<VoxelType>::set(size_t index, const VoxelType& value) {
 
 template <typename VoxelType>
 void RawVolume<VoxelType>::forEachVoxel(
-    const std::function<void(const glm::uvec3&, const VoxelType&)>& fn)
+                       const std::function<void(const glm::uvec3&, const VoxelType&)>& fn)
 {
     for (size_t i = 0; i < nCells(); i++) {
-        glm::ivec3 coords = indexToCoords(i);
+        const glm::ivec3& coords = indexToCoords(i);
         fn(coords, _data[i]);
     }
 }
@@ -106,5 +105,4 @@ const VoxelType* RawVolume<VoxelType>::data() const {
     return _data.data();
 }
 
-} // namespace volume
-} // namespace openspace
+} // namespace openspace::volume

@@ -28,8 +28,10 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/resourcesynchronization.h>
+#include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
 
+#include <ghoul/fmt.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -53,8 +55,7 @@ int main(int argc, char** argv) {
             "Sync",
             fmt::format(
                 "Synchronizing scene {} out of {}: {}",
-                i + 1, tasks.size(),
-                task.description()
+                i + 1, tasks.size(), task.description()
             )
         );
         ProgressBar progressBar(100);

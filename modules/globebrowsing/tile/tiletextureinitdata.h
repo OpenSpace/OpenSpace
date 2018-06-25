@@ -26,9 +26,9 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
-
 #include <string>
 
 namespace openspace::globebrowsing {
@@ -40,11 +40,12 @@ class TileTextureInitData {
 public:
     using HashKey = unsigned long long;
     BooleanType(ShouldAllocateDataOnCPU);
+    BooleanType(PadTiles);
     using Format = ghoul::opengl::Texture::Format;
 
     TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,
-           bool padTiles,
-           ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
+        PadTiles padTiles,
+        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original);
 
@@ -72,7 +73,7 @@ private:
     void calculateHashKey();
     unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
 
-    HashKey _hashKey;
+    HashKey _hashKey = HashKey(0);
     glm::ivec3 _dimensions;
     glm::ivec2 _tilePixelStartOffset;
     glm::ivec2 _tilePixelSizeDifference;

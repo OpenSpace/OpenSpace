@@ -34,7 +34,7 @@ namespace openspace {
 
 class NetworkEngine {
 public:
-    typedef uint16_t MessageIdentifier;
+    using MessageIdentifier = uint16_t;
 
     NetworkEngine();
 
@@ -57,7 +57,7 @@ public:
 
 private:
     std::map<std::string, MessageIdentifier> _identifiers;
-    MessageIdentifier _lastAssignedIdentifier;
+    MessageIdentifier _lastAssignedIdentifier = MessageIdentifier(-1);
 
     struct Message {
         MessageIdentifier identifer;
@@ -67,7 +67,7 @@ private:
 
     std::vector<Message> _initialConnectionMessages;
 
-    bool _shouldPublishStatusMessage;
+    bool _shouldPublishStatusMessage = true;
 
     MessageIdentifier _statusMessageIdentifier;
     MessageIdentifier _identifierMappingIdentifier;

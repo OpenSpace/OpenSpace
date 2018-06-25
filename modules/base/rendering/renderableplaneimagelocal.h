@@ -60,7 +60,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
-    bool _textureIsDirty;
+    bool _textureIsDirty = false;
 };
 
 } // namespace openspace

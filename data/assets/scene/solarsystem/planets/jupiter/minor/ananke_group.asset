@@ -1,7 +1,7 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
-local kernels341 = asset.require('../jup341').Kernels
+local kernel = asset.require('../kernels').jup341
 
 
 
@@ -26,7 +26,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 588.36,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Thelxinoe",
@@ -42,7 +42,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 597.61,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Euanthe",
@@ -58,7 +58,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 598.09,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Iocaste",
@@ -74,7 +74,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 609.43,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "S2003J16",
@@ -91,7 +91,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 610.36,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Praxidike",
@@ -107,7 +107,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 613.90,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Harpalyke",
@@ -123,7 +123,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 624.54,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Mneme",
@@ -139,7 +139,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 627.48,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Hermippe",
@@ -155,7 +155,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 629.81,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Thyone",
@@ -171,7 +171,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 639.80,
-        Kernels = kernels341
+        Kernels = kernel
     },
     {
         Identifier = "Ananke",
@@ -187,7 +187,7 @@ local anankeGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 640.38,
-        Kernels = kernels341
+        Kernels = kernel
     }
 }
 

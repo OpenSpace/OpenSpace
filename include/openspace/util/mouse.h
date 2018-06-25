@@ -84,10 +84,10 @@ enum class MouseButton {
     Button6 = 5,
     Button7 = 6,
     Button8 = 8,
-    Last = Button8,
-    Left = Button1,
-    Right = Button2,
-    Middle = Button3
+    Last    = Button8,
+    Left    = Button1,
+    Right   = Button2,
+    Middle  = Button3
 };
 
 } // namespace openspace

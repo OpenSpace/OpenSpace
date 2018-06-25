@@ -25,27 +25,26 @@
 #ifndef __OPENSPACE_CORE___SCENEINITIALIZER___H__
 #define __OPENSPACE_CORE___SCENEINITIALIZER___H__
 
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/threadpool.h>
-
-#include <mutex>
 #include <unordered_set>
 #include <vector>
 
 namespace openspace {
 
+class SceneGraphNode;
+
 class SceneInitializer {
 public:
     virtual ~SceneInitializer() = default;
     virtual void initializeNode(SceneGraphNode* node) = 0;
-    virtual std::vector<SceneGraphNode*> getInitializedNodes() = 0;
+    virtual std::vector<SceneGraphNode*> takeInitializedNodes() = 0;
     virtual bool isInitializing() const = 0;
 };
 
 class SingleThreadedSceneInitializer : public SceneInitializer {
 public:
     void initializeNode(SceneGraphNode* node) override;
-    std::vector<SceneGraphNode*> getInitializedNodes() override;
+    std::vector<SceneGraphNode*> takeInitializedNodes() override;
     bool isInitializing() const override;
 
 private:
@@ -55,8 +54,9 @@ private:
 class MultiThreadedSceneInitializer : public SceneInitializer {
 public:
     MultiThreadedSceneInitializer(unsigned int nThreads);
+
     void initializeNode(SceneGraphNode* node) override;
-    std::vector<SceneGraphNode*> getInitializedNodes() override;
+    std::vector<SceneGraphNode*> takeInitializedNodes() override;
     bool isInitializing() const override;
 
 private:

@@ -32,9 +32,7 @@ namespace {
 
 namespace openspace::gui {
 
-GuiHelpComponent::GuiHelpComponent()
-    : GuiComponent("Help")
-{}
+GuiHelpComponent::GuiHelpComponent() : GuiComponent("Help") {}
 
 void GuiHelpComponent::render() {
     ImGui::SetNextWindowCollapsed(_isCollapsed);

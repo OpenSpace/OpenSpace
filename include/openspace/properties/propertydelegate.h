@@ -132,7 +132,7 @@ public:
      * <code>T = TemplateProperty<std::string></code>, then <code>U = std::string</code>
      */
     template <typename U>
-    static bool toLuaValue(lua_State* state, U value);
+    static bool toLuaValue(lua_State* state, const U& value);
 
     /**
      * Returns the Lua type that will be put onto the stack in the
@@ -151,10 +151,10 @@ public:
     static int typeLua();
 
     template <typename U>
-    static U fromString(std::string value, bool& success);
+    static U fromString(const std::string& value, bool& success);
 
     template <typename U>
-    static bool toString(std::string& outValue, U inValue);
+    static bool toString(std::string& outValue, const U& inValue);
 };
 
 } // namespace openspace::properties

@@ -57,6 +57,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
 /**
  * Returns the Documentation that describes a Dictionary used to create a log by using the
  * function createLog.
+ *
  * \return The Documentation that describes an acceptable Dictionary for the method
  *         createLog
  */

@@ -47,7 +47,6 @@ namespace openspace {
 
 using datamessagestructures::TimeKeyframe;
 
-
 TimeManager::TimeManager()
     : properties::PropertyOwner({ "TimeManager" })
     , _defaultInterpolationDuration(DefaultInterpolationDurationInfo, 0.5f, 0.f, 5.f)
@@ -74,15 +73,19 @@ void TimeManager::preSynchronization(double dt) {
     progressTime(dt);
 
     // Notify observers about time changes if any.
-    double newTime = time().j2000Seconds();
-    double newDeltaTime = _deltaTime;
+    const double newTime = time().j2000Seconds();
+    const double newDeltaTime = _deltaTime;
     if (newTime != _lastTime) {
-        for (const auto& it : _timeChangeCallbacks) {
+        using K = const CallbackHandle;
+        using V = TimeChangeCallback;
+        for (const std::pair<K, V>& it : _timeChangeCallbacks) {
             it.second();
         }
     }
     if (newDeltaTime != _lastDeltaTime) {
-        for (const auto& it : _deltaTimeChangeCallbacks) {
+        using K = const CallbackHandle;
+        using V = TimeChangeCallback;
+        for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
             it.second();
         }
     }
@@ -159,7 +162,6 @@ void TimeManager::progressTime(double dt) {
     }
 }
 
-
 void TimeManager::interpolate(
     const Keyframe<TimeKeyframeData>& past, 
     const Keyframe<TimeKeyframeData>& future,
@@ -198,7 +200,6 @@ void TimeManager::interpolate(
         time().advanceTime(dt);
         return;
     }*/
-
     /*
     double t0 = now - dt;
     double t1 = now;
@@ -228,13 +229,12 @@ void TimeManager::applyKeyframe(const Keyframe<TimeKeyframeData>& keyframe) {
 }
 
 void TimeManager::addKeyframe(double timestamp, TimeKeyframeData time) {
-    _timeline.addKeyframe(timestamp, time);
+    _timeline.addKeyframe(timestamp, std::move(time));
 }
 
 void TimeManager::removeKeyframesAfter(double timestamp, bool inclusive) {
     _timeline.removeKeyframesAfter(timestamp, inclusive);
 }
-
 
 void TimeManager::removeKeyframesBefore(double timestamp, bool inclusive) {
     _timeline.removeKeyframesBefore(timestamp, inclusive);
@@ -246,7 +246,7 @@ void TimeManager::clearKeyframes() {
 
 void TimeManager::setTimeNextFrame(Time t) {
     _shouldSetTime = true;
-    _timeNextFrame = t;
+    _timeNextFrame = std::move(t);
 }
 
 size_t TimeManager::nKeyframes() const {
@@ -258,19 +258,19 @@ Time& TimeManager::time() {
 }
 
 std::vector<Syncable*> TimeManager::getSyncables() {
-    return{ &_currentTime };
+    return { &_currentTime };
 }
 
 TimeManager::CallbackHandle TimeManager::addTimeChangeCallback(TimeChangeCallback cb) {
     CallbackHandle handle = _nextCallbackHandle++;
-    _timeChangeCallbacks.push_back({ handle, std::move(cb) });
+    _timeChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
 TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCallback cb)
 {
     CallbackHandle handle = _nextCallbackHandle++;
-    _deltaTimeChangeCallbacks.push_back({ handle, std::move(cb) });
+    _deltaTimeChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
@@ -281,10 +281,10 @@ TimeManager::CallbackHandle TimeManager::addTimeJumpCallback(TimeChangeCallback 
 }
 
 void TimeManager::removeTimeChangeCallback(CallbackHandle handle) {
-    auto it = std::find_if(
+    const auto it = std::find_if(
         _timeChangeCallbacks.begin(),
         _timeChangeCallbacks.end(),
-        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+        [handle](const std::pair<CallbackHandle, TimeChangeCallback>& cb) {
             return cb.first == handle;
         }
     );
@@ -298,7 +298,7 @@ void TimeManager::removeTimeChangeCallback(CallbackHandle handle) {
 }
 
 void TimeManager::removeDeltaTimeChangeCallback(CallbackHandle handle) {
-    auto it = std::find_if(
+    const auto it = std::find_if(
         _deltaTimeChangeCallbacks.begin(),
         _deltaTimeChangeCallbacks.end(),
         [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {

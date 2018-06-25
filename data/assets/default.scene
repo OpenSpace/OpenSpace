@@ -58,7 +58,10 @@ local Keybindings = {
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
 asset.onInitialize(function ()
-    openspace.time.setTime(openspace.time.currentWallTime())
+    local now = openspace.time.currentWallTime()
+    -- Jump back one day to show a complete planet
+    openspace.time.setTime(openspace.time.advancedTime(now, "-1d"))
+
     sceneHelper.bindKeys(Keybindings)
 
     openspace.setDefaultGuiSorting()

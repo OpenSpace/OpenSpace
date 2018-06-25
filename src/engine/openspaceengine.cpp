@@ -45,23 +45,19 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/assetloader.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
-#include <openspace/scene/scenelicense.h>
+#include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/resourcesynchronization.h>
-#include <openspace/util/synchronizationwatcher.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
-#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
@@ -71,12 +67,11 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/misc/defer.h>
 #include <ghoul/opengl/debugcontext.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/shaderpreprocessor.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glbinding/callbacks.h>
@@ -86,14 +81,9 @@
 #include <vld.h>
 #endif
 
-#ifdef WIN32
-#include <Windows.h>
-#endif
-
 #ifdef __APPLE__
 #include <openspace/interaction/touchbar.h>
 #endif // __APPLE__
-
 
 #include "openspaceengine_lua.inl"
 
@@ -119,13 +109,13 @@ namespace {
         std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
 
-    static const openspace::properties::Property::PropertyInfo VersionInfo = {
+    const openspace::properties::Property::PropertyInfo VersionInfo = {
         "VersionInfo",
         "Version Information",
         "This value contains the full string identifying this OpenSpace Version"
     };
 
-    static const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+    const openspace::properties::Property::PropertyInfo SourceControlInfo = {
         "SCMInfo",
         "Source Control Management Information",
         "This value contains information from the SCM, such as commit hash and branch"
@@ -155,7 +145,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _timeManager(new TimeManager)
     , _windowWrapper(std::move(windowWrapper))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
-        programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+        std::move(programName),
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
     , _navigationHandler(new interaction::NavigationHandler)
     , _keyBindingManager(new interaction::KeyBindingManager)
@@ -288,7 +279,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
 
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
-        _engine->_commandlineParser->displayHelp();
+        _engine->_commandlineParser->displayHelp(std::cout);
         requestClose = true;
         return;
     }
@@ -597,7 +588,7 @@ void OpenSpaceEngine::initialize() {
 
 void OpenSpaceEngine::scheduleLoadSingleAsset(std::string assetPath) {
     _hasScheduledAssetLoading = true;
-    _scheduledAssetPathToLoad = assetPath;
+    _scheduledAssetPathToLoad = std::move(assetPath);
 }
 
 void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
@@ -657,11 +648,11 @@ void OpenSpaceEngine::loadSingleAsset(const std::string& assetPath) {
     _loadingScreen->setPhase(LoadingScreen::Phase::Synchronization);
     _loadingScreen->postMessage("Synchronizing assets");
 
-    std::vector<std::shared_ptr<Asset>> allAssets =
+    std::vector<std::shared_ptr<const Asset>> allAssets =
         _assetManager->rootAsset()->subTreeAssets();
 
     std::unordered_set<std::shared_ptr<ResourceSynchronization>> resourceSyncs;
-    for (const std::shared_ptr<Asset>& a : allAssets) {
+    for (const std::shared_ptr<const Asset>& a : allAssets) {
         std::vector<std::shared_ptr<ResourceSynchronization>> syncs =
             a->ownSynchronizations();
 
@@ -858,6 +849,16 @@ void OpenSpaceEngine::loadFonts() {
                 "Error registering font '{}' with key '{}'", fontName, key
             ));
         }
+    }
+
+    try {
+        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
+        if (!initSuccess) {
+            LERROR("Error initializing default font renderer");
+        }
+    }
+    catch (const ghoul::RuntimeError& err) {
+        LERRORC(err.component, err.message);
     }
 }
 
@@ -1094,16 +1095,6 @@ void OpenSpaceEngine::initializeGL() {
                 call.function->name() + arguments + returnValue
             );
         });
-    }
-
-    try {
-        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess) {
-            LERROR("Error initializing default font renderer");
-        }
-    }
-    catch (const ghoul::RuntimeError& err) {
-        LERRORC(err.component, err.message);
     }
 
     LDEBUG("Initializing Rendering Engine");

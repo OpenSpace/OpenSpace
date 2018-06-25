@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-namespace luascriptfunctions {
+namespace openspace::luascriptfunctions {
 
 int iswa_addCygnet(lua_State* L) {
     int nArguments = lua_gettop(L);
@@ -56,7 +57,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L) {
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+        return ghoul::lua::luaError(L, fmt::format(
+            "Expected {} argumemts, got {}", 1, nArguments
+        ));
     }
 
     ghoul::Dictionary d;
@@ -185,6 +188,4 @@ int iswa_setBaseUrl(lua_State* L) {
     return 0;
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+} // namespace openspace::luascriptfunctions

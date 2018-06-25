@@ -25,14 +25,12 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
+#include <ghoul/glm.h>
 #include <string>
 #include <vector>
 
-//#include <glm/gtx/quaternion.hpp>
-
-#include <openspace/util/camera.h>
-
 namespace openspace::datamessagestructures {
+
 enum class Type : uint32_t {
     CameraData = 0,
     TimeData,

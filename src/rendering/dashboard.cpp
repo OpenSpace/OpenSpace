@@ -26,12 +26,12 @@
 
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/scriptengine.h>
-
 #include <ghoul/misc/assert.h>
+
 #include "dashboard_lua.inl"
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    const openspace::properties::Property::PropertyInfo EnabledInfo = {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
@@ -49,7 +49,7 @@ Dashboard::Dashboard()
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
-    std::string originalIdentifier = item->identifier();
+    const std::string& originalIdentifier = item->identifier();
     int suffix = 1;
     while (true) {
         auto it = std::find_if(
@@ -77,6 +77,7 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
 
 void Dashboard::removeDashboardItem(int index) {
     ghoul_assert(index < static_cast<int>(_items.size()), "Invalid index");
+
     removePropertySubOwner(_items[index].get());
     _items.erase(_items.begin() + index);
 }
@@ -104,6 +105,7 @@ bool Dashboard::hasItem(int index) const {
 
 const DashboardItem& Dashboard::item(int index) const {
     ghoul_assert(index < static_cast<int>(_items.size()), "Invalid index");
+
     return *_items[index];
 }
 

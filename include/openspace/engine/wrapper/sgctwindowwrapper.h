@@ -35,6 +35,7 @@ namespace openspace {
 /**
  * WindowWrapper subclass wrapping the Simple Graphics Cluster Toolkit, forwarding all
  * method calls to the specific functions in the Engine and SGCTWindow classes.
+ *
  * \sa https://c-student.itn.liu.se/wiki/develop:sgct:sgct
  */
 class SGCTWindowWrapper : public WindowWrapper {
@@ -69,7 +70,7 @@ public:
 
     glm::mat4 viewProjectionMatrix() const override;
     glm::mat4 modelMatrix() const override;
-    void setNearFarClippingPlane(float near, float far) override;
+    void setNearFarClippingPlane(float nearPlane, float farPlane) override;
     void setEyeSeparationDistance(float distance) override;
 
     glm::ivec4 viewportPixelCoordinates() const override;
@@ -78,6 +79,7 @@ public:
     void sendMessageToExternalControl(const std::vector<char>& message) const override;
 
     bool isSimpleRendering() const override;
+    bool isFisheyeRendering() const override;
 
     void takeScreenshot(bool applyWarping = false) const override;
 

@@ -24,19 +24,16 @@
 
 #include <modules/globebrowsing/rendering/gpu/gputileuvtransform.h>
 
-//#include <modules/globebrowsing/rendering/layermanager.h>
-//#include <modules/globebrowsing/tile/chunktile.h>
-//#include <modules/globebrowsing/tile/tile.h>
-//#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileuvtransform.h>
 
 namespace openspace::globebrowsing {
 
 void GPUTileUvTransform::setValue(ghoul::opengl::ProgramObject* programObject,
-                                  const TileUvTransform& tileUvTransform)
+                                  const TileUvTransform& uvTransform)
 {
-    _gpuUvOffset.setValue(programObject, tileUvTransform.uvOffset);
-    _gpuUvScale.setValue(programObject, tileUvTransform.uvScale);
+    _gpuUvOffset.setValue(programObject, uvTransform.uvOffset);
+    _gpuUvScale.setValue(programObject, uvTransform.uvScale);
 }
 
 void GPUTileUvTransform::bind(ghoul::opengl::ProgramObject* programObject,

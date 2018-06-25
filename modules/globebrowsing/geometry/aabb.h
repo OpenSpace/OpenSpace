@@ -37,8 +37,8 @@ struct AABB1 {
         Containing
     };
 
-    AABB1();
-    AABB1(float min, float max);
+    AABB1(float minValue = std::numeric_limits<float>::max(),
+        float maxValue = -std::numeric_limits<float>::max());
 
     void expand(float p);
     float center() const;
@@ -60,8 +60,8 @@ struct AABB2 {
         Containing
     };
 
-    AABB2();
-    AABB2(glm::vec2 min, glm::vec2 max);
+    AABB2(glm::vec2 minValue = glm::vec2(std::numeric_limits<float>::max()),
+        glm::vec2 maxValue = glm::vec2(-std::numeric_limits<float>::max()));
 
     void expand(const glm::vec2& p);
     glm::vec2 center() const;
@@ -83,8 +83,8 @@ struct AABB3 {
         Containing
     };
 
-    AABB3();
-    AABB3(glm::vec3 min, glm::vec3 max);
+    AABB3(glm::vec3 minValue = glm::vec3(std::numeric_limits<float>::max()),
+        glm::vec3 maxValue = glm::vec3(-std::numeric_limits<float>::max()));
 
     void expand(const glm::vec3 p);
     glm::vec3 center() const;

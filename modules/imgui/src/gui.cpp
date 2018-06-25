@@ -25,48 +25,426 @@
 #include <modules/imgui/include/gui.h>
 
 #include <modules/imgui/imguimodule.h>
-
+#include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/keys.h>
-
+#include <openspace/scripting/scriptengine.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/uniformcache.h>
 
-#include <modules/imgui/include/imgui_include.h>
-
-//#define SHOW_IMGUI_HELPERS
 
 namespace {
+    constexpr const char* _loggerCat = "GUI";
+    constexpr const char* configurationFile = "imgui.ini";
+    constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr const float FontSize = 14.f;
+    const ImVec2 Size = ImVec2(500, 500);
 
-const char* _loggerCat = "GUI";
-const char* configurationFile = "imgui.ini";
-//const char* GuiFont = "${FONTS}/ubuntu/Ubuntu-Regular.ttf";
-const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
-const float FontSize = 14.f;
-const ImVec2 Size = ImVec2(500, 500);
+    char* iniFileBuffer = nullptr;
 
-//GLuint fontTex = 0;
-// A VBO max size of 0 will cause a lazy instantiation of the buffer
-size_t vboMaxSize = 0;
-GLuint vao = 0;
-GLuint vbo = 0;
-GLuint vboElements = 0;
-std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-UniformCache(tex, ortho) _uniformCache;
-std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
-char* iniFileBuffer = nullptr;
+    ImFont* captionFont = nullptr;
 
-ImFont* captionFont = nullptr;
+    void addScreenSpaceRenderableLocal(std::string texturePath) {
+        if (!FileSys.fileExists(absPath(texturePath))) {
+            LWARNING(fmt::format("Could not find image '{}'", texturePath));
+            return;
+        }
 
-static void RenderDrawLists(ImDrawData* drawData) {
+        OsEng.scriptEngine().queueScript(
+            fmt::format(
+                "openspace.addScreenSpaceRenderable({{\
+                    Type = 'ScreenSpaceImageLocal',\
+                    TexturePath = openspace.absPath('{}')\
+                }});",
+                std::move(texturePath)
+            ),
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    void addScreenSpaceRenderableOnline(std::string texturePath) {
+        OsEng.scriptEngine().queueScript(
+            fmt::format(
+                "openspace.addScreenSpaceRenderable({{\
+                    Type = 'ScreenSpaceImageOnline', URL = '{}'\
+                }});",
+                std::move(texturePath)
+            ),
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
+    const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+        "ShowHelpText",
+        "Show tooltip help",
+        "If this value is enabled these kinds of tooltips are shown for most properties "
+        "explaining what impact they have on the visuals."
+    };
+
+    const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+        "HelpTextDelay",
+        "Tooltip Delay (in s)",
+        "This value determines the delay in seconds after which the tooltip is shown."
+    };
+
+    const openspace::properties::Property::PropertyInfo HiddenInfo = {
+        "IsHidden",
+        "Is Hidden",
+        "If this value is true, all GUI items will not be rendered, regardless of their "
+        "status"
+    };
+
+} // namespace
+
+namespace openspace::gui {
+
+void CaptionText(const char* text) {
+    ImGui::PushFont(captionFont);
+    ImGui::Text("%s", text);
+    ImGui::PopFont();
+}
+
+GUI::GUI()
+    : GuiComponent("Main")
+    , _globalProperty("Global", "Global Properties")
+    , _sceneProperty(
+        "SceneProperties", "Scene Properties",
+        GuiPropertyComponent::UseTreeLayout::Yes
+    )
+    , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
+    , _moduleProperty("ModuleProperties", "Module Properties")
+    , _virtualProperty("VirtualProperties", "Virtual Properties")
+    , _featuredProperties(
+        "FeaturedProperties",
+        "Featured Properties",
+        GuiPropertyComponent::UseTreeLayout::No
+    )
+    , _showHelpText(ShowHelpInfo, true)
+    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
+    , _allHidden(HiddenInfo, true)
+{
+    for (GuiComponent* comp : _components) {
+        addPropertySubOwner(comp);
+    }
+    _featuredProperties.setEnabled(true);
+    _spaceTime.setEnabled(true);
+
+    {
+        auto showHelpTextFunc = [this]() {
+            for (GuiComponent* comp : _components) {
+                comp->setShowHelpTooltip(_showHelpText);
+            }
+        };
+        showHelpTextFunc();
+        _showHelpText.onChange(std::move(showHelpTextFunc));
+        addProperty(_showHelpText);
+    }
+
+    {
+        auto helpTextDelayFunc = [this](){
+            for (GuiComponent* comp : _components) {
+                comp->setShowHelpTooltipDelay(_helpTextDelay);
+            }
+        };
+        helpTextDelayFunc();
+        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
+        addProperty(_helpTextDelay);
+    }
+
+    addProperty(_allHidden);
+}
+
+GUI::~GUI() {} // NOLINT
+
+void GUI::initialize() {
+    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+        configurationFile,
+        "",
+        ghoul::filesystem::CacheManager::Persistent::Yes
+    );
+
+    iniFileBuffer = new char[cachedFile.size() + 1];
+
+#ifdef WIN32
+    strcpy_s(iniFileBuffer, cachedFile.size() + 1, cachedFile.c_str());
+#else
+    strcpy(iniFileBuffer, cachedFile.c_str());
+#endif
+
+    int nWindows = OsEng.windowWrapper().nWindows();
+    _contexts.resize(nWindows);
+
+    for (int i = 0; i < nWindows; ++i) {
+        _contexts[i] = ImGui::CreateContext();
+        ImGui::SetCurrentContext(_contexts[i]);
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.IniFilename = cachedFile.c_str();
+        io.DeltaTime = 1.f / 60.f;
+        io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
+        io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
+        io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
+        io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
+        io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
+        io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
+        io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
+        io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
+        io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
+        io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
+        io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
+        io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
+        io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
+        io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
+        io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
+        io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
+        io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
+
+        io.Fonts->AddFontFromFileTTF(absPath(GuiFont).c_str(), FontSize);
+        captionFont = io.Fonts->AddFontFromFileTTF(
+            absPath(GuiFont).c_str(),
+            FontSize * 1.5f
+        );
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowPadding = { 4.f, 4.f };
+        style.WindowRounding = 0.f;
+        style.FramePadding = { 3.f, 3.f };
+        style.FrameRounding = 0.f;
+        style.ItemSpacing = { 3.f, 2.f };
+        style.ItemInnerSpacing = { 3.f, 2.f };
+        style.TouchExtraPadding = { 1.f, 1.f };
+        style.IndentSpacing = 15.f;
+        style.ScrollbarSize = 10.f;
+        style.ScrollbarRounding = 0.f;
+        style.GrabMinSize = 10.f;
+        style.GrabRounding = 16.f;
+
+        style.Colors[ImGuiCol_Text] =                 ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+        style.Colors[ImGuiCol_TextDisabled] =         ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_WindowBg] =             ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
+        style.Colors[ImGuiCol_ChildWindowBg] =        ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_PopupBg] =              ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
+        style.Colors[ImGuiCol_Border] =               ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
+        style.Colors[ImGuiCol_BorderShadow] =         ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_FrameBg] =              ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
+        style.Colors[ImGuiCol_FrameBgHovered] =       ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
+        style.Colors[ImGuiCol_FrameBgActive] =        ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
+        style.Colors[ImGuiCol_TitleBg] =              ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgCollapsed] =     ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
+        style.Colors[ImGuiCol_TitleBgActive] =        ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
+        style.Colors[ImGuiCol_MenuBarBg] =            ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
+        style.Colors[ImGuiCol_ScrollbarBg] =          ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+        style.Colors[ImGuiCol_ScrollbarGrab] =        ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
+        style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ScrollbarGrabActive] =  ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+        style.Colors[ImGuiCol_ComboBg] =              ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
+        style.Colors[ImGuiCol_CheckMark] =            ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+        style.Colors[ImGuiCol_SliderGrab] =           ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
+        style.Colors[ImGuiCol_SliderGrabActive] =     ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+        style.Colors[ImGuiCol_Button] =               ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_ButtonHovered] =        ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
+        style.Colors[ImGuiCol_ButtonActive] =         ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
+        style.Colors[ImGuiCol_Header] =               ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
+        style.Colors[ImGuiCol_HeaderHovered] =        ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
+        style.Colors[ImGuiCol_HeaderActive] =         ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+        style.Colors[ImGuiCol_Column] =               ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+        style.Colors[ImGuiCol_ColumnHovered] =        ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
+        style.Colors[ImGuiCol_ColumnActive] =         ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGrip] =           ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_ResizeGripHovered] =    ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+        style.Colors[ImGuiCol_ResizeGripActive] =     ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+        style.Colors[ImGuiCol_CloseButton] =          ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
+        style.Colors[ImGuiCol_CloseButtonHovered] =   ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
+        style.Colors[ImGuiCol_CloseButtonActive] =    ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+        style.Colors[ImGuiCol_PlotLines] =            ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotLinesHovered] =     ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogram] =        ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+        style.Colors[ImGuiCol_TextSelectedBg] =       ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
+        style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+    }
+
+    for (GuiComponent* comp : _components) {
+        comp->initialize();
+    }
+    _sceneProperty.setHasRegularProperties(true);
+    _screenSpaceProperty.setHasRegularProperties(true);
+    _globalProperty.setHasRegularProperties(true);
+    _moduleProperty.setHasRegularProperties(true);
+    _featuredProperties.setHasRegularProperties(true);
+}
+
+void GUI::deinitialize() {
+    ImGui::Shutdown();
+
+    int nWindows = OsEng.windowWrapper().nWindows();
+    for (int i = 0; i < nWindows; ++i) {
+        ImGui::DestroyContext(_contexts[i]);
+    }
+
+    for (GuiComponent* comp : _components) {
+        comp->deinitialize();
+    }
+
+    delete iniFileBuffer;
+}
+
+void GUI::initializeGL() {
+    _program = ghoul::opengl::ProgramObject::Build(
+        "GUI",
+        absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
+        absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
+    );
+
+    _uniformCache.tex = _program->uniformLocation("tex");
+    _uniformCache.ortho = _program->uniformLocation("ortho");
+
+    int nWindows = OsEng.windowWrapper().nWindows();
+    {
+        unsigned char* texData;
+        glm::ivec2 texSize;
+        for (int i = 0; i < nWindows; ++i) {
+            //_contexts[i] = ImGui::CreateContext();
+            ImGui::SetCurrentContext(_contexts[i]);
+
+            ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
+        }
+        _fontTexture = std::make_unique<ghoul::opengl::Texture>(
+            texData,
+            glm::uvec3(texSize.x, texSize.y, 1)
+        );
+        _fontTexture->setName("Gui Text");
+        _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+        _fontTexture->uploadTexture();
+    }
+    for (int i = 0; i < nWindows; ++i) {
+        uintptr_t texture = static_cast<GLuint>(*_fontTexture);
+        ImGui::SetCurrentContext(_contexts[i]);
+        ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
+    }
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+
+    glGenBuffers(1, &vboElements);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    GLuint positionAttrib = _program->attributeLocation("in_position");
+    GLuint uvAttrib = _program->attributeLocation("in_uv");
+    GLuint colorAttrib = _program->attributeLocation("in_color");
+
+    glEnableVertexAttribArray(positionAttrib);
+    glVertexAttribPointer(
+        positionAttrib,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(ImDrawVert),
+        nullptr
+    );
+    glEnableVertexAttribArray(uvAttrib);
+    glVertexAttribPointer(
+        uvAttrib,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(ImDrawVert),
+        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv)) // NOLINT
+    );
+    glEnableVertexAttribArray(colorAttrib);
+    glVertexAttribPointer(
+        colorAttrib,
+        4,
+        GL_UNSIGNED_BYTE,
+        GL_TRUE,
+        sizeof(ImDrawVert),
+        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col)) // NOLINT
+    );
+    glBindVertexArray(0);
+
+    for (GuiComponent* comp : _components) {
+        comp->initializeGL();
+    }
+}
+
+void GUI::deinitializeGL() {
+    _program = nullptr;
+    _fontTexture = nullptr;
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &vboElements);
+
+    for (GuiComponent* comp : _components) {
+        comp->deinitializeGL();
+    }
+}
+
+void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
+                     const glm::vec2& dpiScaling, const glm::vec2& mousePos,
+                     uint32_t mouseButtonsPressed)
+{
+    const int iWindow = OsEng.windowWrapper().currentWindowId();
+    ImGui::SetCurrentContext(_contexts[iWindow]);
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
+    io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);
+    io.DeltaTime = deltaTime;
+
+    io.MousePos = ImVec2(mousePos.x, mousePos.y);
+
+    io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
+    io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
+
+    ImGui::NewFrame();
+}
+
+void GUI::endFrame() {
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+
+        _uniformCache.tex = _program->uniformLocation("tex");
+        _uniformCache.ortho = _program->uniformLocation("ortho");
+    }
+
+    _performance.setEnabled(OsEng.renderEngine().doesPerformanceMeasurements());
+
+    if (_performance.isEnabled()) {
+        _performance.render();
+    }
+
+    if (!_allHidden) {
+        if (_isEnabled) {
+            render();
+        }
+
+        for (GuiComponent* comp : _components) {
+            if (comp->isEnabled()) {
+                comp->render();
+            }
+        }
+    }
+
+    ImGui::Render();
+
+
+    // Drawing
+    ImDrawData* drawData = ImGui::GetDrawData();
+
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
@@ -132,8 +510,8 @@ static void RenderDrawLists(ImDrawData* drawData) {
         );
 
         for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin();
-             pcmd != cmdList->CmdBuffer.end();
-             pcmd++)
+            pcmd != cmdList->CmdBuffer.end();
+            pcmd++)
         {
             if (pcmd->UserCallback) {
                 pcmd->UserCallback(cmdList, pcmd);
@@ -163,572 +541,6 @@ static void RenderDrawLists(ImDrawData* drawData) {
     glBindVertexArray(0);
     _program->deactivate();
     glDisable(GL_SCISSOR_TEST);
-}
-
-void addScreenSpaceRenderableLocal(std::string texturePath) {
-    if (!FileSys.fileExists(absPath(texturePath))) {
-        LWARNING(fmt::format("Could not find image '{}'", texturePath));
-        return;
-    }
-
-    const std::string luaTable =
-        "{Type = 'ScreenSpaceImageLocal', TexturePath = openspace.absPath('" +
-        texturePath + "') }";
-    const std::string script = "openspace.addScreenSpaceRenderable(" +
-        luaTable + ");";
-    OsEng.scriptEngine().queueScript(
-        script,
-        openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    );
-}
-
-void addScreenSpaceRenderableOnline(std::string texturePath) {
-    const std::string luaTable =
-        "{Type = 'ScreenSpaceImageOnline', URL = '" + texturePath + "' }";
-    const std::string script = "openspace.addScreenSpaceRenderable(" +
-        luaTable + ");";
-    OsEng.scriptEngine().queueScript(
-        script,
-        openspace::scripting::ScriptEngine::RemoteScripting::Yes
-    );
-}
-
-static const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
-    "ShowHelpText",
-    "Show tooltip help",
-    "If this value is enabled these kinds of tooltips are shown for most properties "
-    "explaining what impact they have on the visuals."
-};
-
-static const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
-    "HelpTextDelay",
-    "Tooltip Delay (in s)",
-    "This value determines the delay in seconds after which the tooltip is shown."
-};
-
-static const openspace::properties::Property::PropertyInfo HiddenInfo = {
-    "IsHidden",
-    "Is Hidden",
-    "If this value is true, all GUI items will not be rendered, regardless of their "
-    "status"
-};
-
-} // namespace
-
-namespace openspace::gui {
-
-void CaptionText(const char* text) {
-    ImGui::PushFont(captionFont);
-    ImGui::Text("%s", text);
-    ImGui::PopFont();
-}
-
-GUI::GUI()
-    : GuiComponent("Main")
-    , _globalProperty("Global", "Global Properties")
-    , _sceneProperty(
-        "SceneProperties", "Scene Properties",
-        GuiPropertyComponent::UseTreeLayout::Yes
-    )
-    , _screenSpaceProperty("ScreenSpaceProperties", "ScreenSpace Properties")
-    , _moduleProperty("ModuleProperties", "Module Properties")
-    , _virtualProperty("VirtualProperties", "Virtual Properties")
-    , _featuredProperties(
-        "FeaturedProperties",
-        "Featured Properties",
-        GuiPropertyComponent::UseTreeLayout::No
-    )
-    , _showInternals(false)
-    , _showHelpText(ShowHelpInfo, true)
-    , _helpTextDelay(HelpTextDelayInfo, 1.0, 0.0, 10.0)
-    , _currentVisibility(properties::Property::Visibility::Developer)
-    , _allHidden(HiddenInfo, true)
-{
-    addPropertySubOwner(_help);
-    addPropertySubOwner(_performance);
-    addPropertySubOwner(_globalProperty);
-    addPropertySubOwner(_moduleProperty);
-    addPropertySubOwner(_sceneProperty);
-    addPropertySubOwner(_screenSpaceProperty);
-    _featuredProperties.setEnabled(true);
-    addPropertySubOwner(_featuredProperties);
-    addPropertySubOwner(_virtualProperty);
-#ifdef GLOBEBROWSING_USE_GDAL
-    addPropertySubOwner(_globeBrowsing);
-#endif // GLOBEBROWSING_USE_GDAL
-    addPropertySubOwner(_joystick);
-    addPropertySubOwner(_filePath);
-    addPropertySubOwner(_asset);
-    _spaceTime.setEnabled(true);
-    addPropertySubOwner(_spaceTime);
-    addPropertySubOwner(_mission);
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    addPropertySubOwner(_iswa);
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-    {
-        auto showHelpTextFunc = [this](){
-            _help.setShowHelpTooltip(_showHelpText);
-            _filePath.setShowHelpTooltip(_showHelpText);
-#ifdef GLOBEBROWSING_USE_GDAL
-            _globeBrowsing.setShowHelpTooltip(_showHelpText);
-#endif // GLOBEBROWSING_USE_GDAL
-            _performance.setShowHelpTooltip(_showHelpText);
-            _globalProperty.setShowHelpTooltip(_showHelpText);
-            _moduleProperty.setShowHelpTooltip(_showHelpText);
-            _sceneProperty.setShowHelpTooltip(_showHelpText);
-            _screenSpaceProperty.setShowHelpTooltip(_showHelpText);
-            _virtualProperty.setShowHelpTooltip(_showHelpText);
-            _spaceTime.setShowHelpTooltip(_showHelpText);
-            _mission.setShowHelpTooltip(_showHelpText);
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-            _iswa.setShowHelpTooltip(_showHelpText);
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-            _joystick.setShowHelpTooltip(_showHelpText);
-            _parallel.setShowHelpTooltip(_showHelpText);
-            _featuredProperties.setShowHelpTooltip(_showHelpText);
-        };
-        showHelpTextFunc();
-        _showHelpText.onChange(std::move(showHelpTextFunc));
-        addProperty(_showHelpText);
-    }
-
-    {
-        auto helpTextDelayFunc = [this](){
-            _help.setShowHelpTooltipDelay(_helpTextDelay);
-            _filePath.setShowHelpTooltipDelay(_helpTextDelay);
-#ifdef GLOBEBROWSING_USE_GDAL
-            _globeBrowsing.setShowHelpTooltipDelay(_helpTextDelay);
-#endif // GLOBEBROWSING_USE_GDAL
-            _performance.setShowHelpTooltipDelay(_helpTextDelay);
-            _globalProperty.setShowHelpTooltipDelay(_helpTextDelay);
-            _moduleProperty.setShowHelpTooltipDelay(_helpTextDelay);
-            _sceneProperty.setShowHelpTooltipDelay(_helpTextDelay);
-            _screenSpaceProperty.setShowHelpTooltipDelay(_helpTextDelay);
-            _virtualProperty.setShowHelpTooltipDelay(_helpTextDelay);
-            _spaceTime.setShowHelpTooltipDelay(_helpTextDelay);
-            _mission.setShowHelpTooltipDelay(_helpTextDelay);
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-            _iswa.setShowHelpTooltipDelay(_helpTextDelay);
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-            _joystick.setShowHelpTooltipDelay(_helpTextDelay);
-            _parallel.setShowHelpTooltipDelay(_helpTextDelay);
-            _featuredProperties.setShowHelpTooltipDelay(_helpTextDelay);
-        };
-        helpTextDelayFunc();
-        _helpTextDelay.onChange(std::move(helpTextDelayFunc));
-        addProperty(_helpTextDelay);
-    }
-
-    addProperty(_allHidden);
-}
-
-void GUI::initialize() {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        configurationFile, "", ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-
-    iniFileBuffer = new char[cachedFile.size() + 1];
-
-#ifdef WIN32
-    strcpy_s(iniFileBuffer, cachedFile.size() + 1, cachedFile.c_str());
-#else
-    strcpy(iniFileBuffer, cachedFile.c_str());
-#endif
-
-    int nWindows = OsEng.windowWrapper().nWindows();
-    _contexts.resize(nWindows);
-
-    for (int i = 0; i < nWindows; ++i) {
-        _contexts[i] = ImGui::CreateContext();
-        ImGui::SetCurrentContext(_contexts[i]);
-        //}
-
-
-        ImGuiIO& io = ImGui::GetIO();
-        io.IniFilename = iniFileBuffer;
-        io.DeltaTime = 1.f / 60.f;
-        io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
-        io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
-        io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
-        io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(Key::Up);
-        io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(Key::Down);
-        io.KeyMap[ImGuiKey_Home] = static_cast<int>(Key::Home);
-        io.KeyMap[ImGuiKey_End] = static_cast<int>(Key::End);
-        io.KeyMap[ImGuiKey_Delete] = static_cast<int>(Key::Delete);
-        io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(Key::BackSpace);
-        io.KeyMap[ImGuiKey_Enter] = static_cast<int>(Key::Enter);
-        io.KeyMap[ImGuiKey_Escape] = static_cast<int>(Key::Escape);
-        io.KeyMap[ImGuiKey_A] = static_cast<int>(Key::A);
-        io.KeyMap[ImGuiKey_C] = static_cast<int>(Key::C);
-        io.KeyMap[ImGuiKey_V] = static_cast<int>(Key::V);
-        io.KeyMap[ImGuiKey_X] = static_cast<int>(Key::X);
-        io.KeyMap[ImGuiKey_Y] = static_cast<int>(Key::Y);
-        io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
-
-        io.RenderDrawListsFn = RenderDrawLists;
-        io.Fonts->AddFontFromFileTTF(
-            absPath(GuiFont).c_str(),
-            FontSize
-        );
-
-        captionFont = io.Fonts->AddFontFromFileTTF(
-            absPath(GuiFont).c_str(),
-            FontSize * 1.5f
-        );
-
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.WindowPadding = { 4.f, 4.f };
-        style.WindowRounding = 0.f;
-        style.FramePadding = { 3.f, 3.f };
-        style.FrameRounding = 0.f;
-        style.ItemSpacing = { 3.f, 2.f };
-        style.ItemInnerSpacing = { 3.f, 2.f };
-        style.TouchExtraPadding = { 1.f, 1.f };
-        style.IndentSpacing = 15.f;
-        style.ScrollbarSize = 10.f;
-        style.ScrollbarRounding = 0.f;
-        style.GrabMinSize = 10.f;
-        style.GrabRounding = 16.f;
-
-        style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
-        style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-        style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 0.96f);
-        style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.90f);
-        style.Colors[ImGuiCol_Border] = ImVec4(0.65f, 0.65f, 0.65f, 0.59f);
-        style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_FrameBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.30f);
-        style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.91f, 0.94f, 0.99f, 0.40f);
-        style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.90f, 0.90f, 0.45f);
-        style.Colors[ImGuiCol_TitleBg] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
-        style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.71f, 0.81f, 1.00f, 0.45f);
-        style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.51f, 0.69f, 1.00f, 0.63f);
-        style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.26f, 0.27f, 0.33f, 0.80f);
-        style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.75f, 0.80f, 0.43f);
-        style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-        style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
-        style.Colors[ImGuiCol_ComboBg] = ImVec4(0.36f, 0.46f, 0.56f, 1.00f);
-        style.Colors[ImGuiCol_CheckMark] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
-        style.Colors[ImGuiCol_SliderGrab] = ImVec4(1.00f, 1.00f, 1.00f, 0.30f);
-        style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
-        style.Colors[ImGuiCol_Button] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-        style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.36f, 0.54f, 0.68f, 1.00f);
-        style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.61f, 0.81f, 1.00f);
-        style.Colors[ImGuiCol_Header] = ImVec4(0.69f, 0.69f, 0.69f, 0.45f);
-        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.36f, 0.54f, 0.68f, 0.62f);
-        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
-        style.Colors[ImGuiCol_Column] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-        style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.70f, 0.60f, 0.60f, 1.00f);
-        style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.90f, 0.70f, 0.70f, 1.00f);
-        style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-        style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-        style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-        style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.00f);
-        style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.52f, 0.52f, 0.52f, 0.60f);
-        style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
-        style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-        style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-        style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.44f, 0.63f, 1.00f, 0.35f);
-        style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
-    }
-    _sceneProperty.initialize();
-    _sceneProperty.setHasRegularProperties(true);
-    _screenSpaceProperty.initialize();
-    _screenSpaceProperty.setHasRegularProperties(true);
-    _globalProperty.initialize();
-    _globalProperty.setHasRegularProperties(true);
-    _moduleProperty.initialize();
-    _moduleProperty.setHasRegularProperties(true);
-    _featuredProperties.initialize();
-    _featuredProperties.setHasRegularProperties(true);
-    _virtualProperty.initialize();
-    _filePath.initialize();
-    _asset.initialize();
-#ifdef GLOBEBROWSING_USE_GDAL
-    _globeBrowsing.initialize();
-#endif // GLOBEBROWSING_USE_GDAL
-    _joystick.initialize();
-    _performance.initialize();
-    _help.initialize();
-    _parallel.initialize();
-    _mission.initialize();
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.initialize();
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-}
-
-void GUI::deinitialize() {
-    ImGui::Shutdown();
-
-    int nWindows = OsEng.windowWrapper().nWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        ImGui::DestroyContext(_contexts[i]);
-    }
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.deinitialize();
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-    _mission.deinitialize();
-    _parallel.deinitialize();
-    _help.deinitialize();
-    _joystick.deinitialize();
-    _performance.deinitialize();
-    _globalProperty.deinitialize();
-    _moduleProperty.deinitialize();
-    _featuredProperties.deinitialize();
-    _screenSpaceProperty.deinitialize();
-    _virtualProperty.deinitialize();
-    _filePath.deinitialize();
-    _asset.deinitialize();
-#ifdef GLOBEBROWSING_USE_GDAL
-    _globeBrowsing.deinitialize();
-#endif // GLOBEBROWSING_USE_GDAL
-    _sceneProperty.deinitialize();
-
-    delete iniFileBuffer;
-}
-
-void GUI::initializeGL() {
-    _program = ghoul::opengl::ProgramObject::Build(
-        "GUI",
-        absPath("${MODULE_IMGUI}/shaders/gui_vs.glsl"),
-        absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
-    );
-
-    _uniformCache.tex = _program->uniformLocation("tex");
-    _uniformCache.ortho = _program->uniformLocation("ortho");
-
-    if (!_program) {
-        return;
-    }
-
-    unsigned char* pngData;
-    glm::ivec2 textureSize;
-    int nWindows = OsEng.windowWrapper().nWindows();
-    for (int i = 0; i < nWindows; ++i) {
-        //_contexts[i] = ImGui::CreateContext();
-        ImGui::SetCurrentContext(_contexts[i]);
-
-        ImGui::GetIO().Fonts->GetTexDataAsRGBA32(
-            &pngData,
-            &textureSize.x,
-            &textureSize.y
-        );
-    }
-    _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-        pngData,
-        glm::uvec3(textureSize.x, textureSize.y, 1)
-    );
-    _fontTexture->setName("Gui Text");
-    _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-    _fontTexture->uploadTexture();
-    GLuint id = *_fontTexture;
-    uint64_t tmp = id;
-    for (int i = 0; i < nWindows; ++i) {
-        //_contexts[i] = ImGui::CreateContext();
-        ImGui::SetCurrentContext(_contexts[i]);
-
-        ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
-    }
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, nullptr, GL_DYNAMIC_DRAW);
-
-    glGenBuffers(1, &vboElements);
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glEnableVertexAttribArray(_program->attributeLocation("in_position"));
-    glEnableVertexAttribArray(_program->attributeLocation("in_uv"));
-    glEnableVertexAttribArray(_program->attributeLocation("in_color"));
-
-    glVertexAttribPointer(
-        _program->attributeLocation("in_position"),
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ImDrawVert),
-        nullptr // = reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, pos))
-    );
-    glVertexAttribPointer(
-        _program->attributeLocation("in_uv"),
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
-    );
-    glVertexAttribPointer(
-        _program->attributeLocation("in_color"),
-        4,
-        GL_UNSIGNED_BYTE,
-        GL_TRUE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col))
-    );
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    _sceneProperty.initializeGL();
-    _screenSpaceProperty.initializeGL();
-    _globalProperty.initializeGL();
-    _moduleProperty.initializeGL();
-    _featuredProperties.initializeGL();
-    _joystick.initializeGL();
-    _performance.initializeGL();
-    _help.initializeGL();
-#ifdef GLOBEBROWSING_USE_GDAL
-    _globeBrowsing.initializeGL();
-#endif // GLOBEBROWSING_USE_GDAL
-    _filePath.initializeGL();
-    _asset.initializeGL();
-    _parallel.initializeGL();
-    _mission.initializeGL();
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.initializeGL();
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-}
-
-void GUI::deinitializeGL() {
-    _program = nullptr;
-    _fontTexture = nullptr;
-
-    if (vao) {
-        glDeleteVertexArrays(1, &vao);
-    }
-    if (vbo) {
-        glDeleteBuffers(1, &vbo);
-    }
-    if (vboElements) {
-        glDeleteBuffers(1, &vboElements);
-    }
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _iswa.deinitializeGL();
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-    _mission.deinitializeGL();
-    _parallel.deinitializeGL();
-    _help.deinitializeGL();
-    _performance.deinitializeGL();
-    _featuredProperties.deinitializeGL();
-    _globalProperty.deinitializeGL();
-    _joystick.deinitializeGL();
-    _moduleProperty.deinitializeGL();
-    _screenSpaceProperty.deinitializeGL();
-#ifdef GLOBEBROWSING_USE_GDAL
-    _globeBrowsing.deinitializeGL();
-#endif // GLOBEBROWSING_USE_GDAL
-    _filePath.deinitializeGL();
-    _asset.deinitializeGL();
-    _sceneProperty.deinitializeGL();
-}
-
-void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
-                     const glm::vec2& dpiScaling, const glm::vec2& mousePos,
-                     uint32_t mouseButtonsPressed)
-{
-    int iWindow = OsEng.windowWrapper().currentWindowId();
-    ImGui::SetCurrentContext(_contexts[iWindow]);
-
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
-    io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);
-    io.DeltaTime = deltaTime;
-
-    io.MousePos = ImVec2(mousePos.x, mousePos.y);
-
-    io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
-    io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
-
-    ImGui::NewFrame();
-}
-
-void GUI::endFrame() {
-    if (_program->isDirty()) {
-        _program->rebuildFromFile();
-
-        _uniformCache.tex = _program->uniformLocation("tex");
-        _uniformCache.ortho = _program->uniformLocation("ortho");
-    }
-
-    bool perf = OsEng.renderEngine().doesPerformanceMeasurements();
-    _performance.setEnabled(perf);
-
-    if (_performance.isEnabled()) {
-        _performance.render();
-    }
-
-    if (!_allHidden) {
-
-        if (_isEnabled) {
-            render();
-        }
-
-        if (_globalProperty.isEnabled()) {
-            _globalProperty.render();
-        }
-        if (_moduleProperty.isEnabled()) {
-            _moduleProperty.render();
-        }
-        if (_sceneProperty.isEnabled()) {
-            _sceneProperty.render();
-        }
-        if (_screenSpaceProperty.isEnabled()) {
-            _screenSpaceProperty.render();
-        }
-        if (_virtualProperty.isEnabled()) {
-            _virtualProperty.render();
-        }
-        if (_help.isEnabled()) {
-            _help.render();
-        }
-        if (_parallel.isEnabled()) {
-            _parallel.render();
-        }
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        if (_iswa.isEnabled()) {
-            _iswa.render();
-        }
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-        if (_joystick.isEnabled()) {
-            _joystick.render();
-        }
-
-        if (_filePath.isEnabled()) {
-            _filePath.render();
-        }
-        if (_asset.isEnabled()) {
-            _asset.render();
-        }
-
-#ifdef GLOBEBROWSING_USE_GDAL
-        if (_globeBrowsing.isEnabled()) {
-            _globeBrowsing.render();
-        }
-#endif // GLOBEBROWSING_USE_GDAL
-
-        if (_mission.isEnabled() && MissionManager::ref().hasCurrentMission()) {
-            _mission.render();
-        }
-
-        if (_spaceTime.isEnabled()) {
-            _spaceTime.render();
-        }
-
-        if (_featuredProperties.isEnabled()) {
-            _featuredProperties.render();
-        }
-    }
-
-    ImGui::Render();
 }
 
 bool GUI::mouseButtonCallback(MouseButton, MouseAction) {
@@ -805,69 +617,11 @@ void GUI::render() {
 
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    bool sceneProperty = _sceneProperty.isEnabled();
-    ImGui::Checkbox("Scene Graph Properties", &sceneProperty);
-    _sceneProperty.setEnabled(sceneProperty);
-
-    bool screenSpaceProperty = _screenSpaceProperty.isEnabled();
-    ImGui::Checkbox("ScreenSpace Properties", &screenSpaceProperty);
-    _screenSpaceProperty.setEnabled(screenSpaceProperty);
-
-    bool featuredProperties = _featuredProperties.isEnabled();
-    ImGui::Checkbox("Featured Properties", &featuredProperties);
-    _featuredProperties.setEnabled(featuredProperties);
-
-    bool globalProperty = _globalProperty.isEnabled();
-    ImGui::Checkbox("Global Properties", &globalProperty);
-    _globalProperty.setEnabled(globalProperty);
-
-    bool moduleProperty = _moduleProperty.isEnabled();
-    ImGui::Checkbox("Module Properties", &moduleProperty);
-    _moduleProperty.setEnabled(moduleProperty);
-
-    bool spacetime = _spaceTime.isEnabled();
-    ImGui::Checkbox("Space/Time", &spacetime);
-    _spaceTime.setEnabled(spacetime);
-
-    bool parallel = _parallel.isEnabled();
-    ImGui::Checkbox("Parallel Connection", &parallel);
-    _parallel.setEnabled(parallel);
-
-    bool virtualProperty = _virtualProperty.isEnabled();
-    ImGui::Checkbox("Virtual Properties", &virtualProperty);
-    _virtualProperty.setEnabled(virtualProperty);
-
-    bool mission = _mission.isEnabled();
-    ImGui::Checkbox("Mission Information", &mission);
-    _mission.setEnabled(mission);
-
-    bool joystick = _joystick.isEnabled();
-    ImGui::Checkbox("Joystick Information", &joystick);
-    _joystick.setEnabled(joystick);
-
-    bool filePath = _filePath.isEnabled();
-    ImGui::Checkbox("File Paths", &filePath);
-    _filePath.setEnabled(filePath);
-
-    bool asset = _asset.isEnabled();
-    ImGui::Checkbox("Assets", &asset);
-    _asset.setEnabled(asset);
-
-#ifdef GLOBEBROWSING_USE_GDAL
-    bool globeBrowsing = _globeBrowsing.isEnabled();
-    ImGui::Checkbox("GlobeBrowsing", &globeBrowsing);
-    _globeBrowsing.setEnabled(globeBrowsing);
-#endif // GLOBEBROWSING_USE_GDAL
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    bool iswa = _iswa.isEnabled();
-    ImGui::Checkbox("iSWA", &iswa);
-    _iswa.setEnabled(iswa);
-#endif // OPENSPACE_MODULE_ISWA_ENABLED
-
-    bool help = _help.isEnabled();
-    ImGui::Checkbox("Help", &help);
-    _help.setEnabled(help);
+    for (GuiComponent* comp : _components) {
+        bool enabled = comp->isEnabled();
+        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
+        comp->setEnabled(enabled);
+    }
 
     renderAndUpdatePropertyVisibility();
 

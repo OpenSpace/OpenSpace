@@ -48,7 +48,7 @@ private:
     int roundedLongitudalLength(const TileIndex& tileIndex) const;
 
     Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
+    Tile _backgroundTile = Tile::TileUnavailable;
 };
 
 } // namespace openspace::globebrowsing::tileprovider

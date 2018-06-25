@@ -1,0 +1,9 @@
+local Kernels = asset.syncedResource({
+    Name = "Jupiter Spice Kernels",
+    Type = "HttpSynchronization",
+    Identifier = "jupiter_kernels",
+    Version = 1
+})
+
+asset.export("jup310", Kernels .. '/jup310.bsp')
+asset.export("jup341", Kernels .. '/jup341.bsp')

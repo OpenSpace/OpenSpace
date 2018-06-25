@@ -27,28 +27,24 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/quad.h>
-#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace::globebrowsing {
 
+struct TileIndex;
+
 class GeodeticPatch {
 public:
-    GeodeticPatch(
-        double centerLat,
-        double centerLon,
-        double halfSizeLat,
+    GeodeticPatch(double centerLat, double centerLon, double halfSizeLat,
         double halfSizeLon);
 
-    GeodeticPatch(
-        const Geodetic2& center,
-        const Geodetic2& halfSize);
+    GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize);
 
-    GeodeticPatch(const GeodeticPatch& patch);
+    GeodeticPatch(const GeodeticPatch& patch) = default;
 
     GeodeticPatch(const TileIndex& tileIndex);
 
-    void setCenter(const Geodetic2&);
-    void setHalfSize(const Geodetic2&);
+    void setCenter(Geodetic2 center);
+    void setHalfSize(Geodetic2 halfSize);
 
     /**
      * Returns the latitude boundary which is closest to the equator
@@ -60,8 +56,7 @@ public:
      */
     double isNorthern() const;
 
-    Geodetic2 getCorner(Quad q) const;
-    Geodetic2 getSize() const;
+    Geodetic2 corner(Quad q) const;
 
     double minLat() const;
     double maxLat() const;

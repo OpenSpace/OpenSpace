@@ -67,8 +67,9 @@ public:
     /**
      * Allocates <code>numBytes</code> bytes on the GPU and creates an ID for the pixel
      * buffer object.
+     *
      * \param numBytes is the number of bytes to be allocated on GPU memory
-     * \param usage is the <code>Usage</code> for the pixel buffer
+     * \param usage is the Usage for the pixel buffer
      */
     PixelBuffer(size_t numBytes, Usage usage);
 
@@ -80,10 +81,11 @@ public:
     /**
      * Maps an address pointer to GPU direct memory access. The user must make sure the
      * buffer is bound before calling this function.
+     *
      * \param access is the access to which can be any of <code>GL_READ_ONLY</code>,
      * <code>GL_WRITE_ONLY</code>, or <code>GL_READ_WRITE</code>
-     * \returns the DMA address to the mapped buffer. Returns nullptr if the mapping
-     * failed
+     * \return The DMA address to the mapped buffer. Returns nullptr if the mapping
+     *         failed
      */
     void* mapBuffer(Access access);
 
@@ -91,12 +93,13 @@ public:
      * Maps an address pointer to GPU direct memory access. Gives access to a range of
      * the buffer. The user must make sure the buffer is bound before calling this
      * function.
+     *
      * \param offet is the number of bytes to the first address to get in the buffer
      * \param length is the number of bytes to access in the buffer
      * \param access is a bitfield describing the access as described in:
      * https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glMapBufferRange.xhtml
-     * \returns the DMA address to the mapped buffer. Returns nullptr if the mapping
-     * failed
+     * \return The DMA address to the mapped buffer. Returns nullptr if the mapping
+     *         failed
      */
     void* mapBufferRange(GLintptr offset, GLsizeiptr length, BufferAccessMask access);
 
@@ -126,10 +129,10 @@ public:
     operator GLuint() const;
 
 private:
-    GLuint _id;
+    GLuint _id = 0;
     const size_t _numBytes;
     const Usage _usage;
-    bool _isMapped;
+    bool _isMapped = false;
 };
 
 } // namespace openspace::globebrowsing

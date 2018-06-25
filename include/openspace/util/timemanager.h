@@ -25,8 +25,13 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <openspace/util/syncdata.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeline.h>
+#include <functional>
 #include <utility>
 #include <vector>
+
 #include <deque>
 #include <functional>
 #include <openspace/util/timeline.h>
@@ -60,6 +65,7 @@ public:
     void addKeyframe(double timestamp, TimeKeyframeData kf);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
+
     void clearKeyframes();
     void setTimeNextFrame(Time t);
     size_t nKeyframes() const;
@@ -84,6 +90,7 @@ public:
 
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+
     void removeTimeJumpCallback(CallbackHandle handle);
 private:
     void progressTime(double dt);
@@ -107,7 +114,7 @@ private:
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
 
-    double _latestConsumedTimestamp;
+    double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;

@@ -25,16 +25,13 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
 
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tileuvtransform.h>
-
+#include <modules/globebrowsing/tile/tilemetadata.h>
 #include <memory>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace::globebrowsing {
 
-struct TileMetaData;
 struct TileUvTransform;
 
 /**
@@ -74,16 +71,13 @@ public:
         OK
     };
 
-    Tile(ghoul::opengl::Texture* texture,
-         std::shared_ptr<TileMetaData> metaData,
-         Status status);
+    Tile(ghoul::opengl::Texture* texture, std::shared_ptr<TileMetaData> metaData,
+        Status status);
     ~Tile() = default;
 
-    std::shared_ptr<TileMetaData> metaData() const { return _metaData; };
-    Status status() const { return _status; };
-    ghoul::opengl::Texture* texture() const {
-        return _texture;
-    };
+    TileMetaData* metaData() const;
+    Status status() const;
+    ghoul::opengl::Texture* texture() const;
 
     /**
     * A tile with status unavailable that any user can return to

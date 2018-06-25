@@ -26,12 +26,9 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/util/time.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
-
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
 #include <array>
 #include <chrono>
 #include <thread>
@@ -49,11 +46,7 @@ namespace {
 
 namespace openspace {
 
-NetworkEngine::NetworkEngine()
-    // -1 is okay as we assign one identifier in this ctor
-    : _lastAssignedIdentifier(MessageIdentifier(-1))
-    , _shouldPublishStatusMessage(true)
-{
+NetworkEngine::NetworkEngine() {
     static_assert(
         sizeof(MessageIdentifier) == 2,
         "MessageIdentifier has to be 2 bytes or dependent applications will break"
@@ -68,25 +61,20 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     const char type = message[0];
     switch (type) {
         case MessageTypeLuaScript:  // LuaScript
-        {
-            std::string script = message.substr(1);
             OsEng.scriptEngine().queueScript(
-                script,
+                message.substr(1),
                 scripting::ScriptEngine::RemoteScripting::No
             );
             return true;
-        }
         case MessageTypeExternalControlConnected:
-        {
             publishIdentifierMappingMessage();
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
             sendInitialInformation();
             return true;
-        }
         default:
             LERROR(fmt::format("Unknown type '{}'", type));
             return false;
-        }
+    }
 }
 
 void NetworkEngine::publishStatusMessage() {
@@ -101,13 +89,14 @@ void NetworkEngine::publishStatusMessage() {
     // 8 bytes: delta time as double
     // Total: 40
 
-    Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = OsEng.timeManager().time();
 
     uint16_t messageSize = 0;
 
-    double time = currentTime.j2000Seconds();
-    std::string timeString = currentTime.UTC();
+    const double time = currentTime.j2000Seconds();
+    const std::string timeString = currentTime.UTC();
     double delta = OsEng.timeManager().deltaTime();
+
 
     messageSize += sizeof(time);
     messageSize += static_cast<uint16_t>(timeString.length());
@@ -166,7 +155,6 @@ NetworkEngine::MessageIdentifier NetworkEngine::identifier(std::string name) {
     }
     else {
         _lastAssignedIdentifier++;
-
         MessageIdentifier result = _lastAssignedIdentifier;
 
         _identifiers[std::move(name)] = result;
@@ -205,7 +193,7 @@ void NetworkEngine::sendMessages() {
 }
 
 void NetworkEngine::sendInitialInformation() {
-    static const int SleepTime = 250;
+    constexpr const int SleepTime = 250;
     _shouldPublishStatusMessage = false;
     for (const Message& m : _initialConnectionMessages) {
         union {

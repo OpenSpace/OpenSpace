@@ -67,12 +67,12 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+    bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    std::string getBoundsVsPath() const override;
-    std::string getBoundsFsPath() const override;
-    std::string getRaycastPath() const override;
-    std::string getHelperPath() const override;
+    std::string boundsVertexShaderPath() const override;
+    std::string boundsFragmentShaderPath() const override;
+    std::string raycasterPath() const override;
+    std::string helperPath() const override;
 
     void setModelTransform(glm::mat4 transform);
     //void setTime(double time);

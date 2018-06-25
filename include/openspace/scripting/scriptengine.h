@@ -25,18 +25,13 @@
 #ifndef __OPENSPACE_CORE___SCRIPTENGINE___H__
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
+#include <openspace/util/syncable.h>
 #include <openspace/documentation/documentationgenerator.h>
-#include <openspace/util/syncdata.h>
 
 #include <openspace/scripting/lualibrary.h>
-
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
-
-#include <map>
-#include <memory>
-#include <set>
+#include <mutex>
 
 namespace openspace { class SyncBuffer; }
 
@@ -53,6 +48,8 @@ namespace openspace::scripting {
 class ScriptEngine : public Syncable, public DocumentationGenerator {
 public:
     BooleanType(RemoteScripting);
+
+    static constexpr const char* OpenSpaceLibraryName = "openspace";
 
     ScriptEngine();
 
@@ -79,10 +76,10 @@ public:
 
     bool writeLog(const std::string& script);
 
-    virtual void presync(bool isMaster) override;
+    virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postsync(bool isMaster) override;
+    virtual void postSync(bool isMaster) override;
 
     void queueScript(const std::string &script, RemoteScripting remoteScripting);
 
@@ -92,11 +89,11 @@ public:
 
     std::vector<std::string> allLuaFunctions() const;
 
-    static std::string OpenSpaceLibraryName;
-
 private:
+    BooleanType(Replace);
+
     bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, LuaLibrary& library, bool replace);
+    void addLibraryFunctions(lua_State* state, LuaLibrary& library, Replace replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 

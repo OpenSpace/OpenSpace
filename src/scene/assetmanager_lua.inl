@@ -30,28 +30,36 @@ int add(lua_State* state) {
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    std::string assetName = ghoul::lua::checkStringAndPop(state);
+    const std::string& assetName = ghoul::lua::value<std::string>(
+        state,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     assetManager->add(assetName);
 
+    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int remove(lua_State* state) {
     ghoul::lua::checkArgumentsAndThrow(state, 1, "lua::remove");
 
-
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));
 
-    std::string assetName = ghoul::lua::checkStringAndPop(state);
+    const std::string& assetName = ghoul::lua::value<std::string>(
+        state,
+        1,
+        ghoul::lua::PopValue::Yes
+    );
     assetManager->remove(assetName);
 
+    ghoul_assert(lua_gettop(state) == 0, "Incorrect number of items left on stack");
     return 0;
 }
 
 int removeAll(lua_State* state) {
     ghoul::lua::checkArgumentsAndThrow(state, 0, "lua::removeAll");
-
 
     AssetManager* assetManager =
         reinterpret_cast<AssetManager*>(lua_touserdata(state, lua_upvalueindex(1)));

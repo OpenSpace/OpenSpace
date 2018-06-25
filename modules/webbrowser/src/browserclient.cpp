@@ -22,15 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/webbrowser/include/browserclient.h>
 
-#include "include/browserclient.h"
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
+#include <modules/webbrowser/include/webrenderhandler.h>
 
 namespace openspace {
 
-BrowserClient::BrowserClient(WebRenderHandler* handler) {
-    _renderHandler = handler;
-    auto *browserLauncher = new DefaultBrowserLauncher;
+BrowserClient::BrowserClient(WebRenderHandler* handler)
+    : _renderHandler(handler)
+{
+    DefaultBrowserLauncher* browserLauncher = new DefaultBrowserLauncher;
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
 };

@@ -28,31 +28,29 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/util/timemanager.h>
+
 #include <openspace/properties/propertyowner.h>
+
+#include <openspace/network/parallelconnection.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/numericalproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
-#include <glm/gtx/quaternion.hpp>
-
 #include <ghoul/designpattern/event.h>
-#include <ghoul/io/socket/tcpsocket.h>
-
-#include <string>
-#include <vector>
-#include <deque>
 #include <atomic>
-#include <thread>
+#include <deque>
 #include <mutex>
-#include <map>
-#include <condition_variable>
+#include <string>
+#include <thread>
+#include <vector>
 
 namespace openspace {
+
+namespace scripting { struct LuaLibrary; }
 
 class ParallelPeer : public properties::PropertyOwner {
 public:
     ParallelPeer();
     ~ParallelPeer();
+
     void connect();
     void setPort(std::string port);
     void setAddress(std::string address);
@@ -77,7 +75,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
     ParallelConnection::Status status();
     int nConnections();
-    std::shared_ptr<ghoul::Event<>> connectionEvent();
+    ghoul::Event<>& connectionEvent();
 
 private:
     void queueInMessage(const ParallelConnection::Message& message);
@@ -86,9 +84,9 @@ private:
     void handleCommunication();
 
     void handleMessage(const ParallelConnection::Message&);
-    void dataMessageReceived(const std::vector<char>& messageContent);
-    void connectionStatusMessageReceived(const std::vector<char>& messageContent);
-    void nConnectionsMessageReceived(const std::vector<char>& messageContent);
+    void dataMessageReceived(const std::vector<char>& message);
+    void connectionStatusMessageReceived(const std::vector<char>& message);
+    void nConnectionsMessageReceived(const std::vector<char>& message);
 
     void sendCameraKeyframe();
     void sendTimeKeyframe();
@@ -101,6 +99,7 @@ private:
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
+    // Change to properties::IntProperty ? ---abock
     properties::StringProperty _port;
     properties::StringProperty _address;
     properties::StringProperty _name;
@@ -109,13 +108,15 @@ private:
     properties::FloatProperty _cameraKeyframeInterval;
     properties::FloatProperty _timeTolerance;
 
-    double _lastTimeKeyframeTimestamp;
-    double _lastCameraKeyframeTimestamp;
+    double _lastTimeKeyframeTimestamp = 0.0;
+    double _lastCameraKeyframeTimestamp = 0.0;
 
-    std::atomic<bool> _shouldDisconnect;
+    std::atomic_bool _shouldDisconnect = false;
 
-    std::atomic<size_t> _nConnections;
-    std::atomic<ParallelConnection::Status> _status;
+    std::atomic<size_t> _nConnections = 0;
+    std::atomic<ParallelConnection::Status> _status =
+        ParallelConnection::Status::Disconnected;
+
     std::string _hostName;
 
     std::deque<ParallelConnection::Message> _receiveBuffer;
@@ -126,7 +127,7 @@ private:
     std::deque<double> _latencyDiffs;
     double _initialTimeDiff;
 
-    std::unique_ptr<std::thread> _receiveThread;
+    std::unique_ptr<std::thread> _receiveThread = nullptr;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 
     ParallelConnection _connection;

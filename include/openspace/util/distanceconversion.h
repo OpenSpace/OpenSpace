@@ -29,7 +29,6 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/constexpr.h>
-
 #include <array>
 #include <string>
 #include <utility>
@@ -186,8 +185,6 @@ constexpr DistanceUnit distanceUnitFromString(const char* unitName) {
         throw ghoul::MissingCaseException();
     }
 }
-
-
 
 
 

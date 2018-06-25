@@ -28,13 +28,13 @@ namespace openspace::globebrowsing {
 
 template <typename P, typename KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
-    LRUThreadPool<KeyType> pool)
+                                                              LRUThreadPool<KeyType> pool)
     : _threadPool(pool)
-{ }
+{}
 
 template <typename P, typename KeyType>
 void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
-    KeyType key)
+                                                              KeyType key)
 {
     _threadPool.enqueue([this, job]() {
         job->execute();
@@ -45,13 +45,13 @@ void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Jo
 
 template <typename P, typename KeyType>
 std::vector<KeyType>
-PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
+PrioritizingConcurrentJobManager<P, KeyType>::keysToUnfinishedJobs() {
     return _threadPool.getUnqueuedTasksKeys();
 }
 
 template <typename P, typename KeyType>
 std::vector<KeyType>
-PrioritizingConcurrentJobManager<P, KeyType>::getKeysToEnqueuedJobs() {
+PrioritizingConcurrentJobManager<P, KeyType>::keysToEnqueuedJobs() {
     return _threadPool.getQueuedTasksKeys();
 }
 
@@ -67,7 +67,8 @@ void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
 
 template <typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
-    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+    ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop!");
+
     std::lock_guard<std::mutex> lock(_finishedJobsMutex);
     std::shared_ptr<Job<P>> result = _finishedJobs.pop();
     return result;

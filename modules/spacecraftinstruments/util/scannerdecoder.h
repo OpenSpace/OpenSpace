@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
 
 #include <modules/spacecraftinstruments/util/decoder.h>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
@@ -33,9 +35,9 @@ class ScannerDecoder : public Decoder {
 public:
     ScannerDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual std::string getDecoderType() override;
-    virtual std::vector<std::string> getSpiceIDs();
-    std::string getStopCommand();
+    virtual const std::string& decoderType() const override;
+    const std::vector<std::string>& spiceIDs() const;
+    const std::string& stopCommand() const;
     void setStopCommand(std::string stopCommand);
 
 private:

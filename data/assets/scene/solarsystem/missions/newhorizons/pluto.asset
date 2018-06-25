@@ -1,7 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
 local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('./kernels')
 
 
 
@@ -49,6 +48,10 @@ local Pluto = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_PLUTO",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {

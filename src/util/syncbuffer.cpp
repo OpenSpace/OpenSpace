@@ -30,17 +30,45 @@ namespace openspace {
 
 SyncBuffer::SyncBuffer(size_t n)
     : _n(n)
-    , _encodeOffset(0)
-    , _decodeOffset(0)
     , _synchronizationBuffer(new sgct::SharedVector<char>())
 {
     _dataStream.resize(_n);
 }
 
-SyncBuffer::~SyncBuffer() {
-    // The destructor is defined here, so that the otherwise default inlined destructor is
-    // not created (which would make it impossible to use a forward declaration with
-    // unique_ptr
+SyncBuffer::~SyncBuffer() {} // NOLINT
+
+void SyncBuffer::encode(const std::string& s) {
+    ghoul_assert(_encodeOffset + sizeof(char) * s.size() + sizeof(int32_t) < _n, "");
+
+    int32_t length = static_cast<int32_t>(s.length());
+    memcpy(
+        _dataStream.data() + _encodeOffset,
+        reinterpret_cast<const char*>(&length),
+        sizeof(int32_t)
+    );
+    _encodeOffset += sizeof(int32_t);
+    memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
+    _encodeOffset += length;
+}
+
+std::string SyncBuffer::decode() {
+    int32_t length;
+    memcpy(
+        reinterpret_cast<char*>(&length),
+        _dataStream.data() + _decodeOffset,
+        sizeof(int32_t)
+    );
+    std::vector<char> tmp(length + 1);
+    _decodeOffset += sizeof(int32_t);
+    memcpy(tmp.data(), _dataStream.data() + _decodeOffset, length);
+    _decodeOffset += length;
+    tmp[length] = '\0';
+    std::string ret(tmp.data());
+    return ret;
+}
+
+void SyncBuffer::decode(std::string& s) {
+    s = decode();
 }
 
 void SyncBuffer::write() {

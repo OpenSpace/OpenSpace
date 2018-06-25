@@ -29,11 +29,9 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-
 #include <atomic>
 #include <functional>
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
@@ -88,8 +86,8 @@ public:
     void deinitialize();
     void deinitializeGL();
 
-    void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
-    void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
+    void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
+    void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
@@ -128,13 +126,13 @@ public:
 
     float boundingSphere() const;
 
-    SceneGraphNode* childNode(const std::string& name);
+    SceneGraphNode* childNode(const std::string& identifier);
 
-    const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
+    const PerformanceRecord& performanceRecord() const;
 
     void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
-    Renderable* renderable();
+    //Renderable* renderable();
 
     const std::string& guiPath() const;
     bool hasGuiHintHidden() const;
@@ -146,18 +144,18 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
-    std::atomic<State> _state;
+    std::atomic<State> _state = State::Loaded;
     std::vector<std::unique_ptr<SceneGraphNode>> _children;
-    SceneGraphNode* _parent;
+    SceneGraphNode* _parent = nullptr;
     std::vector<SceneGraphNode*> _dependencies;
     std::vector<SceneGraphNode*> _dependentNodes;
-    Scene* _scene;
+    Scene* _scene = nullptr;
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
     bool _guiHintHidden = false;
 
-    PerformanceRecord _performanceRecord;
+    PerformanceRecord _performanceRecord = { 0, 0, 0, 0, 0 };
 
     std::unique_ptr<Renderable> _renderable;
 

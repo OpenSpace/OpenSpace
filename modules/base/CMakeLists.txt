@@ -31,6 +31,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemmission.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemparallelconnection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditempropertyvalue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
@@ -65,6 +66,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemframerate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemmission.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemparallelconnection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditempropertyvalue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemsimulationincrement.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemspacing.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp

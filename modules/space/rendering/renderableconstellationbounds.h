@@ -27,12 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/programobject.h>
-#include <array>
+#include <ghoul/opengl/ghoul_gl.h>
+
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -66,22 +66,23 @@ private:
         std::string constellationAbbreviation; ///< The abbreviation of the constellation
         std::string constellationFullName;
         bool isEnabled;
-        size_t startIndex; ///< The index of the first vertex describing the bounds
-        size_t nVertices; ///< The number of vertices describing the bounds
+        GLsizei startIndex; ///< The index of the first vertex describing the bounds
+        GLsizei nVertices; ///< The number of vertices describing the bounds
     };
 
     /**
-     * Loads the file specified in <code>_vertexFilename</code> and fills the
-     * <code>_constellationBounds</code> variable, as well as the
-     * <code>_vertexValues</code> list. If this method fails, the content of either
-     * destination is undefined.
-     * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
+     * Loads the file specified in _vertexFilename and fills the _constellationBounds
+     * variable, as well as the _vertexValues list. If this method fails, the content of
+     * either destination is undefined.
+     *
+     * \return \c true if the loading succeeded, \c false otherwise
      */
     bool loadVertexFile();
 
     /**
-     * Loads the file specified in <code>_constellationFilename</code> that contains the
-     * mapping between abbreviations and full names of constellations.
+     * Loads the file specified in _constellationFilename that contains the mapping
+     * between abbreviations and full names of constellations.
+     *
      * \return <code>true</code> if the loading succeeded, <code>false</code> otherwise
      */
     bool loadConstellationFile();
@@ -109,14 +110,18 @@ private:
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
 
-    using Vertex = std::array<float, 3>;
+    struct Vertex {
+        float x;
+        float y;
+        float z;
+    };
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
 
     /// The property that stores all indices of constellations that should be drawn
     properties::SelectionProperty _constellationSelection;
 
-    GLuint _vao;
-    GLuint _vbo;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

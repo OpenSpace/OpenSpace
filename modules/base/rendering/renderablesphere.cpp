@@ -29,11 +29,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/util/updatestructures.h>
-
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -47,7 +48,7 @@ namespace {
         Inside = 2
     };
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    const openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
@@ -55,40 +56,40 @@ namespace {
         "projection."
     };
 
-    static const openspace::properties::Property::PropertyInfo OrientationInfo = {
+    const openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both."
     };
 
-    static const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that the sphere is separated in."
     };
 
-    static const openspace::properties::Property::PropertyInfo SizeInfo = {
+    const openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the radius of the sphere in meters."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
+    const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
         "FadeOutThreshould",
         "Fade-Out Threshould",
         "This value determines percentage of the sphere is visible before starting "
         "fading-out it."
     };
 
-    static const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
+    const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
         "FadeInThreshould",
         "Fade-In Threshould",
         "Distance from center of MilkyWay from where the astronomical object starts to "
         "fade in."
     };
 
-    static const openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
+    const openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
         "DisableFadeInOu",
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."
@@ -157,12 +158,6 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e35f)
     , _segments(SegmentsInfo, 8, 4, 1000)
     , _disableFadeInDistance(DisableFadeInOuInfo, true)
-    , _fadeOutThreshold(-1.0)
-    , _fadeInThreshold(0.0)
-    , _shader(nullptr)
-    , _texture(nullptr)
-    , _sphere(nullptr)
-    , _sphereIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -184,7 +179,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     });
 
     if (dictionary.hasKey(OrientationInfo.identifier)) {
-        const std::string v = dictionary.value<std::string>(OrientationInfo.identifier);
+        const std::string& v = dictionary.value<std::string>(OrientationInfo.identifier);
         if (v == "Inside") {
             _orientation = Inside;
         }
@@ -204,10 +199,10 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_orientation);
 
     addProperty(_size);
-    _size.onChange([this](){ _sphereIsDirty = true; });
+    _size.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_segments);
-    _segments.onChange([this](){ _sphereIsDirty = true; });
+    _segments.onChange([this]() { _sphereIsDirty = true; });
 
     addProperty(_texturePath);
     _texturePath.onChange([this]() { loadTexture(); });
@@ -237,7 +232,8 @@ bool RenderableSphere::isReady() const {
 
 void RenderableSphere::initializeGL() {
     _sphere = std::make_unique<PowerScaledSphere>(
-        PowerScaledScalar::CreatePSS(_size), _segments
+        PowerScaledScalar::CreatePSS(_size),
+        _segments
     );
     _sphere->initialize();
 
@@ -290,20 +286,20 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     float adjustedTransparency = _opacity;
 
     if (_fadeInThreshold > 0.0) {
-        double distCamera = glm::length(data.camera.positionVec3());
-        float funcValue = static_cast<float>(
-            (1.0 / double(_fadeInThreshold/1E24))*(distCamera / 1E24)
+        const double distCamera = glm::length(data.camera.positionVec3());
+        const float funcValue = static_cast<float>(
+            (1.0 / double(_fadeInThreshold / 1E24)) * (distCamera / 1E24)
         );
 
-        adjustedTransparency *= funcValue > 1.f ? 1.f : funcValue;
+        adjustedTransparency *= (funcValue > 1.f) ? 1.f : funcValue;
     }
 
     if (_fadeOutThreshold > -1.0) {
-        double distCamera = glm::distance(
+        const double distCamera = glm::distance(
             data.camera.positionVec3(),
             data.position.dvec3()
         );
-        double term = std::exp(
+        const double term = std::exp(
             (-distCamera + _size * _fadeOutThreshold) / (_size * _fadeOutThreshold)
         );
 
@@ -325,13 +321,11 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::Framebuffer;
+    bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                    RenderEngine::RendererImplementation::Framebuffer;
 
-    bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() ==
-        RenderEngine::RendererImplementation::ABuffer;
+    bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                RenderEngine::RendererImplementation::ABuffer;
 
     if (usingABufferRenderer) {
         _shader->setUniform("additiveBlending", true);
@@ -363,7 +357,8 @@ void RenderableSphere::update(const UpdateData&) {
 
     if (_sphereIsDirty) {
         _sphere = std::make_unique<PowerScaledSphere>(
-            PowerScaledScalar::CreatePSS(_size), _segments
+            PowerScaledScalar::CreatePSS(_size),
+            _segments
         );
         _sphere->initialize();
         _sphereIsDirty = false;
@@ -371,24 +366,17 @@ void RenderableSphere::update(const UpdateData&) {
 }
 
 void RenderableSphere::loadTexture() {
-    if (_texturePath.value() != "") {
-        using TR = ghoul::io::TextureReader;
-        std::unique_ptr<ghoul::opengl::Texture> texture = TR::ref().loadTexture(
-            _texturePath
-        );
+    if (!_texturePath.value().empty()) {
+        std::unique_ptr<ghoul::opengl::Texture> texture =
+            ghoul::io::TextureReader::ref().loadTexture(_texturePath);
+
         if (texture) {
             LDEBUGC(
                 "RenderableSphere",
                 fmt::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             texture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than
-            // linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-
             _texture = std::move(texture);
         }
     }

@@ -31,8 +31,8 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* KeyStart = "Start";
-    const char* KeyEnd = "End";
+    constexpr const char* KeyStart = "Start";
+    constexpr const char* KeyEnd = "End";
 } // namespace
 
 namespace openspace {
@@ -58,10 +58,6 @@ documentation::Documentation TimeRange::Documentation() {
         }
     };
 }
-
-TimeRange::TimeRange()
-    : TimeRange(std::numeric_limits<double>::max(), -std::numeric_limits<double>::max())
-{}
 
 TimeRange::TimeRange(double startTime, double endTime)
     : start(startTime)
@@ -127,7 +123,7 @@ bool TimeRange::isEmpty() const {
     return !isDefined();
 }
 
-bool TimeRange::inRange(double min, double max){
+bool TimeRange::inRange(double min, double max) const {
     return (min >= start && max <= end);
 }
 
