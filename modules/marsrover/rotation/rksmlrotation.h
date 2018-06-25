@@ -58,10 +58,10 @@ public:
         
     glm::dmat3 matrix(const Time& time) const override;
     
-    void parseFile() const;
 
 private:
     void openFile() const;
+
     Timeline<Node> _dataTimeline;
     
     Node *_LFdrive;    //creates a Timeline object of the structure type Node 
@@ -87,6 +87,8 @@ private:
 */
 
     properties::StringProperty _frame;
+    void parseFile(std::string path) const;
+
     properties::StringProperty _dataPath;
 
 

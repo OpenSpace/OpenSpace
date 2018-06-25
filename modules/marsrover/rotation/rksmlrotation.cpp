@@ -34,11 +34,11 @@
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 
+#include <functional>
+
+#include <fstream>
 #include <iostream>
 #include <string>
-
-
-
 
 namespace {
     const char* DefaultReferenceFrame = "GALACTIC";
@@ -58,16 +58,25 @@ namespace {
 
 } // namespace
 
+using namespace std::placeholders;
+
 namespace openspace {
     
     constexpr const char* _loggerCat = "RksmlRotation";
+
+    //Test Node
+    struct myNode
+    {
+        std::string na;
+        double ti;
+        double va;
+    };
 
 
 RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     : _dataPath(DataPathInfo) // @TODO Missing documentation
     , _frame(FrameInfo, DefaultReferenceFrame)
 {
-    openFile();
     double now = OsEng.windowWrapper().applicationTime();
 
     _dataPath = dictionary.value<std::string>(DataPathInfo.identifier);
@@ -80,6 +89,7 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     addProperty(_dataPath);
     addProperty(_frame);
     
+    openFile();
     //create a pointer to a new node and assign it some data
     Node caroline;
     caroline.time = 3.0;
@@ -108,6 +118,7 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     };
 
 
+    //Fix: needed?
     _dataPath.onChange(update);
     _frame.onChange(update);
 
@@ -140,36 +151,96 @@ void RksmlRotation::openFile() const {
     const int start = 28;
     const int end = 2072;
 
-
-    //need to loop through all folders ????/
-    for(int i = 0; i < (end-start); i++) {
-        if(i<(100-start)) 
+    for (int i = 0; i < (end - start); i++) {
+        if (i < (100 - start)) 
             fileName = path + "000" + std::to_string(i + start); 
-        else if(i<(1000-start)) 
+        
+        else if (i < (1000 - start)) 
             fileName = path + "00" + std::to_string(i + start); 
+        
         else  
-            fileName = path +  "0" + std::to_string(i + start); 
+            fileName = path + "0" + std::to_string(i + start); 
 
         fileName = fileName + "/rksml_playback_filt_eha.rksml";
         std::replace(fileName.begin(), fileName.end(), '\\', '/');
-        //LERROR(fmt::format("filename   '{}'", fileName));
-
-
-        //save the data in the struct, in some way
-
-    }
     
-
-    //need this right?
-    //std::fstream in(data); 
-    // /in.open();
-    // /if(!in.is_open()){
-    // /}
+        //parse file
+        parseFile(fileName);
+    }
 }
 
 //troligtvis need to have the functionality of parsing in another file, since we need to use namespace libtorrent
-void RksmlRotation::parseFile() const {
+void RksmlRotation::parseFile(std::string path) const {
 	//call file that will parse the data
+    std::string theline;
+    std::string trash;
+    std::string time;
+    std::string unit;
+    std::string name;
+    std::string value;
+    std::string tag;
+    std::string raised;
+    double val;
+    double e;
+
+    //std::string testPath = path + "00048/rksml_playback_filt_eha.rksml";
+
+    std::string line;
+    std::ifstream myfile (path);
+    std::istringstream iss;
+
+    if (myfile.is_open())
+    {
+        while (getline (myfile, line) )
+        {
+            iss.clear();
+            iss = std::istringstream(line);
+
+            //get first node tag
+            std::getline(iss, trash, '<');
+            std::getline(iss, trash, ' ');
+
+            if (trash == "Node")
+            {
+                std::getline(iss, trash, '"');
+                std::getline(iss, time,  '"');
+            }
+
+            else if (trash == "Knot")
+            {
+                std::getline(iss, trash, '"');
+                std::getline(iss, name,  '"');
+                std::getline(iss, trash, '"');
+                std::getline(iss, unit,  '"');
+                std::getline(iss, trash, '>');
+                std::getline(iss, value, '<');
+
+                //TEST
+                //Send to new object with time to 
+                myNode n;
+                n.na = name;
+                n.ti = atof(time.c_str());
+
+                //if *10^x is found
+                if (value.find('E') != std::string::npos)
+                {
+                    raised = value.substr(value.find('E') + 1, value.find('E') + 3 );
+                    value.erase(value.find('E'), value.length());
+                    val = atof(value.c_str());
+                    e = atof(raised.c_str());
+
+                    n.va = val * pow(10.0, e); //fix
+                }
+                else 
+                    n.va = atof(value.c_str());
+            }
+            iss.clear();
+            //trash = "";
+        }
+
+        myfile.close();
+    }
+    else LERROR(fmt::format("never opened file")); //which files are not opened?
 
 }
 } // namespace openspace
