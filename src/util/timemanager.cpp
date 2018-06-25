@@ -93,6 +93,46 @@ void TimeManager::preSynchronization(double dt) {
     _lastDeltaTime = newDeltaTime;
 }
 
+TimeKeyframeData TimeManager::interpolate(double applicationTime) {
+    const std::deque<Keyframe<TimeKeyframeData>>& keyframes = _timeline.keyframes();
+
+    auto firstFutureKeyframe = std::lower_bound(
+        keyframes.begin(),
+        keyframes.end(),
+        applicationTime,
+        &compareKeyframeTimeWithTime
+    );
+
+    const bool hasFutureKeyframes = firstFutureKeyframe != keyframes.end();
+    const bool hasPastKeyframes = firstFutureKeyframe != keyframes.begin();
+
+    const auto lastPastKeyframe = hasPastKeyframes ?
+        (firstFutureKeyframe - 1) :
+        keyframes.end();
+
+
+    if (hasPastKeyframes && hasFutureKeyframes) {
+        return interpolate(*lastPastKeyframe, *firstFutureKeyframe, applicationTime);
+    } else if (hasPastKeyframes) {
+        const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
+        Time predictedTime = {
+            lastPastKeyframe->data.time.j2000Seconds() +
+            deltaApplicationTime *
+                (lastPastKeyframe->data.pause ? 0.0 : lastPastKeyframe->data.delta)
+        };
+        return TimeKeyframeData{
+            predictedTime,
+            lastPastKeyframe->data.delta,
+            false,
+            false
+        };
+    } else if (hasFutureKeyframes) {
+        return TimeKeyframeData{ _currentTime, _targetDeltaTime, false, false };
+    }
+
+    return TimeKeyframeData{ _currentTime, _targetDeltaTime, false, false };
+}
+
 void TimeManager::progressTime(double dt) {
     // Frames     |    1                    2          |
     //            |------------------------------------|
@@ -147,9 +187,12 @@ void TimeManager::progressTime(double dt) {
     if (hasFutureKeyframes && hasPastKeyframes && !firstFutureKeyframe->data.jump) {
         // If keyframes exist before and after this frame,
         // and the next keyframe is not a time jump, interpolate between those.
-        interpolate(*lastPastKeyframe, *firstFutureKeyframe, now);
+        TimeKeyframeData interpolated =
+            interpolate(*lastPastKeyframe, *firstFutureKeyframe, now);
+        time().setTime(interpolated.time.j2000Seconds());
+        _deltaTime = interpolated.delta;
     } else if (!hasConsumedLastPastKeyframe) {
-        applyKeyframe(*lastPastKeyframe);
+        applyKeyframeData(lastPastKeyframe->data);
     } else if (!isPaused()) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
@@ -162,7 +205,7 @@ void TimeManager::progressTime(double dt) {
     }
 }
 
-void TimeManager::interpolate(
+TimeKeyframeData TimeManager::interpolate(
     const Keyframe<TimeKeyframeData>& past, 
     const Keyframe<TimeKeyframeData>& future,
     double appTime)
@@ -185,9 +228,12 @@ void TimeManager::interpolate(
     const double a = pastDerivative * deltaAppTime - deltaSimTime;
     const double b = -futureDerivative * deltaAppTime + deltaSimTime;
 
-    const double q = (1 - t)*pastSimTime + t*futureSimTime + t*(1 - t)*(a*(1 - t) + b*t);
-    time().setTime(q);
-    _deltaTime = 3*a*t*t - 4*a*t + a - 3*b*t*t + 2*b*t - pastSimTime + futureSimTime;
+    const double interpolatedTime = (1 - t)*pastSimTime + t*futureSimTime + t*(1 - t)*(a*(1 - t) + b*t);
+    const double interpolatedDeltaTime = 3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime;
+
+    TimeKeyframeData data{ interpolatedTime, interpolatedDeltaTime, past.data.pause, past.data.jump };
+
+    return data;
 
     /*
     const double secondsOffTolerance = OsEng.parallelPeer().timeTolerance();
@@ -221,10 +267,10 @@ void TimeManager::interpolate(
     */
 }
 
-void TimeManager::applyKeyframe(const Keyframe<TimeKeyframeData>& keyframe) {
-    const Time& currentTime = keyframe.data.time;
+void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData) {
+    const Time& currentTime = keyframeData.time;
     time().setTime(currentTime.j2000Seconds());
-    _targetDeltaTime = keyframe.data.delta;
+    _targetDeltaTime = keyframeData.delta;
     _deltaTime = _targetDeltaTime;
 }
 
@@ -247,6 +293,7 @@ void TimeManager::clearKeyframes() {
 void TimeManager::setTimeNextFrame(Time t) {
     _shouldSetTime = true;
     _timeNextFrame = std::move(t);
+    clearKeyframes();
 }
 
 size_t TimeManager::nKeyframes() const {

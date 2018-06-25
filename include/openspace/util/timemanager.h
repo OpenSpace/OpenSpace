@@ -60,6 +60,8 @@ public:
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
 
+    TimeKeyframeData interpolate(double applicationTime);
+
     void addInterpolation(double targetTime, double durationSeconds);
 
     void addKeyframe(double timestamp, TimeKeyframeData kf);
@@ -94,8 +96,8 @@ public:
     void removeTimeJumpCallback(CallbackHandle handle);
 private:
     void progressTime(double dt);
-    void applyKeyframe(const Keyframe<TimeKeyframeData>& keyframe);
-    void interpolate(
+    void applyKeyframeData(const TimeKeyframeData& keyframe);
+    TimeKeyframeData interpolate(
         const Keyframe<TimeKeyframeData>& past,
         const Keyframe<TimeKeyframeData>& future,
         double time);

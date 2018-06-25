@@ -207,12 +207,12 @@ int time_setTime(lua_State* L) {
     if (lua_gettop(L) == 1) {
         if (isNumber) {
             double value = lua_tonumber(L, 1);
-            OsEng.timeManager().time().setTime(value);
+            OsEng.timeManager().setTimeNextFrame(value);
             return 0;
         }
         if (isString) {
             const char* time = lua_tostring(L, 1);
-            OsEng.timeManager().time().setTime(time);
+            OsEng.timeManager().setTimeNextFrame(Time::convertTime(time));
             return 0;
         }
         ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

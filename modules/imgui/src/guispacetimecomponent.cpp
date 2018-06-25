@@ -194,16 +194,24 @@ void GuiSpaceTimeComponent::render() {
 
     auto incrementTime = [](int days) {
         using namespace std::chrono;
-        const double j2000 = OsEng.timeManager().time().j2000Seconds();
 
+        const double duration = 1.0;
+
+        const TimeKeyframeData predictedTime = OsEng.timeManager().interpolate(
+            OsEng.windowWrapper().applicationTime() + duration
+        );
+        const double j2000 = predictedTime.time.j2000Seconds();
         const long long seconds = duration_cast<std::chrono::seconds>(
             std::chrono::hours(24) * std::abs(days)
         ).count();
 
-        const double newTime = days < 0 ? j2000 - seconds : j2000 + seconds;
+        const double newTime = days < 0 ?
+            j2000 - seconds :
+            j2000 + seconds;
 
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setTime(" + std::to_string(newTime) + ", 1)",
+            "openspace.time.setTime(" + std::to_string(newTime) + ", " +
+            std::to_string(duration) + ")",
             scripting::ScriptEngine::RemoteScripting::Yes
         );
     };
