@@ -1,0 +1,67 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+asset.require("spice/base")
+asset.request('./trail')
+
+
+
+local textures = asset.syncedResource({
+    Name = "Charon Textures",
+    Type = "HttpSynchronization",
+    Identifier = "charon_textures",
+    Version = 3
+})
+
+local Charon = {
+    Identifier = "Charon",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "CHARON",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = NewHorizonsKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_CHARON",
+            DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 6.035E5, 6.035E5, 6.035E5 },
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Identifier = "Greyscale",
+                    Name = "Black & White",
+                    FilePath = textures .. "/NH_Charon_mosaic.png",
+                }
+            },
+            HeightLayers = {
+                {
+                    Identifier = "DTM",
+                    Name = "DTM",
+                    FilePath = textures .. "/NH_Charon_DTM.png",
+                    Enabled = true,
+                    Settings = { Multiplier = 20.0 },
+                    TilePixelSize = 64
+                }
+            }
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })

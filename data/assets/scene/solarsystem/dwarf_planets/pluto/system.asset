@@ -1,0 +1,10 @@
+asset.request('./trail')
+asset.request('./pluto')
+asset.request('./pluto_trail')
+asset.request('./charon')
+asset.request('./charon_trail')
+asset.request('./hydra')
+asset.request('./kerberos')
+asset.request('./nix')
+asset.request('./styx')
+
