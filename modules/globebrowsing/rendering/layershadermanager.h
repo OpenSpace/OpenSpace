@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
