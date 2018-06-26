@@ -81,8 +81,8 @@ class DataLoader extends Component {
     };
 
     const position = {
-      x: width < minSize ? 0 : -100,
-      y: height < minSize ? 0 : -300
+      x: width < minSize ? 0 : 100,
+      y: height < minSize ? 0 : 300
     };
 
     let DataTypeButtons = () => {

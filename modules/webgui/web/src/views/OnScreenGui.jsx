@@ -52,9 +52,11 @@ class OnScreenGui extends Component {
           <Sidebar />
         </section>
         <section className={styles.Grid__Right}>
+          <BottomBar />
+        </section>
+        <section style={{position: 'fixed'}}>
           <DataLoader />
           <PrepareUploadedData />
-          <BottomBar />
         </section>
       </div>
     );

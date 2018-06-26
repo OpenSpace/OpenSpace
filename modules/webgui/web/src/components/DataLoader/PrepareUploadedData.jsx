@@ -29,14 +29,20 @@ class PrepareUploadedData extends Component {
   }
 
   render() {
+    const { width, height } = this.props;
+    const size = {
+      width: width / 2,
+      height: height / 2
+    }
+
     return(
       <div className="page-content-wrapper">
         { this.state.activated && (
           <Window
             type="medium"
             title="Prepare Data"
-            size={{ width:this.props.width/2 , height:this.props.height/2 }}
-            position={{ x:470, y:-370 }}
+            size={size}
+            position={{ x: 100, y: -100 }}
             closeCallback={() => this.setState({ activated: false })}
           >
           { this.vector.map((index) => (
