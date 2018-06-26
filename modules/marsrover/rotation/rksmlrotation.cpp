@@ -39,6 +39,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#define GET_VARIABLE_NAME(Variable) (#Variable)
 
 namespace {
     const char* DefaultReferenceFrame = "GALACTIC";
@@ -91,19 +92,19 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     
     openFile();
     //create a pointer to a new node and assign it some data
-    Node caroline;
-    caroline.time = 3.0;
-    caroline.rotValue = 2.0;
-    Node *ptrToCaroline;
-    ptrToCaroline = &caroline;
-    LERROR(fmt::format("Caroline    '{}'", ptrToCaroline->time));//
-
-    addKeyframe(5000.555, caroline);
+    //Node caroline;
+    //caroline.time = 3.0;
+    //caroline.rotValue = 2.0;
+    //Node *ptrToCaroline;
+    //ptrToCaroline = &caroline;
+    //LERROR(fmt::format("Caroline    '{}'", ptrToCaroline->time));//
+//
+    //addKeyframe(5000.555, caroline);
     //create a new node for every wheelpart
     // and then assign it the data from what we read in
 
 
-    _dataTimeline.firstKeyframeAfter(ptrToCaroline->time);
+    //_dataTimeline.firstKeyframeAfter(ptrToCaroline->time);
 
     //creates a keyframe object of type node 
     //const Keyframe<Node>* nextKeyframe = _dataTimeline.firstKeyframeAfter(now);
@@ -123,18 +124,16 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
     _frame.onChange(update);
 
 }
-//Timeline<Node> RksmlRotation::getValue() {
-//    return _dataTimeline;
-//}
 
-Timeline<RksmlRotation::Node>& RksmlRotation::timeline() {
-    LERROR("inside of timeline");
-    return _dataTimeline;
-}
-void RksmlRotation::addKeyframe(double timestamp, RksmlRotation::Node data) {
-    LERROR("inside of addKeyframe");
-    timeline().addKeyframe(timestamp, data);
-}
+
+//Timeline<RksmlRotation::Node>& RksmlRotation::timeline() {
+//    LERROR("inside of timeline");
+//    return LF_DRIVE_Timeline;   //FIX add all timelines
+//}
+//void RksmlRotation::addKeyframe(double timestamp, RksmlRotation::Node data) {
+//    LERROR("inside of addKeyframe");
+//    timeline().addKeyframe(timestamp, data);
+//}
 
 
 glm::dmat3 RksmlRotation::matrix(const Time& time) const {
@@ -169,7 +168,6 @@ void RksmlRotation::openFile() const {
     }
 }
 
-//troligtvis need to have the functionality of parsing in another file, since we need to use namespace libtorrent
 void RksmlRotation::parseFile(std::string path) const {
 	//call file that will parse the data
     std::string theline;
@@ -182,8 +180,6 @@ void RksmlRotation::parseFile(std::string path) const {
     std::string raised;
     double val;
     double e;
-
-    //std::string testPath = path + "00048/rksml_playback_filt_eha.rksml";
 
     std::string line;
     std::ifstream myfile (path);
@@ -217,9 +213,9 @@ void RksmlRotation::parseFile(std::string path) const {
 
                 //TEST
                 //Send to new object with time to 
-                myNode n;
-                n.na = name;
-                n.ti = atof(time.c_str());
+                Node nodeObject;
+                nodeObject.frameName = name;
+                nodeObject.frameTime = atof(time.c_str());
 
                 //if *10^x is found
                 if (value.find('E') != std::string::npos)
@@ -229,10 +225,13 @@ void RksmlRotation::parseFile(std::string path) const {
                     val = atof(value.c_str());
                     e = atof(raised.c_str());
 
-                    n.va = val * pow(10.0, e); //fix
+                    nodeObject.rotValue = val * pow(10.0, e); 
                 }
                 else 
-                    n.va = atof(value.c_str());
+                    nodeObject.rotValue = atof(value.c_str());
+
+                std::string timelineObject = name + "_Timeline";
+                //addTimelineObject(timelineObject, nodeObject);
             }
             iss.clear();
             //trash = "";
@@ -243,4 +242,72 @@ void RksmlRotation::parseFile(std::string path) const {
     else LERROR(fmt::format("never opened file")); //which files are not opened?
 
 }
+
+void RksmlRotation::addTimelineObject(std::string s, Node n) {
+
+    Timeline<Node> *ptr;
+
+    if( GET_VARIABLE_NAME(LF_DRIVE_Timeline) == s) 
+        ptr = &LF_DRIVE_Timeline;
+
+    else if( GET_VARIABLE_NAME(LF_STEER_Timeline) == s) 
+        ptr = &LF_STEER_Timeline;
+    
+    else if( GET_VARIABLE_NAME(LM_DRIVE_Timeline) == s) 
+        ptr = &LM_DRIVE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(LR_DRIVE_Timeline) == s) 
+        ptr = &LR_DRIVE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(LR_STEER_Timeline) == s) 
+        ptr = &LR_STEER_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RF_DRIVE_Timeline) == s) 
+        ptr = &RF_DRIVE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RF_STEER_Timeline) == s) 
+        ptr = &RF_STEER_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RM_DRIVE_Timeline) == s) 
+        ptr = &RM_DRIVE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RR_DRIVE_Timeline) == s) 
+        ptr = &RR_DRIVE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RR_STEER_Timeline) == s) 
+        ptr = &RR_STEER_Timeline;
+    
+    else if( GET_VARIABLE_NAME(LEFT_BOGIE_Timeline) == s) 
+        ptr = &LEFT_BOGIE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(LEFT_DIFFERENTIAL_Timeline) == s) 
+        ptr = &LEFT_DIFFERENTIAL_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RIGHT_BOGIE_Timeline) == s) 
+        ptr = &RIGHT_BOGIE_Timeline;
+    
+    else if( GET_VARIABLE_NAME(RIGHT_DIFFERENTIAL_Timeline) == s) 
+        ptr = &RIGHT_DIFFERENTIAL_Timeline;
+    
+    else if( GET_VARIABLE_NAME(QUAT_C_Timeline) == s) 
+        ptr = &QUAT_C_Timeline;
+    
+    else if( GET_VARIABLE_NAME(QUAT_X_Timeline) == s) 
+        ptr = &QUAT_X_Timeline;
+    
+    else if( GET_VARIABLE_NAME(QUAT_Y_Timeline) == s) 
+        ptr = &QUAT_Y_Timeline;
+    
+    else if( GET_VARIABLE_NAME(QUAT_Z_Timeline) == s) 
+        ptr = &QUAT_Z_Timeline;
+    else
+        ptr = &QUAT_Z_Timeline;
+
+    ptr->addKeyframe(n.frameTime, n);
+    //ptr->addKeyframe(n.frameTime, n);
+    //ptr->addKeyframe(n.frameTime, n);
+
+
+}
+
 } // namespace openspace

@@ -47,24 +47,47 @@ class RksmlRotation : public Rotation {
 public:
 
     struct Node {
-        double time;
+        std::string frameName;
+        double frameTime;
         double rotValue;    //radians 
     };
+
 
     RksmlRotation(const ghoul::Dictionary& dictionary);
     Timeline<Node>& timeline();
     void addKeyframe(double timestamp, RksmlRotation::Node data);
-    Timeline<Node> getValue();
+
         
     glm::dmat3 matrix(const Time& time) const override;
     
 
 private:
     void openFile() const;
+    void parseFile(std::string path) const;
+    void addTimelineObject(std::string s, Node n);
 
-    Timeline<Node> _dataTimeline;
+    Timeline<Node> LF_DRIVE_Timeline;    //creates a Timeline object of the structure type Node 
+    Timeline<Node> LF_STEER_Timeline;
+    Timeline<Node> LM_DRIVE_Timeline;
+    Timeline<Node> LR_DRIVE_Timeline;
+    Timeline<Node> LR_STEER_Timeline;
+    Timeline<Node> RF_DRIVE_Timeline;
+    Timeline<Node> RF_STEER_Timeline;
+    Timeline<Node> RM_DRIVE_Timeline;
+    Timeline<Node> RR_DRIVE_Timeline;
+    Timeline<Node> RR_STEER_Timeline;
+    Timeline<Node> LEFT_BOGIE_Timeline;
+    Timeline<Node> LEFT_DIFFERENTIAL_Timeline;
+    Timeline<Node> RIGHT_BOGIE_Timeline;
+    Timeline<Node> RIGHT_DIFFERENTIAL_Timeline;
+    Timeline<Node> QUAT_C_Timeline;
+    Timeline<Node> QUAT_X_Timeline;
+    Timeline<Node> QUAT_Y_Timeline;
+    Timeline<Node> QUAT_Z_Timeline;
+
+
     
-    Node *_LFdrive;    //creates a Timeline object of the structure type Node 
+    Node *_LFdrive;    
     Node *_LFsteer;
     Node *_LMdrive;
     Node *_LRdrive;
@@ -79,15 +102,8 @@ private:
     Node *_rightBogie;
     Node *_rightDifferential;
 
-/*
-    Timeline<Node> _quatC;
-    Timeline<Node> _quatX;
-    Timeline<Node> _quatY;
-    Timeline<Node> _quatZ;
-*/
 
     properties::StringProperty _frame;
-    void parseFile(std::string path) const;
 
     properties::StringProperty _dataPath;
 
