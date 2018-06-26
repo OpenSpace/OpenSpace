@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 
