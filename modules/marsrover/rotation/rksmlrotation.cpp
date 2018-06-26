@@ -174,6 +174,50 @@ void RksmlRotation::openFile() {
     }
     std::string testPath = path + "00048/rksml_playback_filt_eha.rksml";
     parseFile(fileName);
+
+    //working
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LF_DRIVE_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LF_STEER_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LM_DRIVE_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LR_DRIVE_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LR_STEER_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RF_DRIVE_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RF_STEER_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RM_DRIVE_Timeline.nKeyframes())));
+    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RR_DRIVE_Timeline.nKeyframes())));
+    
+    double testTime = 401720200.625000;
+    const Keyframe<RksmlRotation::Node>* testNode = LF_STEER_Timeline.lastKeyframeBefore(testTime);
+    //const Keyframe<CameraPose>* nextKeyframe = _cameraPoseTimeline.firstKeyframeAfter(now);
+    //const Keyframe<CameraPose>* prevKeyframe = _cameraPoseTimeline.lastKeyframeBefore(now);
+
+    double nextTime = 0;
+
+    if (testNode) {
+        nextTime = testNode->timestamp;
+        LERROR(fmt::format("nextTime: '{}'", nextTime));
+    }
+    else 
+        LERROR(fmt::format("ingen testNode!!!!"));
+    //LERROR(fmt::format("lastKeyframeBefore name: '{}'", std::to_string(testNode->data.frameName)));
+    //LERROR(fmt::format("lastKeyframeBefore name: '{}'", testNode->frameName));
+    //LERROR(fmt::format("lastKeyframeBefore time: '{}'", std::to_string(testNode->frameTime)));
+    //LERROR(fmt::format("lastKeyframeBefore value: '{}'", std::to_string(testNode->rotValue)));
+    
+    
+    
+    
+    //RR_STEER_Timeline
+    //LEFT_BOGIE_Timeline
+    //LEFT_DIFFERENTIAL_Timeline
+    //RIGHT_BOGIE_Timeline
+    //RIGHT_DIFFERENTIAL_Timeline
+    //QUAT_C_Timeline
+    //QUAT_X_Timeline
+    //QUAT_Y_Timeline
+    //QUAT_Z_Timeline
+
+
 }
 
 void RksmlRotation::parseFile(std::string path) {
@@ -251,71 +295,72 @@ void RksmlRotation::parseFile(std::string path) {
 void RksmlRotation::addTimelineObject(std::string s, RksmlRotation::Node n)
 {
 
-    Timeline<Node> const *ptr;
+    //Timeline<Node> const *ptr;
     
     //ptr = &LF_DRIVE_Timeline;
     //change to case
 
     if ( "LF_DRIVE_Timeline" == s) 
-        ptr = &LF_DRIVE_Timeline;
+        LF_DRIVE_Timeline.addKeyframe(n.frameTime, n);
 
     else if ("LF_STEER_Timeline" == s) 
-        ptr = &LF_STEER_Timeline;
+        LF_STEER_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("LM_DRIVE_Timeline" == s)     
-        ptr = &LM_DRIVE_Timeline;
+        LM_DRIVE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("LR_DRIVE_Timeline" == s) 
-        ptr = &LR_DRIVE_Timeline;
+        LR_DRIVE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("LR_STEER_Timeline" == s) 
-        ptr = &LR_STEER_Timeline;
+        LR_STEER_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RF_DRIVE_Timeline" == s) 
-        ptr = &RF_DRIVE_Timeline;
+        RF_DRIVE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RF_STEER_Timeline" == s) 
-        ptr = &RF_STEER_Timeline;
+        RF_STEER_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RM_DRIVE_Timeline" == s) 
-        ptr = &RM_DRIVE_Timeline;
+        RM_DRIVE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RR_DRIVE_Timeline" == s) 
-        ptr = &RR_DRIVE_Timeline;
+        RR_DRIVE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RR_STEER_Timeline" == s) 
-        ptr = &RR_STEER_Timeline;
+        RR_STEER_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("LEFT_BOGIE_Timeline" == s) 
-        ptr = &LEFT_BOGIE_Timeline;
+        LEFT_BOGIE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("LEFT_DIFFERENTIAL_Timeline" == s) 
-        ptr = &LEFT_DIFFERENTIAL_Timeline;
+        LEFT_DIFFERENTIAL_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RIGHT_BOGIE_Timeline" == s) 
-        ptr = &RIGHT_BOGIE_Timeline;
+        RIGHT_BOGIE_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("RIGHT_DIFFERENTIAL_Timeline" == s) 
-        ptr = &RIGHT_DIFFERENTIAL_Timeline;
+        RIGHT_DIFFERENTIAL_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("QUAT_C_Timeline" == s) 
-        ptr = &QUAT_C_Timeline;
+        QUAT_C_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("QUAT_X_Timeline" == s) 
-        ptr = &QUAT_X_Timeline;
+        QUAT_X_Timeline.addKeyframe(n.frameTime, n);
     
     else if ("QUAT_Y_Timeline" == s) 
-        ptr = &QUAT_Y_Timeline;
+        QUAT_Y_Timeline.addKeyframe(n.frameTime, n);
     
-    else if ("QUAT_Z_Timeline" == s) 
-        ptr = &QUAT_Z_Timeline;
+    else if("QUAT_Z_Timeline" == s) 
+        QUAT_Z_Timeline.addKeyframe(n.frameTime, n); 
+
+    else 
+        QUAT_Z_Timeline.addKeyframe(n.frameTime, n); //solve case!!!!!!!!!!!!!!!!
         
-    else
-        ptr = &QUAT_Z_Timeline; //solve case
     
 
     //addKeyframe(2000.222, n);
-    QUAT_Z_Timeline.addKeyframe(n.frameTime, n);
+    //QUAT_Z_Timeline.addKeyframe(n.frameTime, n);
     //ptr.addKeyframe(n.frameTime, n);
     //ptr->addKeyframe(n.frameTime, n);
     //ptr->addKeyframe(n.frameTime, n);
