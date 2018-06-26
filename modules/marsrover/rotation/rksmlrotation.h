@@ -57,14 +57,18 @@ public:
     Timeline<Node>& timeline();
     void addKeyframe(double timestamp, RksmlRotation::Node data);
 
-        
+	//glm::dmat3 matrix(const Time& time) const        
+    
     glm::dmat3 matrix(const Time& time) const override;
     
+    void addTimelineObject(std::string s, Node n);
+    void openFile();
+    void parseFile(std::string path);
+
+    //behover??
+    //const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
 private:
-    void openFile() const;
-    void parseFile(std::string path) const;
-    void addTimelineObject(std::string s, Node n);
 
     Timeline<Node> LF_DRIVE_Timeline;    //creates a Timeline object of the structure type Node 
     Timeline<Node> LF_STEER_Timeline;
