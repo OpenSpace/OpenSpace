@@ -77,11 +77,11 @@ public:
      */
     struct PropertyInfo {
         /// The unique identifier that is part of the fully qualified URI of this Property
-        std::string identifier;
+        const char* identifier;
         /// The name that is displayed in the user interface
-        std::string guiName;
+        const char* guiName;
         /// The user facing description of this Property
-        std::string description;
+        const char* description;
         /// Determins the visibility of this Property in the user interface
         Visibility visibility = Visibility::All;
     };
