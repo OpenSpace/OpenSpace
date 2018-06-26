@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types'; 
 
+import DataManager from '../../api/DataManager';
+import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
+import { removeLineBreakCharacters } from './utils/helpers';
+
 import styles from './PrepareUploadedData';
 import Window from '../common/Window/Window';
 import provideWindowWidth from './HOC/provideWindowSize';
@@ -19,14 +23,15 @@ class PrepareUploadedData extends Component {
     this.state = {
       activated: false,
       dimensions: { x: 100, y: 100, z: 100 },
-      variable: ''
+      variable: 'rho'
     };
 
-    this.options = 'R T P RHO TEMP VR VT VP BR BT BP JR JT JP'
+    this.options = 'R T P RHO UR UT UP BR BT BP JR JT JP'
       .split(' ').map(v => ({ value: v, label: v }));
 
     this.changeDimensions = this.changeDimensions.bind(this);
     // this.changeVariable = this.changeVariable.bind(this);
+    this.upload = this.upload.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -53,6 +58,19 @@ class PrepareUploadedData extends Component {
   //   this.setState({ variable:'' });
   // }
 
+  upload() {
+    const { dimensions, variable } = this.state;
+    let data = `\'
+      return { 
+        Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
+        Variable="${variable.toLowerCase()}" 
+      }
+    \'`
+    data = removeLineBreakCharacters(data);
+
+    const script = UploadDataItemScript.replace(ValuePlaceholder, data);
+    DataManager.runScript(script);
+  }
 
   render() {
     const { width, height } = this.props;
@@ -93,6 +111,8 @@ class PrepareUploadedData extends Component {
                 />
             </Row> */}
           </Row>
+
+          <button onClick={() => this.upload()}/>
           </Window>
         )}
       </div>

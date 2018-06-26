@@ -108,6 +108,10 @@ void DataLoaderModule::loadDataItem(std::string absPathToItem) {
     _loader->loadDataItem(absPathToItem);
 }
 
+void DataLoaderModule::uploadDataItem(std::string dictionaryString) {
+    _loader->processCurrentlySelectedUploadData(dictionaryString);
+}
+
 void DataLoaderModule::setVolumeDataItems(std::vector<std::string> items) {
     _volumeDataItems = items;
 }
@@ -130,6 +134,13 @@ scripting::LuaLibrary DataLoaderModule::luaLibrary() const {
                 {},
                 "string",
                 "Loads a data item into Open Space"
+            },
+            {
+                "uploadItem",
+                &luascriptfunctions::uploadItem,
+                {},
+                "string",
+                "Uploads data for an item"
             }
         },
     };

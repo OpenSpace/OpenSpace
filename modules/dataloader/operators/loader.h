@@ -65,7 +65,7 @@ class Loader : public PropertyOwner, public Operator {
 
     // void createVolumeDataItem(std::string absPath);
 
-    void processCurrentlySelectedUploadData();
+    void processCurrentlySelectedUploadData(std::string dictionaryString);
 
     ghoul::Dictionary createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath);
 

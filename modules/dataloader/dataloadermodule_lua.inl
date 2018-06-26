@@ -44,4 +44,21 @@ int loadItem(lua_State* L) {
     return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* uploadItem(string):
+* Upoad a data item. Send a ghoul dictionary formatted in Lua as a string.
+*/
+int uploadItem(lua_State* L) {
+    ghoul::lua::checkArgumentsAndThrow(L, 1, "lua::loadItem");
+
+    using ghoul::lua::errorLocation;
+
+    std::string dictionaryString = ghoul::lua::checkStringAndPop(L);
+    OsEng.moduleEngine().module<DataLoaderModule>()->uploadDataItem(dictionaryString);
+
+    ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");
+    return 0;
+}
+
 } // namespace openspace::luascriptfunctions 

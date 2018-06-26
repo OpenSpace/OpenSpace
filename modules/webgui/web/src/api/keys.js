@@ -33,3 +33,4 @@ export const ValuePlaceholder = '___value___';
 export const SetDeltaTimeScript = `openspace.time.setDeltaTime(${ValuePlaceholder})`;
 
 export const LoadDataItemScript = `openspace.dataloader.loadItem(${ValuePlaceholder})`;
+export const UploadDataItemScript = `openspace.dataloader.uploadItem(${ValuePlaceholder})`;

@@ -291,14 +291,15 @@ void Loader::goToFirstTimeStep(std::string absPathToItem) {
     time().setTime(firstTimeStep);
 }
 
-void Loader::processCurrentlySelectedUploadData() {
+void Loader::processCurrentlySelectedUploadData(std::string dictionaryString) {
     // Case 1: _filePaths is a string of a single path to a single CDF file
 
     // Determine path to new volume item
     std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/";
 
     // Create dictionary with properties as values
-    ghoul::Dictionary conversionDictionary = createTaskDictionaryForOneVolumeItem(_filePaths, itemPathBase);
+    // ghoul::Dictionary conversionDictionary = createTaskDictionaryForOneVolumeItem(_filePaths, itemPathBase);
+    ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
     // Schedule tasks? How to loop through several CDF timesteps and run VolumeToRaw for each
     // Create instance of KameleonVolumeToRaw and run

@@ -63,6 +63,7 @@ public:
     void setVolumeDataItems(std::vector<std::string> items);
 
     void loadDataItem(std::string absPathToItem);
+    void uploadDataItem(std::string dictionaryString);
 
     scripting::LuaLibrary luaLibrary() const override;
 
