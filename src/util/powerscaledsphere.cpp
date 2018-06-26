@@ -24,9 +24,10 @@
 
 #include <openspace/util/powerscaledsphere.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
+#include <ghoul/logging/logmanager.h>
+#include <cstring>
 
 namespace {
     constexpr const char* _loggerCat = "PowerScaledSphere";
