@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef OPENSPACE_WITH_ABUFFER_RENDERER
+
 #include <openspace/rendering/abufferrenderer.h>
 
 #include <openspace/engine/openspaceengine.h>
@@ -985,3 +987,5 @@ void ABufferRenderer::saveTextureToMemory(GLenum color_buffer_attachment, int wi
 }
 
 } // namespace openspace
+
+#endif // OPENSPACE_WITH_ABUFFER_RENDERER

@@ -271,6 +271,12 @@ handle_applications()
 ##########################################################################################
 # Misc settings                                                                          #
 ##########################################################################################
+option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
+if (OPENSPACE_WITH_ABUFFER_RENDERER)
+    target_compile_definitions(libOpneSpace PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+endif ()
+
+
 # Just in case, create the bin directory
 add_custom_command(
     TARGET libOpenSpace

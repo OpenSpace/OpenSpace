@@ -304,10 +304,13 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
             newRenderer = std::make_unique<FramebufferRenderer>();
             break;
         case RendererImplementation::ABuffer:
+#ifdef OPENSPACE_WITH_ABUFFER_RENDERER
             newRenderer = std::make_unique<ABufferRenderer>();
+#endif // OPENSPACE_WITH_ABUFFER_RENDERER
             break;
         case RendererImplementation::Invalid:
             LFATAL(fmt::format("Rendering method '{}' not available", renderingMethod));
+            return;
     }
 
     setRenderer(std::move(newRenderer));
@@ -1013,7 +1016,9 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(
                                                  const std::string& renderingMethod) const
 {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
+#ifdef OPENSPACE_WITH_ABUFFER_RENDERER
         { "ABuffer", RendererImplementation::ABuffer },
+#endif // OPENSPACE_WITH_ABUFFER_RENDERER
         { "Framebuffer", RendererImplementation::Framebuffer }
     };
 
