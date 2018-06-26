@@ -9,53 +9,91 @@ import provideWindowWidth from './HOC/provideWindowSize';
 import NumericInput from '../common/Input/NumericInput/NumericInput';
 import Input from '../common/Input/Input/Input';
 import Row from '../common/Row/Row';
+import Label from '../common/Label/Label';
+import Select from '../common/Input/Select/Select';
 
 class PrepareUploadedData extends Component {
   constructor(props) {
     super(props);
-
-    this.vector = ['x', 'y', 'z'];
-
+    
     this.state = {
       activated: false,
+      dimensions: { x: 100, y: 100, z: 100 },
+      variable: ''
     };
+
+    this.options = 'R T P RHO TEMP VR VT VP BR BT BP JR JT JP'
+      .split(' ').map(v => ({ value: v, label: v }));
+
+    this.changeDimensions = this.changeDimensions.bind(this);
+    // this.changeVariable = this.changeVariable.bind(this);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { filePaths } = this.props;
+    const { dimensions } = this.state;
+
     if( filePaths !== prevProps.filePaths && filePaths !== undefined ) {
       this.setState({ activated: true });
     }
   }
 
+
+  // Gets the corresponding key of the last changed value in dimensions.
+  // Assigns the changed value to the correct key of dimensions.
+  changeDimensions({ currentTarget }) {
+    let tempDim = this.state.dimensions;
+    let key = currentTarget.attributes.label.nodeValue;
+    tempDim[key] = Number(currentTarget.value);
+    
+    this.setState({ dimensions: tempDim });
+  }
+
+  // changeVariable({ currentTarget }) {
+  //   this.setState({ variable:'' });
+  // }
+
+
   render() {
     const { width, height } = this.props;
+    const { dimensions } = this.state;
     const size = {
       width: width / 2,
       height: height / 2
     }
-
     return(
       <div className="page-content-wrapper">
         { this.state.activated && (
           <Window
-            type="medium"
+            type="small"
             title="Prepare Data"
             size={size}
             position={{ x: 100, y: -100 }}
             closeCallback={() => this.setState({ activated: false })}
           >
-          { this.vector.map((index) => (
-              <Input 
-                key={index}
-                label={index}
-                placeholder={index}
-                value={100}
-              />
-          ))}
-            
+          <Row>
+            <Label size={'medium'}>Dimensions: </Label>
+            <Row>
+              { Object.keys(dimensions).map((key, index) => (
+                  <Input 
+                    key={key}
+                    label={key}
+                    placeholder={key}
+                    value={dimensions[key]}
+                    onChange={this.changeDimensions}
+                  />
+              ))}
+            </Row>
+            {/* <Row>
+              <Select 
+                label="Variables"
+                id={'test'}   
+                options={this.options}
+                onChange={this.changeVariable}
+                />
+            </Row> */}
+          </Row>
           </Window>
-        
         )}
       </div>
     );
