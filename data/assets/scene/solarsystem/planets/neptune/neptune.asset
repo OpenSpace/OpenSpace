@@ -3,8 +3,6 @@ local transforms = asset.require('./transforms')
 asset.require("spice/base")
 asset.request('./trail')
 
-
-
 local textures = asset.syncedResource({
     Name = "Neptune textures",
     Type = "HttpSynchronization",
@@ -20,6 +18,10 @@ local Neptune = {
             Type = "SpiceRotation",
             SourceFrame = "IAU_NEPTUNE",
             DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
         }
     },
     Renderable = {
@@ -41,6 +43,5 @@ local Neptune = {
         Path = "/Solar System/Planets/Neptune"
     }
 }
-
 
 assetHelper.registerSceneGraphNodesAndExport(asset, { Neptune })

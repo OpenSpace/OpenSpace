@@ -29,6 +29,8 @@
 namespace openspace {
 
 std::pair<double, std::string> simplifyDistance(double meters, bool forceSingularForm) {
+    constexpr const double GraceFactor = 0.5;
+
     const double metersVal = glm::abs(meters);
 
     if (metersVal == 0.0) {
@@ -51,39 +53,39 @@ std::pair<double, std::string> simplifyDistance(double meters, bool forceSingula
         return { val, (val == 1.0 || forceSingularForm) ? "millimeter" : "millimeters" };
     }
 
-    if (metersVal > (1e9 * distanceconstants::Parsec)) {
+    if (metersVal > (1e9 * GraceFactor * distanceconstants::Parsec)) {
         const double val = meters / (1e9 * distanceconstants::Parsec);
         return { val, (val == 1.0 || forceSingularForm) ? "Gigaparsec" : "Gigaparsecs" };
     }
-    else if (metersVal > (1e6 * distanceconstants::Parsec)) {
+    else if (metersVal > (1e6 * GraceFactor * distanceconstants::Parsec)) {
         const double val = meters / (1e6 * distanceconstants::Parsec);
         return { val, (val == 1.0 || forceSingularForm) ? "Megaparsec" : "Megaparsecs" };
     }
-    else if (metersVal > (1e3 * distanceconstants::Parsec)) {
+    else if (metersVal > (1e3 * GraceFactor * distanceconstants::Parsec)) {
         const double val = meters / (1e3 * distanceconstants::Parsec);
         return { val, (val == 1.0 || forceSingularForm) ? "Kiloparsec" : "Kiloparsecs" };
     }
-    else if (metersVal > distanceconstants::Parsec) {
+    else if (metersVal > GraceFactor * distanceconstants::Parsec) {
         const double val = meters / distanceconstants::Parsec;
         return { val, (val == 1.0 || forceSingularForm) ? "Parsec" : "Parsecs" };
     }
-    else if (metersVal > distanceconstants::LightYear) {
+    else if (metersVal > GraceFactor * distanceconstants::LightYear) {
         const double val = meters / distanceconstants::LightYear;
         return { val, (val == 1.0 || forceSingularForm) ? "Lightyear" : "Lightyears" };
     }
-    else if (metersVal > distanceconstants::LightMonth) {
+    else if (metersVal > GraceFactor * distanceconstants::LightMonth) {
         const double val = meters / distanceconstants::LightMonth;
         return { val, (val == 1.0 || forceSingularForm) ? "Lightmonth" : "Lightmonths" };
     }
-    else if (metersVal > distanceconstants::LightDay) {
+    else if (metersVal > GraceFactor * distanceconstants::LightDay) {
         const double val = meters / distanceconstants::LightDay;
         return { val, (val == 1.0 || forceSingularForm) ? "Lightday" : "Lightdays" };
     }
-    else if (metersVal > distanceconstants::LightHour) {
+    else if (metersVal > GraceFactor * distanceconstants::LightHour) {
         const double val = meters / distanceconstants::LightHour;
         return { val, (val == 1.0 || forceSingularForm) ? "Lighthour" : "Lighthours" };
     }
-    else if (metersVal > distanceconstants::AstronomicalUnit) {
+    else if (metersVal > GraceFactor * distanceconstants::AstronomicalUnit) {
         return { meters / distanceconstants::AstronomicalUnit, "AU" };
     }
     else {

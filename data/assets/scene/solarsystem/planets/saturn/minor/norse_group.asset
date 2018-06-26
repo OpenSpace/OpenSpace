@@ -1,8 +1,9 @@
 local assetHelper = asset.require('util/asset_helper')
 local proceduralGlobes = asset.require('util/procedural_globe')
 local transforms = asset.require('../transforms')
-local kernels368 = asset.require('../sat368').Kernels
-local kernels375 = asset.require('../sat375').Kernels
+local kernels = asset.require('../kernels')
+local kernel368 = kernels.sat368
+local kernel375 = kernels.sat375
 
 
 
@@ -26,7 +27,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 545.09,
-        Kernels = kernels375
+        Kernels = kernel375
     },
     {
         Identifier = "Skathi",
@@ -42,7 +43,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 732.52,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2007S2",
@@ -59,7 +60,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 792.96,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Skoll",
@@ -75,7 +76,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 862.37,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2004S13",
@@ -92,7 +93,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 905.85,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Greip",
@@ -108,7 +109,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 906.56,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Hyrrokkin",
@@ -124,7 +125,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 914.29,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Jarnsaxa",
@@ -140,7 +141,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 943.78,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Mundilfari",
@@ -156,7 +157,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 956.70,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2006S1",
@@ -173,7 +174,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 972.41,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2004S17",
@@ -190,7 +191,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 985.45,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Bergelmir",
@@ -206,7 +207,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 985.83,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Narvi",
@@ -222,7 +223,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1008.45,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Suttungr",
@@ -238,7 +239,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1022.82,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Hati",
@@ -254,7 +255,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1033.05,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2004S12",
@@ -271,7 +272,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1048.54,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Farbauti",
@@ -287,7 +288,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1054.78,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Thrymr",
@@ -303,7 +304,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1078.09,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Aegir",
@@ -319,7 +320,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1094.46,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2007S3",
@@ -336,7 +337,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1100,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Bestla",
@@ -352,7 +353,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1101.45,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2004S7",
@@ -369,7 +370,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1101.99,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "S2006S3",
@@ -386,7 +387,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1142.37,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "FENRIR",
@@ -402,7 +403,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1212.53,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     -- Not yet in the Spice kernels
     -- {
@@ -435,7 +436,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1245.06,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Ymir",
@@ -451,7 +452,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1254.15,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Loge",
@@ -467,7 +468,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1300.95,
-        Kernels = kernels368
+        Kernels = kernel368
     },
     {
         Identifier = "Fornjot",
@@ -483,7 +484,7 @@ local norseGroup = {
         },
         TrailColor = trailColor,
         OrbitPeriod = 1432.16,
-        Kernels = kernels368
+        Kernels = kernel368
     },
 }
 

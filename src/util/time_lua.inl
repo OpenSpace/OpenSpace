@@ -227,7 +227,7 @@ int time_advancedTime(lua_State* L) {
             modifier.begin(),
             modifier.end(),
             [](unsigned char c) {
-                const bool digit = std::isdigit(c) == 1;
+                const bool digit = std::isdigit(c) != 0;
                 const bool isDot = c == '.';
                 return !digit && !isDot;
             }

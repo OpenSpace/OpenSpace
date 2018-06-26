@@ -1,8 +1,0 @@
-local Kernels = asset.syncedResource({
-    Name = "Saturn Spice Kernels (sat368)",
-    Type = "TorrentSynchronization",
-    Identifier = "sat368",
-    Magnet = "magnet:?xt=urn:btih:D4DAFF94F8D2973D5561F082B4DF7F96B1949768&dn=sat368.bsp&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.publicbt.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce"
-})
-
-asset.export("Kernels", Kernels .. '/sat368.bsp')
