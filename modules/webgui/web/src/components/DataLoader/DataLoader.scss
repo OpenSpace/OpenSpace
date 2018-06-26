@@ -1,5 +1,37 @@
 /* Documentation */
 
+$fadedGrey: rgba(175, 175, 175, 0.1);
+$lineMargin: 20px;
+
+.buttons {
+  padding: 10px;
+}
+
+// flex
+.container {
+  padding: 10px;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.upload {
+  flex-basis: 20%;
+
+}
+.load {
+  flex-basis: 100%;
+}
+
+.horizontalLine {
+  max-width: 80%;
+  margin-left: 10%;
+  margin-top: $lineMargin;
+  margin-bottom: $lineMargin;
+  border-bottom: 1px solid $fadedGrey;
+  padding: 0 25%;
+}
+
 .centerContent {
   // margin: auto,
   width: 50%;
@@ -10,7 +42,6 @@
 .dataButtons {
   display: table;
   height: 50%;
-  padding: 10px;
 }
 
 .block {

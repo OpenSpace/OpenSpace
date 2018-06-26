@@ -10,6 +10,13 @@ import { getDirectoryLeaf } from '../utils/helpers';
 const LoadingItemsString = 'Loading items...';
 const NoItemsFoundString = 'No items found.';
 
+const Item = (props) => (
+  <div className={props.classes}
+       onClick={props.onClick}>
+    {props.children}
+  </div>
+)
+
 class DataItemList extends React.Component {
   constructor(props) {
     super(props);
@@ -24,18 +31,30 @@ class DataItemList extends React.Component {
 
   render() {
     const { items } = this.props;
-    const noItems = items[0] === LoadingItemsString || items[0] === NoItemsFoundString;
+    const hasItems = items.length > 0;
 
     return (
       <div className={styles.list}>
-        {items.map(itemPathString => (
-          <div className={noItems ? styles.nonItem : styles.item}
-              key={itemPathString}
-              onClick={noItems ? () => {} : () => this.handleClick(itemPathString)}>
-            {noItems ? itemPathString : getDirectoryLeaf(itemPathString)}
-          </div>
-          )
+        {hasItems && items.map((itemPathString, i) => {
+          let classes = styles.item;
+          classes += (i+1) % 2 === 0 ? ' ' + styles.even : '';
+
+          return (
+            <Item classes={classes}
+                  key={itemPathString}
+                  onClick={() => this.handleClick(itemPathString)}>
+              {getDirectoryLeaf(itemPathString)}
+            </Item>
+          )}
         )}
+
+        {!hasItems ? (
+          <Item classes={styles.nonItem}
+                key={NoItemsFoundString}
+                onClick={() => {}}>
+            {NoItemsFoundString}
+          </Item>
+        ) : null}
       </div>
     )
 
@@ -43,12 +62,11 @@ class DataItemList extends React.Component {
 }
 
 DataItemList.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.string)
+  items: PropTypes.arrayOf(PropTypes.string),
 };
 
 DataItemList.defaultProps = {
-  items: [LoadingItemsString],
+  items: []
 };
-
 
 export default DataItemList;

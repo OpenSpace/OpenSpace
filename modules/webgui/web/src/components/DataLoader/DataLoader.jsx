@@ -7,7 +7,7 @@ import DataItemList from './presentational/DataItemList';
 import { stringListToArray } from './utils/helpers';
 
 import DataManager from '../../api/DataManager';
-import styles from './DataLoader';
+import styles from './DataLoader.scss';
 import Window from '../common/Window/Window';
 import { setActivated } from '../../api/Actions/dataLoaderActions';
 import Button from '../common/Input/Button/Button';
@@ -27,24 +27,23 @@ class DataLoader extends Component {
       activeDataType: '',
       dataToLoadUri: '',
       dataItems: [],
-      width: 900,
-      height: 500
+      aButtonIsPressed: false
     };
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  componentDidUpdate(prevProps, prevState) {
     const { activeDataType, dataToLoadUri } = this.state;
-    if ((activeDataType !== nextState.activeDataType) && (nextState.activeDataType !== '')) {
-      this.triggerDataToLoad(nextState.activeDataType);
-      const uri = this.getUriForDataToLoad(nextState.activeDataType);
+
+    if ((prevState.activeDataType !== activeDataType) && (activeDataType !== '')) {
+      this.triggerDataToLoad(activeDataType);
+
+      const uri = this.getUriForDataToLoad(activeDataType);
       this.setState({ dataToLoadUri: uri }, this.subscribeToActiveUri(uri));
     }
 
-    if (dataToLoadUri !== nextState.dataToLoadUri) {
-      this.subscribeToActiveUri(nextState.dataToLoadUri);
+    if (prevState.dataToLoadUri !== dataToLoadUri) {
+      this.subscribeToActiveUri(dataToLoadUri);
     }
-
-    return true;
   }
 
   getUriForDataToLoad(dataType) {
@@ -72,20 +71,31 @@ class DataLoader extends Component {
   }
 
   render() {
-    const {setActivated, activated } = this.props
+    const { setActivated, activated, width, height } = this.props
+    const { dataItems, aButtonIsPressed } = this.state;
+    const minSize = 700;
+
+    const size = {
+      width: width < minSize ? width / 2 : width / 3,
+      height: height / 2
+    };
+
+    const position = {
+      x: width < minSize ? 0 : -100,
+      y: height < minSize ? 0 : -300
+    };
 
     let DataTypeButtons = () => {
       return(
         <section className={styles.dataButtons}>
           <div>
-            {this.dataTypesToLoad.map(dataType => (
-              <Button 
-                key={dataType} 
-                onClick={() => this.setState({activeDataType: dataType})}
-                disabled={dataType !== 'Volumes'}>
-                <Label>{dataType}</Label>
-              </Button>
-            ))}
+          {this.dataTypesToLoad.map(dataType => (
+            <Button key={dataType} 
+                    onClick={() => this.setState({activeDataType: dataType, aButtonIsPressed: true})}
+                    disabled={dataType !== 'Volumes'}>
+              <Label>{dataType}</Label>
+            </Button>
+          ))}
           </div>
         </section>
       );
@@ -94,19 +104,30 @@ class DataLoader extends Component {
     return(
       <div className="page-content-wrapper">
         { this.props.activated && (
-          <div className={styles.centerContent}>
-            <Window
-              type="large"
-              title="Data Loader"
-              size={{ width:this.props.width/2, height:this.props.height/2 }}
-              position={{ x:470, y:-370 }}
-              closeCallback={() => setActivated(false)}
-            >
-              <DataTypeButtons/>
-              <DataItemList items={this.state.dataItems} />
-              <UploadDataButton/>
+            <Window type='large'
+                    title='Data Loader'
+                    size={size}
+                    position={position}
+                    closeCallback={() => setActivated(false)}>
+              <div className={styles.container}>
+                <div className={styles.upload}>
+                  <Label size="large">Upload data from disk</Label>
+                  <div className={styles.buttons}>
+                    <UploadDataButton/>
+                  </div>
+                </div>
+                <div className={styles.horizontalLine}/>
+                <div className={styles.load}>
+                  <Label size="large">Load saved data</Label>
+                  <div className={styles.buttons}>
+                    <DataTypeButtons/>
+                  </div>
+                  { aButtonIsPressed && (
+                    <DataItemList items={dataItems} />
+                  )}
+                </div>
+              </div>
             </Window>
-          </div>
         )}
       </div>
     );

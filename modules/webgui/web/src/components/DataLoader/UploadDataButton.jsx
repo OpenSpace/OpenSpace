@@ -32,13 +32,16 @@ class UploadDataButton extends Component {
 	
 	handleUploadedFiles(data) {
     this.props.setFilePaths(data.Value);
+
+    // Show window for changing task properties
+    // with "convert" button or something
   }
 	
 	render() {
     return(
       <div>
         <Button onClick={() => this.handleClick()}>
-          Load Data
+          Upload Data
         </Button>
       </div>
     );
