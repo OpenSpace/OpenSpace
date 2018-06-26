@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <ghoul/misc/boolean.h>
+#include <memory>
 #include <functional>
 
 namespace ghoul { class Dictionary; }
