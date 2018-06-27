@@ -10,11 +10,8 @@ import { removeLineBreakCharacters } from './utils/helpers';
 import styles from './PrepareUploadedData';
 import Window from '../common/Window/Window';
 import provideWindowWidth from './HOC/provideWindowSize';
-import NumericInput from '../common/Input/NumericInput/NumericInput';
-import Input from '../common/Input/Input/Input';
-import Row from '../common/Row/Row';
-import Label from '../common/Label/Label';
-import Select from '../common/Input/Select/Select';
+import Dimensions from './presentational/Dimensions';
+import Variables from './presentational/Variables';
 
 class PrepareUploadedData extends Component {
   constructor(props) {
@@ -25,9 +22,6 @@ class PrepareUploadedData extends Component {
       dimensions: { x: 100, y: 100, z: 100 },
       variable: 'rho'
     };
-
-    this.options = 'R T P RHO UR UT UP BR BT BP JR JT JP'
-      .split(' ').map(v => ({ value: v, label: v }));
 
     this.changeDimensions = this.changeDimensions.bind(this);
     this.upload = this.upload.bind(this);
@@ -89,30 +83,12 @@ class PrepareUploadedData extends Component {
             position={{ x: 100, y: -100 }}
             closeCallback={() => this.setState({ activated: false })}
           >
-          <Row>
-            <Label size={'medium'}>Dimensions: </Label>
-            <Row>
-              { Object.keys(dimensions).map((key, index) => (
-                  <Input 
-                    key={key}
-                    label={key}
-                    placeholder={key}
-                    value={dimensions[key]}
-                    onChange={this.changeDimensions}
-                  />
-              ))}
-            </Row>
-          </Row>
-          <Row>
-          <Label size={'medium'}>Variable: </Label>
-            <Select 
-              label={variable === '' ? "Select Variable" : variable}
-              options={this.options}
-              onChange={this.changeVariable}
-              placeholder={''}
-            />
-          </Row>
-
+          <Dimensions 
+            dimensions={dimensions} 
+            onChange={this.changeDimensions}/>
+          <Variables 
+            variable={variable}
+            onChange={this.changeVariable} />
           <button onClick={() => this.upload()}/>
           </Window>
         )}
