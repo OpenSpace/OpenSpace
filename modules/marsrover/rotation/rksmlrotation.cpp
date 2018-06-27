@@ -121,13 +121,28 @@ void RksmlRotation::addKeyframe(double timestamp, RksmlRotation::Node data) {
 
 glm::dmat3 RksmlRotation::matrix(const Time& time) const {
     
+    //test
+    //double firstTime = 401720200.625000; //exact (/00048)
+    //double secondTime = 401722030.625000; //exact (/00048)
+    //double betweenTime = 401721200.625000; //between (/00048)
+    //double testTime = 399958900.0;
     double currentTime = time.j2000Seconds();// * pow(10.0, 8.0);
 
     LERROR(fmt::format("current Time: '{}'", std::to_string(currentTime)));
 
+    //should use time
     //double tt = 402555992.017; //00057 (middle of two frames)
     const Keyframe<RksmlRotation::Node>* nextKeyframe = Object_Timeline.firstKeyframeAfter(currentTime);
     const Keyframe<RksmlRotation::Node>* prevKeyframe = Object_Timeline.lastKeyframeBefore(currentTime);
+    
+    //LERROR(fmt::format("OOOOOOOOOOOOOOOOOO"));
+    //LERROR(fmt::format("in matrix"));
+    ////LERROR(fmt::format("timestamp: '{}'", std::to_string(prevKeyframe->timestamp)));
+    //LERROR(fmt::format("frameTime prev: '{}'", std::to_string(prevKeyframe->data.frameTime)));
+    //LERROR(fmt::format("frameTime next: '{}'", std::to_string(nextKeyframe->data.frameTime)));
+    //LERROR(fmt::format("framename: '{}'", std::to_string(prevKeyframe->data.frameName)));
+    //LERROR(fmt::format("rotvalue prev: '{}'", std::to_string(prevKeyframe->data.rotValue)));
+    //LERROR(fmt::format("OOOOOOOOOOOOOOOOOO"));
 
     double radiansResult = 0.0;
     double radians1 = 0.0;
@@ -136,6 +151,21 @@ glm::dmat3 RksmlRotation::matrix(const Time& time) const {
     double time1 = 0.0;
     double time2 = 0.0;
 
+    
+    //if (prevkeyframe)
+        //radians1 = ...
+        //if (nextkeyframe)
+            //radians2 = ...
+        //else 
+            //radTot = radians1;
+
+        //if (nextkeyframe == prevkeyframe)
+            //radTot = radians1 & radians2
+
+    // else if (nextkeyframe)
+        //radTot = radians2
+
+    //else return glm::dmat3(1.0) enhetsmatrisen;
 
     //If both timeframes are found
     if (nextKeyframe != nullptr && prevKeyframe != nullptr) {
@@ -305,5 +335,72 @@ void RksmlRotation::parseFile(std::string path) {
     //LERROR(fmt::format("nummer av objekt: '{}'", Object_Timeline.nKeyframes()));
 }
 
+
+/*
+void RksmlRotation::addTimelineObject(std::string s, RksmlRotation::Node n)
+{
+    getNode(s).addKeyframe(n.frameTime, n);
+}
+
+Timeline<RksmlRotation::Node>& RksmlRotation::getNode(std::string s)
+{
+    if ( "LF_DRIVE_Timeline" == s) 
+        return LF_DRIVE_Timeline;
+
+    else if ("LF_STEER_Timeline" == s) 
+        return LF_STEER_Timeline;
+    
+    else if ("LM_DRIVE_Timeline" == s)     
+        return LM_DRIVE_Timeline;
+    
+    else if ("LR_DRIVE_Timeline" == s) 
+        return LR_DRIVE_Timeline;
+    
+    else if ("LR_STEER_Timeline" == s) 
+        return LR_STEER_Timeline;
+    
+    else if ("RF_DRIVE_Timeline" == s) 
+        return RF_DRIVE_Timeline;
+    
+    else if ("RF_STEER_Timeline" == s) 
+        return RF_STEER_Timeline;
+    
+    else if ("RM_DRIVE_Timeline" == s) 
+        return RM_DRIVE_Timeline;
+    
+    else if ("RR_DRIVE_Timeline" == s) 
+        return RR_DRIVE_Timeline;
+    
+    else if ("RR_STEER_Timeline" == s) 
+        return RR_STEER_Timeline;
+    
+    else if ("LEFT_BOGIE_Timeline" == s) 
+        return LEFT_BOGIE_Timeline;
+    
+    else if ("LEFT_DIFFERENTIAL_Timeline" == s) 
+        return LEFT_DIFFERENTIAL_Timeline;
+    
+    else if ("RIGHT_BOGIE_Timeline" == s) 
+        return RIGHT_BOGIE_Timeline;
+    
+    else if ("RIGHT_DIFFERENTIAL_Timeline" == s) 
+        return RIGHT_DIFFERENTIAL_Timeline;
+    
+    else if ("QUAT_C_Timeline" == s) 
+        return QUAT_C_Timeline;
+    
+    else if ("QUAT_X_Timeline" == s) 
+        return QUAT_X_Timeline;
+    
+    else if ("QUAT_Y_Timeline" == s) 
+        return QUAT_Y_Timeline;
+    
+    else if("QUAT_Z_Timeline" == s) 
+        return QUAT_Z_Timeline; 
+
+    //fix
+    return QUAT_Z_Timeline;
+}
+*/
 
 } // namespace openspace
