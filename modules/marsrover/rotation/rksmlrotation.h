@@ -37,13 +37,14 @@
 
 #include <openspace/network/parallelpeer.h>
 
-
+//include projectionprovider tooo!
+//#include <modules/marsrover/surfaceprojection/projectionprovider.h>
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class RksmlRotation : public Rotation {
+class RksmlRotation : public Rotation { //change to : public ProjectionProvider 
 public:
 
     struct Node {
@@ -54,21 +55,14 @@ public:
 
 
     RksmlRotation(const ghoul::Dictionary& dictionary);
-    Timeline<Node>& timeline();
-    void addKeyframe(double timestamp, RksmlRotation::Node data);
-
-	//glm::dmat3 matrix(const Time& time) const        
-    
+    ~RksmlRotation();
     glm::dmat3 matrix(const Time& time) const override;
     
-    void addTimelineObject(std::string s, Node n);
-    void openFile();
-    void parseFile(std::string path);
-
-    //behover??
-    //const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
 private:
+    void openFile();
+    void parseFile(std::string path);
+    void addTimelineObject(std::string s, Node n);
 
     Timeline<Node> LF_DRIVE_Timeline;    //creates a Timeline object of the structure type Node 
     Timeline<Node> LF_STEER_Timeline;

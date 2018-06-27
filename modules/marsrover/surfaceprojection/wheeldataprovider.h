@@ -22,36 +22,22 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/marsrover/surfaceprojection/projectionprovider.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <ghoul/fmt.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__
+#define __OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__
 
-namespace {
- const std::string _loggerCat = "ProjectionProvider";
- const std::string Type = "Type";
-}
+#include <modules/marsrover/surfaceprojection/projectionprovider.h>
+
 
 namespace openspace {
-std::unique_ptr<ProjectionProvider> ProjectionProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
-	std::string type = "ProjectionProvider";
-	dictionary.getValue(Type, type);
-	auto factory = FactoryManager::ref().factory<ProjectionProvider>();
-	std::unique_ptr<ProjectionProvider> projProvider = factory->create(type, dictionary);
-	if (!projProvider) {
-        throw ghoul::RuntimeError("Unable to create projection provider");
-    }
- 	return projProvider;
-}
+class WheelDataProvider : public ProjectionProvider {
+public:
+ WheelDataProvider(const ghoul::Dictionary& dictionary);
 
-ProjectionProvider::ProjectionProvider(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner(openspace::properties::PropertyOwner::PropertyOwnerInfo{ "projectionProvider", "projectionProvider" })
-{
-}
-
-void ProjectionProvider::initialize() {
-	return;
-}
-
+ //virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+ // const RenderData& data, const SceneGraphNode* parent);
+ static void openFile();
+ virtual void initialize();
+};
 } // namespace openspace
+
+#endif //__OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__

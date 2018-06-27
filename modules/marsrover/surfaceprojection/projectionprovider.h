@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_MARSROVER___PROJECTION_PROVIDER___H__
+#define __OPENSPACE_MODULE_MARSROVER___PROJECTION_PROVIDER___H__
 
 //#include <modules/roverterrainrenderer/filehandler/subsite.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -38,8 +38,9 @@ public:
  //virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
  // const RenderData& data, const SceneGraphNode* parent) = 0;
 
+
  virtual void initialize() = 0;
 };
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_GLOBEBROWSING___MODEL_PROVIDER___H__
+#endif //__OPENSPACE_MODULE_MARSROVER___MODEL_PROVIDER___H__

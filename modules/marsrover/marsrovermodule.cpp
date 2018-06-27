@@ -41,6 +41,8 @@
 #include <modules/marsrover/rotation/rksmlrotation.h>
 
 #include <modules/marsrover/surfaceprojection/spacecraftprojection.h>
+#include <modules/marsrover/surfaceprojection/projectionprovider.h>
+#include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
 
 
 
@@ -72,8 +74,10 @@ void MarsroverModule::internalInitialize(const ghoul::Dictionary&) {
     fTranslation->registerClass<SpacecraftProjection>("SpacecraftProjection");
    
 
-    //auto fProjectionProvider = std::make_unique<ghoul::TemplateFactory<ProjectionProvider>>();
-    //fProjectionProvider->registerClass<MslTerrain>("MslTerrain");
+    auto fProjectionProvider = std::make_unique<ghoul::TemplateFactory<ProjectionProvider>>();
+        fProjectionProvider->registerClass<WheelDataProvider>("WheelDataProvider");
+    FactoryManager::ref().addFactory(std::move(fProjectionProvider));
+
 
     //Read heightmap once
     //MslTerrain terrainMap;

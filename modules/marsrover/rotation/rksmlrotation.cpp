@@ -23,13 +23,17 @@
  ****************************************************************************************/
 
 #include <modules/marsrover/rotation/rksmlrotation.h>
+#include <modules/marsrover/surfaceprojection/projectionprovider.h>
+#include <modules/marsrover/surfaceprojection/wheeldataprovider.h>
+#include <modules/roverterrainrenderer/model/modelprovider.h>
+
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
-
+#include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -39,7 +43,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#define GET_VARIABLE_NAME(Variable) (#Variable)
 
 namespace {
     const char* DefaultReferenceFrame = "GALACTIC";
@@ -87,32 +90,16 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
         _frame = dictionary.value<std::string>(FrameInfo.identifier);
     }
 
+    ghoul::Dictionary modelDic;
+
+    //calls the projectionprovider
+    std::unique_ptr<ProjectionProvider> _projectionProvider;
+
+
     addProperty(_dataPath);
     addProperty(_frame);
     
     openFile();
-    //create a pointer to a new node and assign it some data
-    //Node caroline;
-    //caroline.time = 3.0;
-    //caroline.rotValue = 2.0;
-    //Node *ptrToCaroline;
-    //ptrToCaroline = &caroline;
-    //LERROR(fmt::format("Caroline    '{}'", ptrToCaroline->time));//
-//
-    //addKeyframe(5000.555, caroline);
-    //create a new node for every wheelpart
-    // and then assign it the data from what we read in
-
-
-    //_dataTimeline.firstKeyframeAfter(ptrToCaroline->time);
-
-    //creates a keyframe object of type node 
-    //const Keyframe<Node>* nextKeyframe = _dataTimeline.firstKeyframeAfter(now);
-    //const Keyframe<Node>* prevKeyframe = _dataTimeline.lastKeyframeBefore(now);
-    //if (_dataTimeline.nKeyframes() == 0) {
-    //    return;
-    //}
-
 
     auto update = [this]() {
         requireUpdate();
@@ -129,21 +116,11 @@ RksmlRotation::RksmlRotation(const ghoul::Dictionary& dictionary)
 //const Keyframe<CameraPose>* nextKeyframe = _cameraPoseTimeline.firstKeyframeAfter(now);
 //const Keyframe<CameraPose>* prevKeyframe = _cameraPoseTimeline.lastKeyframeBefore(now);
 
-
-Timeline<RksmlRotation::Node>& RksmlRotation::timeline() {
-    //LERROR("inside of timeline");
-    return LF_DRIVE_Timeline;   //FIX add all timelines
-}
-
-void RksmlRotation::addKeyframe(double timestamp, RksmlRotation::Node data) {
-    //LERROR("inside of addKeyframe");
-    //LF_DRIVE_Timeline.addKeyframe(timestamp, pose);
-    timeline().addKeyframe(timestamp, data);
-}
+RksmlRotation::~RksmlRotation() {}
 
 
 glm::dmat3 RksmlRotation::matrix(const Time& time) const {
-    
+
     return glm::dmat3(1.0);
 }
 
@@ -173,49 +150,57 @@ void RksmlRotation::openFile() {
         //parseFile(fileName);
     }
     std::string testPath = path + "00048/rksml_playback_filt_eha.rksml";
-    parseFile(fileName);
+    parseFile(testPath);
 
     //working
     LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LF_DRIVE_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LF_STEER_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LM_DRIVE_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LR_DRIVE_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LR_STEER_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RF_DRIVE_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RF_STEER_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RM_DRIVE_Timeline.nKeyframes())));
-    LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RR_DRIVE_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LF_STEER_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LM_DRIVE_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LR_DRIVE_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(LR_STEER_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RF_DRIVE_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RF_STEER_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RM_DRIVE_Timeline.nKeyframes())));
+    //LERROR(fmt::format("LF DRIVE number of keyframes '{}'", std::to_string(RR_DRIVE_Timeline.nKeyframes())));
     
     double testTime = 401720200.625000;
-    const Keyframe<RksmlRotation::Node>* testNode = LF_STEER_Timeline.lastKeyframeBefore(testTime);
-    //const Keyframe<CameraPose>* nextKeyframe = _cameraPoseTimeline.firstKeyframeAfter(now);
-    //const Keyframe<CameraPose>* prevKeyframe = _cameraPoseTimeline.lastKeyframeBefore(now);
+    const Keyframe<RksmlRotation::Node>* testNode0 = LF_DRIVE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode1 = LF_STEER_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode2 = LM_DRIVE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode3 = LR_DRIVE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode4 = LR_STEER_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode5 = RF_DRIVE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode6 = RF_STEER_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode7 = RM_DRIVE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode8 = RR_DRIVE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode9 = RR_STEER_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode10 = LEFT_BOGIE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode11 = LEFT_DIFFERENTIAL_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode12 = RIGHT_BOGIE_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode13 = RIGHT_DIFFERENTIAL_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode14 = QUAT_C_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode15 = QUAT_X_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode16 = QUAT_Y_Timeline.lastKeyframeBefore(testTime);
+    const Keyframe<RksmlRotation::Node>* testNode17 = QUAT_Z_Timeline.lastKeyframeBefore(testTime);
+
 
     double nextTime = 0;
 
-    if (testNode) {
-        nextTime = testNode->timestamp;
-        LERROR(fmt::format("nextTime: '{}'", nextTime));
-    }
-    else 
-        LERROR(fmt::format("ingen testNode!!!!"));
-    //LERROR(fmt::format("lastKeyframeBefore name: '{}'", std::to_string(testNode->data.frameName)));
-    //LERROR(fmt::format("lastKeyframeBefore name: '{}'", testNode->frameName));
-    //LERROR(fmt::format("lastKeyframeBefore time: '{}'", std::to_string(testNode->frameTime)));
-    //LERROR(fmt::format("lastKeyframeBefore value: '{}'", std::to_string(testNode->rotValue)));
-    
-    
-    
-    
-    //RR_STEER_Timeline
-    //LEFT_BOGIE_Timeline
-    //LEFT_DIFFERENTIAL_Timeline
-    //RIGHT_BOGIE_Timeline
-    //RIGHT_DIFFERENTIAL_Timeline
-    //QUAT_C_Timeline
-    //QUAT_X_Timeline
-    //QUAT_Y_Timeline
-    //QUAT_Z_Timeline
+    //if (testNode) {
+    //    nextTime = testNode->timestamp;
+    //    LERROR(fmt::format("nextTime: '{}'", nextTime));
+    //}
+    //else 
+    //    LERROR(fmt::format("ingen testNode!!!!"));
+
+    LERROR(fmt::format("QUAT_C_Timeline name: '{}'", std::to_string(testNode14->data.frameName)));
+    LERROR(fmt::format("QUAT_C_Timeline rotvalue: '{}'", std::to_string(testNode14->data.rotValue)));
+    double angle = testNode14->data.rotValue;
+    glm::dmat3 rotationMatrix = glm::dmat3( cos(angle), -sin(angle), 0.0,
+                                            sin(angle), cos(angle), 0.0,
+                                            0.0,        0.0,        1.0);
+
+    LERROR(fmt::format("rotationMatrix     '{}'", rotationMatrix));
 
 
 }
@@ -244,6 +229,8 @@ void RksmlRotation::parseFile(std::string path) {
             iss.clear();
             iss = std::istringstream(line);
 
+
+
             //get first node tag
             std::getline(iss, trash, '<');
             std::getline(iss, trash, ' ');
@@ -268,6 +255,7 @@ void RksmlRotation::parseFile(std::string path) {
                 nodeObject.frameName = name;
                 nodeObject.frameTime = atof(time.c_str());
 
+
                 //if *10^x is found
                 if (value.find('E') != std::string::npos)
                 {
@@ -282,6 +270,7 @@ void RksmlRotation::parseFile(std::string path) {
                     nodeObject.rotValue = atof(value.c_str());
 
                 std::string timelineObject = name + "_Timeline";
+
                 addTimelineObject(timelineObject, nodeObject);
             }
             iss.clear();
@@ -357,13 +346,6 @@ void RksmlRotation::addTimelineObject(std::string s, RksmlRotation::Node n)
     else 
         QUAT_Z_Timeline.addKeyframe(n.frameTime, n); //solve case!!!!!!!!!!!!!!!!
         
-    
-
-    //addKeyframe(2000.222, n);
-    //QUAT_Z_Timeline.addKeyframe(n.frameTime, n);
-    //ptr.addKeyframe(n.frameTime, n);
-    //ptr->addKeyframe(n.frameTime, n);
-    //ptr->addKeyframe(n.frameTime, n);
 }
 
 } // namespace openspace

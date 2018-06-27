@@ -34,6 +34,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/rksmlrotation.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/spacecraftprojection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/projectionprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/wheeldataprovider.h
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.h
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.h
@@ -50,6 +53,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/rksmlrotation.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/spacecraftprojection.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/projectionprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/surfaceprojection/wheeldataprovider.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/extractheightmap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/heighthandler/texturewriterfreeimage.cpp
