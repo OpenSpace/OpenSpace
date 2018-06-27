@@ -166,6 +166,85 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary&) {
             _discoveryMethods->setDopplerImagePos(imagePos);
 
         }
+        if (_discoveryMethods->isTransit()) {
+
+            std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName();
+            std::vector<std::string> planetNames = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlna();
+            SceneGraphNode* planetNode = OsEng.renderEngine().scene()->sceneGraphNode(planetNames[0]);
+            SceneGraphNode* starNode = OsEng.renderEngine().scene()->sceneGraphNode(starName);
+            glm::dvec3 planetPos = planetNode->worldPosition();
+            glm::dvec3 starPos = starNode->worldPosition();
+
+            glm::dvec3 starToPosVec = planetPos - starPos;
+            glm::dvec3 starToSunVec = normalize(glm::dvec3(0.0, 0.0, 0.0) - starPos);
+            
+            std::vector<Exoplanet> planets = OsEng.moduleEngine().module<ExoplanetsModule>()->getPlsy();
+            float starRadius = planets[0].RSTAR * 6.957E8 * _discoveryMethods->getTransitScaleFactor(); // in m
+
+            glm::dvec3 north = _north;
+            float northAngle = glm::acos(glm::dot(normalize(starToPosVec), north)) * 57.2957795;
+            float viewAngle = glm::acos(glm::dot(normalize(starToPosVec), starToSunVec)) * 57.2957795;
+
+            glm::dvec3 posVecProjected = starToPosVec - (((dot(starToPosVec, starToSunVec)) / (glm::length(starToSunVec)))*starToSunVec);
+            float l = glm::length(posVecProjected); //in m
+            float imageYPos = -0.6;
+            if (l<(starRadius*0.76) && viewAngle <= 90.0) { // in front of star
+                imageYPos = -0.8;
+            }
+            //imageYPos = -0.7;
+
+            float imageXPos = 0;
+            if (viewAngle <= 90.0 && northAngle <= 90.0)
+            {
+            imageXPos = (viewAngle / 90.0) * 0.5;
+            }
+            else if (viewAngle > 90.0 && northAngle <= 90.0)
+            {
+            imageXPos = (viewAngle / 90.0) * 0.5;
+            }
+            else if (viewAngle > 90.0 && northAngle > 90.0)
+            {
+            imageXPos = (viewAngle / 90.0) * -0.5;
+            }
+            else if (viewAngle <= 90.0 && northAngle > 90.0)
+            {
+            imageXPos = (viewAngle / 90.0) * -0.5;
+            }
+            imageXPos *= 0.25;
+            _discoveryMethods->setTransitImagePos(imageXPos, imageYPos);
+
+            //glm::dvec3 sunPos = glm::dvec3(0.0, 0.0, 0.0);
+            /*Camera* cam = OsEng.navigationHandler().camera();
+            glm::dvec3 sunPos = cam->positionVec3();
+            glm::dvec3 radiusPos = starPos + (double(planets[0].RSTAR * _discoveryMethods->getTransitScaleFactor()) * _north);
+            glm::dvec3 sunToRadius = normalize(radiusPos - sunPos);
+            glm::dvec3 sunToStar = normalize(starPos - sunPos);
+            
+            glm::dvec3 sunToPlanet = normalize(planetPos - sunPos);
+            
+
+            double angleRadiusStar = glm::acos(glm::dot(sunToRadius, sunToStar))*57.2957795;
+            
+            double anglePlanetStar = glm::acos(glm::dot(sunToPlanet, sunToStar))*57.2957795;
+            
+            glm::dvec3 starToSun = normalize(sunPos - starPos);
+            glm::dvec3 starToPlanet = normalize(planetPos - starPos);
+
+            double anglePlanetSun = glm::dot(starToPlanet, starToSun); //glm::acos(glm::dot(starToPlanet, starToSun)) * 57.2957795;
+            
+            float anglePlanetNorth = glm::acos(glm::dot(starToPlanet, _north)) * 57.2957795;
+
+            //
+            float imageYPos = 1.0;
+            //float viewAngle = glm::acos(glm::dot(starToPlanet, starToSun)) * 57.2957795;
+            //TRANSITING
+            if (anglePlanetStar < angleRadiusStar && anglePlanetSun >= 0.0) {
+                imageYPos = -1.0;
+            }
+            */
+
+
+        }
 
     });
 }

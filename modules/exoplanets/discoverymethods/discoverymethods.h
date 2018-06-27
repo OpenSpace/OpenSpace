@@ -38,8 +38,8 @@ public:
     bool isTransit();
     bool isReference();
     void setDopplerImagePos(float);
+    void setTransitImagePos(float,float);
     float getTransitScaleFactor();
-    //void setSunReferencePosition(glm::dvec3);
 
 private:
 	properties::BoolProperty _showTransit;
@@ -57,8 +57,7 @@ private:
     void removeDirectionsMarkers();
     void scaleNode(std::string, float);
     void moveStar(std::string, float);
-    void moveCameraTransitView(glm::dvec3);
-    void moveCameraDopplerView(glm::dvec3);
+    void moveCamera(glm::dvec3);
     void toggleVisabilityOuterPlanets(std::vector<std::string>, std::string);
     void toggleVisabilityPlanet(std::string, std::string);
 

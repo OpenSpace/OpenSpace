@@ -166,6 +166,28 @@ namespace openspace::exoplanets{
         );
     }
 
+    void addTransitGraphs() {
+        std::string script = "openspace.addScreenSpaceRenderable("
+            "{"
+                "Identifier = 'Transit2',"
+                "Type = 'ScreenSpaceImageLocal',"
+                "TexturePath = openspace.absPath('${BASE}/modules/exoplanets/prick.png'),"
+                "EuclideanPosition = {0.0, 0.0},"
+            "});"
+            "openspace.addScreenSpaceRenderable("
+            "{"
+                "Identifier = 'Transit1',"
+                "Type = 'ScreenSpaceImageLocal',"
+                "TexturePath = openspace.absPath('${BASE}/modules/exoplanets/graph.png'),"
+                "EuclideanPosition = {0.0, -0.7},"
+            "});";
+
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
     
 
     void DiscoveryMethods::scaleNode(std::string nodeName, float scalefactor) {
@@ -220,16 +242,8 @@ namespace openspace::exoplanets{
             openspace::scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
-    
-    void DiscoveryMethods::moveCameraDopplerView(glm::dvec3 pos) {
 
-        Camera* cam = OsEng.navigationHandler().camera();
-        cam->setPositionVec3(pos);
-        OsEng.navigationHandler().resetCameraDirection();
-
-    }
-
-    void DiscoveryMethods::moveCameraTransitView(glm::dvec3 pos) {
+    void DiscoveryMethods::moveCamera(glm::dvec3 pos) {
 
         Camera* cam = OsEng.navigationHandler().camera();
         cam->setPositionVec3(pos);
@@ -254,6 +268,14 @@ namespace openspace::exoplanets{
         );
     }
 
+    void DiscoveryMethods::setTransitImagePos(float valueX,float valueY) {
+        std::string script = "openspace.setPropertyValueSingle( 'ScreenSpace.Transit2.EuclideanPosition', {" + std::to_string(valueX) + "," + std::to_string(valueY) + "}); ";
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
+    }
+
     void DiscoveryMethods::addDopplerMethodVisualization() {
         SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
         std::string starName = OsEng.moduleEngine().module<ExoplanetsModule>()->getStarName(); // getStarName 
@@ -272,7 +294,7 @@ namespace openspace::exoplanets{
         // MOVE CAMERA
         glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, north));
         glm::dvec3 cameraPosition = starPosition + ((4.0 * semiMajorAxis * 149597870700.0) * faceOnVector);
-        moveCameraDopplerView(cameraPosition);
+        moveCamera(cameraPosition);
         // END CAMERA
 
         // SCALE STAR AND PLANET
@@ -355,8 +377,13 @@ namespace openspace::exoplanets{
 
         // MOVE CAMERA
         //borde kanske va periapsis distance, men det går bra ändå
-        glm::dvec3 cameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700.0) * starToSunVec);;
-        moveCameraTransitView(cameraPosition);
+        glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
+        //glm::dvec3 faceOnVector = glm::normalize(glm::cross(starToSunVec, north));
+        glm::dvec3 cameraPosition = starPosition + ((4.0 * semiMajorAxis * 149597870700.0) * starToSunVec);
+        //glm::dvec3 cameraPosition = starPosition + ((3.0 * semiMajorAxis * 149597870700.0) * faceOnVector);
+        
+
+        moveCamera(cameraPosition);
         // END CAMERA
         toggleVisabilityPlanet(planetNames[0], "true");
 
@@ -366,17 +393,21 @@ namespace openspace::exoplanets{
         periapsisDistance *= 149597870700.0; // in m
         starRadius *= 6.957E8; // in m
 
-        float scale = (0.666 * periapsisDistance) / starRadius; // actual radius * scale = wanted radius
+        float scale = (0.5 * periapsisDistance) / starRadius; // actual radius * scale = wanted radius
         scaleNode(starName + "Globe", scale);
         scaleNode(planetNames[0], scale); //eller använda getPlna()?
         _transitScaleFactor = scale;
         // END SCALE
 
+        // ADD THE GRAPH
+        addTransitGraphs();
+        // END GRAPH
+
         // HELPER MARKERS
-        glm::dvec3 north = OsEng.moduleEngine().module<ExoplanetsModule>()->getNorthVector();
+        
         glm::dvec3 northDirectionPos = starPosition + (double(starRadius * scale) * north);
         glm::dvec3 viewDirectionPos = starPosition + (double(starRadius * scale) * starToSunVec);
-        addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
+        //addDirectionsMarkers(viewDirectionPos, northDirectionPos, starRadius);
         // END MARKERS
     }
     void DiscoveryMethods::removeTransitMethodVisualization() {
@@ -386,7 +417,12 @@ namespace openspace::exoplanets{
         scaleNode(starName + "Globe", 1);
         scaleNode(planetNames[0], 1);
 
-
+        // REMOVE GRAPH
+        std::string script = "openspace.removeScreenSpaceRenderable('Transit2');openspace.removeScreenSpaceRenderable('Transit1');";
+        OsEng.scriptEngine().queueScript(
+            script,
+            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+        );
 
         //REMOVE HELP MARKERS
         removeDirectionsMarkers();
