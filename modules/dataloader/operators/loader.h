@@ -61,17 +61,17 @@ class Loader : public PropertyOwner, public Operator {
     void removeDataItemProperties();
 
     // Load a data item with an abs path to the item under its data type subfolder in data/.internal
-    void loadDataItem(std::string absPathToItem);
+    void loadDataItem(const std::string& absPathToItem);
 
     // void createVolumeDataItem(std::string absPath);
 
-    void processCurrentlySelectedUploadData(std::string dictionaryString);
+    void processCurrentlySelectedUploadData(const std::string& dictionaryString);
 
     ghoul::Dictionary createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath);
 
     // Perfom tasks that create dictionaries and converts
     // .CDF formatted volume files into .rawvolume
-    void performTasks(std::string& path);
+    // void performTasks(std::string& path);
 
   private:
     properties::StringProperty _filePaths;
@@ -91,7 +91,7 @@ class Loader : public PropertyOwner, public Operator {
     std::vector<std::unique_ptr<Task>> tasks;
 
   void initializeNode(ghoul::Dictionary dict);
-  void goToFirstTimeStep(std::string absPathToItem);
+  void goToFirstTimeStep(const std::string& absPathToItem);
 
 };
 

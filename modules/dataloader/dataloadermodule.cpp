@@ -104,11 +104,11 @@ std::vector<std::string> DataLoaderModule::volumeDataItems() {
     return _volumeDataItems;
 }
 
-void DataLoaderModule::loadDataItem(std::string absPathToItem) {
+void DataLoaderModule::loadDataItem(const std::string& absPathToItem) {
     _loader->loadDataItem(absPathToItem);
 }
 
-void DataLoaderModule::uploadDataItem(std::string dictionaryString) {
+void DataLoaderModule::uploadDataItem(const std::string& dictionaryString) {
     _loader->processCurrentlySelectedUploadData(dictionaryString);
 }
 

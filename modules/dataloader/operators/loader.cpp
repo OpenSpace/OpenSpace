@@ -221,7 +221,7 @@ void Loader::createInternalDataItemProperties() {
 
 // void Loader::createVolumeDataItem(std::string absPath) {}
 
-void Loader::loadDataItem(std::string absPathToItem) {
+void Loader::loadDataItem(const std::string& absPathToItem) {
     std::string sourceDir = absPathToItem;
     const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(absPathToItem);
 
@@ -284,14 +284,14 @@ void Loader::initializeNode(ghoul::Dictionary dict) {
     scene()->initializeNode(node);
 }
 
-void Loader::goToFirstTimeStep(std::string absPathToItem) {
+void Loader::goToFirstTimeStep(const std::string& absPathToItem) {
     std::string firstDictionaryFilePath = openspace::dataloader::helpers::getFileWithExtensionFromItemFolder(absPathToItem, "dictionary");
     ghoul::Dictionary dict = ghoul::lua::loadDictionaryFromFile(firstDictionaryFilePath);
     std::string firstTimeStep = dict.value<std::string>(KeyTime);
     time().setTime(firstTimeStep);
 }
 
-void Loader::processCurrentlySelectedUploadData(std::string dictionaryString) {
+void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryString) {
     // Case 1: _filePaths is a string of a single path to a single CDF file
 
     // Determine path to new volume item

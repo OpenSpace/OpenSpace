@@ -62,8 +62,8 @@ public:
     std::vector<std::string> volumeDataItems();
     void setVolumeDataItems(std::vector<std::string> items);
 
-    void loadDataItem(std::string absPathToItem);
-    void uploadDataItem(std::string dictionaryString);
+    void loadDataItem(const std::string& absPathToItem);
+    void uploadDataItem(const std::string& dictionaryString);
 
     scripting::LuaLibrary luaLibrary() const override;
 
