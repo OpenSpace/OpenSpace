@@ -82,7 +82,6 @@ local Body = {
 }
 
 
-
 -- pink texture, tex_02
 local Body_staticParts_1 = {
     Identifier = "Body_staticParts_1",
@@ -675,15 +674,15 @@ local Wheel_Base = {
 
 -- LEFT SIDE -- 
 
-local Wheel_Leg_1A_L = {
-    Identifier = "Wheel_Leg_1A_L",
-    Parent = transforms.Leg_1A_L_Location.Identifier,
+local Wheel_Leg_1_L = {
+    Identifier = "Wheel_Leg_1_L",
+    Parent = transforms.Leg_1_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1A_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1_L.obj"
         },
         ColorTexture = textures .. "/tex_03.png",
         GUI = {
@@ -694,7 +693,7 @@ local Wheel_Leg_1A_L = {
 
 local Wheel_Leg_1A_L_detail = {
     Identifier = "Wheel_Leg_1A_L_detail",
-    Parent = Wheel_Leg_1A_L.Identifier,
+    Parent = Wheel_Leg_1_L.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -710,26 +709,26 @@ local Wheel_Leg_1A_L_detail = {
 }
 
 
-local Wheel_Leg_1B_L = {
-    Identifier = "Wheel_Leg_1B_L",
-    Parent = transforms.Leg_1B_L_Location.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_L.obj"
-        },
-        ColorTexture = textures .. "/tex_03.png",
-        GUI = {
-            Path = "/Solar System/Planets/Mars/Curiosity/Model"
-        }
-    }
-}
+-- local Wheel_Leg_1B_L = {
+--     Identifier = "Wheel_Leg_1B_L",
+--     Parent = transforms.Leg_1B_L_Location.Identifier,
+--     Renderable = {
+--         Type = "RenderableModel",
+--         Body = "MARS SCIENCE LABORATORY",
+--         Geometry = {
+--           Type = "MultiModelGeometry",
+--           GeometryFile = models .. "/MSL_WHEEL_LEG_1B_L.obj"
+--         },
+--         ColorTexture = textures .. "/tex_03.png",
+--         GUI = {
+--             Path = "/Solar System/Planets/Mars/Curiosity/Model"
+--         }
+--     }
+-- }
 
 local Wheel_Leg_1B_L_detail = {
     Identifier = "Wheel_Leg_1B_L_detail",
-    Parent = Wheel_Leg_1B_L.Identifier,
+    Parent = Wheel_Leg_1_L.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -885,15 +884,15 @@ local Wheel_B_L = {
 
 -- RIGHT SIDE -- 
 
-local Wheel_Leg_1A_R = {
-    Identifier = "Wheel_Leg_1A_R",
-    Parent = transforms.Leg_1A_R_Location.Identifier,
+local Wheel_Leg_1_R = {
+    Identifier = "Wheel_Leg_1_R",
+    Parent = transforms.Leg_1_R_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1A_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_1_R.obj"
         },
         ColorTexture = textures .. "/tex_03.png",
         GUI = {
@@ -904,7 +903,7 @@ local Wheel_Leg_1A_R = {
 
 local Wheel_Leg_1A_R_detail = {
     Identifier = "Wheel_Leg_1A_R_detail",
-    Parent = Wheel_Leg_1A_R.Identifier,
+    Parent = Wheel_Leg_1_R.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -919,26 +918,26 @@ local Wheel_Leg_1A_R_detail = {
     }
 }
 
-local Wheel_Leg_1B_R = {
-    Identifier = "Wheel_Leg_1B_R",
-    Parent = transforms.Leg_1B_R_Location.Identifier,
-    Renderable = {
-        Type = "RenderableModel",
-        Body = "MARS SCIENCE LABORATORY",
-        Geometry = {
-          Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_R.obj"
-        },
-        ColorTexture = textures .. "/tex_03.png",
-        GUI = {
-            Path = "/Solar System/Planets/Mars/Curiosity/Model"
-        }
-    }
-}
+--local Wheel_Leg_1B_R = {
+--    Identifier = "Wheel_Leg_1B_R",
+--    Parent = transforms.Leg_1B_R_Location.Identifier,
+--    Renderable = {
+--        Type = "RenderableModel",
+--        Body = "MARS SCIENCE LABORATORY",
+--        Geometry = {
+--          Type = "MultiModelGeometry",
+--          GeometryFile = models .. "/MSL_WHEEL_LEG_1B_R.obj"
+--        },
+--        ColorTexture = textures .. "/tex_03.png",
+--        GUI = {
+--            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+--        }
+--    }
+--}
 
 local Wheel_Leg_1B_R_detail = {
     Identifier = "Wheel_Leg_1B_R_detail",
-    Parent = Wheel_Leg_1B_R.Identifier,
+    Parent = Wheel_Leg_1_R.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -1139,9 +1138,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     --HeightMap,
 
     Wheel_Base,
-    Wheel_Leg_1A_L,
+    Wheel_Leg_1_L,
     Wheel_Leg_1A_L_detail,
-    Wheel_Leg_1B_L,
+    -- Wheel_Leg_1B_L,
     Wheel_Leg_1B_L_detail,
     Wheel_Leg_2_L,
     Wheel_Wrist_F_L,
@@ -1152,9 +1151,9 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Wheel_Wrist_hub_B_L,
     Wheel_B_L,
 
-    Wheel_Leg_1A_R,
+    Wheel_Leg_1_R,
     Wheel_Leg_1A_R_detail,
-    Wheel_Leg_1B_R,
+    -- Wheel_Leg_1B_R,
     Wheel_Leg_1B_R_detail,
     Wheel_Leg_2_R,
     Wheel_Wrist_F_R,

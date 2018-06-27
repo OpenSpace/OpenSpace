@@ -124,6 +124,7 @@ Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
 
 void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose)
 {
+    //_cameraPoseTimeline.addKeyframe(timestamp, pose);
     timeline().addKeyframe(timestamp, pose);
 }
 
