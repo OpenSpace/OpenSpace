@@ -273,7 +273,7 @@ handle_applications()
 ##########################################################################################
 option(OPENSPACE_WITH_ABUFFER_RENDERER "Compile ABuffer Renderer" OFF)
 if (OPENSPACE_WITH_ABUFFER_RENDERER)
-    target_compile_definitions(libOpneSpace PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
+    target_compile_definitions(libOpenSpace PUBLIC "OPENSPACE_WITH_ABUFFER_RENDERER")
 endif ()
 
 
