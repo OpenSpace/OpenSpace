@@ -28,15 +28,14 @@
 
 #include <openspace/scene/rotation.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+//#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
+//#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/timeline.h>
 
 #include <string>
 
 #include <openspace/network/parallelpeer.h>
-
 
 
 namespace openspace {
@@ -49,27 +48,25 @@ public:
     struct Node {
         std::string frameName;
         double frameTime;
-        double rotValue;    //radians 
+        double rotValue; //radians
+        int axis; 
     };
 
-
     RksmlRotation(const ghoul::Dictionary& dictionary);
-    Timeline<Node>& timeline();
-    void addKeyframe(double timestamp, RksmlRotation::Node data);
-
-	//glm::dmat3 matrix(const Time& time) const        
+    //Timeline<Node>& timeline();
+    //void addKeyframe(double timestamp, RksmlRotation::Node data);     
     
     glm::dmat3 matrix(const Time& time) const override;
     
-    void addTimelineObject(std::string s, Node n);
+private:
+    //void addTimelineObject(std::string s, Node n);
     void openFile();
     void parseFile(std::string path);
+    Timeline<RksmlRotation::Node>& getNode(std::string s);
 
-    //behover??
-    //const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
-
-private:
-
+    Timeline<Node> Object_Timeline;    //creates a Timeline object of the structure type Node 
+	//Not a good way
+	/*
     Timeline<Node> LF_DRIVE_Timeline;    //creates a Timeline object of the structure type Node 
     Timeline<Node> LF_STEER_Timeline;
     Timeline<Node> LM_DRIVE_Timeline;
@@ -88,33 +85,10 @@ private:
     Timeline<Node> QUAT_X_Timeline;
     Timeline<Node> QUAT_Y_Timeline;
     Timeline<Node> QUAT_Z_Timeline;
-
-
-    
-    Node *_LFdrive;    
-    Node *_LFsteer;
-    Node *_LMdrive;
-    Node *_LRdrive;
-    Node *_LRsteer;
-    Node *_RFdrive;
-    Node *_RFsteer;
-    Node *_RMdrive;
-    Node *_RRdrive;
-    Node *_RRsteer;
-    Node *_leftBogie;
-    Node *_leftDifferential;
-    Node *_rightBogie;
-    Node *_rightDifferential;
-
-
-    properties::StringProperty _frame;
-
+	*/
     properties::StringProperty _dataPath;
-
-
-    //properties::IntProperty    _rotationAxisCorrection;
-    //properties::FloatProperty  _rotationAngle;
-    //properties::BoolProperty   _rotationDir2;
+    properties::StringProperty _objectPart;
+    properties::IntProperty _rotationAxis;
 };
 
 } // namespace openspace
