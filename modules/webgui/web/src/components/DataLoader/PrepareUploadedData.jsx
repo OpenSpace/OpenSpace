@@ -10,7 +10,7 @@ import { removeLineBreakCharacters } from './utils/helpers';
 import styles from './PrepareUploadedData';
 import Window from '../common/Window/Window';
 import provideWindowWidth from './HOC/provideWindowSize';
-import Dimensions from './presentational/Dimensions';
+import OptionSelect from './presentational/OptionSelect';
 import Variables from './presentational/Variables';
 
 class PrepareUploadedData extends Component {
@@ -20,21 +20,24 @@ class PrepareUploadedData extends Component {
     this.state = {
       activated: false,
       dimensions: { x: 100, y: 100, z: 100 },
+      domainBounds: {upper: 10, lower: 10},
       variable: 'rho'
     };
 
     this.changeDimensions = this.changeDimensions.bind(this);
-    this.upload = this.upload.bind(this);
+    this.changeDomainBounds = this.changeDomainBounds.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
+    this.upload = this.upload.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { filePaths } = this.props;
-    const { dimensions } = this.state;
 
     if( filePaths !== prevProps.filePaths && filePaths !== undefined ) {
       this.setState({ activated: true });
     }
+    console.log('this.state:'); 
+    console.log(this.state);
   }
 
 
@@ -44,8 +47,20 @@ class PrepareUploadedData extends Component {
     let tempDim = this.state.dimensions;
     let key = currentTarget.attributes.label.nodeValue;
     tempDim[key] = Number(currentTarget.value);
-    
+
     this.setState({ dimensions: tempDim });
+  }
+
+  changeDomainBounds({ currentTarget }) {
+    let tempBound = this.state.domainBounds;
+    let key = currentTarget.attributes.label.nodeValue;
+    tempBound[key] = Number(currentTarget.value);
+
+    this.setState({ domainBounds: tempBound });
+  }
+
+  changeVariable(event) {
+    this.setState({ variable: event.value });
   }
 
   upload() {
@@ -68,7 +83,7 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height } = this.props;
-    const { dimensions, variable } = this.state;
+    const { dimensions, variable, domainBounds } = this.state;
     const size = {
       width: width / 2,
       height: height / 2
@@ -83,12 +98,17 @@ class PrepareUploadedData extends Component {
             position={{ x: 100, y: -100 }}
             closeCallback={() => this.setState({ activated: false })}
           >
-          <Dimensions 
-            dimensions={dimensions} 
+          <OptionSelect 
+            label={'Dimensions'}
+            options={dimensions} 
             onChange={this.changeDimensions}/>
           <Variables 
             variable={variable}
             onChange={this.changeVariable} />
+          <OptionSelect 
+            label={'Domain Bounds'}
+            options={domainBounds} 
+            onChange={this.changeDomainBounds}/>
           <button onClick={() => this.upload()}/>
           </Window>
         )}

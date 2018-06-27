@@ -5,23 +5,20 @@ import 'react-select/dist/react-select.css';
 import Input from '../../common/Input/Input/Input';
 import Label from '../../common/Label/Label';
 import Row from '../../common/Row/Row';
-import styles from './Dimensions.scss';
-import { excludeKeys } from '../../../utils/helpers';
+import styles from './OptionSelect.scss';
 
-const Dimensions = (props) => {
-
-  const { dimensions, onChange } = props;
-
+const OptionSelect = (props) => {
+  const { options, onChange, label } = props;
   return (
-    <Row className={styles.dimensions}>
-      <Label size={'medium'}>Dimensions: </Label>
+    <Row className={styles.optionSelect}>
+      <Label size={'medium'}>{label}:</Label>
         <Row>
-          { Object.keys(dimensions).map((key, index) => (
+          { Object.keys(options).map((key, index) => (
               <Input 
                 key={key}
                 label={key}
                 placeholder={key}
-                value={dimensions[key]}
+                value={options[key]}
                 onChange={onChange}
               />
           ))}
@@ -30,18 +27,16 @@ const Dimensions = (props) => {
   );
 };
 
-Dimensions.propTypes = {
-  dimensions: PropTypes.object,
+OptionSelect.propTypes = {
+  options: PropTypes.object.isRequired,
+  label: PropTypes.string,
   onChange: PropTypes.func,
 }
 
-Dimensions.defaultProps = {
-  dimensions: {
-    x: 100,
-    y: 100,
-    z: 100,
-  },
+OptionSelect.defaultProps = {
+  options: {},
+  label:'Loading',
   onChange: () => {},
 }
 
-export default Dimensions;
+export default OptionSelect;
