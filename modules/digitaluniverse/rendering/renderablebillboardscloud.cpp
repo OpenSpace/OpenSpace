@@ -528,6 +528,7 @@ RenderableBillboardsCloud::RenderableBillboardsCloud(const ghoul::Dictionary& di
     }
     else if (dictionary.hasKey(keyColor)) {
         _pointColor = dictionary.value<glm::vec3>(keyColor);
+        _pointColor.setViewOption(properties::Property::ViewOptions::Color);
         addProperty(_pointColor);
     }
 
@@ -708,8 +709,6 @@ void RenderableBillboardsCloud::initializeGL() {
     _uniformCache.fadeInValue = _program->uniformLocation("fadeInValue");
     _uniformCache.screenSize = _program->uniformLocation("screenSize");
     _uniformCache.spriteTexture = _program->uniformLocation("spriteTexture");
-    _uniformCache.polygonTexture = _program->uniformLocation("polygonTexture");
-    _uniformCache.hasPolygon = _program->uniformLocation("hasPolygon");
     _uniformCache.hasColormap = _program->uniformLocation("hasColorMap");
     _uniformCache.enabledRectSizeControl = _program->uniformLocation(
         "enabledRectSizeControl"
@@ -832,21 +831,14 @@ void RenderableBillboardsCloud::renderBillboards(const RenderData& data,
     glGetIntegerv(GL_VIEWPORT, viewport);
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
-    ghoul::opengl::TextureUnit spriteTextureUnit;
-    if (_hasSpriteTexture) {
-        spriteTextureUnit.activate();
-        _spriteTexture->bind();
-        _program->setUniform(_uniformCache.spriteTexture, spriteTextureUnit);
-    }
-
-    ghoul::opengl::TextureUnit polygonTextureUnit;
+    ghoul::opengl::TextureUnit textureUnit;
+    textureUnit.activate();
     if (_hasPolygon) {
-        polygonTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _pTexture);
-        _program->setUniform(_uniformCache.polygonTexture, polygonTextureUnit);
-        _program->setUniform(_uniformCache.hasPolygon, _hasPolygon);
+    } else {
+        _spriteTexture->bind();
     }
-
+    _program->setUniform(_uniformCache.spriteTexture, textureUnit);
     _program->setUniform(_uniformCache.hasColormap, _hasColorMapFile);
 
     glBindVertexArray(_vao);
