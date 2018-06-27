@@ -180,7 +180,7 @@ void GuiSpaceTimeComponent::render() {
     if (dateChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setTime(\"" + std::string(Buffer) + "\")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
 
@@ -212,7 +212,7 @@ void GuiSpaceTimeComponent::render() {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setTime(" + std::to_string(newTime) + ", " +
             std::to_string(duration) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     };
 
@@ -244,7 +244,7 @@ void GuiSpaceTimeComponent::render() {
 
         OsEng.scriptEngine().queueScript(
             "openspace.time.setTime(\"" + nowTime + "\")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
 
     }
@@ -323,7 +323,7 @@ void GuiSpaceTimeComponent::render() {
 
             OsEng.scriptEngine().queueScript(
                 "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::RemoteScripting::No
             );
         }
         if (unitChanged) {
@@ -356,7 +356,7 @@ void GuiSpaceTimeComponent::render() {
 
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ", 0)",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     else {
@@ -388,14 +388,14 @@ void GuiSpaceTimeComponent::render() {
 
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ", 0)",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
         if (_slidingDelta != 0.f) {
             OsEng.scriptEngine().queueScript(
                 "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ", 0)",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::RemoteScripting::No
             );
 
         }
@@ -410,7 +410,7 @@ void GuiSpaceTimeComponent::render() {
     if (pauseChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.togglePause()",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
 
@@ -418,7 +418,7 @@ void GuiSpaceTimeComponent::render() {
     if (minusDs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -427,7 +427,7 @@ void GuiSpaceTimeComponent::render() {
     if (minusHs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -436,7 +436,7 @@ void GuiSpaceTimeComponent::render() {
     if (minusMs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -445,7 +445,7 @@ void GuiSpaceTimeComponent::render() {
     if (minusSs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(-1) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -454,7 +454,7 @@ void GuiSpaceTimeComponent::render() {
     if (zero) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(0) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -464,7 +464,7 @@ void GuiSpaceTimeComponent::render() {
     if (plusSs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(1) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -473,7 +473,7 @@ void GuiSpaceTimeComponent::render() {
     if (plusMs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -482,7 +482,7 @@ void GuiSpaceTimeComponent::render() {
     if (plusHs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();
@@ -491,7 +491,7 @@ void GuiSpaceTimeComponent::render() {
     if (plusDs) {
         OsEng.scriptEngine().queueScript(
             "openspace.time.setDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::RemoteScripting::No
         );
     }
     ImGui::SameLine();

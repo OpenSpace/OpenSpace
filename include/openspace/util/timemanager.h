@@ -57,6 +57,8 @@ public:
     using TimeChangeCallback = std::function<void()>;
 
     Time& time();
+    const Timeline<TimeKeyframeData>& timeline();
+
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
 
@@ -89,11 +91,12 @@ public:
     CallbackHandle addTimeChangeCallback(TimeChangeCallback cb);
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
     CallbackHandle addTimeJumpCallback(TimeChangeCallback cb);
+    CallbackHandle addTimelineChangeCallback(TimeChangeCallback cb);
 
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
-
     void removeTimeJumpCallback(CallbackHandle handle);
+    void removeTimelineChangeCallback(CallbackHandle handle);
 private:
     void progressTime(double dt);
     void applyKeyframeData(const TimeKeyframeData& keyframe);
@@ -112,6 +115,7 @@ private:
 
     double _lastTime = 0;
     double _lastDeltaTime = 0;
+    bool _timelineChanged;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;
@@ -122,6 +126,7 @@ private:
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _deltaTimeChangeCallbacks;
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeJumpCallbacks;
+    std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timelineChangeCallbacks;
 };
 
 } // namespace openspace

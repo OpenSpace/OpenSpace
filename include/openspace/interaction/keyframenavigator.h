@@ -48,7 +48,7 @@ public:
     Timeline<CameraPose>& timeline();
 
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
+    void removeKeyframesAfter(double timestamp, bool inclusive = false);
     void clearKeyframes();
     size_t nKeyframes() const;
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;

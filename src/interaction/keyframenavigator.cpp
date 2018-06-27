@@ -132,8 +132,8 @@ void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraP
     timeline().addKeyframe(timestamp, std::move(pose));
 }
 
-void KeyframeNavigator::removeKeyframesAfter(double timestamp) {
-    timeline().removeKeyframesAfter(timestamp);
+void KeyframeNavigator::removeKeyframesAfter(double timestamp, bool inclusive) {
+    timeline().removeKeyframesAfter(timestamp, inclusive);
 }
 
 void KeyframeNavigator::clearKeyframes() {

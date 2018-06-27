@@ -89,8 +89,17 @@ void TimeManager::preSynchronization(double dt) {
             it.second();
         }
     }
+    if (_timelineChanged) {
+        using K = const CallbackHandle;
+        using V = TimeChangeCallback;
+        for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
+            it.second();
+        }
+    }
+
     _lastTime = newTime;
     _lastDeltaTime = newDeltaTime;
+    _timelineChanged = false;
 }
 
 TimeKeyframeData TimeManager::interpolate(double applicationTime) {
@@ -110,10 +119,10 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
         (firstFutureKeyframe - 1) :
         keyframes.end();
 
-
-    if (hasPastKeyframes && hasFutureKeyframes) {
+    if (hasPastKeyframes && hasFutureKeyframes && !firstFutureKeyframe->data.jump) {
         return interpolate(*lastPastKeyframe, *firstFutureKeyframe, applicationTime);
     } else if (hasPastKeyframes) {
+        // Extrapolate based on last past keyframe
         const double deltaApplicationTime = applicationTime - lastPastKeyframe->timestamp;
         Time predictedTime = {
             lastPastKeyframe->data.time.j2000Seconds() +
@@ -126,11 +135,9 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
             false,
             false
         };
-    } else if (hasFutureKeyframes) {
-        return TimeKeyframeData{ _currentTime, _targetDeltaTime, false, false };
     }
-
-    return TimeKeyframeData{ _currentTime, _targetDeltaTime, false, false };
+    // As the last option, fall back on the current time.
+    return TimeKeyframeData{ _currentTime, _targetDeltaTime, _timePaused, false };
 }
 
 void TimeManager::progressTime(double dt) {
@@ -149,6 +156,12 @@ void TimeManager::progressTime(double dt) {
         // will override any timeline operations.
         time().setTime(_timeNextFrame.j2000Seconds());
         _shouldSetTime = false;
+
+        using K = const CallbackHandle;
+        using V = TimeChangeCallback;
+        for (const std::pair<K, V>& it : _timeJumpCallbacks) {
+            it.second();
+        }
         return;
     }
 
@@ -162,17 +175,6 @@ void TimeManager::progressTime(double dt) {
         &compareKeyframeTimeWithTime
     );
 
-    // Check if there is a time jump between the latest consumed timestamp and 
-    // the first future keyframe (non-inclusive interval).
-    // I.e. are we consuming a time jump this frame?
-    const bool consumingTimeJump = std::find_if(
-        keyframes.begin(),
-        firstFutureKeyframe,
-        [this](const Keyframe<TimeKeyframeData>& f) {
-            return f.timestamp > _latestConsumedTimestamp && f.data.jump;
-        }
-    ) != firstFutureKeyframe;
-    
     const bool hasFutureKeyframes = firstFutureKeyframe != keyframes.end();
     const bool hasPastKeyframes = firstFutureKeyframe != keyframes.begin();
 
@@ -186,7 +188,7 @@ void TimeManager::progressTime(double dt) {
 
     if (hasFutureKeyframes && hasPastKeyframes && !firstFutureKeyframe->data.jump) {
         // If keyframes exist before and after this frame,
-        // and the next keyframe is not a time jump, interpolate between those.
+        // interpolate between those.
         TimeKeyframeData interpolated =
             interpolate(*lastPastKeyframe, *firstFutureKeyframe, now);
         time().setTime(interpolated.time.j2000Seconds());
@@ -277,24 +279,38 @@ TimeKeyframeData TimeManager::interpolate(
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData) {
     const Time& currentTime = keyframeData.time;
     time().setTime(currentTime.j2000Seconds());
+    _timePaused = keyframeData.pause;
     _targetDeltaTime = keyframeData.delta;
     _deltaTime = _targetDeltaTime;
 }
 
 void TimeManager::addKeyframe(double timestamp, TimeKeyframeData time) {
     _timeline.addKeyframe(timestamp, std::move(time));
+    _timelineChanged = true;
 }
 
 void TimeManager::removeKeyframesAfter(double timestamp, bool inclusive) {
+    size_t nKeyframes = _timeline.nKeyframes();
     _timeline.removeKeyframesAfter(timestamp, inclusive);
+    if (nKeyframes != _timeline.nKeyframes()) {
+        _timelineChanged = true;
+    }
 }
 
 void TimeManager::removeKeyframesBefore(double timestamp, bool inclusive) {
+    size_t nKeyframes = _timeline.nKeyframes();
     _timeline.removeKeyframesBefore(timestamp, inclusive);
+    if (nKeyframes != _timeline.nKeyframes()) {
+        _timelineChanged = true;
+    }
 }
 
 void TimeManager::clearKeyframes() {
+    size_t nKeyframes = _timeline.nKeyframes();
     _timeline.clearKeyframes();
+    if (nKeyframes != _timeline.nKeyframes()) {
+        _timelineChanged = true;
+    }
 }
 
 void TimeManager::setTimeNextFrame(Time t) {
@@ -309,6 +325,10 @@ size_t TimeManager::nKeyframes() const {
 
 Time& TimeManager::time() {
     return _currentTime;
+}
+
+const Timeline<TimeKeyframeData>& TimeManager::timeline() {
+    return _timeline;
 }
 
 std::vector<Syncable*> TimeManager::getSyncables() {
@@ -328,9 +348,16 @@ TimeManager::CallbackHandle TimeManager::addDeltaTimeChangeCallback(TimeChangeCa
     return handle;
 }
 
-TimeManager::CallbackHandle TimeManager::addTimeJumpCallback(TimeChangeCallback cb) {
+TimeManager::CallbackHandle TimeManager::addTimeJumpCallback(TimeChangeCallback cb)
+{
     CallbackHandle handle = _nextCallbackHandle++;
-    _timeJumpCallbacks.push_back({ handle, std::move(cb) });
+    _timeJumpCallbacks.emplace_back(handle, std::move(cb));
+    return handle;
+}
+
+TimeManager::CallbackHandle TimeManager::addTimelineChangeCallback(TimeChangeCallback cb) {
+    CallbackHandle handle = _nextCallbackHandle++;
+    _timelineChangeCallbacks.push_back({ handle, std::move(cb) });
     return handle;
 }
 
@@ -383,6 +410,23 @@ void TimeManager::removeTimeJumpCallback(CallbackHandle handle) {
     );
 
     _timeJumpCallbacks.erase(it);
+}
+
+void TimeManager::removeTimelineChangeCallback(CallbackHandle handle) {
+    auto it = std::find_if(
+        _timelineChangeCallbacks.begin(),
+        _timelineChangeCallbacks.end(),
+        [handle](const std::pair<CallbackHandle, std::function<void()>>& cb) {
+        return cb.first == handle;
+    }
+    );
+
+    ghoul_assert(
+        it != _timelineChangeCallbacks.end(),
+        "handle must be a valid callback handle"
+    );
+
+    _timelineChangeCallbacks.erase(it);
 }
 
 bool TimeManager::isPaused() const {
@@ -445,7 +489,9 @@ void TimeManager::setPause(bool pause, double interpolationDuration) {
     _timePaused = pause;
 
     clearKeyframes();
-    addKeyframe(now, currentKeyframe);
+    if (interpolationDuration > 0) {
+        addKeyframe(now, currentKeyframe);
+    }
     addKeyframe(now + interpolationDuration, futureKeyframe);
 }
 

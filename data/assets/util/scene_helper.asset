@@ -41,7 +41,7 @@ local setDeltaTimeKeys = function(t)
 
     result = {}
     for i, v in ipairs(t) do
-        openspace.bindKey(
+        openspace.bindKeyLocal(
             Keys[i],
             'openspace.time.setDeltaTime(' .. v .. ")",
             'Setting the simulation speed to ' .. v .. ' seconds per realtime second'

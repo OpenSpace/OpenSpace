@@ -89,17 +89,20 @@ private:
     void nConnectionsMessageReceived(const std::vector<char>& message);
 
     void sendCameraKeyframe();
-    void sendTimeKeyframe();
+    void sendTimeTimeline();
 
     void setStatus(ParallelConnection::Status status);
     void setHostName(const std::string& hostName);
     void setNConnections(size_t nConnections);
 
-    double calculateBufferedKeyframeTime(double originalTime);
+    double convertTimestamp(double originalTime);
+    void analyzeTimeDifference(double messageTimestamp);
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
-    // Change to properties::IntProperty ? ---abock
+
+    // While the port should in theory be an int,
+    // we use a StringProperty to avoid a slider in the GUI.
     properties::StringProperty _port;
     properties::StringProperty _address;
     properties::StringProperty _name;
@@ -123,6 +126,7 @@ private:
     std::mutex _receiveBufferMutex;
 
     std::atomic<bool> _timeJumped;
+    std::atomic<bool> _timeTimelineChanged;
     std::mutex _latencyMutex;
     std::deque<double> _latencyDiffs;
     double _initialTimeDiff;
@@ -133,6 +137,7 @@ private:
     ParallelConnection _connection;
 
     TimeManager::CallbackHandle _timeJumpCallback = -1;
+    TimeManager::CallbackHandle _timeTimelineChangeCallback = -1;
 };
 
 } // namespace openspace

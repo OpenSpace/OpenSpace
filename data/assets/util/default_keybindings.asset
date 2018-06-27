@@ -54,7 +54,7 @@ openspace.setPropertyValueSingle('Modules.ImGUI.Main.IsHidden', b);]],
         Key = "SPACE",
         Command = "openspace.time.togglePause()",
         Documentation = "Starts and stops the simulation time.",
-        Local = false
+        Local = true
     },
     {
         Key = "f",
