@@ -30,8 +30,8 @@ class PrepareUploadedData extends Component {
       .split(' ').map(v => ({ value: v, label: v }));
 
     this.changeDimensions = this.changeDimensions.bind(this);
-    // this.changeVariable = this.changeVariable.bind(this);
     this.upload = this.upload.bind(this);
+    this.changeVariable = this.changeVariable.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -54,10 +54,6 @@ class PrepareUploadedData extends Component {
     this.setState({ dimensions: tempDim });
   }
 
-  // changeVariable({ currentTarget }) {
-  //   this.setState({ variable:'' });
-  // }
-
   upload() {
     const { dimensions, variable } = this.state;
     let data = `\'
@@ -72,9 +68,13 @@ class PrepareUploadedData extends Component {
     DataManager.runScript(script);
   }
 
+  changeVariable(event) {
+    this.setState({ variable: event.value});
+  }
+
   render() {
     const { width, height } = this.props;
-    const { dimensions } = this.state;
+    const { dimensions, variable } = this.state;
     const size = {
       width: width / 2,
       height: height / 2
@@ -102,14 +102,15 @@ class PrepareUploadedData extends Component {
                   />
               ))}
             </Row>
-            {/* <Row>
-              <Select 
-                label="Variables"
-                id={'test'}   
-                options={this.options}
-                onChange={this.changeVariable}
-                />
-            </Row> */}
+          </Row>
+          <Row>
+          <Label size={'medium'}>Variable: </Label>
+            <Select 
+              label={variable === '' ? "Select Variable" : variable}
+              options={this.options}
+              onChange={this.changeVariable}
+              placeholder={''}
+            />
           </Row>
 
           <button onClick={() => this.upload()}/>
