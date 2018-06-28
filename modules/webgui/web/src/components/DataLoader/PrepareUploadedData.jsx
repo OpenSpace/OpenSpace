@@ -9,6 +9,7 @@ import { removeLineBreakCharacters } from './utils/helpers';
 
 import styles from './PrepareUploadedData';
 import Window from '../common/Window/Window';
+import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
 import OptionSelect from './presentational/OptionSelect';
 import Variables from './presentational/Variables';
@@ -21,12 +22,14 @@ class PrepareUploadedData extends Component {
       activated: false,
       dimensions: { x: 100, y: 100, z: 100 },
       domainBounds: {upper: 10, lower: 10},
-      variable: 'rho'
+      variable: 'rho',
+      rSquared: false,
     };
 
     this.changeDimensions = this.changeDimensions.bind(this);
     this.changeDomainBounds = this.changeDomainBounds.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
+    this.changeRSquared = this.changeRSquared.bind(this);
     this.upload = this.upload.bind(this);
   }
 
@@ -36,10 +39,7 @@ class PrepareUploadedData extends Component {
     if( filePaths !== prevProps.filePaths && filePaths !== undefined ) {
       this.setState({ activated: true });
     }
-    console.log('this.state:'); 
-    console.log(this.state);
   }
-
 
   // Gets the corresponding key of the last changed value in dimensions.
   // Assigns the changed value to the correct key of dimensions.
@@ -61,6 +61,10 @@ class PrepareUploadedData extends Component {
 
   changeVariable(event) {
     this.setState({ variable: event.value });
+  }
+
+  changeRSquared(checked) {
+    this.setState({ rSquared: checked });
   }
 
   upload() {
@@ -109,6 +113,9 @@ class PrepareUploadedData extends Component {
             label={'Domain Bounds'}
             options={domainBounds} 
             onChange={this.changeDomainBounds}/>
+          <Checkbox 
+            label={'Factor R-Squared?'}
+            onChange={this.changeRSquared}/>
           <button onClick={() => this.upload()}/>
           </Window>
         )}
