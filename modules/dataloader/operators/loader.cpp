@@ -342,7 +342,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
 // void Loader::createVolumeDataItem(std::string absPath) {}
 
-ghoul::Dictionary Loader::createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath) {
+// ghoul::Dictionary Loader::createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath) {
 
     // defaults
     // const int dimensions[3] = {100, 100, 128};
@@ -358,20 +358,20 @@ ghoul::Dictionary Loader::createTaskDictionaryForOneVolumeItem(std::string input
     // const std::string RawVolumeOutput = itemOutputFilePath + ".rawvolume";
     // const std::string DictionaryOutput = itemOutputFilePath + ".dictionary";
 
-    std::initializer_list<std::pair<std::string, ghoul::any>> list = {
-        std::make_pair( "Type", "KameleonVolumeToRawTask" ),
-        std::make_pair( "Input", inputPath ),
-        std::make_pair( "Dimensions", _uploadedDataDimensions ),
-        std::make_pair( "Variable", _uploadedDataVariable),
-        std::make_pair( "FactorRSquared", _uploadedDataFactorRSquared ),
-        std::make_pair( "LowerDomainBound", _uploadedDataLowerDomainBounds ),
-        std::make_pair( "UpperDomainBound", _uploadedDataHigherDomainBounds ),
-        std::make_pair( "RawVolumeOutput", RawVolumeOutput ),
-        std::make_pair( "DictionaryOutput", DictionaryOutput)
-    };
+//     std::initializer_list<std::pair<std::string, ghoul::any>> list = {
+//         std::make_pair( "Type", "KameleonVolumeToRawTask" ),
+//         std::make_pair( "Input", inputPath ),
+//         std::make_pair( "Dimensions", _uploadedDataDimensions ),
+//         std::make_pair( "Variable", _uploadedDataVariable),
+//         std::make_pair( "FactorRSquared", _uploadedDataFactorRSquared ),
+//         std::make_pair( "LowerDomainBound", _uploadedDataLowerDomainBounds ),
+//         std::make_pair( "UpperDomainBound", _uploadedDataHigherDomainBounds ),
+//         std::make_pair( "RawVolumeOutput", RawVolumeOutput ),
+//         std::make_pair( "DictionaryOutput", DictionaryOutput)
+//     };
 
-    return ghoul::Dictionary(list);
-}
+//     return ghoul::Dictionary(list);
+// }
 
 // ghoul::Dictionary Loader::createVolumeItemDictionary(std::string dataDictionaryPath, std::string dataStatePath) {
 

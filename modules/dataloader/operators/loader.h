@@ -68,7 +68,7 @@ class Loader : public PropertyOwner, public Operator {
 
     void processCurrentlySelectedUploadData(const std::string& dictionaryString);
 
-    ghoul::Dictionary createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath);
+    // ghoul::Dictionary createTaskDictionaryForOneVolumeItem(std::string inputPath, std::string outputBasePath);
 
     // Perfom tasks that create dictionaries and converts
     // .CDF formatted volume files into .rawvolume
