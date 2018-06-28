@@ -26,17 +26,52 @@
 #define __OPENSPACE_MODULE_MARSROVER___WHEEL_DATA_PROVIDER___H__
 
 #include <modules/marsrover/surfaceprojection/projectionprovider.h>
-
+#include <openspace/util/timeline.h>
+#include <string>
 
 namespace openspace {
 class WheelDataProvider : public ProjectionProvider {
 public:
- WheelDataProvider(const ghoul::Dictionary& dictionary);
 
- //virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
- // const RenderData& data, const SceneGraphNode* parent);
- static void openFile();
- virtual void initialize();
+	struct Node {
+        std::string frameName;
+        double frameTime;
+        double rotValue; //radians
+        int axis; 
+    };
+
+
+	WheelDataProvider(const ghoul::Dictionary& dictionary);
+
+	//virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+	// const RenderData& data, const SceneGraphNode* parent);
+	static void loadData(std::string path);
+	static void parseFile(std::string path); 
+	Timeline<WheelDataProvider::Node>& getNode(std::string s);
+	virtual void initialize();
+
+private:
+	Timeline<WheelDataProvider::Node> Object_Timeline;
+
+	Timeline<WheelDataProvider::Node> LF_DRIVE_Timeline;    
+    Timeline<WheelDataProvider::Node> LF_STEER_Timeline;
+    Timeline<WheelDataProvider::Node> LM_DRIVE_Timeline;
+    Timeline<WheelDataProvider::Node> LR_DRIVE_Timeline;
+    Timeline<WheelDataProvider::Node> LR_STEER_Timeline;
+    Timeline<WheelDataProvider::Node> RF_DRIVE_Timeline;
+    Timeline<WheelDataProvider::Node> RF_STEER_Timeline;
+    Timeline<WheelDataProvider::Node> RM_DRIVE_Timeline;
+    Timeline<WheelDataProvider::Node> RR_DRIVE_Timeline;
+    Timeline<WheelDataProvider::Node> RR_STEER_Timeline;
+    Timeline<WheelDataProvider::Node> LEFT_BOGIE_Timeline;
+    Timeline<WheelDataProvider::Node> LEFT_DIFFERENTIAL_Timeline;
+    Timeline<WheelDataProvider::Node> RIGHT_BOGIE_Timeline;
+    Timeline<WheelDataProvider::Node> RIGHT_DIFFERENTIAL_Timeline;
+    Timeline<WheelDataProvider::Node> QUAT_C_Timeline;
+    Timeline<WheelDataProvider::Node> QUAT_X_Timeline;
+    Timeline<WheelDataProvider::Node> QUAT_Y_Timeline;
+    Timeline<WheelDataProvider::Node> QUAT_Z_Timeline;
+
 };
 } // namespace openspace
 

@@ -30,7 +30,7 @@ asset.onInitialize(function ()
     --moving
     --openspace.time.setTime("2012-08-28T18:20:09")
     --moving longer forward in time
-    openspace.time.setTime("2014-08-29T06:56:39")
+    openspace.time.setTime("2013-08-22T05:44:00")
 
     openspace.setDefaultGuiSorting()
 
