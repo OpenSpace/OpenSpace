@@ -59,7 +59,7 @@ class PrepareUploadedData extends Component {
     let key = currentTarget.attributes.label.nodeValue;
     tempBound[key] = Number(currentTarget.value);
 
-    this.setState({ domainBounds: tempBound });
+    this.setState({ lowerDomainBounds: tempBound });
   }
   
   changeUpperDomainBounds({ currentTarget }) {
@@ -67,7 +67,7 @@ class PrepareUploadedData extends Component {
     let key = currentTarget.attributes.label.nodeValue;
     tempBound[key] = Number(currentTarget.value);
 
-    this.setState({ domainBounds: tempBound });
+    this.setState({ upperDomainBounds: tempBound });
   }
 
   changeVariable(event) {
@@ -79,11 +79,14 @@ class PrepareUploadedData extends Component {
   }
 
   upload() {
-    const { dimensions, variable, domainBounds, rSquared } = this.state;
+    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state;
     let data = `\'
       return { 
         Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
-        Variable="${variable.toLowerCase()}" 
+        Variable="${variable.toLowerCase()}",
+        LowerDomainBound={${lowerDomainBounds.x}, ${lowerDomainBounds.y}, ${lowerDomainBounds.z}}, 
+        UpperDomainBound={${upperDomainBounds.x}, ${upperDomainBounds.y}, ${upperDomainBounds.z}}, 
+        FactorRSquared="${rSquared}"
       }
     \'`
     data = removeLineBreakCharacters(data);
@@ -131,7 +134,7 @@ class PrepareUploadedData extends Component {
           <Checkbox 
             label={'Factor R-Squared?'}
             onChange={this.changeRSquared}/>
-          <button onClick={() => this.upload()}/>
+          <button onClick={() => this.upload()}>Convert</button>
           </Window>
         )}
       </div>
