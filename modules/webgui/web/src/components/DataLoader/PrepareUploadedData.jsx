@@ -5,10 +5,14 @@ import PropTypes from 'prop-types';
 
 import DataManager from '../../api/DataManager';
 import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
-import { removeLineBreakCharacters } from './utils/helpers';
+import { removeLineBreakCharacters, getDirectoryLeaf } from './utils/helpers';
 
-import styles from './PrepareUploadedData';
+import Row from '../common/Row/Row';
+import styles from './PrepareUploadedData.scss';
+import CenteredLabel from '../common/CenteredLabel/CenteredLabel';
+import Button from '../common/Input/Button/Button';
 import Window from '../common/Window/Window';
+import ProgressBar from '../common/ProgressBar/ProgressBar';
 import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
 import OptionSelect from './presentational/OptionSelect';
@@ -99,9 +103,9 @@ class PrepareUploadedData extends Component {
         Input="/home/jgrangien/Data/mas_merged_step_276.cdf",
         Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
         Variable="${variable.toLowerCase()}",
-        LowerDomainBound={${lowerDomainBounds.x}, ${lowerDomainBounds.y}, ${lowerDomainBounds.z}}, 
-        UpperDomainBound={${upperDomainBounds.x}, ${upperDomainBounds.y}, ${upperDomainBounds.z}}, 
-        FactorRSquared="${rSquared}"
+        LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
+        UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
+        FactorRSquared="${rSquared.toString()}",
         RawVolumeOutput="/home/jgrangien/Data/test/mas.rawvolume",
         DictionaryOutput="/home/jgrangien/Data/test/mas.dictionary" 
       }
@@ -120,49 +124,52 @@ class PrepareUploadedData extends Component {
     const { width, height } = this.props;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, volumeProgress } = this.state;
 
-    const size = {
-      width: width / 2,
-      height: height / 2
+    const WINDOW_MAX_WIDTH = 400;
+    const w = width / 2;
+    const h = height / 2;
+    const windowSize = {
+      width: w > WINDOW_MAX_WIDTH ? WINDOW_MAX_WIDTH : w,
+      height: h
     }
-    const progressPercent = Math.floor(volumeProgress * 100);
+
+    const volumeProgressPercent = Math.floor(volumeProgress * 100);
+
+    if (!this.state.activated) {
+      return null;
+    }
 
     return(
-      <div className="page-content-wrapper">
-        { this.state.activated && (
-          <Window
-            type="small"
-            title="Prepare Data"
-            size={size}
-            position={{ x: 100, y: -100 }}
-            closeCallback={() => this.setState({ activated: false })}
-          >
-          <OptionSelect 
-            label={'Dimensions'}
-            options={dimensions} 
-            onChange={this.changeDimensions}/>
-          <Variables 
-            variable={variable}
-            onChange={this.changeVariable} />
-          <OptionSelect 
-            label={'Lower Domain Bounds'}
-            options={lowerDomainBounds} 
-            onChange={this.changeLowerDomainBounds}/>
-          <OptionSelect 
-            label={'Upper Domain Bounds'}
-            options={upperDomainBounds} 
-            onChange={this.changeUpperDomainBounds}/>
-          <Checkbox 
-            label={'Factor R-Squared?'}
-            onChange={this.changeRSquared}/>
-          <button onClick={() => this.upload()}>Convert</button>
-          <Row>
-            <div style={{width: '100%', height: '50px', border: '1px solid black'}}>
-              <div style={{width:`${progressPercent}%`, backgroundColor: 'green', height: '45px'}}/>
-            </div>
-          </Row>
-          </Window>
-        )}
-      </div>
+      <Window type="small"
+              title="Prepare Data"
+              size={windowSize}
+              position={{ x: 100, y: -100 }}
+              closeCallback={() => this.setState({ activated: false })}>
+        <div className={styles.content}>
+          <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>
+          <OptionSelect label='Dimensions'
+                        options={dimensions} 
+                        onChange={this.changeDimensions}/>
+          <Variables variable={variable}
+                      onChange={this.changeVariable} />
+          <OptionSelect label='Lower Domain Bounds'
+                        options={lowerDomainBounds} 
+                        onChange={this.changeLowerDomainBounds}/>
+          <OptionSelect label='Upper Domain Bounds'
+                        options={upperDomainBounds} 
+                        onChange={this.changeUpperDomainBounds}/>
+          <Checkbox label='Factor r^2?'
+                    onChange={this.changeRSquared}/>
+          <Button onClick={() => this.upload()}>
+            Convert
+          </Button>
+          { volumeProgressPercent >= 0.01 && (
+            <Row>
+              <ProgressBar label='Volume conversion progress'
+                          progressPercent={volumeProgressPercent} />
+            </Row>
+          )}
+        </div>
+      </Window>
     );
   }
 }

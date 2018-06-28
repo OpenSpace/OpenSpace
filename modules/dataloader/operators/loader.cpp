@@ -24,7 +24,6 @@
 
 #include <iostream>
 #include <thread>
-#include <chrono>
 #include <string>
 #include <ghoul/lua/lua_helper.h>
 #include <modules/dataloader/operators/loader.h>
@@ -350,14 +349,14 @@ ghoul::Dictionary Loader::createTaskDictionaryForOneVolumeItem(std::string input
     // const int lowerDomainBound[3] = {1, -90, 0};
     // const int upperDomainBound[3] = {15, 90, 360};
 
-    Set item dirLeaf as name
-    const std::string itemName = openspace::dataloader::helpers::getDirLeaf(inputPath);
-    const std::string itemOutputFilePath = outputBasePath + 
-        ghoul::filesystem::FileSystem::PathSeparator +
-        itemName;
+    // Set item dirLeaf as name
+    // const std::string itemName = openspace::dataloader::helpers::getDirLeaf(inputPath);
+    // const std::string itemOutputFilePath = outputBasePath + 
+    //     ghoul::filesystem::FileSystem::PathSeparator +
+    //     itemName;
 
-    const std::string RawVolumeOutput = itemOutputFilePath + ".rawvolume";
-    const std::string DictionaryOutput = itemOutputFilePath + ".dictionary";
+    // const std::string RawVolumeOutput = itemOutputFilePath + ".rawvolume";
+    // const std::string DictionaryOutput = itemOutputFilePath + ".dictionary";
 
     std::initializer_list<std::pair<std::string, ghoul::any>> list = {
         std::make_pair( "Type", "KameleonVolumeToRawTask" ),

@@ -8,11 +8,11 @@ import Row from '../../common/Row/Row';
 import styles from './OptionSelect.scss';
 
 const OptionSelect = (props) => {
-  const { options, onChange, label } = props;
+  const { options, onChange, label, subLabel } = props;
   return (
-    <Row className={styles.optionSelect}>
-      <Label size={'medium'}>{label}:</Label>
-        <Row>
+    <div className={styles.optionSelect}>
+      <Label size='medium'>{label}:</Label>
+        <Row className="hej">
           { Object.keys(options).map((key, index) => (
               <Input 
                 key={key}
@@ -23,7 +23,7 @@ const OptionSelect = (props) => {
               />
           ))}
         </Row>
-    </Row>
+    </div>
   );
 };
 

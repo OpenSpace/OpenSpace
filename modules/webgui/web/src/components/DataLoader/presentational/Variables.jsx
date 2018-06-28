@@ -9,11 +9,11 @@ import styles from './Variables.scss';
 
 const Variables = (props) => {
   const{ variable, onChange } = props;
-  const options = 'R T P RHO UR UT UP BR BT BP JR JT JP'
-  .split(' ').map(v => ({ value: v, label: v }));
+  const options = 'r theta phi rho T P ur utheta uphi br btheta bphi jr jtheta jphi'
+    .split(' ').map(v => ({ value: v, label: v }));
 
   return(
-    <Row className={styles.variables}>
+    <div className={styles.variables}>
       <Label size={'medium'}>Variable: </Label>
       <Select 
         label={variable === '' ? "Select..." : variable}
@@ -21,7 +21,7 @@ const Variables = (props) => {
         onChange={onChange}
         placeholder={''}
       />
-    </Row>
+    </div>
   );
 }
 
