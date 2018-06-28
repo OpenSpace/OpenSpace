@@ -530,8 +530,8 @@ void OpenSpaceEngine::initialize() {
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
-            "An invluded module required a higher OpenGL version than is supported on "
-            "this syystem",
+            "An included module required a higher OpenGL version than is supported on "
+            "this system",
             "OpenSpaceEngine"
         );
     }
@@ -539,14 +539,6 @@ void OpenSpaceEngine::initialize() {
     {
         // Check the available OpenGL extensions against the required extensions
         using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
-        OCC& c = SysCap.component<OCC>();
-        bool hasDepthBuffer = c.isExtensionSupported("GL_NV_depth_buffer_float") ||
-            c.isExtensionSupported("GL_ARB_depth_buffer_float");
-        if (!hasDepthBuffer) {
-            LFATAL("OpenSpace requires support of either the 'GL_NV_depth_buffer_float' "
-                "or 'GL_ARB_depth_buffer_float' OpenGL extensions, which are not "
-                "available on this system. There is likely to be a crash incoming");
-        }
         for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
             for (const std::string& ext : m->requiredOpenGLExtensions()) {
                 if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
