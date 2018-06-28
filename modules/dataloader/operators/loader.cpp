@@ -23,11 +23,14 @@
  ****************************************************************************************/
 
 #include <iostream>
-#include <ghoul/lua/lua_helper.h>
+#include <thread>
+#include <chrono>
 #include <string>
+#include <ghoul/lua/lua_helper.h>
 #include <modules/dataloader/operators/loader.h>
 #include <modules/dataloader/dataloadermodule.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/task.h>
 #include <ghoul/logging/logmanager.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -48,8 +51,15 @@ const std::string KeyRenderableType = "RenderableTimeVaryingVolume";
 const std::string scaleTypeKey = "StaticScale";
 const std::string translationTypeKey = "SpiceTranslation";
 const std::string volumesGuiPathKey = "/Solar System/Volumes";
+const std::string KeyVolumeToRawTask = "KameleonVolumeToRawTask";
 
 const bool guiHidden = false;
+
+const std::string testInput = "/home/jgrangien/Data/mas_merged_step_276.cdf";
+const std::string testVariable = "rho";
+const std::string testFactor = "true";
+const std::string testRawOutput = "/home/jgrangien/Data/test/mas.rawvolume";
+const std::string testDictOutput = "/home/jgrangien/Data/test/mas.dictionary";
 } 
 
 namespace {
@@ -63,6 +73,12 @@ namespace {
       "UploadDataTrigger",
       "Trigger load data files",
       "If this property is triggered it will call the function to load data"
+  };
+
+  static const openspace::properties::Property::PropertyInfo VolumeConversionProgressInfo = {
+      "VolumeConversionProgress",
+      "Progress value for volume conversion",
+      "This float value between 0 and 1 corresponds to the progress of volume conversion"
   };
 
   static const openspace::properties::Property::PropertyInfo UploadedDataDimensionsInfo = {
@@ -107,6 +123,7 @@ Loader::Loader()
     : PropertyOwner({ "Loader" })
     , _filePaths(SelectedFilesInfo)
     , _uploadDataTrigger(UploadDataTriggerInfo)
+    , _volumeConversionProgress(VolumeConversionProgressInfo)
     , _uploadedDataDimensions(UploadedDataDimensionsInfo)
     , _uploadedDataVariable(UploadedDataVariableInfo)
     , _uploadedDataFactorRSquared(UploadedDataFactorRSquaredInfo)
@@ -119,6 +136,7 @@ Loader::Loader()
 
     addProperty(_filePaths);
     addProperty(_uploadDataTrigger);
+    addProperty(_volumeConversionProgress);
 
     addProperty(_uploadedDataDimensions);
     addProperty(_uploadedDataVariable);
@@ -297,14 +315,28 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
     // Determine path to new volume item
     std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/";
 
-    // Create dictionary with properties as values
-    // ghoul::Dictionary conversionDictionary = createTaskDictionaryForOneVolumeItem(_filePaths, itemPathBase);
-    ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
+    _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
     // Schedule tasks? How to loop through several CDF timesteps and run VolumeToRaw for each
     // Create instance of KameleonVolumeToRaw and run
-    // KameleonVolumeToRawTask kameleonVolumeToRawTask(conversionDictionary);
-    // kameleonVolumeToRawTask.perform();
+
+    {
+    std::thread t([&](){
+        auto volumeToRawTask = Task::createFromDictionary(_currentVolumeConversionDictionary);
+
+        std::mutex m;
+        const float e = 0.0003f;
+        std::function<void(float)> cb = [&](float progress) {
+            std::lock_guard g(m);
+            _volumeConversionProgress = progress;
+        };
+
+        volumeToRawTask->perform(cb);
+        LINFO("Conversion complete");
+    });
+
+    t.detach();
+    }
 
     // Create state file, transferfunction file in volume item directory
 }
@@ -318,7 +350,7 @@ ghoul::Dictionary Loader::createTaskDictionaryForOneVolumeItem(std::string input
     // const int lowerDomainBound[3] = {1, -90, 0};
     // const int upperDomainBound[3] = {15, 90, 360};
 
-    // Set item dirLeaf as name
+    Set item dirLeaf as name
     const std::string itemName = openspace::dataloader::helpers::getDirLeaf(inputPath);
     const std::string itemOutputFilePath = outputBasePath + 
         ghoul::filesystem::FileSystem::PathSeparator +
@@ -347,3 +379,4 @@ ghoul::Dictionary Loader::createTaskDictionaryForOneVolumeItem(std::string input
 // }
 
 }
+

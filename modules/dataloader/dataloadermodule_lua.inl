@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <iostream>
+
 namespace openspace::luascriptfunctions {
 
 /**
@@ -34,7 +36,7 @@ int loadItem(lua_State* L) {
 
     using ghoul::lua::errorLocation;
 
-    const std::string path = ghoul::lua::checkStringAndPop(L);
+    const char* path = ghoul::lua::checkStringAndPop(L);
 
     /** handle path to check item type or handle it in different function **/
 
@@ -54,7 +56,7 @@ int uploadItem(lua_State* L) {
 
     using ghoul::lua::errorLocation;
 
-    const std::string dictionaryString = ghoul::lua::checkStringAndPop(L);
+    const char* dictionaryString = ghoul::lua::checkStringAndPop(L);
     OsEng.moduleEngine().module<DataLoaderModule>()->uploadDataItem(dictionaryString);
 
     ghoul_assert(lua_gettop(L) == 0, "Incorrect number of items left on stack");

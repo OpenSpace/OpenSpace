@@ -148,16 +148,13 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     };
 
     float* data = volume->data();
+
+    size_t progressUpdateStep = volume->nCells() / 20;
+
     for (size_t index = 0; index < volume->nCells(); ++index) {
         const glm::vec3 coords = volume->indexToCoords(index);
         const glm::vec3 coordsZeroToOne = coords / dims;
         const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
-
-        // Radius is within custom limit of exclusion, skip value
-        if (volumeCoords.x < innerRadialLimit) {
-            // std::cout << "Skipping radius " << volumeCoords.x << std::endl;
-            continue;
-        }
 
         // Radius is within custom limit of exclusion, skip value
         if (volumeCoords.x < innerRadialLimit) {
@@ -182,7 +179,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
         data[index] = value;
 
-        if (_readerCallback != nullptr) {
+        if (_readerCallback != nullptr && index % progressUpdateStep == 0) {
             (*_readerCallback)((float) index / volume->nCells());
         }
     }

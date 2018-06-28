@@ -19,8 +19,9 @@ class PrepareUploadedData extends Component {
     super(props);
     
     this.state = {
+      volumeProgress: 0,
       activated: false,
-      dimensions: { x: 100, y: 100, z: 100 },
+      dimensions: { x: 100, y: 100, z: 128 },
       lowerDomainBounds: { r: 1, theta: -90, phi: 0 },
       upperDomainBounds: { r: 15, theta: 90, phi: 360 },
       variable: 'rho',
@@ -33,6 +34,8 @@ class PrepareUploadedData extends Component {
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
     this.upload = this.upload.bind(this);
+    this.handleProgressValue = this.handleProgressValue.bind(this);
+    this.subscribeToVolumeConversionProgress = this.subscribeToVolumeConversionProgress.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -41,6 +44,16 @@ class PrepareUploadedData extends Component {
     if( filePaths !== prevProps.filePaths && filePaths !== undefined ) {
       this.setState({ activated: true });
     }
+
+    this.subscribeToVolumeConversionProgress();
+  }
+
+  handleProgressValue(data) {
+    this.setState({volumeProgress: data.Value});
+  }
+
+  subscribeToVolumeConversionProgress() {
+    DataManager.subscribe('Modules.DataLoader.Loader.VolumeConversionProgress', this.handleProgressValue);
   }
 
   // TODO: Generalize the onChange function of OptionSelect!
@@ -82,16 +95,20 @@ class PrepareUploadedData extends Component {
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state;
     let data = `\'
       return { 
+        Type="KameleonVolumeToRawTask",
+        Input="/home/jgrangien/Data/mas_merged_step_276.cdf",
         Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
         Variable="${variable.toLowerCase()}",
         LowerDomainBound={${lowerDomainBounds.x}, ${lowerDomainBounds.y}, ${lowerDomainBounds.z}}, 
         UpperDomainBound={${upperDomainBounds.x}, ${upperDomainBounds.y}, ${upperDomainBounds.z}}, 
         FactorRSquared="${rSquared}"
+        RawVolumeOutput="/home/jgrangien/Data/test/mas.rawvolume",
+        DictionaryOutput="/home/jgrangien/Data/test/mas.dictionary" 
       }
     \'`
     data = removeLineBreakCharacters(data);
-
     const script = UploadDataItemScript.replace(ValuePlaceholder, data);
+
     DataManager.runScript(script);
   }
 
@@ -101,11 +118,14 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height } = this.props;
-    const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state;
+    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, volumeProgress } = this.state;
+
     const size = {
       width: width / 2,
       height: height / 2
     }
+    const progressPercent = Math.floor(volumeProgress * 100);
+
     return(
       <div className="page-content-wrapper">
         { this.state.activated && (
@@ -135,6 +155,11 @@ class PrepareUploadedData extends Component {
             label={'Factor R-Squared?'}
             onChange={this.changeRSquared}/>
           <button onClick={() => this.upload()}>Convert</button>
+          <Row>
+            <div style={{width: '100%', height: '50px', border: '1px solid black'}}>
+              <div style={{width:`${progressPercent}%`, backgroundColor: 'green', height: '45px'}}/>
+            </div>
+          </Row>
           </Window>
         )}
       </div>

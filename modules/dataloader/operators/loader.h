@@ -31,6 +31,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 #include <openspace/util/taskloader.h>
 
@@ -76,6 +77,9 @@ class Loader : public PropertyOwner, public Operator {
   private:
     properties::StringProperty _filePaths;
     properties::TriggerProperty _uploadDataTrigger;
+    properties::FloatProperty _volumeConversionProgress;
+
+    ghoul::Dictionary _currentVolumeConversionDictionary;
   
     // Volume specific. 
     // Put in structs for different data types? Different file?
