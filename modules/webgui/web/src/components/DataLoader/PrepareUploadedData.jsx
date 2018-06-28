@@ -21,8 +21,8 @@ class PrepareUploadedData extends Component {
     this.state = {
       activated: false,
       dimensions: { x: 100, y: 100, z: 100 },
-      lowerDomainBounds: { r: 1, phi: -90, theta: 0 },
-      upperDomainBounds: { r: 15, phi: 90, theta: 360 },
+      lowerDomainBounds: { r: 1, theta: -90, phi: 0 },
+      upperDomainBounds: { r: 15, theta: 90, phi: 360 },
       variable: 'rho',
       rSquared: false,
     };
