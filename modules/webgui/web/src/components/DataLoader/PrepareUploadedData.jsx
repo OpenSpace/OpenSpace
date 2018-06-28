@@ -21,13 +21,15 @@ class PrepareUploadedData extends Component {
     this.state = {
       activated: false,
       dimensions: { x: 100, y: 100, z: 100 },
-      domainBounds: {upper: 10, lower: 10},
+      lowerDomainBounds: { r: 1, phi: -90, theta: 0 },
+      upperDomainBounds: { r: 15, phi: 90, theta: 360 },
       variable: 'rho',
       rSquared: false,
     };
 
     this.changeDimensions = this.changeDimensions.bind(this);
-    this.changeDomainBounds = this.changeDomainBounds.bind(this);
+    this.changeLowerDomainBounds = this.changeLowerDomainBounds.bind(this);
+    this.changeUpperDomainBounds = this.changeUpperDomainBounds.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
     this.upload = this.upload.bind(this);
@@ -41,6 +43,7 @@ class PrepareUploadedData extends Component {
     }
   }
 
+  // TODO: Generalize the onChange function of OptionSelect!
   // Gets the corresponding key of the last changed value in dimensions.
   // Assigns the changed value to the correct key of dimensions.
   changeDimensions({ currentTarget }) {
@@ -51,8 +54,16 @@ class PrepareUploadedData extends Component {
     this.setState({ dimensions: tempDim });
   }
 
-  changeDomainBounds({ currentTarget }) {
-    let tempBound = this.state.domainBounds;
+  changeLowerDomainBounds({ currentTarget }) {
+    let tempBound = this.state.lowerDomainBounds;
+    let key = currentTarget.attributes.label.nodeValue;
+    tempBound[key] = Number(currentTarget.value);
+
+    this.setState({ domainBounds: tempBound });
+  }
+  
+  changeUpperDomainBounds({ currentTarget }) {
+    let tempBound = this.state.upperDomainBounds;
     let key = currentTarget.attributes.label.nodeValue;
     tempBound[key] = Number(currentTarget.value);
 
@@ -68,7 +79,7 @@ class PrepareUploadedData extends Component {
   }
 
   upload() {
-    const { dimensions, variable } = this.state;
+    const { dimensions, variable, domainBounds, rSquared } = this.state;
     let data = `\'
       return { 
         Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
@@ -87,7 +98,7 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height } = this.props;
-    const { dimensions, variable, domainBounds } = this.state;
+    const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state;
     const size = {
       width: width / 2,
       height: height / 2
@@ -110,9 +121,13 @@ class PrepareUploadedData extends Component {
             variable={variable}
             onChange={this.changeVariable} />
           <OptionSelect 
-            label={'Domain Bounds'}
-            options={domainBounds} 
-            onChange={this.changeDomainBounds}/>
+            label={'Lower Domain Bounds'}
+            options={lowerDomainBounds} 
+            onChange={this.changeLowerDomainBounds}/>
+          <OptionSelect 
+            label={'Upper Domain Bounds'}
+            options={upperDomainBounds} 
+            onChange={this.changeUpperDomainBounds}/>
           <Checkbox 
             label={'Factor R-Squared?'}
             onChange={this.changeRSquared}/>
