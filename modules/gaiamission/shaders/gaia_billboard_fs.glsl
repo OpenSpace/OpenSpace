@@ -93,7 +93,6 @@ void main() {
     // Luminosity decrease by {squared} distance [measured in Pc].
     float observedDistance = ge_observedDist / ONE_PARSEC;
     luminosity /= pow(observedDistance, 2.0);
-    //luminosity /= observedDistance;
 
     // Multiply our color with the luminosity as well as a user-controlled property.
     color *= luminosity * pow(luminosityMultiplier, 3.0);

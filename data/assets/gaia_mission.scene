@@ -10,38 +10,38 @@ local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 asset.require('scene/solarsystem/planets/earth/moon/moon')
 
 -- Add everything from DU except the old stars
---asset.request('scene/digitaluniverse/2dF')
---asset.request('scene/digitaluniverse/2mass')
---asset.request('scene/digitaluniverse/6dF')
---asset.request('scene/digitaluniverse/abell')
---asset.request('scene/digitaluniverse/alternatestarlabels')
---asset.request('scene/digitaluniverse/backgroundradiation')
---asset.request('scene/digitaluniverse/clusters')
---asset.request('scene/digitaluniverse/constellationbounds')
---asset.request('scene/digitaluniverse/constellations')
---asset.request('scene/digitaluniverse/dwarfs')
---asset.request('scene/digitaluniverse/exoplanets')
---asset.request('scene/digitaluniverse/globularclusters')
---asset.request('scene/digitaluniverse/grids')
---asset.request('scene/digitaluniverse/groups')
---asset.request('scene/digitaluniverse/h2regions')
---asset.request('scene/digitaluniverse/kepler')
---asset.request('scene/digitaluniverse/localdwarfs')
+asset.request('scene/digitaluniverse/2dF')
+asset.request('scene/digitaluniverse/2mass')
+asset.request('scene/digitaluniverse/6dF')
+asset.request('scene/digitaluniverse/abell')
+asset.request('scene/digitaluniverse/alternatestarlabels')
+asset.request('scene/digitaluniverse/backgroundradiation')
+asset.request('scene/digitaluniverse/clusters')
+asset.request('scene/digitaluniverse/constellationbounds')
+asset.request('scene/digitaluniverse/constellations')
+asset.request('scene/digitaluniverse/dwarfs')
+asset.request('scene/digitaluniverse/exoplanets')
+asset.request('scene/digitaluniverse/globularclusters')
+asset.request('scene/digitaluniverse/grids')
+asset.request('scene/digitaluniverse/groups')
+asset.request('scene/digitaluniverse/h2regions')
+asset.request('scene/digitaluniverse/kepler')
+asset.request('scene/digitaluniverse/localdwarfs')
 asset.request('scene/digitaluniverse/milkyway')
---asset.request('scene/digitaluniverse/obassociations')
---asset.request('scene/digitaluniverse/openclusters')
---asset.request('scene/digitaluniverse/planetarynebulae')
---asset.request('scene/digitaluniverse/pulsars')
---asset.request('scene/digitaluniverse/quasars')
---asset.request('scene/digitaluniverse/sdss')
---asset.request('scene/digitaluniverse/starlabels')
---asset.request('scene/digitaluniverse/stars')
---asset.request('scene/digitaluniverse/superclusters')
---asset.request('scene/digitaluniverse/supernovaremnants')
---asset.request('scene/digitaluniverse/tully')
---asset.request('scene/digitaluniverse/voids')
+asset.request('scene/digitaluniverse/obassociations')
+asset.request('scene/digitaluniverse/openclusters')
+asset.request('scene/digitaluniverse/planetarynebulae')
+asset.request('scene/digitaluniverse/pulsars')
+asset.request('scene/digitaluniverse/quasars')
+asset.request('scene/digitaluniverse/sdss')
+asset.request('scene/digitaluniverse/starlabels')
+asset.request('scene/digitaluniverse/superclusters')
+asset.request('scene/digitaluniverse/supernovaremnants')
+asset.request('scene/digitaluniverse/tully')
+asset.request('scene/digitaluniverse/voids')
 
-asset.request('scene/milkyway/gaia/gaiamission')
+asset.require('scene/digitaluniverse/stars')
+asset.require('scene/milkyway/gaia/gaia_full')
 
 -- Load default key bindings applicable to most scenes
 asset.require('util/default_keybindings')
@@ -63,8 +63,6 @@ local Keybindings = {
     }
 }
 
-local GaiaModelAsset = asset.require('scene/milkyway/gaia/gaiamodel')
-asset.require('scene/milkyway/gaia/trail')
 
 assetHelper.registerDashboardItems(asset, {
     {
@@ -83,6 +81,7 @@ asset.onInitialize(function ()
     sceneHelper.bindKeys(Keybindings)
 
     openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.MouseSensitivity', 40.0);
+    openspace.setPropertyValueSingle('Scene.Stars.renderable.Enabled', false);
     
     openspace.setDefaultGuiSorting()
 
@@ -101,7 +100,7 @@ asset.onInitialize(function ()
     )
 
     openspace.navigation.setCameraState({
-        Focus = GaiaModelAsset.GaiaModel.Identifier,
+        Focus = "GaiaModel",
         Position = { 1000000000000.0, 1000000000000.0, 1000000000000.0 },
         Rotation = { 0.683224, -0.765934, -0.601234, -0.418073 },
     })

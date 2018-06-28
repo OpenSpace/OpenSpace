@@ -93,7 +93,7 @@ void main() {
     }
 
     vec4 position = gl_in[0].gl_Position;
-    vec2 starSize = vec2(initStarSize + closeUpBoost) * position.w / 10000.0;
+    vec2 starSize = vec2(initStarSize + closeUpBoost) * position.w / 1000.0;
 
     float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
 
@@ -121,7 +121,6 @@ void main() {
             + wCameraRight * starSize.x * (corners[i].x - 0.5)
             + wCameraUp * starSize.y * (corners[i].y - 0.5);
         gl_Position = vec4(projection * view * cornerPoint);
-        //gl_Position = position + vec4(starSize * (corners[i] - 0.5), 0.0, 0.0);
         gl_Position.z = 0.0;
         texCoord = corners[i];
         ge_gPosition  = viewPosition;

@@ -1,9 +1,9 @@
-local dataFolder = "e:/gaia_sync_data/AMNH"
+local dataFolder = "E:/gaia_sync_data"
 return {
     {
         Type = "ConstructOctreeTask",
-        InFileOrFolderPath = "E:/gaia_sync_data/Gaia_DR2_full_24columns/",
-        OutFileOrFolderPath = "L:/DR2_full_Octree_test_50,50/",
+        InFileOrFolderPath = dataFolder .. "/Gaia_DR2_full_24columns/",
+        OutFileOrFolderPath = dataFolder .. "/DR2_full_Octree_test_50,50/",
         MaxDist = 500,
         MaxStarsPerNode = 50000,
         SingleFileInput = false,
@@ -36,8 +36,8 @@ return {
 
     -- {
     --     Type = "ConstructOctreeTask",
-    --     InFileOrFolderPath = dataFolder .. "/Binary/GaiaUMS.bin",
-    --     OutFileOrFolderPath = dataFolder .. "/Octree/GaiaUMS_Octree.bin",
+    --     InFileOrFolderPath = dataFolder .. "/AMNH/Binary/GaiaUMS.bin",
+    --     OutFileOrFolderPath = dataFolder .. "/AMNH/Octree/GaiaUMS_Octree.bin",
     --     MaxDist = 10,
     --     MaxStarsPerNode = 20000,
     --     SingleFileInput = true,

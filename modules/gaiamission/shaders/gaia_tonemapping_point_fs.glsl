@@ -163,8 +163,6 @@ Fragment getFragment() {
     }
 
     color = vec4(intensity, 1.0f);
-    //color = vec4(vec3(atan(screenPos.y, screenPos.x) + M_PI) / (2 * M_PI), 1.0f);
-    //color = vec4(vec2(filterScaleFactor), 1.0, 1.0f);
 
     // Use the following to check for any intensity at all.
     //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
