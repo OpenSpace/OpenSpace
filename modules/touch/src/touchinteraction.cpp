@@ -68,86 +68,86 @@
 namespace {
     constexpr const char* _loggerCat = "TouchInteraction";
 
-    const openspace::properties::Property::PropertyInfo OriginInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Origin",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo UnitTestInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo EventsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
         "True if we have a touch event",
         "",
         openspace::properties::Property::Visibility::Hidden
     };
 
-    const openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Reset all properties to default",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
         "MaxTapTime",
         "Max tap delay (in ms) for double tap",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
         "Touch Screen size in inches",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
         "TapZoomFactor",
         "Scaling distance travelled on tap",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
         "DirectManipulationRadius",
         "Radius a planet has to have to activate direct-manipulation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo RollThresholdInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RollThresholdInfo = {
         "RollThreshold",
         "Threshold for min angle for roll interpret",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
+    constexpr openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
         "OrbitThreshold",
         "Threshold to activate orbit spinning in direct-manipulation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
         "SpinningSensitivity",
         "Sensitivity of spinning in direct-manipulation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ZoomSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityInfo = {
         "ZoomSensitivity",
         "Sensitivity of exponential zooming in relation to distance from focus node",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     ZoomSensitivityDistanceThresholdInfo = {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
@@ -155,57 +155,57 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ZoomBoundarySphereMultiplierInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo
+    ZoomBoundarySphereMultiplierInfo = {
         "ZoomBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom & prevent "
         "surface collision",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
         ""
     };
 
-    const openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo PanModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PanModeInfo = {
         "PanMode",
         "Allow panning gesture",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
         "PanDeltaDistance",
         "Delta distance between fingers allowed for interpreting pan interaction",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SlerpTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SlerpTimeInfo = {
         "SlerpTime",
         "Time to slerp in seconds to new orientation with new node picking",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo GuiButtonSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GuiButtonSizeInfo = {
         "GuiButtonSize",
         "GUI button size in pixels",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo FrictionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo PickingRadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PickingRadiusInfo = {
         "PickingRadiusMinimum",
         "Minimum radius for picking in NDC coordinates",
         "" // @TODO Missing documentation

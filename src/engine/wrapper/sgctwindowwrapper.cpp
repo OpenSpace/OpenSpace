@@ -32,14 +32,14 @@
 namespace {
     constexpr const char* GuiWindowTag = "GUI";
 
-    openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EyeSeparationInfo = {
         "EyeSeparation",
         "Eye Separation",
         "Sets a static eye separation for use in stereoscopic rendering. If no "
         "stereoscopic rendering is performed, this value is unused."
     };
 
-    openspace::properties::Property::PropertyInfo ShowStatsGraphInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowStatsGraphInfo = {
         "ShowStatsGraph",
         "Show Statistics Graph",
         "Toggles the rendering of the SGCT statistics graph that is rendered on top of "

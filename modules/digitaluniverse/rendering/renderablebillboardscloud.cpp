@@ -69,116 +69,116 @@ namespace {
     constexpr int8_t CurrentCacheVersion = 1;
     constexpr double PARSEC = 0.308567756E17;
 
-    const openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "Texture",
         "Point Sprite Texture",
         "The path to the texture that should be used as the point sprite."
     };
 
-    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all points."
     };
 
-    const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each point."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "This value is used to define the color of the astronomical object."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorMapInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Color Map File",
         "The path to the color map file of the astronomical object."
     };
 
-    const openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PolygonSidesInfo = {
         "PolygonSides",
         "Polygon Sides",
         "The number of sides for the polygon used to represent the astronomical object."
     };
 
-    const openspace::properties::Property::PropertyInfo TextColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
         "The text color for the astronomical object."
     };
 
-    const openspace::properties::Property::PropertyInfo TextSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
         "The text size for the astronomical object labels."
     };
 
-    const openspace::properties::Property::PropertyInfo LabelFileInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered."
     };
 
-    const openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LabelMinSizeInfo = {
         "TextMinSize",
         "Text Min Size",
         "The minimal size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    const openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LabelMaxSizeInfo = {
         "TextMaxSize",
         "Text Max Size",
         "The maximum size (in pixels) of the text for the labels for the astronomical "
         "objects being rendered."
     };
 
-    const openspace::properties::Property::PropertyInfo DrawElementsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
         "Enables/Disables the drawing of the astronomical objects."
     };
 
-    const openspace::properties::Property::PropertyInfo DrawLabelInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
         "Determines whether labels should be drawn or hidden."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which paramenter is used default color of the "
         "astronomical objects."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorRangeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorRangeInfo = {
         "ColorRange",
         "Color Range",
         "This value determines the color ranges for the color parameter of the "
         "astronomical objects."
     };
 
-    const openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
         "Transformation matrix to be applied to each astronomical object."
     };
 
-    const openspace::properties::Property::PropertyInfo RenderOptionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOptionInfo",
         "Render Option",
         "Debug option for rendering of billboards and texts."
     };
 
-    const openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
@@ -186,39 +186,40 @@ namespace {
         "fading-in."
     };
 
-    const openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
         "DisableFadeIn",
         "Disable Fade-in effect",
         "Enables/Disables the Fade-in effect."
     };
 
-    const openspace::properties::Property::PropertyInfo BillboardMaxSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardMaxSizeInfo = {
         "BillboardMaxSize",
         "Billboard Max Size in Pixels",
         "The max size (in pixels) for the billboard representing the astronomical "
         "object."
     };
 
-    const openspace::properties::Property::PropertyInfo BillboardMinSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardMinSizeInfo = {
         "BillboardMinSize",
         "Billboard Min Size in Pixels",
         "The min size (in pixels) for the billboard representing the astronomical "
         "object."
     };
 
-    const openspace::properties::Property::PropertyInfo CorrectionSizeEndDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+    CorrectionSizeEndDistanceInfo = {
         "CorrectionSizeEndDistance",
         "Distance in 10^X meters where correction size stops acting.",
         "Distance in 10^X meters where correction size stops acting."
     };
 
-    const openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CorrectionSizeFactorInfo = {
         "CorrectionSizeFactor",
         "Control variable for distance size.",
         ""
     };
 
-    const openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PixelSizeControlInfo = {
         "EnablePixelSizeControl",
         "Enable pixel size control.",
         "Enable pixel size control for rectangular projections."

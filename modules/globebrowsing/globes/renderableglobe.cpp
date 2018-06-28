@@ -39,127 +39,127 @@ namespace {
     constexpr const char* keyShadowSource = "Source";
     constexpr const char* keyShadowCaster = "Caster";
 
-    const openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SaveOrThrowInfo = {
         "SaveOrThrowCamera",
         "Save or throw camera",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ShowChunkEdgeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowChunkEdgeInfo = {
         "ShowChunkEdges",
         "Show chunk edges",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ShowChunkBoundsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowChunkBoundsInfo = {
         "ShowChunkBounds",
         "Show chunk bounds",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ShowChunkAABBInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowChunkAABBInfo = {
         "ShowChunkAABB",
         "Show chunk AABB",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo HeightResolutionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HeightResolutionInfo = {
         "ShowHeightResolution",
         "Show height resolution",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo HeightIntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HeightIntensityInfo = {
         "ShowHeightIntensities",
         "Show height intensities",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo FrustumCullingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrustumCullingInfo = {
         "PerformFrustumCulling",
         "Perform frustum culling",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo HorizonCullingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HorizonCullingInfo = {
         "PerformHorizonCulling",
         "Perform horizon culling",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
         "LevelByProjectedAreaElseDistance",
         "Level by projected area (else distance)",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo CollectStatsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CollectStatsInfo = {
         "CollectStats",
         "Collect stats",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo LimitLevelInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LimitLevelInfo = {
         "LimitLevelByAvailableData",
         "Limit level by available data",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
         "ModelSpaceRenderingCutoffLevel",
         "Model Space Rendering Cutoff Level",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo AtmosphereInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
         "UseAccurateNormals",
         "Use Accurate Normals",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo EclipseInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
         "Enables/Disable Eclipse shadows"
     };
 
-    const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
         "Eclipse Hard Shadows",
         "Enables the rendering of eclipse shadows using hard shadows"
     };
 
-    const openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LodScaleFactorInfo = {
         "LodScaleFactor",
         "Level of Detail Scale Factor",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo CameraMinHeightInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CameraMinHeightInfo = {
         "CameraMinHeight",
         "Camera Minimum Height",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
         "orenNayarRoughness",
         "" // @TODO Missing documentation

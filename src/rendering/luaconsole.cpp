@@ -66,52 +66,52 @@ namespace {
     // when horizontal scrolling is required.
     constexpr const int NVisibleCharsAfterCursor = 5;
 
-    const openspace::properties::Property::PropertyInfo VisibleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is Visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out."
     };
 
-    const openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RemoveScriptingInfo = {
         "RemoteScripting",
         "Remote scripting",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remove instances."
     };
 
-    const openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
         "Sets the background color of the console."
     };
 
-    const openspace::properties::Property::PropertyInfo HighlightColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight Color",
         "Sets the color of the lines below the console."
     };
 
-    const openspace::properties::Property::PropertyInfo SeparatorColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SeparatorColorInfo = {
         "SeparatorColor",
         "Separator Color",
         "Sets the color of the separator between the history part and the entry part of "
         "the console."
     };
 
-    const openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
         "Sets the text color of the entry area of the console."
     };
 
-    const openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History Text Color",
         "Sets the text color of the history area of the console."
     };
 
-    const openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History Length",
         "Determines the length of the history in number of lines."

@@ -39,43 +39,43 @@ namespace {
     constexpr const char* _loggerCat = "DataCygnet";
     constexpr const int MaxTextures = 6;
 
-    const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data Options",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use Logarithm",
         "" // @TODO Missing documentation
     };
 
-     const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto Contrast",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto Filter",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
         "NormValues",
         "Normalize Values",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background Values",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
         "Transferfunctions",
         "Transfer Functions",
         "" // @TODO Missing documentation

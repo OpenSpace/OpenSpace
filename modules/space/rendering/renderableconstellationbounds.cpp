@@ -41,15 +41,14 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-
-    const openspace::properties::Property::PropertyInfo VertexInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
         "File",
         "Vertex File Path",
         "The file pointed to with this value contains the vertex locations of the "
         "constellations."
     };
 
-    const openspace::properties::Property::PropertyInfo ConstellationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ConstellationInfo = {
         "ConstellationFile",
         "Constellation File Path",
         "Specifies the file that contains the mapping between constellation "
@@ -57,14 +56,14 @@ namespace {
         "abbreviations are used as the full names."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color of constellation lines",
         "Specifies the color of the constellation lines. The lines are always drawn at "
         "full opacity."
     };
 
-    const openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
         "The constellations that are selected are displayed on the celestial sphere."

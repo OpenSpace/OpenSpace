@@ -45,21 +45,21 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
-    const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "ColorTexture",
         "Color Texture",
         "This value points to a color texture file that is applied to the geometry "
         "rendered in this object."
     };
 
-    const openspace::properties::Property::PropertyInfo ShadingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
         "of the Sun."
     };
 
-    const openspace::properties::Property::PropertyInfo ModelTransformInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "

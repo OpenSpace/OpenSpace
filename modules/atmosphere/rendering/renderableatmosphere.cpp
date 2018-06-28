@@ -81,107 +81,111 @@ namespace {
     const char* keyTextureScale             = "PreCalculatedTextureScale";
     const char* keySaveTextures             = "SaveCalculatedTextures";
 
-    const openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "atmmosphereHeight",
         "Atmosphere Height (KM)",
         "The thickness of the atmosphere in Km"
     };
 
-    const openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AverageGroundReflectanceInfo =
+    {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
         "phase"
     };
 
-    const openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
+    constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmittioninfo = {
         "GroundRadianceEmittion",
         "Percentage of initial radiance emitted from ground",
         "Multiplier of the ground radiance color during the rendering phase"
     };
 
-    const openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
         "constant factor"
     };
 
-    const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffXInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffXInfo =
+    {
         "RayleighScatteringCoeffX",
         "Rayleigh Scattering Coeff X (x10e-3)",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffYInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffYInfo =
+    {
         "RayleighScatteringCoeffY",
         "Rayleigh Scattering Coeff Y (x10e-3)",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo RayleighScatteringCoeffZInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RayleighScatteringCoeffZInfo =
+    {
         "RayleighScatteringCoeffZ",
         "Rayleigh Scattering Coeff Z (x10e-3)",
         "Rayleigh sea-level scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
         "Ozone",
         "Ozone Layer Enabled",
         "Enables/Disable Ozone Layer during pre-calculation phase"
     };
 
-    const openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
         "Ozone Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
         "constant factor"
     };
 
-    const openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffXInfo = {
         "OzoneLayerCoeffX",
         "Ozone Layer Extinction Coeff X (x10e-5)",
         "Ozone scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffYInfo = {
         "OzoneLayerCoeffY",
         "Ozone Layer Extinction Coeff Y (x10e-5)",
         "Ozone scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffZInfo = {
         "OzoneLayerCoeffZ",
         "Ozone Layer Extinction Coeff Z (x10e-5)",
         "Ozone scattering coefficients in meters"
     };
 
-     const openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale",
         "Mie Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
         "constant factor"
     };
 
-    const openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffXInfo = {
         "MieScatteringCoeffX",
         "Mie Scattering Coeff X (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffYInfo = {
         "MieScatteringCoeffY",
         "Mie Scattering Coeff Y (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffZInfo = {
         "MieScatteringCoeffZ",
         "Mie Scattering Coeff Z (x10e-3)",
         "Mie sea-level scattering coefficients in meters"
     };
 
-    const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     MieScatteringExtinctionPropCoeffInfo =
     {
         "MieScatteringExtinctionPropCoefficient",
@@ -189,37 +193,39 @@ namespace {
         "Mie Scattering/Extinction Proportion Coefficient (%)"
     };
 
-    const openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie Asymmetric Factor G",
         "Averaging of the scattering angle over a high number of scattering events"
     };
 
-    const openspace::properties::Property::PropertyInfo SunIntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
         "Unitless for now"
     };
 
-    const openspace::properties::Property::PropertyInfo AtmosphereExposureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereExposureInfo = {
         "HdrExposure",
         "Atmosphere Exposure",
         "Constant to controls the exposure of the radiance range"
     };
 
-    const openspace::properties::Property::PropertyInfo AtmosphereGammaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AtmosphereGammaInfo = {
         "Gamma",
         "Gamma Correction",
         "Gamma Correction"
     };
 
-    const openspace::properties::Property::PropertyInfo EnableSunOnCameraPositionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo
+        EnableSunOnCameraPositionInfo =
+    {
         "SunFollowingCamera",
         "Enable Sun On Camera Position",
         "When selected the Sun is artificially positioned behind the observer all times"
     };
 
-    const openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadowsInfo",
         "Enable Hard Shadows for Eclipses",
         "Enable/Disables hard shadows through the atmosphere"

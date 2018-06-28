@@ -29,20 +29,20 @@ namespace {
     constexpr const char* keyChromaKeyColor = "ChromaKeyColor";
     constexpr const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
 
-    const openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {
         "ChromaKeyColor",
         "Chroma Key Color",
         "This color is used as the chroma key for the layer that is adjusted."
     };
 
-    const openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ChromaKeyToleranceInfo = {
         "ChromaKeyTolerance",
         "Chroma Key Tolerance",
         "This value determines the tolerance that is used to determine whether a color "
         "is matching the selected Chroma key."
     };
 
-    const openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of layer adjustment that is applied to the underlying layer."

@@ -48,7 +48,7 @@ namespace {
         Inside = 2
     };
 
-    const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
@@ -56,40 +56,40 @@ namespace {
         "projection."
     };
 
-    const openspace::properties::Property::PropertyInfo OrientationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both."
     };
 
-    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that the sphere is separated in."
     };
 
-    const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the radius of the sphere in meters."
     };
 
-    const openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadeOutThreshouldInfo = {
         "FadeOutThreshould",
         "Fade-Out Threshould",
         "This value determines percentage of the sphere is visible before starting "
         "fading-out it."
     };
 
-    const openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadeInThreshouldInfo = {
         "FadeInThreshould",
         "Fade-In Threshould",
         "Distance from center of MilkyWay from where the astronomical object starts to "
         "fade in."
     };
 
-    const openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOuInfo = {
         "DisableFadeInOu",
         "Disable Fade-In/Fade-Out effects",
         "Enables/Disables the Fade-In/Out effects."

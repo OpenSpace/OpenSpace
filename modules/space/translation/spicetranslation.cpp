@@ -38,7 +38,7 @@ namespace {
 
     constexpr const char* DefaultReferenceFrame = "GALACTIC";
 
-    const openspace::properties::Property::PropertyInfo TargetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
@@ -46,7 +46,7 @@ namespace {
         "or a NAIF integer id code (such as '399')."
     };
 
-    const openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
@@ -54,7 +54,7 @@ namespace {
         "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')."
     };
 
-    const openspace::properties::Property::PropertyInfo FrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "

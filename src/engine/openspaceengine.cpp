@@ -109,13 +109,13 @@ namespace {
         std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
 
-    const openspace::properties::Property::PropertyInfo VersionInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo VersionInfo = {
         "VersionInfo",
         "Version Information",
         "This value contains the full string identifying this OpenSpace Version"
     };
 
-    const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo SourceControlInfo = {
         "SCMInfo",
         "Source Control Management Information",
         "This value contains information from the SCM, such as commit hash and branch"

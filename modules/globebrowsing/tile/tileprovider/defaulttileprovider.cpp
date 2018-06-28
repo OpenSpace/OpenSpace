@@ -40,14 +40,14 @@ namespace {
     constexpr const char* KeyPreCacheLevel = "PreCacheLevel";
     constexpr const char* KeyPadTiles = "PadTiles";
 
-    const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider."
     };
 
-    const openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
         "TilePixelSize",
         "Tile Pixel Size",
         "This value is the preferred size (in pixels) for each tile. Choosing the right "

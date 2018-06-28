@@ -81,7 +81,7 @@ namespace {
     constexpr const char* KeyFontMono = "Mono";
     constexpr const char* KeyFontLight = "Light";
 
-    const openspace::properties::Property::PropertyInfo PerformanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PerformanceInfo = {
         "PerformanceMeasurements",
         "Performance Measurements",
         "If this value is enabled, detailed performance measurements about the updates "
@@ -90,7 +90,7 @@ namespace {
         "performance."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowDateInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowDateInfo = {
         "ShowDate",
         "Show Date Information",
         "This values determines whether the date will be printed in the top left corner "
@@ -98,7 +98,7 @@ namespace {
         "fisheye rendering, for example)."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowInfoInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowInfoInfo = {
         "ShowInfo",
         "Show Rendering Information",
         "This value determines whether the rendering info, which is the delta time and "
@@ -107,14 +107,14 @@ namespace {
         "example)."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowOverlaySlavesInfo = {
         "ShowOverlayOnSlaves",
         "Show Overlay Information on Slaves",
         "If this value is enabled, the overlay information text is also automatically "
         "rendered on the slave nodes. This values is disabled by default."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowLogInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowLogInfo = {
         "ShowLog",
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
@@ -122,21 +122,21 @@ namespace {
         "log."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowVersionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowVersionInfo = {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
         "hash are shown on the screen."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowCameraInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
         "ShowCamera",
         "Shows information about the current camera state, such as friction",
         "This value determines whether the information about the current camrea state is "
         "shown on the screen"
     };
 
-    const openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TakeScreenshotInfo = {
         "TakeScreenshot",
         "Take Screenshot",
         "If this property is triggered, a screenshot is taken and stored in the current "
@@ -146,7 +146,7 @@ namespace {
         "already present in the folder."
     };
 
-    const openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ApplyWarpingInfo = {
         "ApplyWarpingScreenshot",
         "Apply Warping to Screenshots",
         "This value determines whether a warping should be applied before taking a "
@@ -155,13 +155,13 @@ namespace {
         "interface."
     };
 
-    const openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameNumber",
         "Show Frame Number",
         "If this value is enabled, the current frame number is rendered into the window."
     };
 
-    const openspace::properties::Property::PropertyInfo DisableMasterInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisableMasterInfo = {
         "DisableMasterRendering",
         "Disable Master Rendering",
         "If this value is enabled, the rendering on the master node will be disabled. "
@@ -171,7 +171,7 @@ namespace {
         "master node is not required and performance can be gained by disabling it."
     };
 
-    const openspace::properties::Property::PropertyInfo DisableTranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DisableTranslationInfo = {
         "DisableSceneTranslationOnMaster",
         "Disable Scene Translation on Master",
         "If this value is enabled, any scene translations such as specified in, for "
@@ -181,28 +181,28 @@ namespace {
         "difficult."
     };
 
-    const openspace::properties::Property::PropertyInfo AaSamplesInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AaSamplesInfo = {
         "AaSamples",
         "Number of Anti-aliasing samples",
         "This value determines the number of anti-aliasing samples to be used in the "
         "rendering for the MSAA method."
     };
 
-    const openspace::properties::Property::PropertyInfo HDRExposureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HDRExposureInfo = {
         "HDRExposure",
         "HDR Exposure",
         "This value determines the amount of light per unit area reaching the "
         "equivalent of an electronic image sensor."
     };
 
-    const openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundExposureInfo = {
         "Background Exposure",
         "BackgroundExposure",
         "This value determines the amount of light per unit area reaching the "
         "equivalent of an electronic image sensor for the background image."
     };
 
-    const openspace::properties::Property::PropertyInfo GammaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
         "Gamma, is the nonlinear operation used to encode and decode luminance or "

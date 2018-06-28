@@ -38,20 +38,20 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for these rings."
     };
 
-    const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value specifies the radius of the rings in meter."
     };
 
-    const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used to limit the width of the rings.Each of the two values is a "
@@ -60,7 +60,7 @@ namespace {
         "only shown between radius/2 and radius. It defaults to {0.0, 1.0}."
     };
 
-    const openspace::properties::Property::PropertyInfo NightFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
         "Night Factor",
         "This value is a multiplicative factor that is applied to the side of the rings "
@@ -68,7 +68,7 @@ namespace {
         "of the night side occurs."
     };
 
-    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value determines the transparency of part of the rings depending on the "

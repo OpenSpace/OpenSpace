@@ -39,7 +39,7 @@ namespace {
     constexpr const char* ProgramName = "ShadowCylinderProgram";
     constexpr const char* MainFrame = "GALACTIC";
 
-    const openspace::properties::Property::PropertyInfo NumberPointsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "AmountOfPoints",
         "Points",
         "This value determines the number of control points that is used to construct "
@@ -47,7 +47,7 @@ namespace {
         "but it will have a negative impact on the performance."
     };
 
-    const openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow Length",
         "This value determines the length of the shadow that is cast by the target "
@@ -55,48 +55,48 @@ namespace {
         "target to the Sun multiplied with this value."
     };
 
-    const openspace::properties::Property::PropertyInfo ShadowColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
         "This value determines the color that is used for the shadow cylinder."
     };
 
-    const openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
         "This value determines the type of the terminator that is used to calculate the "
         "shadow eclipse."
     };
 
-    const openspace::properties::Property::PropertyInfo LightSourceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
         "This value determines the SPICE name of the object that is used as the "
         "illuminator for computing the shadow cylinder."
     };
 
-    const openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "This value specifies the SPICE name of the object that is the observer of the "
         "shadow cylinder."
     };
 
-    const openspace::properties::Property::PropertyInfo BodyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
         "Target Body",
         "This value is the SPICE name of target body that is used as the shadow caster "
         "for the shadow cylinder."
     };
 
-    const openspace::properties::Property::PropertyInfo BodyFrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body Frame",
         "This value is the SPICE name of the reference frame in which the shadow "
         "cylinder is expressed."
     };
 
-    const openspace::properties::Property::PropertyInfo AberrationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
         "This value determines the aberration method that is used to compute the shadow "

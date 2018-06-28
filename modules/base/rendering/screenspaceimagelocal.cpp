@@ -33,7 +33,7 @@
 #include <ghoul/opengl/textureconversion.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo TexturePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture path",
         "Sets the path of the texture that is displayed on this screen space plane. If "

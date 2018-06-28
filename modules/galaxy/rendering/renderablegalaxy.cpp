@@ -58,31 +58,31 @@ namespace {
     constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
         "PointStepSize",
         "Point Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
         "NEnabledPointsRatio",
         "Enabled points",
         "" // @TODO Missing documentation
