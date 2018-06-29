@@ -25,5 +25,10 @@ assetHelper.registerDashboardItems(asset, {
         Type = "DashboardItemParallelConnection",
         Identifier = "ParallelConnection",
         GuiName = "Parallel Connection"
+    },
+    {
+        Type = "DashboardItemGlobeLocation",
+        Identifier = "GlobeLocation",
+        GuiName = "Globe Location"
     }
 })
