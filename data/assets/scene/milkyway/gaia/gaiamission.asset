@@ -15,12 +15,12 @@ local colorLUT = asset.syncedResource({
 })
 
 -- Download a preprocessed binary octree of Radial Velocity subset values per star (preprocessed into 8 binary files).
--- local torrentStars = asset.syncedResource({
---     Name = "Gaia DR2 RV Octree",
---     Type = "TorrentSynchronization",
---     Identifier = "gaia_stars",
---     Magnet = "magnet:?xt=urn:btih:a9baaeda82673a46b737b86b1cb419d345331caf&dn=DR2_rv_Octree[10kSPN,20dist]"
--- })
+local onlineStars = asset.syncedResource({
+    Name = "Gaia Stars RV",
+    Type = "HttpSynchronization",
+    Identifier = "gaia_stars_rv_octree",
+    Version = 1
+})
 
 local localStars = "E:/gaia_sync_data"
 
@@ -28,21 +28,16 @@ local GaiaMission = {
     Identifier = "GaiaMission",
     Renderable = {
         Type = "RenderableGaiaStars",
-        -- File = torrentStars .. "/DR2_rv_Octree[10kSPN,20dist]/",
+        File = onlineStars .. "/",
         -- File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]/",
-        File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]_5p/",
+        -- File = localStars .. "/DR2_rv_Octree[10kSPN,20dist]_5p/",
         -- File = localStars .. "/DR2_full_Octree[20kSPN,200dist]_90,0/",
         -- File = localStars .. "/DR2_full_Octree[50kSPN,250dist]_50,125/",
-        -- File = localStars .. "/DR2_full_Octree[50kSPN,250dist]_200pc,50/",
+        -- File = localStars .. "/DR2_full_Octree[150kSPN,250dist]/",
         -- File = localStars .. "/DR2_full_Octree[50kSPN,500dist]_50,50/",
-        -- File = localStars .. "/DR2_full_Octree[75kSPN,800dist]_5p/", -- 915M
-        FileReaderOption = "StreamOctree", -- BinaryOctree, StreamOctree
-
-        -- File = localStars .. "/TGAS_Octree_10kSPN.bin",
-        -- File = localStars .. "/AMNH_DR1_Octree_10kSPN.bin",
-        -- FileReaderOption = "BinaryOctree", -- BinaryOctree, StreamOctree
+        FileReaderOption = "StreamOctree",
         RenderOption = "Color",
-        ShaderOption = "Point_SSBO",
+        ShaderOption = "Billboard_SSBO",
         Texture = textures .. "/halo.png",
         ColorMap = colorLUT .. "/colorbv.cmap",
         LuminosityMultiplier = 35,
@@ -77,7 +72,7 @@ local GaiaMissionTGAS = {
         Enabled = false,
         File = localStars .. "/AMNH_DR1_Octree_10kSPN.bin",
         --File = localStars .. "/TGAS_Octree_10kSPN.bin",
-        FileReaderOption = "BinaryOctree", -- BinaryOctree, StreamOctree
+        FileReaderOption = "BinaryOctree",
         RenderOption = "Color",
         ShaderOption = "Point_SSBO",
         Texture = textures .. "/halo.png",
