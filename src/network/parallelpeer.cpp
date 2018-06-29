@@ -95,12 +95,6 @@ namespace {
         "Camera Keyframe interval",
         "" // @TODO Missing documentation
     };
-
-    const openspace::properties::Property::PropertyInfo TimeToleranceInfo = {
-        "TimeTolerance",
-        "Time tolerance",
-        "" // @TODO Missing documentation
-    };
 } // namespace
 
 namespace openspace {
@@ -115,7 +109,6 @@ ParallelPeer::ParallelPeer()
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
-    , _timeTolerance(TimeToleranceInfo, 1.f, 0.5f, 5.f)
     , _connectionEvent(std::make_shared<ghoul::Event<>>())
     , _connection(nullptr)
 {
@@ -129,7 +122,6 @@ ParallelPeer::ParallelPeer()
 
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
-    addProperty(_timeTolerance);
 }
 
 ParallelPeer::~ParallelPeer() {
@@ -267,10 +259,6 @@ double ParallelPeer::latencyStandardDeviation() const {
         expectedLatencyDiff * expectedLatencyDiff;
 
     return std::sqrt(latencyVariance);
-}
-
-double ParallelPeer::timeTolerance() const {
-    return _timeTolerance;
 }
 
 void ParallelPeer::dataMessageReceived(const std::vector<char>& message)

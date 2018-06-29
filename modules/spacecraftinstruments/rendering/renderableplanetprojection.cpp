@@ -107,6 +107,26 @@ namespace {
         "Ambient Brightness",
         "This value determines the ambient brightness of the dark side of the planet."
     };
+
+    const openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
+        "MaxProjectionsPerFrame",
+        "Max Projections Per Frame",
+        "The maximum number of image projections to perform per frame. "
+        "Useful to avoid freezing the system for large delta times."
+    };
+
+    const openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
+        "ProjectionsInBuffer",
+        "Projections In Buffer",
+        "(Read only) The number of images that are currently waiting to be projected"
+    };
+
+    const openspace::properties::Property::PropertyInfo ClearProjectionBufferInfo = {
+        "ClearProjectionBuffer",
+        "Clear Projection Buffer",
+        "Remove all pending projections from the buffer"
+    };
+
 } // namespace
 
 namespace openspace {
@@ -164,6 +184,12 @@ documentation::Documentation RenderablePlanetProjection::Documentation() {
                 new DoubleVerifier,
                 Optional::Yes,
                 AmbientBrightnessInfo.description
+            },
+            {
+                MaxProjectionsPerFrameInfo.identifier,
+                new DoubleVerifier,
+                Optional::Yes,
+                MaxProjectionsPerFrameInfo.description
             }
         }
     };
@@ -178,6 +204,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _heightExaggeration(HeightExaggerationInfo, 1.f, 0.f, 1e6f, 1.f, 3.f)
     , _meridianShift(MeridianShiftInfo, false)
     , _ambientBrightness(AmbientBrightnessInfo, 0.075f, 0.f, 1.f)
+    , _maxProjectionsPerFrame(MaxProjectionsPerFrameInfo, 1, 1, 64)
+    , _projectionsInBuffer(ProjectionsInBufferInfo, 0, 1, 32)
+    , _clearProjectionBuffer(ClearProjectionBufferInfo)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -295,9 +324,25 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         );
     }
 
+    if (dict.hasKey(MaxProjectionsPerFrameInfo.identifier)) {
+        _maxProjectionsPerFrame = static_cast<int>(
+            dict.value<double>(MaxProjectionsPerFrameInfo.identifier)
+        );
+    }
+
     addProperty(_heightExaggeration);
     addProperty(_meridianShift);
     addProperty(_ambientBrightness);
+
+    addProperty(_maxProjectionsPerFrame);
+    addProperty(_projectionsInBuffer);
+
+    _clearProjectionBuffer.onChange([this]() {
+        _imageTimes.clear();
+        _projectionsInBuffer = _imageTimes.size();
+    });
+
+    addProperty(_clearProjectionBuffer);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {} // NOLINT
@@ -550,6 +595,8 @@ ghoul::opengl::Texture& RenderablePlanetProjection::baseTexture() const {
 void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) {
     if (_projectionComponent.needsClearProjection()) {
         _projectionComponent.clearAllProjections();
+        _imageTimes.clear();
+        _projectionsInBuffer = _imageTimes.size();
     }
 
     if (_projectionComponent.needsMipMapGeneration()) {
@@ -559,15 +606,26 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _camScaling = glm::vec2(1.f, 0.f); // Unit scaling
     _up = data.camera.lookUpVectorCameraSpace();
 
+    
     if (_shouldCapture && _projectionComponent.doesPerformProjection()) {
+        int nPerformedProjections = 0;
         for (const Image& img : _imageTimes) {
+            if (nPerformedProjections >= _maxProjectionsPerFrame) {
+                break;
+            }
             RenderablePlanetProjection::attitudeParameters(img.timeRange.start);
             imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
+            ++nPerformedProjections;
         }
-        _shouldCapture = false;
+        _imageTimes.erase(_imageTimes.begin(),
+                          _imageTimes.begin() + nPerformedProjections);
+        _projectionsInBuffer = _imageTimes.size();
+        if (_imageTimes.empty()) {
+            _shouldCapture = false;
+        }
+
     }
-    attitudeParameters(_time);
-    _imageTimes.clear();
+    attitudeParameters(data.time.j2000Seconds());
 
     double  lt;
     glm::dvec3 p = SpiceManager::ref().targetPosition(
@@ -575,7 +633,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _projectionComponent.projecteeId(),
         "GALACTIC",
         {},
-        _time,
+        data.time.j2000Seconds(),
         lt
     );
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
@@ -720,21 +778,26 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     _projectionComponent.update();
 
     const double time = data.time.j2000Seconds();
+    const double integrateFromTime = data.integrateFromTime.j2000Seconds();
 
     // Only project new images if time changed since last update.
-    if (time != _time) {
+    if (time > integrateFromTime) {
         if (openspace::ImageSequencer::ref().isReady()) {
-            openspace::ImageSequencer::ref().updateSequencer(time);
             if (_projectionComponent.doesPerformProjection()) {
-                _shouldCapture = openspace::ImageSequencer::ref().imagePaths(
-                    _imageTimes,
+                std::vector<Image> newImageTimes;
+                _shouldCapture |= openspace::ImageSequencer::ref().imagePaths(
+                    newImageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),
-                    _time
+                    time,
+                    integrateFromTime
                 );
+                _imageTimes.insert(_imageTimes.end(),
+                                   newImageTimes.begin(),
+                                   newImageTimes.end());
+                _projectionsInBuffer = _imageTimes.size();
             }
         }
-        _time = time;
     }
 
     _stateMatrix = data.modelTransform.rotation;

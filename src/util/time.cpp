@@ -132,6 +132,18 @@ scripting::LuaLibrary Time::luaLibrary() {
         "time",
         {
             {
+                "setTime",
+                &luascriptfunctions::time_setTime,
+                {},
+                "{number, string}",
+                "Sets the current simulation time to the "
+                "specified value. If the parameter is a number, the value is the number "
+                "of seconds past the J2000 epoch. If it is a string, it has to be a "
+                "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
+                "Note: providing time zone using the Z format is not supported. UTC is "
+                "assumed."
+            },
+            {
                 "setDeltaTime",
                 &luascriptfunctions::time_setDeltaTime,
                 {},
@@ -163,16 +175,39 @@ scripting::LuaLibrary Time::luaLibrary() {
                 " and restoring it afterwards"
             },
             {
-                "setTime",
-                &luascriptfunctions::time_setTime,
+                "interpolateTime",
+                &luascriptfunctions::time_interpolateTime,
                 {},
-                "{number, string}",
+                "{number, string} [, number]",
                 "Sets the current simulation time to the "
                 "specified value. If the parameter is a number, the value is the number "
                 "of seconds past the J2000 epoch. If it is a string, it has to be a "
                 "valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. "
                 "Note: providing time zone using the Z format is not supported. UTC is "
                 "assumed."
+            },
+            {
+                "interpolateDeltaTime",
+                &luascriptfunctions::time_interpolateDeltaTime,
+                {},
+                "number",
+                "Sets the amount of simulation time that happens "
+                "in one second of real time"
+            },
+            {
+                "interpolatePause",
+                &luascriptfunctions::time_interpolatePause,
+                {},
+                "bool",
+                "Pauses the simulation time or restores the delta time"
+            },
+            {
+                "interpolateTogglePause",
+                &luascriptfunctions::time_interpolateTogglePause,
+                {},
+                "",
+                "Toggles the pause function, i.e. temporarily setting the delta time to 0"
+                " and restoring it afterwards"
             },
             {
                 "currentTime",

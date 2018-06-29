@@ -892,7 +892,8 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
 void RenderableFov::update(const UpdateData& data) {
     _drawFOV = false;
     if (openspace::ImageSequencer::ref().isReady()) {
-        _drawFOV = ImageSequencer::ref().isInstrumentActive(_instrument.name);
+        _drawFOV = ImageSequencer::ref().isInstrumentActive(data.time.j2000Seconds(),
+                                                            _instrument.name);
     }
 
     // TODO: figure out if time has changed
@@ -902,7 +903,7 @@ void RenderableFov::update(const UpdateData& data) {
         computeIntercepts(data, t.first, t.second);
         updateGPU();
 
-        const double t2 = (ImageSequencer::ref().nextCaptureTime());
+        const double t2 = (ImageSequencer::ref().nextCaptureTime(data.time.j2000Seconds()));
         const double diff = (t2 - data.time.j2000Seconds());
         _interpolationTime = 0.f;
         const float interpolationStart = 7.f; //seconds before

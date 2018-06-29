@@ -28,6 +28,7 @@
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
 #include <ext/json/json.hpp>
 
@@ -46,7 +47,9 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
         std::string value = json.at(ValueKey).get<std::string>();
 
         if (propertyKey == SpecialKeyTime) {
-            OsEng.timeManager().time().setTime(std::move(value));
+            Time newTime;
+            newTime.setTime(value);
+            OsEng.timeManager().setTimeNextFrame(newTime);
         }
         else {
             properties::Property* prop = property(propertyKey);

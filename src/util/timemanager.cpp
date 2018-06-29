@@ -32,12 +32,38 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
+    // Properties for time interpolation
+    // These are used when setting the time from lua time interpolation functions,
+    // when called without arguments.
+
     static const openspace::properties::Property::PropertyInfo
-    DefaultInterpolationDurationInfo = {
-        "DefaultInterpolationDuration",
-        "Default Interpolation Duration",
-        "The duration taken to interpolate in time, "
-        "unless another duration is specified by lua scripts etc. (In wallclock seconds)"
+    DefaultTimeInterpolationDurationInfo = {
+        "DefaultTimeInterpolationDuration",
+        "Default Time Interpolation Duration",
+        "The default duration taken to interpolate between times"
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+    DefaultDeltaTimeInterpolationDurationInfo = {
+        "DefaultDeltaTimeInterpolationDuration",
+        "Default Delta Time Interpolation Duration",
+        "The default duration taken to interpolate between delta times"
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+        DefaultPauseInterpolationDurationInfo = {
+        "DefaultPauseInterpolationDuration",
+        "Default Pause Interpolation Duration",
+        "The default duration taken to transition to the paused state, "
+        "when interpolating"
+    };
+
+    static const openspace::properties::Property::PropertyInfo
+        DefaultUnpauseInterpolationDurationInfo = {
+        "DefaultUnpauseInterpolationDuration",
+        "Default Unpause Interpolation Duration",
+        "The default duration taken to transition to the unpaused state, "
+        "when interpolating"
     };
 
     const char* _loggerCat = "TimeManager";
@@ -49,12 +75,18 @@ using datamessagestructures::TimeKeyframe;
 
 TimeManager::TimeManager()
     : properties::PropertyOwner({ "TimeManager" })
-    , _defaultInterpolationDuration(DefaultInterpolationDurationInfo, 0.5f, 0.f, 5.f)
+    , _defaultTimeInterpolationDuration(DefaultTimeInterpolationDurationInfo, 2.0f, 0.f, 5.f)
+    , _defaultDeltaTimeInterpolationDuration(DefaultDeltaTimeInterpolationDurationInfo, 1.0f, 0.f, 5.f)
+    , _defaultPauseInterpolationDuration(DefaultPauseInterpolationDurationInfo, 0.5f, 0.f, 5.f)
+    , _defaultUnpauseInterpolationDuration(DefaultUnpauseInterpolationDurationInfo, 1.0f, 0.f, 5.f)
 {
-    addProperty(_defaultInterpolationDuration);
+    addProperty(_defaultTimeInterpolationDuration);
+    addProperty(_defaultDeltaTimeInterpolationDuration);
+    addProperty(_defaultPauseInterpolationDuration);
+    addProperty(_defaultUnpauseInterpolationDuration);
 }
 
-void TimeManager::addInterpolation(double targetTime, double durationSeconds) {
+void TimeManager::interpolateTime(double targetTime, double durationSeconds) {
     ghoul_precondition(durationSeconds > 0.f, "durationSeconds must be positive");
 
     const double now = OsEng.windowWrapper().applicationTime();
@@ -141,6 +173,7 @@ TimeKeyframeData TimeManager::interpolate(double applicationTime) {
 }
 
 void TimeManager::progressTime(double dt) {
+    static_cast<Time&>(_integrateFromTime) = _currentTime;
     // Frames     |    1                    2          |
     //            |------------------------------------|
     // Keyframes  | a     b             c       d   e  |
@@ -154,7 +187,8 @@ void TimeManager::progressTime(double dt) {
     if (_shouldSetTime) {
         // Setting the time using `setTimeNextFrame`
         // will override any timeline operations.
-        time().setTime(_timeNextFrame.j2000Seconds());
+        static_cast<Time&>(_currentTime).setTime(_timeNextFrame.j2000Seconds());
+        static_cast<Time&>(_integrateFromTime).setTime(_timeNextFrame.j2000Seconds());
         _shouldSetTime = false;
 
         using K = const CallbackHandle;
@@ -191,7 +225,7 @@ void TimeManager::progressTime(double dt) {
         // interpolate between those.
         TimeKeyframeData interpolated =
             interpolate(*lastPastKeyframe, *firstFutureKeyframe, now);
-        time().setTime(interpolated.time.j2000Seconds());
+        static_cast<Time&>(_currentTime).setTime(interpolated.time.j2000Seconds());
         _deltaTime = interpolated.delta;
     } else if (!hasConsumedLastPastKeyframe) {
         applyKeyframeData(lastPastKeyframe->data);
@@ -199,7 +233,7 @@ void TimeManager::progressTime(double dt) {
         // If there are no keyframes to consider
         // and time is not paused, just advance time.
         _deltaTime = _targetDeltaTime;
-        time().advanceTime(dt * _deltaTime);
+        static_cast<Time&>(_currentTime).advanceTime(dt * _deltaTime);
     }
 
     if (hasPastKeyframes) {
@@ -208,12 +242,12 @@ void TimeManager::progressTime(double dt) {
 }
 
 TimeKeyframeData TimeManager::interpolate(
-    const Keyframe<TimeKeyframeData>& past, 
+    const Keyframe<TimeKeyframeData>& past,
     const Keyframe<TimeKeyframeData>& future,
     double appTime)
 {
     // https://en.wikipedia.org/wiki/Spline_interpolation
-    // q = (1 - t)y1 + t*y2 + t(1 - t)(a(1 - t) + bt), where
+    // interpolatedTime = (1 - t)y1 + t*y2 + t(1 - t)(a(1 - t) + bt), where
     // a = k1 * deltaAppTime - deltaSimTime,
     // b = -k2 * deltaAppTime + deltaSimTime,
     // with y1 = pastTime, y2 = futureTime, k1 = past dt, k2 = future dt.
@@ -231,9 +265,12 @@ TimeKeyframeData TimeManager::interpolate(
     const double b = -futureDerivative * deltaAppTime + deltaSimTime;
 
     const double interpolatedTime =
-        (1 - t)*pastSimTime + t*futureSimTime + t*(1 - t)*(a*(1 - t) + b*t);
+        (1 - t)*pastSimTime + t * futureSimTime + t * (1 - t)*(a*(1 - t) + b * t);
+
+    // Derivative of interpolated time.
+    // Division by deltaAppTime to get appTime derivative as opposed to t (in [0, 1]) derivative.
     const double interpolatedDeltaTime =
-        3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime;
+        (3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime) / deltaAppTime;
 
     TimeKeyframeData data {
         interpolatedTime,
@@ -278,7 +315,7 @@ TimeKeyframeData TimeManager::interpolate(
 
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframeData) {
     const Time& currentTime = keyframeData.time;
-    time().setTime(currentTime.j2000Seconds());
+    static_cast<Time&>(_currentTime).setTime(currentTime.j2000Seconds());
     _timePaused = keyframeData.pause;
     _targetDeltaTime = keyframeData.delta;
     _deltaTime = _targetDeltaTime;
@@ -319,12 +356,21 @@ void TimeManager::setTimeNextFrame(Time t) {
     clearKeyframes();
 }
 
+
+void TimeManager::setDeltaTime(double deltaTime) {
+    interpolateDeltaTime(deltaTime, 0.0);
+}
+
 size_t TimeManager::nKeyframes() const {
     return _timeline.nKeyframes();
 }
 
-Time& TimeManager::time() {
+const Time& TimeManager::time() const {
     return _currentTime;
+}
+
+const Time& TimeManager::integrateFromTime() const {
+    return _integrateFromTime;
 }
 
 const Timeline<TimeKeyframeData>& TimeManager::timeline() {
@@ -332,7 +378,7 @@ const Timeline<TimeKeyframeData>& TimeManager::timeline() {
 }
 
 std::vector<Syncable*> TimeManager::getSyncables() {
-    return { &_currentTime };
+    return { &_currentTime, &_integrateFromTime };
 }
 
 TimeManager::CallbackHandle TimeManager::addTimeChangeCallback(TimeChangeCallback cb) {
@@ -433,6 +479,22 @@ bool TimeManager::isPaused() const {
     return _timePaused;
 }
 
+float TimeManager::defaultTimeInterpolationDuration() const {
+    return _defaultTimeInterpolationDuration;
+}
+
+float TimeManager::defaultDeltaTimeInterpolationDuration() const {
+    return _defaultDeltaTimeInterpolationDuration;
+}
+
+float TimeManager::defaultPauseInterpolationDuration() const {
+    return _defaultPauseInterpolationDuration;
+}
+
+float TimeManager::defaultUnpauseInterpolationDuration() const {
+    return _defaultUnpauseInterpolationDuration;
+}
+
 double TimeManager::deltaTime() const {
     return _deltaTime;
 }
@@ -441,11 +503,7 @@ double TimeManager::targetDeltaTime() const {
     return _targetDeltaTime;
 }
 
-void TimeManager::setTargetDeltaTime(double newDeltaTime) {
-    setTargetDeltaTime(newDeltaTime, _defaultInterpolationDuration);
-}
-
-void TimeManager::setTargetDeltaTime(double newDeltaTime, double interpolationDuration) {
+void TimeManager::interpolateDeltaTime(double newDeltaTime, double interpolationDuration) {
     if (newDeltaTime == _targetDeltaTime) {
         return;
     }
@@ -458,6 +516,7 @@ void TimeManager::setTargetDeltaTime(double newDeltaTime, double interpolationDu
     }
 
     const double now = OsEng.windowWrapper().applicationTime();
+
     Time newTime = time().j2000Seconds() +
         (_deltaTime + newDeltaTime) * 0.5 * interpolationDuration;
 
@@ -471,10 +530,10 @@ void TimeManager::setTargetDeltaTime(double newDeltaTime, double interpolationDu
 }
 
 void TimeManager::setPause(bool pause) {
-    setPause(pause, _defaultInterpolationDuration);
+    interpolatePause(pause, 0);
 }
 
-void TimeManager::setPause(bool pause, double interpolationDuration) {
+void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
     if (pause == _timePaused) {
         return;
     }
@@ -493,15 +552,6 @@ void TimeManager::setPause(bool pause, double interpolationDuration) {
         addKeyframe(now, currentKeyframe);
     }
     addKeyframe(now + interpolationDuration, futureKeyframe);
-}
-
-bool TimeManager::togglePause() {
-    return togglePause(_defaultInterpolationDuration);
-}
-
-bool TimeManager::togglePause(double interpolationDuration) {
-    setPause(!_timePaused, interpolationDuration);
-    return _timePaused;
 }
 
 } // namespace openspace

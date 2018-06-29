@@ -45,6 +45,7 @@ struct TransformData {
 struct UpdateData {
     TransformData modelTransform;
     const Time time;
+    const Time integrateFromTime;
     const bool doPerformanceMeasurement;
 };
 

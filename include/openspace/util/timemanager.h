@@ -56,7 +56,8 @@ public:
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
 
-    Time& time();
+    const Time& time() const;
+    const Time& integrateFromTime() const;
     const Timeline<TimeKeyframeData>& timeline();
 
     std::vector<Syncable*> getSyncables();
@@ -64,29 +65,29 @@ public:
 
     TimeKeyframeData interpolate(double applicationTime);
 
-    void addInterpolation(double targetTime, double durationSeconds);
+    void setTimeNextFrame(Time t);
+    void setDeltaTime(double deltaTime);
+    void setPause(bool pause);
+
+    double targetDeltaTime() const;
+    double deltaTime() const;
+    bool isPaused() const;
+
+    float defaultTimeInterpolationDuration() const;
+    float defaultDeltaTimeInterpolationDuration() const;
+    float defaultPauseInterpolationDuration() const;
+    float defaultUnpauseInterpolationDuration() const;
+
+    void interpolateTime(double targetTime, double durationSeconds);
+    void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
+    void interpolatePause(bool pause, double durationSeconds);
 
     void addKeyframe(double timestamp, TimeKeyframeData kf);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
 
-    void clearKeyframes();
-    void setTimeNextFrame(Time t);
     size_t nKeyframes() const;
-
-    double targetDeltaTime() const;
-    double deltaTime() const;
-
-    void setTargetDeltaTime(double deltaTime);
-    void setTargetDeltaTime(double deltaTime, double interpolationDuration);
-
-    void setPause(bool pause);
-    void setPause(bool pause, double interpolationDuration);
-
-    bool togglePause();
-    bool togglePause(double interpolationDuration);
-
-    bool isPaused() const;
+    void clearKeyframes();
 
     CallbackHandle addTimeChangeCallback(TimeChangeCallback cb);
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
@@ -105,20 +106,25 @@ private:
         const Keyframe<TimeKeyframeData>& future,
         double time);
 
+    Timeline<TimeKeyframeData> _timeline;
+    SyncData<Time> _currentTime;
+    SyncData<Time> _integrateFromTime;
+
     bool _timePaused = false;
     double _targetDeltaTime = 1.0;
     double _deltaTime = 0.0;
-    properties::FloatProperty _defaultInterpolationDuration;
+    double _lastTime = 0;
+    double _lastDeltaTime = 0;
+
+    properties::FloatProperty _defaultTimeInterpolationDuration;
+    properties::FloatProperty _defaultDeltaTimeInterpolationDuration;
+    properties::FloatProperty _defaultPauseInterpolationDuration;
+    properties::FloatProperty _defaultUnpauseInterpolationDuration;
 
     bool _shouldSetTime = false;
     Time _timeNextFrame;
 
-    double _lastTime = 0;
-    double _lastDeltaTime = 0;
     bool _timelineChanged;
-
-    Timeline<TimeKeyframeData> _timeline;
-    SyncData<Time> _currentTime;
 
     double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;

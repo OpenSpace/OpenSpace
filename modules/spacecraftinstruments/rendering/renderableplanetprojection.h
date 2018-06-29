@@ -30,6 +30,7 @@
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace {
@@ -90,6 +91,9 @@ private:
     properties::FloatProperty _heightExaggeration;
     properties::BoolProperty _meridianShift;
     properties::FloatProperty _ambientBrightness;
+    properties::IntProperty _maxProjectionsPerFrame;
+    properties::IntProperty _projectionsInBuffer;
+    properties::TriggerProperty _clearProjectionBuffer;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
 
@@ -101,8 +105,6 @@ private:
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
     glm::vec3 _boresight;
-
-    double _time = -std::numeric_limits<double>::max();
 
     std::vector<Image> _imageTimes;
 

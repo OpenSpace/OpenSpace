@@ -385,21 +385,21 @@ void RenderableModelProjection::update(const UpdateData& data) {
     }
 
     const double time = data.time.j2000Seconds();
+    const double integrateFromTime = data.integrateFromTime.j2000Seconds();
 
     // Only project new images if time changed since last update.
-    if (time != _time) {
+    if (time > integrateFromTime) {
         if (ImageSequencer::ref().isReady()) {
-            ImageSequencer::ref().updateSequencer(time);
             if (_projectionComponent.doesPerformProjection()) {
                 _shouldCapture = ImageSequencer::ref().imagePaths(
                     _imageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),
-                    _time
+                    time, 
+                    integrateFromTime
                 );
             }
         }
-        _time = time;
     }
 
     glm::dmat3 stateMatrix = data.modelTransform.rotation;

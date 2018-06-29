@@ -57,15 +57,11 @@ bool ImageSequencer::isReady() {
     return _hasData;
 }
 
-void ImageSequencer::updateSequencer(const Time& time) {
-    _currentTime = time.j2000Seconds();
-}
-
-std::pair<double, std::string> ImageSequencer::nextTarget() {
+std::pair<double, std::string> ImageSequencer::nextTarget(double time) {
     const auto it = std::lower_bound(
         _targetTimes.begin(),
         _targetTimes.end(),
-        _currentTime,
+        time,
         [](const std::pair<double, std::string>& a, double b) { return a.first < b; }
     );
 
@@ -77,11 +73,11 @@ std::pair<double, std::string> ImageSequencer::nextTarget() {
     }
 }
 
-std::pair<double, std::string> ImageSequencer::currentTarget() {
+std::pair<double, std::string> ImageSequencer::currentTarget(double time) {
     const auto it = std::lower_bound(
         _targetTimes.begin(),
         _targetTimes.end(),
-        _currentTime,
+        time,
         [](const std::pair<double, std::string>& a, double b) { return a.first < b; }
     );
 
@@ -94,14 +90,15 @@ std::pair<double, std::string> ImageSequencer::currentTarget() {
 }
 
 std::pair<double, std::vector<std::string>> ImageSequencer::incidentTargetList(
-                                                                                int range)
+                                                                              double time,
+                                                                              int range)
 {
     std::pair<double, std::vector<std::string>> incidentTargets;
 
     auto it = std::lower_bound(
         _targetTimes.begin(),
         _targetTimes.end(),
-        _currentTime,
+        time,
         [](const std::pair<double, std::string>& a, double b) { return a.first < b; }
     );
 
@@ -123,20 +120,20 @@ std::pair<double, std::vector<std::string>> ImageSequencer::incidentTargetList(
     return incidentTargets;
 }
 
-double ImageSequencer::intervalLength() {
-    const double upcoming = nextCaptureTime();
+double ImageSequencer::intervalLength(double time) {
+    const double upcoming = nextCaptureTime(time);
     if (_nextCapture != upcoming) {
         _nextCapture = upcoming;
-        _intervalLength = upcoming - _currentTime;
+        _intervalLength = upcoming - time;
     }
     return _intervalLength;
 }
 
-double ImageSequencer::nextCaptureTime() {
+double ImageSequencer::nextCaptureTime(double currentTime) {
     const auto it = std::lower_bound(
         _captureProgression.begin(),
         _captureProgression.end(),
-        _currentTime
+        currentTime
     );
     if (it != _captureProgression.end()) {
         return *it;
@@ -156,7 +153,7 @@ Image ImageSequencer::latestImageForInstrument(const std::string& instrumentID) 
     }
 }
 
-std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments() {
+std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(double time) {
     // first set all instruments to off
     for (std::pair<std::string, bool>& i : _switchingMap) {
         i.second = false;
@@ -169,7 +166,7 @@ std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments() {
         // for each spice-instrument
         for (const std::string& instrumentID : key.second->translations()) {
             // check if the spice-instrument is active
-            if (isInstrumentActive(instrumentID)) {
+            if (isInstrumentActive(time, instrumentID)) {
                 // go over switching map
                 for (std::pair<std::string, bool>& instrument : _switchingMap) {
                     // if instrument is present in switching map
@@ -185,10 +182,10 @@ std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments() {
     return _switchingMap;
 }
 
-bool ImageSequencer::isInstrumentActive(const std::string& instrumentID) {
+bool ImageSequencer::isInstrumentActive(double time, const std::string& instrumentID) {
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
         //check if this instrument is in range
-        if (i.second.includes(_currentTime)) {
+        if (i.second.includes(time)) {
             //if so, then get the corresponding spiceID
             const std::vector<std::string>& ids =
                 _fileTranslation[i.first]->translations();
@@ -203,10 +200,10 @@ bool ImageSequencer::isInstrumentActive(const std::string& instrumentID) {
     return false;
 }
 
-float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) const {
+float ImageSequencer::instrumentActiveTime(double time, const std::string& instrumentID) const {
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
         //check if this instrument is in range
-        if (i.second.includes(_currentTime)){
+        if (i.second.includes(time)){
             //if so, then get the corresponding spiceID
             const std::vector<std::string>& ids =
                 _fileTranslation.at(i.first)->translations();
@@ -215,7 +212,7 @@ float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) cons
             for (const std::string& s : ids) {
                 if (s == instrumentID) {
                     return static_cast<float>(
-                        (_currentTime - i.second.start) / (i.second.end - i.second.start)
+                        (time - i.second.start) / (i.second.end - i.second.start)
                     );
                 }
             }
@@ -226,18 +223,19 @@ float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) cons
 
 bool ImageSequencer::imagePaths(std::vector<Image>& captures,
                                 const std::string& projectee,
-                                const std::string& instrumentRequest, double sinceTime)
+                                const std::string& instrumentRequest,
+                                double time, double sinceTime)
 {
     // TODO: Check how this works with time jumps
 
     // check if this instance is either in range or
     // a valid candidate to recieve data
 
-    if (!isInstrumentActive(instrumentRequest)) {
+    if (!isInstrumentActive(time, instrumentRequest)) {
         return false;
     }
 
-    if (!_subsetMap[projectee]._range.includes(_currentTime) &&
+    if (!_subsetMap[projectee]._range.includes(time) &&
         !_subsetMap[projectee]._range.includes(sinceTime))
     {
         return false;
@@ -253,7 +251,7 @@ bool ImageSequencer::imagePaths(std::vector<Image>& captures,
     // what to look for
     Image findPrevious, findCurrent;
     findPrevious.timeRange.start = sinceTime;
-    findCurrent.timeRange.start = _currentTime;
+    findCurrent.timeRange.start = time;
 
     // find the two iterators that correspond to the latest time jump
     auto compareTime = [](const Image& a, const Image& b) -> bool {
