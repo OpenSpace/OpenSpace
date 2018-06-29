@@ -1028,11 +1028,24 @@ bool RenderablePlanesCloud::readSpeckFile() {
             }
 
             str >> textureIndex;
-            str >> dummy; // texture file name
+            std::string fileName;
+            str >> fileName; // texture file name
 
-            _textureFileMap.insert(
-            {textureIndex, absPath(_texturesPath + "/" + dummy) }
-            );
+            std::string fullPath = absPath(_texturesPath + '/' + fileName);
+            std::string pngPath =
+                ghoul::filesystem::File(fullPath).fullBaseName() + ".png";
+
+            if (FileSys.fileExists(fullPath)) {
+                _textureFileMap.insert({ textureIndex, fullPath });
+
+            }
+            else if (FileSys.fileExists(pngPath)) {
+                _textureFileMap.insert({ textureIndex, pngPath });
+            }
+            else {
+                LWARNING(fmt::format("Could not find image file {}", fileName));
+                _textureFileMap.insert({ textureIndex, "" });
+            }
         }
     }
 
