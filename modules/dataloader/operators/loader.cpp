@@ -151,18 +151,20 @@ Loader::Loader()
 
 void Loader::uploadData() {
     nfdchar_t *outPath = NULL;
-    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
+    nfdresult_t result = NFD_OpenDialog( "cdf", NULL, &outPath );
+    std::string fullPaths;
         
     // TODO: Separate thread
-    // if ( result == NFD_OKAY ) {
-    //     LINFO("Path(s): " + *outPath);
-    //     free(outPath);
-    // }
-    // else if ( result == NFD_CANCEL ) {
-    //     LINFO("User pressed cancel.");
-    // }
+    if ( outPath && result == NFD_OKAY ) {
+        fullPaths = outPath;
+        free(outPath);
+        LINFO("Paths = " + fullPaths);
+    }
+    else if ( result == NFD_CANCEL ) {
+        LINFO("User pressed cancel.");
+    }
     // else {
-    //     LINFO("Error: %s\n", NFD_GetError() );
+    //     LINFO("Error: \n" + *NFD_GetError() );
     // }
 
   // Linux
