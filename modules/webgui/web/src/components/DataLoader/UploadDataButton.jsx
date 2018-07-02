@@ -17,9 +17,8 @@ class UploadDataButton extends Component {
 	}
 
 	handleClick() {
-    // this.subscribeToFilepaths();
+    this.subscribeToFilepaths();
     this.triggerFilesToUpload();
-    this.props.setFilePaths("/home/mberg/Data/testData.cdf"); 
   }
 
   triggerFilesToUpload() {
@@ -32,9 +31,6 @@ class UploadDataButton extends Component {
 	
 	handleUploadedFiles(data) {
     this.props.setFilePaths(data.Value);
-
-    // Show window for changing task properties
-    // with "convert" button or something
   }
 	
 	render() {

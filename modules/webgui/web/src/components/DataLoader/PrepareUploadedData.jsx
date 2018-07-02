@@ -142,7 +142,11 @@ class PrepareUploadedData extends Component {
       <Window type="small"
               title="Prepare Data"
               size={windowSize}
+<<<<<<< HEAD
               position={{ x: 300, y: 300 }}
+=======
+              position={{ x: 100, y: 200 }}
+>>>>>>> Run file dialog on separate thread and connect chosen file to GUI
               closeCallback={() => this.setState({ activated: false })}>
         <div className={styles.content}>
           <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>

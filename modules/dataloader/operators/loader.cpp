@@ -150,22 +150,28 @@ Loader::Loader()
 }
 
 void Loader::uploadData() {
-    nfdchar_t *outPath = NULL;
-    nfdresult_t result = NFD_OpenDialog( "cdf", NULL, &outPath );
-    std::string fullPaths;
-        
-    // TODO: Separate thread
-    if ( outPath && result == NFD_OKAY ) {
-        fullPaths = outPath;
-        free(outPath);
-        LINFO("Paths = " + fullPaths);
+    {
+    std::thread t([&](){
+        LINFO("opened dialog?");
+        nfdchar_t *outPath = NULL;
+        nfdresult_t result = NFD_OpenDialog( "cdf", NULL, &outPath ); //TODO: handle different data types
+
+        if ( outPath && result == NFD_OKAY ) {
+            LINFO("selected a file."); 
+            _filePaths = outPath;
+            free(outPath);
+        }
+        else if ( result == NFD_CANCEL ) {
+            LINFO("User pressed cancel."); 
+        }
+        else {
+            std::string error = NFD_GetError();
+            LINFO("Error: \n" + error );
+        }
+    });
+
+    t.detach();
     }
-    else if ( result == NFD_CANCEL ) {
-        LINFO("User pressed cancel.");
-    }
-    // else {
-    //     LINFO("Error: \n" + *NFD_GetError() );
-    // }
 
   // Linux
   // #ifdef _linux
@@ -224,14 +230,14 @@ void Loader::uploadData() {
 //   // Still to do
 //   #endif
 
-;
+
 }
 
 void Loader::createInternalDataItemProperties() {
     module()->validateDataDirectory();
     std::vector<std::string> volumeItems = module()->volumeDataItems();
 
-    LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
+    // LDEBUG("volume items vec size " + std::to_string(volumeItems.size()));
 
     for (auto item : volumeItems) {
         const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(item);
