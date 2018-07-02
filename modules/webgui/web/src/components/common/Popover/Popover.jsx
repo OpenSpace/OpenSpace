@@ -27,7 +27,7 @@ class Popover extends Component {
   }
 
   get inheritedProps() {
-    const doNotInclude = 'title arrow closeCallback';
+    const doNotInclude = 'title arrow closeCallback detachable';
     return excludeKeys(this.props, doNotInclude);
   }
 
@@ -60,7 +60,7 @@ class Popover extends Component {
   }
 
   get asWindow() {
-    return (<Window {...this.props}>{ this.props.children }</Window>);
+    return (<Window {...excludeKeys(this.props, 'detachable arrow')}>{ this.props.children }</Window>);
   }
 
   toggleDetach() {

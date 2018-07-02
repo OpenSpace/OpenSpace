@@ -55,7 +55,6 @@ class OnScreenGui extends Component {
           <BottomBar />
         </section>
         <section style={{position: 'fixed'}}>
-          <DataLoader />
           <PrepareUploadedData />
         </section>
       </div>
