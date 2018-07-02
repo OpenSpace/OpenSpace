@@ -25,6 +25,11 @@
 #include <iostream>
 #include <thread>
 #include <string>
+
+#include <nfd.h>
+#include <stdio.h> // nfd
+#include <stdlib.h> // nfd
+
 #include <ghoul/lua/lua_helper.h>
 #include <modules/dataloader/operators/loader.h>
 #include <modules/dataloader/dataloadermodule.h>
@@ -145,63 +150,77 @@ Loader::Loader()
 }
 
 void Loader::uploadData() {
+    nfdchar_t *outPath = NULL;
+    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
+        
+    // TODO: Separate thread
+    // if ( result == NFD_OKAY ) {
+    //     LINFO("Path(s): " + *outPath);
+    //     free(outPath);
+    // }
+    // else if ( result == NFD_CANCEL ) {
+    //     LINFO("User pressed cancel.");
+    // }
+    // else {
+    //     LINFO("Error: %s\n", NFD_GetError() );
+    // }
 
   // Linux
-  #ifdef _linux
-  system("thunar /home/mberg");
+  // #ifdef _linux
+  // system("thunar /home/mberg");
 
   // Windows 
-  #elif _WIN32
+//   #elif _WIN32
 
-  char filepath[ MAX_PATH ];
+//   char filepath[ MAX_PATH ];
 
-  OPENFILENAME ofn;
-    ZeroMemory( &filepath, sizeof( filepath ) );
-    ZeroMemory( &ofn,      sizeof( ofn ) );
-    ofn.lStructSize  = sizeof( ofn );
-    ofn.hwndOwner    = NULL;  // If you have a window to center over, put its HANDLE here
-    ofn.lpstrFilter  = "Text Files\0*.txt\0Any File\0*.*\0";
-    ofn.lpstrFile    = filepath;
-    ofn.nMaxFile     = MAX_PATH;
-    ofn.lpstrTitle   = "Upload Data";
-    ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+//   OPENFILENAME ofn;
+//     ZeroMemory( &filepath, sizeof( filepath ) );
+//     ZeroMemory( &ofn,      sizeof( ofn ) );
+//     ofn.lStructSize  = sizeof( ofn );
+//     ofn.hwndOwner    = NULL;  // If you have a window to center over, put its HANDLE here
+//     ofn.lpstrFilter  = "Text Files\0*.txt\0Any File\0*.*\0";
+//     ofn.lpstrFile    = filepath;
+//     ofn.nMaxFile     = MAX_PATH;
+//     ofn.lpstrTitle   = "Upload Data";
+//     ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
   
-  if (GetOpenFileNameA( &ofn ))
-  {
-	// ghoul::filesystem::Directory fileDir(filepath);    
-    // _filePaths = fileDir.readDirectories(
-    //   ghoul::filesystem::Directory::Recursive::No,
-    //   ghoul::filesystem::Directory::Sort::Yes
-    // );
-    _filePaths = filepath;
-  }
-  else
-  {
-    // All the below is to print incorrect user input. 
-    switch (CommDlgExtendedError())
-    {
-      case CDERR_DIALOGFAILURE   : std::cout << "CDERR_DIALOGFAILURE\n";   break;
-      case CDERR_FINDRESFAILURE  : std::cout << "CDERR_FINDRESFAILURE\n";  break;
-      case CDERR_INITIALIZATION  : std::cout << "CDERR_INITIALIZATION\n";  break;
-      case CDERR_LOADRESFAILURE  : std::cout << "CDERR_LOADRESFAILURE\n";  break;
-      case CDERR_LOADSTRFAILURE  : std::cout << "CDERR_LOADSTRFAILURE\n";  break;
-      case CDERR_LOCKRESFAILURE  : std::cout << "CDERR_LOCKRESFAILURE\n";  break;
-      case CDERR_MEMALLOCFAILURE : std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
-      case CDERR_MEMLOCKFAILURE  : std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
-      case CDERR_NOHINSTANCE     : std::cout << "CDERR_NOHINSTANCE\n";     break;
-      case CDERR_NOHOOK          : std::cout << "CDERR_NOHOOK\n";          break;
-      case CDERR_NOTEMPLATE      : std::cout << "CDERR_NOTEMPLATE\n";      break;
-      case CDERR_STRUCTSIZE      : std::cout << "CDERR_STRUCTSIZE\n";      break;
-      case FNERR_BUFFERTOOSMALL  : std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
-      case FNERR_INVALIDFILENAME : std::cout << "FNERR_INVALIDFILENAME\n"; break;
-      case FNERR_SUBCLASSFAILURE : std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
-      default                    : std::cout << "You cancelled.\n";
-    }
-  }
-  // MAC
-  #elif __APPLE__
-  // Still to do
-  #endif
+//   if (GetOpenFileNameA( &ofn ))
+//   {
+// 	// ghoul::filesystem::Directory fileDir(filepath);    
+//     // _filePaths = fileDir.readDirectories(
+//     //   ghoul::filesystem::Directory::Recursive::No,
+//     //   ghoul::filesystem::Directory::Sort::Yes
+//     // );
+//     _filePaths = filepath;
+//   }
+//   else
+//   {
+//     // All the below is to print incorrect user input. 
+//     switch (CommDlgExtendedError())
+//     {
+//       case CDERR_DIALOGFAILURE   : std::cout << "CDERR_DIALOGFAILURE\n";   break;
+//       case CDERR_FINDRESFAILURE  : std::cout << "CDERR_FINDRESFAILURE\n";  break;
+//       case CDERR_INITIALIZATION  : std::cout << "CDERR_INITIALIZATION\n";  break;
+//       case CDERR_LOADRESFAILURE  : std::cout << "CDERR_LOADRESFAILURE\n";  break;
+//       case CDERR_LOADSTRFAILURE  : std::cout << "CDERR_LOADSTRFAILURE\n";  break;
+//       case CDERR_LOCKRESFAILURE  : std::cout << "CDERR_LOCKRESFAILURE\n";  break;
+//       case CDERR_MEMALLOCFAILURE : std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
+//       case CDERR_MEMLOCKFAILURE  : std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
+//       case CDERR_NOHINSTANCE     : std::cout << "CDERR_NOHINSTANCE\n";     break;
+//       case CDERR_NOHOOK          : std::cout << "CDERR_NOHOOK\n";          break;
+//       case CDERR_NOTEMPLATE      : std::cout << "CDERR_NOTEMPLATE\n";      break;
+//       case CDERR_STRUCTSIZE      : std::cout << "CDERR_STRUCTSIZE\n";      break;
+//       case FNERR_BUFFERTOOSMALL  : std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
+//       case FNERR_INVALIDFILENAME : std::cout << "FNERR_INVALIDFILENAME\n"; break;
+//       case FNERR_SUBCLASSFAILURE : std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
+//       default                    : std::cout << "You cancelled.\n";
+//     }
+//   }
+//   // MAC
+//   #elif __APPLE__
+//   // Still to do
+//   #endif
 
 ;
 }

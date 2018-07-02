@@ -52,3 +52,41 @@ create_new_module(
     STATIC
     ${HEADER_FILES} ${SOURCE_FILES} 
 )
+
+# target_include_directories(
+#     openspace-module-dataloader
+#     SYSTEM PUBLIC
+#     ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/include
+# )
+# 
+# # TODO: generalize
+# target_link_libraries(
+#     openspace-module-dataloader
+#     ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/build/lib/Debug/x64/libnfd_d.a
+# )
+# 
+# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/build/lib/Debug/x64)
+
+set (NFD_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_common.c)
+
+# linux
+if (UNIX AND (NOT APPLE))
+    FIND_PACKAGE(PkgConfig REQUIRED)
+    PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)
+    pkg_search_module(GLIB REQUIRED glib-2.0)
+
+
+    set (NFD_SOURCE_FILES ${NFD_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_gtk.c)
+    include_directories(${GTK3_INCLUDE_DIRS})
+    link_directories(${GTK3_LIBRARY_DIRS})
+    add_definitions(${GTK3_CFLAGS_OTHER})
+endif()
+
+# message(WARNING "nfd ${NFD_SOURCE_FILES}")
+
+add_library(nativefiledialog ${NFD_SOURCE_FILES})
+target_include_directories(nativefiledialog SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/include) #unneeded?
+
+target_link_libraries(openspace-module-dataloader nativefiledialog ${GLIB_LDFLAGS} ${GTK3_LIBRARIES})
+
+# register_external_libraries("${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/build/lib/Release/x64/libnfd.a/")

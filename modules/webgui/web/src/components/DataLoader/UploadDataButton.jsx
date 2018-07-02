@@ -18,8 +18,8 @@ class UploadDataButton extends Component {
 
 	handleClick() {
     // this.subscribeToFilepaths();
-    // this.triggerFilesToUpload();
-   this.props.setFilePaths("/home/mberg/Data/testData.cdf"); 
+    this.triggerFilesToUpload();
+    this.props.setFilePaths("/home/mberg/Data/testData.cdf"); 
   }
 
   triggerFilesToUpload() {
