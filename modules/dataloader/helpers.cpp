@@ -18,13 +18,14 @@ namespace {
 } 
 
 std::string getDirLeaf(std::string dir) {
-    std::regex dirLeaf_regex("([^/]+)/?$");
-    std::smatch dirLeaf_match;
+    std::regex dirLeafRegex("([^/]+)/?$");
+    std::smatch dirLeafMatch;
 
-    if (std::regex_search(dir, dirLeaf_match, dirLeaf_regex)) {
-        return dirLeaf_match[0].str();
+    if (std::regex_search(dir, dirLeafMatch, dirLeafRegex)) {
+        return dirLeafMatch[0].str();
     } else {
         LWARNING("Found no match in " + dir + ".");
+        return "";
     }
 }
 
@@ -52,4 +53,15 @@ std::string getFileWithExtensionFromItemFolder(std::string absPathToItem, std::s
     return filePath;
 }
 
+std::string getFileBaseName(std::string file) {
+    std::regex fileRegex("(.*)\.[^.]+$");
+    std::smatch fileMatch; 
+
+    if (std::regex_search(file, fileMatch, fileRegex)) {
+        return fileMatch[0].str();
+    } else {
+        LWARNING("Found no base name for file " + file + ".");
+        return "";
+    }
+}
 }

@@ -48,6 +48,11 @@
 #include <windows.h>
 #endif
 
+using Directory = ghoul::filesystem::Directory;
+using RawPath = ghoul::filesystem::Directory::RawPath;
+using Recursive = ghoul::filesystem::Directory::Recursive;
+// using PathSeparator = FileSys.PathSeparator;
+
 namespace {
 constexpr const char* _loggerCat = "Loader";
 constexpr const char* KeyTime = "Time";
@@ -56,6 +61,7 @@ const std::string scaleTypeKey = "StaticScale";
 const std::string translationTypeKey = "SpiceTranslation";
 const std::string volumesGuiPathKey = "/Solar System/Volumes";
 const std::string KeyVolumeToRawTask = "KameleonVolumeToRawTask";
+const std::string KeyVariable = "Variable";
 
 const bool guiHidden = false;
 } 
@@ -98,6 +104,10 @@ Loader::Loader()
 }
 
 void Loader::uploadData() {
+    std::string test = "mas_merged_rho_2.cdf";
+    std::string result = openspace::dataloader::helpers::getFileBaseName(test);
+    LDEBUG("result = " + result);
+
     {
     std::thread t([&](){
         LINFO("opened dialog?");
@@ -120,65 +130,6 @@ void Loader::uploadData() {
 
     t.detach();
     }
-
-  // Linux
-  // #ifdef _linux
-  // system("thunar /home/mberg");
-
-  // Windows 
-//   #elif _WIN32
-
-//   char filepath[ MAX_PATH ];
-
-//   OPENFILENAME ofn;
-//     ZeroMemory( &filepath, sizeof( filepath ) );
-//     ZeroMemory( &ofn,      sizeof( ofn ) );
-//     ofn.lStructSize  = sizeof( ofn );
-//     ofn.hwndOwner    = NULL;  // If you have a window to center over, put its HANDLE here
-//     ofn.lpstrFilter  = "Text Files\0*.txt\0Any File\0*.*\0";
-//     ofn.lpstrFile    = filepath;
-//     ofn.nMaxFile     = MAX_PATH;
-//     ofn.lpstrTitle   = "Upload Data";
-//     ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
-  
-//   if (GetOpenFileNameA( &ofn ))
-//   {
-// 	// ghoul::filesystem::Directory fileDir(filepath);    
-//     // _filePaths = fileDir.readDirectories(
-//     //   ghoul::filesystem::Directory::Recursive::No,
-//     //   ghoul::filesystem::Directory::Sort::Yes
-//     // );
-//     _filePaths = filepath;
-//   }
-//   else
-//   {
-//     // All the below is to print incorrect user input. 
-//     switch (CommDlgExtendedError())
-//     {
-//       case CDERR_DIALOGFAILURE   : std::cout << "CDERR_DIALOGFAILURE\n";   break;
-//       case CDERR_FINDRESFAILURE  : std::cout << "CDERR_FINDRESFAILURE\n";  break;
-//       case CDERR_INITIALIZATION  : std::cout << "CDERR_INITIALIZATION\n";  break;
-//       case CDERR_LOADRESFAILURE  : std::cout << "CDERR_LOADRESFAILURE\n";  break;
-//       case CDERR_LOADSTRFAILURE  : std::cout << "CDERR_LOADSTRFAILURE\n";  break;
-//       case CDERR_LOCKRESFAILURE  : std::cout << "CDERR_LOCKRESFAILURE\n";  break;
-//       case CDERR_MEMALLOCFAILURE : std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
-//       case CDERR_MEMLOCKFAILURE  : std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
-//       case CDERR_NOHINSTANCE     : std::cout << "CDERR_NOHINSTANCE\n";     break;
-//       case CDERR_NOHOOK          : std::cout << "CDERR_NOHOOK\n";          break;
-//       case CDERR_NOTEMPLATE      : std::cout << "CDERR_NOTEMPLATE\n";      break;
-//       case CDERR_STRUCTSIZE      : std::cout << "CDERR_STRUCTSIZE\n";      break;
-//       case FNERR_BUFFERTOOSMALL  : std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
-//       case FNERR_INVALIDFILENAME : std::cout << "FNERR_INVALIDFILENAME\n"; break;
-//       case FNERR_SUBCLASSFAILURE : std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
-//       default                    : std::cout << "You cancelled.\n";
-//     }
-//   }
-//   // MAC
-//   #elif __APPLE__
-//   // Still to do
-//   #endif
-
-
 }
 
 void Loader::createInternalDataItemProperties() {
@@ -287,7 +238,6 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
     // Case 1: _filePaths is a string of a single path to a single CDF file
 
     // Determine path to new volume item
-    std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/";
 
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
 
@@ -296,6 +246,33 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
     {
     std::thread t([&](){
+        std::string variable = _currentVolumeConversionDictionary.value<std::string>(KeyVariable);
+
+        // ??? won't work multithreaded
+        // std::string itemPathBase = "${DATA}" +
+        //     ghoul::filesystem::FileSystem::PathSeparator;
+        // LDEBUG(itemPathBase);
+        // itemPathBase += ".internal" +
+        //     ghoul::filesystem::FileSystem::PathSeparator;
+        // LDEBUG(itemPathBase);
+        // itemPathBase += "volumes_from_cdf" +
+        //     ghoul::filesystem::FileSystem::PathSeparator;
+        // LDEBUG(itemPathBase);
+        // itemPathBase += openspace::dataloader::helpers::getDirLeaf(_filePaths) + "_" + variable;
+
+        std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(_filePaths);
+        std::string itemName = openspace::dataloader::helpers::getFileBaseName(dirLeaf) + "_" + variable;
+        std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
+        Directory d(itemPathBase, RawPath::No);
+        FileSys.createDirectory(d);
+
+        std::string rawVolumeOutput = d.path() + "/" + itemName + ".rawvolume";
+        std::string dictionaryOutput = d.path() + "/" + itemName + ".dictionary";
+
+        _currentVolumeConversionDictionary.setValue("Type", KeyVolumeToRawTask);
+        _currentVolumeConversionDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
+        _currentVolumeConversionDictionary.setValue("DictionaryOutput", dictionaryOutput);
+
         auto volumeToRawTask = Task::createFromDictionary(_currentVolumeConversionDictionary);
 
         std::mutex m;
@@ -306,7 +283,8 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         };
 
         volumeToRawTask->perform(cb);
-        LINFO("Conversion complete");
+
+        LINFO("Created files in " + d.path());
     });
 
     t.detach();
