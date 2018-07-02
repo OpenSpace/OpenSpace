@@ -41,7 +41,7 @@ class UploadDataButton extends Component {
     return(
       <div>
         <Button onClick={() => this.handleClick()}>
-          Upload Data
+          <Label>Upload Data</Label>
         </Button>
       </div>
     );

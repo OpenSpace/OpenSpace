@@ -142,7 +142,7 @@ class PrepareUploadedData extends Component {
       <Window type="small"
               title="Prepare Data"
               size={windowSize}
-              position={{ x: 100, y: -100 }}
+              position={{ x: 300, y: 300 }}
               closeCallback={() => this.setState({ activated: false })}>
         <div className={styles.content}>
           <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>
