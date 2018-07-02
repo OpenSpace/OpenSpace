@@ -58,12 +58,6 @@ const std::string volumesGuiPathKey = "/Solar System/Volumes";
 const std::string KeyVolumeToRawTask = "KameleonVolumeToRawTask";
 
 const bool guiHidden = false;
-
-const std::string testInput = "/home/jgrangien/Data/mas_merged_step_276.cdf";
-const std::string testVariable = "rho";
-const std::string testFactor = "true";
-const std::string testRawOutput = "/home/jgrangien/Data/test/mas.rawvolume";
-const std::string testDictOutput = "/home/jgrangien/Data/test/mas.dictionary";
 } 
 
 namespace {
@@ -84,41 +78,6 @@ namespace {
       "Progress value for volume conversion",
       "This float value between 0 and 1 corresponds to the progress of volume conversion"
   };
-
-  static const openspace::properties::Property::PropertyInfo UploadedDataDimensionsInfo = {
-      "UploadedDataDimensions",
-      "The Dimensions of an uploaded data set",
-      "This property contains a three dimensional vector with the dimensional "
-      "values of the data that is to be uploaded"
-  };
-
-  static const openspace::properties::Property::PropertyInfo UploadedDataVariableInfo = {
-      "UploadedDataVariable",
-      "The variable from the volume data that is to be processed for visualization",
-      "This property says what variable is to be read from the volume data "
-      "to process for visualization in the engine."
-  };
-
-  static const openspace::properties::Property::PropertyInfo UploadedDataFactorRSquaredInfo = {
-      "UploadedDataFactorRSquared",
-      "Whether or not to factor the uploaded data with the radial component squared",
-      "This property says whether or not the processing of the data should "
-      "multiply each variable value with the radius squared"
-  };
-
-  static const openspace::properties::Property::PropertyInfo UploadedDataLowerDomainBoundsInfo = {
-      "UploadedDataLowerDomainBounds",
-      "Lower domain bounds for data to be uploaded.",
-      "This property contains a vector of the lower domain bounds for the data "
-      "that is to be uploaded and processed for visualization."
-  };
-
-  static const openspace::properties::Property::PropertyInfo UploadedDataHigherDomainBoundsInfo = {
-      "UploadedDataHigherDomainBounds",
-      "Higher domain bounds for data to be uploaded.",
-      "This property contains a vector of the higher domain bounds for the data "
-      "that is to be uploaded and processed for visualization."
-  };
 }
 
 namespace openspace::dataloader {
@@ -128,11 +87,6 @@ Loader::Loader()
     , _filePaths(SelectedFilesInfo)
     , _uploadDataTrigger(UploadDataTriggerInfo)
     , _volumeConversionProgress(VolumeConversionProgressInfo)
-    , _uploadedDataDimensions(UploadedDataDimensionsInfo)
-    , _uploadedDataVariable(UploadedDataVariableInfo)
-    , _uploadedDataFactorRSquared(UploadedDataFactorRSquaredInfo)
-    , _uploadedDataLowerDomainBounds(UploadedDataLowerDomainBoundsInfo)
-    , _uploadedDataHigherDomainBounds(UploadedDataHigherDomainBoundsInfo)
 {
     _uploadDataTrigger.onChange([this](){
         uploadData();
@@ -141,12 +95,6 @@ Loader::Loader()
     addProperty(_filePaths);
     addProperty(_uploadDataTrigger);
     addProperty(_volumeConversionProgress);
-
-    addProperty(_uploadedDataDimensions);
-    addProperty(_uploadedDataVariable);
-    addProperty(_uploadedDataFactorRSquared);
-    addProperty(_uploadedDataLowerDomainBounds);
-    addProperty(_uploadedDataHigherDomainBounds);
 }
 
 void Loader::uploadData() {

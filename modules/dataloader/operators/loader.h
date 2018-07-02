@@ -81,14 +81,6 @@ class Loader : public PropertyOwner, public Operator {
 
     ghoul::Dictionary _currentVolumeConversionDictionary;
   
-    // Volume specific. 
-    // Put in structs for different data types? Different file?
-    properties::DVec3Property _uploadedDataDimensions;
-    properties::StringProperty _uploadedDataVariable;
-    properties::BoolProperty _uploadedDataFactorRSquared;
-    properties::DVec3Property _uploadedDataLowerDomainBounds;
-    properties::DVec3Property _uploadedDataHigherDomainBounds;
-
     // State properties
 
     TaskLoader taskLoader;
