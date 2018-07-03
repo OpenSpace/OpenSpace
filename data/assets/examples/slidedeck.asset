@@ -2,29 +2,34 @@ local helper = asset.require('util/slidedeck_helper')
 local deck = nil
 
 asset.onInitialize(function ()
-	deck = helper.createDeck("example")
-	local identifier = helper.addSlide(deck, "${DATA}/test2.jpg")
-	local identifier = helper.addSlide(deck, "${DATA}/test3.jpg")
+    deck = helper.createDeck("example", {
+        FlatScreen = false,
+        SphericalPosition = {0.0, 3.1415 / 2},
+        Scale = 0.7
+    })
 
-	function nextSlide() 
-		openspace.printDebug(helper)
-	    helper.goToNextSlide(deck)
-	end
+    helper.addSlide(deck, "${DATA}/test2.jpg")
+    helper.addSlide(deck, "${DATA}/test3.jpg")
 
-	function previousSlide() 
-		openspace.printDebug(helper)
-	    helper.goToPreviousSlide(deck)
-	end
+    local interpolationDuration = 0
 
-	helper.setCurrentSlide(deck, 1)
-	openspace.bindKey("RIGHT", "nextSlide()")
-	openspace.bindKey("LEFT", "previousSlide()")
+    function nextSlide()
+        helper.goToNextSlide(deck, interpolationDuration)
+    end
+
+    function previousSlide()
+        helper.goToPreviousSlide(deck, interpolationDuration)
+    end
+
+    helper.setCurrentSlide(deck, 1)
+    openspace.bindKey("RIGHT", "nextSlide()")
+    openspace.bindKey("LEFT", "previousSlide()")
 
 end)
 
 
 asset.onDeinitialize(function()
-	openspace.clearKey("RIGHT")
-	openspace.clearKey("LEFT")
-	helper.removeDeck(deck)
+    openspace.clearKey("RIGHT")
+    openspace.clearKey("LEFT")
+    helper.removeDeck(deck)
 end)
