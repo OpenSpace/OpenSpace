@@ -95,7 +95,7 @@ Loader::Loader()
     , _volumeConversionProgress(VolumeConversionProgressInfo)
 {
     _uploadDataTrigger.onChange([this](){
-        uploadData();
+        selectData();
     });
 
     addProperty(_filePaths);
@@ -103,16 +103,15 @@ Loader::Loader()
     addProperty(_volumeConversionProgress);
 }
 
-// Rename select data
-void Loader::uploadData() {
+void Loader::selectData() {
     {
     std::thread t([&](){
         nfdchar_t *outPath = NULL;
         nfdresult_t result = NFD_OpenDialog( "cdf", NULL, &outPath ); //TODO: handle different data types
 
         if ( outPath && result == NFD_OKAY ) {
-            LINFO("selected a file."); 
             _filePaths = outPath;
+            _volumeConversionProgress = 0.0f;
             free(outPath);
         }
         else if ( result == NFD_CANCEL ) {
@@ -120,7 +119,7 @@ void Loader::uploadData() {
         }
         else {
             std::string error = NFD_GetError();
-            LINFO("Error: \n" + error );
+            LINFO("Error: \n" + error);
         }
     });
 

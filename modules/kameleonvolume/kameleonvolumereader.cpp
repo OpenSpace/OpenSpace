@@ -149,7 +149,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
     float* data = volume->data();
 
-    size_t progressUpdateStep = volume->nCells() / 20;
+    size_t progressUpdateStep = volume->nCells() / 10;
 
     for (size_t index = 0; index < volume->nCells(); ++index) {
         const glm::vec3 coords = volume->indexToCoords(index);
@@ -324,6 +324,8 @@ std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const 
 std::string KameleonVolumeReader::time() const {
     double start =
         ccmc::Time(simulationStart()).getEpoch();
+    // std::cout << "time = " + std::to_string(start) << std::endl;
+
     // Get elapsed time in seconds and convert to milliseconds.
     double elapsed = elapsedTime() * 1000;
     return ccmc::Time(start + elapsed).toString();

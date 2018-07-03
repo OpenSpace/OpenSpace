@@ -41,9 +41,9 @@ class ProgressBar extends React.Component {
     }
 
     initializeDots() {
-
         this.intervalHandle = setInterval(() => {
             const { dots } = this.state;
+
             if (dots.length < 3) {
                 this.setState({dots: dots + '.'});
             } else {
@@ -85,16 +85,14 @@ class ProgressBar extends React.Component {
 };
 
 ProgressBar.propTypes = {
-    label: PropTypes.string,
+    label: PropTypes.string.isRequired,
     initializingMsg: PropTypes.string,
-    progressPercent: PropTypes.number,
+    progressPercent: PropTypes.number.isRequired,
     colorFill: PropTypes.string,
 };
 
 ProgressBar.defaultProps = {
-    label: '',
     initializingMsg: 'Working',
-    progressPercent: 0,
     colorFill: '#aff7c0',
 }
 

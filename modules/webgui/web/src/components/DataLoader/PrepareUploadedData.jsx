@@ -24,7 +24,7 @@ class PrepareUploadedData extends Component {
     
     this.state = {
       volumeProgress: 0,
-      uploadButtonClicked: false,
+      uploadButtonIsClicked: false,
 
       activated: false,
       dimensions: { x: 100, y: 100, z: 128 },
@@ -48,7 +48,10 @@ class PrepareUploadedData extends Component {
     const { filePaths } = this.props;
 
     if( filePaths !== prevProps.filePaths && filePaths !== undefined ) {
-      this.setState({ activated: true });
+      this.setState({ 
+        activated: true, 
+        uploadButtonIsClicked: false
+      });
     }
 
     this.subscribeToVolumeConversionProgress();
@@ -98,7 +101,7 @@ class PrepareUploadedData extends Component {
   }
 
   upload() {
-    this.setState({uploadButtonClicked: true});
+    this.setState({uploadButtonIsClicked: true});
 
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state;
     let data = `\'
@@ -143,11 +146,7 @@ class PrepareUploadedData extends Component {
       <Window type="small"
               title="Prepare Data"
               size={windowSize}
-<<<<<<< HEAD
-              position={{ x: 300, y: 300 }}
-=======
               position={{ x: 100, y: 200 }}
->>>>>>> Run file dialog on separate thread and connect chosen file to GUI
               closeCallback={() => this.setState({ activated: false })}>
         <div className={styles.content}>
           <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>
@@ -165,7 +164,7 @@ class PrepareUploadedData extends Component {
           <Checkbox label='Factor r^2?'
                     onChange={this.changeRSquared}/>
           <Button onClick={() => this.upload()}> Convert </Button>
-          {this.state.uploadButtonClicked && (
+          {this.state.uploadButtonIsClicked && (
             <Row>
               <ProgressBar label='Volume conversion progress'
                            initializingMsg='Reading'
