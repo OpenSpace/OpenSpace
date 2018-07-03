@@ -29,8 +29,10 @@
 #include <nfd.h>
 #include <stdio.h> // nfd
 #include <stdlib.h> // nfd
+#include <experimental/filesystem>
 
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <modules/dataloader/operators/loader.h>
 #include <modules/dataloader/dataloadermodule.h>
 #include <openspace/scene/scene.h>
@@ -43,6 +45,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 
+
+#include <fstream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -62,6 +66,16 @@ const std::string translationTypeKey = "SpiceTranslation";
 const std::string volumesGuiPathKey = "/Solar System/Volumes";
 const std::string KeyVolumeToRawTask = "KameleonVolumeToRawTask";
 const std::string KeyVariable = "Variable";
+
+const std::string KeyStepSize = "StepSize";
+const std::string KeyGridType = "GridType";
+const std::string KeySecondsAfter = "SecondsAfter";
+const std::string KeySecondsBefore = "SecondsBefore";
+
+const double DefaultStepSize = 0.02;
+const std::string DefaultGridType = "Spherical";
+const double DefaultSecondsAfter = 24*60;
+const double DefaultSecondsBefore = 24*60;
 
 const bool guiHidden = false;
 } 
@@ -111,7 +125,7 @@ void Loader::selectData() {
 
         if ( outPath && result == NFD_OKAY ) {
             _filePaths = outPath;
-            _volumeConversionProgress = 0.0f;
+            _volumeConversionProgress = FLT_MIN;
             free(outPath);
         }
         else if ( result == NFD_CANCEL ) {
@@ -261,18 +275,49 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
         Directory d(itemPathBase, RawPath::No);
         FileSys.createDirectory(d);
+        const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
 
-        std::string rawVolumeOutput = d.path() + "/" + selectedFile.filename() + ".rawvolume";
-        std::string dictionaryOutput = d.path() + "/" + selectedFile.filename() + ".dictionary";
+        std::string rawVolumeOutput = outputBasePath + ".rawvolume";
+        std::string dictionaryOutput = outputBasePath + ".dictionary";
 
         _currentVolumeConversionDictionary.setValue("Type", KeyVolumeToRawTask);
         _currentVolumeConversionDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
         _currentVolumeConversionDictionary.setValue("DictionaryOutput", dictionaryOutput);
 
+        /*** create state file ***/
+        // Check if file exists
+        // If it exists, clear contents? delete and create new?
+        // Create file, write dictionary to string contents
+        std::initializer_list<std::pair<std::string, ghoul::any>> stateList = {
+            std::make_pair( KeyStepSize, DefaultStepSize ),
+            std::make_pair( KeyGridType, DefaultGridType ),
+            std::make_pair( KeySecondsAfter, DefaultSecondsAfter ),
+            std::make_pair( KeySecondsBefore, DefaultSecondsBefore )
+        };
+        ghoul::Dictionary stateDict(stateList);
+        ghoul::DictionaryLuaFormatter formatter;
+        std::string stateString = formatter.format(stateDict);
+        std::fstream f(outputBasePath + ".state", std::ios::out);
+        f << "return " << stateString;
+        f.close();
+
+        /*** copy over tf file ***/
+        std::ifstream tfSource(absPath("${DATA}/assets/scene/solarsystem/model/mas/transferfunctions/mas_mhd_r_squared.txt"));
+        std::ofstream tfDest(absPath(itemPathBase + "/transferfunction.txt"));
+        if (!tfSource) {
+            LERROR("Could not open source transferfunction file.");
+        }
+        if (!tfDest) {
+            LERROR("Could not open destination transferfunction file.");
+        }
+
+        tfDest << tfSource.rdbuf();
+        tfSource.close();
+        tfDest.close();
+
         auto volumeToRawTask = Task::createFromDictionary(_currentVolumeConversionDictionary);
 
         std::mutex m;
-        const float e = 0.0003f;
         std::function<void(float)> cb = [&](float progress) {
             std::lock_guard g(m);
             _volumeConversionProgress = progress;
@@ -281,6 +326,8 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         volumeToRawTask->perform(cb);
 
         LINFO("Created files in " + d.path());
+
+        loadDataItem(absPath(itemPathBase));
     });
 
     t.detach();
