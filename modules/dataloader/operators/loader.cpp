@@ -103,6 +103,7 @@ Loader::Loader()
     addProperty(_volumeConversionProgress);
 }
 
+// Rename select data
 void Loader::uploadData() {
     {
     std::thread t([&](){

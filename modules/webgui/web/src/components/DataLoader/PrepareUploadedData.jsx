@@ -24,6 +24,8 @@ class PrepareUploadedData extends Component {
     
     this.state = {
       volumeProgress: 0,
+      uploadButtonClicked: false,
+
       activated: false,
       dimensions: { x: 100, y: 100, z: 128 },
       lowerDomainBounds: { r: 1, theta: -90, phi: 0 },
@@ -96,18 +98,17 @@ class PrepareUploadedData extends Component {
   }
 
   upload() {
+    this.setState({uploadButtonClicked: true});
+
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state;
     let data = `\'
-      return { 
-        Type="KameleonVolumeToRawTask",
-        Input="/home/jgrangien/Data/mas_merged_step_276.cdf",
+      return {
+        Input="${this.props.filePaths}",
         Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
         Variable="${variable.toLowerCase()}",
         LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
         UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
-        FactorRSquared="${rSquared.toString()}",
-        RawVolumeOutput="/home/jgrangien/Data/test/mas.rawvolume",
-        DictionaryOutput="/home/jgrangien/Data/test/mas.dictionary" 
+        FactorRSquared="${rSquared.toString()}"
       }
     \'`
     data = removeLineBreakCharacters(data);
@@ -163,15 +164,14 @@ class PrepareUploadedData extends Component {
                         onChange={this.changeUpperDomainBounds}/>
           <Checkbox label='Factor r^2?'
                     onChange={this.changeRSquared}/>
-          <Button onClick={() => this.upload()}>
-            Convert
-          </Button>
-          { volumeProgressPercent >= 0.01 && (
+          <Button onClick={() => this.upload()}> Convert </Button>
+          {this.state.uploadButtonClicked && (
             <Row>
               <ProgressBar label='Volume conversion progress'
-                          progressPercent={volumeProgressPercent} />
+                           initializingMsg='Reading'
+                           progressPercent={volumeProgressPercent} />
             </Row>
-          )}
+          )} 
         </div>
       </Window>
     );
