@@ -1,0 +1,58 @@
+--apollo.scene
+
+local assetHelper = asset.require('util/asset_helper')
+local sceneHelper = asset.require('util/scene_helper')
+
+asset.require('spice/base')
+assetHelper.requestAll(asset, 'scene/solarsystem/sun')
+asset.require('scene/solarsystem/planets')
+asset.request('scene/digitaluniverse/stars')
+asset.request('scene/digitaluniverse/milkyway')
+
+-- Load default key bindings applicable to most scenes
+asset.require('util/default_keybindings')
+asset.require('util/default_dashboard')
+
+asset.request('customization/globebrowsing')
+
+local a15Asset = asset.require('scene/solarsystem/missions/apollo/a15')
+
+
+asset.onInitialize(function ()
+    openspace.time.setTime("1971-07-30T10:05:00.00")
+
+    openspace.setDefaultGuiSorting()
+
+    sceneHelper.setDeltaTimeKeys({
+      1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
+      28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
+    })
+
+    openspace.markInterestingNodes({
+        "Earth", "Moon", "Apollo15"
+    })
+
+    openspace.addVirtualProperty(
+        "BoolProperty",
+        "Show Trails",
+        "*Trail.renderable.Enabled",
+        "Disable or enable all trails of the scene at the same time",
+        true,
+        nil,
+        nil
+    )
+
+    openspace.navigation.setCameraState({
+        Focus = a15.Apollo15.Identifier,
+        Position = { 526781518487.171326, 257168309890.072144, -1381125204152.817383 },
+        Rotation = { -0.106166, 0.981574, -0.084545, 0.134513 },
+    })
+end)
+
+asset.onDeinitialize(function ()
+    openspace.removeVirtualProperty("*Trail.renderable.Enabled")
+
+    openspace.removeInterestingNodes({
+        "Earth", "Moon", "Apollo15"
+    })
+end)
