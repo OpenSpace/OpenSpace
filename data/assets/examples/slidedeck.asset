@@ -1,0 +1,30 @@
+local helper = asset.require('util/slidedeck_helper')
+local deck = nil
+
+asset.onInitialize(function ()
+	deck = helper.createDeck("example")
+	local identifier = helper.addSlide(deck, "${DATA}/test2.jpg")
+	local identifier = helper.addSlide(deck, "${DATA}/test3.jpg")
+
+	function nextSlide() 
+		openspace.printDebug(helper)
+	    helper.goToNextSlide(deck)
+	end
+
+	function previousSlide() 
+		openspace.printDebug(helper)
+	    helper.goToPreviousSlide(deck)
+	end
+
+	helper.setCurrentSlide(deck, 1)
+	openspace.bindKey("RIGHT", "nextSlide()")
+	openspace.bindKey("LEFT", "previousSlide()")
+
+end)
+
+
+asset.onDeinitialize(function()
+	openspace.clearKey("RIGHT")
+	openspace.clearKey("LEFT")
+	helper.removeDeck(deck)
+end)
