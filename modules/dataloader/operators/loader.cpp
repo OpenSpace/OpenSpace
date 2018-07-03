@@ -49,9 +49,9 @@
 #endif
 
 using Directory = ghoul::filesystem::Directory;
+using File = ghoul::filesystem::File;
 using RawPath = ghoul::filesystem::Directory::RawPath;
 using Recursive = ghoul::filesystem::Directory::Recursive;
-// using PathSeparator = FileSys.PathSeparator;
 
 namespace {
 constexpr const char* _loggerCat = "Loader";
@@ -104,13 +104,8 @@ Loader::Loader()
 }
 
 void Loader::uploadData() {
-    std::string test = "mas_merged_rho_2.cdf";
-    std::string result = openspace::dataloader::helpers::getFileBaseName(test);
-    LDEBUG("result = " + result);
-
     {
     std::thread t([&](){
-        LINFO("opened dialog?");
         nfdchar_t *outPath = NULL;
         nfdresult_t result = NFD_OpenDialog( "cdf", NULL, &outPath ); //TODO: handle different data types
 
@@ -260,14 +255,15 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         // LDEBUG(itemPathBase);
         // itemPathBase += openspace::dataloader::helpers::getDirLeaf(_filePaths) + "_" + variable;
 
-        std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(_filePaths);
-        std::string itemName = openspace::dataloader::helpers::getFileBaseName(dirLeaf) + "_" + variable;
+        auto selectedFile = File(_filePaths);
+        std::string selectedFileBaseName = selectedFile.baseName();
+        std::string itemName = selectedFileBaseName + "_" + variable;
         std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
         Directory d(itemPathBase, RawPath::No);
         FileSys.createDirectory(d);
 
-        std::string rawVolumeOutput = d.path() + "/" + itemName + ".rawvolume";
-        std::string dictionaryOutput = d.path() + "/" + itemName + ".dictionary";
+        std::string rawVolumeOutput = d.path() + "/" + selectedFile.filename() + ".rawvolume";
+        std::string dictionaryOutput = d.path() + "/" + selectedFile.filename() + ".dictionary";
 
         _currentVolumeConversionDictionary.setValue("Type", KeyVolumeToRawTask);
         _currentVolumeConversionDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
