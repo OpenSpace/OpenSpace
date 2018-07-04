@@ -181,7 +181,7 @@ local RA_Shoulder_AZ = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_RA_SHOULDER_AZ_new.obj"
         },
-        ColorTexture = textures .. "/tex_01.png",
+        ColorTexture = textures .. "/tex_03.png",
         GUI = {
             Path = "/Solar System/Planets/Mars/Curiosity/Model"
         }
@@ -659,7 +659,7 @@ local Wheel_Base = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_BASE.obj"
         },
-        ColorTexture = textures .. "/tex_03.png",
+        ColorTexture = textures .. "/tex_02.png",
         GUI = {
             Path = "/Solar System/Planets/Mars/Curiosity/Model"
         }
@@ -781,7 +781,7 @@ local Wheel_Wrist_F_L = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj"
         },
-        ColorTexture = textures .. "/tex_03.png",
+        ColorTexture = textures .. "/tex_02.png",
         GUI = {
             Path = "/Solar System/Planets/Mars/Curiosity/Model"
         }
@@ -850,7 +850,7 @@ local Wheel_Wrist_B_L = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_B_L.obj"
         },
-        ColorTexture = textures .. "/tex_03.png",
+        ColorTexture = textures .. "/tex_02.png",
         GUI = {
             Path = "/Solar System/Planets/Mars/Curiosity/Model"
         }
@@ -991,7 +991,7 @@ local Wheel_Wrist_F_R = {
           GeometryFile = models .. "/MSL_WHEEL_WRIST_F_R.obj"
           --GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj"
         },
-        ColorTexture = textures .. "/tex_03.png",
+        ColorTexture = textures .. "/tex_02.png",
         GUI = {
             Path = "/Solar System/Planets/Mars/Curiosity/Model"
         }
@@ -1062,7 +1062,7 @@ local Wheel_Wrist_B_R = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_1A_B_R.obj"
         },
-        ColorTexture = textures .. "/tex_03.png",
+        ColorTexture = textures .. "/tex_02.png",
         GUI = {
             Path = "/Solar System/Planets/Mars/Curiosity/Model"
         }

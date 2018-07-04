@@ -151,7 +151,7 @@ glm::dmat3 RksmlRotation::matrix(const Time& time) const {
                 time2 = nextKeyframe->data.frameTime; // x1
                 radians2 = nextKeyframe->data.rotValue; // y1
                 //(y0 * (x1 - value) + y1 * (value - x0)) / (x1 - x0);
-                radiansResult = (radians1 * (time2 - currentTime) + radians1 * (currentTime - time1)) / (time1 - time2); 
+                radiansResult = (radians1 * (time2 - currentTime) + radians2 * (currentTime - time1)) / (time2 - time1); 
             }
         }
         else 
