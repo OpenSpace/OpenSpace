@@ -56,8 +56,8 @@ local CuriosityKernels = {
     
     kernels .. "/SPK/mar085s.bsp",
     kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
-    --kernels .. "/SPK/msl_surf_rover_tlm.bsp",
-    kernels .. "/SPK/msl_surf_rover_loc.bsp",
+    kernels .. "/SPK/msl_surf_rover_tlm.bsp",   --DONT USE THIS ONE WHEN WE HAVE THE DATA!!! FIX
+    --kernels .. "/SPK/msl_surf_rover_loc.bsp", --USE THIS ONE WHEN WE HAVE THE DATA!!! FIX
 
 
 

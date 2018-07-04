@@ -5,12 +5,12 @@ local marsTransforms2 = asset.require('scene/solarsystem/planets/mars/mars')
 
 --local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
-local wheeldata = asset.syncedResource({
-    Name = "Wheel Data",
-    Type = "HttpSynchronization",
-    Identifier = "marscuriosity_wheeldata",
-    Version = 1
-})
+--local wheeldata = asset.syncedResource({
+--    Name = "Wheel Data",
+--    Type = "HttpSynchronization",
+--    Identifier = "marscuriosity_wheeldata",
+--    Version = 1
+--})
 
 
 local extra_rot = {
@@ -20,8 +20,8 @@ local extra_rot = {
         Rotation = {
             Type = "StaticRotation",
             Rotation = { 1.0000000,  0.0000110, -0.0000120;
-  -0.0000110,  1.0000000,  0.0000000;
-   0.0000120,  0.0000000,  1.0000000
+                          -0.0000110,  1.0000000,  0.0000000;
+                           0.0000120,  0.0000000,  1.0000000
             }
         }
     },
@@ -84,6 +84,10 @@ local MSL_Body = {
         Translation = {
             Type = "StaticTranslation",
             Position = { 0.17, 0.0, -0.844 }
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 10.0
         }
     },
     GUI = {
@@ -134,7 +138,7 @@ local RA_Shoulder_AZ_Location = {
         },
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, -0.05}
+            Position = {0.0, 0.0, -0.08}
         }
     },
     GUI = {
@@ -161,7 +165,7 @@ local RA_Shoulder_EL_Location = {
         },
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.15, 0.2, 0.0}
+            Position = {0.17, 0.2, -0.005}
         }
     },
     GUI = {
@@ -258,13 +262,13 @@ local RA_Mahli_Location = {
 
 
 ---- MASTCAM RSM ----
-local RSM_ZERO_AZ_Location = {
-    Identifier = "RSM_ZERO_AZ_Location",
+local RSM_ROOT_Location = {
+    Identifier = "RSM_ROOT_Location",
     Parent = MSL_Body.Identifier,
     Transform = {
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.702, 0.575, -0.526}
+            Position = {0.7039, 0.5769, -0.563}
         }
     },
     GUI = {
@@ -274,11 +278,11 @@ local RSM_ZERO_AZ_Location = {
 
 local RSM_AZ_Location = {
     Identifier = "RSM_AZ_Location",
-    Parent = RSM_ZERO_AZ_Location.Identifier,
+    Parent = RSM_ROOT_Location.Identifier,
     Transform = {
         Rotation = {
             Type = "AdvancedSpiceRotation",
-            SourceFrame = "MSL_RSM_ZERO_AZ",
+            SourceFrame = "MSL_ROVER", 
             DestinationFrame = "MSL_RSM_AZ",
             RotationAxisSpice = 0,
             RotationAngleSpice = 0,
@@ -287,6 +291,10 @@ local RSM_AZ_Location = {
             RotationDirectionSpice = true,
             RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
+        },
+        Translation = {
+            Type = "StaticTranslation",
+            Position = {0.0, 0.008, 0.0}
         }
     },
     GUI = {
@@ -304,23 +312,24 @@ local RSM_ZERO_EL_Location = {
 
 local RSM_EL_Location = {
     Identifier = "RSM_EL_Location",
-    Parent = RSM_ZERO_EL_Location.Identifier,
+    Parent = RSM_AZ_Location.Identifier,
     Transform = {
         Rotation = {  
             Type = "AdvancedSpiceRotation",
-            SourceFrame = "MSL_RSM_ZERO_AZ",
-            DestinationFrame = "MSL_RSM_AZ",
+            SourceFrame = "MSL_RSM_AZ",
+            DestinationFrame = "MSL_RSM_EL",
             RotationAxisSpice = 0,
             RotationAngleSpice = 0,
-            RotationAxisStatic = 3,
-            RotationAngle = 1.5708,
+            RotationAxisStatic = 2,
+            RotationAngle = 0.7853981634,  
             RotationDirectionSpice = true,
             RotationDirectionStatic = true,
             Kernels = kernels.CuriosityKernels
         },
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, -0.664}
+            --Position = {0.0, 0.0, -0.664}
+            Position = {0.002, 0.007, -0.688}   
         }
     },
     GUI = {
@@ -415,14 +424,14 @@ local CHEMIN_Location = {
 local Wheel_base_Location = {
     Identifier = "Wheel_base_Location",
     Parent = MSL_Body.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LEFT_BOGIE",
-            RotationAxis = 1;
-        }
-    },
+    --Transform = {
+    --    Rotation = {
+    --        Type = "RksmlRotation",
+    --        DataPath = wheeldata .. "/rksml/", 
+    --        Object = "LEFT_BOGIE",
+    --        RotationAxis = 1;
+    --    }
+    --},
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -433,15 +442,16 @@ local Leg_1_L_Location = {
     Identifier = "Leg_1_L_Location",
     Parent = Wheel_base_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LEFT_BOGIE",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LEFT_BOGIE",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.185, -0.75, -0.22}
+            --old Position = {0.185, -0.78, -0.22}
+            Position = {0.217, -0.812, -0.215}   --for the right side
         }
     },
     GUI = {
@@ -467,15 +477,15 @@ local Leg_2_L_Location = {
     Identifier = "Leg_2_L_Location",
     Parent = Leg_1_L_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LEFT_DIFFERENTIAL",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LEFT_DIFFERENTIAL",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.74, 0.0, 0.24}
+            Position = {-0.74, -0.00380, 0.223} --CORRECT, DONT CHANGE
         }
     },
     GUI = {
@@ -483,19 +493,19 @@ local Leg_2_L_Location = {
     }
 }
 
-local Wrist_F_L = {
-    Identifier = "Wrist_F_L",
+local Wrist_F_L_Location = {
+    Identifier = "Wrist_F_L_Location",
     Parent = Leg_1_L_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LF_STEER",
-            RotationAxis = 3;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LF_STEER",
+        --    RotationAxis = 3;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.882, -0.26, 0.2}
+            Position = {0.8839, -0.2659, 0.2} --CORRECT, DONT TOUCH
         }
     },
     GUI = {
@@ -505,17 +515,17 @@ local Wrist_F_L = {
 
 local Wheel_F_L_Location = {
     Identifier = "Wheel_F_L_Location",
-    Parent = Wrist_F_L.Identifier,
+    Parent = Wrist_F_L_Location.Identifier,
     Transform = { 
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LF_DRIVE",
-            RotationAxis = 2;
-        }, 
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LF_DRIVE",
+        --    RotationAxis = 2;
+        --}, 
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, 0.45}
+            Position = {0.0, 0.0, 0.426}
         }
     },
     GUI = {
@@ -527,15 +537,15 @@ local Wheel_C_L_Location = {
     Identifier = "Wheel_C_L_Location",
     Parent = Leg_2_L_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LM_DRIVE",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LM_DRIVE",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.45, -0.4, 0.4}
+            Position = {0.45, -0.4, 0.403}
         }
     },
     GUI = {
@@ -548,15 +558,15 @@ local Wrist_B_L_Location = {
     Identifier = "Wrist_B_L_Location",
     Parent = Leg_2_L_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LR_STEER",
-            RotationAxis = 3;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LR_STEER",
+        --    RotationAxis = 3;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.62, -0.27, 0.0}
+            Position = {-0.627, -0.2635, -0.022} --CORRECT, DONT CHANGE
         }
     },
     GUI = {
@@ -569,15 +579,15 @@ local Wheel_B_L_Location = {
     Identifier = "Wheel_B_L_Location",
     Parent = Wrist_B_L_Location.Identifier,
     Transform = {  
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "LR_DRIVE",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "LR_DRIVE",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, -0.0, 0.42}
+            Position = {0.0, -0.0, 0.426}
         }
     },
     GUI = {
@@ -592,15 +602,15 @@ local Leg_1_R_Location = {
     Identifier = "Leg_1_R_Location",
     Parent = Wheel_base_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "RIGHT_BOGIE",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "RIGHT_BOGIE",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.185, 0.75, -0.22}
+            Position = {0.217, 0.812, -0.215}   --Check with caroline!!!
         }
     },
     GUI = {
@@ -612,15 +622,17 @@ local Leg_2_R_Location = {
     Identifier = "Leg_2_R_Location",
     Parent = Leg_1_R_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "RIGHT_DIFFERENTIAL",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "RIGHT_DIFFERENTIAL",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.74, 0.0, 0.24}
+            --Position = {-0.74, 0.0, 0.24}
+            Position = {-0.74, 0.00380, 0.223} --want to use this one, once the center point is changed in maya
+
         }
     },
     GUI = {
@@ -632,15 +644,23 @@ local Wrist_F_R_Location = {
     Identifier = "Wrist_F_R_Location",
     Parent = Leg_1_R_Location.Identifier,
     Transform = {  
-        Rotation = {
-           Type = "RksmlRotation",
-           DataPath = wheeldata .. "/rksml/", 
-           Object = "RF_STEER",
-           RotationAxis = 3;
-        }, 
+        --Rotation = {
+        --   Type = "RksmlRotation",
+        --   DataPath = wheeldata .. "/rksml/", 
+        --   Object = "RF_STEER",
+        --   RotationAxis = 3;
+        --}, 
+        --Rotation = {
+        --     Type = "StaticRotation",
+        --     Rotation = { -1.0,  0.0, 0.0,
+        --                   0.0,  -1.0,  0.0,
+        --                    0.0,  0.0,  1.0
+        --                 }
+        -- },
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.882, 0.26, 0.2}
+            Position = {0.882, 0.259, 0.215}
+            --Position = {0.8839, 0.2659, 0.2} --position for the Wrist_F_L
         }
     },
     GUI = {
@@ -653,15 +673,15 @@ local Wheel_F_R_Location = {
     Identifier = "Wheel_F_R_Location",
     Parent = Wrist_F_R_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "RF_DRIVE",
-            RotationAxis = 2;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "RF_DRIVE",
+        --    RotationAxis = 2;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, 0.45}
+            Position = {0.0, 0.0, 0.426}
         }
     },
     GUI = {
@@ -673,15 +693,15 @@ local Wheel_C_R_Location = {
     Identifier = "Wheel_C_R_Location",
     Parent = Leg_2_R_Location.Identifier,
     Transform = {  
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "RM_DRIVE",
-            RotationAxis = 2;
-        }, 
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "RM_DRIVE",
+        --    RotationAxis = 2;
+        --}, 
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.45, 0.4, 0.4}
+            Position = {0.45, 0.4, 0.403}
         }
     },
     GUI = {
@@ -693,15 +713,16 @@ local Wrist_B_R_Location = {
     Identifier = "Wrist_B_R_Location",
     Parent = Leg_2_R_Location.Identifier,
     Transform = {   
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "RR_STEER",
-            RotationAxis = 3;
-        },
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/",  
+        --    Object = "RR_STEER",
+        --    RotationAxis = 3;
+        --},
         Translation = {
             Type = "StaticTranslation",
-            Position = {-0.62, 0.27, 0.0}
+            --Position = {-0.627, -0.2685, -0.022} --Position for Wrist_B_L
+            Position = {-0.6208, 0.2759, -0.025}            
         }
     },
     GUI = {
@@ -713,15 +734,15 @@ local Wheel_B_R_Location = {
     Identifier = "Wheel_B_R_Location",
     Parent = Wrist_B_R_Location.Identifier,
     Transform = {
-        Rotation = {
-            Type = "RksmlRotation",
-            DataPath = wheeldata .. "/rksml/", 
-            Object = "RR_DRIVE",
-            RotationAxis = 2;
-        },   
+        --Rotation = {
+        --    Type = "RksmlRotation",
+        --    DataPath = wheeldata .. "/rksml/", 
+        --    Object = "RR_DRIVE",
+        --    RotationAxis = 2;
+        --},   
         Translation = {
             Type = "StaticTranslation",
-            Position = {0.0, 0.0, 0.42}
+            Position = {0.0, -0.0005, 0.426}
         }
     },
     GUI = {
@@ -744,7 +765,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     RA_Wrist_Location,
     RA_Turret_Location,
     RA_Mahli_Location,
-    RSM_ZERO_AZ_Location,
+    RSM_ROOT_Location,
     RSM_AZ_Location,
     RSM_ZERO_EL_Location,
     RSM_EL_Location,
@@ -759,7 +780,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     Leg_1_L_Location,
     -- Leg_1B_L_Location,
     Leg_2_L_Location,
-    Wrist_F_L,
+    Wrist_F_L_Location,
     Wheel_F_L_Location,
     Wheel_C_L_Location,
     Wrist_B_L_Location,

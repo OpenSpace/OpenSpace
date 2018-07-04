@@ -32,14 +32,8 @@ local Curiosity = {
 
 local CuriosityModel = {
     Identifier = "CuriosityModel",
-    Parent = Curiosity.Identifier
-    --GuiPath = "/Solar Syste/Planets/Mars/Curiosity",
-    --Transform = {
-    --    Scale = {
-    --        Type = "StaticScale",
-    --        Scale = 2.0;
-    --    }
-    --}
+    Parent = Curiosity.Identifier,
+    GuiPath = "/Solar Syste/Planets/Mars/Curiosity"
 }
 
 
@@ -466,7 +460,7 @@ local RA_Turret_details_2 = {
 
 local RSM_root = {
     Identifier = "RSM_root",
-    Parent = transforms.RSM_ZERO_AZ_Location.Identifier,
+    Parent = transforms.RSM_ROOT_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -614,13 +608,13 @@ local dataPath = asset.localResource("data")
 local Submodules = {
     Identifier = "Submodules",
     Parent = "Mars",
-    Renderable = {
-        Type = "RoverTerrain",
-        RoverLocationPath = dataPath .. "/path/rover_locations.shp",
-        --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
-        ModelPath = "F:/RoverTerrain-Models&Textures/models/",    
-        TexturePath = "F:/RoverTerrain-Models&Textures/textures/",
-    },
+    --Renderable = {
+    --    Type = "RoverTerrain",
+    --    RoverLocationPath = dataPath .. "/path/rover_locations.shp",
+    --    --//"/modelsEasy/" and "/texturesEasy/" contains data for site048 and drive1570 only, to load all models use path "/models/" and "/textures/"
+    --    ModelPath = "F:/RoverTerrain-Models&Textures/models/",    
+    --    TexturePath = "F:/RoverTerrain-Models&Textures/textures/",
+    --},
     GuiPath = "/Solar System/Curiosity"
 }
 
@@ -664,6 +658,22 @@ local Wheel_Base = {
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_BASE.obj"
+        },
+        ColorTexture = textures .. "/tex_03.png",
+        GUI = {
+            Path = "/Solar System/Planets/Mars/Curiosity/Model"
+        }
+    }
+}
+local Wheel_Base_2 = {
+    Identifier = "Wheel_Base_2",
+    Parent = Wheel_Base.Identifier,
+    Renderable = {
+        Type = "RenderableModel",
+        Body = "MARS SCIENCE LABORATORY",
+        Geometry = {
+          Type = "MultiModelGeometry",
+          GeometryFile = models .. "/MSL_WHEEL_BASE_2.obj"
         },
         ColorTexture = textures .. "/tex_03.png",
         GUI = {
@@ -752,7 +762,7 @@ local Wheel_Leg_2_L = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_2_L.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_2_L_new.obj"
         },
         ColorTexture = textures .. "/tex_03.png",
         GUI = {
@@ -763,7 +773,7 @@ local Wheel_Leg_2_L = {
 
 local Wheel_Wrist_F_L = {
     Identifier = "Wheel_Wrist_F_L",
-    Parent = transforms.Wrist_F_L.Identifier,
+    Parent = transforms.Wrist_F_L_Location.Identifier,
     Renderable = {
         Type = "RenderableModel",
         Body = "MARS SCIENCE LABORATORY",
@@ -960,7 +970,7 @@ local Wheel_Leg_2_R = {
         Body = "MARS SCIENCE LABORATORY",
         Geometry = {
           Type = "MultiModelGeometry",
-          GeometryFile = models .. "/MSL_WHEEL_LEG_2_R.obj"
+          GeometryFile = models .. "/MSL_WHEEL_LEG_2_R_new.obj"
         },
         ColorTexture = textures .. "/tex_03.png",
         GUI = {
@@ -979,6 +989,7 @@ local Wheel_Wrist_F_R = {
         Geometry = {
           Type = "MultiModelGeometry",
           GeometryFile = models .. "/MSL_WHEEL_WRIST_F_R.obj"
+          --GeometryFile = models .. "/MSL_WHEEL_WRIST_F_L.obj"
         },
         ColorTexture = textures .. "/tex_03.png",
         GUI = {
@@ -1138,6 +1149,7 @@ assetHelper.registerSceneGraphNodesAndExport(asset, {
     --HeightMap,
 
     Wheel_Base,
+    Wheel_Base_2,
     Wheel_Leg_1_L,
     Wheel_Leg_1A_L_detail,
     -- Wheel_Leg_1B_L,

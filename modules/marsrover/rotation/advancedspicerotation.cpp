@@ -175,7 +175,6 @@ glm::dmat3 AdvancedSpiceRotation::matrix(const Time& time) const {
             _destinationFrame,
             time.j2000Seconds()
         );
-
         if (_rotationAxisSPICE != 0) 
         {
             double angle = SpiceManager::ref().getEulerAngle(result, _rotationAngleSPICE);

@@ -136,7 +136,7 @@ local color_layers = {
     {   
         Identifier = "HiRISE_texture",
         Name = "MSL Gale Texture",
-        FilePath = "F:/MSLBaseMap/MSL_Gale_Orthophoto_Mosaic_25cm_v3_lonlat_Texture.vrt",
+        FilePath = "L:/MSLDATA/MSLBaseMap/MSL_Gale_Orthophoto_Mosaic_25cm_v3_lonlat_Texture.vrt",
         TilePixelSize = 90
     }
 }
@@ -185,7 +185,7 @@ local height_layers = {
         Identifier = "HiRISE",
         Name = "MSL Gale",
         Enables = true,
-        FilePath = "F:/MSLBaseMap/MSL_Gale_DEM_Mosaic_1m_v3_lonlat_Heightmap.vrt",
+        FilePath = "L:/MSLDATA/MSLBaseMap/MSL_Gale_DEM_Mosaic_1m_v3_lonlat_Heightmap.vrt",
         TilePixelSize = 90,
         Enabled = true
     }
