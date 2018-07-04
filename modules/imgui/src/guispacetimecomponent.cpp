@@ -192,7 +192,7 @@ void GuiSpaceTimeComponent::render() {
         _tooltipDelay
     );
 
-    auto incrementTime = [](int days) {
+    auto incrementTime = [](float days) {
         using namespace std::chrono;
 
         const float duration = OsEng.timeManager().defaultTimeInterpolationDuration();
@@ -233,6 +233,12 @@ void GuiSpaceTimeComponent::render() {
     }
     ImGui::SameLine();
 
+    const bool minusHour = ImGui::Button("-Hour");
+    if (minusHour) {
+        incrementTime(-1/24.0);
+    }
+    ImGui::SameLine();
+
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
 
     const bool nowDay = ImGui::Button("Now");
@@ -252,6 +258,11 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
 
+    const bool plusHour = ImGui::Button("Hour");
+    if (plusHour) {
+        incrementTime(1/24.0);
+    }
+    ImGui::SameLine();
 
     const bool plusDay = ImGui::Button("+Day");
     if (plusDay) {
