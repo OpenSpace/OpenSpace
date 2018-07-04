@@ -28,7 +28,8 @@ local object = {
         ColorMap = speck .. "/lss.cmap",
         ColorOption = { "redshift", "prox5Mpc" },
         ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-        Unit = "Mpc"
+        Unit = "Mpc",
+        ScaleFactor = 508.0
     },
     GUI = {
         Name = "6dF Galaxies",
