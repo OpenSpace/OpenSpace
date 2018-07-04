@@ -31,19 +31,19 @@ namespace {
     constexpr const char* _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
 
-    const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "" // @TODO Missing documentation

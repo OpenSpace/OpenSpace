@@ -1072,7 +1072,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
-            raycastProgram->setUniform("windowSize", _resolution);
+            raycastProgram->setUniform("windowSize", static_cast<glm::vec2>(_resolution));
 
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);

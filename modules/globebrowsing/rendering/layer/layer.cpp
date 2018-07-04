@@ -46,21 +46,21 @@ namespace {
     constexpr const char* KeyBlendMode = "BlendMode";
     constexpr const char* KeyPadTiles = "PadTiles";
 
-    const openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed."
     };
 
-    const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath."
     };
 
-    const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
@@ -68,21 +68,21 @@ namespace {
         "composition."
     };
 
-    const openspace::properties::Property::PropertyInfo ResetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles."
     };
 
-    const openspace::properties::Property::PropertyInfo RemoveInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "

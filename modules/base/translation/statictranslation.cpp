@@ -28,7 +28,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo PositionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
         "Position",
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "

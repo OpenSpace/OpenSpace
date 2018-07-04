@@ -73,7 +73,7 @@ int addVirtualProperty(lua_State* L) {
     if (type == "BoolProperty") {
         const bool v = ghoul::lua::value<bool>(L, 5);
         prop = std::make_unique<properties::BoolProperty>(
-            properties::Property::PropertyInfo{ identifier, name, description },
+            properties::Property::PropertyInfo{ identifier.c_str(), name.c_str(), description.c_str() },
             v
         );
     }
@@ -83,7 +83,7 @@ int addVirtualProperty(lua_State* L) {
         const int max = ghoul::lua::value<int>(L, 7);
 
         prop = std::make_unique<properties::IntProperty>(
-            properties::Property::PropertyInfo{ identifier, name, description },
+            properties::Property::PropertyInfo{ identifier.c_str(), name.c_str(), description.c_str() },
             v,
             min,
             max
@@ -95,7 +95,7 @@ int addVirtualProperty(lua_State* L) {
         const float max = ghoul::lua::value<float>(L, 7);
 
         prop = std::make_unique<properties::FloatProperty>(
-            properties::Property::PropertyInfo{ identifier, name, description },
+            properties::Property::PropertyInfo{ identifier.c_str(), name.c_str(), description.c_str() },
             v,
             min,
             max
@@ -103,7 +103,7 @@ int addVirtualProperty(lua_State* L) {
     }
     else if (type == "TriggerProperty") {
         prop = std::make_unique<properties::TriggerProperty>(
-            properties::Property::PropertyInfo{ identifier, name, description }
+            properties::Property::PropertyInfo{ identifier.c_str(), name.c_str(), description.c_str() }
         );
     }
     else {

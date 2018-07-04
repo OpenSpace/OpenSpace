@@ -30,14 +30,14 @@ namespace {
     constexpr const char* keyMultiplier = "Multiplier";
     constexpr const char* keyOffset = "Offset";
 
-    const openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Set Default",
         "If this value is triggered it will reset all of these values to their default "
         "values."
     };
 
-    const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value sets the transparency of this layer. If this value is equal to '1', "
@@ -45,20 +45,20 @@ namespace {
         "completely transparent."
     };
 
-    const openspace::properties::Property::PropertyInfo GammaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
         "This value is used as an exponent to adjust the color for each tile."
     };
 
-    const openspace::properties::Property::PropertyInfo MultiplierInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
         "Multiplier",
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
         "gamma value as an exponent."
     };
 
-    const openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "

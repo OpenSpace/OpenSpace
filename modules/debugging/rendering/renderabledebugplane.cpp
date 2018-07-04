@@ -47,13 +47,13 @@ namespace {
         Center
     };
 
-    const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane."
     };
 
-    const openspace::properties::Property::PropertyInfo BillboardInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
@@ -61,13 +61,13 @@ namespace {
         "transformations."
     };
 
-    const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the size of the plane in meters."
     };
 
-    const openspace::properties::Property::PropertyInfo OriginInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Texture Coordinate Origin",
         "The origin of the texture coorinate system."

@@ -32,7 +32,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane."

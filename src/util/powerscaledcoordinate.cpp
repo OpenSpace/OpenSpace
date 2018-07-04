@@ -25,7 +25,7 @@
 #include <openspace/util/powerscaledcoordinate.h>
 
 #include <openspace/util/powerscaledscalar.h>
-
+#include <cstring>
 #include <sstream>
 
 namespace {

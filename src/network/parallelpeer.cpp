@@ -44,53 +44,53 @@ namespace {
     constexpr const size_t MaxLatencyDiffs = 64;
     constexpr const char* _loggerCat = "ParallelPeer";
 
-    const openspace::properties::Property::PropertyInfo PasswordInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
         "server."
     };
 
-    const openspace::properties::Property::PropertyInfo HostPasswordInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host Password",
         "The password that is required to take control of the joint session and thus "
         "send all commands to connected clients."
     };
 
-    const openspace::properties::Property::PropertyInfo PortInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
         "OpenSpace."
     };
 
-    const openspace::properties::Property::PropertyInfo AddressInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The address of the Wormhole server either as a DNS name or an IP address."
     };
 
-    const openspace::properties::Property::PropertyInfo NameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
         "Connection Name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
         "connected instances."
     };
 
-    const openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer Time",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
         "TimeKeyframeInterval",
         "Time keyframe interval",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
         "Camera Keyframe interval",
         "" // @TODO Missing documentation

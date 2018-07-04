@@ -1,0 +1,51 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+local kernels = asset.require('./kernels').PlutoKernels
+
+
+
+local Styx = {
+    Identifier = "Styx",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "STYX",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = PlutoKernels
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 0.45E5, 0.45E5, 0.45E5 },
+        SegmentsPerPatch = 64,
+        Layers = {}
+    },
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+local StyxTrail = {
+    Identifier = "StyxTrail",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTrailOrbit",
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "STYX",
+            Observer = "PLUTO BARYCENTER",
+        },
+        Color = { 0.00, 0.62, 1.00 },
+        Period = 20.16155,
+        Resolution = 1000
+    },
+    GUI = {
+        Name = "Hydra Trail",
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Styx, StyxTrail })

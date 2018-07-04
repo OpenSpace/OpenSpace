@@ -55,7 +55,7 @@ namespace {
 
     constexpr const char* NoImageText = "No Image";
 
-    const openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
         "Color Texture",
         "The texture path selected in this property is used as the base texture that is "
@@ -64,14 +64,14 @@ namespace {
         "asset, the last texture is used."
     };
 
-    const openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
         "AddColorTexture",
         "Add Color Base Texture",
         "Adds a new base color texture to the list of selectable base maps used prior to "
         "any image projection."
     };
 
-    const openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
         "HeightTexturePaths",
         "Heightmap Texture",
         "The texture path selected in this property is used as the height map on the "
@@ -79,13 +79,13 @@ namespace {
         "this value is specified in an asset, the last texture is used."
     };
 
-    const openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
         "AddHeightTexture",
         "Add Heightmap Texture",
         "Adds a new height map texture to the list of selectable height maps used."
     };
 
-    const openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
         "HeightExaggeration",
         "Height Exaggeration",
         "This value determines the level of height exaggeration that is applied to a "
@@ -93,7 +93,7 @@ namespace {
         "value of '1' uses the measured height field."
     };
 
-    const openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
         "MeridianShift",
         "Meridian Shift",
         "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
@@ -102,7 +102,7 @@ namespace {
         "shift."
     };
 
-    const openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
         "Ambient Brightness",
         "This value determines the ambient brightness of the dark side of the planet."

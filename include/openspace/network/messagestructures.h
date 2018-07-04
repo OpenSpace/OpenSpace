@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
 #include <ghoul/glm.h>
+#include <cstring>
 #include <string>
 #include <vector>
 

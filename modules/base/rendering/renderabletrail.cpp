@@ -53,13 +53,13 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    const openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail."
     };
 
-    const openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
@@ -67,7 +67,7 @@ namespace {
         "'false', the entire trail is rendered at full opacity and color."
     };
 
-    const openspace::properties::Property::PropertyInfo FadeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
         "Fade",
         "Line fade",
         "The fading factor that is applied to the trail if the 'EnableFade' value is "
@@ -75,7 +75,7 @@ namespace {
         "the less fading is applied."
     };
 
-    const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
@@ -83,7 +83,7 @@ namespace {
         "ignored."
     };
 
-    const openspace::properties::Property::PropertyInfo PointSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
         "This value specifies the base size of the points along the line if the selected "
@@ -92,7 +92,7 @@ namespace {
         "values are half this size."
     };
 
-    const openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
         "Determines how the trail should be rendered to the screen.If 'Lines' is "

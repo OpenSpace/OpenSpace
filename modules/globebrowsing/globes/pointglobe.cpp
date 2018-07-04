@@ -32,13 +32,13 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo IntensityClampInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IntensityClampInfo = {
         "IntensityClamp",
         "Intensity clamp",
         ""
     };
 
-    const openspace::properties::Property::PropertyInfo LightIntensityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LightIntensityInfo = {
         "LightIntensity",
         "Light intensity",
         "" // @TODO Missing documentation
