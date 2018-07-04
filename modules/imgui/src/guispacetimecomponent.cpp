@@ -258,7 +258,7 @@ void GuiSpaceTimeComponent::render() {
 
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 15.f);
 
-    const bool plusHour = ImGui::Button("Hour");
+    const bool plusHour = ImGui::Button("+Hour");
     if (plusHour) {
         incrementTime(1/24.0);
     }
