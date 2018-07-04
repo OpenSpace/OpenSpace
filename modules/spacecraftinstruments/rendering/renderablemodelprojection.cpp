@@ -287,9 +287,9 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     const glm::vec3 directionToSun = glm::normalize(
         _sunPosition - glm::vec3(bodyPosition)
     );
-    const glm::vec3 directionToSunViewSpace = glm::mat3(
+    const glm::vec3 directionToSunViewSpace = glm::normalize(glm::mat3(
         data.camera.combinedViewMatrix()
-    ) * directionToSun;
+    ) * directionToSun);
 
     _programObject->setUniform(_mainUniformCache.performShading, _performShading);
     _programObject->setUniform(
