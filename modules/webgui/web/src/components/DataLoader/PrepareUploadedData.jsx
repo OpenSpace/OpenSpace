@@ -17,26 +17,27 @@ import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
 import OptionSelect from './presentational/OptionSelect';
 import Variables from './presentational/Variables';
+import { KEY_DIMENSIONS, KEY_UPPER_DOMAIN_BOUNDS, KEY_LOWER_DOMAIN_BOUNDS } from './constants';
 
 class PrepareUploadedData extends Component {
   constructor(props) {
     super(props);
     
     this.state = {
+      activated: false,
       volumeProgress: 0,
       uploadButtonIsClicked: false,
 
-      activated: false,
-      dimensions: { x: 100, y: 100, z: 128 },
-      lowerDomainBounds: { r: 1, theta: -90, phi: 0 },
-      upperDomainBounds: { r: 15, theta: 90, phi: 360 },
-      variable: 'rho',
-      rSquared: false,
+      data: {
+        dimensions: { x: 100, y: 100, z: 128 },
+        lowerDomainBounds: { r: 1, theta: -90, phi: 0 },
+        upperDomainBounds: { r: 15, theta: 90, phi: 360 },
+        variable: 'rho',
+        rSquared: false,
+      }
     };
 
-    this.changeDimensions = this.changeDimensions.bind(this);
-    this.changeLowerDomainBounds = this.changeLowerDomainBounds.bind(this);
-    this.changeUpperDomainBounds = this.changeUpperDomainBounds.bind(this);
+    this.onChangeOptionSelect = this.onChangeOptionSelect.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
     this.upload = this.upload.bind(this);
@@ -65,46 +66,49 @@ class PrepareUploadedData extends Component {
     DataManager.subscribe('Modules.DataLoader.Loader.VolumeConversionProgress', this.handleProgressValue);
   }
 
-  // TODO: Generalize the onChange function of OptionSelect!
-  // Gets the corresponding key of the last changed value in dimensions.
-  // Assigns the changed value to the correct key of dimensions.
-  changeDimensions({ currentTarget }) {
-    let tempDim = this.state.dimensions;
-    let key = currentTarget.attributes.label.nodeValue;
-    tempDim[key] = Number(currentTarget.value);
+  onChangeOptionSelect({ currentTarget }, type) {
+    const keyToChange = currentTarget.attributes.label.nodeValue;
+    const valueToSet = Number(currentTarget.value);
+    let dataToChange = ''
 
-    this.setState({ dimensions: tempDim });
-  }
+    switch (type) {
+      case KEY_DIMENSIONS:
+        dataToChange = 'dimensions'
+        break;
+      case KEY_UPPER_DOMAIN_BOUNDS:
+        dataToChange = 'upperDomainBounds'
+        break;
+      case KEY_LOWER_DOMAIN_BOUNDS:
+        dataToChange = 'lowerDomainBounds'
+        break;
+      default:
+        return;
+    }
 
-  changeLowerDomainBounds({ currentTarget }) {
-    let tempBound = this.state.lowerDomainBounds;
-    let key = currentTarget.attributes.label.nodeValue;
-    tempBound[key] = Number(currentTarget.value);
-
-    this.setState({ lowerDomainBounds: tempBound });
+    this.setState({ 
+      data: { 
+        ...this.state.data, 
+        [dataToChange]: { 
+          ...this.state.data[dataToChange], 
+          [keyToChange]: valueToSet
+        } 
+      }
+    });
   }
   
-  changeUpperDomainBounds({ currentTarget }) {
-    let tempBound = this.state.upperDomainBounds;
-    let key = currentTarget.attributes.label.nodeValue;
-    tempBound[key] = Number(currentTarget.value);
-
-    this.setState({ upperDomainBounds: tempBound });
-  }
-
   changeVariable(event) {
-    this.setState({ variable: event.value });
+    this.setState({ data: { ...this.state.data, variable: event.value }});
   }
 
   changeRSquared(checked) {
-    this.setState({ rSquared: checked });
+    this.setState({ data: { ...this.state.data, rSquared: checked }});
   }
 
   upload() {
     this.setState({uploadButtonIsClicked: true});
 
-    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state;
-    let data = `\'
+    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
+    let payload = `\'
       return {
         Input="${this.props.filePaths}",
         Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
@@ -114,8 +118,8 @@ class PrepareUploadedData extends Component {
         FactorRSquared="${rSquared.toString()}"
       }
     \'`
-    data = removeLineBreakCharacters(data);
-    const script = UploadDataItemScript.replace(ValuePlaceholder, data);
+    payload = removeLineBreakCharacters(payload);
+    const script = UploadDataItemScript.replace(ValuePlaceholder, payload);
 
     DataManager.runScript(script);
   }
@@ -126,7 +130,7 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height } = this.props;
-    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, volumeProgress } = this.state;
+    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, volumeProgress } = this.state.data;
 
     const WINDOW_MAX_WIDTH = 400;
     const w = width / 2;
@@ -152,15 +156,15 @@ class PrepareUploadedData extends Component {
           <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>
           <OptionSelect label='Dimensions'
                         options={dimensions} 
-                        onChange={this.changeDimensions}/>
+                        onChange={(target) => this.onChangeOptionSelect(target, KEY_DIMENSIONS)}/>
           <Variables variable={variable}
                       onChange={this.changeVariable} />
           <OptionSelect label='Lower Domain Bounds'
                         options={lowerDomainBounds} 
-                        onChange={this.changeLowerDomainBounds}/>
+                        onChange={(target) => this.onChangeOptionSelect(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
           <OptionSelect label='Upper Domain Bounds'
                         options={upperDomainBounds} 
-                        onChange={this.changeUpperDomainBounds}/>
+                        onChange={(target) => this.onChangeOptionSelect(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
           <Checkbox label='Factor r^2?'
                     onChange={this.changeRSquared}/>
           <Button onClick={() => this.upload()}> Convert </Button>

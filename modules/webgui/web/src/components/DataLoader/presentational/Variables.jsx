@@ -25,7 +25,6 @@ const Variables = (props) => {
   );
 }
 
-
 Variables.propTypes = {
   variable: PropTypes.string,
   onChange: PropTypes.func,
