@@ -18,4 +18,4 @@
 	url = https://github.com/OpenSpace/libtorrent.git
 [submodule "modules/dataloader/ext/nativefiledialog"]
 	path = modules/dataloader/ext/nativefiledialog
-	url = git@github.com:mlabbe/nativefiledialog.git
+	url = https://github.com/mlabbe/nativefiledialog.git

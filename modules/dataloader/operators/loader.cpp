@@ -180,6 +180,7 @@ void Loader::loadDataItem(const std::string& absPathToItem) {
 
     if (scene()->sceneGraphNode(dirLeaf)) {
       LINFO(fmt::format("The sceneGraphNode {} has already been created!", std::string(dirLeaf)));
+      goToFirstTimeStep(absPathToItem);
       return;
     }
 
