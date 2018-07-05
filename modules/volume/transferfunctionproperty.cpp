@@ -61,6 +61,7 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(TransferFunctionProperty, volume::TransferFunct
     toLuaConversion,
     fromStringConversion,
     toStringConversion,
-    LUA_TTABLE);
+    LUA_TTABLE
+)
 
 } // namespace openspace::properties

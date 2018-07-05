@@ -111,7 +111,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset, unsigned int o
         bool octreeLastOnly = true;
         do {
             // Visit ancestor
-            if (bstNode != bstOffset || octreeNode != octreeOffset) {
+            if (bstNode != static_cast<int>(bstOffset) || octreeNode != octreeOffset) {
                 // Is actually an ancestor
 
                 std::vector<float> ancestorVoxels;
@@ -133,9 +133,9 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset, unsigned int o
                 // Calculate leaf offset in ancestor sized voxels
                 glm::vec3 ancestorOffset = (leafOffset * invVoxelScale) + glm::vec3(padding - 0.5);
 
-                for (int z = 0; z < brickDim; z++) {
-                    for (int y = 0; y < brickDim; y++) {
-                        for (int x = 0; x < brickDim; x++) {
+                for (int z = 0; z < static_cast<int>(brickDim); z++) {
+                    for (int y = 0; y < static_cast<int>(brickDim); y++) {
+                        for (int x = 0; x < static_cast<int>(brickDim); x++) {
                             glm::vec3 leafSamplePoint = glm::vec3(x, y, z) + glm::vec3(padding);
                             glm::vec3 ancestorSamplePoint = ancestorOffset + (glm::vec3(x, y, z) + glm::vec3(0.5)) * invVoxelScale;
                             float leafValue = leafValues[linearCoords(leafSamplePoint)];
@@ -162,6 +162,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset, unsigned int o
             leafOffset.z += (octreeChild / 4) * childSize;
 
             octreeLevel++;
+        // @TODO(emiax):  This does not make sense? unsigned int check against -1
         } while (octreeNode != -1);
 
         bstRightOnly &= (bstNode % 2 == 0);
@@ -218,8 +219,8 @@ bool ErrorHistogramManager::saveToFile(const std::string& filename) {
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (int i = 0; i < _numInnerNodes; ++i) {
-        int offset = i*_numBins;
+    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+        int offset = i * _numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
 

@@ -276,9 +276,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& renderData,
             glm::dmat4 dSgctProjectionToWorldTransformMatrix(
                 dProjectionToTmpRotTransformMatrix
             );
-            double* mSource = reinterpret_cast<double *>(
-                glm::value_ptr(dSgctProjectionToWorldTransformMatrix)
-            );
+            double* mSource = glm::value_ptr(dSgctProjectionToWorldTransformMatrix);
 
             mSource[12] += renderData.camera.eyePositionVec3().x;
             mSource[13] += renderData.camera.eyePositionVec3().y;
@@ -977,7 +975,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     );
     loadAtmosphereDataIntoShaderProgram(_inScatteringProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (int layer = 0; layer < static_cast<int>(_r_samples); ++layer) {
+    for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(_inScatteringProgramObject, layer);
         renderQuadForCalc(quadCalcVAO, vertexSize);
     }
@@ -1043,7 +1041,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
     _deltaSProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
     loadAtmosphereDataIntoShaderProgram(_deltaSProgramObject);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (int layer = 0; layer < static_cast<int>(_r_samples); ++layer) {
+    for (int layer = 0; layer < _r_samples; ++layer) {
         step3DTexture(_deltaSProgramObject, layer, false);
         renderQuadForCalc(quadCalcVAO, vertexSize);
     }
@@ -1090,7 +1088,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
         _deltaJProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_deltaJProgramObject);
-        for (int layer = 0; layer < static_cast<int>(_r_samples); ++layer) {
+        for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_deltaJProgramObject, layer);
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
@@ -1112,16 +1110,10 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
         glViewport(0, 0, _delta_e_table_width, _delta_e_table_height);
         _irradianceSupTermsProgramObject->activate();
         if (scatteringOrder == 2) {
-            _irradianceSupTermsProgramObject->setUniform(
-                "firstIteraction",
-                static_cast<int>(1)
-            );
+            _irradianceSupTermsProgramObject->setUniform("firstIteraction", 1);
         }
         else {
-            _irradianceSupTermsProgramObject->setUniform(
-                "firstIteraction",
-                static_cast<int>(0)
-            );
+            _irradianceSupTermsProgramObject->setUniform("firstIteraction", 0);
         }
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
@@ -1173,7 +1165,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             deltaJTableTextureUnit
         );
         loadAtmosphereDataIntoShaderProgram(_inScatteringSupTermsProgramObject);
-        for (int layer = 0; layer < static_cast<int>(_r_samples); ++layer) {
+        for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_inScatteringSupTermsProgramObject, layer);
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
@@ -1234,7 +1226,7 @@ void AtmosphereDeferredcaster::executeCalculations(GLuint quadCalcVAO,
             deltaSRayleighTableTextureUnit
         );
         loadAtmosphereDataIntoShaderProgram(_deltaSSupTermsProgramObject);
-        for (int layer = 0; layer < static_cast<int>(_r_samples); ++layer) {
+        for (int layer = 0; layer < _r_samples; ++layer) {
             step3DTexture(_deltaSSupTermsProgramObject, layer, false);
             renderQuadForCalc(quadCalcVAO, vertexSize);
         }
@@ -1335,7 +1327,7 @@ void AtmosphereDeferredcaster::createRenderQuad(GLuint* vao, GLuint* vbo, GLfloa
         GL_FLOAT,
         GL_FALSE,
         sizeof(GLfloat) * 4,
-        reinterpret_cast<GLvoid*>(0)
+        nullptr
     );
     glEnableVertexAttribArray(0);
 
@@ -1356,22 +1348,16 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(
     shaderProg->setUniform("betaMieExtinction", _mieExtinctionCoeff);
     shaderProg->setUniform("mieG", _miePhaseConstant);
     shaderProg->setUniform("sunRadiance", _sunRadianceIntensity);
-    shaderProg->setUniform(
-        "TRANSMITTANCE_W",
-        static_cast<int>(_transmittance_table_width)
-    );
-    shaderProg->setUniform(
-        "TRANSMITTANCE_H",
-        static_cast<int>(_transmittance_table_height)
-    );
-    shaderProg->setUniform("SKY_W", static_cast<int>(_irradiance_table_width));
-    shaderProg->setUniform("SKY_H", static_cast<int>(_irradiance_table_height));
-    shaderProg->setUniform("OTHER_TEXTURES_W", static_cast<int>(_delta_e_table_width));
-    shaderProg->setUniform("OTHER_TEXTURES_H", static_cast<int>(_delta_e_table_height));
-    shaderProg->setUniform("SAMPLES_R", static_cast<int>(_r_samples));
-    shaderProg->setUniform("SAMPLES_MU", static_cast<int>(_mu_samples));
-    shaderProg->setUniform("SAMPLES_MU_S", static_cast<int>(_mu_s_samples));
-    shaderProg->setUniform("SAMPLES_NU", static_cast<int>(_nu_samples));
+    shaderProg->setUniform("TRANSMITTANCE_W", _transmittance_table_width);
+    shaderProg->setUniform("TRANSMITTANCE_H", _transmittance_table_height);
+    shaderProg->setUniform("SKY_W", _irradiance_table_width);
+    shaderProg->setUniform("SKY_H", _irradiance_table_height);
+    shaderProg->setUniform("OTHER_TEXTURES_W", _delta_e_table_width);
+    shaderProg->setUniform("OTHER_TEXTURES_H", _delta_e_table_height);
+    shaderProg->setUniform("SAMPLES_R", _r_samples);
+    shaderProg->setUniform("SAMPLES_MU", _mu_samples);
+    shaderProg->setUniform("SAMPLES_MU_S", _mu_s_samples);
+    shaderProg->setUniform("SAMPLES_NU", _nu_samples);
     shaderProg->setUniform("ozoneLayerEnabled", _ozoneEnabled);
     shaderProg->setUniform("HO", _ozoneHeightScale);
     shaderProg->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
@@ -1463,7 +1449,7 @@ void AtmosphereDeferredcaster::step3DTexture(
         float epsilon =
             (layer == 0) ?
             0.01f :
-            (layer == (static_cast<int>(_r_samples) - 1)) ? -0.001f : 0.0f;
+            (layer == (_r_samples - 1)) ? -0.001f : 0.0f;
         float r = sqrtf(earth2 + ri_2 * diff) + epsilon;
         float dminG = r - _atmospherePlanetRadius;
         float dminT = _atmosphereRadius - r;

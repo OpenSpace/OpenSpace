@@ -78,7 +78,6 @@ namespace {
         "${MODULES}/multiresvolume/shaders/helper.glsl";
     constexpr const char* GlslHeaderPath =
         "${MODULES}/multiresvolume/shaders/header.glsl";
-    bool registeredGlslHelpers = false;
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",

@@ -482,18 +482,18 @@ int removeSceneGraphNode(lua_State* L) {
     }
 
     std::function<void (SceneGraphNode*, SceneGraphNode*)> removeNode =
-        [&removeNode](SceneGraphNode* parent, SceneGraphNode* node) {
-            std::vector<SceneGraphNode*> children = node->children();
+        [&removeNode](SceneGraphNode* p, SceneGraphNode* localNode) {
+            std::vector<SceneGraphNode*> children = localNode->children();
 
-            std::unique_ptr<SceneGraphNode> n = parent->detachChild(*node);
-            ghoul_assert(n.get() == node, "Wrong node returned from detaching");
+            std::unique_ptr<SceneGraphNode> n = p->detachChild(*localNode);
+            ghoul_assert(n.get() == localNode, "Wrong node returned from detaching");
 
             for (SceneGraphNode* c : children) {
                 removeNode(n.get(), c);
             }
 
-            node->deinitializeGL();
-            node->deinitialize();
+            localNode->deinitializeGL();
+            localNode->deinitialize();
             n = nullptr;
         };
 

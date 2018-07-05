@@ -42,14 +42,14 @@ Tile::Tile(ghoul::opengl::Texture* texture, std::shared_ptr<TileMetaData> metaDa
 
 TileMetaData* Tile::metaData() const {
     return _metaData.get();
-};
+}
 
 Tile::Status Tile::status() const {
     return _status;
-};
+}
 
 ghoul::opengl::Texture* Tile::texture() const {
     return _texture;
-};
+}
 
 } // namespace openspace::globebrowsing

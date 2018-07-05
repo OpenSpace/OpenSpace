@@ -34,7 +34,7 @@ LinearLruCache<ValueType>::LinearLruCache(size_t capacity, size_t nIndices)
 template <typename ValueType>
 bool LinearLruCache<ValueType>::has(size_t key) const {
     return _cache[key].first != nullptr;
-};
+}
 
 template <typename ValueType>
 void LinearLruCache<ValueType>::set(size_t key, ValueType value) {
