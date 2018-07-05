@@ -66,12 +66,15 @@ const std::string scaleTypeKey = "StaticScale";
 const std::string translationTypeKey = "SpiceTranslation";
 const std::string volumesGuiPathKey = "/Solar System/Volumes";
 const std::string KeyVolumeToRawTask = "KameleonVolumeToRawTask";
-const std::string KeyVariable = "Variable";
+constexpr const char* KeyVariable = "Variable";
 
 const std::string KeyStepSize = "StepSize";
 const std::string KeyGridType = "GridType";
 const std::string KeySecondsAfter = "SecondsAfter";
 const std::string KeySecondsBefore = "SecondsBefore";
+
+constexpr const char* KeyTask = "Task";
+constexpr const char* KeyItemName = "ItemName";
 
 const double DefaultStepSize = 0.02;
 const std::string DefaultGridType = "Spherical";
@@ -262,8 +265,6 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
 
     {
     std::thread t([&](){
-        std::string variable = _currentVolumeConversionDictionary.value<std::string>(KeyVariable);
-
         // ??? won't work multithreaded
         // std::string itemPathBase = "${DATA}" +
         //     ghoul::filesystem::FileSystem::PathSeparator;
@@ -277,19 +278,24 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         // itemPathBase += openspace::dataloader::helpers::getDirLeaf(_filePaths) + "_" + variable;
 
         auto selectedFile = File(_filePaths);
-        std::string selectedFileBaseName = selectedFile.baseName();
-        std::string itemName = selectedFileBaseName + "_" + variable;
+        std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
+
         std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
         Directory d(itemPathBase, RawPath::No);
         FileSys.createDirectory(d);
         const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
 
+        ghoul::Dictionary taskDictionary;
+        if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary)) {
+            throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
+        }
+
         std::string rawVolumeOutput = outputBasePath + ".rawvolume";
         std::string dictionaryOutput = outputBasePath + ".dictionary";
 
-        _currentVolumeConversionDictionary.setValue("Type", KeyVolumeToRawTask);
-        _currentVolumeConversionDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
-        _currentVolumeConversionDictionary.setValue("DictionaryOutput", dictionaryOutput);
+        taskDictionary.setValue("Type", KeyVolumeToRawTask);
+        taskDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
+        taskDictionary.setValue("DictionaryOutput", dictionaryOutput);
 
         /*** create state file ***/
         // Check if file exists
@@ -322,7 +328,7 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         tfSource.close();
         tfDest.close();
 
-        auto volumeToRawTask = Task::createFromDictionary(_currentVolumeConversionDictionary);
+        auto volumeToRawTask = Task::createFromDictionary(taskDictionary);
 
         std::mutex m;
         std::function<void(float)> cb = [&](float progress) {

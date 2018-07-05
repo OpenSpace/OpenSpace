@@ -23,3 +23,10 @@ export const getDirectoryLeaf = (directory) => {
 export const removeLineBreakCharacters = (input) => {
   return input.replace(/\r?\n|\r/g, '');
 }
+
+/**
+ * @param {string} filename - the input file name with extension
+ */
+export const getFileBasename = (filename) => {
+  return filename.replace(/\.[^.]+$/, '');
+}

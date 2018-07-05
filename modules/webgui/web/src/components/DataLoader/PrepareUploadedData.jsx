@@ -5,9 +5,10 @@ import PropTypes from 'prop-types';
 
 import DataManager from '../../api/DataManager';
 import { UploadDataItemScript, ValuePlaceholder } from '../../api/keys';
-import { removeLineBreakCharacters, getDirectoryLeaf } from './utils/helpers';
+import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename } from './utils/helpers';
 
 import Row from '../common/Row/Row';
+import Input from '../common/Input/Input/Input';
 import styles from './PrepareUploadedData.scss';
 import CenteredLabel from '../common/CenteredLabel/CenteredLabel';
 import Button from '../common/Input/Button/Button';
@@ -27,6 +28,7 @@ class PrepareUploadedData extends Component {
       activated: false,
       volumeProgress: 0,
       uploadButtonIsClicked: false,
+      itemName: '',
 
       data: {
         dimensions: { x: 100, y: 100, z: 128 },
@@ -40,6 +42,8 @@ class PrepareUploadedData extends Component {
     this.onChangeMultiInputs = this.onChangeMultiInputs.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
+    this.changeItemName = this.changeItemName.bind(this);
+    this.getDefaultItemName = this.getDefaultItemName.bind(this);
     this.upload = this.upload.bind(this);
     this.handleProgressValue = this.handleProgressValue.bind(this);
     this.subscribeToVolumeConversionProgress = this.subscribeToVolumeConversionProgress.bind(this);
@@ -85,8 +89,16 @@ class PrepareUploadedData extends Component {
     this.setState({ data: { ...this.state.data, variable: event.value }});
   }
 
+  changeItemName(event) {
+    this.setState({ itemName: event.target.value});
+  }
+
   changeRSquared(checked) {
     this.setState({ data: { ...this.state.data, rSquared: checked }});
+  }
+
+  getDefaultItemName() {
+    return `${getFileBasename(getDirectoryLeaf(this.props.filePaths))}_${this.state.data.variable}`
   }
 
   upload() {
@@ -95,12 +107,15 @@ class PrepareUploadedData extends Component {
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
     let payload = `\'
       return {
-        Input="${this.props.filePaths}",
-        Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
-        Variable="${variable.toLowerCase()}",
-        LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
-        UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
-        FactorRSquared="${rSquared.toString()}"
+        ItemName = "${this.state.itemName || this.getDefaultItemName()}",
+        Task = {
+          Input="${this.props.filePaths}",
+          Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
+          Variable="${variable.toLowerCase()}",
+          LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
+          UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
+          FactorRSquared="${rSquared.toString()}"
+        }
       }
     \'`
     payload = removeLineBreakCharacters(payload);
@@ -139,7 +154,12 @@ class PrepareUploadedData extends Component {
               position={{ x: 100, y: 200 }}
               closeCallback={() => this.setState({ activated: false })}>
         <div className={styles.content}>
-          <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>
+          <div>
+          <Input onChange={(event) => this.changeItemName(event)}
+                 label='Item name'
+                 placeholder='name'
+                 value={this.state.itemName || this.getDefaultItemName()} />
+          </div>
           <MultiInputs label='Dimensions'
                         options={dimensions} 
                         onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
