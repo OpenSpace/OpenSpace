@@ -45,20 +45,19 @@ class Camera;
 class SceneGraphNode;
 
 //Class used for keeping track of the recent average frame time
-class FrameTimeAverage
-{
+class FrameTimeAverage {
 public:
     //Update the circular buffer with the most recent frame time
     void updateWithNewFrame(double sample);
     //Get the value of the most recent average frame time (seconds)
-    double getAvgFrameTime();
+    double averageFrameTime() const;
 
 private:
-    static const int totalSamples = 10;
+    static const int TotalSamples = 10;
     int _nSamples = 0;
-    double _samples[totalSamples];
+    double _samples[TotalSamples];
     double _runningTotal = 0.0;
-    int index = 0;
+    int _index = 0;
 };
 
 class TouchInteraction : public properties::PropertyOwner {

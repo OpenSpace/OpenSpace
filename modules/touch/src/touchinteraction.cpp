@@ -372,10 +372,10 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
     int zoomTapThresholdX = (float)res.x * (1.0f - bottomCornerSizeForZoomTap_fraction);
     int zoomTapThresholdY = (float)res.y * (1.0f - bottomCornerSizeForZoomTap_fraction);
 
-    bool isTapInLowerCorner = (   std::abs(pos.x) > zoomTapThresholdX
-                               && std::abs(pos.y) > zoomTapThresholdY );
+    bool isTapInLowerCorner = std::abs(pos.x) > zoomTapThresholdX &&
+                              std::abs(pos.y) > zoomTapThresholdY;
 
-    if( _doubleTap && isTapInLowerCorner ) {
+    if (_doubleTap && isTapInLowerCorner) {
         _zoomOutTap = true;
         _tap = false;
         _doubleTap = false;
@@ -954,12 +954,13 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
     _debugProperties.minDiff = minDiff;
 #endif
 
-    if (_zoomOutTap)
-         return ZOOM_OUT;
+    if (_zoomOutTap) {
+        return ZOOM_OUT;
+    }
     else if (_doubleTap) {
         return PICK;
     }
-    else  if (list.size() == 1) {
+    else if (list.size() == 1) {
         return ROT;
     }
     else {
@@ -1068,7 +1069,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                     length(currDistanceToFocusNode) / distanceFromFocusSurface;
                 if (ratioOfDistanceToNodeVsSurface > _zoomSensitivityDistanceThreshold) {
                     zoomFactor *= pow(
-		        std::abs(distanceFromFocusSurface),
+                std::abs(distanceFromFocusSurface),
                         static_cast<float>(_zoomSensitivityExponential)
                     );
                 }
@@ -1164,12 +1165,14 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
 
 double TouchInteraction::computeConstTimeDecayCoefficient(double velocity) {
     const double postDecayVelocityTarget = 1e-6;
-    double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.getAvgFrameTime();
+    double stepsToDecay = _constTimeDecay_secs / _frameTimeAvg.averageFrameTime();
 
-    if (stepsToDecay > 0.0 && std::abs(velocity) > postDecayVelocityTarget)
-        return std::pow((postDecayVelocityTarget / std::abs(velocity)), (1.0 / stepsToDecay));
-    else
+    if (stepsToDecay > 0.0 && std::abs(velocity) > postDecayVelocityTarget) {
+        return std::pow(postDecayVelocityTarget / std::abs(velocity), 1.0 / stepsToDecay);
+    }
+    else {
         return 1.0;
+    }
 }
 
 double TouchInteraction::computeTapZoomDistance(double zoomGain) {
@@ -1351,7 +1354,7 @@ void TouchInteraction::unitTest() {
 // _timeSlack = 0.0501 % 0.01 = 0.01
 void TouchInteraction::decelerate(double dt) {
     _frameTimeAvg.updateWithNewFrame(dt);
-    double expectedFrameTime = _frameTimeAvg.getAvgFrameTime();
+    double expectedFrameTime = _frameTimeAvg.averageFrameTime();
 
     // Number of times velocities should decelerate, depending on chosen frequency and
     // time slack over from last frame
@@ -1373,10 +1376,12 @@ void TouchInteraction::decelerate(double dt) {
 }
 
 double TouchInteraction::computeDecayCoeffFromFrametime(double coeff, int times) {
-    if( coeff > 0.00001 )
+    if (coeff > 0.00001) {
         return std::pow(coeff, times);
-    else
+    }
+    else {
         return 0.0;
+    }
 }
 
 // Called if all fingers are off the screen
@@ -1466,15 +1471,17 @@ void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
 
 void FrameTimeAverage::updateWithNewFrame(double sample) {
     if (sample > 0.0005) {
-        _samples[index++] = sample;
-        if (index >= totalSamples)
-            index = 0;
-        if (_nSamples < totalSamples)
+        _samples[_index++] = sample;
+        if (_index >= TotalSamples) {
+            _index = 0;
+        }
+        if (_nSamples < TotalSamples) {
             _nSamples++;
+        }
     }
 }
 
-double FrameTimeAverage::getAvgFrameTime() {
+double FrameTimeAverage::averageFrameTime() const {
     double ft;
     if (_nSamples == 0)
         ft = 1.0 / 60.0; //Just guess at 60fps if no data is available yet
