@@ -297,13 +297,15 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         taskDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
         taskDictionary.setValue("DictionaryOutput", dictionaryOutput);
 
+        std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
+
         /*** create state file ***/
         // Check if file exists
         // If it exists, clear contents? delete and create new?
         // Create file, write dictionary to string contents
         std::initializer_list<std::pair<std::string, ghoul::any>> stateList = {
             std::make_pair( KeyStepSize, DefaultStepSize ),
-            std::make_pair( KeyGridType, DefaultGridType ),
+            std::make_pair( KeyGridType, gridType ),
             std::make_pair( KeySecondsAfter, DefaultSecondsAfter ),
             std::make_pair( KeySecondsBefore, DefaultSecondsBefore )
         };

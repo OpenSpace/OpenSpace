@@ -12,6 +12,7 @@ import Input from '../common/Input/Input/Input';
 import styles from './PrepareUploadedData.scss';
 import CenteredLabel from '../common/CenteredLabel/CenteredLabel';
 import Button from '../common/Input/Button/Button';
+import RadioButtons from '../common/Input/RadioButtons/RadioButtons';
 import Window from '../common/Window/Window';
 import ProgressBar from '../common/ProgressBar/ProgressBar';
 import Checkbox from '../common/Input/Checkbox/Checkbox';
@@ -29,6 +30,7 @@ class PrepareUploadedData extends Component {
       volumeProgress: 0,
       uploadButtonIsClicked: false,
       itemName: '',
+      gridType: '',
 
       data: {
         dimensions: { x: 100, y: 100, z: 128 },
@@ -43,6 +45,7 @@ class PrepareUploadedData extends Component {
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
     this.changeItemName = this.changeItemName.bind(this);
+    this.handleGridTypeChange = this.handleGridTypeChange.bind(this);
     this.getDefaultItemName = this.getDefaultItemName.bind(this);
     this.upload = this.upload.bind(this);
     this.handleProgressValue = this.handleProgressValue.bind(this);
@@ -97,6 +100,10 @@ class PrepareUploadedData extends Component {
     this.setState({ data: { ...this.state.data, rSquared: checked }});
   }
 
+  handleGridTypeChange(option) {
+    this.setState({ gridType: option });
+  }
+
   getDefaultItemName() {
     return `${getFileBasename(getDirectoryLeaf(this.props.filePaths))}_${this.state.data.variable}`
   }
@@ -108,6 +115,7 @@ class PrepareUploadedData extends Component {
     let payload = `\'
       return {
         ItemName = "${this.state.itemName || this.getDefaultItemName()}",
+        GridType = "${this.state.gridType}",
         Task = {
           Input="${this.props.filePaths}",
           Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
@@ -171,6 +179,10 @@ class PrepareUploadedData extends Component {
           <MultiInputs label='Upper Domain Bounds'
                         options={upperDomainBounds} 
                         onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
+          <div><RadioButtons options={['Spherical', 'Cartesian']}
+                             defaultOption='Spherical'
+                             label='Grid type'
+                             onChange={this.handleGridTypeChange} /></div>
           <Checkbox label='Factor r^2?'
                     onChange={this.changeRSquared}/>
           <Button onClick={() => this.upload()}> Convert </Button>

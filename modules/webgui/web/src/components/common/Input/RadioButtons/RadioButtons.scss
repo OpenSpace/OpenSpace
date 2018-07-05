@@ -1,0 +1,22 @@
+.wrapper {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: column;
+}
+
+.optionsHorizontal {
+    flex-direction: row;
+}
+.optionsVertical {
+    flex-direction: column;
+}
+
+.optionsHorizontal,
+.optionsVertical {
+    display: flex;
+    display: -webkit-flex;
+    label {
+        display: flex;
+        display: -webkit-flex;
+    }
+}
