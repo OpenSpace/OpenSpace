@@ -41,12 +41,13 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/dataloader/helpers.cpp>
+
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
 
-
 #include <fstream>
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -176,6 +177,11 @@ void Loader::createInternalDataItemProperties() {
 void Loader::loadDataItem(const std::string& absPathToItem) {
     std::string sourceDir = absPathToItem;
     const std::string dirLeaf = openspace::dataloader::helpers::getDirLeaf(absPathToItem);
+
+    if (scene()->sceneGraphNode(dirLeaf)) {
+      LINFO(fmt::format("The sceneGraphNode {} has already been created!", std::string(dirLeaf)));
+      return;
+    }
 
     // TODO: Variables to let user initialize in GUI
     std::string sunKey = "SUN";
