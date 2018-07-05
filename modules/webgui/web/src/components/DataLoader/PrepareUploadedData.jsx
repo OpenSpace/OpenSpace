@@ -15,7 +15,7 @@ import Window from '../common/Window/Window';
 import ProgressBar from '../common/ProgressBar/ProgressBar';
 import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
-import OptionSelect from './presentational/OptionSelect';
+import MultiInputs from './presentational/MultiInputs';
 import Variables from './presentational/Variables';
 import { KEY_DIMENSIONS, KEY_UPPER_DOMAIN_BOUNDS, KEY_LOWER_DOMAIN_BOUNDS } from './constants';
 
@@ -37,7 +37,7 @@ class PrepareUploadedData extends Component {
       }
     };
 
-    this.onChangeOptionSelect = this.onChangeOptionSelect.bind(this);
+    this.onChangeMultiInputs = this.onChangeMultiInputs.bind(this);
     this.changeVariable = this.changeVariable.bind(this);
     this.changeRSquared = this.changeRSquared.bind(this);
     this.upload = this.upload.bind(this);
@@ -66,24 +66,9 @@ class PrepareUploadedData extends Component {
     DataManager.subscribe('Modules.DataLoader.Loader.VolumeConversionProgress', this.handleProgressValue);
   }
 
-  onChangeOptionSelect({ currentTarget }, type) {
+  onChangeMultiInputs({ currentTarget }, dataToChange) {
     const keyToChange = currentTarget.attributes.label.nodeValue;
     const valueToSet = Number(currentTarget.value);
-    let dataToChange = ''
-
-    switch (type) {
-      case KEY_DIMENSIONS:
-        dataToChange = 'dimensions'
-        break;
-      case KEY_UPPER_DOMAIN_BOUNDS:
-        dataToChange = 'upperDomainBounds'
-        break;
-      case KEY_LOWER_DOMAIN_BOUNDS:
-        dataToChange = 'lowerDomainBounds'
-        break;
-      default:
-        return;
-    }
 
     this.setState({ 
       data: { 
@@ -130,7 +115,8 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height } = this.props;
-    const { dimensions, variable, lowerDomainBounds, upperDomainBounds, volumeProgress } = this.state.data;
+    const { volumeProgress } = this.state;
+    const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
 
     const WINDOW_MAX_WIDTH = 400;
     const w = width / 2;
@@ -154,17 +140,17 @@ class PrepareUploadedData extends Component {
               closeCallback={() => this.setState({ activated: false })}>
         <div className={styles.content}>
           <CenteredLabel>{getDirectoryLeaf(this.props.filePaths)}</CenteredLabel>
-          <OptionSelect label='Dimensions'
+          <MultiInputs label='Dimensions'
                         options={dimensions} 
-                        onChange={(target) => this.onChangeOptionSelect(target, KEY_DIMENSIONS)}/>
+                        onChange={(target) => this.onChangeMultiInputs(target, KEY_DIMENSIONS)}/>
           <Variables variable={variable}
                       onChange={this.changeVariable} />
-          <OptionSelect label='Lower Domain Bounds'
+          <MultiInputs label='Lower Domain Bounds'
                         options={lowerDomainBounds} 
-                        onChange={(target) => this.onChangeOptionSelect(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
-          <OptionSelect label='Upper Domain Bounds'
+                        onChange={(target) => this.onChangeMultiInputs(target, KEY_LOWER_DOMAIN_BOUNDS)}/>
+          <MultiInputs label='Upper Domain Bounds'
                         options={upperDomainBounds} 
-                        onChange={(target) => this.onChangeOptionSelect(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
+                        onChange={(target) => this.onChangeMultiInputs(target, KEY_UPPER_DOMAIN_BOUNDS)}/>
           <Checkbox label='Factor r^2?'
                     onChange={this.changeRSquared}/>
           <Button onClick={() => this.upload()}> Convert </Button>

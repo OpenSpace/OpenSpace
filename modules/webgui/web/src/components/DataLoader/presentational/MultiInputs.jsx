@@ -5,12 +5,12 @@ import 'react-select/dist/react-select.css';
 import Input from '../../common/Input/Input/Input';
 import Label from '../../common/Label/Label';
 import Row from '../../common/Row/Row';
-import styles from './OptionSelect.scss';
+import styles from './MultiInputs.scss';
 
-const OptionSelect = (props) => {
+const MultiInputs = (props) => {
   const { options, onChange, label, subLabel } = props;
   return (
-    <div className={styles.optionSelect}>
+    <div className={styles.multiInputs}>
       <Label size='medium'>{label}:</Label>
         <Row className="hej">
           { Object.keys(options).map((key, index) => (
@@ -27,16 +27,16 @@ const OptionSelect = (props) => {
   );
 };
 
-OptionSelect.propTypes = {
+MultiInputs.propTypes = {
   options: PropTypes.object.isRequired,
   label: PropTypes.string,
   onChange: PropTypes.func,
 }
 
-OptionSelect.defaultProps = {
+MultiInputs.defaultProps = {
   options: {},
   label:'Loading',
   onChange: () => {},
 }
 
-export default OptionSelect;
+export default MultiInputs;
