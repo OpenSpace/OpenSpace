@@ -24,8 +24,10 @@
 
 #include <openspace/util/powerscaledsphere.h>
 
-#include <ghoul/glm.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
 #include <ghoul/logging/logmanager.h>
+#include <cstring>
 
 namespace {
     constexpr const char* _loggerCat = "PowerScaledSphere";
@@ -34,17 +36,11 @@ namespace {
 namespace openspace {
 
 PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segments)
-    : _vaoID(0)
-    , _vBufferID(0)
-    , _iBufferID(0)
-    , _isize(6 * segments * segments)
+    : _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
 {
-    static_assert(sizeof(Vertex) == 64,
-                  "The size of the Vertex needs to be 64 for performance");
-
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
     const float r = radius[0];
@@ -65,8 +61,9 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
             const float z = r * cos(phi) * sin(theta);  //
 
             glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f))
+            if (!(x == 0.f && y == 0.f && z == 0.f)) {
                 normal = glm::normalize(normal);
+            }
 
             const float t1 = (fj / fsegments);
             const float t2 = 1.f - (fi / fsegments);
@@ -124,17 +121,11 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
 
 // Alternative Constructor for using accurate triaxial ellipsoid
 PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
-    : _vaoID(0)
-    , _vBufferID(0)
-    , _iBufferID(0)
-    , _isize(6 * segments * segments)
+    : _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
     , _varray(new Vertex[_vsize])
     , _iarray(new int[_isize])
 {
-    static_assert(sizeof(Vertex) == 64,
-        "The size of the Vertex needs to be 64 for performance");
-
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
 
@@ -158,8 +149,9 @@ PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
             _varray[nr].location[3] = 0.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f))
+            if (!(x == 0.f && y == 0.f && z == 0.f)) {
                 normal = glm::normalize(normal);
+            }
 
             _varray[nr].normal[0] = normal[0];
             _varray[nr].normal[1] = normal[1];
@@ -225,8 +217,9 @@ PowerScaledSphere::~PowerScaledSphere() {
 
 bool PowerScaledSphere::initialize() {
     // Initialize and upload to graphics card
-    if (_vaoID == 0)
+    if (_vaoID == 0) {
         glGenVertexArrays(1, &_vaoID);
+    }
 
     if (_vBufferID == 0) {
         glGenBuffers(1, &_vBufferID);
@@ -253,31 +246,26 @@ bool PowerScaledSphere::initialize() {
     glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
     glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
-    );
     glVertexAttribPointer(
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)) // NOLINT
     );
+
+    glEnableVertexAttribArray(2);
     glVertexAttribPointer(
         2,
         3,
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)) // NOLINT
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);

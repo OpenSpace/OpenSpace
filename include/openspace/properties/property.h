@@ -25,11 +25,8 @@
 #ifndef __OPENSPACE_CORE___PROPERTY___H__
 #define __OPENSPACE_CORE___PROPERTY___H__
 
-#include <openspace/properties/propertydelegate.h>
-
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
-
 #include <functional>
 #include <string>
 
@@ -80,11 +77,11 @@ public:
      */
     struct PropertyInfo {
         /// The unique identifier that is part of the fully qualified URI of this Property
-        std::string identifier;
+        const char* identifier;
         /// The name that is displayed in the user interface
-        std::string guiName;
+        const char* guiName;
         /// The user facing description of this Property
-        std::string description;
+        const char* description;
         /// Determins the visibility of this Property in the user interface
         Visibility visibility = Visibility::All;
     };
@@ -102,13 +99,16 @@ public:
     static OnChangeHandle OnChangeHandleAll;
 
     /**
-     * The constructor for the property. The <code>identifier</code> needs to be unique
-     * for each PropertyOwner. The <code>guiName</code> will be stored in the metaData
-     * to be accessed by the GUI elements using the <code>guiName</code> key. The default
-     * visibility settings is Visibility::All, whereas the default read-only state is
-     * <code>false</code>.
+     * The constructor for the property. The \p info (see #PropertyInfo) contains
+     * necessary information for this Property. #PropertyInfo::identifier needs to be
+     * unique for each PropertyOwner. The #PropertyInfo::guiName will be stored in the
+     * metaData to be accessed by the GUI elements using the #PropertyInfo::guiName key.
+     * The default visibility settings is Visibility::All, whereas the default read-only
+     * state is \c false.
+     *
      * \param info The PropertyInfo structure that contains all the required static
-     * information for initializing this Property.
+     *        information for initializing this Property.
+     *
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
@@ -124,6 +124,7 @@ public:
      * This method returns the class name of the Property. The method is used by the
      * TemplateFactory to create new instances of Propertys. The returned value is almost
      * always identical to the C++ class name of the derived class.
+     *
      * \return The class name of the Property
      */
     virtual std::string className() const = 0;
@@ -132,24 +133,27 @@ public:
      * This method returns the encapsulated value of the Property to the caller. The type
      * that is returned is determined by the type function and is up to the developer of
      * the derived class. The default implementation returns an empty ghoul::any object.
+     *
      * \return The value that is encapsulated by this Property, or an empty ghoul::any
-     * object if the method was not overritten.
+     *         object if the method was not overritten.
      */
     virtual ghoul::any get() const;
 
     /**
-     * Sets the value encapsulated by this Property to the <code>value</code> passed to
-     * this function. It is the caller's responsibility to ensure that the type contained
-     * in <code>value</code> is compatible with the concrete subclass of the Property. The
-     * method Property::type will return the desired type for the Property. The default
+     * Sets the value encapsulated by this Property to the \p value passed to this
+     * function. It is the caller's responsibility to ensure that the type contained in
+     * \p value is compatible with the concrete subclass of the Property. The method
+     * Property::type will return the desired type for the Property. The default
      * implementation of this method ignores the input.
+     *
      * \param value The new value that should be stored in this Property
      */
     virtual void set(ghoul::any value);
 
     /**
      * This method returns the type that is requested by this Property for the set method.
-     * The default implementation returns the type of <code>void</code>.
+     * The default implementation returns the type of \c void.
+     *
      * \return The type that is requested by this Property's Property::set method
      */
     virtual const std::type_info& type() const;
@@ -160,8 +164,9 @@ public:
      * as long as the rest of the stack is unchanged. The implementation has to be
      * synchronized with the Property::setLuaValue method. The default implementation is a
      * no-op.
+     *
      * \param state The Lua state to which the value will be encoded
-     * \return <code>true</code> if the encoding succeeded, <code>false</code> otherwise
+     * \return \c true if the encoding succeeded, \c false otherwise
      */
     virtual bool getLuaValue(lua_State* state) const;
 
@@ -172,41 +177,44 @@ public:
      * stack and must leave all other elements unchanged. The implementation has to be
      * synchronized with the Property::getLuaValue method. The default implementation is a
      * no-op.
+     *
      * \param state The Lua state from which the value will be decoded
-     * \return <code>true</code> if the decoding and setting of the value succeeded,
-     * <code>false</code> otherwise
+     * \return \c true if the decoding and setting of the value succeeded, \c false
+     *         otherwise
      */
     virtual bool setLuaValue(lua_State* state);
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method
      * and which will be consumed by the Property::setLuaValue method. The returned value
-     * can belong to the set of Lua types: <code>LUA_TNONE</code>, <code>LUA_TNIL</code>,
-     * <code>LUA_TBOOLEAN</code>, <code>LUA_TLIGHTUSERDATA</code>,
-     * <code>LUA_TNUMBER</code>, <code>LUA_TSTRING</code>, <code>LUA_TTABLE</code>,
-     * <code>LUA_TFUNCTION</code>, <code>LUA_TUSERDATA</code>, or
-     * <code>LUA_TTHREAD</code>. The default implementation will return
-     * <code>LUA_TNONE</code>.
+     * can belong to the set of Lua types: \c LUA_TNONE, \c LUA_TNIL, \c LUA_TBOOLEAN,
+     * \c LUA_TLIGHTUSERDATA, \c LUA_TNUMBER, \c LUA_TSTRING, \c LUA_TTABLE,
+     * \c LUA_TFUNCTION, \c LUA_TUSERDATA, or \c LUA_TTHREAD. The default implementation
+     * will return \c LUA_TNONE.
+     *
      * \return The Lua type that will be consumed or produced by the Property::getLuaValue
-     * and Property::setLuaValue methods.
+     *         and Property::setLuaValue methods.
      */
     virtual int typeLua() const;
 
     /**
-     * This method encodes the encapsulated value of this Property as a
+     * This method encodes the encapsulated \p value of this Property as a
      * <code>std::string</code>. The specific details of this serialization is up to the
      * property developer. The implementation has to be synchronized with the
-     Property::setStringValue method. The default implementation is a no-op.
+     * Property::setStringValue method. The default implementation is a no-op.
+     *
      * \param value The value to which the Property will be encoded
-     * \return <code>true</code> if the encoding succeeded, <code>false</code> otherwise
+     * \return \p true if the encoding succeeded, \p false otherwise
      */
     virtual bool getStringValue(std::string& value) const;
 
     /**
      * This method encodes the encapsulated value of this Property as a
      * <code>std::string</code>.
+     *
      * \return the string value
-     * \throws an exception if value couldn't be fetched
+     *
+     * \throw ghoul::RuntimeError If value could not be fetched
      */
     std::string getStringValue() const;
 
@@ -215,30 +223,35 @@ public:
      * passed <code>std::string</code>. The specific details of the deserialization are up
      * to the Property developer. The implementation has to be synchronized with the
      * Property::getLuaValue method. The default implementation is a no-op.
+     *
      * \param value The value from which the Property will be decoded
-     * \return <code>true</code> if the decoding and setting of the value succeeded,
-     * <code>false</code> otherwise
+     * \return \c true if the decoding and setting of the value succeeded, \c false
+     *         otherwise
      */
     virtual bool setStringValue(std::string value);
 
     /**
-     * This method registers a <code>callback</code> function that will be called every
-     * time if either Property:set or Property::setLuaValue was called with a value that
-     * is different from the previously stored value. The callback can be removed by
-     * calling the removeOnChange method with the OnChangeHandle that was returned here.
+     * This method registers a \p callback function that will be called every time if
+     * either Property:set or Property::setLuaValue was called with a value that is
+     * different from the previously stored value. The callback can be removed by calling
+     * the removeOnChange method with the OnChangeHandle that was returned here.
+     *
      * \param callback The callback function that is called when the encapsulated type has
-     * been successfully changed by either the Property::set or Property::setLuaValue
-     * methods.
-     * \pre The callback must not be empty
+     *        been successfully changed by either the Property::set or
+     *        Property::setLuaValue methods.
      * \return An OnChangeHandle that can be used in subsequent calls to remove a callback
+     *
+     * \pre The callback must not be empty
      */
     OnChangeHandle onChange(std::function<void()> callback);
 
     /**
-    * This method registers a <code>callback</code> function that will be called when
-    * the property is destructed.
-    * \pre The callback must not be empty
+    * This method registers a \p callback function that will be called when the property
+    * is destructed.
+    *
     * \return An OnDeleteHandle that can be used in subsequent calls to remove a callback
+    *
+    * \pre The callback must not be empty
     */
     OnDeleteHandle onDelete(std::function<void()> callback);
 
@@ -246,48 +259,56 @@ public:
      * This method deregisters a callback that was previously registered with the onChange
      * method. If OnChangeHandleAll is passed to this function, all registered callbacks
      * are removed.
+     *
      * \param handle An OnChangeHandle that was returned from a previous call to onChange
-     * by this property or OnChangeHandleAll if all callbacks should be removed.
-     * \pre handle must refer to a callback that has been previously registred
-     * \pre handle must refer to a callback that has not been removed previously
+     *        by this property or OnChangeHandleAll if all callbacks should be removed.
+     *
+     * \pre \p handle must refer to a callback that has been previously registred
+     * \pre \p handle must refer to a callback that has not been removed previously
      */
     void removeOnChange(OnChangeHandle handle);
 
     /**
     * This method deregisters a callback that was previously registered with the onDelete
     * method.
+    *
     * \param handle An OnDeleteHandle that was returned from a previous call to onDelete
-    * by this property.
-    * \pre handle must refer to a callback that has been previously registred
-    * \pre handle must refer to a callback that has not been removed previously
+    *        by this property.
+    *
+    * \pre \p handle must refer to a callback that has been previously registred
+    * \pre \p handle must refer to a callback that has not been removed previously
     */
     void removeOnDelete(OnDeleteHandle handle);
 
     /**
      * This method returns the unique identifier of this Property.
+     *
      * \return The unique identifier of this Property
      */
     const std::string& identifier() const;
 
     /**
      * Returns the fully qualified name for this Property that uniquely identifies this
-     * Property within OpenSpace. It consists of the <code>identifier</code> preceded by
-     * all levels of PropertyOwner%s separated with <code>.</code>; for example:
+     * Property within OpenSpace. It consists of the identifier preceded by all levels of
+     * PropertyOwner%s separated with <code>.</code>; for example:
      * <code>owner1.owner2.identifier</code>.
+     *
      * \return The fully qualified identifier for this Property
      */
     std::string fullyQualifiedIdentifier() const;
 
     /**
-     * Returns the PropertyOwner of this Property or <code>nullptr</code>, if it does not
-     * have an owner.
-     *\ return The Property of this Property
+     * Returns the PropertyOwner of this Property or \c nullptr, if it does not have an
+     * owner.
+     *
+     * \return The Property of this Property
      */
     PropertyOwner* owner() const;
 
     /**
      * Assigned the Property to a new PropertyOwner. This method does not inform the
      * PropertyOwner of this action.
+     *
      * \param owner The new PropertyOwner for this Property
      */
     void setPropertyOwner(PropertyOwner* owner);
@@ -297,23 +318,26 @@ public:
      * constructor. This method returns the same value as accessing the metaData object
      * and requesting the <code>std::string</code> stored for the <code>guiName</code>
      * key.
+     *
      * \return The human-readable GUI name for this Property
      */
-    std::string guiName() const;
+    const std::string& guiName() const;
 
     /**
      * This function returns a user-facing description of the Property which can be
      * displayed in the user interface to inform the user what this Property does and how
      * it affects the rendering.
+     *
      * \return The description of this Property
      */
-    std::string description() const;
+    const std::string& description() const;
 
     /**
      * Sets the identifier of the group that this Property belongs to. Property groups can
      * be used, for example, by GUI application to visually group different properties,
-     * but it has no impact on the Property itself. The default value for the groupID is
-     * <code>""</code>.
+     * but it has no impact on the Property itself. The default value for the \p groupID
+     * is <code>""</code>.
+     *
      * \param groupId The group id that this property should belong to
      */
     void setGroupIdentifier(std::string groupId);
@@ -329,12 +353,14 @@ public:
      * Sets a hint about the visibility of the Property. Each application accessing the
      * properties is free to ignore this hint. It is stored in the metaData Dictionary
      * with the key: <code>Visibility</code>.
+     *
      * \param visibility The new visibility of the Property
      */
     void setVisibility(Visibility visibility);
 
     /**
-     * Returns this Property%'s visibility setting
+     * Returns this Property%'s visibility setting.
+     *
      * \return This Property%'s visibility setting
      */
     Visibility visibility() const;
@@ -344,19 +370,18 @@ public:
      * applications. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set,
      * Property::setLuaValue, or Property::setStringValue methods. The value is stored in
-     * the metaData Dictionary with the key: <code>isReadOnly</code>. The default value is
-     * <code>false</code>.
-     * \param state <code>true</code> if the Property should be read only,
-     * <code>false</code> otherwise
+     * the metaData Dictionary with the key: \c isReadOnly. The default value is \c false.
+     *
+     * \param state \c true if the Property should be read only, \c false otherwise
      */
     void setReadOnly(bool state);
 
     /**
     * Default view options that can be used in the Property::setViewOption method. The
-    * values are: Property::ViewOptions::Color = <code>color</code>,
-    * Property::ViewOptions::LightPosition = <code>lightPosition</code>,
-    * Property::ViewOptions::PowerScaledScalar = <code>powerScaledScalar</code>, and
-    * Property::ViewOptions::PowerScaledCoordinate = <code>powerScaledCoordinate</code>.
+    * values are: Property::ViewOptions::Color = \c color,
+    * Property::ViewOptions::LightPosition = \c lightPosition,
+    * Property::ViewOptions::PowerScaledScalar = \c powerScaledScalar, and
+    * Property::ViewOptions::PowerScaledCoordinate = \c powerScaledCoordinate.
     */
     struct ViewOptions {
         static const char* Color;
@@ -381,8 +406,10 @@ public:
      * This method returns the state of a \p option hint. See Property::ViewOptions for a
      * default list of possible options. As these are only hints, the GUI is free to
      * ignore any suggestion by the developer.
+     *
      * \param option The view option that should be retrieved
      * \param defaultValue The value that is returned if the \p option was not set
+     *
      * \return The view option's value
      */
     bool viewOption(const std::string& option, bool defaultValue = false) const;
@@ -391,6 +418,7 @@ public:
      * Returns the metaData that contains all information for external applications to
      * correctly display information about the Property. No information that is stored in
      * this Dictionary is necessary for the programmatic use of the Property.
+     *
      * \return The Dictionary containing all meta data information about this Property
      */
     const ghoul::Dictionary& metaData() const;
@@ -398,13 +426,15 @@ public:
     /**
      * Convert the Property into a string containing a JSON representation of the
      * Property. Includes description of the object.
-     * @return the JSON string
+     *
+     * \return The JSON string
      */
     virtual std::string toJson() const;
 
     /**
      * Get a valid JSON formatted representation of the Property's value.
-     * @return the value in a json compatible format
+     *
+     * \return the value in a json compatible format
      */
     virtual std::string jsonValue() const;
 
@@ -418,19 +448,21 @@ public:
 
     /**
      * Creates the information that is general to every Property and adds the
-     * <code>Identifier</code>, <code>Name</code>, <code>Type</code>, and
-     * <code>MetaData</code> keys and their values. The meta data is handles by the
-     * generateMetaDataDescription method, which has to be overloaded if a concrete base
-     * class wants to add meta data that is not curated by the Property class
+     * \c Identifier, \c Name, \c Type, and \c MetaData keys and their values. The meta
+     * data is handles by the generateMetaDataDescription method, which has to be
+     * overloaded if a concrete base class wants to add meta data that is not curated by
+     * the Property class.
+     *
      * \return The base description common to all Property classes
      */
     std::string generateBaseJsonDescription() const;
 
     /**
-     * Creates the information for the <code>MetaData</code> key-part of the json
-     * description for the Property. The result can be included as one key-value pair in
-     * the description text generated by subclasses. Only the metadata curated by the
-     * Property class is used in this method.
+     * Creates the information for the \c MetaData key-part of the JSON description for
+     * the Property. The result can be included as one key-value pair in the description
+     * text generated by subclasses. Only the metadata curated by the Property class is
+     * used in this method.
+     *
      * \return The metadata information text for the property
      */
     virtual std::string generateMetaDataJsonDescription() const;
@@ -444,12 +476,12 @@ public:
      * <code>return { generateBaseDescription(), generateMetaDataDescription(),</code>
      * <code>generateAdditionalDescription()}</code>, which #generateMetaDataDescription
      * and this method being the override points to customize the behavior.
+     *
      * \return The information specific to each subclass of Property
      */
     virtual std::string generateAdditionalJsonDescription() const;
 
 protected:
-
     static const char* IdentifierKey;
     static const char* NameKey;
     static const char* TypeKey;
@@ -465,7 +497,7 @@ protected:
     void notifyChangeListeners();
 
     /// The PropetyOwner this Property belongs to, or <code>nullptr</code>
-    PropertyOwner* _owner;
+    PropertyOwner* _owner = nullptr;
 
     /// The identifier for this Property
     std::string _identifier;
@@ -488,7 +520,7 @@ protected:
 private:
     void notifyDeleteListeners();
 
-    OnChangeHandle _currentHandleValue;
+    OnChangeHandle _currentHandleValue = 0;
 
 #ifdef _DEBUG
     // These identifiers can be used for debugging. Each Property is assigned one unique

@@ -36,6 +36,7 @@
 #include <openspace/util/keys.h>
 #include <ghoul/misc/invariants.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/util/camera.h>
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -67,92 +68,92 @@
 namespace {
     constexpr const char* _loggerCat = "TouchInteraction";
 
-    static const openspace::properties::Property::PropertyInfo OriginInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Origin",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UnitTestInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo EventsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "TouchEvents",
         "True if we have a touch event",
         "",
         openspace::properties::Property::Visibility::Hidden
     };
 
-    static const openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Reset all properties to default",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
         "MaxTapTime",
         "Max tap delay (in ms) for double tap",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
         "Touch Screen size in inches",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
         "TapZoomFactor",
         "Scaling distance travelled on tap",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DirectManipulationInfo = {
         "DirectManipulationRadius",
         "Radius a planet has to have to activate direct-manipulation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RollThresholdInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RollThresholdInfo = {
         "RollThreshold",
         "Threshold for min angle for roll interpret",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
+    constexpr openspace::properties::Property::PropertyInfo OrbitSpinningThreshold = {
         "OrbitThreshold",
         "Threshold to activate orbit spinning in direct-manipulation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SpinningSensitivityInfo = {
         "SpinningSensitivity",
         "Sensitivity of spinning in direct-manipulation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ZoomSensitivityExpInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityExpInfo = {
         "ZoomSensitivityExp",
         "Sensitivity of exponential zooming in relation to distance from focus node",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ZoomSensitivityPropInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityPropInfo = {
         "ZoomSensitivityProp",
         "Sensitivity of zooming proportional to distance from focus node",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     ZoomSensitivityDistanceThresholdInfo = {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
@@ -160,7 +161,7 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
     ZoomBoundarySphereMultiplierInfo = {
         "ZoomBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom & prevent "
@@ -168,55 +169,55 @@ namespace {
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
         "ConstantTimeDecaySecs",
         "Time duration that a pitch/roll/zoom/pan should take to decay to zero (seconds)",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
         ""
     };
 
-    static const openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo PanModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PanModeInfo = {
         "PanMode",
         "Allow panning gesture",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
         "PanDeltaDistance",
         "Delta distance between fingers allowed for interpreting pan interaction",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SlerpTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SlerpTimeInfo = {
         "SlerpTime",
         "Time to slerp in seconds to new orientation with new node picking",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo GuiButtonSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GuiButtonSizeInfo = {
         "GuiButtonSize",
         "GUI button size in pixels",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo FrictionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo PickingRadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PickingRadiusInfo = {
         "PickingRadiusMinimum",
         "Minimum radius for picking in NDC coordinates",
         "" // @TODO Missing documentation
@@ -245,11 +246,11 @@ TouchInteraction::TouchInteraction()
     , _zoomSensitivityProportionalDist(ZoomSensitivityPropInfo, 11.f, 5.f, 50.f)
     , _zoomSensitivityDistanceThreshold(
         ZoomSensitivityDistanceThresholdInfo,
-        0.05,
-        0.01,
-        0.25
+        0.05f,
+        0.01f,
+        0.25f
     )
-    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001, 1.0, 1.01)
+    , _zoomBoundarySphereMultiplier(ZoomBoundarySphereMultiplierInfo, 1.001f, 1.f, 1.01f)
     , _inputStillThreshold(InputSensitivityInfo, 0.0005f, 0.f, 0.001f)
     // used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f)
@@ -369,8 +370,8 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
         list.at(0).getScreenY(res.y)
     );
     const float bottomCornerSizeForZoomTap_fraction = 0.08f;
-    int zoomTapThresholdX = res.x * (1.0f - bottomCornerSizeForZoomTap_fraction);
-    int zoomTapThresholdY = res.y * (1.0f - bottomCornerSizeForZoomTap_fraction);
+    int zoomTapThresholdX = static_cast<int>(res.x * (1.0f - bottomCornerSizeForZoomTap_fraction));
+    int zoomTapThresholdY = static_cast<int>(res.y * (1.0f - bottomCornerSizeForZoomTap_fraction));
 
     bool isTapInLowerCorner = std::abs(pos.x) > zoomTapThresholdX &&
                               std::abs(pos.y) > zoomTapThresholdY;
@@ -630,13 +631,12 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         );
         if (c != list.end()) {
              // normalized -1 to 1 coordinates on screen
-            screenPoints.push_back(
-                glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))
-            );
+            screenPoints.emplace_back(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5));
         } else {
             OsEng.moduleEngine().module<ImGUIModule>()->touchInput = {
-                1,
-                glm::dvec2(0.0, 0.0), 1
+                true,
+                glm::dvec2(0.0, 0.0),
+                1
             };
             resetAfterInput();
             return;
@@ -692,8 +692,9 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
         // prevents touch to infinitely be active (due to windows bridge case where event
         // doesnt get consumed sometimes when LMA fails to converge)
         OsEng.moduleEngine().module<ImGUIModule>()->touchInput = {
-            1,
-            glm::dvec2(0.0, 0.0), 1
+            true,
+            glm::dvec2(0.0, 0.0),
+            1
         };
         resetAfterInput();
     }
@@ -710,11 +711,13 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
         "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu"
     };
     std::vector<SceneGraphNode*> selectableNodes;
-    for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes())
-        for (std::string name : selectables)
+    for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) {
+        for (const std::string& name : selectables) {
             if (node->identifier() == name) {
                 selectableNodes.push_back(node);
             }
+        }
+    }
 
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
     glm::dvec3 camPos = _camera->positionVec3();
@@ -964,7 +967,9 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
         return ROT;
     }
     else {
-        float avgDistance = std::abs(dist - lastDist) / list.at(0).getMotionSpeed();
+        float avgDistance = static_cast<float>(
+            std::abs(dist - lastDist) / list.at(0).getMotionSpeed()
+        );
         // if average distance between 3 fingers are constant we have panning
         if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
             return PAN;
@@ -989,7 +994,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list,
 void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list,
                                          const std::vector<Point>& lastProcessed)
 {
-    TuioCursor cursor = list.at(0);
+    const TuioCursor& cursor = list.at(0);
     const int action = interpretInteraction(list, lastProcessed);
 
 #ifdef TOUCH_DEBUG_PROPERTIES
@@ -1390,7 +1395,7 @@ void TouchInteraction::resetAfterInput() {
     _debugProperties.nFingers = 0;
     _debugProperties.interactionMode = "None";
 #endif
-    if (_directTouchMode && _selected.size() > 0 && _lmSuccess) {
+    if (_directTouchMode && !_selected.empty() && _lmSuccess) {
         double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
         if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) {
              // allow node to start "spinning" after direct-manipulation finger is let go

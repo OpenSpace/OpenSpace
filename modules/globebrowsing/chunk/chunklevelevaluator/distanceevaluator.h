@@ -36,7 +36,7 @@ namespace openspace::globebrowsing::chunklevelevaluator {
 */
 class Distance : public Evaluator {
 public:
-    int getDesiredLevel(const Chunk& chunk, const RenderData& data) const override;
+    int desiredLevel(const Chunk& chunk, const RenderData& data) const override;
 };
 
 } // namespace openspace::globebrowsing::chunklevelevaluator

@@ -25,22 +25,23 @@
 #ifndef __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
 #define __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
 
-#include <ghoul/io/socket/socketserver.h>
-
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <map>
 #include <functional>
+#include <memory>
+#include <mutex>
 #include <vector>
-#include <atomic>
+
+namespace ghoul::io {
+    class Socket;
+    class SocketServer;
+} // namespace ghoul::io
 
 namespace openspace {
 
 class ConnectionPool {
 public:
-    ConnectionPool(
-        std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket);
+    using SocketHandleFunc = std::function<void(ghoul::io::Socket& socket)>;
+
+    ConnectionPool(SocketHandleFunc handleSocket);
     ~ConnectionPool();
 
     void addServer(std::shared_ptr<ghoul::io::SocketServer> server);
@@ -54,9 +55,9 @@ private:
     void removeDisconnectedSockets();
     void acceptNewSockets();
 
-    std::function<void(std::shared_ptr<ghoul::io::Socket>)> _handleSocket;
+    SocketHandleFunc _handleSocket;
     std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
-    std::vector<std::shared_ptr<ghoul::io::Socket>> _sockets;
+    std::vector<std::unique_ptr<ghoul::io::Socket>> _sockets;
 };
 
 } // namespace openspace

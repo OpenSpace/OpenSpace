@@ -23,9 +23,14 @@
  ****************************************************************************************/
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-#include <ghoul/logging/logmanager.h>
+
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/volume/rawvolume.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -39,45 +44,57 @@
 #include <ccmc/ENLIL.h>
 #include <ccmc/CCMCTime.h>
 #include <ccmc/Attribute.h>
+#include <ccmc/Interpolator.h>
 
 #ifdef WIN32
 #pragma warning (pop)
 #endif // WIN32
 
-#include <ghoul/fmt.h>
-
 namespace {
     constexpr const char* _loggerCat = "KameleonVolumeReader";
+
+    template <typename T>
+    T globalAttribute(ccmc::Model&, const std::string&) {
+        static_assert(sizeof(T) == 0);
+    }
+
+    template <>
+    std::string globalAttribute(ccmc::Model& model, const std::string& attribute) {
+        return model.getGlobalAttribute(attribute).getAttributeString();
+    }
+
+    template <>
+    float globalAttribute(ccmc::Model& model, const std::string& attribute) {
+        return model.getGlobalAttribute(attribute).getAttributeFloat();
+    }
+
+
 } // namespace
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
-KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
-    : _path(path)
-{
+KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(path)) {
     if (!FileSys.fileExists(path)) {
-        LERROR(fmt::format("'{}' does not exist", _path));
         throw ghoul::FileNotFoundError(_path);
     }
 
-    long status = _kameleon.open(_path);
+    const long status = _kameleon.open(_path);
     if (status != ccmc::FileReader::OK) {
         LERROR(fmt::format("Failed to open file '{}' with Kameleon", _path));
         throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
     }
 
-    _model = _kameleon.model;
-
     // Possibly use a kameleon interpolator instead of a model interpolator?
-    _interpolator = std::unique_ptr<ccmc::Interpolator>(_model->createNewInterpolator());
+    _interpolator = std::unique_ptr<ccmc::Interpolator>(
+        _kameleon.model->createNewInterpolator()
+    );
 }
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
-    const glm::uvec3 & dimensions,
-    const std::string & variable,
-    const glm::vec3 & lowerDomainBound,
-    const glm::vec3 & upperDomainBound) const
+                                                            const glm::uvec3 & dimensions,
+                                                              const std::string& variable,
+                                                        const glm::vec3& lowerDomainBound,
+                                                  const glm::vec3& upperDomainBound) const
 {
     float min, max;
     return readFloatVolume(
@@ -92,130 +109,64 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
                                                             const glm::uvec3 & dimensions,
-                                                            const std::string & variable,
-                                                            const glm::vec3 & lowerBound,
-                                                            const glm::vec3 & upperBound,
-                                                            float& minValue,
-                                                            float& maxValue) const
+                                                              const std::string& variable,
+                                                              const glm::vec3& lowerBound,
+                                                              const glm::vec3& upperBound,
+                                                                          float& minValue,
+                                                                    float& maxValue) const
 {
-    minValue = FLT_MAX;
-    maxValue = FLT_MIN;
+    minValue = std::numeric_limits<float>::max();
+    maxValue = -std::numeric_limits<float>::max();
 
-    auto volume = std::make_unique<volume::RawVolume<float>>(dimensions);
+    std::unique_ptr<volume::RawVolume<float>> volume =
+        std::make_unique<volume::RawVolume<float>>(dimensions);
+
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
 
-    auto interpolate =
-        [this](const std::string& var, glm::vec3 volumeCoords) {
-            return _interpolator->interpolate(
-                var,
-                volumeCoords[0],
-                volumeCoords[1],
-                volumeCoords[2]);
-        };
-
-    auto sample = [&variable, &interpolate](glm::vec3 volumeCoords) {
-        return interpolate(variable, volumeCoords);
+    auto interpolate = [this](const std::string& var, const glm::vec3& coords) {
+        return _interpolator->interpolate(var, coords[0], coords[1], coords[2]);
     };
 
     float* data = volume->data();
-    for (size_t index = 0; index < volume->nCells(); index++) {
-        glm::vec3 coords = volume->indexToCoords(index);
-        glm::vec3 coordsZeroToOne = coords / dims;
-        glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
+    for (size_t index = 0; index < volume->nCells(); ++index) {
+        const glm::vec3 coords = volume->indexToCoords(index);
+        const glm::vec3 coordsZeroToOne = coords / dims;
+        const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = sample(volumeCoords);
+        data[index] = interpolate(variable, volumeCoords);
 
-        if (data[index] < minValue) {
-            minValue = data[index];
-        }
-        if (data[index] > maxValue) {
-            maxValue = data[index];
-        }
+        minValue = glm::min(minValue, data[index]);
+        maxValue = glm::max(maxValue, data[index]);
     }
 
     return volume;
 }
 
-std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {
-    // get the grid system string
-    std::string gridSystem =
-        _model->getGlobalAttribute("grid_system_1").getAttributeString();
-
-    // remove leading and trailing brackets
-    gridSystem = gridSystem.substr(1, gridSystem.length() - 2);
-
-    // remove all whitespaces
-    gridSystem.erase(
-        remove_if(
-            gridSystem.begin(),
-            gridSystem.end(),
-            isspace),
-        gridSystem.end()
-    );
-
-    // replace all comma signs with whitespaces
-    std::replace(gridSystem.begin(), gridSystem.end(), ',', ' ');
-
-    // tokenize
-    std::istringstream iss(gridSystem);
-    std::vector<std::string> tokens{
-        std::istream_iterator<std::string>{iss},
-        std::istream_iterator<std::string>{}
-    };
-
-    // validate
-    if (tokens.size() != 3) {
-        throw ghoul::RuntimeError(
-            "Expected three dimensional grid system. Got " +
-            std::to_string(tokens.size()) +
-            "dimensions");
-    }
-
-    std::string x = tokens.at(0);
-    std::string y = tokens.at(1);
-    std::string z = tokens.at(2);
-
-    std::transform(
-        x.begin(),
-        x.end(),
-        x.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    std::transform(
-        y.begin(),
-        y.end(), y.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    std::transform(
-        z.begin(),
-        z.end(), z.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-
-    return std::vector<std::string>{x, y, z};
-}
-
 std::vector<std::string> KameleonVolumeReader::variableNames() const {
     std::vector<std::string> variableNames;
-    const int nVariables = _model->getNumberOfVariables();
+    const int nVariables = _kameleon.model->getNumberOfVariables();
     for (int i = 0; i < nVariables; ++i) {
-        variableNames.push_back(_model->getVariableName(i));
+        variableNames.push_back(_kameleon.model->getVariableName(i));
     }
     return variableNames;
 }
 
 std::vector<std::string> KameleonVolumeReader::variableAttributeNames() const {
-    return _model->getVariableAttributeNames();
+    return _kameleon.model->getVariableAttributeNames();
 }
 
 std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
     std::vector<std::string> attributeNames;
-    const int nAttributes = _model->getNumberOfGlobalAttributes();
+    const int nAttributes = _kameleon.model->getNumberOfGlobalAttributes();
     for (int i = 0; i < nAttributes; ++i) {
-        attributeNames.push_back(_model->getGlobalAttributeName(i));
+        attributeNames.push_back(_kameleon.model->getGlobalAttributeName(i));
     }
     return attributeNames;
+}
+
+std::array<std::string, 3> KameleonVolumeReader::gridVariableNames() const {
+    return openspace::gridVariables(_kameleon.model);
 }
 
 void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary,
@@ -239,7 +190,7 @@ void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionar
 ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     ghoul::Dictionary globalAttributesDictionary;
     for (const std::string& attributeName : globalAttributeNames()) {
-        ccmc::Attribute attribute = _model->getGlobalAttribute(attributeName);
+        ccmc::Attribute attribute = _kameleon.model->getGlobalAttribute(attributeName);
         addAttributeToDictionary(globalAttributesDictionary, attributeName, attribute);
     }
 
@@ -248,7 +199,7 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     for (const std::string& variableName : variableNames()) {
         ghoul::Dictionary variableAttributesDictionary;
         for (const std::string& attributeName : varAttrNames) {
-            ccmc::Attribute attribute = _model->getVariableAttribute(
+            ccmc::Attribute attribute = _kameleon.model->getVariableAttribute(
                 variableName,
                 attributeName
             );
@@ -269,12 +220,10 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
 
 std::string KameleonVolumeReader::simulationStart() const {
     std::string startTime;
-    if (_model->doesAttributeExist("start_time")){
-        startTime =
-            _model->getGlobalAttribute("start_time").getAttributeString();
-    } else if (_model->doesAttributeExist("tim_rundate_cal")) {
-        startTime =
-            _model->getGlobalAttribute("tim_rundate_cal").getAttributeString();
+    if (_kameleon.model->doesAttributeExist("start_time")) {
+        startTime = globalAttribute<std::string>(*_kameleon.model, "start_time");
+    } else if (_kameleon.model->doesAttributeExist("tim_rundate_cal")) {
+        startTime = globalAttribute<std::string>(*_kameleon.model, "tim_rundate_cal");
         size_t numChars = startTime.length();
         if (numChars < 19) {
             // Fall through to add the required characters
@@ -298,12 +247,10 @@ std::string KameleonVolumeReader::simulationStart() const {
                     break;
             }
         }
-    } else if (_model->doesAttributeExist("tim_obsdate_cal")) {
-        startTime =
-            _model->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
-    } else if (_model->doesAttributeExist("tim_crstart_cal")) {
-        startTime =
-            _model->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+    } else if (_kameleon.model->doesAttributeExist("tim_obsdate_cal")) {
+        startTime = globalAttribute<std::string>(*_kameleon.model, "tim_obsdate_cal");
+    } else if (_kameleon.model->doesAttributeExist("tim_crstart_cal")) {
+        startTime = globalAttribute<std::string>(*_kameleon.model, "tim_crstart_cal");
     }
 
     if (startTime.length() == 19) {
@@ -314,20 +261,20 @@ std::string KameleonVolumeReader::simulationStart() const {
 }
 
 float KameleonVolumeReader::elapsedTime() const {
-    if (_model->doesAttributeExist("elapsed_time_in_seconds")) {
-        return _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat();
-    } else if (_model->doesAttributeExist("time_physical_time")) {
-        return _model->getGlobalAttribute("time_physical_time").getAttributeFloat();
+    if (_kameleon.model->doesAttributeExist("elapsed_time_in_seconds")) {
+        return globalAttribute<float>(*_kameleon.model, "elapsed_time_in_seconds");
+    } else if (_kameleon.model->doesAttributeExist("time_physical_time")) {
+        return globalAttribute<float>(*_kameleon.model, "time_physical_time");
     }
-    return 0;
+    return 0.f;
 }
 
 std::string KameleonVolumeReader::simulationEnd() const {
-    return _model->getGlobalAttribute("end_time").getAttributeString();
+    return globalAttribute<std::string>(*_kameleon.model, "end_time");
 }
 
 std::string KameleonVolumeReader::getVisUnit(const std::string& variable) const {
-    return _model->getNativeUnit(variable);
+    return _kameleon.model->getNativeUnit(variable);
 }
 
 std::string KameleonVolumeReader::time() const {
@@ -339,12 +286,13 @@ std::string KameleonVolumeReader::time() const {
 }
 
 double KameleonVolumeReader::minValue(const std::string & variable) const {
-    return _model->getVariableAttribute(variable, "actual_min").getAttributeFloat();
+    ccmc::Model& m = *_kameleon.model;
+    return m.getVariableAttribute(variable, "actual_min").getAttributeFloat();
 }
 
 double KameleonVolumeReader::maxValue(const std::string & variable) const {
-    return _model->getVariableAttribute(variable, "actual_max").getAttributeFloat();
+    ccmc::Model& m = *_kameleon.model;
+    return m.getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
 
-} // namepace kameleonvolume
-} // namespace openspace
+} // namespace openspace::kameleonvolume

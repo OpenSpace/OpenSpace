@@ -113,7 +113,8 @@ private:
     bool isAtmosphereInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position,
         double radius) const;
 
-    const double DISTANCE_CULLING = 1e10;
+    // Number of planet radii to use as distance threshold for culling
+    const double DISTANCE_CULLING_RADII = 5000;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;

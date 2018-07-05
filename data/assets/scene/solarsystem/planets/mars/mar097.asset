@@ -1,8 +1,8 @@
 local Kernels = asset.syncedResource({
     Name = "Mars Spice Kernels",
-    Type = "TorrentSynchronization",
-    Identifier = "mar097",
-    Magnet = "magnet:?xt=urn:btih:308F326B9AF864294D73042FBBED33B17291E27E&dn=mar097.bsp&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.publicbt.com%3a80%2fannounce&tr=udp%3a%2f%2ftracker.ccc.de%3a80%2fannounce"
+    Type = "HttpSynchronization",
+    Identifier = "mars_kernels",
+    Version = 1
 })
 
 asset.export("Kernels", Kernels .. '/mar097.bsp')

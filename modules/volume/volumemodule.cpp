@@ -23,23 +23,30 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumemodule.h>
+
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
-
+#include <modules/volume/tasks/generaterawvolumetask.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/util/task.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 
 using namespace volume;
 
-VolumeModule::VolumeModule()  : OpenSpaceModule(Name) {}
+VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
 
 void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    auto factory = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-    factory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
+    auto rFactory = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(rFactory, "No renderable factory existed");
+    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
+
+    auto tFactory = FactoryManager::ref().factory<Task>();
+    ghoul_assert(tFactory, "No task factory existed");
+    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
+
 }
 
 } // namespace openspace

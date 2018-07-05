@@ -24,19 +24,15 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 
+#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
+#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
+#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
+#include <modules/digitaluniverse/rendering/renderablepoints.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
-
-#include <modules/digitaluniverse/rendering/renderablepoints.h>
-#include <modules/digitaluniverse/rendering/renderablebillboardscloud.h>
-#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
-#include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
 

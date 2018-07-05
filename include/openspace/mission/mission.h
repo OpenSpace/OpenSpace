@@ -27,7 +27,6 @@
 
 #include <openspace/util/timerange.h>
 
-#include <functional>
 #include <string>
 #include <vector>
 
@@ -50,48 +49,55 @@ public:
     /**
      * Constructs a MissionPhase from the information provided in the \p dictionary. See
      * the MissionPhase::Documentation for accepted ghoul::Dictionary values.
+     *
      * \param dictionary The ghoul::Dictionary that contains information about the current
-     * MissionPhase
+     *        MissionPhase
+     *
      * \throw SpecificationError If the \p dictionary does not adhere to the Documentation
      * \throw RuntimeError If the time range of subphases is smaller than the specified
-     * time range
+     *        time range
      * \throw RuntimeError If neither subphases or a time range is specified
      */
     MissionPhase(const ghoul::Dictionary& dictionary);
 
     /**
      * Returns the name of the MissionPhase.
+     *
      * \return The name of the MissionPhase
      */
-    std::string name() const;
+    const std::string& name() const;
 
     /**
      * Returns the TimeRange of the MissionPhase.
+     *
      * \return The TimeRange of the MissionPhase
      */
-    TimeRange timeRange() const;
+    const TimeRange& timeRange() const;
 
     /**
      * Returns the description of the MissionPhase.
+     *
      * \return The description of the MissionPhase
      */
-    std::string description() const;
+    const std::string& description() const;
 
     /**
      * Returns all subphases sorted by start time.
+     *
      * \return All subphases sorted by start time
      */
-    std::vector<MissionPhase> phases() const;
+    const std::vector<MissionPhase>& phases() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 
     /**
      * Returns all MissionPhase%s whose MissionPhase::timeRange includes the provided
      * \p time, up to a maximum subphase depth of \p maxDepth.
+     *
      * \param time The time in which the subphases have to be active in order to be
-     * included
+     *        included
      * \param maxDepth The maximum levels of subphases that will be considered. If this
-     * value is equal to <code>-1</code>, an infinite depth will be considered.
+     *        value is equal to <code>-1</code>, an infinite depth will be considered.
      * \return A list of MissionPhases that cover the provided \p time
      */
     Trace phaseTrace(double time, int maxDepth = -1) const;
@@ -108,9 +114,11 @@ protected:
      * Recursive function that walks the subphases and adds the MissionPhase%s that cover
      * the provided \p time and adds these to the list of \p trace%s. Each recursive call
      * will decrease the \p maxDepth counter until it reaches 0.
+     *
      * \param time The time which the subphases have to cover to be added to the \p trace
      * \param trace The list of MissionPhase%s that are active during the time \p time
      * \param maxDepth The maximum depth of levels that will be considered
+     *
      * \pre maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
@@ -133,9 +141,11 @@ using Mission = MissionPhase;
 
 /**
  * This function constructs a Mission from the provided \p filename. The file must be a
- * Lua table that describes the Mission according to MissionPhase::Documentation
+ * Lua table that describes the Mission according to MissionPhase::Documentation.
+ *
  * \param filename The file that is used to create the Mission
  * \return The constructed Mission
+ *
  * \pre \p filename must not be empty
  * \pre \p filename must not contain tokens
  * \pre \p filename must exist

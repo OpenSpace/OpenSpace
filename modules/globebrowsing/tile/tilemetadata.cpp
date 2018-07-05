@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
+#include <sstream>
+
 namespace openspace::globebrowsing {
 
 void TileMetaData::serialize(std::ostream& os) {
@@ -40,13 +42,14 @@ void TileMetaData::serialize(std::ostream& os) {
 
 TileMetaData TileMetaData::deserialize(std::istream& is) {
     TileMetaData res;
-    int n; is >> n;
+    int n;
+    is >> n;
     res.maxValues.resize(n);
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; ++i) {
         is >> res.maxValues[i];
     }
     res.minValues.resize(n);
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; ++i) {
         is >> res.minValues[i];
     }
 

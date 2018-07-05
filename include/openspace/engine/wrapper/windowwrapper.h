@@ -30,10 +30,6 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
 
-#include <cstdint>
-#include <functional>
-#include <vector>
-
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
@@ -281,6 +277,13 @@ public:
      * widnow; <code>false</code> otherwise
      */
     virtual bool isSimpleRendering() const;
+
+    /**
+    * Returns <code>true</code> if the rendering is being done using a Fisheye lens;
+    * <code>false</code> otherwise. On default, this method returns
+    * <code>false</code>
+    */
+    virtual bool isFisheyeRendering() const;
 
     /**
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.

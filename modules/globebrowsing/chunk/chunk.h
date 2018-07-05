@@ -27,9 +27,7 @@
 
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-
 #include <ghoul/glm.h>
-
 #include <vector>
 
 namespace openspace { struct RenderData; }
@@ -41,10 +39,11 @@ struct TileIndex;
 
 class Chunk {
 public:
-    constexpr static float DEFAULT_HEIGHT = 0.f;
+    constexpr static float DefaultHeight = 0.f;
 
     struct BoundingHeights {
-        float min, max;
+        float min;
+        float max;
         bool available;
     };
 
@@ -66,7 +65,7 @@ public:
      * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
      * otherwise Status::DO_NOTHING.
      *
-     * \returns The Status of the chunk.
+     * \return The Status of the chunk.
      */
     Status update(const RenderData& data);
 
@@ -88,8 +87,8 @@ public:
      * to cover all HeightLayers. If the Chunk has a higher level than its highest
      * resolution HightLayer Tile, it will base its BoundingHeights on that Tile.
      * This means that high level Chunks can have BoundingHeights that are not
-    * tightly fitting.
-    */
+     * tightly fitting.
+     */
     BoundingHeights boundingHeights() const;
 
 private:

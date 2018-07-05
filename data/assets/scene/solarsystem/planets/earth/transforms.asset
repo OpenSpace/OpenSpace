@@ -56,8 +56,6 @@ local EarthIAU = {
     }
 }
 
-
-
 assetHelper.registerSceneGraphNodesAndExport(asset, {
     EarthBarycenter,
     EarthInertial,

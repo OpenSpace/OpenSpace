@@ -25,9 +25,17 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 #define __OPENSPACE_MODULE_WEBBROWSER___DEFAULT_BROWSER_LAUNCHER___H__
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4100)
+#endif // _MSC_VER
+
 #include <include/cef_life_span_handler.h>
 #include <include/cef_request_handler.h>
-#include <ghoul/logging/logmanager.h>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif // _MSC_VER
 
 namespace openspace {
 

@@ -25,16 +25,19 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER___H__
 
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/rendering/layer/layer.h>
-
 #include <openspace/properties/propertyowner.h>
 
-#include <ghoul/opengl/texture.h>
-
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <ghoul/misc/dictionary.h>
 #include <vector>
+
+namespace openspace::globebrowsing {
+    struct ChunkTile;
+    using ChunkTilePile = std::vector<ChunkTile>;
+    struct TileDepthTransform;
+    struct TileIndex;
+} // namespace openspace::globebrowsing
 
 namespace openspace::globebrowsing::tileprovider {
 
@@ -51,13 +54,7 @@ public:
      * to be instantiated.
      */
     static std::unique_ptr<TileProvider> createFromDictionary(
-        layergroupid::TypeID layerTypeID,
-        const ghoul::Dictionary& dictionary);
-
-    /**
-     * Default constructor.
-     */
-    TileProvider();
+        layergroupid::TypeID layerTypeID, const ghoul::Dictionary& dictionary);
 
     /**
      * Implementations of the TileProvider interface must implement
@@ -65,16 +62,16 @@ public:
      * dictionary must define a key specifying what implementation
      * of TileProvider to be instantiated.
      */
-    TileProvider(const ghoul::Dictionary& dictionary);
+    TileProvider(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
     /**
      * Virtual destructor that subclasses should override to do
      * clean up.
      */
-    virtual ~TileProvider() = default;
+    virtual ~TileProvider();
 
     virtual bool initialize();
-    virtual bool deinitialize() { return true; };
+    virtual bool deinitialize();
 
     /**
      * Method for querying tiles, given a specified <code>TileIndex</code>.
@@ -93,23 +90,23 @@ public:
      * \returns The tile corresponding to the TileIndex by the time
      * the method was invoked.
      */
-    virtual Tile getTile(const TileIndex& tileIndex) = 0;
+    virtual Tile tile(const TileIndex& tileIndex) = 0;
 
 
-    virtual ChunkTile getChunkTile(TileIndex tileIndex, int parents = 0,
+    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0,
         int maxParents = 1337);
 
-    virtual ChunkTilePile getChunkTilePile(TileIndex tileIndex, int pileSize);
+    virtual ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
-    Tile getDefaultTile() const;
+    Tile defaultTile() const;
 
     /**
      * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
      * corresponds the <code>Tile</code> that would be returned
-     * if the function <code>getTile</code> would be invoked with the same
+     * if the function <code>tile</code> would be invoked with the same
      * <code>TileIndex</code> argument at this point in time.
      */
-    virtual Tile::Status getTileStatus(const TileIndex& index) = 0;
+    virtual Tile::Status tileStatus(const TileIndex& index) = 0;
 
     /**
      * Get the associated depth transform for this TileProvider.
@@ -156,11 +153,11 @@ private:
     void initializeDefaultTile();
 
     static unsigned int _numTileProviders;
-    unsigned int _uniqueIdentifier;
-    bool _initialized;
+    unsigned int _uniqueIdentifier = 0;
+    bool _isInitialized = false;
 
     std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
-    Tile _defaultTile;
+    Tile _defaultTile = Tile(nullptr, nullptr, Tile::Status::Unavailable);
 };
 
 } // namespace openspace::globebrowsing::tileprovider

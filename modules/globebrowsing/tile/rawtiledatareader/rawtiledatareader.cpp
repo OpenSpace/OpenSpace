@@ -24,31 +24,12 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiletextureinitdata.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
-
+#include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/geometry/angle.h>
-
-#include <float.h>
-#include <sstream>
-#include <algorithm>
-#include <memory>
-#include <set>
-#include <queue>
-#include <iostream>
-#include <unordered_map>
-#include <limits>
-
-#include <math.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
 namespace openspace::globebrowsing {
 
@@ -63,9 +44,10 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
-    char* dataDestination, char* pboMappedDataDestination) const
+                                                         char* dataDestination,
+                                                     char* pboMappedDataDestination) const
 {
-    IODescription io = getIODescription(tileIndex);
+    IODescription io = ioDescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
 
     // Build the RawTile from the data we querred
@@ -94,11 +76,11 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     rawTile->imageData = dataDestination;
     rawTile->error = worstError;
-    rawTile->tileIndex = tileIndex;
+    rawTile->tileIndex = std::move(tileIndex);
 
     rawTile->textureInitData = std::make_shared<TileTextureInitData>(_initData);
 
-    if (_preprocess == PerformPreprocessing::Yes) {
+    if (_preprocess) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile));
     }
@@ -112,13 +94,15 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
     io = adjustIODescription(io);
 
     // Only read the minimum number of rasters
-    int nRastersToRead = std::min(dataSourceNumRasters(),
-        static_cast<int>(_initData.nRasters()));
+    int nRastersToRead = std::min(
+        dataSourceNumRasters(),
+        static_cast<int>(_initData.nRasters())
+    );
 
     switch (_initData.ghoulTextureFormat()) {
         case ghoul::opengl::Texture::Format::Red: {
-            char* dataDestination = imageDataDest;
-            RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
+            char* dest = imageDataDest;
+            const RawTile::ReadError err = repeatedRasterRead(1, io, dest);
             worstError = std::max(worstError, err);
             break;
         }
@@ -129,13 +113,8 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
-                    char* dataDestination = imageDataDest +
-                                            (i * _initData.bytesPerDatum());
-
-                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
-
-                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                    // CE_Failure = 3, CE_Fatal = 4
+                    char* dest = imageDataDest + (i * _initData.bytesPerDatum());
+                    const RawTile::ReadError err = repeatedRasterRead(1, io, dest);
                     worstError = std::max(worstError, err);
                 }
             }
@@ -143,37 +122,21 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
-                    char* dataDestination = imageDataDest +
-                                            (i * _initData.bytesPerDatum());
-
-                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
-
-                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                    // CE_Failure = 3, CE_Fatal = 4
+                    char* dest = imageDataDest + (i * _initData.bytesPerDatum());
+                    const RawTile::ReadError err = repeatedRasterRead(1, io, dest);
                     worstError = std::max(worstError, err);
                 }
                 // Last read is the alpha channel
-                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
-                RawTile::ReadError err = repeatedRasterRead(2, io, dataDestination);
-
-                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                char* dest = imageDataDest + (3 * _initData.bytesPerDatum());
+                const RawTile::ReadError err = repeatedRasterRead(2, io, dest);
                 worstError = std::max(worstError, err);
             }
             else { // Three or more rasters
                 for (int i = 0; i < nRastersToRead; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
-                    char* dataDestination = imageDataDest +
-                                            (i * _initData.bytesPerDatum());
-
-                    RawTile::ReadError err = repeatedRasterRead(
-                        i + 1,
-                        io,
-                        dataDestination
-                    );
-
-                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                    // CE_Failure = 3, CE_Fatal = 4
+                    char* dest = imageDataDest + (i * _initData.bytesPerDatum());
+                    const RawTile::ReadError err = repeatedRasterRead(i + 1, io, dest);
                     worstError = std::max(worstError, err);
                 }
             }
@@ -185,13 +148,8 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
-                    char* dataDestination = imageDataDest +
-                                            (i * _initData.bytesPerDatum());
-
-                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
-
-                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                    // CE_Failure = 3, CE_Fatal = 4
+                    char* dest = imageDataDest + (i * _initData.bytesPerDatum());
+                    const RawTile::ReadError err = repeatedRasterRead(1, io, dest);
                     worstError = std::max(worstError, err);
                 }
             }
@@ -199,47 +157,28 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
-                    char* dataDestination = imageDataDest +
-                                            (i * _initData.bytesPerDatum());
-
-                    RawTile::ReadError err = repeatedRasterRead(1, io, dataDestination);
-
-                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                    // CE_Failure = 3, CE_Fatal = 4
+                    char* dest = imageDataDest + (i * _initData.bytesPerDatum());
+                    const RawTile::ReadError err = repeatedRasterRead(1, io, dest);
                     worstError = std::max(worstError, err);
                 }
                 // Last read is the alpha channel
-                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
-                RawTile::ReadError err = repeatedRasterRead(2, io, dataDestination);
-
-                // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                // CE_Failure = 3, CE_Fatal = 4
+                char* dest = imageDataDest + (3 * _initData.bytesPerDatum());
+                const RawTile::ReadError err = repeatedRasterRead(2, io, dest);
                 worstError = std::max(worstError, err);
             }
             else { // Three or more rasters
                 for (int i = 0; i < 3 && i < nRastersToRead; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
-                    char* dataDestination = imageDataDest +
-                                            (i * _initData.bytesPerDatum());
-
-                    RawTile::ReadError err = repeatedRasterRead(
-                        3 - i,
-                        io,
-                        dataDestination
-                    );
-
-                    // CE_None = 0, CE_Debug = 1, CE_Warning = 2,
-                    // CE_Failure = 3, CE_Fatal = 4
+                    char* dest = imageDataDest + (i * _initData.bytesPerDatum());
+                    const RawTile::ReadError err = repeatedRasterRead(3 - i, io, dest);
                     worstError = std::max(worstError, err);
                 }
             }
             if (nRastersToRead > 3) { // Alpha channel exists
                 // Last read is the alpha channel
-                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
-                RawTile::ReadError err = repeatedRasterRead(4, io, dataDestination);
-
-                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                char* dest = imageDataDest + (3 * _initData.bytesPerDatum());
+                const RawTile::ReadError err = repeatedRasterRead(4, io, dest);
                 worstError = std::max(worstError, err);
             }
             break;
@@ -255,7 +194,7 @@ IODescription RawTileDataReader::adjustIODescription(const IODescription& io) co
     return io;
 }
 
-IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
+IODescription RawTileDataReader::ioDescription(const TileIndex& tileIndex) const {
     IODescription io;
     io.read.region = highestResPixelRegion(tileIndex);
 
@@ -268,14 +207,14 @@ IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) co
     io.read.fullRegion = fullPixelRegion();
     // For correct sampling in dataset, we need to pad the texture tile
 
-    PixelRegion padding = PixelRegion(
+    const PixelRegion padding = PixelRegion(
         _initData.tilePixelStartOffset(),
         _initData.tilePixelSizeDifference()
     );
 
     PixelRegion scaledPadding = padding;
-    double scale =
-        io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
+    const double scale = static_cast<double>(io.read.region.numPixels.x) /
+                         static_cast<double>(io.write.region.numPixels.x);
     scaledPadding.numPixels *= scale;
     scaledPadding.start *= scale;
 
@@ -286,15 +225,19 @@ IODescription RawTileDataReader::getIODescription(const TileIndex& tileIndex) co
     io.write.bytesPerLine = _initData.bytesPerLine();
     io.write.totalNumBytes = _initData.totalNumBytes();
 
-    ghoul_assert(io.write.region.numPixels.x == io.write.region.numPixels.y,
-        "Write region must be square");
-    ghoul_assert(io.write.region.numPixels.x == _initData.dimensions().x,
-        "Write region must match tile it writes to.");
+    ghoul_assert(
+        io.write.region.numPixels.x == io.write.region.numPixels.y,
+        "Write region must be square"
+    );
+    ghoul_assert(
+        io.write.region.numPixels.x == _initData.dimensions().x,
+        "Write region must match tile it writes to."
+    );
 
     return io;
 }
 
-TileDepthTransform RawTileDataReader::getDepthTransform() const {
+const TileDepthTransform& RawTileDataReader::depthTransform() const {
     return _depthTransform;
 }
 
@@ -307,93 +250,73 @@ const PixelRegion::PixelRange RawTileDataReader::fullPixelSize() const {
 }
 
 PixelRegion RawTileDataReader::fullPixelRegion() const {
-    PixelRegion fullRegion;
-    fullRegion.start.x = 0;
-    fullRegion.start.y = 0;
-    fullRegion.numPixels.x = rasterXSize();
-    fullRegion.numPixels.y = rasterYSize();
-    return fullRegion;
+    return { { 0, 0 }, { rasterXSize(), rasterYSize() } };
 }
 
-std::array<double, 6> RawTileDataReader::getGeoTransform() const {
-    std::array<double, 6> padfTransform;
-
-    GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2.0, M_PI));
-    padfTransform[1] = Angle<double>::fromRadians(
-        globalCoverage.size().lon).asDegrees() / rasterXSize();
-    padfTransform[5] = -Angle<double>::fromRadians(
-        globalCoverage.size().lat).asDegrees() / rasterYSize();
-    padfTransform[0] = Angle<double>::fromRadians(
-        globalCoverage.getCorner(Quad::NORTH_WEST).lon).asDegrees();
-    padfTransform[3] = Angle<double>::fromRadians(
-        globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
-    padfTransform[2] = 0;
-    padfTransform[4] = 0;
-    return padfTransform;
+std::array<double, 6> RawTileDataReader::geoTransform() const {
+    GeodeticPatch cov(
+        Geodetic2(0,0),
+        Geodetic2(glm::half_pi<double>(), glm::pi<double>())
+    );
+    return {
+        Angle<double>::fromRadians(cov.corner(Quad::NORTH_WEST).lon).asDegrees(),
+        Angle<double>::fromRadians(cov.size().lon).asDegrees() / rasterXSize(),
+        0.0,
+        Angle<double>::fromRadians(cov.corner(Quad::NORTH_WEST).lat).asDegrees(),
+        0.0,
+        -Angle<double>::fromRadians(cov.size().lat).asDegrees() / rasterYSize()
+    };
 }
 
 PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
-    const Geodetic2& geo) const {
-    std::array<double, 6> padfTransform = getGeoTransform();
+                                                               const Geodetic2& geo) const
+{
+    const std::array<double, 6>& t = geoTransform();
 
-    double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
-    double X = Angle<double>::fromRadians(geo.lon).asDegrees();
+    const double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
+    const double X = Angle<double>::fromRadians(geo.lon).asDegrees();
 
-    // convert from pixel and line to geodetic coordinates
-    // Xp = padfTransform[0] + P*padfTransform[1] + L*padfTransform[2];
-    // Yp = padfTransform[3] + P*padfTransform[4] + L*padfTransform[5];
-
-    // <=>
-    double* a = &(padfTransform[0]);
-    double* b = &(padfTransform[3]);
-
-    // Xp = a[0] + P*a[1] + L*a[2];
-    // Yp = b[0] + P*b[1] + L*b[2];
-
-    // <=>
-    double divisor = (a[2] * b[1] - a[1] * b[2]);
+    const double divisor = t[2] * t[4] - t[1] * t[5];
     ghoul_assert(divisor != 0.0, "Division by zero!");
-    //ghoul_assert(a[2] != 0.0, "a2 must not be zero!");
-    double P = (a[0] * b[2] - a[2] * b[0] + a[2] * Y - b[2] * X) / divisor;
-    double L = (-a[0] * b[1] + a[1] * b[0] - a[1] * Y + b[1] * X) / divisor;
+
+    const double P = (t[0] * t[5] - t[2] * t[3] + t[2] * Y - t[5] * X) / divisor;
+    const double L = (-t[0] * t[4] + t[1] * t[3] - t[1] * Y + t[4] * X) / divisor;
     // ref: https://www.wolframalpha.com/input/?i=X+%3D+a0+%2B+a1P+%2B+a2L,
     //      +Y+%3D+b0+%2B+b1P+%2B+b2L,+solve+for+P+and+L
 
-    [[ maybe_unused ]] double Xp = a[0] + P*a[1] + L*a[2];
-    [[ maybe_unused ]] double Yp = b[0] + P*b[1] + L*b[2];
-
+    [[ maybe_unused ]] const double Xp = t[0] + P * t[1] + L * t[2];
+    [[ maybe_unused ]] const double Yp = t[3] + P * t[4] + L * t[5];
     ghoul_assert(std::abs(X - Xp) < 1e-10, "inverse should yield X as before");
     ghoul_assert(std::abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
 
     return PixelRegion::PixelCoordinate(glm::round(P), glm::round(L));
 }
 
-Geodetic2 RawTileDataReader::pixelToGeodetic(
-    const PixelRegion::PixelCoordinate& p) const {
-    std::array<double, 6> padfTransform = getGeoTransform();
-    Geodetic2 geodetic;
-    // Should be using radians and not degrees?
-    geodetic.lon = padfTransform[0] + p.x * padfTransform[1] + p.y * padfTransform[2];
-    geodetic.lat = padfTransform[3] + p.x * padfTransform[4] + p.y * padfTransform[5];
-    return geodetic;
+Geodetic2 RawTileDataReader::pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const
+{
+    std::array<double, 6> padfTransform = geoTransform();
+    return {
+        padfTransform[0] + p.x * padfTransform[1] + p.y * padfTransform[2],
+        padfTransform[3] + p.x * padfTransform[4] + p.y * padfTransform[5]
+    };
 }
 
 PixelRegion RawTileDataReader::highestResPixelRegion(
                                                  const GeodeticPatch& geodeticPatch) const
 {
-    Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
-    Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
-    PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
-    PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
+    const Geodetic2 nwCorner = geodeticPatch.corner(Quad::NORTH_WEST);
+    const Geodetic2 swCorner = geodeticPatch.corner(Quad::SOUTH_EAST);
+    const PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
+    const PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
     PixelRegion region(pixelStart, pixelEnd - pixelStart);
     return region;
 }
 
-RawTile::ReadError RawTileDataReader::repeatedRasterRead(
-        int rasterBand, const IODescription& fullIO, char* dataDestination,
-        int depth) const
+RawTile::ReadError RawTileDataReader::repeatedRasterRead(int rasterBand,
+                                                         const IODescription& fullIO,
+                                                         char* dataDestination,
+                                                         int depth) const
 {
-    RawTile::ReadError worstError = RawTile::ReadError::None;
 
     // NOTE:
     // Ascii graphics illustrates the implementation details of this method, for one
@@ -420,13 +343,13 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
     //                            |              |
     //                            +--------------+
 
+    RawTile::ReadError worstError = RawTile::ReadError::None;
     if (!io.read.region.isInside(io.read.fullRegion)) {
         //  Loop through each side: left, top, right, bottom
         for (int i = 0; i < 4; ++i) {
-
             // Example:
             // We are currently considering the left side of the pixel region
-            PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
+            const PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
             IODescription cutoff = io.cut(side, io.read.fullRegion.edge(side));
 
             // Example:
@@ -455,7 +378,9 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
                 );
 
                 cutoff.read.region.align(
-                    oppositeSide, io.read.fullRegion.edge(oppositeSide));
+                    oppositeSide,
+                    io.read.fullRegion.edge(oppositeSide)
+                );
 
                 // Example:
                 // The cut off region is wrapped to the opposite side of the region,
@@ -478,15 +403,19 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
                 // The cutoff region has been repeated along one of its sides, but
                 // as we can see in this example, it still has a top part outside the
                 // defined gdal region. This is handled through recursion.
-                RawTile::ReadError err = repeatedRasterRead(
-                    rasterBand, cutoff, dataDestination, depth + 1);
+                const RawTile::ReadError err = repeatedRasterRead(
+                    rasterBand,
+                    cutoff,
+                    dataDestination,
+                    depth + 1
+                );
 
                 worstError = std::max(worstError, err);
             }
         }
     }
 
-    RawTile::ReadError err = rasterRead(rasterBand, io, dataDestination);
+    const RawTile::ReadError err = rasterRead(rasterBand, io, dataDestination);
 
     // The return error from a repeated rasterRead is ONLY based on the main region,
     // which in the usual case will cover the main area of the patch anyway
@@ -494,18 +423,17 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 }
 
 std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
-    std::shared_ptr<RawTile> rawTile, const PixelRegion& region) const
+                                                         std::shared_ptr<RawTile> rawTile,
+                                                          const PixelRegion& region) const
 {
-    size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
+    const size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
 
-    TileMetaData* preprocessData = new TileMetaData();
+    std::shared_ptr<TileMetaData> preprocessData = std::make_shared<TileMetaData>();
     preprocessData->maxValues.resize(_initData.nRasters());
     preprocessData->minValues.resize(_initData.nRasters());
     preprocessData->hasMissingData.resize(_initData.nRasters());
 
-    std::vector<float> noDataValues;
-    noDataValues.resize(_initData.nRasters());
-
+    std::vector<float> noDataValues(_initData.nRasters());
     for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
         preprocessData->maxValues[raster] = -FLT_MAX;
         preprocessData->minValues[raster] = FLT_MAX;
@@ -514,20 +442,17 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     }
 
     bool allIsMissing = true;
-
     for (int y = 0; y < region.numPixels.y; ++y) {
-        size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+        const size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
         size_t i = 0;
         for (int x = 0; x < region.numPixels.x; ++x) {
             for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
-                float noDataValue = noDataValueAsFloat();
-                float val = tiledatatype::interpretFloat(
+                const float noDataValue = noDataValueAsFloat();
+                const float val = tiledatatype::interpretFloat(
                     _initData.glType(),
                     &(rawTile->imageData[yi + i])
                 );
-                if (val != noDataValue &&
-                    val == val)
-                {
+                if (val != noDataValue && val == val) {
                     preprocessData->maxValues[raster] = std::max(
                         val,
                         preprocessData->maxValues[raster]
@@ -543,7 +468,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                     float& floatToRewrite = reinterpret_cast<float&>(
                         rawTile->imageData[yi + i]
                     );
-                    floatToRewrite = -FLT_MAX;
+                    floatToRewrite = -std::numeric_limits<float>::max();
                 }
                 i += _initData.bytesPerDatum();
             }
@@ -554,43 +479,44 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
         rawTile->error = RawTile::ReadError::Failure;
     }
 
-    return std::shared_ptr<TileMetaData>(preprocessData);
+    return preprocessData;
 }
 
 float RawTileDataReader::depthOffset() const {
-    return 0.0f;
+    return 0.f;
 }
 
 float RawTileDataReader::depthScale() const {
-    return 1.0f;
+    return 1.f;
 }
 
 TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
-    bool isFloat =
+    const bool isFloat =
         (_initData.glType() == GL_HALF_FLOAT ||
          _initData.glType() == GL_FLOAT ||
          _initData.glType() == GL_DOUBLE);
-    double maximumValue =
-        isFloat ? 1.0 : tiledatatype::getMaximumValue(_initData.glType());
 
-    TileDepthTransform transform;
-    transform.depthOffset = depthOffset();
-    transform.depthScale = static_cast<float>(depthScale() * maximumValue);
-    return transform;
+    const double maximumValue = isFloat ?
+        1.f :
+        tiledatatype::getMaximumValue(_initData.glType());
+
+    return {
+        static_cast<float>(depthScale() * maximumValue),
+        depthOffset()
+    };
 }
 
 RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
-    std::shared_ptr<const RawTile> rawTile) const
+                                             std::shared_ptr<const RawTile> rawTile) const
 {
-    float missingDataValue = noDataValueAsFloat();
+    const float missingDataValue = noDataValueAsFloat();
 
     bool hasMissingData = false;
-
     for (size_t c = 0; c < _initData.nRasters(); c++) {
         hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
     }
 
-    bool onHighLevel = rawTile->tileIndex.level > 6;
+    const bool onHighLevel = rawTile->tileIndex.level > 6;
     if (hasMissingData && onHighLevel) {
         return RawTile::ReadError::Fatal;
     }

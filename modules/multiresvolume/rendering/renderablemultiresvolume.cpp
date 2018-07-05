@@ -28,6 +28,7 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/glm.h>
 
@@ -50,8 +51,6 @@
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/vectorproperty.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -79,81 +78,80 @@ namespace {
         "${MODULES}/multiresvolume/shaders/helper.glsl";
     constexpr const char* GlslHeaderPath =
         "${MODULES}/multiresvolume/shaders/header.glsl";
-    bool registeredGlslHelpers = false;
 
-    static const openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory Budget",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming Budget",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global Time",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo LoopInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo SelectorNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick Selector",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StatsToFileInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print Stats",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats Filename",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo ScalingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
@@ -164,29 +162,19 @@ namespace openspace {
 
 RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)
-    , _transferFunction(nullptr)
-    , _timestep(0)
-    , _atlasMapSize(0)
-    , _tfBrickSelector(nullptr)
-    , _simpleTfBrickSelector(nullptr)
-    , _localTfBrickSelector(nullptr)
-    , _errorHistogramManager(nullptr)
-    , _histogramManager(nullptr)
-    , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
+    , _useGlobalTime(UseGlobalTimeInfo, false)
+    , _loop(LoopInfo, false)
     , _currentTime(CurrentTimeInfo, 0, 0, 0)
     , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
     , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)
-    , _useGlobalTime(UseGlobalTimeInfo, false)
-    , _loop(LoopInfo, false)
+    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
     , _selectorName(SelectorNameInfo)
-    , _gatheringStats(false)
     , _statsToFile(StatsToFileInfo, false)
     , _statsToFileName(StatsToFileNameInfo)
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     std::string name;
 
@@ -615,7 +603,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     ss.str(std::string());
     ss << "transferFunction_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_transferFunction->getTexture()));
+    program->setUniform(ss.str(), getTextureUnit(_transferFunction->texture()));
 
     ss.str(std::string());
     ss << "textureAtlas_" << getId();
@@ -648,7 +636,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 */
 /*
 std::vector<ghoul::opengl::Texture*> RenderableMultiresVolume::getTextures() {
-    std::vector<ghoul::opengl::Texture*> textures{_transferFunction->getTexture(), _atlasManager->textureAtlas()};
+    std::vector<ghoul::opengl::Texture*> textures{_transferFunction->texture(), _atlasManager->textureAtlas()};
     return textures;
 }
 

@@ -43,20 +43,22 @@ public:
     /**
      * Returns if this component is enabled, that is, if it is currently active and
      * visible on the screen.
-     * \return <code>true</code> if this component is enabled, <code>false</code>
-     * otherwise
+     *
+     * \return \c true if this component is enabled, \c false otherwise
      */
     bool isEnabled() const;
 
     /**
      * Sets if this component is enabled, that is, if it is currently active and visible
      * on the screen.
+     *
      * \param enabled The new enabled status of this component
      */
     void setEnabled(bool enabled);
 
     /// Initializes the component with everything that does not require an OpenGL context
     virtual void initialize();
+
     /// Initializes the component with everything that requires an OpenGL context
     virtual void initializeGL();
 
@@ -73,14 +75,15 @@ public:
     void setShowHelpTooltipDelay(double delay);
 
 protected:
-    /// <code>true</code> if this component is enabled and visible on the screen
+    /// \c true if this component is enabled and visible on the screen
     properties::BoolProperty _isEnabled;
-    /// if <code>true</code> this window is currently collapsed. This setting mirrors the
-    /// ImGui internal state of the window
+
+    /// if \c true this window is currently collapsed. This setting mirrors the ImGui
+    /// internal state of the window
     properties::BoolProperty _isCollapsed;
 
-    bool _showHelpTooltip;
-    double _tooltipDelay;
+    bool _showHelpTooltip = true;
+    double _tooltipDelay = true;
 };
 
 } // namespace openspace::gui

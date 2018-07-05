@@ -25,51 +25,49 @@
 #ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
 #define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
 
+#include <ghoul/misc/templatefactory.h>
+#include <openspace/json.h>
 #include <memory>
 #include <string>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-#include <include/openspace/engine/openspaceengine.h>
+#include <thread>
 
-#include "topic.h"
+namespace ghoul::io { class Socket; }
 
 namespace openspace {
 
 using TopicId = size_t;
 
+class Topic;
+
 class Connection {
 public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s, const std::string &address);
+    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address);
 
-    void handleMessage(std::string message);
+    void handleMessage(const std::string& message);
     void sendMessage(const std::string& message);
-    void handleJson(nlohmann::json json);
+    void handleJson(const nlohmann::json& json);
     void sendJson(const nlohmann::json& json);
-    void setAuthorized(const bool status);
+    void setAuthorized(bool status);
 
-    bool isAuthorized();
+    bool isAuthorized() const;
 
-    std::shared_ptr<ghoul::io::Socket> socket();
+    ghoul::io::Socket* socket();
     std::thread& thread();
     void setThread(std::thread&& thread);
 
 private:
     ghoul::TemplateFactory<Topic> _topicFactory;
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> _socket;
+    std::unique_ptr<ghoul::io::Socket> _socket;
     std::thread _thread;
 
     std::string _address;
     bool _requireAuthorization;
-    bool _isAuthorized;
-    std::map <TopicId, std::string> _messageQueue;
-    std::map <TopicId, std::chrono::system_clock::time_point> _sentMessages;
+    bool _isAuthorized = false;
+    std::map<TopicId, std::string> _messageQueue;
+    std::map<TopicId, std::chrono::system_clock::time_point> _sentMessages;
 
-    bool isWhitelisted();
+    bool isWhitelisted() const;
 };
 
 } // namespace openspace

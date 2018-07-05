@@ -63,7 +63,7 @@ void TuioEar::addTuioCursor(TuioCursor* tcur) {
         _removeList.erase(foundID);
     }
     else {
-        _list.push_back(TuioCursor(*tcur));
+        _list.emplace_back(*tcur);
     }
     _mx.unlock();
 }

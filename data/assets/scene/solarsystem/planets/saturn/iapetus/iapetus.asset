@@ -1,6 +1,6 @@
 local transforms = asset.require('../transforms')
 local assetHelper = asset.require('util/asset_helper')
-local kernels375 = asset.require('../sat375').Kernels
+local kernel = asset.require('../kernels').sat375
 asset.request('./trail')
 
 
@@ -20,7 +20,7 @@ local Iapetus = {
             Type = "SpiceTranslation",
             Target = "IAPETUS",
             Observer = "SATURN BARYCENTER",
-            Kernels = kernels375
+            Kernels = kernel
         },
         Rotation = {
             Type = "SpiceRotation",

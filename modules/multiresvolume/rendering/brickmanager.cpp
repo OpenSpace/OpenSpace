@@ -98,9 +98,11 @@ bool BrickManager::readHeader() {
     numBricksFrame_ = numBricks_*numBricks_*numBricks_;
 
     // Calculate number of bricks in tree
-    unsigned int numOTLevels = static_cast<unsigned int>(log((int)numBricks_) / log(2) + 1);
+    unsigned int numOTLevels = static_cast<unsigned int>(
+        log(static_cast<int>(numBricks_)) / log(2) + 1
+    );
     unsigned int numOTNodes = static_cast<unsigned int>((pow(8, numOTLevels) - 1) / 7);
-    unsigned int numBSTNodes = static_cast<unsigned int>(_header.numTimesteps_ * 2 - 1);
+    unsigned int numBSTNodes = _header.numTimesteps_ * 2 - 1;
     numBricksTree_ = numOTNodes * numBSTNodes;
     LDEBUG(fmt::format("Num OT levels: {}", numOTLevels));
     LDEBUG(fmt::format("Num OT nodes: {}", numOTNodes));
@@ -325,9 +327,10 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
 
     // Map PBO
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle_[_pboIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, volumeSize_, 0, GL_STREAM_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, volumeSize_, nullptr, GL_STREAM_DRAW);
     float *mappedBuffer = reinterpret_cast<float*>(
-        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+    );
 
     if (!mappedBuffer) {
         LERROR("Failed to map PBO");
@@ -463,7 +466,8 @@ bool BrickManager::PBOToAtlas(BUFFER_INDEX _pboIndex) {
         static_cast<GLsizei>(dim[2]), // depth
         GL_RED,                       // format
         GL_FLOAT,                     // type
-        NULL);                        // *pixels
+        nullptr                       // *pixels
+    );
     glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 

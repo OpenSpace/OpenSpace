@@ -108,7 +108,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _tfUnit->activate();
-    _transferFunction->getTexture().bind();
+    _transferFunction->texture().bind();
     program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
 
     _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -131,23 +131,20 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
         "maxNumBricksPerAxis_" + id,
         static_cast<unsigned int>(_tsp->header().xNumBricks_)
     );
-    program.setUniform(
-        "paddedBrickDim_" + id,
-        static_cast<unsigned int>(_tsp->paddedBrickDim())
-    );
+    program.setUniform("paddedBrickDim_" + id, _tsp->paddedBrickDim());
 
     glm::size3_t size = _atlasManager->textureSize();
     glm::ivec3 atlasSize(size.x, size.y, size.z);
     program.setUniform("atlasSize_" + id, atlasSize);
 }
 
-bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data,
+bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
                                              glm::vec3& localPosition)
 {
     // Camera rig position in world coordinates.
     glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
 
     // Camera position in world coordinates.
     glm::vec4 camWorldPos = rigWorldPos;
@@ -177,19 +174,19 @@ void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
     _tfUnit = nullptr;
 }
 
-std::string MultiresVolumeRaycaster::getBoundsVsPath() const {
+std::string MultiresVolumeRaycaster::boundsVertexShaderPath() const {
     return GlslBoundsVsPath;
 }
 
-std::string MultiresVolumeRaycaster::getBoundsFsPath() const {
+std::string MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
     return GlslBoundsFsPath;
 }
 
-std::string MultiresVolumeRaycaster::getRaycastPath() const {
+std::string MultiresVolumeRaycaster::raycasterPath() const {
     return GlslRaycastPath;
 }
 
-std::string MultiresVolumeRaycaster::getHelperPath() const {
+std::string MultiresVolumeRaycaster::helperPath() const {
     return GlslHelperPath; // no helper file
 }
 

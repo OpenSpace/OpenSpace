@@ -33,8 +33,8 @@ class TargetDecoder : public Decoder {
 public:
     TargetDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual std::string getDecoderType() override;
-    virtual std::vector<std::string> getTranslation() override;
+    virtual const std::string& decoderType() const override;
+    virtual const std::vector<std::string>& translations() const override;
 
 private:
     std::string _type;

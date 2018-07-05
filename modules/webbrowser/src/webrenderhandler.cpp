@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <algorithm>
-#include "include/webrenderhandler.h"
+#include <modules/webbrowser/include/webrenderhandler.h>
+
+#include <ghoul/glm.h>
 
 namespace openspace {
 
@@ -40,7 +41,7 @@ bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
 }
 
 void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
-                               CefRenderHandler::PaintElementType type,
+                               CefRenderHandler::PaintElementType,
                                const CefRenderHandler::RectList& dirtyRects,
                                const void* buffer, int w, int h)
 {
@@ -63,17 +64,18 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // copy alpha channel from buffer into the alpha mask
-    int maskSize = w * h;
-    auto bf = (unsigned char*) buffer;
-    int bufferIndex = 3, maskIndex = 0;
-    for (; maskIndex < maskSize; bufferIndex += 4, ++maskIndex) {
+    const unsigned char* bf = reinterpret_cast<const unsigned char*>(buffer);
+    for (int maskIndex = 0, bufferIndex = 3;
+         maskIndex < w * h;
+         bufferIndex += 4, ++maskIndex)
+    {
         _alphaMask[maskIndex] = bf[bufferIndex] > 0;
     }
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
     int index = x + (_width * y);
-    index = glm::clamp(index, (int) 0, (int) _alphaMask.size() - 1);
+    index = glm::clamp(index, 0, static_cast<int>(_alphaMask.size() - 1));
     return _alphaMask[index];
 }
 

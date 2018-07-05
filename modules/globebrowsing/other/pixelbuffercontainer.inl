@@ -36,7 +36,7 @@ PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
 
 template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access access) {
-    typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     const bool notFoundAmongMappedBuffers = (iter == _indexMap.end());
 
     if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
@@ -52,7 +52,7 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
             _pixelBuffers[i]->unbind();
             if (dataPtr) { // Success in mapping
                 // Add this index to the map of mapped pixel buffers
-                _indexMap.emplace(key, static_cast<int>(i));
+                _indexMap.emplace(std::move(key), static_cast<int>(i));
                 return dataPtr;
             }
         }
@@ -62,10 +62,11 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
 
 template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset,
-    GLsizeiptr length, BufferAccessMask access)
+                                                    GLsizeiptr length,
+                                                    BufferAccessMask access)
 {
-    typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
-    bool notFoundAmongMappedBuffers = iter == _indexMap.end();
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const bool notFoundAmongMappedBuffers = (iter == _indexMap.end());
 
     if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
         ghoul_assert(_pixelBuffers[iter->second], "Incorrect index map");
@@ -74,13 +75,13 @@ void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset
 
     // Find a pixel buffer that is unmapped
     for (int i = 0; i < _pixelBuffers.size(); ++i) {
-        bool bufferIsMapped = _pixelBuffers[i]->isMapped();
+        const bool bufferIsMapped = _pixelBuffers[i]->isMapped();
         if (!bufferIsMapped) {
             _pixelBuffers[i]->bind();
             void* dataPtr = _pixelBuffers[i]->mapBufferRange(offset, length, access);
             _pixelBuffers[i]->unbind();
             if (dataPtr) { // Success in mapping
-                _indexMap.emplace(key, i);
+                _indexMap.emplace(std::move(key), i);
                 return dataPtr;
             }
         }
@@ -92,7 +93,7 @@ template <class KeyType>
 bool PixelBufferContainer<KeyType>::resetMappedBuffers() {
     bool success = true;
     for (auto iter = _indexMap.begin(); iter != _indexMap.end(); iter++) {
-        int index = iter->second; // Index where the mapped buffer is stored
+        const int index = iter->second; // Index where the mapped buffer is stored
         _pixelBuffers[index]->bind();
         success &= _pixelBuffers[index]->unMapBuffer();
         _pixelBuffers[index]->unbind();
@@ -104,9 +105,9 @@ bool PixelBufferContainer<KeyType>::resetMappedBuffers() {
 template <class KeyType>
 bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
     bool success = false;
-   typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     if (iter != _indexMap.end()) { // Found a mapped pixel buffer
-        int index = iter->second; // Index where the mapped buffer is stored
+        const int index = iter->second; // Index where the mapped buffer is stored
         _pixelBuffers[index]->bind();
         success = _pixelBuffers[index]->unMapBuffer();
         _pixelBuffers[index]->unbind();
@@ -117,7 +118,7 @@ bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
 
 template <class KeyType>
 GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
-    typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
+    const typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     if (iter != _indexMap.end()) { // Found a mapped pixel buffer
         int index = iter->second; // Index where the mapped buffer is stored
         return *_pixelBuffers[index];

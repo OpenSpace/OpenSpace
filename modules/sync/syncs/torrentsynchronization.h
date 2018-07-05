@@ -28,8 +28,6 @@
 #include <openspace/util/resourcesynchronization.h>
 
 #include <modules/sync/torrentclient.h>
-#include <openspace/documentation/documentation.h>
-#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 

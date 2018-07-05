@@ -34,12 +34,11 @@ namespace openspace::gui {
 class GuiAssetComponent : public GuiComponent {
 public:
     GuiAssetComponent();
+
     void render() override;
 
 private:
-    void renderTree(const std::shared_ptr<openspace::Asset> a,
-        const std::string& rootPath
-    );
+    void renderTree(const Asset& asset, const std::string& relativeToPath);
 };
 
 } // namespace openspace::gui

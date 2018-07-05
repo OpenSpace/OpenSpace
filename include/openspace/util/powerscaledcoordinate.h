@@ -26,9 +26,6 @@
 #define __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
 
 #include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 
 namespace openspace {
 
@@ -37,7 +34,7 @@ class PowerScaledScalar;
 class PowerScaledCoordinate {
 public:
     // constructors
-    PowerScaledCoordinate();
+    PowerScaledCoordinate() = default;
 
     PowerScaledCoordinate(PowerScaledCoordinate&& rhs);
     PowerScaledCoordinate(const PowerScaledCoordinate& rhs);
@@ -109,7 +106,7 @@ public:
 
 private:
     // internal glm vector
-    glm::vec4 _vec;
+    glm::vec4 _vec = glm::vec4(0.f);
 };
 
 typedef PowerScaledCoordinate psc;

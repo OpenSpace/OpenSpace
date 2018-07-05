@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/glm.h>
-
 #include <memory>
 
 namespace ghoul { class Dictionary; }
@@ -46,7 +45,9 @@ public:
 
     Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation() = default;
+
     virtual bool initialize();
+
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const Time& time) const = 0;
     void update(const Time& time);
@@ -58,8 +59,8 @@ protected:
     void requireUpdate();
 
 private:
-    bool _needsUpdate;
-    double _cachedTime;
+    bool _needsUpdate = true;
+    double _cachedTime = -std::numeric_limits<double>::max();
     glm::dmat3 _cachedMatrix;
 };
 

@@ -26,9 +26,11 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/documentation/documentation.h>
+#include <vector>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class KameleonVolumeModule : public OpenSpaceModule {
 public:

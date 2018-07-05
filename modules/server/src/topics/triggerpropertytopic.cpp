@@ -22,27 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/query/query.h>
+#include <modules/server/include/topics/triggerpropertytopic.h>
+
+#include <openspace/json.h>
 #include <openspace/properties/property.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
-#include <modules/server/include/triggerpropertytopic.h>
 
 namespace {
-const std::string PropertyKey = "property";
-const std::string ValueKey = "value";
-const std::string _loggerCat = "TriggerPropertyTopic";
-}
+    constexpr const char* PropertyKey = "property";
+    //constexpr const char* ValueKey = "value";
+    constexpr const char* _loggerCat = "TriggerPropertyTopic";
+} // namespace
 
 namespace openspace {
 
-void TriggerPropertyTopic::handleJson(nlohmann::json json) {
+void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
-        auto propertyKey = json.at(PropertyKey).get<std::string>();
+        const std::string& propertyKey = json.at(PropertyKey).get<std::string>();
 
-        auto prop = property(propertyKey);
-        if (prop != nullptr) {
+        properties::Property* prop = property(propertyKey);
+        if (prop) {
             LDEBUG("Triggering " + propertyKey);
             prop->set("poke");
         }
@@ -60,4 +60,8 @@ void TriggerPropertyTopic::handleJson(nlohmann::json json) {
     }
 }
 
+bool TriggerPropertyTopic::isDone() const {
+    return true;
 }
+
+} // namespace openspace

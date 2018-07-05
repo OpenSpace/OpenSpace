@@ -31,9 +31,10 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 
 namespace {
-    const char* KeyType = "Type";
+    constexpr const char* KeyType = "Type";
 } // namespace
 
 namespace openspace {
@@ -63,24 +64,21 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
-    std::string rotationType = dictionary.value<std::string>(KeyType);
+    const std::string& rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
     std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
     return result;
 }
 
-Rotation::Rotation()
+Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
+
+Rotation::Rotation(const ghoul::Dictionary&)
     : properties::PropertyOwner({ "Rotation" })
-    , _needsUpdate(true)
 {}
 
 void Rotation::requireUpdate() {
     _needsUpdate = true;
 }
-
-Rotation::Rotation(const ghoul::Dictionary&)
-    : properties::PropertyOwner({ "Rotation" })
-{}
 
 bool Rotation::initialize() {
     return true;
@@ -91,7 +89,7 @@ const glm::dmat3& Rotation::matrix() const {
 }
 
 void Rotation::update(const Time& time) {
-    if (!_needsUpdate && time.j2000Seconds() == _cachedTime) {
+    if (!_needsUpdate && (time.j2000Seconds() == _cachedTime)) {
         return;
     }
     _cachedMatrix = matrix(time);

@@ -64,18 +64,13 @@ TEST_F(RawVolumeIoTest, BasicInputOutput) {
 
     glm::uvec3 dims{ 2, 4, 8 };
     auto value = [dims](glm::uvec3 v) {
-        return v.z * dims.z * dims.y + v.y * dims.y + v.x;
+        return static_cast<float>(v.z * dims.z * dims.y + v.y * dims.y + v.x);
     };
 
     RawVolume<float> vol(dims);
-    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float
-        ) {
-        vol.set(x, value(x));
-    });
+    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float) { vol.set(x, value(x)); });
 
-    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
-        ASSERT_EQ(v, value(x));
-    });
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) { ASSERT_EQ(v, value(x)); });
 
     std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
 

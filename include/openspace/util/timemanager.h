@@ -25,13 +25,12 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <openspace/util/syncdata.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeline.h>
+#include <functional>
 #include <utility>
 #include <vector>
-#include <deque>
-#include <functional>
-#include <openspace/util/timeline.h>
-#include <openspace/util/time.h>
-#include <openspace/util/syncdata.h>
 
 namespace openspace {
 
@@ -43,7 +42,7 @@ public:
     Time& time();
     std::vector<Syncable*> getSyncables();
     void preSynchronization(double dt);
-    void addKeyframe(double timestamp, Time kf);
+    void addKeyframe(double timestamp, Time keyframeTime);
     void removeKeyframesBefore(double timestamp);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
@@ -54,13 +53,14 @@ public:
     CallbackHandle addDeltaTimeChangeCallback(TimeChangeCallback cb);
     void removeTimeChangeCallback(CallbackHandle handle);
     void removeDeltaTimeChangeCallback(CallbackHandle handle);
+
 private:
     bool _shouldSetTime = false;
     Time _timeNextFrame;
     Timeline<Time> _timeline;
     SyncData<Time> _currentTime;
     void consumeKeyframes(double dt);
-    double _latestConsumedTimestamp;
+    double _latestConsumedTimestamp = -std::numeric_limits<double>::max();
     int _nextCallbackHandle = 0;
 
     std::vector<std::pair<CallbackHandle, TimeChangeCallback>> _timeChangeCallbacks;

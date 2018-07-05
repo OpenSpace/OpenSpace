@@ -24,96 +24,99 @@
 
 #include <modules/volume/envelope.h>
 
+#include <ghoul/lua/ghoul_lua.h>
+
+using json = nlohmann::json;
+
 namespace openspace::volume {
 
 EnvelopePoint::EnvelopePoint(glm::vec3 c, float x, float y)
     : color(c)
-    , colorHex(getHexadecimalFromVec3(c))
-    , position(std::make_pair(x, y))
+    , colorHex(hexadecimalFromVec3(std::move(c)))
+    , position({ x, y })
 {}
 
 EnvelopePoint::EnvelopePoint(std::string c, float x, float y)
     : color(hexadecimalToRGBConversion(c))
-    , colorHex(c)
+    , colorHex(std::move(c))
     , position(std::make_pair(x, y))
 {}
 
-Envelope::Envelope() {}
-
 Envelope::Envelope(std::vector<EnvelopePoint> vec) {
-    _points = vec;
+    _points = std::move(vec);
 }
 
 bool Envelope::operator!=(const Envelope& env) const {
-    const double minDist = 0.0001;
+    constexpr const double MinDist = 0.0001;
 
     if (_points.size() != env._points.size()) {
         return true;
     }
 
-    auto iter = _points.begin();
-    auto envIter = env._points.begin();
-    for (; iter != _points.end(); ++iter, ++envIter) {
-        if (abs(iter->position.first - envIter->position.first) > minDist ||
-            abs(iter->position.second - envIter->position.second) > minDist ||
-             iter->color != envIter->color)
+    for (auto iter = _points.begin(), envIter = env._points.begin();
+         iter != _points.end();
+         ++iter, ++envIter)
+    {
+        if (abs(iter->position.first - envIter->position.first) > MinDist ||
+            abs(iter->position.second - envIter->position.second) > MinDist ||
+            iter->color != envIter->color)
+        {
             return true;
+        }
     }
     return false;
 }
 
-
 void Envelope::setPoints(std::vector<EnvelopePoint> vec) {
-    this->_points = vec;
+    _points = std::move(vec);
 }
 
-std::vector<EnvelopePoint> Envelope::getPoints() {
+const std::vector<EnvelopePoint>& Envelope::points() const {
     return _points;
 }
 
 bool Envelope::isValueInEnvelope(float pos) const {
-    if (!_points.empty()) {
-        if (_points.front().position.first <= pos && _points.back().position.first >= pos)
-            return true;
-    }
-    return false;
+    return !_points.empty() && (_points.front().position.first <= pos) &&
+           (_points.back().position.first >= pos);
 }
 
 bool Envelope::isEnvelopeValid() const {
-    auto currentIter = _points.begin();
-    auto nextIter = currentIter + 1;
-    for (; nextIter != _points.end(); ++currentIter, ++nextIter) {
+    for (auto currentIter = _points.begin(), nextIter = currentIter + 1;
+         nextIter != _points.end();
+         ++currentIter, ++nextIter)
+    {
         if (currentIter->position.first > nextIter->position.first)
             return false;
     }
     return true;
 }
 
-glm::vec3 Envelope::normalizeColor(glm::vec3 vec) const{
-
-    return glm::vec3{ vec.r / 255.f, vec.g / 255.f , vec.b / 255.f };
+glm::vec3 Envelope::normalizeColor(glm::vec3 vec) const {
+    return { vec.r / 255.f, vec.g / 255.f , vec.b / 255.f };
 }
 
-glm::vec4 Envelope::getValueAtPosition(float pos) const {
+glm::vec4 Envelope::valueAtPosition(float pos) const {
     auto afterIter = _points.begin();
-    glm::vec4 color{ 0.f, 0.f , 0.f , 0.f };
     while (afterIter->position.first < pos ) {
-        if(afterIter == _points.end())
-            return color;
+        if (afterIter == _points.end()) {
+            return { 0.f, 0.f, 0.f ,0.f };
+        }
         ++afterIter;
     }
     if (afterIter->position.first == pos) {
-        return glm::vec4{ afterIter->color, afterIter->position.second };
+        return { afterIter->color, afterIter->position.second };
     }
-    auto beforeIter = afterIter -1;
+    auto beforeIter = afterIter - 1;
 
     float dist = afterIter->position.first - beforeIter->position.first;
-    float alpha;
-    if(dist < 0.0001)
-        color = { normalizeColor((beforeIter->color + afterIter->color) / 2.f),
-                std::max(beforeIter->position.second, afterIter->position.second) };
-    else
-        color = {
+    if (dist < 0.0001) {
+        return {
+            normalizeColor((beforeIter->color + afterIter->color) / 2.f),
+            std::max(beforeIter->position.second, afterIter->position.second)
+        };
+    }
+    else {
+        return {
             normalizeColor(
                 beforeIter->color * (abs(pos - afterIter->position.first) / dist) +
                 afterIter->color * (abs(pos - beforeIter->position.first) / dist)
@@ -122,94 +125,102 @@ glm::vec4 Envelope::getValueAtPosition(float pos) const {
                 afterIter->position.second *
                 (abs(pos - beforeIter->position.first) / dist)
         };
-
-    return color;
+    }
 }
 
-int EnvelopePoint::HexadecimalToDecimal(std::string hex) const {
-    int hexLength = hex.length();
+int EnvelopePoint::hexadecimalToDecimal(const std::string& hex) const {
+    const size_t hexLength = hex.length();
     double dec = 0;
-    for (int i = 0; i < hexLength; ++i)
-    {
+    for (size_t i = 0; i < hexLength; ++i) {
         char b = hex[i];
 
-        if (b >= 48 && b <= 57)
+        if (b >= 48 && b <= 57) {
             b -= 48;
-        else if (b >= 65 && b <= 70)
+        }
+        else if (b >= 65 && b <= 70) {
             b -= 55;
-        else if (b >= 97 && b <= 102)
+        }
+        else if (b >= 97 && b <= 102) {
             b -= 87;
+        }
         dec += b * pow(16, ((hexLength - i) - 1));
     }
-    return (int)dec;
+    return static_cast<int>(dec);
 }
 
-std::string EnvelopePoint::DecimalToHexadecimal(int dec) const {
-    if (dec < 1) return "00";
+std::string EnvelopePoint::decimalToHexadecimal(int dec) const {
+    if (dec < 1) {
+        return "00";
+    }
 
     int hex = dec;
-    std::string hexStr = "";
+    std::string hexStr;
 
-    while (dec > 0)
-    {
+    while (dec > 0) {
         hex = dec % 16;
 
-        if (hex < 10)
-            hexStr = hexStr.insert(0, std::string(1, (hex + 48)));
-        else
-            hexStr = hexStr.insert(0, std::string(1, (hex + 55)));
+        if (hex < 10) {
+            hexStr = hexStr.insert(0, std::string(1, static_cast<char>(hex + 48)));
+        }
+        else {
+            hexStr = hexStr.insert(0, std::string(1, static_cast<char>(hex + 55)));
+        }
         dec /= 16;
     }
     return hexStr;
 }
 
-glm::vec3 EnvelopePoint::hexadecimalToRGBConversion(std::string hex) const {
-    float r = static_cast<float>(HexadecimalToDecimal(hex.substr(1, 2)));
-    float g = static_cast<float>(HexadecimalToDecimal(hex.substr(3, 2)));
-    float b = static_cast<float>(HexadecimalToDecimal(hex.substr(5, 2)));
+glm::vec3 EnvelopePoint::hexadecimalToRGBConversion(const std::string& hex) const {
+    const float r = static_cast<float>(hexadecimalToDecimal(hex.substr(1, 2)));
+    const float g = static_cast<float>(hexadecimalToDecimal(hex.substr(3, 2)));
+    const float b = static_cast<float>(hexadecimalToDecimal(hex.substr(5, 2)));
 
     return glm::vec3(r, g, b);
 }
 
-std::string EnvelopePoint::getHexadecimalFromVec3(glm::vec3 vec) const {
-
-    std::string r = DecimalToHexadecimal(static_cast<int>(vec.r));
-    std::string g = DecimalToHexadecimal(static_cast<int>(vec.g));
-    std::string b = DecimalToHexadecimal(static_cast<int>(vec.b));
+std::string EnvelopePoint::hexadecimalFromVec3(const glm::vec3& vec) const {
+    std::string r = decimalToHexadecimal(static_cast<int>(vec.r));
+    std::string g = decimalToHexadecimal(static_cast<int>(vec.g));
+    std::string b = decimalToHexadecimal(static_cast<int>(vec.b));
 
     return ("#" + r + g + b);
 }
 
-json Envelope::getJSONPoints() const {
+json Envelope::jsonPoints() const {
     json j;
-    for (int i = 0; i < _points.size(); i++) {
+    for (size_t i = 0; i < _points.size(); i++) {
         j[i] = {
-            { "color", _points.at(i).colorHex },
-            { "position",{
-                { "x", _points.at(i).position.first },
-                { "y", _points.at(i).position.second },
+            {
+                "color",
+                _points.at(i).colorHex
             },
+            {
+                "position",
+                {
+                    { "x", _points.at(i).position.first },
+                    { "y", _points.at(i).position.second },
+                },
             }
         };
     }
     return j;
 }
 
-json Envelope::getJSONEnvelope() const {
+json Envelope::jsonEnvelope() const {
     json j;
-    j["points"] = getJSONPoints();
+    j["points"] = jsonPoints();
     return j;
 }
 
 void Envelope::setEnvelopeLuaTable(lua_State* state) const {
     for (auto iter = _points.begin(); iter != _points.end(); ++iter) {
         lua_newtable(state);
-        lua_pushstring(state, iter->colorHex.c_str());
+        ghoul::lua::push(state, iter->colorHex);
         lua_setfield(state, -2, "color");
         lua_newtable(state);
-        lua_pushnumber(state, static_cast<lua_Number>(iter->position.first));
+        ghoul::lua::push(state, iter->position.first);
         lua_setfield(state, -2, "x");
-        lua_pushnumber(state, static_cast<lua_Number>(iter->position.second));
+        ghoul::lua::push(state, iter->position.second);
         lua_setfield(state, -2, "y");
         lua_setfield(state, -2, "position");
         lua_setfield(

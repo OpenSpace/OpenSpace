@@ -24,11 +24,11 @@
 
 #include <openspace/properties/vector/bvec3property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/glm.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/misc.h>
-
 #include <limits>
+#include <sstream>
 
 namespace {
 
@@ -39,11 +39,11 @@ glm::bvec3 fromLuaConversion(lua_State* state, bool& success) {
         int hasNext = lua_next(state, -2);
         if (hasNext != 1) {
             success = false;
-            return glm::bvec3(0);
+            return glm::bvec3(false);
         }
         if (lua_isboolean(state, -1) != 1) {
             success = false;
-            return glm::bvec3(0);
+            return glm::bvec3(false);
         }
         else {
             result[i] = static_cast<glm::bvec3::value_type>(lua_toboolean(state, -1));
@@ -65,7 +65,7 @@ bool toLuaConversion(lua_State* state, glm::bvec3 val) {
     return true;
 }
 
-glm::bvec3 fromStringConversion(std::string val, bool& success) {
+glm::bvec3 fromStringConversion(const std::string& val, bool& success) {
     glm::bvec3 result;
     std::vector<std::string> tokens = ghoul::tokenizeString(val, ',');
     if (tokens.size() != static_cast<size_t>(result.length())) {

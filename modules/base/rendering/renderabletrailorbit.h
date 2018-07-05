@@ -91,17 +91,17 @@ private:
 
     /// A dirty flag that determines whether a full sweep (recomputing of all values)
     /// is necessary
-    bool _needsFullSweep;
+    bool _needsFullSweep = true;
     /// A dirty flag to determine whether the index buffer needs to be regenerated and
     /// then reuploaded
-    bool _indexBufferDirty;
+    bool _indexBufferDirty = true;
 
     /// The time stamp of the oldest point in the array
-    double _firstPointTime;
+    double _firstPointTime = 0.0;
     /// The time stamp of the newest fixed point in the array
-    double _lastPointTime;
+    double _lastPointTime = 0.0;
     /// The time stamp of when the last valid trail was generated.
-    double _previousTime;
+    double _previousTime = 0.0;
 };
 
 } // namespace openspace

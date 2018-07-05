@@ -32,13 +32,10 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::filesystem {
-    class File;
-}
+namespace ghoul::filesystem { class File; }
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -47,76 +44,74 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-    namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
-    class RenderablePoints : public Renderable {
-    public:
-        explicit RenderablePoints(const ghoul::Dictionary& dictionary);
-        ~RenderablePoints() = default;
+class RenderablePoints : public Renderable {
+public:
+    explicit RenderablePoints(const ghoul::Dictionary& dictionary);
+    ~RenderablePoints() = default;
 
-        void initialize() override;
-        void initializeGL() override;
-        void deinitializeGL() override;
+    void initialize() override;
+    void initializeGL() override;
+    void deinitializeGL() override;
 
-        bool isReady() const override;
+    bool isReady() const override;
 
-        void render(const RenderData& data, RendererTasks& rendererTask) override;
-        void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
 
-        static documentation::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
-    private:
+private:
 
-        enum Unit {
-            Meter = 0,
-            Kilometer = 1,
-            Parsec = 2,
-            Kiloparsec = 3,
-            Megaparsec = 4,
-            Gigaparsec = 5,
-
-            GigalightYears = 6
-        };
-
-        void createDataSlice();
-
-        bool loadData();
-        bool readSpeckFile();
-        bool readColorMapFile();
-        bool loadCachedFile(const std::string& file);
-        bool saveCachedFile(const std::string& file) const;
-
-        bool _dataIsDirty;
-        bool _hasSpriteTexture;
-        bool _spriteTextureIsDirty;
-        bool _hasColorMapFile;
-
-        properties::FloatProperty _alphaValue;
-        properties::FloatProperty _scaleFactor;
-        properties::Vec3Property _pointColor;
-        properties::StringProperty _spriteTexturePath;
-
-        std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
-        std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
-        ghoul::opengl::ProgramObject* _program;
-        UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
-            spriteTexture, hasColorMap) _uniformCache;
-
-        std::string _speckFile;
-        std::string _colorMapFile;
-
-        Unit _unit;
-
-        std::vector<double> _slicedData;
-        std::vector<float> _fullData;
-        std::vector<glm::vec4> _colorMapData;
-
-        int _nValuesPerAstronomicalObject;
-
-        GLuint _vao;
-        GLuint _vbo;
+    enum Unit {
+        Meter = 0,
+        Kilometer = 1,
+        Parsec = 2,
+        Kiloparsec = 3,
+        Megaparsec = 4,
+        Gigaparsec = 5,
+        GigalightYears = 6
     };
 
+    void createDataSlice();
+
+    bool loadData();
+    bool readSpeckFile();
+    bool readColorMapFile();
+    bool loadCachedFile(const std::string& file);
+    bool saveCachedFile(const std::string& file) const;
+
+    bool _dataIsDirty = true;
+    bool _hasSpriteTexture = false;
+    bool _spriteTextureIsDirty = true;
+    bool _hasColorMapFile = false;
+
+    properties::FloatProperty _alphaValue;
+    properties::FloatProperty _scaleFactor;
+    properties::Vec3Property _pointColor;
+    properties::StringProperty _spriteTexturePath;
+
+    std::unique_ptr<ghoul::opengl::Texture> _spriteTexture;
+    std::unique_ptr<ghoul::filesystem::File> _spriteTextureFile;
+    ghoul::opengl::ProgramObject* _program = nullptr;
+    UniformCache(modelViewProjectionTransform, color, sides, alphaValue, scaleFactor,
+        spriteTexture, hasColorMap) _uniformCache;
+
+    std::string _speckFile;
+    std::string _colorMapFile;
+
+    Unit _unit = Parsec;
+
+    std::vector<double> _slicedData;
+    std::vector<float> _fullData;
+    std::vector<glm::vec4> _colorMapData;
+
+    int _nValuesPerAstronomicalObject = 0;
+
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+};
 
 } // namespace openspace
 

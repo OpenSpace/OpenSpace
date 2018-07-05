@@ -37,8 +37,8 @@ public:
     SingleImageProvider(const std::string& imagePath);
     virtual ~SingleImageProvider() = default;
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual Tile tile(const TileIndex& tileIndex) override;
+    virtual Tile::Status tileStatus(const TileIndex& index) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;

@@ -28,7 +28,6 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
-
 #include <memory>
 
 namespace ghoul::filesystem { class File; }
@@ -43,12 +42,6 @@ struct Image;
 struct LinePoint;
 struct RenderData;
 struct UpdateData;
-
-struct target {
-    std::string body;
-    std::string frame;
-    std::string node;
-};
 
 class RenderablePlaneProjection : public Renderable {
 public:
@@ -70,27 +63,31 @@ private:
 
     std::string _texturePath;
 
-    bool _planeIsDirty;
+    bool _planeIsDirty = false;
 
     glm::dmat3 _stateMatrix;
     std::string _frame;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    bool _textureIsDirty;
-    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    bool _textureIsDirty = false;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 //    ghoul::opengl::Texture* _texture;
-    ghoul::filesystem::File* _textureFile;
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    GLuint _quad = 0;
+    GLuint _vertexPositionBuffer = 0;
     std::string _spacecraft;
     std::string _instrument;
     std::string _defaultTarget;
 
-    double _previousTime;
-    target _target;
-    std::string _name;
-    bool _moving;
-    bool _hasImage;
+    double _previousTime = 0.0;
+    struct {
+        std::string body;
+        std::string frame;
+        std::string node;
+    } _target;
+    std::string _name = "ImagePlane";
+    bool _moving = false;
+    bool _hasImage = false;
 };
 
 } // namespace openspace

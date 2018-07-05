@@ -213,6 +213,7 @@ openspace.globebrowsing.addBlendingLayersFromDirectory = function (dir, node_nam
 
     for _, file in pairs(files) do
         if file and file:find('.info') then
+            local c, h
             _, c, h, _ = openspace.globebrowsing.parseInfoFile(file)
 
             if c then
@@ -232,6 +233,7 @@ openspace.globebrowsing.addFocusNodesFromDirectory = function (dir, node_name)
 
     for _, file in pairs(files) do
         if file and file:find('.info') then
+            local n, l
             n, _, _, l = openspace.globebrowsing.parseInfoFile(file)
 
             if n and l then

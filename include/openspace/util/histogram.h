@@ -26,19 +26,17 @@
 #define __OPENSPACE_CORE___HISTOGRAM___H__
 
 #include <vector>
-#include <iostream>
 
 namespace openspace {
 
 class Histogram {
 public:
-    Histogram();
-    Histogram(float minValue, float maxValue, int numBins);
-    Histogram(float minValue, float maxValue, int numBins, float* data);
-    Histogram(Histogram&& other);
+    Histogram() = default;
+    Histogram(float minValue, float maxValue, int numBins, float* data = nullptr);
+    Histogram(Histogram&& other) = default;
     ~Histogram();
 
-    Histogram& operator=(Histogram&& other);
+    Histogram& operator=(Histogram&& other) = default;
 
     int numBins() const;
     float minValue() const;
@@ -68,7 +66,7 @@ public:
     void print() const;
     void generateEqualizer();
     Histogram equalize();
-    float equalize (float);
+    float equalize(float) const;
     float entropy();
     std::vector<char> getBinaryData() const;
 
@@ -78,14 +76,14 @@ public:
     void changeRange(float minValue, float maxValue);
 
 private:
-    int _numBins;
-    float _minValue;
-    float _maxValue;
+    int _numBins = -1;
+    float _minValue = 0.f;
+    float _maxValue = 0.f;
 
 
-    float* _data;
+    float* _data = nullptr;
     std::vector<float> _equalizer;
-    int _numValues;
+    int _numValues = 0;
 
 };
 

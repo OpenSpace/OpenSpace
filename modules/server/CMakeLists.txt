@@ -26,34 +26,36 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(HEADER_FILES
-    include/connectionpool.h
+    servermodule.h
     include/connection.h
+    include/connectionpool.h
     include/jsonconverters.h
-    include/topic.h
-    include/authorizationtopic.h
-    include/getpropertytopic.h
-    include/luascripttopic.h
-    include/subscriptiontopic.h
-    include/setpropertytopic.h
-    include/timetopic.h
-    include/triggerpropertytopic.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
+    include/topics/authorizationtopic.h
+    include/topics/bouncetopic.h
+    include/topics/getpropertytopic.h
+    include/topics/luascripttopic.h
+    include/topics/setpropertytopic.h
+    include/topics/subscriptiontopic.h
+    include/topics/timetopic.h
+    include/topics/topic.h
+    include/topics/triggerpropertytopic.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    src/connectionpool.cpp
+    servermodule.cpp
     src/connection.cpp
+    src/connectionpool.cpp
     src/jsonconverters.cpp
-    src/topics/topic.cpp
     src/topics/authorizationtopic.cpp
+    src/topics/bouncetopic.cpp
     src/topics/getpropertytopic.cpp
     src/topics/luascripttopic.cpp
-    src/topics/subscriptiontopic.cpp
     src/topics/setpropertytopic.cpp
+    src/topics/subscriptiontopic.cpp
     src/topics/timetopic.cpp
+    src/topics/topic.cpp
     src/topics/triggerpropertytopic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

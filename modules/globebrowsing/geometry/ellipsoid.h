@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodetic3.h>
-
 #include <ghoul/glm.h>
 
 #include <vector>
 
 namespace openspace::globebrowsing {
+
+struct Geodetic2;
+struct Geodetic3;
 
 /**
  * This class is based largely on the Ellipsoid class defined in the book
@@ -74,7 +74,7 @@ public:
 
     glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(
         const glm::dvec3& p) const;
-    glm::dvec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+    glm::dvec3 geodeticSurfaceNormal(const Geodetic2& geodetic2) const;
 
     const glm::dvec3& radii() const;
     const glm::dvec3& radiiSquared() const;

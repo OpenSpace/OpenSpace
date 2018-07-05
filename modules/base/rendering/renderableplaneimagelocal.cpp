@@ -26,13 +26,14 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
@@ -61,8 +62,6 @@ documentation::Documentation RenderablePlaneImageLocal::Documentation() {
 RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _texturePath(TextureInfo)
-    , _texture(nullptr)
-    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -81,7 +80,7 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 }
 
 bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady() && _texture != nullptr;
+    return RenderablePlane::isReady() && (_texture != nullptr);
 }
 
 void RenderablePlaneImageLocal::initializeGL() {

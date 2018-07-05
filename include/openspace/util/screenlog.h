@@ -28,8 +28,8 @@
 #include <ghoul/logging/log.h>
 
 #include <chrono>
-#include <vector>
 #include <mutex>
+#include <vector>
 
 namespace openspace {
 
@@ -81,7 +81,7 @@ public:
     /**
      * Destructor
      */
-    ~ScreenLog();
+    ~ScreenLog() = default;
 
     /**
      * Overwritten ghoul::loggling::Log method that is called whenever a new log message

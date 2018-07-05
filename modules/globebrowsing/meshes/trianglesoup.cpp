@@ -28,7 +28,7 @@
 
 namespace {
     constexpr const char* _loggerCat = "TriangleSoup";
-}
+} // namespace
 
 namespace openspace::globebrowsing {
 
@@ -37,11 +37,8 @@ TriangleSoup::TriangleSoup(std::vector<unsigned int> elements, Positions usePosi
     : _useVertexPositions(usePositions)
     , _useTextureCoordinates(useTextures)
     , _useVertexNormals(useNormals)
-    , _vaoID(0)
-    , _vertexBufferID(0)
-    , _elementBufferID(0)
 {
-    setElements(elements);
+    setElements(std::move(elements));
 }
 
 TriangleSoup::~TriangleSoup() {
@@ -54,11 +51,11 @@ void TriangleSoup::setVertexPositions(std::vector<glm::vec4> positions) {
     _useVertexPositions = true;
     _gpuDataNeedUpdate = true;
     _vertexData.resize(positions.size());
-    for (size_t i = 0; i < positions.size(); i++) {
-        _vertexData[i].position[0] = positions[i].x;
-        _vertexData[i].position[1] = positions[i].y;
-        _vertexData[i].position[2] = positions[i].z;
-        _vertexData[i].position[3] = positions[i].w;
+    for (size_t i = 0; i < positions.size(); ++i) {
+        _vertexData[i].position[0] = positions[i][0];
+        _vertexData[i].position[1] = positions[i][1];
+        _vertexData[i].position[2] = positions[i][2];
+        //_vertexData[i].position[3] = positions[i][3];
     }
 }
 
@@ -66,9 +63,9 @@ void TriangleSoup::setVertexTextureCoordinates(std::vector<glm::vec2> textures) 
     _useTextureCoordinates = true;
     _gpuDataNeedUpdate = true;
     _vertexData.resize(textures.size());
-    for (size_t i = 0; i < textures.size(); i++) {
-        _vertexData[i].texture[0] = textures[i].s;
-        _vertexData[i].texture[1] = textures[i].t;
+    for (size_t i = 0; i < textures.size(); ++i) {
+        _vertexData[i].texture[0] = textures[i][0];
+        _vertexData[i].texture[1] = textures[i][1];
     }
 }
 
@@ -76,19 +73,16 @@ void TriangleSoup::setVertexNormals(std::vector<glm::vec3> normals) {
     _useVertexNormals = true;
     _gpuDataNeedUpdate = true;
     _vertexData.resize(normals.size());
-    for (size_t i = 0; i < normals.size(); i++) {
-        _vertexData[i].normal[0] = normals[i].x;
-        _vertexData[i].normal[1] = normals[i].y;
-        _vertexData[i].normal[2] = normals[i].z;
+    for (size_t i = 0; i < normals.size(); ++i) {
+        _vertexData[i].normal[0] = normals[i][0];
+        _vertexData[i].normal[1] = normals[i][1];
+        _vertexData[i].normal[2] = normals[i][2];
     }
 }
 
 void TriangleSoup::setElements(std::vector<unsigned int> elements) {
-    _elementData.resize(elements.size());
     _gpuDataNeedUpdate = true;
-    for (size_t i = 0; i < elements.size(); i++) {
-        _elementData[i] = elements[i];
-    }
+    _elementData = std::move(elements);
 }
 
 bool TriangleSoup::updateDataOnGPU() {
@@ -98,14 +92,14 @@ bool TriangleSoup::updateDataOnGPU() {
     }
 
     // Create VBOs
-    if (_vertexBufferID == 0 && _vertexData.size() > 0) {
+    if (_vertexBufferID == 0 && !_vertexData.empty()) {
         glGenBuffers(1, &_vertexBufferID);
         if (_vertexBufferID == 0) {
             LERROR("Could not create vertex buffer");
             return false;
         }
     }
-    if (_elementBufferID == 0 && _elementData.size() > 0) {
+    if (_elementBufferID == 0 && !_elementData.empty()) {
         glGenBuffers(1, &_elementBufferID);
         if (_elementBufferID == 0) {
             LERROR("Could not create vertex element buffer");
@@ -128,20 +122,31 @@ bool TriangleSoup::updateDataOnGPU() {
     // Positions at location 0
     if (_useVertexPositions) {
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-            //reinterpret_cast<const GLvoid*>(offsetof(Vertex, position)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
     }
     // Textures at location 1
     if (_useTextureCoordinates) {
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture)));
+        glVertexAttribPointer(
+            1,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(Vertex),
+            reinterpret_cast<const GLvoid*>(offsetof(Vertex, texture)) // NOLINT
+        );
     }
     // Normals at location 2
     if (_useVertexNormals) {
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-            reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
+        glVertexAttribPointer(
+            2,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(Vertex),
+            reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))  // NOLINT
+        );
     }
 
     // Element buffer

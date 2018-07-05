@@ -32,9 +32,7 @@ in float ta;
 uniform float alphaValue;
 uniform vec3 color;
 uniform sampler2D spriteTexture;
-uniform sampler2D polygonTexture;
 uniform bool hasColorMap;
-uniform bool hasPolygon;
 uniform float fadeInValue;
 
 Fragment getFragment() {      
@@ -44,10 +42,10 @@ Fragment getFragment() {
     vec4 fullColor = vec4(1.0);
     
     if (hasColorMap) {
-        fullColor = vec4(gs_colorMap.rgb * textureColor.rgb, gs_colorMap.a * textureColor.a * alphaValue);
-    } else if (hasPolygon) {
-        vec4 polygon = texture(polygonTexture, texCoord);
-        fullColor = vec4(color.rgb * textureColor.rgb + polygon.rgb, textureColor.a * alphaValue);
+        fullColor = vec4(
+            gs_colorMap.rgb * textureColor.rgb, 
+            gs_colorMap.a * textureColor.a * alphaValue
+            );
     } else {
         fullColor = vec4(color.rgb * textureColor.rgb, textureColor.a * alphaValue);
     }

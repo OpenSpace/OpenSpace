@@ -28,11 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 
-#include <string>
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
@@ -46,7 +44,7 @@ public:
         ghoul::Dictionary dictionary
     );
 
-    DashboardItem(ghoul::Dictionary dictionary);
+    DashboardItem(const ghoul::Dictionary& dictionary);
 
     bool isEnabled() const;
     virtual void render(glm::vec2& penPosition) = 0;

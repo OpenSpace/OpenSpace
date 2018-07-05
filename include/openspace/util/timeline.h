@@ -44,10 +44,7 @@ struct KeyframeBase {
 */
 template <typename T>
 struct Keyframe : public KeyframeBase {
-    Keyframe(size_t i, double t, T p)
-        : KeyframeBase{i, t}
-        , data(p)
-    {}
+    Keyframe(size_t i, double t, T p);
     T data;
 };
 
@@ -57,8 +54,8 @@ struct Keyframe : public KeyframeBase {
 template <typename T>
 class Timeline {
 public:
-    Timeline();
-    virtual ~Timeline();
+    virtual ~Timeline() = default;
+
     void addKeyframe(double time, T data);
     void clearKeyframes();
     void removeKeyframe(size_t id);
@@ -70,8 +67,9 @@ public:
     const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
     const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
     const std::deque<Keyframe<T>>& keyframes() const;
+
 private:
-    size_t _nextKeyframeId;
+    size_t _nextKeyframeId = 1;
     std::deque<Keyframe<T>> _keyframes;
 };
 
@@ -92,6 +90,6 @@ bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 } // namespace openspace
 
-#include <openspace/util/timeline.inl>
+#include "timeline.inl"
 
 #endif // __OPENSPACE_CORE___TIMELINE___H__

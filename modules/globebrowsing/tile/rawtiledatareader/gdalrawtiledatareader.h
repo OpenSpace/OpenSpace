@@ -27,22 +27,12 @@
 
 #ifdef GLOBEBROWSING_USE_GDAL
 
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-
-#include <gdal.h>
-
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 #include <string>
 #include <mutex>
+#include <gdal.h>
 
 class GDALDataset;
 class GDALRasterBand;
@@ -53,7 +43,6 @@ class GeodeticPatch;
 
 class GdalRawTileDataReader : public RawTileDataReader {
 public:
-
     /**
     * Opens a GDALDataset in readonly mode and calculates meta data required for
     * reading tile using a TileIndex.
@@ -66,7 +55,6 @@ public:
         const TileTextureInitData& initData,
         RawTileDataReader::PerformPreprocessing preprocess =
             RawTileDataReader::PerformPreprocessing::No);
-
 
     virtual ~GdalRawTileDataReader() override;
 
@@ -87,8 +75,8 @@ protected:
      * by GDAL.
      * If the transform is not available, the function returns a transform to map
      * the pixel coordinates to cover the whole geodetic lat long space.
-    */
-    virtual std::array<double, 6> getGeoTransform() const override;
+     */
+    virtual std::array<double, 6> geoTransform() const override;
 
 private:
     // Private virtual function overloading
@@ -108,7 +96,7 @@ private:
 
     std::string _datasetFilePath;
 
-    GDALDataset* _dataset;
+    GDALDataset* _dataset = nullptr;
 
     struct GdalDatasetMetaDataCached {
         int rasterCount;

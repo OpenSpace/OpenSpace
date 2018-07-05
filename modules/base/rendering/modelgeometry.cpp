@@ -27,13 +27,13 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/invariants.h>
-
+#include <ghoul/misc/templatefactory.h>
 #include <fstream>
 
 namespace {
@@ -78,7 +78,7 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
         throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
 
-    const std::string geometryType = dictionary.value<std::string>(KeyType);
+    const std::string& geometryType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
     return factory->create(geometryType, dictionary);;
@@ -86,7 +86,6 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "ModelGeometry" })
-    , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -98,17 +97,7 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 }
 
 double ModelGeometry::boundingRadius() const {
-    double maxDistSquared = 0;
-    double distSquared;
-    for (const Vertex& v : _vertices) {
-        distSquared = // x*x + y*y + z*z
-            v.location[0] * v.location[0] +
-            v.location[1] * v.location[1] +
-            v.location[2] * v.location[2];
-        maxDistSquared = glm::max(maxDistSquared, distSquared);
-    }
-    double maxDist = std::sqrt(maxDistSquared);
-    return maxDist;
+    return _boundingRadius;
 }
 
 void ModelGeometry::render() {
@@ -123,7 +112,7 @@ void ModelGeometry::render() {
     glBindVertexArray(0);
 }
 
-void ModelGeometry::changeRenderMode(const GLenum mode) {
+void ModelGeometry::changeRenderMode(GLenum mode) {
     _mode = mode;
 }
 
@@ -135,6 +124,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
             glm::pow(v.location[1], 2.f) +
             glm::pow(v.location[2], 2.f), maximumDistanceSquared);
     }
+    _boundingRadius = maximumDistanceSquared;
     parent->setBoundingSphere(glm::sqrt(maximumDistanceSquared));
 
     if (_vertices.empty()) {
@@ -157,21 +147,14 @@ bool ModelGeometry::initialize(Renderable* parent) {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        nullptr // = reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
-    );
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
     glVertexAttribPointer(
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)) // NOLINT
     );
     glVertexAttribPointer(
         2,
@@ -179,7 +162,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
         GL_FLOAT,
         GL_FALSE,
         sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)) // NOLINT
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
@@ -202,18 +185,14 @@ void ModelGeometry::deinitialize() {
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
-    const std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+    const std::string& cachedFile = FileSys.cacheManager()->cachedFilename(
         filename,
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
     const bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO(fmt::format(
-            "Cached file '{}' used for file '{}",
-            cachedFile,
-            filename
-        ));
+        LINFO(fmt::format("Cached file '{}' used for file '{}", cachedFile, filename));
 
         const bool success = loadCachedFile(cachedFile);
         if (success) {
@@ -222,8 +201,6 @@ bool ModelGeometry::loadObj(const std::string& filename) {
         else {
             FileSys.cacheManager()->removeCacheFile(filename);
         }
-        // Intentional fall-through to the 'else' computation to generate the cache
-        // file for the next run
     }
     else {
         LINFO(fmt::format(
@@ -249,12 +226,14 @@ bool ModelGeometry::loadObj(const std::string& filename) {
 bool ModelGeometry::saveCachedFile(const std::string& filename) {
     std::ofstream fileStream(filename, std::ofstream::binary);
     if (fileStream.good()) {
-        fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
-            sizeof(int8_t));
+        fileStream.write(
+            reinterpret_cast<const char*>(&CurrentCacheVersion),
+            sizeof(int8_t)
+        );
 
-        int64_t vSize = _vertices.size();
+        const int64_t vSize = _vertices.size();
         fileStream.write(reinterpret_cast<const char*>(&vSize), sizeof(int64_t));
-        int64_t iSize = _indices.size();
+        const int64_t iSize = _indices.size();
         fileStream.write(reinterpret_cast<const char*>(&iSize), sizeof(int64_t));
 
         fileStream.write(
@@ -286,15 +265,15 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
             return false;
         }
 
-        int64_t vSize, iSize;
+        int64_t vSize;
         fileStream.read(reinterpret_cast<char*>(&vSize), sizeof(int64_t));
+        int64_t iSize;
         fileStream.read(reinterpret_cast<char*>(&iSize), sizeof(int64_t));
 
         if (vSize == 0 || iSize == 0) {
-            LERROR(fmt::format(
-                "Error opening file '{}' for loading cache file",
-                filename
-            ));
+            LERROR(
+                fmt::format("Error opening file '{}' for loading cache file", filename)
+            );
             return false;
         }
 
@@ -302,8 +281,7 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
         _indices.resize(iSize);
 
         fileStream.read(
-            reinterpret_cast<char*>(_vertices.data()),
-            sizeof(Vertex) * vSize
+            reinterpret_cast<char*>(_vertices.data()), sizeof(Vertex) * vSize
         );
         fileStream.read(reinterpret_cast<char*>(_indices.data()), sizeof(int) * iSize);
 

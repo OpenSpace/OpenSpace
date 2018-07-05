@@ -29,14 +29,14 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/scene.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -45,21 +45,21 @@ namespace {
     constexpr const char* ProgramName = "ModelProgram";
     constexpr const char* KeyGeometry = "Geometry";
 
-    static const openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "ColorTexture",
         "Color Texture",
         "This value points to a color texture file that is applied to the geometry "
         "rendered in this object."
     };
 
-    static const openspace::properties::Property::PropertyInfo ShadingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
         "of the Sun."
     };
 
-    static const openspace::properties::Property::PropertyInfo ModelTransformInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
@@ -105,12 +105,9 @@ documentation::Documentation RenderableModel::Documentation() {
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _geometry(nullptr)
     , _colorTexturePath(TextureInfo)
     , _performShading(ShadingInfo, true)
     , _modelTransform(ModelTransformInfo, glm::mat3(1.0))
-    , _programObject(nullptr)
-    , _texture(nullptr)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -180,7 +177,6 @@ void RenderableModel::initializeGL() {
     );
     _uniformCache.texture = _programObject->uniformLocation("texture1");
 
-
     loadTexture();
 
     _geometry->initialize(this);
@@ -208,16 +204,19 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.opacity, _opacity);
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::scale(
             glm::dmat4(_modelTransform.value()), glm::dvec3(data.modelTransform.scale)
         );
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
+                                          modelTransform;
 
-    glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
-    glm::vec3 directionToSunViewSpace =
+    const glm::vec3 directionToSun = glm::normalize(
+        _sunPos - data.modelTransform.translation
+    );
+    const glm::vec3 directionToSunViewSpace =
         glm::normalize(glm::mat3(data.camera.combinedViewMatrix()) * directionToSun);
 
     _programObject->setUniform(
@@ -277,7 +276,7 @@ void RenderableModel::update(const UpdateData&) {
 
 void RenderableModel::loadTexture() {
     _texture = nullptr;
-    if (_colorTexturePath.value() != "") {
+    if (!_colorTexturePath.value().empty()) {
         _texture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(_colorTexturePath)
         );

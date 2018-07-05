@@ -25,17 +25,15 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 
 #include <modules/sync/syncmodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/util/httprequest.h>
+#include <ghoul/fmt.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <cstdio>
 #include <fstream>
 #include <numeric>
-#include <memory>
-#include <sstream>
 
 namespace {
     constexpr const char* KeyIdentifier = "Identifier";
@@ -123,22 +121,26 @@ void HttpSynchronization::start() {
         return;
     }
 
-    std::string query = std::string("?") + QueryKeyIdentifier + "=" + _identifier +
-        "&" + QueryKeyFileVersion + "=" + std::to_string(_version) +
-        "&" + QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
+    const std::string& query =
+        std::string("?") + QueryKeyIdentifier + "=" + _identifier + "&" +
+        QueryKeyFileVersion + "=" + std::to_string(_version) + "&" +
+        QueryKeyApplicationVersion + "=" + std::to_string(ApplicationVersion);
 
-    _syncThread = std::thread([this](const std::string& q) {
-        for (const std::string& url : _synchronizationRepositories) {
-            if (trySyncFromUrl(url + q)) {
-                createSyncFile();
-                resolve();
-                return;
+    _syncThread = std::thread(
+        [this](const std::string& q) {
+            for (const std::string& url : _synchronizationRepositories) {
+                if (trySyncFromUrl(url + q)) {
+                    createSyncFile();
+                    resolve();
+                    return;
+                }
             }
-        }
-        if (!_shouldCancel) {
-            reject();
-        }
-    }, query);
+            if (!_shouldCancel) {
+                reject();
+            }
+        },
+        query
+    );
 }
 
 void HttpSynchronization::cancel() {
@@ -164,8 +166,8 @@ bool HttpSynchronization::nTotalBytesIsKnown() {
 }
 
 void HttpSynchronization::createSyncFile() {
-    std::string directoryName = directory();
-    std::string filepath = directoryName + ".ossync";
+    const std::string& directoryName = directory();
+    const std::string& filepath = directoryName + ".ossync";
 
     FileSys.createDirectory(directoryName, ghoul::filesystem::FileSystem::Recursive::Yes);
 
@@ -175,7 +177,7 @@ void HttpSynchronization::createSyncFile() {
 }
 
 bool HttpSynchronization::hasSyncFile() {
-    std::string path = directory() + ".ossync";
+    const std::string& path = directory() + ".ossync";
     return FileSys.fileExists(path);
 }
 
@@ -200,7 +202,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
 
     std::istringstream fileList(std::string(buffer.begin(), buffer.end()));
 
-    std::string line = "";
+    std::string line;
 
     std::unordered_map<std::string, size_t> fileSizes;
     std::mutex fileSizeMutex;
@@ -240,9 +242,7 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                         fileSizes.begin(),
                         fileSizes.end(),
                         size_t(0),
-                        [](size_t a, auto b) {
-                            return a + b.second;
-                        }
+                        [](size_t a, auto b) { return a + b.second; }
                     );
                 }
             }
@@ -272,15 +272,16 @@ bool HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             if (success != 0) {
                 LERRORC(
                     "HTTPSynchronization",
-                    fmt::format(
-                        "Error renaming file {} to {}", tempName, originalName
-                    )
+                    fmt::format("Error renaming file {} to {}", tempName, originalName)
                 );
-
                 failed = true;
             }
         }
         else {
+            LERRORC(
+                "HTTPSynchronization",
+                fmt::format("Error downloading file from URL {}", d->url())
+            );
             failed = true;
         }
     }

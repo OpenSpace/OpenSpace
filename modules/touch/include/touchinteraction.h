@@ -134,7 +134,7 @@ public:
     Camera* getCamera();
     SceneGraphNode* getFocusNode();
     void setFocusNode(SceneGraphNode* focusNode);
-    void setCamera(Camera* cam);
+    void setCamera(Camera* camera);
 
 private:
     /* Returns true if we have the GUI window open. If so, emulates the incoming touch
@@ -183,7 +183,7 @@ private:
     // Resets all properties that can be changed in the GUI to default
     void resetToDefault();
 
-    Camera* _camera;
+    Camera* _camera = nullptr;
     SceneGraphNode* _focusNode = nullptr;
 
     // Property variables
@@ -248,7 +248,7 @@ private:
     bool _lmSuccess;
     bool _guiON;
     std::vector<SelectedBody> _selected;
-    SceneGraphNode* _pickingSelected;
+    SceneGraphNode* _pickingSelected = nullptr;
     LMstat _lmstat;
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;

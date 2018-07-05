@@ -214,8 +214,8 @@ def check_naming_convention_subcomponent(lines, component, file):
     subcomponent_part = ifndef_symbol[2 + len(component) + 1 :]
     subcomponent_part = subcomponent_part[: subcomponent_part.find('_')]
 
-    path_part = file.split(os.sep)[1]
-    second_path_part = file.split(os.sep)[2]
+    path_part = file.split('/')[1]
+    second_path_part = file.split('/')[2]
 
 
     if (path_part.upper() != subcomponent_part) and (second_path_part.upper() != subcomponent_part):
@@ -550,16 +550,18 @@ def check_files(positiveList, negativeList, component, check_function):
     files = []
     for p in positiveList:
         f = glob.glob(p, recursive=True)
+        f = [fi.replace('\\', '/') for fi in f]
         files.extend(f)
 
     negativeFiles = []
     for n in negativeList:
         f = glob.glob(n, recursive=True)
+        f = [fi.replace('\\', '/') for fi in f]
         negativeFiles.extend(f)
 
-    files = [f for f in files if f not in negativeFiles]
+    filtered_files = [f for f in files if f not in negativeFiles]
 
-    for file in files:
+    for file in filtered_files:
         check_function(file, component)
 
 

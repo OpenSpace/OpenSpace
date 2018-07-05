@@ -24,17 +24,19 @@
 
 #include <openspace/scene/scenelicensewriter.h>
 
+#include <openspace/scene/scenelicense.h>
 #include <sstream>
 
 namespace {
-    const char* MainTemplateFilename = "${WEB}/scenelicense/main.hbs";
-    const char* SceneLicenseTemplateFilename = "${WEB}/scenelicense/scenelicense.hbs";
-    const char* JsFilename = "${WEB}/scenelicense/script.js";
+    constexpr const char* MainTemplateFilename = "${WEB}/scenelicense/main.hbs";
+    constexpr const char* SceneLicenseTemplateFilename =
+                                                   "${WEB}/scenelicense/scenelicense.hbs";
+    constexpr const char* JsFilename = "${WEB}/scenelicense/script.js";
 } // namespace
 
 namespace openspace {
 
-SceneLicenseWriter::SceneLicenseWriter(const std::vector<SceneLicense>& licenses)
+SceneLicenseWriter::SceneLicenseWriter(std::vector<SceneLicense> licenses)
     : DocumentationGenerator(
         "Documentation",
         "sceneLicenses",
@@ -44,7 +46,7 @@ SceneLicenseWriter::SceneLicenseWriter(const std::vector<SceneLicense>& licenses
         },
         JsFilename
     )
-    , _licenses(licenses)
+    , _licenses(std::move(licenses))
 {}
 
 std::string SceneLicenseWriter::generateJson() const {
@@ -66,7 +68,7 @@ std::string SceneLicenseWriter::generateJson() const {
 
     json << "]";
 
-    std::string jsonString = "";
+    std::string jsonString;
     for (const char& c : json.str()) {
         if (c == '\'') {
             jsonString += "\\'";

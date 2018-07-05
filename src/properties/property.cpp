@@ -33,11 +33,11 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const char* MetaDataKeyGroup = "Group";
-    const char* MetaDataKeyVisibility = "Visibility";
-    const char* MetaDataKeyReadOnly = "isReadOnly";
+    constexpr const char* MetaDataKeyGroup = "Group";
+    constexpr const char* MetaDataKeyVisibility = "Visibility";
+    constexpr const char* MetaDataKeyReadOnly = "isReadOnly";
 
-    const char* _metaDataKeyViewPrefix = "view.";
+    constexpr const char* _metaDataKeyViewPrefix = "view.";
 } // namespace
 
 namespace openspace::properties {
@@ -61,11 +61,9 @@ uint64_t Property::Identifier = 0;
 #endif
 
 Property::Property(PropertyInfo info)
-    : _owner(nullptr)
-    , _identifier(std::move(info.identifier))
+    : _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
-    , _currentHandleValue(0)
 #ifdef _DEBUG
     , _id(Identifier++)
 #endif
@@ -90,7 +88,7 @@ std::string Property::fullyQualifiedIdentifier() const {
     while (currentOwner) {
         std::string ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
-            identifier = ownerId + "." + identifier;
+            identifier = ownerId + "." + identifier; // NOLINT
         }
         currentOwner = currentOwner->owner();
     }
@@ -105,7 +103,7 @@ bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any) {}
+void Property::set(ghoul::any) {} // NOLINT
 
 bool Property::setLuaValue(lua_State*) {
     return false;
@@ -127,20 +125,20 @@ std::string Property::getStringValue() const {
     std::string value;
     bool status = getStringValue(value);
     if (!status) {
-        throw std::runtime_error("Could not get string value");
+        throw ghoul::RuntimeError("Could not get string value", identifier());
     }
     return value;
 }
 
-bool Property::setStringValue(std::string) {
+bool Property::setStringValue(std::string) { // NOLINT
     return false;
 }
 
-std::string Property::guiName() const {
+const std::string& Property::guiName() const {
     return _guiName;
 }
 
-std::string Property::description() const {
+const std::string& Property::description() const {
     return _description;
 }
 
@@ -173,7 +171,7 @@ void Property::setReadOnly(bool state) {
 
 void Property::setViewOption(std::string option, bool value) {
     _metaData.setValue(
-        _metaDataKeyViewPrefix + option,
+        _metaDataKeyViewPrefix + std::move(option),
         value,
         ghoul::Dictionary::CreateIntermediate::Yes
     );
@@ -191,26 +189,25 @@ const ghoul::Dictionary& Property::metaData() const {
 
 std::string Property::toJson() const {
     std::string result = "{";
-    result +=
-        "\"" + std::string(DescriptionKey) + "\": " +
-        generateBaseJsonDescription() + ", ";
-    result +=
-        "\"" + std::string(JsonValueKey) + "\": " + jsonValue();
-    result += "}";
+    result += "\"" + std::string(DescriptionKey) + "\": " +
+              generateBaseJsonDescription() + ", ";
+    result += "\"" + std::string(JsonValueKey) + "\": " + jsonValue() + '}';
     return result;
 }
 
 std::string Property::jsonValue() const {
     std::string value = getStringValue();
     if (value[0] == '"' && value[value.size() - 1] == '"') {
-        value.erase(0, 1);
-        value.erase(value.size() - 1, 1);
+        return value.substr(1, value.size() - 2);
     }
-    return value;
+    else {
+        return value;
+    }
 }
 
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
+
     OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
     return handle;
@@ -218,6 +215,7 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
 
 Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
+
     OnDeleteHandle handle = _currentHandleValue++;
     _onDeleteCallbacks.emplace_back(handle, std::move(callback));
     return handle;
@@ -303,7 +301,7 @@ std::string Property::generateMetaDataJsonDescription() const {
     };
     Visibility visibility = static_cast<Visibility>(
         _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility));
-    std::string vis = VisibilityConverter.at(visibility);
+    const std::string& vis = VisibilityConverter.at(visibility);
 
     bool isReadOnly = false;
     if (_metaData.hasKey(MetaDataKeyReadOnly)) {
@@ -326,9 +324,9 @@ std::string Property::generateAdditionalJsonDescription() const {
     return "{}";
 }
 
-void Property::setInterpolationTarget(ghoul::any) {}
+void Property::setInterpolationTarget(ghoul::any) {} // NOLINT
 void Property::setLuaInterpolationTarget(lua_State*) {}
-void Property::setStringInterpolationTarget(std::string) {}
+void Property::setStringInterpolationTarget(std::string) {} // NOLINT
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
 } // namespace openspace::properties

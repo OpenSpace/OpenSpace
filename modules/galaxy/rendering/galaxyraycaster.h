@@ -25,14 +25,12 @@
 #ifndef __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
 #define __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
 
-#include <memory>
+#include <openspace/rendering/volumeraycaster.h>
 
+#include <openspace/util/boxgeometry.h>
 #include <ghoul/glm.h>
 #include <string>
-#include <vector>
-#include <openspace/rendering/volumeraycaster.h>
-#include <openspace/util/boxgeometry.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
+#include <memory>
 
 namespace ghoul::opengl {
     class Texture;
@@ -51,7 +49,7 @@ public:
 
     virtual ~GalaxyRaycaster();
     void initialize();
-    void deinitialize();
+
     void renderEntryPoints(const RenderData& data,
         ghoul::opengl::ProgramObject& program) override;
     void renderExitPoints(const RenderData& data,
@@ -60,20 +58,20 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data,
         ghoul::opengl::ProgramObject& program) override;
-    bool cameraIsInside(const RenderData& data,
+    bool isCameraInside(const RenderData& data,
         glm::vec3& localPosition) override;
 
-
-    std::string getBoundsVsPath() const override;
-    std::string getBoundsFsPath() const override;
-    std::string getRaycastPath() const override;
-    std::string getHelperPath() const override;
+    std::string boundsVertexShaderPath() const override;
+    std::string boundsFragmentShaderPath() const override;
+    std::string raycasterPath() const override;
+    std::string helperPath() const override;
 
     void setAspect(const glm::vec3& aspect);
     void setModelTransform(glm::mat4 transform);
     void setTime(double time);
     void setStepSize(float stepSize);
     void setOpacityCoefficient(float opacityCoefficient);
+
 private:
     BoxGeometry _boundingBox;
     float _stepSize;

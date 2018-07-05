@@ -27,15 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
-
 #include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace::globebrowsing {
+
+class Layer;
 
 namespace tileprovider { class TileProvider; }
 
@@ -64,7 +61,7 @@ struct LayerGroup : public properties::PropertyOwner {
     /// @returns the size of the pile to be used in rendering of this layer
     int pileSize() const;
 
-    bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
+    bool layerBlendingEnabled() const;
 
     void onChange(std::function<void(void)> callback);
 

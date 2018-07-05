@@ -24,25 +24,21 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <functional>
-
 namespace openspace::interaction {
 
 template <typename T>
 Interpolator<T>::Interpolator()
     : _transferFunction([](float t){ return t; })
-    , _t(0.0)
-    , _interpolationTime(1.0)
 {}
 
 template <typename T>
 void Interpolator<T>::start() {
-    _t = 0.0;
+    _t = 0.f;
 }
 
 template <typename T>
 void Interpolator<T>::end() {
-    _t = 1.0;
+    _t = 1.f;
 }
 
 template <typename T>
@@ -52,7 +48,7 @@ void Interpolator<T>::setDeltaTime(float deltaTime) {
 
 template <typename T>
 void Interpolator<T>::setTransferFunction(std::function<T(float)> transferFunction) {
-    _transferFunction = transferFunction;
+    _transferFunction = std::move(transferFunction);
 }
 
 template <typename T>
@@ -78,7 +74,7 @@ T Interpolator<T>::value() const {
 
 template <typename T>
 bool Interpolator<T>::isInterpolating() const {
-    return _t < 1.0 && _t >= 0.0;
+    return (_t < 1.f) && (_t >= 0.f);
 }
 
 } // namespace openspace::interaction

@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboarditem.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <vector>

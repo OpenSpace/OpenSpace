@@ -27,6 +27,7 @@
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
+#include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <cassert>
 

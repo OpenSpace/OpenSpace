@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK_RENDERER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK_RENDERER___H__
 
-#include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <memory>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -35,6 +34,7 @@ namespace openspace { struct RenderData; }
 namespace openspace::globebrowsing {
 
 class Chunk;
+class Ellipsoid;
 class Grid;
 class GPULayerManager;
 class LayerManager;
@@ -45,6 +45,8 @@ class ChunkRenderer {
 public:
     ChunkRenderer(std::shared_ptr<Grid> grid, std::shared_ptr<LayerManager> layerManager,
         Ellipsoid& ellipsoid);
+
+    ~ChunkRenderer();
 
     /**
      * Chooses to render a chunk either locally or globally depending on the chunklevel
@@ -80,8 +82,7 @@ private:
     void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
     ghoul::opengl::ProgramObject* getActivatedProgramWithTileData(
-        std::shared_ptr<LayerShaderManager> layeredShaderManager,
-        std::shared_ptr<GPULayerManager> gpuLayerManager,
+        LayerShaderManager& layeredShaderManager, GPULayerManager& gpuLayerManager,
         const Chunk& chunk);
 
     void calculateEclipseShadows(const Chunk& chunk,

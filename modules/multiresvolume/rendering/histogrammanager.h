@@ -39,6 +39,7 @@ public:
     Histogram* getHistogram(unsigned int brickIndex);
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
+
 private:
     std::vector<Histogram> _histograms;
     float _minBin;

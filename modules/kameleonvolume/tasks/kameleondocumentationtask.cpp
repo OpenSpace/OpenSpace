@@ -25,28 +25,24 @@
 #include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-
 #include <openspace/openspace.h>
 #include <openspace/documentation/verifier.h>
-
-#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
-
-#include <string>
+#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <fstream>
 
 namespace {
-    const char* KeyInput = "Input";
-    const char* KeyOutput = "Output";
-    const char* MainTemplateFilename = "${WEB}/kameleondocumentation/main.hbs";
-    const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
-    const char* JsFilename = "${WEB}/kameleondocumentation/script.js";
-    const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    const char* CssFilename = "${WEB}/common/style.css";
+    constexpr const char* KeyInput = "Input";
+    constexpr const char* KeyOutput = "Output";
+    constexpr const char* MainTemplateFilename = "${WEB}/kameleondocumentation/main.hbs";
+    constexpr const char* HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr const char* JsFilename = "${WEB}/kameleondocumentation/script.js";
+    constexpr const char* BootstrapFilename = "${WEB}/common/bootstrap.min.css";
+    constexpr const char* CssFilename = "${WEB}/common/style.css";
 } // namespace
 
-namespace openspace {
-namespace kameleonvolume {
+namespace openspace::kameleonvolume {
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
 {
@@ -61,8 +57,10 @@ KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& di
 }
 
 std::string KameleonDocumentationTask::description() {
-    return "Extract metadata from cdf-file " + _inputPath +
-        " and output html documentation to " + _outputPath;
+    return fmt::format(
+        "Extract metadata from cdf file {} and output html documentation to {}",
+        _inputPath, _outputPath
+    );
 }
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
@@ -73,13 +71,13 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
 
 
     ghoul::Dictionary dictionary = {
-        {"kameleon", std::move(kameleonDictionary)},
-        {"version",
+        { "kameleon", std::move(kameleonDictionary) },
+        { "version",
             std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
             std::to_string(OPENSPACE_VERSION_MINOR) + "." +
             std::to_string(OPENSPACE_VERSION_PATCH)
         },
-        {"input", _inputPath}
+        { "input", _inputPath }
     };
 
     std::string json = formatter.format(dictionary);
@@ -120,8 +118,10 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     );
 
     std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
-    std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
-        std::istreambuf_iterator<char>{}};
+    std::string mainTemplateContent{
+        std::istreambuf_iterator<char>{mainTemplateInput},
+        std::istreambuf_iterator<char>{}
+    };
 
     std::ofstream file;
     file.exceptions(~std::ofstream::goodbit);
@@ -182,5 +182,4 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
     };
 }
 
-} // namespace kameleonvolume
-} // namespace openspace
+} // namespace openspace::kameleonvolume

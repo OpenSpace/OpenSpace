@@ -60,7 +60,6 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
 template<typename KeyType>
 LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     : _queuedTasks(queueSize)
-    , _stop(false)
 {
     for (size_t i = 0; i < numThreads; ++i) {
         _workers.push_back(std::thread(LRUThreadPoolWorker<KeyType>(*this)));
@@ -70,7 +69,7 @@ LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
 template<typename KeyType>
 LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
     : LRUThreadPool(toCopy._workers.size(), toCopy._queuedTasks.maximumCacheSize())
-{ }
+{}
 
 // the destructor joins all threads
 template<typename KeyType>
@@ -90,17 +89,19 @@ LRUThreadPool<KeyType>::~LRUThreadPool() {
 // add new work item to the pool
 template<typename KeyType>
 void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
-    { // acquire lock
+    {
         std::unique_lock<std::mutex> lock(_queueMutex);
 
         // add the task
         //_queuedTasks.put(key, f);
-        std::vector<std::pair<KeyType, std::function<void()>>> unfinishedTasks =
+        const std::vector<std::pair<KeyType, std::function<void()>>>& unfinishedTasks =
             _queuedTasks.putAndFetchPopped(key, f);
-        for (auto unfinishedTask : unfinishedTasks) {
+        for (const std::pair<KeyType, std::function<void()>>& unfinishedTask :
+             unfinishedTasks)
+        {
             _unqueuedTasks.push_back(unfinishedTask.first);
         }
-    } // release lock
+    }
 
     // wake up one thread
     _condition.notify_one();
@@ -111,7 +112,6 @@ bool LRUThreadPool<KeyType>::touch(KeyType key) {
     std::unique_lock<std::mutex> lock(_queueMutex);
     return _queuedTasks.touch(key);
 }
-
 
 template<typename KeyType>
 std::vector<KeyType> LRUThreadPool<KeyType>::getUnqueuedTasksKeys() {
@@ -137,10 +137,8 @@ std::vector<KeyType> LRUThreadPool<KeyType>::getQueuedTasksKeys() {
 
 template<typename KeyType>
 void LRUThreadPool<KeyType>::clearEnqueuedTasks() {
-    { // acquire lock
-        std::unique_lock<std::mutex> lock(_queueMutex);
-        _queuedTasks.clear();
-    } // release lock
+    std::unique_lock<std::mutex> lock(_queueMutex);
+    _queuedTasks.clear();
 }
 
 } // namespace openspace::globebrowsing

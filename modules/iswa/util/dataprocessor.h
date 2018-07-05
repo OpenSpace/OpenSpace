@@ -25,61 +25,72 @@
 #ifndef __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 #define __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 
-#include <openspace/properties/selectionproperty.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <memory>
 #include <set>
-#include <openspace/util/histogram.h>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
-class DataProcessor{
-    friend class IswaBaseGroup;
-public:
-    DataProcessor();
-    virtual ~DataProcessor();
+namespace properties { class SelectionProperty; }
 
-    virtual std::vector<std::string> readMetadata(std::string data,
+class Histogram;
+
+class DataProcessor {
+    //friend class IswaBaseGroup;
+
+public:
+    DataProcessor() = default;
+    virtual ~DataProcessor() = default;
+
+    virtual std::vector<std::string> readMetadata(const std::string& data,
         glm::size3_t& dimensions) = 0;
-    virtual void addDataValues(std::string data,
+
+    virtual void addDataValues(const std::string& data,
         properties::SelectionProperty& dataOptions) = 0;
-    virtual std::vector<float*> processData(std::string data,
+
+    virtual std::vector<float*> processData(const std::string& data,
         properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);
     void normValues(glm::vec2 normValues);
-    glm::size3_t dimensions();
-    glm::vec2 filterValues();
+    glm::size3_t dimensions() const;
+    glm::vec2 filterValues() const;
 
     void clear();
 
 protected:
     float processDataPoint(float value, int option);
+
     float normalizeWithStandardScore(float value, float mean, float sd,
-        glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
+
     float unnormalizeWithStandardScore(float value, float mean, float sd,
-        glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+        const glm::vec2& normalizationValues = glm::vec2(1.f, 1.f));
 
     void initializeVectors(int numOptions);
-    void calculateFilterValues(std::vector<int> selectedOptions);
-    void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
+    void calculateFilterValues(const std::vector<int>& selectedOptions);
+    void add(const std::vector<std::vector<float>>& optionValues,
+        const std::vector<float>& sum);
 
     glm::size3_t _dimensions;
-    bool _useLog;
-    bool _useHistogram;
-    glm::vec2 _normValues;
-    glm::vec2 _filterValues;
+    bool _useLog = false;
+    bool _useHistogram = false;
+    glm::vec2 _normValues = glm::vec2(1.f);
+    glm::vec2 _filterValues = glm::vec2(0.f);
 
     std::vector<float> _min;
     std::vector<float> _max;
     std::vector<float> _sum;
     std::vector<float> _standardDeviation;
     std::vector<float> _numValues;
-    std::vector<std::shared_ptr<Histogram>> _histograms;
-    std::set<std::string> _coordinateVariables;
+    std::vector<std::unique_ptr<Histogram>> _histograms;
+    std::set<std::string> _coordinateVariables = { "x", "y", "z", "phi", "theta" };
 
-    glm::vec2 _histNormValues;
+    glm::vec2 _histNormValues = glm::vec2(10.f, 10.f);
 };
 
 } // namespace openspace
