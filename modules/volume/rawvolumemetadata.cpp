@@ -29,19 +29,19 @@
 #include <openspace/util/time.h>
 
 namespace {
-    const constexpr char* KeyDimensions = "Dimensions";
-    const constexpr char* KeyLowerDomainBound = "LowerDomainBound";
-    const constexpr char* KeyUpperDomainBound = "UpperDomainBound";
+    constexpr const char* KeyDimensions = "Dimensions";
+    constexpr const char* KeyLowerDomainBound = "LowerDomainBound";
+    constexpr const char* KeyUpperDomainBound = "UpperDomainBound";
 
-    const constexpr char* KeyMinValue = "MinValue";
-    const constexpr char* KeyMaxValue = "MaxValue";
+    constexpr const char* KeyMinValue = "MinValue";
+    constexpr const char* KeyMaxValue = "MaxValue";
 
-    const constexpr char* KeyTime = "Time";
-    const constexpr char* KeyDomainUnit = "DomainUnit";
-    const constexpr char* KeyValueUnit = "ValueUnit";
+    constexpr const char* KeyTime = "Time";
+    constexpr const char* KeyDomainUnit = "DomainUnit";
+    constexpr const char* KeyValueUnit = "ValueUnit";
 
-    const constexpr char* KeyGridType = "GridType";
-}
+    constexpr const char* KeyGridType = "GridType";
+} // namespace
 
 namespace openspace::volume {
 
@@ -104,8 +104,8 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() {
     }
 
     if (hasValueRange) {
-        dict.setValue<double>(KeyMinValue, static_cast<float>(minValue));
-        dict.setValue<double>(KeyMaxValue, static_cast<float>(maxValue));
+        dict.setValue<double>(KeyMinValue, minValue);
+        dict.setValue<double>(KeyMaxValue, maxValue);
     }
     if (hasDomainUnit) {
         dict.setValue<std::string>(KeyValueUnit, valueUnit);

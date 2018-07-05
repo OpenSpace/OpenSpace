@@ -131,10 +131,7 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
         "maxNumBricksPerAxis_" + id,
         static_cast<unsigned int>(_tsp->header().xNumBricks_)
     );
-    program.setUniform(
-        "paddedBrickDim_" + id,
-        static_cast<unsigned int>(_tsp->paddedBrickDim())
-    );
+    program.setUniform("paddedBrickDim_" + id, _tsp->paddedBrickDim());
 
     glm::size3_t size = _atlasManager->textureSize();
     glm::ivec3 atlasSize(size.x, size.y, size.z);
@@ -147,7 +144,7 @@ bool MultiresVolumeRaycaster::isCameraInside(const RenderData& data,
     // Camera rig position in world coordinates.
     glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
 
     // Camera position in world coordinates.
     glm::vec4 camWorldPos = rigWorldPos;

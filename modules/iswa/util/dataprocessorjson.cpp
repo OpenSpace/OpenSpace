@@ -24,7 +24,7 @@
 
 #include <modules/iswa/util/dataprocessorjson.h>
 
-#include <modules/iswa/ext/json.h>
+#include <openspace/json.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/util/histogram.h>
 

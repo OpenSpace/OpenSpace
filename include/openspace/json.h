@@ -1,8 +1,9 @@
 /*****************************************************************************************
  *                                                                                       *
- * OpenSpace                                                                             *
+ * GHOUL                                                                                 *
+ * General Helpful Open Utility Library                                                  *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2012-2018                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +23,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
+#ifndef __OPENSPACE_CORE___JSON___H__
+#define __OPENSPACE_CORE___JSON___H__
 
 #ifdef WIN32
 #pragma warning (push)
@@ -36,8 +37,7 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif // __GNUC__
 
-
-#include <modules/iswa/ext/json/json.hpp>
+#include <ext/json/json.hpp>
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
@@ -47,4 +47,4 @@
 #pragma warning (pop)
 #endif // WIN32
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
+#endif // __OPENSPACE_CORE___JSON___H__

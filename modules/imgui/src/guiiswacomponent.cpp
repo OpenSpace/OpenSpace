@@ -27,8 +27,8 @@
 #include <modules/imgui/include/guiiswacomponent.h>
 
 #include <modules/imgui/include/imgui_include.h>
-#include <modules/iswa/ext/json.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/json.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/engine/openspaceengine.h>

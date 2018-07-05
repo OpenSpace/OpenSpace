@@ -113,7 +113,7 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
     _nDiskReads = 0;
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, 0, GL_STREAM_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 
     if (!mappedBuffer) {
@@ -240,7 +240,7 @@ void AtlasManager::pboToAtlas(BufferIndex bufferIndex) {
         static_cast<GLsizei>(dim[2]), // depth
         GL_RED,                       // format
         GL_FLOAT,                     // type
-        NULL                          // *pixels
+        nullptr                       // *pixels
     );
     glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

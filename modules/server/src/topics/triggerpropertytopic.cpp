@@ -24,10 +24,10 @@
 
 #include <modules/server/include/topics/triggerpropertytopic.h>
 
+#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
-#include <ext/json/json.hpp>
 
 namespace {
     constexpr const char* PropertyKey = "property";
@@ -62,6 +62,6 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
 
 bool TriggerPropertyTopic::isDone() const {
     return true;
-};
+}
 
 } // namespace openspace

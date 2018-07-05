@@ -47,17 +47,17 @@ struct BrickSelection {
 
     BrickSelection() {}
 
-    BrickSelection(int numBricks, int numTimeSteps, SplitType splitType,
-                   float splitPoints)
+    BrickSelection(int numBricks, int numTimeSteps, SplitType splitType_,
+                   float splitPoints_)
     {
-        this->cover = BrickCover(numBricks);
-        this->lowT = 0;
-        this->highT = numTimeSteps;
-        this->brickIndex = 0;
-        this->splitType = splitType;
-        this->splitPoints = splitPoints;
-        this->nSpatialSplits = 0;
-        this->nTemporalSplits = 0;
+        cover = BrickCover(numBricks);
+        lowT = 0;
+        highT = numTimeSteps;
+        brickIndex = 0;
+        splitType = splitType_;
+        splitPoints = splitPoints_;
+        nSpatialSplits = 0;
+        nTemporalSplits = 0;
     }
 
     BrickSelection splitSpatially(bool x, bool y, bool z, unsigned int childBrickIndex,

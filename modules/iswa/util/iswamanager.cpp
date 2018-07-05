@@ -33,6 +33,7 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
@@ -44,25 +45,6 @@
 #include <fstream>
 
 #include "iswamanager_lua.inl"
-
-#ifdef __clang__
-#pragma clang diagnostic push
-// #pragma clang diagnostic ignored "-Wuseless-cast"
-// #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#elif (defined __GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif // __clang__
-
-#include <modules/iswa/ext/json.h>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif (defined __GNUC__)
-#pragma GCC diagnostic pop
-#endif // __clang__
-
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 

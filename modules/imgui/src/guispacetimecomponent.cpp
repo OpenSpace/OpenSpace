@@ -40,8 +40,6 @@
 
 #include <numeric>
 
-#include <imgui_internal.h>
-
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
 

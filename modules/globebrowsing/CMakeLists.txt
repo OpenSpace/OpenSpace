@@ -42,7 +42,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboardglobelocation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.h
@@ -138,7 +138,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboardglobelocation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dashboard/dashboarditemglobelocation.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp

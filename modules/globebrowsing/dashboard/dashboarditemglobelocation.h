@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
-#define __OPENSPACE_MDOULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
 
 #include <openspace/rendering/dashboarditem.h>
 

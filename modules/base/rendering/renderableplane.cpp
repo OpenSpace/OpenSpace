@@ -200,7 +200,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
-            glm::dmat4(1.0), 
+            glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 

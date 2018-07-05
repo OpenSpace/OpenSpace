@@ -229,7 +229,7 @@ void DataCygnet::setTextureUniforms() {
         _shader->setUniform("transferFunctions[0]", tfUnits[0]);
     } else {
         for (int option : selectedOptions) {
-            if (_transferFunctions.size() >= option) {
+            if (static_cast<int>(_transferFunctions.size()) >= option) {
                 tfUnits[j].activate();
                 _transferFunctions[option].bind();
                 _shader->setUniform(

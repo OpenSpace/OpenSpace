@@ -24,7 +24,7 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <modules/iswa/ext/json.h>
+#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

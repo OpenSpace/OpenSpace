@@ -35,6 +35,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunction.h
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionhandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/transferfunctionproperty.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h
