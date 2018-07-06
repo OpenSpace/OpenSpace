@@ -58,14 +58,14 @@ create_new_module(
 # Handling files here in favor of easy updates as a git submodule
 # as opposed to a custom file structure with a CMakeLists.txt for it
 set (NFD_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_common.c)
-set (NDF_EXTRA)
+set (NFD_EXTRA)
 
 if (WIN32)
-    set (NDF_SOURCE_FILES ${NDF_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_win.cpp)
-endif( WIN32)
+    set (NFD_SOURCE_FILES ${NFD_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_win.cpp)
+endif(WIN32)
 
 if (APPLE)
-    set (NDF_SOURCE_FILES ${NDF_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_cocoa.m)
+    set (NFD_SOURCE_FILES ${NFD_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ext/nativefiledialog/src/nfd_cocoa.m)
 endif( APPLE)
 
 if (UNIX AND (NOT APPLE))
@@ -76,7 +76,7 @@ if (UNIX AND (NOT APPLE))
     include_directories(${GTK3_INCLUDE_DIRS})
     link_directories(${GTK3_LIBRARY_DIRS})
     add_definitions(${GTK3_CFLAGS_OTHER})
-    set (NDF_EXTRA ${NDF_EXTRA} ${GTK3_LIBRARIES})
+    set (NFD_EXTRA ${NFD_EXTRA} ${GTK3_LIBRARIES})
 endif()
 
 add_library(nativefiledialog ${NFD_SOURCE_FILES})
@@ -88,5 +88,5 @@ target_include_directories(nativefiledialog
 
 target_link_libraries(openspace-module-dataloader 
     nativefiledialog 
-    ${NDF_EXTRA}
+    ${NFD_EXTRA}
 )
