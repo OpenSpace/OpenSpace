@@ -16,15 +16,15 @@ local marsTransforms2 = asset.require('scene/solarsystem/planets/mars/mars')
 local extra_rot = {
     Identifier = "extra_rot",
     Parent =  marsTransforms2.Mars.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            Rotation = { 1.0000000,  0.0000110, -0.0000120;
-                          -0.0000110,  1.0000000,  0.0000000;
-                           0.0000120,  0.0000000,  1.0000000
-            }
-        }
-    },
+    --Transform = {
+    --    Rotation = {  --correct rotation for time "2013-08-22T05:44:00"
+    --        Type = "StaticRotation",
+    --        Rotation = { 1.0000000,  0.0000110, -0.0000120;
+    --                      -0.0000110,  1.0000000,  0.0000000;
+    --                       0.0000120,  0.0000000,  1.0000000
+    --        }
+    --    }
+    --},
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -34,21 +34,23 @@ local extra_rot = {
 local MSL_Rotation = {
     Identifier = "MSL_Rotation",
     Parent =  extra_rot.Identifier,
-    Transform = {
-        Rotation = {
-            Type = "StaticRotation",
-            -- correct, no scalefactor
-            --Rotation = { 0.9999998,  0.0006846, -0.0001692,
-            --            -0.0006846,  0.9999998,  0.0000001,
-            --             0.0001692,  0.0000001,  1.0000000
-            --}
-            -- scalefactor
-            Rotation = { 0.9999995,  0.0006493, -0.0008098,
-                        -0.0006493,  0.9999998,  0.0000003,
-                         0.0008098,  0.0000003,  0.9999996
-            }
-        }
-    },
+    --Transform = {
+    --    Rotation = {
+    --        Type = "StaticRotation",
+    --        -- correct, no scalefactor
+                --correct rotation for landing site: "2012-08-06T01:33:28", vi tror att det är landing site
+    --        --Rotation = { 0.9999998,  0.0006846, -0.0001692, 
+    --        --            -0.0006846,  0.9999998,  0.0000001,
+    --        --             0.0001692,  0.0000001,  1.0000000
+    --        --}
+    --        -- scalefactor
+              --correct rotation for time "2013-08-22T05:44:00"
+    --        Rotation = { 0.9999995,  0.0006493, -0.0008098, 
+    --                    -0.0006493,  0.9999998,  0.0000003,
+    --                     0.0008098,  0.0000003,  0.9999996
+    --        }
+    --    }
+    --},
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }
@@ -58,6 +60,14 @@ local MSL_Location = {
     Identifier = "MSL_Location",
     Parent =  MSL_Rotation.Identifier,
     Transform = {   
+        --Translation = {
+        --    Type = "SpacecraftProjection",
+        --    Target = "MSL",                 
+        --    Observer = "MSL_LANDING_SITE",
+        --    Frame = "MSL_TOPO",
+        --    HeightTexture = "HeightmapTesting.jpg",                        
+        --    Kernels = kernels.CuriosityKernels    
+        --},
         Translation = {
             Type = "SpacecraftProjection",
             Target = "MSL",                 
@@ -80,16 +90,16 @@ local MSL_Location = {
 local MSL_Body = {
     Identifier = "MSL_Body",
     Parent =  MSL_Location.Identifier,
-    Transform = {   
-        Translation = {
-            Type = "StaticTranslation",
-            Position = { 0.17, 0.0, -0.844 }
-        },
-        Scale = {
-            Type = "StaticScale",
-            Scale = 10.0
-        }
-    },
+    --Transform = {   
+    --    Translation = {
+    --        Type = "StaticTranslation",
+    --        Position = { 0.17, 0.0, -0.844 }
+    --    },
+    --    --Scale = {
+    --    --    Type = "StaticScale",
+    --    --    Scale = 10.0
+    --    --}
+    --},
     GUI = {
         Path = "/Solar System/Planets/Mars/Curiosity/Model"
     }

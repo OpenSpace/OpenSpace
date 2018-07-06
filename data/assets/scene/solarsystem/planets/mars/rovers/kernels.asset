@@ -8,300 +8,28 @@ local kernels = asset.syncedResource({
 })
 
 local CuriosityKernels = {
-    --kernels .. "/PCK/pck00008.tpc",
-    --kernels .. "/FK/msl.tf",
-    --kernels .. "/SCLK/msl.tsc",
-    --kernels .. "/SCLK/msl_lmst_ops120808_v1.tsc",
-    --kernels .. "/SPK/msl_surf_rover_tlm.bsp",
-    --kernels .. "/LSK/msl.tls",
-    --kernels .. "/SPK/msl_struct_v02.bsp",
-    --kernels .. "/SPK/de425s.bsp",
-    --kernels .. "/SPK/mar085s.bsp",
-    --kernels .. "/SPK/msl_cruise_v1.bsp",
-    --kernels .. "/SPK/msl_edl_v01.bsp", 
-    --kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
-    --kernels .. "/SPK/msl_surf_rover_tlm.bsp",
-    --kernels .. "/CK/msl_ra_toolsref_v1.bc",
-    --kernels .. "/CK/msl_cruise_recon_rawrt_v2.bc",
-    --kernels .. "/CK/msl_cruise_recon_raweng_v1.bc",
-    --kernels .. "/SPK/msl_edl_v01.bsp",
-    --kernels .. "/CK/msl_surf_hga_tlm.bc",
-    --kernels .. "/CK/msl_surf_ra_tlmenc.bc",
-    --kernels .. "/CK/msl_surf_ra_tlmres.bc",
-    --kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
-    --kernels .. "/CK/msl_surf_rsm_tlmres.bc",
-  --
-    
-
-
-
-
-   --------- SCLK --------
+    --if you are in a hurry--
     kernels .. "/SCLK/msl.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00002.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00007.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00009.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00010.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00011.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00012.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00013.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00014.tsc",
-    kernels .. "/SCLK/MSL_76_SCLKSCET.00015.tsc",
-    kernels .. "/SCLK/msl_lmst_gc120806_v3.tsc",
     kernels .. "/SCLK/msl_lmst_ops120808_v1.tsc",
-
-    -------- SPK --------
-    -- an ever-growing SPK file containing the position of the rover relative to the sites
-    -- along the path and position of the sites relative to the landing site
-    
-    kernels .. "/SPK/mar085s.bsp",
-    kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm.bsp",   --DONT USE THIS ONE WHEN WE HAVE THE DATA!!! FIX
-    --kernels .. "/SPK/msl_surf_rover_loc.bsp", --USE THIS ONE WHEN WE HAVE THE DATA!!! FIX
-
-
-
-    kernels .. "/SPK/de418.bsp",    
-    kernels .. "/SPK/de424s.bsp",
-    kernels .. "/SPK/de425s.bsp",
-
-    kernels .. "/SPK/msl_atls_gc120806_v3.bsp",
-    kernels .. "/SPK/msl_atls_ops120808_v1.bsp",
-    kernels .. "/SPK/msl_cruise.bsp",
-    kernels .. "/SPK/msl_cruise.bsp.history",
-    kernels .. "/SPK/msl_cruise_merged_120808.bsp",
-    kernels .. "/SPK/msl_cruise_v1.bsp",
-    kernels .. "/SPK/msl_edl_v01.bsp", 
-    kernels .. "/SPK/msl_ls_gc120806_iau2000_v3.bsp",
-    kernels .. "/SPK/msl_spk_cruise_od057_v1-tcm2_eph-edl-landed.bsp",
-    kernels .. "/SPK/msl_still_at_ls_v1.bsp",
-    kernels .. "/SPK/msl_struct_v01.bsp",
-    kernels .. "/SPK/msl_struct_v01.cmt",
-    kernels .. "/SPK/msl_struct_v02.bsp",
-    kernels .. "/SPK/msl_struct_v02.cmt",
-    kernels .. "/SPK/msl_surf_rover_runout.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0000_0089_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0089_0179_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0179_0269_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0269_0359_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0359_0449_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0449_0583_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0583_0707_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0707_0804_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0804_0938_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_0938_1062_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_1062_1159_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_1159_1293_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_1293_1417_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_1417_1514_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_1514_1648_v1.bsp",
-    kernels .. "/SPK/msl_surf_rover_tlm_1648_1772_v1.bsp",
-
-
-    -------- CK --------
-    
-    kernels .. "/CK/msl_cruise_recon_nospin.bc",
-    kernels .. "/CK/msl_cruise_recon_raweng_v1.bc",
-    kernels .. "/CK/msl_cruise_recon_rawrt_v2.bc",
-    kernels .. "/CK/msl_edl_v01.bc",
-    kernels .. "/CK/msl_hga_zero_v3.bc",
-    kernels .. "/CK/msl_ra_straight_v1.bc",
-    kernels .. "/CK/msl_ra_toolsref_v1.bc",
-    kernels .. "/CK/msl_rover2cacs_v1.bc",
-    kernels .. "/CK/msl_rsm_calpose_v2.bc",
-    kernels .. "/CK/msl_still_at_ls_v1.bc",
-    --HGA Antenna
-    kernels .. "/CK/msl_surf_hga_tlm.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0000_0089_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0089_0179_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0179_0269_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0269_0359_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0359_0449_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0449_0583_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0583_0707_v2.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0707_0804_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0804_0938_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_0938_1062_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_1062_1159_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_1159_1293_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_1293_1417_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_1417_1514_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_1514_1648_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_1648_1772_v1.bc",
-    kernels .. "/CK/msl_surf_hga_tlm_spanned.bc",
-    ----Robotic Arm
-    kernels .. "/CK/msl_surf_ra_tlmenc.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0000_0089_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0089_0179_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0179_0269_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0269_0359_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0359_0449_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0449_0583_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0583_0707_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0707_0804_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0804_0938_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_0938_1062_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_1062_1159_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_1159_1293_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_1293_1417_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_1417_1514_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_1514_1648_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_1648_1772_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmenc_spanned.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0000_0089_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0089_0179_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0179_0269_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0269_0359_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0359_0449_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0449_0583_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0583_0707_v2.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0707_0804_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0804_0938_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_0938_1062_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_1062_1159_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_1159_1293_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_1293_1417_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_1417_1514_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_1514_1648_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_1648_1772_v1.bc",
-    kernels .. "/CK/msl_surf_ra_tlmres_spanned.bc",
-    ----Rover
-    --kernels .. "/CK/msl_surf_rover_runout.bc",
     kernels .. "/CK/msl_surf_rover_tlm.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0000_0089_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0089_0179_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0179_0269_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0269_0359_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0359_0449_v1v.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0449_0583_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0583_0707_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0707_0804_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0804_0938_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_0938_1062_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_1062_1159_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_1159_1293_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_1293_1417_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_1417_1514_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_1514_1648_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_1648_1772_v1.bc",
-    --kernels .. "/CK/msl_surf_rover_tlm_spanned.bc",
-    ----MastCam
+    kernels .. "/CK/msl_ra_toolsref_v1.bc",
+    kernels .. "/CK/msl_cruise_recon_rawrt_v2.bc",
+    kernels .. "/CK/msl_cruise_recon_raweng_v1.bc",
+    kernels .. "/CK/msl_surf_hga_tlm.bc",
+    kernels .. "/CK/msl_surf_ra_tlmenc.bc",
+    kernels .. "/CK/msl_surf_ra_tlmres.bc",
     kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0000_0089_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0089_0179_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0179_0269_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0269_0359_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0359_0449_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0449_0583_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0583_0707_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0707_0804_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0804_0938_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_0938_1062_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_1062_1159_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_1159_1293_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_1293_1417_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_1417_1514_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_1514_1648_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_1648_1772_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmenc_spanned.bc",
     kernels .. "/CK/msl_surf_rsm_tlmres.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0000_0089_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0089_0179_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0179_0269_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0269_0359_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0359_0449_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0449_0583_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0583_0707_v2.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0804_0938_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_0938_1062_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_1062_1159_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_1159_1293_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_1293_1417_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_1417_1514_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_1514_1648_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_1648_1772_v1.bc",
-    kernels .. "/CK/msl_surf_rsm_tlmres_spanned.bc",   
-
-
-  
-    -------- FK --------
-
+    kernels .. "/SPK/msl_struct_v02.bsp",
+    kernels .. "/SPK/de425s.bsp",
+    kernels .. "/SPK/mar085s.bsp",
+    kernels .. "/SPK/msl_cruise_v1.bsp",
+    kernels .. "/SPK/msl_edl_v01.bsp",
+    kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
+    kernels .. "/SPK/msl_surf_rover_loc.bsp",   --boris new file
     kernels .. "/FK/msl.tf",
-
-    -- FIX: remove unnecessary files
-    kernels .. "/FK/msl_V01.tf",
-    kernels .. "/FK/msl_V02.tf",
-    kernels .. "/FK/msl_V03.tf",
-    kernels .. "/FK/msl_V05.tf",
-    kernels .. "/FK/msl_V06.tf",
-    kernels .. "/FK/msl_V07.tf",
-    -- Master, Reference frame is defined relatively to antoher frame
-    -- Defenition of surface, rover, instruments
-    kernels .. "/FK/msl_v08.tf",
-
-    -- surface msl_topo sites along the path relative to the landing site and location of the rover relative to these sites
-    kernels .. "/FK/msl_tp_gc120806_iau2000_v3.tf",
-    kernels .. "/FK/msl_tp_ops120808_iau2000_v1.tf",
-
-    -------- IK --------
-
-    -- Instrument kernels provide: geometric parameters, field of view size, shape and orientation for the named instruments
-    -- Includes cameras, a few other rover-mounted instruments, all cruise stage, decent stage and rover mounted antenna  
-    -- Temporary IK for MSL instruments 
-    kernels .. "/IK/msl_aux_v00.ti",
-    
-    -- CHEMCAM 
-    kernels .. "/IK/msl_chrmi_20120731_c03.ti",
-    
-    -- HAZCAM BACK: left A, left B, right A, right B
-    kernels .. "/IK/msl_hbla_20120731_c03.ti",
-    kernels .. "/IK/msl_hblb_20120731_c03.ti",
-    kernels .. "/IK/msl_hbra_20120731_c03.ti",
-    kernels .. "/IK/msl_hbrb_20120731_c03.ti",
-
-    -- HAZCAM FRONT: left A, left B, right A, right B
-    kernels .. "/IK/msl_hfla_20120731_c03.ti",
-    kernels .. "/IK/msl_hflb_20120731_c03.ti",
-    kernels .. "/IK/msl_hfra_20120731_c03.ti",
-    kernels .. "/IK/msl_hfrb_20120731_c03.ti",
-    
-    -- Mahli and Mardi cameras
-    kernels .. "/IK/msl_mahli_20120731_c02.ti",
-    kernels .. "/IK/msl_mardi_20120731_c02.ti",
-    
-    -- MASTCAM front and back
-    kernels .. "/IK/msl_ml_20120731_c03.ti",
-    kernels .. "/IK/msl_mr_20120731_c03.ti",
-
-    -- NAVCAM: left A, left B, right A, right B
-    kernels .. "/IK/msl_nla_20120731_c04.ti",
-    kernels .. "/IK/msl_nlb_20120731_c04.ti",
-    kernels .. "/IK/msl_nlb_20130530_c05.ti",
-    kernels .. "/IK/msl_nra_20120731_c04.ti",
-    kernels .. "/IK/msl_nrb_20120731_c04.ti",
-    kernels .. "/IK/msl_nrb_20130530_c05.ti",
-    
-    -- Antennas
-    kernels .. "/IK/msl_struct_v01.ti",
-
-
-
-    -- LSK -- 
     kernels .. "/LSK/msl.tls",
-    kernels .. "/LSK/naif0009.tls",
-    kernels .. "/LSK/naif0010.tls",
-    kernels .. "/LSK/naif0011.tls",
-    kernels .. "/LSK/naif0012.tls",
-
-    -------- PCK -------- 
-    kernels .. "/PCK/pck00008.tpc"
-
-
-
-
-
-
+    kernels .. "/PCK/pck00008.tpc",
 
 
 }
@@ -310,6 +38,285 @@ local CuriosityKernels = {
 
 asset.export("kernels", kernels)
 asset.export("CuriosityKernels", CuriosityKernels)
+
+
+    ----KERNEL COPY----
+    ----correct spot on landing site with motion, but diffing from the path eventually
+    --------- SCLK --------
+    --kernels .. "/SCLK/msl.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00002.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00007.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00009.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00010.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00011.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00012.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00013.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00014.tsc",
+    ----kernels .. "/SCLK/MSL_76_SCLKSCET.00015.tsc",
+    --kernels .. "/SCLK/msl_lmst_gc120806_v3.tsc",
+    --kernels .. "/SCLK/msl_lmst_ops120808_v1.tsc",
+
+    ---------- SPK --------
+    ---- an ever-growing SPK file containing the position of the rover relative to the sites
+    ---- along the path and position of the sites relative to the landing site
+
+    --kernels .. "/SPK/mar085s.bsp",    --Needed for moving along the path
+    --kernels .. "/SPK/msl_ls_ops120808_iau2000_v1.bsp",
+    ----kernels .. "/SPK/msl_surf_rover_tlm.bsp",
+    --kernels .. "/SPK/msl_surf_rover_loc.bsp",
+
+
+
+    ----kernels .. "/SPK/de418.bsp",    
+    ----kernels .. "/SPK/de424s.bsp",
+    ----kernels .. "/SPK/de425s.bsp",
+
+    ----kernels .. "/SPK/msl_atls_gc120806_v3.bsp",
+    ----kernels .. "/SPK/msl_atls_ops120808_v1.bsp",
+    ----kernels .. "/SPK/msl_cruise.bsp",
+    ----kernels .. "/SPK/msl_cruise.bsp.history",
+    ----kernels .. "/SPK/msl_cruise_merged_120808.bsp",
+    ----kernels .. "/SPK/msl_cruise_v1.bsp",
+    ----kernels .. "/SPK/msl_edl_v01.bsp", 
+    ----kernels .. "/SPK/msl_ls_gc120806_iau2000_v3.bsp",   --removing this puts rover on landing site
+
+    --kernels .. "/SPK/msl_spk_cruise_od057_v1-tcm2_eph-edl-landed.bsp",
+    --kernels .. "/SPK/msl_still_at_ls_v1.bsp",
+
+    ----kernels .. "/SPK/msl_struct_v01.bsp",
+    ----kernels .. "/SPK/msl_struct_v01.cmt",
+    ----kernels .. "/SPK/msl_struct_v02.bsp",
+    ----kernels .. "/SPK/msl_struct_v02.cmt",
+
+    --kernels .. "/SPK/msl_surf_rover_runout.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0000_0089_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0089_0179_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0179_0269_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0269_0359_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0359_0449_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0449_0583_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0583_0707_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0707_0804_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0804_0938_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_0938_1062_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_1062_1159_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_1159_1293_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_1293_1417_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_1417_1514_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_1514_1648_v1.bsp",
+    --kernels .. "/SPK/msl_surf_rover_tlm_1648_1772_v1.bsp",
+
+
+    -------- CK --------
+
+    ------MastCam
+    ----kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
+    ----kernels .. "/CK/msl_surf_rsm_tlmenc_spanned.bc",
+    ----kernels .. "/CK/msl_surf_rsm_tlmres.bc",
+    ----kernels .. "/CK/msl_surf_rsm_tlmres_spanned.bc",   
+    
+    ----kernels .. "/CK/msl_cruise_recon_nospin.bc",
+    ----kernels .. "/CK/msl_cruise_recon_raweng_v1.bc", --Förbättrade i sidled ensam
+    ----kernels .. "/CK/msl_cruise_recon_rawrt_v2.bc",
+    ----kernels .. "/CK/msl_edl_v01.bc",
+    ----kernels .. "/CK/msl_hga_zero_v3.bc",
+    ----kernels .. "/CK/msl_ra_straight_v1.bc",
+    ----kernels .. "/CK/msl_ra_toolsref_v1.bc",
+    ----kernels .. "/CK/msl_rover2cacs_v1.bc",
+    ----kernels .. "/CK/msl_rsm_calpose_v2.bc",
+
+    --kernels .. "/CK/msl_still_at_ls_v1.bc",
+    ----HGA Antenna
+    --kernels .. "/CK/msl_surf_hga_tlm.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0000_0089_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0089_0179_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0179_0269_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0269_0359_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0359_0449_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0449_0583_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0583_0707_v2.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0707_0804_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0804_0938_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_0938_1062_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_1062_1159_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_1159_1293_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_1293_1417_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_1417_1514_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_1514_1648_v1.bc",
+    ---- kernels .. "/CK/msl_surf_hga_tlm_1648_1772_v1.bc",
+    --kernels .. "/CK/msl_surf_hga_tlm_spanned.bc",
+    ------Robotic Arm
+    --kernels .. "/CK/msl_surf_ra_tlmenc.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0000_0089_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0089_0179_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0179_0269_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0269_0359_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0359_0449_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0449_0583_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0583_0707_v2.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0707_0804_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0804_0938_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_0938_1062_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_1062_1159_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_1159_1293_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_1293_1417_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_1417_1514_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_1514_1648_v1.bc",
+    ----kernels .. "/CK/msl_surf_ra_tlmenc_1648_1772_v1.bc",
+    --kernels .. "/CK/msl_surf_ra_tlmenc_spanned.bc",
+    --kernels .. "/CK/msl_surf_ra_tlmres.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0000_0089_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0089_0179_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0179_0269_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0269_0359_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0359_0449_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0449_0583_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0583_0707_v2.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0707_0804_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0804_0938_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_0938_1062_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_1062_1159_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_1159_1293_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_1293_1417_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_1417_1514_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_1514_1648_v1.bc",
+    ---- kernels .. "/CK/msl_surf_ra_tlmres_1648_1772_v1.bc",
+    --kernels .. "/CK/msl_surf_ra_tlmres_spanned.bc",
+    ------Rover
+    ----kernels .. "/CK/msl_surf_rover_runout.bc",
+    --kernels .. "/CK/msl_surf_rover_tlm.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0000_0089_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0089_0179_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0179_0269_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0269_0359_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0359_0449_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0449_0583_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0583_0707_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0707_0804_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0804_0938_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_0938_1062_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_1062_1159_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_1159_1293_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_1293_1417_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_1417_1514_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_1514_1648_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_1648_1772_v1.bc",
+    ----kernels .. "/CK/msl_surf_rover_tlm_spanned.bc",
+    ------MastCam
+    --kernels .. "/CK/msl_surf_rsm_tlmenc.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0000_0089_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0089_0179_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0179_0269_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0269_0359_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0359_0449_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0449_0583_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0583_0707_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0707_0804_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0804_0938_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_0938_1062_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_1062_1159_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_1159_1293_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_1293_1417_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_1417_1514_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_1514_1648_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmenc_1648_1772_v1.bc",
+    --kernels .. "/CK/msl_surf_rsm_tlmenc_spanned.bc",
+    --kernels .. "/CK/msl_surf_rsm_tlmres.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0000_0089_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0089_0179_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0179_0269_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0269_0359_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0359_0449_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0449_0583_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0583_0707_v2.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0804_0938_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_0938_1062_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_1062_1159_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_1159_1293_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_1293_1417_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_1417_1514_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_1514_1648_v1.bc",
+    ---- kernels .. "/CK/msl_surf_rsm_tlmres_1648_1772_v1.bc",
+    --kernels .. "/CK/msl_surf_rsm_tlmres_spanned.bc",   
+
+
+  
+    -------- FK --------
+
+    ---- kernels .. "/FK/msl.tf",
+
+    ---- FIX: remove unnecessary files
+    ----kernels .. "/FK/msl_V01.tf",
+    ----kernels .. "/FK/msl_V02.tf",
+    ----kernels .. "/FK/msl_V03.tf",
+    ----kernels .. "/FK/msl_V05.tf",
+    ----kernels .. "/FK/msl_V06.tf",
+    ----kernels .. "/FK/msl_V07.tf",
+    ---- Master, Reference frame is defined relatively to antoher frame
+    ---- Defenition of surface, rover, instruments
+    --kernels .. "/FK/msl_v08.tf",
+
+    ---- surface msl_topo sites along the path relative to the landing site and location of the rover relative to these sites
+    ---- kernels .. "/FK/msl_tp_gc120806_iau2000_v3.tf",
+    ---- kernels .. "/FK/msl_tp_ops120808_iau2000_v1.tf",
+
+    -------- IK --------
+
+    ---- Instrument kernels provide: geometric parameters, field of view size, shape and orientation for the named instruments
+    ---- Includes cameras, a few other rover-mounted instruments, all cruise stage, decent stage and rover mounted antenna  
+    ---- Temporary IK for MSL instruments 
+    --kernels .. "/IK/msl_aux_v00.ti",
+    
+    ---- CHEMCAM 
+    --kernels .. "/IK/msl_chrmi_20120731_c03.ti",
+    
+    ---- HAZCAM BACK: left A, left B, right A, right B
+    --kernels .. "/IK/msl_hbla_20120731_c03.ti",
+    --kernels .. "/IK/msl_hblb_20120731_c03.ti",
+    --kernels .. "/IK/msl_hbra_20120731_c03.ti",
+    --kernels .. "/IK/msl_hbrb_20120731_c03.ti",
+
+    ---- HAZCAM FRONT: left A, left B, right A, right B
+    --kernels .. "/IK/msl_hfla_20120731_c03.ti",
+    --kernels .. "/IK/msl_hflb_20120731_c03.ti",
+    --kernels .. "/IK/msl_hfra_20120731_c03.ti",
+    --kernels .. "/IK/msl_hfrb_20120731_c03.ti",
+    
+    ---- Mahli and Mardi cameras
+    --kernels .. "/IK/msl_mahli_20120731_c02.ti",
+    --kernels .. "/IK/msl_mardi_20120731_c02.ti",
+    
+    ---- MASTCAM front and back
+    --kernels .. "/IK/msl_ml_20120731_c03.ti",
+    --kernels .. "/IK/msl_mr_20120731_c03.ti",
+
+    ---- NAVCAM: left A, left B, right A, right B
+    --kernels .. "/IK/msl_nla_20120731_c04.ti",
+    --kernels .. "/IK/msl_nlb_20120731_c04.ti",
+    --kernels .. "/IK/msl_nlb_20130530_c05.ti",
+    --kernels .. "/IK/msl_nra_20120731_c04.ti",
+    --kernels .. "/IK/msl_nrb_20120731_c04.ti",
+    --kernels .. "/IK/msl_nrb_20130530_c05.ti",
+    
+    ---- Antennas
+    --kernels .. "/IK/msl_struct_v01.ti",
+
+
+
+    ---- LSK -- 
+    --kernels .. "/LSK/msl.tls",
+    --kernels .. "/LSK/naif0009.tls",
+    --kernels .. "/LSK/naif0010.tls",
+    --kernels .. "/LSK/naif0011.tls",
+    --kernels .. "/LSK/naif0012.tls",
+
+    -------- PCK -------- 
+    --kernels .. "/PCK/pck00008.tpc"
+
+
+
+
+
 
 
 

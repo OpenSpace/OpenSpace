@@ -365,17 +365,17 @@ glm::dvec3 SpacecraftProjection::position(const Time& time) const
 
     glm::dvec3 scaleFactor = glm::dvec3((sphereRadius / equatRadius), (sphereRadius / equatRadius), (sphereRadius / polarRadius));
 
-    glm::dvec3 newPosition = spacecraftPosition * scaleFactor;
+    glm::dvec3 newPosition = spacecraftPosition; // * scaleFactor;
 
-    double rad;
-    double lon;
-    double lat; 
+    //double rad;
+    //double lon;
+    //double lat; 
 
     newPosition = SpiceManager::ref().fromCartesianToLatitudinal(newPosition);
 
     //static height correction
     //newPosition.x = newPosition.x + 428.6;
-    newPosition.x = newPosition.x + 450.6;
+    newPosition.x = newPosition.x + 556.0;
 
     newPosition = SpiceManager::ref().fromLatitudinalToCartesian(newPosition);
 

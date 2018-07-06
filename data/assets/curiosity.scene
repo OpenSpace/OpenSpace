@@ -25,12 +25,12 @@ asset.onInitialize(function ()
     --selfie
     --openspace.time.setTime("2018-01-23T12:28:28")
     --Landing
-    --openspace.time.setTime("2012-08-06T01:33:28")
+    openspace.time.setTime("2012-08-06T01:33:28")
     --openspace.time.setTime("2013-07-05T03:04:09")
     --moving
     --openspace.time.setTime("2012-08-28T18:20:09")
     --moving longer forward in time
-    openspace.time.setTime("2013-08-22T05:44:00")
+    --openspace.time.setTime("2013-08-22T05:44:00")
 
     openspace.setDefaultGuiSorting()
 
