@@ -243,7 +243,8 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     ghoul::Dictionary inputMetadata = reader.readMetaData();
     ghoul::Dictionary outputMetadata;
 
-    std::string time = reader.time();
+    // std::string time = reader.time();
+    std::string time = "2000-07-14T10:00:58.848";
 
     // Do not include time offset in time string
     if (time.back() == 'Z') {
@@ -255,14 +256,18 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     outputMetadata.setValue(KeyLowerDomainBound, _lowerDomainBound);
     outputMetadata.setValue(KeyUpperDomainBound, _upperDomainBound);
 
+    float tempMin = 0.0f;
+    float tempMax = 1.0f;
     outputMetadata.setValue<float>(
         KeyMinValue,
-        static_cast<float>(volumeMinValue)
+        tempMin
+        // static_cast<float>(volumeMinValue)
         // static_cast<float>(reader.minValue(_variable))
     );
     outputMetadata.setValue<float>(
         KeyMaxValue,
-        static_cast<float>(volumeMaxValue)
+        tempMax
+        // static_cast<float>(volumeMaxValue)
         // static_cast<float>(reader.maxValue(_variable))
     );
     outputMetadata.setValue<std::string>(
