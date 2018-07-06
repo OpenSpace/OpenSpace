@@ -226,7 +226,7 @@ void IswaCygnet::update(const UpdateData&) {
 
 void IswaCygnet::enabled(bool enabled) {
     _enabled = enabled;
-};
+}
 
 void IswaCygnet::registerProperties() {}
 

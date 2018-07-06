@@ -557,8 +557,7 @@ int time_advancedTime(lua_State* L) {
     lua_pop(L, 2);
 
     if (usesISO) {
-        Time t(j2000Seconds + dt);
-        ghoul::lua::push(L, t.ISO8601());
+        ghoul::lua::push(L, Time(j2000Seconds + dt).ISO8601());
     }
     else {
         ghoul::lua::push(L, j2000Seconds + dt);

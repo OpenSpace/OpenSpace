@@ -28,6 +28,7 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -37,20 +38,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <fstream>
-
- #ifdef __clang__
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif // __GNUC__
-
-#include <modules/iswa/ext/json.h>
-
-#ifdef __clang__
-
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif // __GNUC__
 
 namespace {
     using json = nlohmann::json;

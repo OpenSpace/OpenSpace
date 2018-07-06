@@ -40,8 +40,6 @@
 
 #include <numeric>
 
-#include <imgui_internal.h>
-
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
 
@@ -302,7 +300,7 @@ void GuiSpaceTimeComponent::render() {
         }
 
         _deltaTime = static_cast<float>(
-            convertTime(dt, TimeUnit::Second, static_cast<TimeUnit>(_deltaTimeUnit))
+            convertTime(dt, TimeUnit::Second, _deltaTimeUnit)
         );
 
         bool valueChanged = ImGui::InputFloat(
@@ -328,7 +326,7 @@ void GuiSpaceTimeComponent::render() {
 
             double newDeltaTime = convertTime(
                 _deltaTime,
-                static_cast<TimeUnit>(_deltaTimeUnit),
+                _deltaTimeUnit,
                 TimeUnit::Second
             );
 
@@ -393,7 +391,7 @@ void GuiSpaceTimeComponent::render() {
 
         const double newDeltaTime = convertTime(
             _deltaTime + _slidingDelta,
-            static_cast<TimeUnit>(_deltaTimeUnit),
+            _deltaTimeUnit,
             TimeUnit::Second
         );
 

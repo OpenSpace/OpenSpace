@@ -364,7 +364,7 @@ public:
      * succeeds iff \p body is the name of a valid body, \p value is a value associated
      * with the body, and the value consists of three \c double values. If all conditions
      * are true, the value is retrieved using the method \c bodvrd_c and stored in \p v.
-     * 
+     *
      * \param body The name of the body whose value should be retrieved or the NAIF ID of
      *        this body
      * \param value The value that should be retrieved, this value is case-sensitive

@@ -78,7 +78,6 @@ namespace {
         "${MODULES}/multiresvolume/shaders/helper.glsl";
     constexpr const char* GlslHeaderPath =
         "${MODULES}/multiresvolume/shaders/header.glsl";
-    bool registeredGlslHelpers = false;
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
@@ -163,29 +162,19 @@ namespace openspace {
 
 RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)
-    , _transferFunction(nullptr)
-    , _timestep(0)
-    , _atlasMapSize(0)
-    , _tfBrickSelector(nullptr)
-    , _simpleTfBrickSelector(nullptr)
-    , _localTfBrickSelector(nullptr)
-    , _errorHistogramManager(nullptr)
-    , _histogramManager(nullptr)
-    , _localErrorHistogramManager(nullptr)
-    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
+    , _useGlobalTime(UseGlobalTimeInfo, false)
+    , _loop(LoopInfo, false)
     , _currentTime(CurrentTimeInfo, 0, 0, 0)
     , _memoryBudget(MemoryBudgetInfo, 0, 0, 0)
     , _streamingBudget(StreamingBudgetInfo, 0, 0, 0)
-    , _useGlobalTime(UseGlobalTimeInfo, false)
-    , _loop(LoopInfo, false)
+    , _stepSizeCoefficient(StepSizeCoefficientInfo, 1.f, 0.01f, 10.f)
     , _selectorName(SelectorNameInfo)
-    , _gatheringStats(false)
     , _statsToFile(StatsToFileInfo, false)
     , _statsToFileName(StatsToFileNameInfo)
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f), glm::vec3(6.28f))
+    , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     std::string name;
 

@@ -157,9 +157,10 @@ void TorrentClient::pollAlerts() {
 #endif // SYNC_USE_LIBTORRENT
 }
 
-TorrentClient::TorrentId TorrentClient::addTorrentFile(const std::string& torrentFile,
-                                                       const std::string& destination,
-                                                       TorrentProgressCallback cb)
+TorrentClient::TorrentId TorrentClient::addTorrentFile(
+                                        [[ maybe_unused ]] const std::string& torrentFile,
+                                          [[maybe_unused]] const std::string& destination,
+                                              [[maybe_unused]] TorrentProgressCallback cb)
 {
 #ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
@@ -189,9 +190,10 @@ TorrentClient::TorrentId TorrentClient::addTorrentFile(const std::string& torren
 #endif // SYNC_USE_LIBTORRENT
 }
 
-TorrentClient::TorrentId TorrentClient::addMagnetLink(const std::string& magnetLink,
-                                                      const std::string& destination,
-                                                      TorrentProgressCallback cb)
+TorrentClient::TorrentId TorrentClient::addMagnetLink(
+                                           [[maybe_unused]] const std::string& magnetLink,
+                                          [[maybe_unused]] const std::string& destination,
+                                              [[maybe_unused]] TorrentProgressCallback cb)
 {
 #ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
@@ -221,7 +223,7 @@ TorrentClient::TorrentId TorrentClient::addMagnetLink(const std::string& magnetL
 #endif // SYNC_USE_LIBTORRENT
 }
 
-void TorrentClient::removeTorrent(TorrentId id) {
+void TorrentClient::removeTorrent([[maybe_unused]] TorrentId id) {
 #ifdef SYNC_USE_LIBTORRENT
     std::lock_guard<std::mutex> guard(_mutex);
 
@@ -237,7 +239,7 @@ void TorrentClient::removeTorrent(TorrentId id) {
 #endif // SYNC_USE_LIBTORRENT
 }
 
-void TorrentClient::notify(TorrentId id) {
+void TorrentClient::notify([[maybe_unused]] TorrentId id) {
 #ifdef SYNC_USE_LIBTORRENT
     TorrentProgressCallback callback;
     TorrentProgress progress;

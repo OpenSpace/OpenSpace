@@ -119,7 +119,7 @@ protected:
     SpiceManager::AberrationCorrection _aberration;
     std::vector<std::string> _potentialTargets;
     float _fovy = -1.f;
-    float _aspectRatio = -1.f;;
+    float _aspectRatio = -1.f;
 
     GLuint _fboID = 0;
     GLuint _depthFboID = 0;

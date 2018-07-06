@@ -307,7 +307,7 @@ void RenderableFieldlines::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(LinePoint),
-            reinterpret_cast<void*>(0)
+            nullptr
         );
 
         GLuint colorLocation = 1;

@@ -48,8 +48,7 @@ glm::dmat4x2 fromLuaConversion(lua_State* state, bool& success) {
                 return glm::dmat4x2(0);
             }
             else {
-                result[i][j]
-                    = static_cast<glm::dmat4x2::value_type>(lua_tonumber(state, -1));
+                result[i][j] = lua_tonumber(state, -1);
                 lua_pop(state, 1);
                 ++number;
             }

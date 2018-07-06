@@ -24,10 +24,10 @@
 
 #include <modules/server/include/topics/luascripttopic.h>
 
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <ext/json/json.hpp>
 
 namespace {
     constexpr const char* ScriptKey = "script";

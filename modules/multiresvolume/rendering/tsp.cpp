@@ -137,10 +137,10 @@ bool TSP::readHeader() {
 
     paddedBrickDim_ = _header.xBrickDim_ + 2 * paddingWidth_;
     // TODO support dimensions of different size
-    numOTLevels_ = static_cast<unsigned int>(log((int)_header.xNumBricks_) / log(2) + 1);
+    numOTLevels_ = static_cast<unsigned int>(log(static_cast<int>(_header.xNumBricks_)) / log(2) + 1);
     numOTNodes_ = static_cast<unsigned int>((pow(8, numOTLevels_) - 1) / 7);
-    numBSTLevels_ = static_cast<unsigned int>(log((int)_header.numTimesteps_) / log(2) + 1);
-    numBSTNodes_ = static_cast<unsigned int>(_header.numTimesteps_ * 2 - 1);
+    numBSTLevels_ = static_cast<unsigned int>(log(static_cast<int>(_header.numTimesteps_)) / log(2) + 1);
+    numBSTNodes_ = _header.numTimesteps_ * 2 - 1;
     numTotalNodes_ = numOTNodes_ * numBSTNodes_;
 
     LDEBUG(fmt::format("Num OT levels: {}", numOTLevels_));
@@ -160,10 +160,10 @@ bool TSP::construct() {
     LDEBUG("Constructing TSP tree");
 
     // Loop over the OTs (one per BST node)
-    for (unsigned int OT = 0; OT<numBSTNodes_; ++OT) {
+    for (unsigned int OT = 0; OT < numBSTNodes_; ++OT) {
 
         // Start at the root of each OT
-        unsigned int OTNode = OT*numOTNodes_;
+        unsigned int OTNode = OT * numOTNodes_;
 
         // Calculate BST level (first level is level 0)
         unsigned int BSTLevel = static_cast<unsigned int>(log(OT + 1) / log(2));
@@ -177,7 +177,7 @@ bool TSP::construct() {
             for (unsigned int i = 0; i<OTNodesInLevel; ++i) {
 
                 // Brick index
-                data_[OTNode*NUM_DATA + BRICK_INDEX] = (int)OTNode;
+                data_[OTNode*NUM_DATA + BRICK_INDEX] = static_cast<int>(OTNode);
 
                 // Error metrics
                 //int localOTNode = (OTNode - OT*numOTNodes_);

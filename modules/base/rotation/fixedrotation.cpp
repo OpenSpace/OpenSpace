@@ -100,7 +100,8 @@ namespace {
         "stay fixed to the current position of that object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo =
+    {
         "xAxis-InvertObject",
         "xAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -108,7 +109,8 @@ namespace {
         "referenced object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo =
+    {
         "yAxis-InvertObject",
         "yAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -116,7 +118,8 @@ namespace {
         "referenced object."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo =
+    {
         "zAxis-InvertObject",
         "zAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
@@ -145,7 +148,9 @@ namespace {
         "rotation."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo XAxisOrthogonalVectorInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo
+    XAxisOrthogonalVectorInfo =
+    {
         "xAxis-Orthogonal",
         "xAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -153,7 +158,9 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo YAxisOrthogonalVectorInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo
+    YAxisOrthogonalVectorInfo =
+    {
         "yAxis-Orthogonal",
         "yAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
@@ -161,7 +168,9 @@ namespace {
         "construct an orthogonal vector instead."
     };
 
-    constexpr const openspace::properties::Property::PropertyInfo ZAxisOrthogonalVectorInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo
+    ZAxisOrthogonalVectorInfo =
+    {
         "zAxis-Orthogonal",
         "zAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "

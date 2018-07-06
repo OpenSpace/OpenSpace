@@ -106,7 +106,8 @@ documentation::Documentation DashboardItemPropertyValue::Documentation() {
     };
 }
 
-DashboardItemPropertyValue::DashboardItemPropertyValue(const ghoul::Dictionary& dictionary)
+DashboardItemPropertyValue::DashboardItemPropertyValue(
+                                                      const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)

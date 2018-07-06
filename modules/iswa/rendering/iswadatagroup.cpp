@@ -24,7 +24,6 @@
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 
-#include <modules/iswa/ext/json.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
@@ -32,6 +31,7 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
+#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

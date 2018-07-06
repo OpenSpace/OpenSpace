@@ -45,7 +45,7 @@ namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
-}
+} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -102,7 +102,7 @@ private:
 
     // Stats timers
     std::string _statsFileName;
-    bool _gatheringStats;
+    bool _gatheringStats = false;
     std::chrono::system_clock::time_point _frameStart;
     std::chrono::duration<double> _selectionDuration;
     std::chrono::duration<double> _uploadDuration;
@@ -110,7 +110,7 @@ private:
     unsigned int _nUsedBricks;
     unsigned int _nStreamedBricks;
 
-    int _timestep;
+    int _timestep = 0;
 
     std::string _filename;
 
@@ -127,21 +127,21 @@ private:
 
     std::shared_ptr<TSP> _tsp;
     std::vector<int> _brickIndices;
-    int _atlasMapSize;
+    int _atlasMapSize = 0;
 
     std::shared_ptr<AtlasManager> _atlasManager;
 
     std::unique_ptr<MultiresVolumeRaycaster> _raycaster;
 
-    TfBrickSelector* _tfBrickSelector;
-    SimpleTfBrickSelector* _simpleTfBrickSelector;
-    LocalTfBrickSelector* _localTfBrickSelector;
+    TfBrickSelector* _tfBrickSelector = nullptr;
+    SimpleTfBrickSelector* _simpleTfBrickSelector = nullptr;
+    LocalTfBrickSelector* _localTfBrickSelector = nullptr;
 
     Selector _selector;
 
-    HistogramManager* _histogramManager;
-    ErrorHistogramManager* _errorHistogramManager;
-    LocalErrorHistogramManager* _localErrorHistogramManager;
+    HistogramManager* _histogramManager = nullptr;
+    ErrorHistogramManager* _errorHistogramManager = nullptr;
+    LocalErrorHistogramManager* _localErrorHistogramManager = nullptr;
 
     float _w;
     PowerScaledCoordinate _pscOffset;

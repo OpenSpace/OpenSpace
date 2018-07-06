@@ -70,7 +70,7 @@ bool TileProvider::initialize() {
 
 bool TileProvider::deinitialize() {
     return true;
-};
+}
 
 float TileProvider::noDataValueAsFloat() {
     ghoul_assert(_isInitialized, "TileProvider was not initialized.");

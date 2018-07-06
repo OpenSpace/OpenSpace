@@ -39,7 +39,7 @@ public:
     ~ShenBrickSelector();
     void setSpatialTolerance(float spatialTolerance);
     void setTemporalTolerance(float temporalTolerance);
-    void selectBricks(int timestep, std::vector<int>& bricks);
+    void selectBricks(int timestep, std::vector<int>& bricks) override;
 
 private:
     TSP* _tsp;

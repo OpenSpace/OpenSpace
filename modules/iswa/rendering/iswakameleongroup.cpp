@@ -24,8 +24,8 @@
 
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
-#include <modules/iswa/ext/json.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>

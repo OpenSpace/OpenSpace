@@ -411,7 +411,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         );
         return true;
     }
-    
+
     // Go to the previous '.' character
     if (modifierControl && key == Key::Left) {
         std::string current = _commands.at(_activeCommand);

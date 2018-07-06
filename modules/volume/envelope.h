@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__
 #define __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__
 
+#include <openspace/json.h>
 #include <ghoul/glm.h>
-#include <ext/json/json.hpp>
 
 struct lua_State;
 

@@ -44,9 +44,9 @@ public:
 
     ~TfBrickSelector();
 
-    virtual bool initialize();
+    bool initialize() override;
 
-    void selectBricks(int timestep, std::vector<int>& bricks);
+    void selectBricks(int timestep, std::vector<int>& bricks) override;
     void setMemoryBudget(int memoryBudget);
     void setStreamingBudget(int streamingBudget);
     bool calculateBrickErrors();

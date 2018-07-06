@@ -22,16 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/servermodule.h>
 #include <modules/server/include/topics/topic.h>
-#include <ext/json/json.hpp>
+
+#include <modules/server/servermodule.h>
+#include <openspace/json.h>
 
 namespace openspace {
 
 void Topic::initialize(Connection* connection, size_t topicId) {
     _connection = connection;
     _topicId = topicId;
-};
+}
 
 nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
     // TODO: add message time
@@ -40,7 +41,7 @@ nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
         { "payload", payload }
     };
     return j;
-};
+}
 
 nlohmann::json Topic::wrappedError(std::string message, int code) {
     nlohmann::json j = {
@@ -50,6 +51,6 @@ nlohmann::json Topic::wrappedError(std::string message, int code) {
         { "code", code }
     };
     return j;
-};
+}
 
 } // namespace openspace

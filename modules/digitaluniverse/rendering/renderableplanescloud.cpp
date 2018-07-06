@@ -786,11 +786,11 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 invMVPParts = glm::inverse(modelMatrix) *
                                    glm::inverse(data.camera.combinedViewMatrix()) *
                                    glm::inverse(glm::dmat4(projectionMatrix));
-    const glm::dvec3 orthoRight = glm::dvec3(
-        glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0)))
+    const glm::dvec3 orthoRight = glm::normalize(
+        glm::dvec3(invMVPParts * glm::dvec4(1.0, 0.0, 0.0, 0.0))
     );
-    const glm::dvec3 orthoUp = glm::dvec3(
-        glm::normalize(glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0)))
+    const glm::dvec3 orthoUp = glm::normalize(
+        glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
     );
 
     if (_hasSpeckFile) {

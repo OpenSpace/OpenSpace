@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/dashboard/dashboardglobelocation.h>
+#include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
@@ -111,7 +111,8 @@ documentation::Documentation DashboardItemGlobeLocation::Documentation() {
     };
 }
 
-DashboardItemGlobeLocation::DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary)
+DashboardItemGlobeLocation::DashboardItemGlobeLocation(
+                                                      const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
     , _fontName(FontNameInfo, KeyFontMono)
     , _fontSize(FontSizeInfo, DefaultFontSize, 6.f, 144.f, 1.f)

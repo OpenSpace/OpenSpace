@@ -35,7 +35,7 @@
 #endif // __clang__
 
 #include <imgui.h>
-
+#include <imgui_internal.h>
 
 #ifdef __clang__
 #pragma clang diagnostic pop

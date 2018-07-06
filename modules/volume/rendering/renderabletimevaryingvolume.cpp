@@ -321,7 +321,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (int i = 0; i < t.rawVolume->nCells(); ++i) {
+        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             t.histogram->add(data[i]);
         }
 

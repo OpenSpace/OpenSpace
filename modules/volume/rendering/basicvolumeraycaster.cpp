@@ -50,9 +50,9 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
                             std::shared_ptr<openspace::TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
-    : _volumeTexture(volumeTexture)
+    : _clipPlanes(clipPlanes)
+    , _volumeTexture(volumeTexture)
     , _transferFunction(transferFunction)
-    , _clipPlanes(clipPlanes)
     , _boundingBox(glm::vec3(1.0))
 {}
 
