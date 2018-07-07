@@ -140,10 +140,10 @@ void ServerModule::consumeMessages() {
     std::lock_guard<std::mutex> lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();
-        _messageQueue.pop_front();
         if (std::shared_ptr<Connection> c = m.connection.lock()) {
             c->handleMessage(m.messageString);
         }
+        _messageQueue.pop_front();
     }
 }
 
