@@ -29,6 +29,7 @@
 #include <modules/base/translation/statictranslation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -45,6 +46,8 @@ namespace {
     constexpr const char* KeyTransformTranslation = "Transform.Translation";
     constexpr const char* KeyTransformRotation = "Transform.Rotation";
     constexpr const char* KeyTransformScale = "Transform.Scale";
+
+    constexpr const char* KeyTimeFrame = "TimeFrame";
 } // namespace
 
 namespace openspace {
@@ -117,6 +120,24 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG(fmt::format("Successfully created scale for '{}'", result->identifier()));
+    }
+
+    if (dictionary.hasKey(KeyTimeFrame)) {
+        ghoul::Dictionary timeFrameDictionary;
+        dictionary.getValue(KeyTimeFrame, timeFrameDictionary);
+        result->_timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
+        if (result->_timeFrame == nullptr) {
+            LERROR(fmt::format(
+                "Failed to create time frame for SceneGraphNode '{}'",
+                result->identifier()
+            ));
+            return nullptr;
+        }
+        result->addPropertySubOwner(result->_timeFrame.get());
+        LDEBUG(fmt::format(
+            "Successfully created time frame for '{}'",
+            result->identifier()
+        ));
     }
 
     // We initialize the renderable last as it probably has the most dependencies
@@ -240,6 +261,10 @@ void SceneGraphNode::update(const UpdateData& data) {
     if (s != State::Initialized && _state != State::GLInitialized) {
         return;
     }
+    if (!isTimeFrameActive(data.time)) {
+        return;
+    }
+
     if (_transform.translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -351,7 +376,9 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         { _worldPositionCached, _worldRotationCached, _worldScaleCached }
     };
 
-    //_performanceRecord.renderTime = 0;
+    if (!isTimeFrameActive(data.time)) {
+        return;
+    }
 
     bool visible = _renderable &&
                    _renderable->isVisible() &&
@@ -359,26 +386,23 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
                    _renderable->isEnabled() &&
                    _renderable->matchesRenderBinMask(data.renderBinMask);
 
-    if (visible) {
-        if (data.doPerformanceMeasurement) {
-            glFinish();
-            auto start = std::chrono::high_resolution_clock::now();
-
-            _renderable->render(newData, tasks);
-
-            glFinish();
-            auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.renderTime = (end - start).count();
-        }
-        else {
-            _renderable->render(newData, tasks);
-        }
+    if (!visible) {
+        return;
     }
 
-    // evaluate all the children, tail-recursive function(?)
+    if (data.doPerformanceMeasurement) {
+        glFinish();
+        auto start = std::chrono::high_resolution_clock::now();
 
-    //for (SceneGraphNode* child : _children)
-    //    child->render(newData);
+        _renderable->render(newData, tasks);
+
+        glFinish();
+        auto end = std::chrono::high_resolution_clock::now();
+        _performanceRecord.renderTime = (end - start).count();
+    }
+    else {
+        _renderable->render(newData, tasks);
+    }
 }
 
 void SceneGraphNode::setParent(SceneGraphNode& parent) {
@@ -587,6 +611,11 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     else {
         return position();
     }
+}
+
+bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
+    return (!_parent || _parent->isTimeFrameActive(time)) &&
+        (!_timeFrame || _timeFrame->isActive(time));
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {

@@ -53,6 +53,7 @@
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <modules/base/timeframe/timeframeinterval.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -133,6 +134,11 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
 
     fScale->registerClass<LuaScale>("LuaScale");
     fScale->registerClass<StaticScale>("StaticScale");
+
+    auto fTimeFrame = FactoryManager::ref().factory<TimeFrame>();
+    ghoul_assert(fTimeFrame, "Scale factory was not created");
+
+    fTimeFrame->registerClass<TimeFrameInterval>("TimeFrameInterval");
 
     auto fGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fGeometry, "Model geometry factory was not created");
