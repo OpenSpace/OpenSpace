@@ -77,7 +77,7 @@ class Loader : public PropertyOwner, public Operator {
     // void performTasks(std::string& path);
 
   private:
-    properties::StringListProperty _selectedFilePathsMult;
+    properties::StringListProperty _selectedFilePaths;
     properties::TriggerProperty _uploadDataTrigger;
     properties::FloatProperty _volumeConversionProgress;
 

@@ -53,8 +53,6 @@ class PrepareUploadedData extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { selectedFilePaths } = this.props;
-    console.log(`length = ${selectedFilePaths.length}`)
-    console.log(`comparis = ${JSON.stringify(selectedFilePaths) === JSON.stringify(prevProps.selectedFilePaths)}`)
 
     if (selectedFilePaths.length > 0 && JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths)) {
       this.setState({ 
@@ -106,6 +104,8 @@ class PrepareUploadedData extends Component {
   }
 
   getDefaultItemName() {
+
+    // First render base case
     if (this.props.selectedFilePaths[0] === '') {
       return 'item_name';
     }
@@ -141,7 +141,6 @@ class PrepareUploadedData extends Component {
   }
 
   render() {
-    console.log(this.state.activated)
     const { width, height, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
     const { volumeProgress } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;

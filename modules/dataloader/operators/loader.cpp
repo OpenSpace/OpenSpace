@@ -121,7 +121,7 @@ namespace openspace::dataloader {
 
 Loader::Loader() 
     : PropertyOwner({ "Loader" })
-    , _selectedFilePathsMult(SelectedFilesInfo)
+    , _selectedFilePaths(SelectedFilesInfo)
     , _currentVolumesConvertedCount(CurrentVolumesConvertedCountInfo)
     , _currentVolumesToConvertCount(CurrentVolumesToConvertCount)
     , _uploadDataTrigger(UploadDataTriggerInfo)
@@ -131,7 +131,7 @@ Loader::Loader()
         selectData();
     });
 
-    addProperty(_selectedFilePathsMult);
+    addProperty(_selectedFilePaths);
     addProperty(_currentVolumesConvertedCount);
     addProperty(_currentVolumesToConvertCount);
     addProperty(_uploadDataTrigger);
@@ -155,7 +155,7 @@ void Loader::selectData() {
             _volumeConversionProgress = FLT_MIN;
             _currentVolumesConvertedCount = 0;
             _currentVolumesToConvertCount = count;
-            _selectedFilePathsMult = paths;
+            _selectedFilePaths = paths;
             NFD_PathSet_Free(&outPathSet);
         }
         else if ( result == NFD_CANCEL ) {
@@ -341,24 +341,23 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         tfSource.close();
         tfDest.close();
 
+        ghoul::Dictionary taskDictionary;
+        if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary)) {
+            throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
+        }
+
         std::mutex m;
         std::function<void(float)> cb = [&](float progress) {
             std::lock_guard g(m);
             _volumeConversionProgress = progress;
         };
 
-        std::vector<std::string> selectedFiles = _selectedFilePathsMult;
+        std::vector<std::string> selectedFiles = _selectedFilePaths;
         unsigned int counter = 0;
         for (const std::string &file : selectedFiles) {
             _volumeConversionProgress = FLT_MIN;
             auto selectedFile = File(file);
             const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
-
-            // Also loop invariate?
-            ghoul::Dictionary taskDictionary;
-            if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary)) {
-                throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
-            }
 
             const std::string rawVolumeOutput = outputBasePath + ".rawvolume";
             const std::string dictionaryOutput = outputBasePath + ".dictionary";
