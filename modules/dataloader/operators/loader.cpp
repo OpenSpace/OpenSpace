@@ -91,6 +91,19 @@ namespace {
       "This list contains names of selected files in char format"
   };
 
+  static const openspace::properties::Property::PropertyInfo CurrentVolumesConvertedCountInfo = {
+      "CurrentVolumesConvertedCount",
+      "The amount of volumes currently converted",
+      "This number indicates how many of the volumes currently selected "
+      "for conversion have been converted."
+  };
+  
+  static const openspace::properties::Property::PropertyInfo CurrentVolumesToConvertCount = {
+      "CurrentVolumesToConvertCount",
+      "The amount of volumes to be converted",
+      "This number indicates how many volumes are currently selected to be converted."
+  };
+
   static const openspace::properties::Property::PropertyInfo UploadDataTriggerInfo = {
       "UploadDataTrigger",
       "Trigger load data files",
@@ -108,7 +121,9 @@ namespace openspace::dataloader {
 
 Loader::Loader() 
     : PropertyOwner({ "Loader" })
-    , _filePaths(SelectedFilesInfo)
+    , _selectedFilePathsMult(SelectedFilesInfo)
+    , _currentVolumesConvertedCount(CurrentVolumesConvertedCountInfo)
+    , _currentVolumesToConvertCount(CurrentVolumesToConvertCount)
     , _uploadDataTrigger(UploadDataTriggerInfo)
     , _volumeConversionProgress(VolumeConversionProgressInfo)
 {
@@ -116,7 +131,9 @@ Loader::Loader()
         selectData();
     });
 
-    addProperty(_filePaths);
+    addProperty(_selectedFilePathsMult);
+    addProperty(_currentVolumesConvertedCount);
+    addProperty(_currentVolumesToConvertCount);
     addProperty(_uploadDataTrigger);
     addProperty(_volumeConversionProgress);
 }
@@ -124,13 +141,22 @@ Loader::Loader()
 void Loader::selectData() {
     {
     std::thread t([&](){
-        nfdchar_t *outPath = NULL;
-        nfdresult_t result = NFD_OpenDialog( "cdf", NULL, &outPath ); //TODO: handle different data types
+        nfdpathset_t outPathSet;
+        std::vector<std::string> paths;
+        nfdresult_t result = NFD_OpenDialogMultiple( "cdf", NULL, &outPathSet );
 
-        if ( outPath && result == NFD_OKAY ) {
-            _filePaths = outPath;
+        size_t count = NFD_PathSet_GetCount(&outPathSet);
+        if (count > 0 && result == NFD_OKAY) {
+            for (size_t i = 0; i < count; ++i) {
+                nfdchar_t *path = NFD_PathSet_GetPath(&outPathSet, i);
+                paths.push_back(static_cast<std::string>(path));
+            }
+
             _volumeConversionProgress = FLT_MIN;
-            free(outPath);
+            _currentVolumesConvertedCount = 0;
+            _currentVolumesToConvertCount = count;
+            _selectedFilePathsMult = paths;
+            NFD_PathSet_Free(&outPathSet);
         }
         else if ( result == NFD_CANCEL ) {
             LINFO("User pressed cancel."); 
@@ -254,8 +280,6 @@ void Loader::goToFirstTimeStep(const std::string& absPathToItem) {
 }
 
 void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryString) {
-    // Case 1: _filePaths is a string of a single path to a single CDF file
-
     // Determine path to new volume item
 
     _currentVolumeConversionDictionary = ghoul::lua::loadDictionaryFromString(dictionaryString);
@@ -277,32 +301,16 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         // LDEBUG(itemPathBase);
         // itemPathBase += openspace::dataloader::helpers::getDirLeaf(_filePaths) + "_" + variable;
 
-        auto selectedFile = File(_filePaths);
         std::string itemName = _currentVolumeConversionDictionary.value<std::string>(KeyItemName);
-
         std::string itemPathBase = "${DATA}/.internal/volumes_from_cdf/" + itemName;
         Directory d(itemPathBase, RawPath::No);
         FileSys.createDirectory(d);
-        const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
-
-        ghoul::Dictionary taskDictionary;
-        if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary)) {
-            throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
-        }
-
-        std::string rawVolumeOutput = outputBasePath + ".rawvolume";
-        std::string dictionaryOutput = outputBasePath + ".dictionary";
-
-        taskDictionary.setValue("Type", KeyVolumeToRawTask);
-        taskDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
-        taskDictionary.setValue("DictionaryOutput", dictionaryOutput);
-
-        std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
 
         /*** create state file ***/
         // Check if file exists
         // If it exists, clear contents? delete and create new?
         // Create file, write dictionary to string contents
+        const std::string gridType = _currentVolumeConversionDictionary.value<std::string>(KeyGridType);
         std::initializer_list<std::pair<std::string, ghoul::any>> stateList = {
             std::make_pair( KeyStepSize, DefaultStepSize ),
             std::make_pair( KeyGridType, gridType ),
@@ -312,9 +320,12 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         ghoul::Dictionary stateDict(stateList);
         ghoul::DictionaryLuaFormatter formatter;
         std::string stateString = formatter.format(stateDict);
-        std::fstream f(outputBasePath + ".state", std::ios::out);
-        f << "return " << stateString;
-        f.close();
+        std::fstream stateStream(absPath(itemPathBase + "/" + itemName + ".state"), std::ios::out);
+        if (!stateStream) {
+            LERROR("Could not create state file");
+        }
+        stateStream << "return " << stateString;
+        stateStream.close();
 
         /*** copy over tf file ***/
         std::ifstream tfSource(absPath("${DATA}/assets/scene/solarsystem/model/mas/transferfunctions/mas_mhd_r_squared.txt"));
@@ -330,15 +341,39 @@ void Loader::processCurrentlySelectedUploadData(const std::string& dictionaryStr
         tfSource.close();
         tfDest.close();
 
-        auto volumeToRawTask = Task::createFromDictionary(taskDictionary);
-
         std::mutex m;
         std::function<void(float)> cb = [&](float progress) {
             std::lock_guard g(m);
             _volumeConversionProgress = progress;
         };
 
-        volumeToRawTask->perform(cb);
+        std::vector<std::string> selectedFiles = _selectedFilePathsMult;
+        unsigned int counter = 0;
+        for (const std::string &file : selectedFiles) {
+            _volumeConversionProgress = FLT_MIN;
+            auto selectedFile = File(file);
+            const std::string outputBasePath = d.path() + "/" + selectedFile.filename();
+
+            // Also loop invariate?
+            ghoul::Dictionary taskDictionary;
+            if (!_currentVolumeConversionDictionary.getValue<ghoul::Dictionary>(KeyTask, taskDictionary)) {
+                throw ghoul::RuntimeError("Must provide Task dictionary for volume conversion.");
+            }
+
+            const std::string rawVolumeOutput = outputBasePath + ".rawvolume";
+            const std::string dictionaryOutput = outputBasePath + ".dictionary";
+
+            taskDictionary.setValue("Type", KeyVolumeToRawTask);
+            taskDictionary.setValue("Input", file);
+            taskDictionary.setValue("RawVolumeOutput", rawVolumeOutput);
+            taskDictionary.setValue("DictionaryOutput", dictionaryOutput);
+
+            auto volumeToRawTask = Task::createFromDictionary(taskDictionary);
+
+            volumeToRawTask->perform(cb);
+            counter++;
+            _currentVolumesConvertedCount = counter;
+        }
 
         LINFO("Created files in " + d.path());
 

@@ -33,6 +33,7 @@ class DataLoader extends Component {
     };
   }
 
+  // TODO: separate file
   popover() {
     const { width, height } = this.props
     const { dataItems, aButtonIsPressed, showPopover } = this.state;

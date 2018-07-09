@@ -28,10 +28,12 @@
 #include <modules/dataloader/operators/operator.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/stringlistproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
 
 #include <openspace/util/taskloader.h>
 
@@ -75,11 +77,13 @@ class Loader : public PropertyOwner, public Operator {
     // void performTasks(std::string& path);
 
   private:
-    properties::StringProperty _filePaths;
+    properties::StringListProperty _selectedFilePathsMult;
     properties::TriggerProperty _uploadDataTrigger;
     properties::FloatProperty _volumeConversionProgress;
 
     ghoul::Dictionary _currentVolumeConversionDictionary;
+    properties::UIntProperty _currentVolumesConvertedCount;
+    properties::UIntProperty _currentVolumesToConvertCount;
   
     // State properties
 

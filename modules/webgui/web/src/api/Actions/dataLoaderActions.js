@@ -7,9 +7,17 @@ export const setActivated = (isActivated) => ({
   }
 });
 
-export const setFilePaths = (filePaths) => ({
+export const setSelectedFilePaths = (selectedFilePaths) => ({
   type: actionTypes.setSelectedFilesPathName,
-  payload: {
-    filePaths: filePaths
-  }
+  payload: { selectedFilePaths }
+});
+
+export const setVolumesConvertedCount = (count) => ({
+  type: actionTypes.setVolumesConvertedCount,
+  payload: { currentVolumesConvertedCount: count }
+});
+
+export const setVolumesToConvertCount = (count) => ({
+  type: actionTypes.setVolumesToConvertCount,
+  payload: { currentVolumesToConvertCount: count }
 });

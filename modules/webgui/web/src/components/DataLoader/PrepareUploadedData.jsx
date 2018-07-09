@@ -10,7 +10,6 @@ import { removeLineBreakCharacters, getDirectoryLeaf, getFileBasename } from './
 import Row from '../common/Row/Row';
 import Input from '../common/Input/Input/Input';
 import styles from './PrepareUploadedData.scss';
-import CenteredLabel from '../common/CenteredLabel/CenteredLabel';
 import Button from '../common/Input/Button/Button';
 import RadioButtons from '../common/Input/RadioButtons/RadioButtons';
 import Window from '../common/Window/Window';
@@ -53,9 +52,11 @@ class PrepareUploadedData extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { filePaths } = this.props;
+    const { selectedFilePaths } = this.props;
+    console.log(`length = ${selectedFilePaths.length}`)
+    console.log(`comparis = ${JSON.stringify(selectedFilePaths) === JSON.stringify(prevProps.selectedFilePaths)}`)
 
-    if( filePaths !== prevProps.filePaths && filePaths !== undefined ) {
+    if (selectedFilePaths.length > 0 && JSON.stringify(selectedFilePaths) !== JSON.stringify(prevProps.selectedFilePaths)) {
       this.setState({ 
         activated: true, 
         uploadButtonIsClicked: false
@@ -105,7 +106,11 @@ class PrepareUploadedData extends Component {
   }
 
   getDefaultItemName() {
-    return `${getFileBasename(getDirectoryLeaf(this.props.filePaths))}_${this.state.data.variable}`
+    if (this.props.selectedFilePaths[0] === '') {
+      return 'item_name';
+    }
+
+    return `${getFileBasename(getDirectoryLeaf(this.props.selectedFilePaths[0]))}_${this.state.data.variable}`
   }
 
   upload() {
@@ -117,7 +122,6 @@ class PrepareUploadedData extends Component {
         ItemName = "${this.state.itemName || this.getDefaultItemName()}",
         GridType = "${this.state.gridType}",
         Task = {
-          Input="${this.props.filePaths}",
           Dimensions={${dimensions.x}, ${dimensions.y}, ${dimensions.z}}, 
           Variable="${variable.toLowerCase()}",
           LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
@@ -137,7 +141,8 @@ class PrepareUploadedData extends Component {
   }
 
   render() {
-    const { width, height } = this.props;
+    console.log(this.state.activated)
+    const { width, height, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
     const { volumeProgress } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
 
@@ -191,6 +196,7 @@ class PrepareUploadedData extends Component {
               <ProgressBar label='Volume conversion progress'
                            initializingMsg='Reading'
                            progressPercent={volumeProgressPercent} />
+              <div>{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</div>
             </Row>
           )} 
         </div>
@@ -200,17 +206,23 @@ class PrepareUploadedData extends Component {
 }
 
 PrepareUploadedData.propTypes = {
-  filePaths: PropTypes.string,
+  selectedFilePaths: PropTypes.arrayOf(PropTypes.string),
+  currentVolumesConvertedCount: PropTypes.number,
+  currentVolumesToConvertCount: PropTypes.number,
   width: PropTypes.number,
   height: PropTypes.number
 };
 
 PrepareUploadedData.defaultProps = {
-  filePaths: '',
+  selectedFilePaths: [],
+  currentVolumesConvertedCount: 0,
+  currentVolumesToConvertCount: 0
 }
 
 const mapStateToProps = state => ({
-  filePaths: state.dataLoader.filePaths
+  selectedFilePaths: state.dataLoader.selectedFilePaths,
+  currentVolumesConvertedCount: state.dataLoader.currentVolumesConvertedCount,
+  currentVolumesToConvertCount: state.dataLoader.currentVolumesToConvertCount,
 });
 
 PrepareUploadedData = connect(

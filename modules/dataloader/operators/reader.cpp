@@ -85,7 +85,7 @@ Reader::Reader()
 void Reader::readVolumeDataItems() {
     Directory volumeDir = getVolumeDir();
 
-    std::vector volumeItems = volumeDir.readDirectories(
+    std::vector<std::string> volumeItems = volumeDir.readDirectories(
       Recursive::No,
       Sort::Yes
     );

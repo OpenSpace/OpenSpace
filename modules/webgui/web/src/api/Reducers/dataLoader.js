@@ -11,11 +11,27 @@ export const dataLoader = (state = {}, action) => {
       }
 
     case actionTypes.setSelectedFilesPathName:
-      const { filePaths } = action.payload;
+      const { selectedFilePaths } = action.payload;
       
       return {
         ...state,
-        filePaths
+        selectedFilePaths
+      }
+
+    case actionTypes.setVolumesConvertedCount:
+      const { currentVolumesConvertedCount } = action.payload;
+      
+      return {
+        ...state,
+        currentVolumesConvertedCount
+      }
+
+    case actionTypes.setVolumesToConvertCount:
+      const { currentVolumesToConvertCount } = action.payload;
+      
+      return {
+        ...state,
+        currentVolumesToConvertCount
       }
 
     default:
