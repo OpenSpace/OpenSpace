@@ -19,7 +19,12 @@ import Checkbox from '../common/Input/Checkbox/Checkbox';
 import provideWindowWidth from './HOC/provideWindowSize';
 import MultiInputs from './presentational/MultiInputs';
 import Variables from './presentational/Variables';
-import { KEY_DIMENSIONS, KEY_UPPER_DOMAIN_BOUNDS, KEY_LOWER_DOMAIN_BOUNDS } from './constants';
+import Translation from './presentational/Translation';
+import { KEY_DIMENSIONS, 
+  KEY_UPPER_DOMAIN_BOUNDS, 
+  KEY_LOWER_DOMAIN_BOUNDS, 
+  KEY_SPICE_TRANSLATION,
+  KEY_STATIC_TRANSLATION } from './constants';
 
 class PrepareUploadedData extends Component {
   constructor(props) {
@@ -31,6 +36,10 @@ class PrepareUploadedData extends Component {
       uploadButtonIsClicked: false,
       itemName: '',
       gridType: '',
+      translationType: KEY_STATIC_TRANSLATION,
+      translationPos: { x: 0, y: 0, z: 0 },
+      translationTarget: 'SUN',
+      translationObserver: 'SUN',
 
       data: {
         dimensions: { x: 100, y: 100, z: 128 },
@@ -50,6 +59,9 @@ class PrepareUploadedData extends Component {
     this.upload = this.upload.bind(this);
     this.handleProgressValue = this.handleProgressValue.bind(this);
     this.subscribeToVolumeConversionProgress = this.subscribeToVolumeConversionProgress.bind(this);
+    this.handleTranslationTypeChange = this.handleTranslationTypeChange.bind(this);
+    this.handleSetStaticTranslation = this.handleSetStaticTranslation.bind(this);
+    this.handleSetTranslationTarget = this.handleSetTranslationTarget.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -115,10 +127,55 @@ class PrepareUploadedData extends Component {
     return `${getFileBasename(getDirectoryLeaf(this.props.selectedFilePaths[0]))}_${this.state.data.variable}`
   }
 
+  handleTranslationTypeChange(target) {
+    let translationType;
+    target === 'Spice' 
+      ? translationType = KEY_SPICE_TRANSLATION 
+      : translationType = KEY_STATIC_TRANSLATION;
+    this.setState({ translationType });  
+  }
+
+  handleSetStaticTranslation({ currentTarget }) {
+    const { translationPos } = this.state;
+    let label = currentTarget.attributes.label.value;
+    let value = Number(currentTarget.value);
+    this.setState({ translationPos: {...translationPos, [label]: value } })
+  }
+
+  handleSetTranslationTarget(event) {   
+    console.log('event.value', event.value);
+     
+    this.setState({ translationTarget: event.value})
+  }
+
   upload() {
     this.setState({uploadButtonIsClicked: true});
 
+    const { translationType, translationPos, translationTarget, translationObserver } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds, rSquared } = this.state.data;
+    
+    let transform;
+    if (translationType === KEY_STATIC_TRANSLATION) {
+      transform = `\' 
+      Transform = {
+        Translation = {
+          Type = "${translationType}",
+          Position = { ${translationPos.x}, ${translationPos.y}, ${translationPos.z}}
+        }
+      }
+    \'`      
+    } else {
+      transform = `\' 
+        Transform = {
+          Translation = {
+            Type = "${translationType}",
+            Target = "${translationTarget}",
+            Observer = "${translationObserver}",
+          }
+        }
+      \'`
+    }
+
     let payload = `\'
       return {
         ItemName = "${this.state.itemName || this.getDefaultItemName()}",
@@ -129,12 +186,13 @@ class PrepareUploadedData extends Component {
           LowerDomainBound={${lowerDomainBounds.r}, ${lowerDomainBounds.theta}, ${lowerDomainBounds.phi}}, 
           UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
           FactorRSquared="${rSquared.toString()}"
+        },
+        "${transform}",
         }
       }
     \'`
     payload = removeLineBreakCharacters(payload);
     const script = UploadDataItemScript.replace(ValuePlaceholder, payload);
-
     DataManager.runScript(script);
   }
 
@@ -144,8 +202,9 @@ class PrepareUploadedData extends Component {
 
   render() {
     const { width, height, currentVolumesConvertedCount, currentVolumesToConvertCount } = this.props;
-    const { volumeProgress } = this.state;
+    const { volumeProgress, translationType, translationPos, translationTarget } = this.state;
     const { dimensions, variable, lowerDomainBounds, upperDomainBounds } = this.state.data;
+    const spiceOptions = 'SUN EARTH'.split(' ').map(v => ({ value: v, label: v }));
 
     const WINDOW_MAX_WIDTH = 400;
     const w = width / 2;
@@ -191,6 +250,12 @@ class PrepareUploadedData extends Component {
                              onChange={this.handleGridTypeChange} /></div>
           <Checkbox label='Factor r^2?'
                     onChange={this.changeRSquared}/>
+          <Translation translationType={translationType} 
+                        translationPos={translationPos}
+                        onTranslationTypeChange={this.handleTranslationTypeChange}
+                        onSetTranslation={(target) => this.handleSetStaticTranslation(target)}
+                        onSetTranslationTarget={this.handleSetTranslationTarget}
+                        target={translationTarget} />
           <Button onClick={() => this.upload()}> Convert </Button>
           {this.state.uploadButtonIsClicked && (
             <div>

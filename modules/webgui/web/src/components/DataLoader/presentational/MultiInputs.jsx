@@ -12,7 +12,7 @@ const MultiInputs = (props) => {
   return (
     <div className={styles.multiInputs}>
       <Label size='medium'>{label}:</Label>
-        <Row className="hej">
+        <Row>
           { Object.keys(options).map((key, index) => (
               <Input 
                 key={key}
