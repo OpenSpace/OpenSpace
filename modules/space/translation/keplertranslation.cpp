@@ -32,23 +32,23 @@
 
 namespace {
 
-template <typename T, typename Func>
-T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
-    T x = 0;
-    T x2 = x0;
+    template <typename T, typename Func>
+    T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
+        T x = 0;
+        T x2 = x0;
 
-    for (int i = 0; i < maxIter; ++i) {
-        x = x2;
-        x2 = function(x);
-        if (std::abs(x2 - x) < err) {
-            return x2;
+        for (int i = 0; i < maxIter; ++i) {
+            x = x2;
+            x2 = function(x);
+            if (std::abs(x2 - x) < err) {
+                return x2;
+            }
         }
+
+        return x2;
     }
 
-    return x2;
-}
-
-    const openspace::properties::Property::PropertyInfo EccentricityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
@@ -56,7 +56,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "are not supported."
     };
 
-    const openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
         "SemiMajorAxis",
         "Semi-major axis",
         "This value determines the semi-major axis, that is the distance of the object "
@@ -64,7 +64,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "apoapsis)."
     };
 
-    const openspace::properties::Property::PropertyInfo InclinationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo InclinationInfo = {
         "Inclination",
         "Inclination",
         "This value determines the degrees of inclination, or the angle of the orbital "
@@ -72,7 +72,7 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "central body."
     };
 
-    const openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
         "AscendingNode",
         "Right ascension of ascending Node",
         "This value determines the right ascension of the ascending node in degrees, "
@@ -80,28 +80,28 @@ T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 1
         "the horizonal reference plane intersect."
     };
 
-    const openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
         "Argument of Periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
         "position on the orbit that is closest to the orbiting body."
     };
 
-    const openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
         "MeanAnomaly",
         "Mean anomaly at epoch",
         "This value determines the mean anomaly at the epoch in degrees, which "
         "determines the initial location of the object along the orbit at epoch."
     };
 
-    const openspace::properties::Property::PropertyInfo EpochInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
         "This value determines the epoch for which the initial location is defined in "
         "the form of YYYY MM DD HH:mm:ss."
     };
 
-    const openspace::properties::Property::PropertyInfo PeriodInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
         "Period",
         "Orbit period",
         "Specifies the orbital period (in seconds)."

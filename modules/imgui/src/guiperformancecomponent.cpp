@@ -44,27 +44,27 @@ namespace {
         Total = 5
     };
 
-    const openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SortingSelectionInfo = {
         "SortingSelection",
         "Sorting",
         "This value determines the sorting order of the performance measurements."
     };
 
-    const openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SceneGraphEnabledInfo = {
         "ShowSceneGraph",
         "Show Scene Graph Measurements",
         "If this value is enabled, the window showing the measurements for the scene "
         "graph values is visible."
     };
 
-    const openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FunctionsEnabledInfo = {
         "ShowFunctions",
         "Show Function Measurements",
         "If this value is enabled, the window showing the measurements for the "
         "individual functions is visible."
     };
 
-    const openspace::properties::Property::PropertyInfo OutputLogsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OutputLogsInfo = {
         "OutputLogs",
         "Output Logs",
         "" // @TODO Missing documentation

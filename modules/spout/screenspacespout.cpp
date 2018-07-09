@@ -33,14 +33,14 @@
 namespace {
     constexpr const char* KeyName = "Name";
 
-    const openspace::properties::Property::PropertyInfo NameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "SpoutName",
         "Spout Sender Name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used."
     };
 
-    const openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "SpoutSelection",
         "Spout Selection",
         "This property displays all available Spout sender on the system. If one them is "
@@ -48,7 +48,7 @@ namespace {
         "previous value."
     };
 
-    const openspace::properties::Property::PropertyInfo UpdateInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
         "If this property is trigged, the 'SpoutSelection' options will be refreshed."

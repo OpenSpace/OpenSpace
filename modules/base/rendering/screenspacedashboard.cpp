@@ -36,7 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo UseMainInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "

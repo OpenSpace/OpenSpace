@@ -29,7 +29,7 @@
 #include <glm/gtx/vector_angle.hpp>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo RollFrictionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RollFrictionInfo = {
         "RollFriction",
         "Roll Friction",
         "If this is enabled, a small friction is applied to the rolling part of the "
@@ -37,7 +37,8 @@ namespace {
         "is disabled, the camera will roll forever."
     };
 
-    const openspace::properties::Property::PropertyInfo RotationalFrictionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationalFrictionInfo =
+    {
         "RotationalFriction",
         "Rotational Friction",
         "If this is enabled, a small friction is applied to the rotational part of the "
@@ -45,7 +46,7 @@ namespace {
         "is disabled, the camera will rotate forever."
     };
 
-    const openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ZoomFrictionInfo = {
         "ZoomFriction",
         "Zoom Friction",
         "If this is enabled, a small friction is applied to the zoom part of the camera "
@@ -53,21 +54,21 @@ namespace {
         "disabled, the camera will zoom in or out forever."
     };
 
-    const openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse Sensitivity",
         "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have."
     };
 
-    const openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick Sensitivity",
         "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
         "the sensitivity is the less impact a joystick motion will have."
     };
 
-    const openspace::properties::Property::PropertyInfo FrictionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction Factor",
         "Determines the factor that is applied if the 'Roll Friction', 'Rotational "
@@ -75,35 +76,35 @@ namespace {
         "faster the camera movements will stop."
     };
 
-    const openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FollowFocusNodeInfo = {
         "FollowFocusNodeRotationDistance",
         "Follow focus node rotation distance",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MinimumDistanceInfo = {
         "MinimumAllowedDistance",
         "Minimum allowed distance",
         "" // @TODO Missing documentation
     };
 
-    static const openspace::properties::Property::PropertyInfo
-        StereoInterpolationTimeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StereoInterpolationTimeInfo =
+    {
         "StereoInterpolationTime",
         "Stereo interpolation time",
         "The time to interpolate to a new stereoscopic depth "
         "when the focus node is changed"
     };
 
-    const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
         RotateToFocusInterpolationTimeInfo = {
-        "RotateToFocusInterpolationTime",
-        "Rotate to focus interpolation time",
-        "The time to interpolate the camera rotation "
-        "when the focus node is changed"
-    };
+            "RotateToFocusInterpolationTime",
+            "Rotate to focus interpolation time",
+            "The time to interpolate the camera rotation "
+            "when the focus node is changed"
+        };
 
-    const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
         UseAdaptiveStereoscopicDepthInfo = {
             "UseAdaptiveStereoscopicDepth",
             "Adaptive Steroscopic Depth",
@@ -111,9 +112,9 @@ namespace {
             "the focus node. If enabled, view scale will be set to "
             "StereoscopicDepthOfFocusSurface / distance. "
             "If disabled, view scale will be set to 10^StaticViewScaleExponent."
-    };
+        };
 
-    const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
         StaticViewScaleExponentInfo = {
             "StaticViewScaleExponent",
             "Static View Scale Exponent",
@@ -121,7 +122,7 @@ namespace {
             "Only used if UseAdaptiveStereoscopicDepthInfo is set to false."
         };
 
-    const openspace::properties::Property::PropertyInfo
+    constexpr openspace::properties::Property::PropertyInfo
         StereoscopicDepthOfFocusSurfaceInfo = {
             "StereoscopicDepthOfFocusSurface",
             "Stereoscopic depth of the surface in focus",
@@ -155,8 +156,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _mouseStates(_mouseSensitivity * 0.0001, 1 / (_friction.friction + 0.0000001))
     , _joystickStates(_joystickSensitivity * 0.1, 1 / (_friction.friction + 0.0000001))
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
-    , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _stereoscopicDepthOfFocusSurface(StereoscopicDepthOfFocusSurfaceInfo, 8, 0.25, 100)
+    , _staticViewScaleExponent(StaticViewScaleExponentInfo, 0.f, -30, 10)
     , _rotateToFocusInterpolationTime(RotateToFocusInterpolationTimeInfo, 2.0, 0.0, 10.0)
     , _stereoInterpolationTime(StereoInterpolationTimeInfo, 8.0, 0.0, 10.0)
 {
@@ -511,22 +512,6 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
     else {
         return localCameraRotation;
     }
-
-    double t = _rotateToFocusNodeInterpolator.value();
-    _rotateToFocusNodeInterpolator.setDeltaTime(static_cast<float>(deltaTime));
-    _rotateToFocusNodeInterpolator.step();
-
-    glm::dquat result = glm::slerp(
-        localCameraRotation,
-        glm::dquat(glm::dvec3(0.0)),
-        glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0)
-    );
-
-    if (angle(result) < 0.01) {
-        _rotateToFocusNodeInterpolator.end();
-    }
-
-    return result;
 }
 
 double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,

@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
 
 #include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
+#include <openspace/json.h>
 #include <memory>
 #include <string>
 #include <thread>

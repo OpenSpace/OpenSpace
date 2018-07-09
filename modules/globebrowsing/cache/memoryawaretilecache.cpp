@@ -34,39 +34,39 @@
 namespace {
     constexpr const char* _loggerCat = "MemoryAwareTileCache";
 
-    const openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
         "utilizing."
     };
 
-    const openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
         "utilizing."
     };
 
-    const openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
         "ApplyTileCacheSize",
         "Apply tile cache size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
         "ClearTileCache",
         "Clear tile cache",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo UsePboInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UsePboInfo = {
         "UsePbo",
         "Use PBO",
         "If this value is enabled, pixel buffer objects are used to upload the texture "

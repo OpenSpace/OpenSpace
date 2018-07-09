@@ -24,6 +24,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <algorithm>
+
 namespace openspace {
 
 template <class ModuleSubClass>

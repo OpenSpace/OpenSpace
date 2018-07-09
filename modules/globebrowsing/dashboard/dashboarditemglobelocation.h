@@ -22,29 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__
 
-#ifdef WIN32
-#pragma warning (push)
-#pragma warning (disable : 4706) // assignment within conditional expression
-#endif // WIN32
+#include <openspace/rendering/dashboarditem.h>
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif // __GNUC__
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
+namespace ghoul::fontrendering { class Font; }
 
-#include <modules/iswa/ext/json/json.hpp>
+namespace openspace {
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif // __GNUC__
+namespace documentation { struct Documentation; }
 
-#ifdef WIN32
-#pragma warning (pop)
-#endif // WIN32
+class DashboardItemGlobeLocation : public DashboardItem {
+public:
+    DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
+    ~DashboardItemGlobeLocation() = default;
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___JSON___H__
+    void render(glm::vec2& penPosition) override;
+
+    glm::vec2 size() const override;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DASHBOARDITEMGLOBELOCATION___H__

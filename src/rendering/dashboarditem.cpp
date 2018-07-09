@@ -32,25 +32,25 @@
 namespace {
     constexpr const char* KeyType = "Type";
 
-    const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard"
     };
 
-    const openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         ""
     };
 
-    const openspace::properties::Property::PropertyInfo IdentifierInfo = {
+    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
         "Identifier",
         "Identifier",
         ""
     };
 
-    const openspace::properties::Property::PropertyInfo GuiNameInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
         ""

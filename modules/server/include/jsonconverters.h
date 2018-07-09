@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
 #define __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
 
-#include <ext/json/json.hpp>
+#include <openspace/json.h>
 #include <ghoul/glm.h>
 
 namespace openspace::properties {

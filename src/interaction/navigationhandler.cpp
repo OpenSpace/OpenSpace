@@ -45,7 +45,7 @@ namespace {
     constexpr const char* KeyPosition = "Position";
     constexpr const char* KeyRotation = "Rotation";
 
-    const openspace::properties::Property::PropertyInfo OriginInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo OriginInfo = {
         "Origin",
         "Origin",
         "The name of the scene graph node that is the origin of the camera interaction. "
@@ -53,7 +53,7 @@ namespace {
         "towards this object. Any scene graph node can be the origin node."
     };
 
-    const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo KeyFrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "

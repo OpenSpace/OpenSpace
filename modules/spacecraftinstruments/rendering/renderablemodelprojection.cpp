@@ -53,14 +53,14 @@ namespace {
 
     constexpr const char* DestinationFrame = "GALACTIC";
 
-    const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorTexture",
         "Color Base Texture",
         "This is the path to a local image file that is used as the base texture for the "
         "model on which the image projections are layered."
     };
 
-    const openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "
@@ -287,9 +287,9 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     const glm::vec3 directionToSun = glm::normalize(
         _sunPosition - glm::vec3(bodyPosition)
     );
-    const glm::vec3 directionToSunViewSpace = glm::mat3(
+    const glm::vec3 directionToSunViewSpace = glm::normalize(glm::mat3(
         data.camera.combinedViewMatrix()
-    ) * directionToSun;
+    ) * directionToSun);
 
     _programObject->setUniform(_mainUniformCache.performShading, _performShading);
     _programObject->setUniform(

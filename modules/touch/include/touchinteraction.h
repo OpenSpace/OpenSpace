@@ -44,6 +44,22 @@ namespace openspace {
 class Camera;
 class SceneGraphNode;
 
+//Class used for keeping track of the recent average frame time
+class FrameTimeAverage {
+public:
+    //Update the circular buffer with the most recent frame time
+    void updateWithNewFrame(double sample);
+    //Get the value of the most recent average frame time (seconds)
+    double averageFrameTime() const;
+
+private:
+    static const int TotalSamples = 10;
+    int _nSamples = 0;
+    double _samples[TotalSamples];
+    double _runningTotal = 0.0;
+    int _index = 0;
+};
+
 class TouchInteraction : public properties::PropertyOwner {
 public:
     using Point = std::pair<int, TUIO::TuioPoint>;
@@ -51,7 +67,7 @@ public:
     TouchInteraction();
 
     // for interpretInteraction()
-    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK };
+    enum Type { ROT = 0, PINCH, PAN, ROLL, PICK, ZOOM_OUT };
 
     // Stores the velocity in all 6DOF
     struct VelocityStates {
@@ -148,6 +164,17 @@ private:
     void computeVelocities(const std::vector<TUIO::TuioCursor>& list,
         const std::vector<Point>& lastProcessed);
 
+    //Compute velocity based on double-tap for zooming
+    double computeTapZoomDistance(double zoomGain);
+
+    //Compute coefficient for velocity decay to be applied in decceleration
+    double computeConstTimeDecayCoefficient(double velocity);
+
+    //Compute coefficient of decay based on current frametime; if frametime has been
+    // longer than usual then multiple decay steps may be applied to keep the decay
+    // relative to user time
+    double computeDecayCoeffFromFrametime(double coeff, int times);
+
     /* Decelerate the velocities. Function is called in step() but is dereferenced from
      * frame time to assure same behaviour on all systems
      */
@@ -172,7 +199,8 @@ private:
     properties::FloatProperty _rollAngleThreshold;
     properties::FloatProperty _orbitSpeedThreshold;
     properties::FloatProperty _spinSensitivity;
-    properties::FloatProperty _zoomSensitivity;
+    properties::FloatProperty _zoomSensitivityExponential;
+    properties::FloatProperty _zoomSensitivityProportionalDist;
     properties::FloatProperty _zoomSensitivityDistanceThreshold;
     properties::FloatProperty _zoomBoundarySphereMultiplier;
     properties::FloatProperty _inputStillThreshold;
@@ -184,6 +212,7 @@ private:
     properties::Vec4Property _friction;
     properties::FloatProperty _pickingRadiusMinimum;
     properties::BoolProperty _ignoreGui;
+    properties::FloatProperty _constTimeDecay_secs;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
@@ -215,6 +244,7 @@ private:
     bool _directTouchMode;
     bool _tap;
     bool _doubleTap;
+    bool _zoomOutTap;
     bool _lmSuccess;
     bool _guiON;
     std::vector<SelectedBody> _selected;
@@ -222,6 +252,16 @@ private:
     LMstat _lmstat;
     glm::dquat _toSlerp;
     glm::dvec3 _centroid;
+
+    FrameTimeAverage _frameTimeAvg;
+
+    struct ConstantTimeDecayCoefficients {
+        double zoom = 0.0;
+        double orbit = 0.0;
+        double roll = 0.0;
+        double pan = 0.0;
+    };
+    ConstantTimeDecayCoefficients _constTimeDecayCoeff;
 };
 
 } // openspace namespace

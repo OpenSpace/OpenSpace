@@ -46,7 +46,7 @@ namespace {
     constexpr const char* KeyPreCacheStartTime = "PreCacheStartTime";
     constexpr const char* KeyPreCacheEndTime = "PreCacheEndTime";
 
-    const openspace::properties::Property::PropertyInfo FilePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File Path",
         "This is the path to the XML configuration file that describes the temporal tile "

@@ -37,33 +37,33 @@
 namespace {
     constexpr const char* ProgramName = "GridProgram";
 
-    const openspace::properties::Property::PropertyInfo GridColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridColorInfo = {
         "GridColor",
         "Grid Color",
         "This value determines the color of the grid lines that are rendered."
     };
 
-    const openspace::properties::Property::PropertyInfo GridMatrixInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridMatrixInfo = {
         "GridMatrix",
         "Grid Matrix",
         "This value specifies the local transformation matrix that defines the "
         "orientation of this grid relative to the parent's rotation."
     };
 
-    const openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
         "surrounding sphere."
     };
 
-    const openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
         "This value specifies the line width of the spherical grid."
     };
 
-    const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "This value specifies the radius of the grid."

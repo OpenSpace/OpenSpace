@@ -27,7 +27,7 @@
 namespace openspace {
 
 template<class T>
-SyncData<T>::SyncData(const T& val) : data(val) {};
+SyncData<T>::SyncData(const T& val) : data(val) {}
 
 template<class T>
 SyncData<T>::SyncData(const SyncData<T>& o) : data(o.data) {}
@@ -70,6 +70,6 @@ void SyncData<T>::postSync(bool isMaster) {
         data = doubleBufferedData;
         _mutex.unlock();
     }
-};
+}
 
 } // namespace openspace

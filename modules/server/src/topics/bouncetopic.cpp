@@ -30,7 +30,7 @@ namespace openspace {
 
 void BounceTopic::handleJson(const nlohmann::json& json) {
     _connection->sendJson(json);
-};
+}
 
 bool BounceTopic::isDone() const {
     return false;

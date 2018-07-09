@@ -49,7 +49,7 @@ namespace {
         BlendModeAdditive
     };
 
-    const openspace::properties::Property::PropertyInfo BillboardInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
@@ -57,13 +57,13 @@ namespace {
         "transformations."
     };
 
-    const openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "This value specifies the size of the plane in meters."
     };
 
-    const openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
         "This determines the blending mode that is applied to this plane."
@@ -200,7 +200,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     glm::dvec3 objectPositionWorld = glm::dvec3(
         glm::translate(
-            glm::dmat4(1.0), 
+            glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 

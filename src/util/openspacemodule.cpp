@@ -99,6 +99,10 @@ ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() cons
     return { 3, 3, 0 };
 }
 
+std::vector<std::string> OpenSpaceModule::requiredOpenGLExtensions() const {
+    return {};
+}
+
 std::string OpenSpaceModule::modulePath() const {
     std::string moduleIdentifier = identifier();
     std::transform(

@@ -65,73 +65,73 @@ namespace {
     constexpr const char* KeyUnit = "VisUnit";
     constexpr const float SecondsInOneDay = 60 * 60 * 24;
 
-    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "stepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "gridType",
         "Grid Type",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
         "secondsBefore",
         "Seconds before",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "secondsAfter",
         "Seconds after",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "sourceDirectory",
         "Source Directory",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "transferFunctionPath",
         "Transfer Function Path",
         ""
     };
 
-    const openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
         "triggerTimeJump",
         "Jump",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
+    constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "jumpToTimestep",
         "Jump to timestep",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CurrentTimeStepInfo = {
         "currentTimestep",
         "Current timestep",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo OpacityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "opacity",
         "Opacity",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo rNormalizationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
         "rNormalization",
         "Radius normalization",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
         "rUpperBound",
         "Radius upper bound",
         "" // @TODO Missing documentation
@@ -321,7 +321,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (int i = 0; i < t.rawVolume->nCells(); ++i) {
+        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
             t.histogram->add(data[i]);
         }
 

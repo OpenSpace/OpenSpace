@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/dashboard/dashboarditemglobelocation.h>
 #include <modules/globebrowsing/geometry/geodetic3.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
@@ -217,6 +218,12 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         )]);
 
     FactoryManager::ref().addFactory(std::move(fTileProvider));
+
+    auto fDashboard = FactoryManager::ref().factory<DashboardItem>();
+    ghoul_assert(fDashboard, "Dashboard factory was not created");
+
+    fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
+
 }
 
 globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {

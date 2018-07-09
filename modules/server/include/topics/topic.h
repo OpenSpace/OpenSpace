@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SERVER___TOPIC___H__
 #define __OPENSPACE_MODULE_SERVER___TOPIC___H__
 
-#include <ext/json/json.hpp>
+#include <openspace/json.h>
 
 namespace openspace {
 

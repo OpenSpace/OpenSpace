@@ -28,6 +28,7 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -38,37 +39,23 @@
 #include <ghoul/opengl/texture.h>
 #include <fstream>
 
- #ifdef __clang__
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif // __GNUC__
-
-#include <modules/iswa/ext/json.h>
-
-#ifdef __clang__
-
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif // __GNUC__
-
 namespace {
     using json = nlohmann::json;
     constexpr const char* _loggerCat = "KameleonPlane";
 
-    const openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline Seedpoints",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SliceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "" // @TODO Missing documentation

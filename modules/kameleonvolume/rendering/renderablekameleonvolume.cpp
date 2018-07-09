@@ -60,73 +60,73 @@ namespace {
     constexpr const char* KeyGridType = "GridType";
     constexpr const char* ValueSphericalGridType = "Spherical";
 
-    const openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Dimensions",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo VariableInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VariableInfo = {
         "Variable",
         "Variable",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
         "Lower Domain Bound",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
         "Upper Domain Bound",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo DomainScaleInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DomainScaleInfo = {
         "DomainScale",
         "Domain scale",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
         "Lower Value Bound",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
         "Upper Value Bound",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SourcePathInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
         "Source Path",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo CacheInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CacheInfo = {
         "Cache",
         "Cache",
         "" // @TODO Missing documentation

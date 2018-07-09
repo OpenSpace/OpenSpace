@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___ABUFFERRENDERER___H__
 #define __OPENSPACE_CORE___ABUFFERRENDERER___H__
 
+#ifdef OPENSPACE_WITH_ABUFFER_RENDERER
+
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/raycasterlistener.h>
 
@@ -142,5 +144,7 @@ private:
 };
 
 } // namespace openspace
+
+#endif // OPENSPACE_WITH_ABUFFER_RENDERER
 
 #endif // __OPENSPACE_CORE___ABUFFERRENDERER___H__

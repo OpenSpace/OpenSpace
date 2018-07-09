@@ -24,8 +24,8 @@
 
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
-#include <modules/iswa/ext/json.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
@@ -35,13 +35,13 @@ namespace {
     constexpr const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
-    const openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline Seedpoints",
         "" // @TODO Missing documentation

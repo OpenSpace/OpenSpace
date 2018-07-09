@@ -110,13 +110,13 @@ namespace {
         std::string configurationOverwrite;
     } commandlineArgumentPlaceholders;
 
-    const openspace::properties::Property::PropertyInfo VersionInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo VersionInfo = {
         "VersionInfo",
         "Version Information",
         "This value contains the full string identifying this OpenSpace Version"
     };
 
-    const openspace::properties::Property::PropertyInfo SourceControlInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo SourceControlInfo = {
         "SCMInfo",
         "Source Control Management Information",
         "This value contains information from the SCM, such as commit hash and branch"
@@ -535,9 +535,26 @@ void OpenSpaceEngine::initialize() {
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
-            "Module required higher OpenGL version than is supported",
+            "An included module required a higher OpenGL version than is supported on "
+            "this system",
             "OpenSpaceEngine"
         );
+    }
+
+    {
+        // Check the available OpenGL extensions against the required extensions
+        using OCC = ghoul::systemcapabilities::OpenGLCapabilitiesComponent;
+        for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
+            for (const std::string& ext : m->requiredOpenGLExtensions()) {
+                if (!SysCap.component<OCC>().isExtensionSupported(ext)) {
+                    LFATAL(fmt::format(
+                        "Module {} required OpenGL extension {} which is not available "
+                        "on this system. Some functionality related to this module will "
+                        "probably not work.", m->guiName(), ext
+                    ));
+                }
+            }
+        }
     }
 
     // Register Lua script functions

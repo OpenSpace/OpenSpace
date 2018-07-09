@@ -58,31 +58,31 @@ namespace {
     constexpr const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
     constexpr const char* _loggerCat       = "Renderable Galaxy";
 
-    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointStepSizeInfo = {
         "PointStepSize",
         "Point Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledPointsRatioInfo = {
         "NEnabledPointsRatio",
         "Enabled points",
         "" // @TODO Missing documentation
@@ -123,7 +123,7 @@ namespace openspace {
     }
     glm::vec3 volumeSize;
     if (volumeDictionary.getValue("Size", volumeSize)) {
-        _volumeSize = static_cast<glm::vec3>(volumeSize);
+        _volumeSize = volumeSize;
     }
     else {
         LERROR("No volume dimensions specified.");
@@ -266,11 +266,11 @@ void RenderableGalaxy::initializeGL() {
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
     glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
     glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -299,11 +299,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
 
-        glm::mat4 volumeTransform = glm::scale(
-            transform,
-            static_cast<glm::vec3>(_volumeSize)
-        );
-        _pointTransform = glm::scale(transform, static_cast<glm::vec3>(_pointScaling));
+        glm::mat4 volumeTransform = glm::scale(transform, _volumeSize);
+        _pointTransform = glm::scale(transform, _pointScaling);
 
         const glm::vec4 translation = glm::vec4(_translation.value(), 0.0);
 
@@ -325,7 +322,7 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
 
     const glm::vec3 position = data.camera.position().vec3();
     const float length = safeLength(position);
-    const glm::vec3 galaxySize = static_cast<glm::vec3>(_volumeSize);
+    const glm::vec3 galaxySize = _volumeSize;
 
     const float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
 

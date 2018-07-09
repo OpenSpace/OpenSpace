@@ -1,0 +1,51 @@
+local assetHelper = asset.require('util/asset_helper')
+local transforms = asset.require('./transforms')
+asset.require("spice/base")
+asset.request('./trail')
+
+
+
+local Charon = {
+    Identifier = "Charon",
+    Parent = transforms.PlutoBarycenter.Identifier,
+    Transform = {
+        Translation = {
+            Type = "SpiceTranslation",
+            Target = "CHARON",
+            Observer = "PLUTO BARYCENTER",
+            Kernels = NewHorizonsKernels
+        },
+        Rotation = {
+            Type = "SpiceRotation",
+            SourceFrame = "IAU_CHARON",
+            DestinationFrame = "GALACTIC"
+        },
+        Scale = {
+            Type = "StaticScale",
+            Scale = 1.0
+        }
+    },
+    Renderable = {
+        Type = "RenderableGlobe",
+        Radii = { 6.035E5, 6.035E5, 6.035E5 },
+        SegmentsPerPatch = 64,
+        Layers = {
+            ColorLayers = {
+                {
+                    Identifier = "Greyscale_USGS",
+                    Name = "Black & White [USGS]",
+                    FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90",
+                    Enabled = true
+                }
+            }
+        }
+    },
+    Tag = { "planet_solarSystem", "planet_terrestrial" },
+    GUI = {
+        Path = "/Solar System/Dwarf Planets/Pluto"
+    }
+}
+
+
+
+assetHelper.registerSceneGraphNodesAndExport(asset, { Charon })

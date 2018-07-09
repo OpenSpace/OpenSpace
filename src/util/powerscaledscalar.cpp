@@ -24,6 +24,7 @@
 
 #include <openspace/util/powerscaledscalar.h>
 
+#include <cstring>
 #include <sstream>
 
 namespace {

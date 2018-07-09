@@ -32,31 +32,31 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo VisibilityInfo = {
+    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Size",
         "Marker radius",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Marker transparency",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ThicknessInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ThicknessInfo = {
         "Thickness",
         "Marker thickness",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor", "Marker color", "" // @TODO Missing documentation
     };
 } // namespace

@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERMANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERMANAGER___H__
 
+#include <memory>
 #include <string>
 #include <vector>
 

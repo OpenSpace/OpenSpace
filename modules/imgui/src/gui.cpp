@@ -83,20 +83,20 @@ namespace {
         );
     }
 
-    const openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
         "explaining what impact they have on the visuals."
     };
 
-    const openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip Delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown."
     };
 
-    const openspace::properties::Property::PropertyInfo HiddenInfo = {
+    constexpr openspace::properties::Property::PropertyInfo HiddenInfo = {
         "IsHidden",
         "Is Hidden",
         "If this value is true, all GUI items will not be rendered, regardless of their "

@@ -43,14 +43,14 @@ public:
         int memoryBudget, int streamingBudget);
     ~SimpleTfBrickSelector();
 
-    virtual bool initialize();
+    bool initialize() override;
 
-    void selectBricks(int timestep, std::vector<int>& bricks);
+    void selectBricks(int timestep, std::vector<int>& bricks) override;
     void setMemoryBudget(int memoryBudget);
     void setStreamingBudget(int streamingBudget);
     bool calculateBrickImportances();
- private:
 
+private:
     TSP* _tsp;
     HistogramManager* _histogramManager;
     TransferFunction* _transferFunction;

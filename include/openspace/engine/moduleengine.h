@@ -56,8 +56,9 @@ public:
      * Registers all of the OpenSpaceModule%s which are created by the CMake configuration
      * and stored in the <code>moduleregistration.h</code> file. For all of those modules
      * the OpenSpaceModule::initialize method with will called.
+     *
      * \throw ghoul::RuntimeError If two modules in the default modules have the same
-     * name
+     *        name
     */
     void initialize(const std::map<std::string, ghoul::Dictionary>& moduleConfigurations);
 
@@ -80,9 +81,11 @@ public:
     /**
      * Registers the passed \p module with this ModuleEngine. The OpenSpaceModule::create
      * method will be called on the \p module in the process.
+     *
      * \param module The OpenSpaceModule that is to be registered
+     *
      * \throw ghoul::RuntimeError If the name of the \p module was already registered
-     * previously
+     *        previously
      * \pre \p module must not be nullptr
      */
     void registerModule(std::unique_ptr<OpenSpaceModule> module,
@@ -91,6 +94,7 @@ public:
     /**
      * Returns a list of all registered OpenSpaceModule%s that have been registered with
      * this ModuleEngine. All returned OpenSpaceModule%s are guaranteed to be initialized.
+     *
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
@@ -99,6 +103,7 @@ public:
      * Get the module subclass with given template argument. Requires the module subclass
      * to have the public static member variable <code>name</code> which must be equal to
      * the name of the module used in its constructor.
+     *
      * \return a pointer to the module of the given subclass
      */
     template <class ModuleSubClass>
@@ -107,6 +112,7 @@ public:
     /**
      * Returns the combined minimum OpenGL version. The return value is the maximum
      * version of all registered modules' OpenGL versions.
+     *
      * \return The combined minimum OpenGL version
      */
     ghoul::systemcapabilities::Version requiredOpenGLVersion() const;

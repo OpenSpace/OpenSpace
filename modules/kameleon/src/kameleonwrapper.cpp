@@ -731,7 +731,7 @@ glm::vec4 KameleonWrapper::modelScaleScaled() const {
         scale.z *= 6.371f;
         scale.w = 6;
     }
-    else if (units[0] == "m" && units[1] == "radian" & units[2] == "radian") {
+    else if (units[0] == "m" && units[1] == "radian" && units[2] == "radian") {
         // For spherical coordinate systems the radius is in meter
         scale.w = -log10(1.f / _max.x);
     }

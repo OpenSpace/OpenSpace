@@ -24,7 +24,6 @@
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 
-#include <modules/iswa/ext/json.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
@@ -32,49 +31,50 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
+#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr const char* _loggerCat = "IswaDataGroup";
     using json = nlohmann::json;
 
-    const openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use Logarithm",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto Contrast",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto Filter",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo NormalizeValues = {
+    constexpr openspace::properties::Property::PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize Values",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background Values",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer Functions",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data Options",
         "" // @TODO Missing documentation

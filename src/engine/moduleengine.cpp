@@ -90,30 +90,30 @@ void ModuleEngine::deinitializeGL() {
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module,
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod,
                                   const ghoul::Dictionary& configuration)
 {
-    ghoul_assert(module, "Module must not be nullptr");
+    ghoul_assert(mod, "Module must not be nullptr");
 
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
-        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->identifier() == module->identifier();
+        [&mod](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->identifier() == mod->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + module->identifier() + "' was registered before",
+            "Module name '" + mod->identifier() + "' was registered before",
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registering module '{}'", module->identifier()));
-    module->initialize(this, configuration);
-    addPropertySubOwner(module.get());
-    LDEBUG(fmt::format("Registered module '{}'", module->identifier()));
-    _modules.push_back(std::move(module));
+    LDEBUG(fmt::format("Registering module '{}'", mod->identifier()));
+    mod->initialize(this, configuration);
+    addPropertySubOwner(mod.get());
+    LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
+    _modules.push_back(std::move(mod));
 }
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {

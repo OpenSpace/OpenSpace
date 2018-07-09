@@ -70,32 +70,32 @@ namespace {
     constexpr const int SeedPointSourceFile = 0;
     constexpr const int SeedPointSourceTable = 1;
 
-    const openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         KeyFieldlinesStepSize,
         //"StepSize",
         "Fieldline Step Size",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo Classification = {
+    constexpr openspace::properties::Property::PropertyInfo Classification = {
         KeyFieldlinesClassification,
         "Fieldline Classification",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
         "Fieldline Color",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
         "Source",
         "SeedPoint Source",
         "" // @TODO Missing documentation
     };
 
-    const openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
+    constexpr openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
         "SourceFile",
         "SeedPoint File",
         "" // @TODO Missing documentation
@@ -307,7 +307,7 @@ void RenderableFieldlines::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             sizeof(LinePoint),
-            reinterpret_cast<void*>(0)
+            nullptr
         );
 
         GLuint colorLocation = 1;

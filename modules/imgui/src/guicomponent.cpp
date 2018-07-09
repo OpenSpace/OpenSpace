@@ -25,13 +25,13 @@
 #include <modules/imgui/include/guicomponent.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
         "This setting determines whether this object will be visible or not."
     };
 
-    const openspace::properties::Property::PropertyInfo CollapsedInfo = {
+    constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
         "This setting determines whether this window is collapsed or not."

@@ -359,8 +359,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         true
     );
 
@@ -371,8 +371,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_RGBA32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -388,8 +388,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         true
     );
 
@@ -399,8 +399,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_RGBA32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         true
     );
 
@@ -409,8 +409,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
         GL_DEPTH_COMPONENT32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         true
     );
 
@@ -419,8 +419,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_RGBA16,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         0,
         GL_RGBA,
         GL_UNSIGNED_SHORT,
@@ -436,8 +436,8 @@ void FramebufferRenderer::updateResolution() {
         GL_TEXTURE_2D,
         0,
         GL_DEPTH_COMPONENT32F,
-        GLsizei(_resolution.x),
-        GLsizei(_resolution.y),
+        _resolution.x,
+        _resolution.y,
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
@@ -1072,7 +1072,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
-            raycastProgram->setUniform("windowSize", _resolution);
+            raycastProgram->setUniform("windowSize", static_cast<glm::vec2>(_resolution));
 
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);

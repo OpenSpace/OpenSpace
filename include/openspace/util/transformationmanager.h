@@ -28,6 +28,7 @@
 #include <ghoul/designpattern/singleton.h>
 
 #include <ghoul/glm.h>
+#include <memory>
 #include <set>
 #include <string>
 

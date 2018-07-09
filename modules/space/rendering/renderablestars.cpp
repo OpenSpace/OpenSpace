@@ -80,42 +80,42 @@ namespace {
         float speed;
     };
 
-    const openspace::properties::Property::PropertyInfo PsfTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
         "Texture",
         "Point Spread Function Texture",
         "The path to the texture that should be used as a point spread function for the "
         "stars."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "
         "to its color. The texture is used as a one dimensional lookup function."
     };
 
-    const openspace::properties::Property::PropertyInfo ColorOptionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
         "stars."
     };
 
-    const openspace::properties::Property::PropertyInfo TransparencyInfo = {
+    constexpr openspace::properties::Property::PropertyInfo TransparencyInfo = {
         "Transparency",
         "Transparency",
         "This value is a multiplicative factor that is applied to the transparency of "
         "all stars."
     };
 
-    const openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
         "This value is used as a multiplicative factor that is applied to the apparent "
         "size of each star."
     };
 
-    const openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo MinBillboardSizeInfo = {
         "MinBillboardSize",
         "Min Billboard Size",
         "This value is used as a lower limit on the size of stars that are rendered. Any "

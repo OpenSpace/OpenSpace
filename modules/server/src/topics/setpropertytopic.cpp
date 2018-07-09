@@ -24,12 +24,12 @@
 
 #include <modules/server/include/topics/setpropertytopic.h>
 
+#include <openspace/json.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <ext/json/json.hpp>
 
 namespace {
     constexpr const char* PropertyKey = "property";
@@ -70,6 +70,6 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
 
 bool SetPropertyTopic::isDone() const {
     return true;
-};
+}
 
 } // namespace openspace

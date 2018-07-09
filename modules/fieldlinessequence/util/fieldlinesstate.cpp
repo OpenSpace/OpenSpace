@@ -24,10 +24,10 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <openspace/json.h>
 #include <openspace/util/time.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
-#include <ext/json/json.hpp>
 #include <fstream>
 
 namespace {

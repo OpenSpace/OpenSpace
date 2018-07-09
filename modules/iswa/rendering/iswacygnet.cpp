@@ -43,12 +43,12 @@
 namespace {
     constexpr const char* _loggerCat = "IswaCygnet";
 
-    const openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "" // @TODO Missing documentation
     };
-    const openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "" // @TODO Missing documentation
@@ -226,7 +226,7 @@ void IswaCygnet::update(const UpdateData&) {
 
 void IswaCygnet::enabled(bool enabled) {
     _enabled = enabled;
-};
+}
 
 void IswaCygnet::registerProperties() {}
 

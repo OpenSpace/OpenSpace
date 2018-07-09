@@ -188,7 +188,7 @@ std::string EnvelopePoint::hexadecimalFromVec3(const glm::vec3& vec) const {
 
 json Envelope::jsonPoints() const {
     json j;
-    for (int i = 0; i < _points.size(); i++) {
+    for (size_t i = 0; i < _points.size(); i++) {
         j[i] = {
             {
                 "color",
