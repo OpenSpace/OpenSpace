@@ -107,7 +107,8 @@ class PrepareUploadedData extends Component {
 
     // First render base case
     if (this.props.selectedFilePaths[0] === '') {
-      return 'item_name';
+      const today = new Date();
+      return `Unnamed_volume_${today.getFullYear()}_${today.getMonth()}_${today.getDay()}__${today.getHours()}_${today.getMinutes()}`;
     }
 
     return `${getFileBasename(getDirectoryLeaf(this.props.selectedFilePaths[0]))}_${this.state.data.variable}`
