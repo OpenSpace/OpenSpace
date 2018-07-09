@@ -12,6 +12,7 @@ import Input from '../common/Input/Input/Input';
 import styles from './PrepareUploadedData.scss';
 import Button from '../common/Input/Button/Button';
 import RadioButtons from '../common/Input/RadioButtons/RadioButtons';
+import Label from '../common/Label/Label';
 import Window from '../common/Window/Window';
 import ProgressBar from '../common/ProgressBar/ProgressBar';
 import Checkbox from '../common/Input/Checkbox/Checkbox';
@@ -192,12 +193,16 @@ class PrepareUploadedData extends Component {
                     onChange={this.changeRSquared}/>
           <Button onClick={() => this.upload()}> Convert </Button>
           {this.state.uploadButtonIsClicked && (
-            <Row>
-              <ProgressBar label='Volume conversion progress'
-                           initializingMsg='Reading'
-                           progressPercent={volumeProgressPercent} />
-              <div>{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</div>
-            </Row>
+            <div>
+              <Row>
+                <ProgressBar label='Volume conversion progress'
+                            initializingMsg='Reading'
+                            progressPercent={volumeProgressPercent} />
+              </Row>
+              <Row className={styles.filesConverted}>
+                <Label size="small">{currentVolumesConvertedCount} / {currentVolumesToConvertCount} files complete</Label>
+              </Row>
+            </div>
           )} 
         </div>
       </Window>
