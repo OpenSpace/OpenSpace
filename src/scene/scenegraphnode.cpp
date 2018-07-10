@@ -614,8 +614,17 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
 }
 
 bool SceneGraphNode::isTimeFrameActive(const Time& time) const {
-    return (!_parent || _parent->isTimeFrameActive(time)) &&
-        (!_timeFrame || _timeFrame->isActive(time));
+    for (const auto& dep : _dependencies) {
+        if (!dep->isTimeFrameActive(time)) {
+            return false;
+        }
+    }
+
+    if (_parent && !_parent->isTimeFrameActive(time)) {
+        return false;
+    }
+
+    return !_timeFrame || _timeFrame->isActive(time);
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
