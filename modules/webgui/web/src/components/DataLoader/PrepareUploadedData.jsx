@@ -143,8 +143,6 @@ class PrepareUploadedData extends Component {
   }
 
   handleSetTranslationTarget(event) {   
-    console.log('event.value', event.value);
-     
     this.setState({ translationTarget: event.value})
   }
 
@@ -156,24 +154,23 @@ class PrepareUploadedData extends Component {
     
     let transform;
     if (translationType === KEY_STATIC_TRANSLATION) {
-      transform = `\' 
+      transform = ` 
       Transform = {
         Translation = {
           Type = "${translationType}",
           Position = { ${translationPos.x}, ${translationPos.y}, ${translationPos.z}}
         }
-      }
-    \'`      
+      },
+    `      
     } else {
-      transform = `\' 
+      transform = `
         Transform = {
           Translation = {
             Type = "${translationType}",
             Target = "${translationTarget}",
             Observer = "${translationObserver}",
           }
-        }
-      \'`
+        },`
     }
 
     let payload = `\'
@@ -187,8 +184,7 @@ class PrepareUploadedData extends Component {
           UpperDomainBound={${upperDomainBounds.r}, ${upperDomainBounds.theta}, ${upperDomainBounds.phi}}, 
           FactorRSquared="${rSquared.toString()}"
         },
-        "${transform}",
-        }
+        ${transform}
       }
     \'`
     payload = removeLineBreakCharacters(payload);
