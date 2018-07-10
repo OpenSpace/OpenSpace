@@ -30,25 +30,25 @@
 #include <openspace/util/time.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo HasStartInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo HasStartInfo = {
         "HasStart",
         "Has Start",
         "If enabled, this TimeFrame will be inactive before the Start"
     };
 
-    const openspace::properties::Property::PropertyInfo StartInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo StartInfo = {
         "Start",
         "Start",
         "Specifies the time when this TimeFrame becomes active"
     };
 
-    const openspace::properties::Property::PropertyInfo HasEndInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has End",
         "If enabled, this TimeFrame will be inactive after the End"
     };
 
-    const openspace::properties::Property::PropertyInfo EndInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo EndInfo = {
         "End",
         "End",
         "Specifies the time when this TimeFrame becomes inactive"
@@ -131,7 +131,9 @@ TimeFrameInterval::TimeFrameInterval(const ghoul::Dictionary& dictionary)
     addProperty(_hasEnd);
     addProperty(_end);
 
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "TimeFrameInterval");
+    documentation::testSpecificationAndThrow(Documentation(),
+                                             dictionary,
+                                             "TimeFrameInterval");
 
     if (dictionary.hasValue<std::string>(StartInfo.identifier)) {
         _start = SpiceManager::ref().ephemerisTimeFromDate(

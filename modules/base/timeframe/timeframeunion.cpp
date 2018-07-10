@@ -31,7 +31,7 @@
 #include <openspace/util/time.h>
 
 namespace {
-    const openspace::properties::Property::PropertyInfo TimeFramesInfo = {
+    constexpr const openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time Frames",
         "A vector of time frames to combine into one." 
@@ -85,7 +85,7 @@ TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
     ghoul::Dictionary frames =
         dictionary.value<ghoul::Dictionary>(TimeFramesInfo.identifier);
 
-    for (const auto& k : frames.keys()) {
+    for (const std::string& k : frames.keys()) {
         const ghoul::Dictionary& subDictionary = frames.value<ghoul::Dictionary>(k);
         _timeFrames.push_back(TimeFrame::createFromDictionary(subDictionary));
         TimeFrame& subFrame = *_timeFrames.back();
