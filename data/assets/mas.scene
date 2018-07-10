@@ -19,12 +19,37 @@ local sunAsset = asset.require('scene/solarsystem/sun/sun')
 -- local masMhdAsset = asset.require('scene/solarsystem/model/mas/mas_mhd')
 asset.require('scene/solarsystem/model/mas/mas_mhd')
 
+-- Namespaced global lua state
+MasScene = {
+    Options = {
+        TexIndex = 1
+    },
+    SunTextures = {
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_20G_offset.png",
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_100G_offset.png",
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/br_photo_bas05_trans_1000G_offset.png",
+        asset.require('../mas/bastille_day_sun_textures').TexturesPath .. "/black.png",
+        asset.require('./scene/solarsystem/sun/sun_textures').TexturesPath .. "/sun.jpg",
+    }
+}
+
 -- This causes crash because the renderable is not removed properly before the next frame
 local toggleMas = function ()
     return 
         -- "openspace.removeSceneGraphNode('Mas_MHD');" ..
         "openspace.assset.remove('Mas_MHD');" ..
         "openspace.asset.add('Mas_MHD');"
+end
+
+local setup = function ()
+    return
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.aBlendingEnabled', false);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.particleSize', 7);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.particleSpacing', 59);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.speed', 19);" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Color.uniform', {0.575, 0, 0.75, 1});" ..
+        "openspace.setPropertyValueSingle('Scene.FL_MAS.renderable.Flow.color', {1, 0, 0.65, 1});" ..
+        "openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[1]);"
 end
 
 local Keybindings = {
@@ -36,8 +61,8 @@ local Keybindings = {
     },
     {
         Key = "F6",
-        Command = "openspace.time.setTime('2000 JUL 14 10:08:37.100');",
-        Documentation = "Set time with margin to when eclipse data starts",
+        Command = "openspace.time.setTime('2000 JUL 14 10:11:50.100');",
+        Documentation = "Set time close to when bastille eruption starts",
         Local = false
     },
     {
@@ -47,15 +72,38 @@ local Keybindings = {
         Local = true
     },
     {
-        Key = "F9",
+        Key = "F8",
         Command = propertyHelper.invert('Scene.SunGlare.renderable.Enabled'),
         Documentation = "Toggle sun glare",
         Local = false
     },
     {
-        Key = "F10",
+        Key = "F9",
         Command = propertyHelper.invert('Scene.Sun.renderable.Enabled'),
         Documentation = "Toggle sun",
+        Local = false
+    },
+    {
+        Key = "F10",
+        Command = setup(),
+        Documentation = "Setup scene property values after initialization",
+        Local = false
+    },
+    {
+        Key = "i",
+        Command = [[
+            if (MasScene.Options.TexIndex == nil) then 
+                MasScene.Options.TexIndex = 1 
+            end; 
+
+            MasScene.Options.TexIndex = MasScene.Options.TexIndex + 1
+            if (MasScene.Options.TexIndex > #MasScene.SunTextures) then
+                MasScene.Options.TexIndex = 1 
+            end;
+
+            openspace.setPropertyValueSingle('Scene.Sun.renderable.ColorTexture', MasScene.SunTextures[MasScene.Options.TexIndex]);
+        ]],
+        Documentation = "Display next sun texture in list of textures",
         Local = false
     },
     {
@@ -87,9 +135,6 @@ local Keybindings = {
 -- asset.require('./fieldlines/enlil')
 asset.require('./fieldlines/mas')
 
-local sunAsset = asset.require('scene/solarsystem/sun/sun')
-local sunRadius = 695508000
-
 asset.onInitialize(function ()
     -- openspace.time.setTime("2017 JUN 01 00:00:00")
     openspace.time.setTime("2000 JUL 14 08:33:37.100")
@@ -109,7 +154,7 @@ asset.onInitialize(function ()
         "BoolProperty",
         "Show Trails",
         "Scene.*Trail.renderable.Enabled",
-        "Disable or enable all trails of the sHmmcene at the same time",
+        "Disable or enable all trails of the scene at the same time",
         true,
         nil,
         nil
@@ -117,8 +162,8 @@ asset.onInitialize(function ()
 
     openspace.navigation.setCameraState({
         Focus = sunAsset.Sun.Identifier,
-        Position = { 100000000000.0, 0, 0 },
-        Rotation = { 0.758797, 0.221490, -0.605693, -0.091135 }
+        Position = {-92160702466.762482, 188131804731.671265, -27180258494.341042},
+        Rotation = {0.655461, -0.629141, -0.410504, -0.077712},
     })
 
 end)
