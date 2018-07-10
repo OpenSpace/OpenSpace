@@ -22,13 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___TIMEFRAMEINTERVAL___H__
-#define __OPENSPACE_MODULE_BASE___TIMEFRAMEINTERVAL___H__
+#ifndef __OPENSPACE_MODULE_BASE___TIMEFRAMEUNION___H__
+#define __OPENSPACE_MODULE_BASE___TIMEFRAMEUNION___H__
 
 #include <openspace/scene/timeframe.h>
-
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 
@@ -36,22 +33,18 @@ class Time;
 
 namespace documentation { struct Documentation; }
 
-class TimeFrameInterval : public TimeFrame {
+class TimeFrameUnion : public TimeFrame {
 public:
-    TimeFrameInterval();
-    TimeFrameInterval(const ghoul::Dictionary& dictionary);
+    TimeFrameUnion();
+    TimeFrameUnion(const ghoul::Dictionary& dictionary);
     bool isActive(const Time&) const override;
 
     static documentation::Documentation Documentation();
 
 private:
-    properties::BoolProperty _hasStart;
-    properties::DoubleProperty _start;
-
-    properties::BoolProperty _hasEnd;
-    properties::DoubleProperty _end;
+    std::vector<std::unique_ptr<TimeFrame>> _timeFrames;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___TIMEFRAMEINTERVAL___H__
+#endif // __OPENSPACE_MODULE_BASE___TIMEFRAMEUNION___H__

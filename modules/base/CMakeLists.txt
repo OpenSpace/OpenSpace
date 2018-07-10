@@ -57,6 +57,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
     ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -93,6 +94,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/luascale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeinterval.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/timeframe/timeframeunion.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
