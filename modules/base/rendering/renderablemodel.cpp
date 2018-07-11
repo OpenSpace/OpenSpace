@@ -33,6 +33,8 @@
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/lightsource.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/invariants.h>
@@ -82,6 +84,12 @@ namespace {
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
         "all other transformations are applied."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
+        "LightSources",
+        "Light Sources",
+        "A list of light sources that this model should accept light from."
     };
 } // namespace
 
@@ -134,6 +142,18 @@ documentation::Documentation RenderableModel::Documentation() {
                 new DoubleMatrix3Verifier,
                 Optional::Yes,
                 ModelTransformInfo.description
+            },
+            {
+                LightSourcesInfo.identifier,
+                new TableVerifier({
+                    {
+                        "*",
+                        new ReferencingVerifier("core_light_source"),
+                        Optional::Yes
+                    }
+                }),
+                Optional::Yes,
+                LightSourcesInfo.description
             }
         }
     };
@@ -147,6 +167,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _specularIntensity(SpecularIntensityInfo, 1.0, 0.0, 1.0)
     , _performShading(ShadingInfo, true)
     , _modelTransform(ModelTransformInfo, glm::mat3(1.0))
+    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -187,6 +208,20 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _performShading = dictionary.value<bool>(ShadingInfo.identifier);
     }
 
+    if (dictionary.hasKey(LightSourcesInfo.identifier)) {
+        const ghoul::Dictionary& lsDictionary =
+            dictionary.value<ghoul::Dictionary>(LightSourcesInfo.identifier);
+
+        for (const std::string& k : lsDictionary.keys()) {
+            std::unique_ptr<LightSource> lightSource = LightSource::createFromDictionary(
+                lsDictionary.value<ghoul::Dictionary>(k)
+            );
+            _lightSourcePropertyOwner.addPropertySubOwner(lightSource.get());
+            _lightSources.push_back(std::move(lightSource));
+        }
+    }
+
+    addPropertySubOwner(_lightSourcePropertyOwner);
     addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
@@ -198,6 +233,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_specularIntensity);
     addProperty(_performShading);
 }
+
+RenderableModel::~RenderableModel() {}
 
 bool RenderableModel::isReady() const {
     return _programObject && _texture;
@@ -252,15 +289,38 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
                                           modelTransform;
 
-    const glm::vec3 directionToSun = glm::normalize(
+    /*const glm::vec3 directionToSun = glm::normalize(
         _sunPos - data.modelTransform.translation
     );
     const glm::vec3 directionToSunViewSpace =
-        glm::normalize(glm::mat3(data.camera.combinedViewMatrix()) * directionToSun);
+        glm::normalize(glm::mat3(data.camera.combinedViewMatrix()) * directionToSun);*/
+
+
+    int nLightSources = 0;
+    _lightIntensitiesBuffer.resize(_lightSources.size());
+    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+    for (const auto& lightSource : _lightSources) {
+        if (!lightSource->isEnabled()) {
+            continue;
+        }
+        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+        _lightDirectionsViewSpaceBuffer[nLightSources] = glm::normalize(glm::vec3(1.0));
+        ++nLightSources;
+    }
 
     _programObject->setUniform(
-        _uniformCache.directionToSunViewSpace,
-        directionToSunViewSpace
+        _uniformCache.nLightSources,
+        nLightSources
+    );
+    _programObject->setUniform(
+        _uniformCache.lightIntensities,
+        _lightIntensitiesBuffer.data(),
+        nLightSources
+    );
+    _programObject->setUniform(
+        _uniformCache.lightDirectionsViewSpace,
+        _lightDirectionsViewSpaceBuffer.data(),
+        nLightSources
     );
     _programObject->setUniform(
         _uniformCache.modelViewTransform,
@@ -305,17 +365,19 @@ void RenderableModel::update(const UpdateData&) {
         _programObject->rebuildFromFile();
         updateUniformCache();
     }
-
-    _sunPos = OsEng.renderEngine().scene()->sceneGraphNode(
-        "SolarSystemBarycenter"
-    )->worldPosition();
 }
 
 
 void RenderableModel::updateUniformCache() {
     _uniformCache.opacity = _programObject->uniformLocation("opacity");
-    _uniformCache.directionToSunViewSpace = _programObject->uniformLocation(
-        "directionToSunViewSpace"
+    _uniformCache.nLightSources = _programObject->uniformLocation(
+        "nLightSources"
+    );
+    _uniformCache.lightDirectionsViewSpace = _programObject->uniformLocation(
+        "lightDirectionsViewSpace"
+    );
+    _uniformCache.lightIntensities = _programObject->uniformLocation(
+        "lightIntensities"
     );
     _uniformCache.modelViewTransform = _programObject->uniformLocation(
         "modelViewTransform"

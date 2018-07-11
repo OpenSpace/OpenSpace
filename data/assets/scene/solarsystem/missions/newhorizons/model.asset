@@ -1,7 +1,6 @@
 local assetHelper = asset.require('util/asset_helper')
 local transforms = asset.require('./transforms')
-
-
+local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
 
 local textures = asset.syncedResource({
     Name = "New Horizons Textures",
@@ -30,7 +29,20 @@ local NewHorizons = {
         ColorTexture = textures .. "/NHTexture.jpg",
         AmbientIntensity = 0.4,
         DiffuseIntensity = 1.0,
-        SpecularIntensity = 1.0
+        SpecularIntensity = 1.0,
+        LightSources = {
+            {
+                Type = "SceneGraphLightSource",
+                Identifier = "Sun",
+                Reference = sunTransforms.SolarSystemBarycenter.Identifier,
+                Intensity = 1.0
+            }
+            --{
+            --    Identifier = "Sun"
+            --    Type = "CameraLightSource",
+            --    Intensity = 1.0
+            --}
+        }
     },
     GUI = {
         Name = "New Horizons",

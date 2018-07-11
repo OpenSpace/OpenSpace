@@ -22,73 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#ifndef __OPENSPACE_CORE___LIGHTSOURCE___H__
+#define __OPENSPACE_CORE___LIGHTSOURCE___H__
 
-in vec2 vs_st;
-in vec3 vs_normalViewSpace;
-in vec4 vs_positionCameraSpace;
-in float vs_screenSpaceDepth;
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
-uniform float ambientIntensity = 0.2;
-uniform float diffuseIntensity = 1.0;
-uniform float specularIntensity = 1.0;
+#include <ghoul/glm.h>
+#include <memory>
 
-uniform bool performShading = true;
+namespace ghoul { class Dictionary; }
 
-uniform sampler2D texture1;
+namespace openspace {
 
-uniform int nLightSources;
-uniform vec3 lightDirectionsViewSpace[8];
-uniform float lightIntensities[8];
+namespace documentation { struct Documentation; }
 
-uniform float opacity = 1.0;
+class SceneGraphNode;
+class RenderData;
 
-const vec3 SpecularAlbedo = vec3(1.0);
+class LightSource : public properties::PropertyOwner {
+public:
+    static std::unique_ptr<LightSource> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
-Fragment getFragment() {
-    vec3 diffuseAlbedo = texture(texture1, vs_st).rgb;
+    LightSource();
+    LightSource(const ghoul::Dictionary& dictionary);
+    virtual ~LightSource() = default;
 
-    Fragment frag;
+    virtual glm::vec3 positionRelativeTo(const SceneGraphNode& node,
+                                         const RenderData& renderData) const = 0;
 
-    if (performShading) {
-        // Some of these values could be passed in as uniforms
-        const vec3 lightColorAmbient = vec3(1.0);
-        const vec3 lightColor = vec3(1.0);
-        
-        vec3 n = normalize(vs_normalViewSpace);
-        vec3 c = normalize(vs_positionCameraSpace.xyz);
+    virtual float intensity() const = 0;
 
-        vec3 color = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+    bool isEnabled() const;
 
-        for (int i = 0; i < nLightSources; ++i) {
-            vec3 l = lightDirectionsViewSpace[i];
-            vec3 r = reflect(l, n);
+    virtual bool initialize();
 
-            float diffuseCosineFactor = dot(n,l);
-            float specularCosineFactor = dot(c,r);
-            const float specularPower = 100.0;
+    static documentation::Documentation Documentation();
 
-            vec3 diffuseColor =
-                diffuseIntensity * lightColor * diffuseAlbedo *
-                max(diffuseCosineFactor, 0);
+private:
+    properties::BoolProperty _enabled;
+};
 
-            vec3 specularColor =
-                specularIntensity * lightColor * SpecularAlbedo *
-                pow(max(specularCosineFactor, 0), specularPower);
+}  // namespace openspace
 
-            color += lightIntensities[i] * (diffuseColor + specularColor);
-        }
-        frag.color.rgb = color;
-    }
-    else {
-        frag.color.rgb = diffuseAlbedo;
-    }
-
-    frag.color.a    = opacity;
-    frag.depth      = vs_screenSpaceDepth;
-    frag.gPosition  = vs_positionCameraSpace;
-    frag.gNormal    = vec4(vs_normalViewSpace, 1.0);
-
-
-    return frag;
-}
+#endif // __OPENSPACE_CORE___LIGHTSOURCE___H__
