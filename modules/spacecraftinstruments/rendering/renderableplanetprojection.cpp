@@ -775,7 +775,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     _projectionComponent.update();
 
     const double time = data.time.j2000Seconds();
-    const double integrateFromTime = data.integrateFromTime.j2000Seconds();
+    const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
     // Only project new images if time changed since last update.
     if (time > integrateFromTime) {
