@@ -27,19 +27,26 @@
 
 #include <modules/server/include/topics/topic.h>
 
-namespace openspace::properties { class Property; }
+#include <openspace/interaction/websocketinputstate.h>
+
+namespace openspace::interaction {
+
+    struct WebsocketInputStates;
+}
 
 namespace openspace {
 
 class FlightControllerTopic : public Topic {
 public:
-    FlightControllerTopic() = default;
+    FlightControllerTopic();
     ~FlightControllerTopic();
 
     void handleJson(const nlohmann::json& json) override;
     bool isDone() const override;
 
 private:
+    bool _isDone;
+    openspace::interaction::WebsocketInputStates _inputStates;
 
 };
 

@@ -26,62 +26,94 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
+
+#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/interaction/websocketinputstate.h>
+#include <openspace/interaction/navigationhandler.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <iterator>
+#include <unordered_map>
+
 namespace {
+
+    using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
+
     constexpr const char* _loggerCat = "FlightControllerTopic";
-    constexpr const char* EventKey = "event";
+    constexpr const char* TypeKey = "type";
 
-    constexpr const char* FlightControllerEvent = "flightcontroller_event";
+    constexpr const char* FlightControllerType = "flightcontroller";
 
-    constexpr const char* OrbitX = "orbitX";
-    constexpr const char* OrbitY = "orbitY";
-    constexpr const char* ZoomIn = "zoomIn";
-    constexpr const char* ZoomOut = "zoomOut";
-    constexpr const char* LocalRollX = "localRollX";
-    constexpr const char* LocalRollY = "localRollY";
-    constexpr const char* GlobalRollX = "globalRollX";
-    constexpr const char* GlobalRollY = "globalRollY";
-    constexpr const char* PanX = "panX";
-    constexpr const char* PanY = "panY";
+    const std::string OrbitX = "orbitX";
+    const std::string OrbitY = "orbitY";
+    const std::string ZoomIn = "zoomIn";
+    const std::string ZoomOut = "zoomOut";
+    const std::string LocalRollX = "localRollX";
+    const std::string LocalRollY = "localRollY";
+    const std::string GlobalRollX = "globalRollX";
+    const std::string GlobalRollY = "globalRollY";
+    const std::string PanX = "panX";
+    const std::string PanY = "panY";
 
-    const std::vector<const char*> InteractionProperties {
-        OrbitX,
-        OrbitY,
-        ZoomIn,
-        ZoomOut,
-        LocalRollX,
-        LocalRollY,
-        GlobalRollX,
-        GlobalRollY,
-        PanX,
-        PanY
-    };
+    const static std::unordered_map<std::string, AxisType> AxisIndexMap ({
+        {OrbitX, AxisType::OrbitX},
+        {OrbitY, AxisType::OrbitY},
+        {ZoomIn, AxisType::ZoomIn},
+        {ZoomOut, AxisType::ZoomOut},
+        {LocalRollX, AxisType::LocalRollX},
+        {LocalRollY, AxisType::LocalRollY},
+        {GlobalRollX, AxisType::GlobalRollX},
+        {GlobalRollY, AxisType::GlobalRollY},
+        {PanX, AxisType::PanX},
+        {PanY, AxisType::PanY}
+    });
+
+    const int Axes = 10;
+
 } // namespace
 
 using nlohmann::json;
 
 namespace openspace {
 
+FlightControllerTopic::FlightControllerTopic()
+: _isDone(false)
+{
+    for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); ++it) {
+        OsEng.navigationHandler().setWebsocketAxisMapping(
+            int(std::distance(AxisIndexMap.begin(), it)),
+            it->second);
+    }
+
+    OsEng.navigationHandler().setWebsocketInputStates(_inputStates);
+}
+
 FlightControllerTopic::~FlightControllerTopic() {
 }
 
 bool FlightControllerTopic::isDone() const {
-    return true;
+    return _isDone;
 }
 
 void FlightControllerTopic::handleJson(const nlohmann::json& json) {
-    std::string key = json.at(OrbitX).get<std::string>();
-    const std::string& event = json.at(EventKey).get<std::string>();
+    auto state = _inputStates.begin();
+    std::fill(state->axes.begin(), state->axes.end(), 0.0f);
+    state->isConnected = true;
 
-    if (event == FlightControllerEvent) {
-        for (auto it = json.begin(); it != json.end(); ++it) {
-            LDEBUG(fmt::format("{} : {}", it.key(), it.value()));
+    for (auto it = json.begin(); it != json.end(); ++it) {
+        const auto mapIt = AxisIndexMap.find(it.key());
+        if (mapIt == AxisIndexMap.end()) {
+            LWARNING(fmt::format(
+                "No axis named {} (value: {})", it.key() , it.value()
+            ));
+            continue;
         }
+
+        state->axes[std::distance(AxisIndexMap.begin(), mapIt)] = float(it.value());
     }
 }
 

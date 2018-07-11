@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/mouse.h>
@@ -43,6 +44,7 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
+struct WebsocketInputStates;
 class KeyframeNavigator;
 class OrbitalNavigator;
 
@@ -101,6 +103,14 @@ public:
     std::vector<std::string> joystickButtonCommand(int button) const;
 
 
+    // Websockets
+    void setWebsocketInputStates(WebsocketInputStates& states);
+    void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
+                                WebsocketCameraStates::AxisInvert shouldInvert =
+                                WebsocketCameraStates::AxisInvert::No,
+                                WebsocketCameraStates::AxisNormalize shouldNormalize =
+                                WebsocketCameraStates::AxisNormalize::No
+                                );
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);

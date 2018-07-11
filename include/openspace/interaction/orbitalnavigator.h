@@ -31,6 +31,7 @@
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
+#include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/glm.h>
@@ -57,6 +58,7 @@ public:
     void startInterpolateCameraDirection(const Camera& camera);
 
     JoystickCameraStates& joystickStates();
+    WebsocketCameraStates& websocketStates();
 
     bool followingNodeRotation() const;
     SceneGraphNode* focusNode() const;
@@ -88,6 +90,7 @@ private:
 
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
+    properties::FloatProperty _websocketSensitivity;
 
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
@@ -98,6 +101,7 @@ private:
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
+    WebsocketCameraStates _websocketStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;

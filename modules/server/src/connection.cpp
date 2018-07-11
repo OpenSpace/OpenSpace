@@ -26,6 +26,7 @@
 
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
+#include <modules/server/include/topics/flightcontrollertopic.h>
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
@@ -56,6 +57,7 @@ namespace {
     constexpr const char* TimeTopicKey = "time";
     constexpr const char* TriggerPropertyTopicKey = "trigger";
     constexpr const char* BounceTopicKey = "bounce";
+    constexpr const char* FlightControllerTopicKey = "flightcontroller";
 } // namespace
 
 namespace openspace {
@@ -74,6 +76,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<TimeTopic>(TimeTopicKey);
     _topicFactory.registerClass<TriggerPropertyTopic>(TriggerPropertyTopicKey);
     _topicFactory.registerClass<BounceTopic>(BounceTopicKey);
+    _topicFactory.registerClass<FlightControllerTopic>(FlightControllerTopicKey);
 
     // see if the default config for requiring auth (on) is overwritten
     _requireAuthorization = OsEng.configuration().doesRequireSocketAuthentication;

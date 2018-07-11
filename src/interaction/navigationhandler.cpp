@@ -153,6 +153,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
             }
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
+        _inputState->resetWebsockets();
     }
 }
 
@@ -306,6 +307,20 @@ void NavigationHandler::setJoystickAxisMapping(int axis,
     );
 }
 
+void NavigationHandler::setWebsocketAxisMapping(int axis,
+                                               WebsocketCameraStates::AxisType mapping,
+                                               WebsocketCameraStates::AxisInvert shouldInvert,
+                                               WebsocketCameraStates::AxisNormalize shouldNormalize)
+{
+    _orbitalNavigator->websocketStates().setAxisMapping(
+                                                       axis,
+                                                       mapping,
+                                                       shouldInvert,
+                                                       shouldNormalize
+                                                       );
+}
+
+
 JoystickCameraStates::AxisInformation
 NavigationHandler::joystickAxisMapping(int axis) const
 {
@@ -340,6 +355,10 @@ void NavigationHandler::clearJoystickButtonCommand(int button) {
 
 std::vector<std::string> NavigationHandler::joystickButtonCommand(int button) const {
     return _orbitalNavigator->joystickStates().buttonCommand(button);
+}
+
+void NavigationHandler::setWebsocketInputStates(WebsocketInputStates& states) {
+    _inputState->setWebsocketInputStates(states);
 }
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {

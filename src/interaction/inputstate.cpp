@@ -25,6 +25,7 @@
 #include <openspace/interaction/inputstate.h>
 
 #include <openspace/interaction/joystickinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <ghoul/fmt.h>
 #include <algorithm>
 
@@ -73,6 +74,10 @@ void InputState::setJoystickInputStates(JoystickInputStates& states) {
     _joystickInputStates = &states;
 }
 
+void InputState::setWebsocketInputStates(WebsocketInputStates& states) {
+    _websocketInputStates = &states;
+}
+
 const std::vector<std::pair<Key, KeyModifier>>& InputState::pressedKeys() const {
     return _keysDown;
 }
@@ -117,5 +122,28 @@ float InputState::joystickAxis(int i) const {
 bool InputState::joystickButton(int i) const {
     return _joystickInputStates->button(i, JoystickAction::Press);
 }
+
+WebsocketInputStates& InputState::websocketInputStates() {
+    return *_websocketInputStates;
+}
+
+float InputState::websocketAxis(int i) const {
+    return _websocketInputStates->axis(i);
+}
+
+bool InputState::websocketButton(int i) const {
+    return _websocketInputStates->button(i, WebsocketAction::Press);
+}
+
+void InputState::resetWebsockets() {
+    if(!_websocketInputStates) { return; }
+    
+    for (auto it = _websocketInputStates->begin(); it < _websocketInputStates->end(); ++it) {
+        it->isConnected = false;
+    }
+
+}
+
+
 
 } // namespace openspace::interaction
