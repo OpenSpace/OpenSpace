@@ -65,6 +65,9 @@ protected:
 private:
     void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
+    void clearProjectionBufferAfterTime(double time);
+    void insertImageProjections(const std::vector<Image>& images);
+
     ProjectionComponent _projectionComponent;
 
     properties::OptionProperty _colorTexturePaths;
@@ -107,8 +110,6 @@ private:
     glm::vec3 _boresight;
 
     std::vector<Image> _imageTimes;
-
-    bool _shouldCapture = false;
 
     GLuint _quad = 0;
     GLuint _vertexPositionBuffer = 0;

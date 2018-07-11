@@ -607,7 +607,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
     _up = data.camera.lookUpVectorCameraSpace();
 
     
-    if (_shouldCapture && _projectionComponent.doesPerformProjection()) {
+    if (_projectionComponent.doesPerformProjection()) {
         int nPerformedProjections = 0;
         for (const Image& img : _imageTimes) {
             if (nPerformedProjections >= _maxProjectionsPerFrame) {
@@ -620,9 +620,6 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
         _imageTimes.erase(_imageTimes.begin(),
                           _imageTimes.begin() + nPerformedProjections);
         _projectionsInBuffer = _imageTimes.size();
-        if (_imageTimes.empty()) {
-            _shouldCapture = false;
-        }
 
     }
     attitudeParameters(data.time.j2000Seconds());
@@ -785,23 +782,47 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         if (openspace::ImageSequencer::ref().isReady()) {
             if (_projectionComponent.doesPerformProjection()) {
                 std::vector<Image> newImageTimes;
-                _shouldCapture |= openspace::ImageSequencer::ref().imagePaths(
+                openspace::ImageSequencer::ref().imagePaths(
                     newImageTimes,
                     _projectionComponent.projecteeId(),
                     _projectionComponent.instrumentId(),
                     time,
                     integrateFromTime
                 );
-                _imageTimes.insert(_imageTimes.end(),
-                                   newImageTimes.begin(),
-                                   newImageTimes.end());
-                _projectionsInBuffer = _imageTimes.size();
+
+                if (!newImageTimes.empty()) {
+                    double lastExposure = newImageTimes[0].timeRange.end;
+                    clearProjectionBufferAfterTime(lastExposure);
+                    insertImageProjections(newImageTimes);
+                }
             }
         }
     }
 
     _stateMatrix = data.modelTransform.rotation;
 }
+
+void RenderablePlanetProjection::clearProjectionBufferAfterTime(double time) {
+    const auto& it = std::find_if(
+        _imageTimes.begin(),
+        _imageTimes.end(),
+        [time](const Image& image) {
+            return image.timeRange.end > time;
+        }
+    );
+    if (it != _imageTimes.end()) {
+        _imageTimes.erase(it, _imageTimes.end());
+    }
+}
+
+void RenderablePlanetProjection::insertImageProjections(const std::vector<Image>& images)
+{
+    _imageTimes.insert(_imageTimes.end(),
+        images.begin(),
+        images.end());
+    _projectionsInBuffer = _imageTimes.size();
+}
+
 
 void RenderablePlanetProjection::loadColorTexture() {
     using ghoul::opengl::Texture;
