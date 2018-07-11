@@ -43,6 +43,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/systemcapabilitiesbinding.h>
@@ -62,6 +63,7 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
+    engine.addDocumentation(TimeFrame::Documentation());
 }
 
 void registerCoreClasses(scripting::ScriptEngine& engine) {
