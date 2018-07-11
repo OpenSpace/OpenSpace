@@ -18,7 +18,7 @@ local Labels = {
             Type = "MultiModelGeometry",
             GeometryFile = models .. "/Labels.obj"
         }, 
-        ColorTexture =  textures .. "/labels.png"
+        ColorTexture =  textures .. "/labels.png",
         AmbientIntensity = 0.8,
         DiffuseIntensity = 1.0,
         SpecularIntensity = 1.0
