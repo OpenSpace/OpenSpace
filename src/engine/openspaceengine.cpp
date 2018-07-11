@@ -50,6 +50,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptscheduler.h>
@@ -202,6 +203,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<TimeFrame>>(),
+        "TimeFrame"
     );
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Task>>(),
